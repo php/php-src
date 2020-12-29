@@ -129,19 +129,19 @@ PHP_MINFO_FUNCTION(bcmath)
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
-static void php_str2num(bc_num *num, char *str)
+static void php_str2num(bc_num *num, char *str, uint32_t arg_num)
 {
 	char *p;
 
 	if (!(p = strchr(str, '.'))) {
 		if (!bc_str2num(num, str, 0)) {
-			zend_type_error("bcmath function argument is not well-formed");
+			zend_argument_value_error(arg_num, "bcmath function argument is not well-formed");
 		}
 		return;
 	}
 
 	if (!bc_str2num(num, str, strlen(p+1))) {
-		zend_type_error("bcmath function argument is not well-formed");
+		zend_argument_value_error(arg_num, "bcmath function argument is not well-formed");
 	}
 }
 /* }}} */
@@ -174,8 +174,8 @@ PHP_FUNCTION(bcadd)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 	bc_add (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
@@ -214,8 +214,8 @@ PHP_FUNCTION(bcsub)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 	bc_sub (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
@@ -254,8 +254,8 @@ PHP_FUNCTION(bcmul)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 	bc_multiply (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
@@ -294,8 +294,8 @@ PHP_FUNCTION(bcdiv)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 
 	switch (bc_divide(first, second, &result, scale)) {
 		case 0: /* OK */
@@ -341,8 +341,8 @@ PHP_FUNCTION(bcmod)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 
 	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
@@ -389,9 +389,9 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&second);
 	bc_init_num(&mod);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
-	php_str2num(&mod, ZSTR_VAL(modulus));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
+	php_str2num(&mod, ZSTR_VAL(modulus), 3);
 
 	if (bc_raisemod(first, second, mod, &result, scale) == SUCCESS) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
@@ -432,8 +432,8 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+	php_str2num(&first, ZSTR_VAL(left), 1);
+	php_str2num(&second, ZSTR_VAL(right), 2);
 	bc_raise (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
@@ -468,7 +468,7 @@ PHP_FUNCTION(bcsqrt)
 	}
 
 	bc_init_num(&result);
-	php_str2num(&result, ZSTR_VAL(left));
+	php_str2num(&result, ZSTR_VAL(left), 1);
 
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
@@ -509,8 +509,12 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&first);
 	bc_init_num(&second);
 
-	if (!bc_str2num(&first, ZSTR_VAL(left), scale) || !bc_str2num(&second, ZSTR_VAL(right), scale)) {
-		zend_type_error("bcmath function argument is not well-formed");
+	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
+		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+	}
+
+	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
+		zend_argument_value_error(2, "bcmath function argument is not well-formed");
 	}
 
 	RETVAL_LONG(bc_compare(first, second));

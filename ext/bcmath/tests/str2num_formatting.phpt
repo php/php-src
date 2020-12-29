@@ -18,31 +18,31 @@ echo "\n";
 
 try {
     echo bcadd(" 0", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bcadd("1e1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bcadd("1,1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bcadd("Hello", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bcadd("1 1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
@@ -58,31 +58,31 @@ echo "\n";
 
 try {
     echo bccomp(" 0", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bccomp("1e1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bccomp("1,1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bccomp("Hello", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     echo bccomp("1 1", "2");
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
@@ -94,11 +94,11 @@ try {
 2
 2
 
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
 
 -1
 -1
@@ -106,8 +106,8 @@ bcmath function argument is not well-formed
 -1
 -1
 
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
-bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed

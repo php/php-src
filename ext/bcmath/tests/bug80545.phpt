@@ -8,9 +8,9 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
 <?php
 try {
     bcadd('a', 'a');
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage();
 }
 ?>
 --EXPECT--
-bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
