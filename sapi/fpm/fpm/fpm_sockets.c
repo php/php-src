@@ -89,6 +89,8 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 			}
 			setenv(envname, env_value + socket_set[i], 1);
 		}
+		sprintf(envname, "FPM_SOCKETS_%d", socket_set_count);
+		unsetenv(envname);
 		free(env_value);
 	}
 
