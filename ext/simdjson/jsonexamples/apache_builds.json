@@ -1,0 +1,4421 @@
+{
+  "assignedLabels" : [
+    {
+      
+    }
+  ],
+  "mode" : "EXCLUSIVE",
+  "nodeDescription" : "the master Jenkins node",
+  "nodeName" : "",
+  "numExecutors" : 0,
+  "description" : "<a href=\"http://www.apache.org/\"><img src=\"https://www.apache.org/images/asf_logo_wide.gif\"></img></a>\r\n<p>\r\nThis is a public build and test server for <a href=\"http://projects.apache.org/\">projects</a> of the\r\n<a href=\"http://www.apache.org/\">Apache Software Foundation</a>. All times on this server are UTC.\r\n</p>\r\n<p>\r\nSee the <a href=\"http://wiki.apache.org/general/Hudson\">Jenkins wiki page</a> for more information\r\nabout this service.\r\n</p>",
+  "jobs" : [
+    {
+      "name" : "Abdera-trunk",
+      "url" : "https://builds.apache.org/job/Abdera-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Abdera2-trunk",
+      "url" : "https://builds.apache.org/job/Abdera2-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Accumulo-1.3.x",
+      "url" : "https://builds.apache.org/job/Accumulo-1.3.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Accumulo-1.4.x",
+      "url" : "https://builds.apache.org/job/Accumulo-1.4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Accumulo-Trunk",
+      "url" : "https://builds.apache.org/job/Accumulo-Trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ACE-trunk",
+      "url" : "https://builds.apache.org/job/ACE-trunk/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "ActiveMQ",
+      "url" : "https://builds.apache.org/job/ActiveMQ/",
+      "color" : "aborted_anime"
+    },
+    {
+      "name" : "ActiveMQ Protocol Buffer",
+      "url" : "https://builds.apache.org/job/ActiveMQ%20Protocol%20Buffer/",
+      "color" : "red"
+    },
+    {
+      "name" : "ActiveMQ-Apollo",
+      "url" : "https://builds.apache.org/job/ActiveMQ-Apollo/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "ActiveMQ-Apollo-Deploy",
+      "url" : "https://builds.apache.org/job/ActiveMQ-Apollo-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ActiveMQ-Java7",
+      "url" : "https://builds.apache.org/job/ActiveMQ-Java7/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "ActiveMQ-SysTest-Trunk",
+      "url" : "https://builds.apache.org/job/ActiveMQ-SysTest-Trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "ActiveMQ-Trunk-Deploy",
+      "url" : "https://builds.apache.org/job/ActiveMQ-Trunk-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Amber",
+      "url" : "https://builds.apache.org/job/Amber/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Amber-OAuth-2.0",
+      "url" : "https://builds.apache.org/job/Amber-OAuth-2.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Amber-OAuth-2.0-windows",
+      "url" : "https://builds.apache.org/job/Amber-OAuth-2.0-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ant-Build-Matrix",
+      "url" : "https://builds.apache.org/job/Ant-Build-Matrix/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Ant_BuildFromPOMs",
+      "url" : "https://builds.apache.org/job/Ant_BuildFromPOMs/",
+      "color" : "red"
+    },
+    {
+      "name" : "Ant_Nightly",
+      "url" : "https://builds.apache.org/job/Ant_Nightly/",
+      "color" : "red"
+    },
+    {
+      "name" : "Any23-trunk",
+      "url" : "https://builds.apache.org/job/Any23-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Apache Airavata",
+      "url" : "https://builds.apache.org/job/Apache%20Airavata/",
+      "color" : "red"
+    },
+    {
+      "name" : "Apache Wicket 1.4.x",
+      "url" : "https://builds.apache.org/job/Apache%20Wicket%201.4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Apache Wicket 1.5.x",
+      "url" : "https://builds.apache.org/job/Apache%20Wicket%201.5.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "Apache Wicket 6.0.x",
+      "url" : "https://builds.apache.org/job/Apache%20Wicket%206.0.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "apache-deltacloud-core",
+      "url" : "https://builds.apache.org/job/apache-deltacloud-core/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "archetypes",
+      "url" : "https://builds.apache.org/job/archetypes/",
+      "color" : "blue"
+    },
+    {
+      "name" : "archiva-1.3.x",
+      "url" : "https://builds.apache.org/job/archiva-1.3.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6-empty-repo",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6-empty-repo/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6-web-it-js",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6-web-it-js/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6-windows",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6-with-it-macos",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6-with-it-macos/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.6-with-web-it-js-windows",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.6-with-web-it-js-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.7",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.7/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "archiva-all-maven-3.x-jdk-1.7-web-it-js",
+      "url" : "https://builds.apache.org/job/archiva-all-maven-3.x-jdk-1.7-web-it-js/",
+      "color" : "red"
+    },
+    {
+      "name" : "archiva-parent",
+      "url" : "https://builds.apache.org/job/archiva-parent/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Aries",
+      "url" : "https://builds.apache.org/job/Aries/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Aries - Deploy",
+      "url" : "https://builds.apache.org/job/Aries%20-%20Deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "AriesWithSnapshotDependencies",
+      "url" : "https://builds.apache.org/job/AriesWithSnapshotDependencies/",
+      "color" : "red"
+    },
+    {
+      "name" : "ASF Parent Pom",
+      "url" : "https://builds.apache.org/job/ASF%20Parent%20Pom/",
+      "color" : "blue"
+    },
+    {
+      "name" : "AsyncWeb",
+      "url" : "https://builds.apache.org/job/AsyncWeb/",
+      "color" : "blue"
+    },
+    {
+      "name" : "AVRO-python",
+      "url" : "https://builds.apache.org/job/AVRO-python/",
+      "color" : "blue"
+    },
+    {
+      "name" : "AvroJava",
+      "url" : "https://builds.apache.org/job/AvroJava/",
+      "color" : "blue"
+    },
+    {
+      "name" : "AWF",
+      "url" : "https://builds.apache.org/job/AWF/",
+      "color" : "blue"
+    },
+    {
+      "name" : "axis-trunk",
+      "url" : "https://builds.apache.org/job/axis-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Axis2",
+      "url" : "https://builds.apache.org/job/Axis2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "axis2-1.5",
+      "url" : "https://builds.apache.org/job/axis2-1.5/",
+      "color" : "blue"
+    },
+    {
+      "name" : "axis2-1.6",
+      "url" : "https://builds.apache.org/job/axis2-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "axis2-transports-trunk",
+      "url" : "https://builds.apache.org/job/axis2-transports-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Axis2-trunk-java-1.6",
+      "url" : "https://builds.apache.org/job/Axis2-trunk-java-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Bigtop-tickle-slaves",
+      "url" : "https://builds.apache.org/job/Bigtop-tickle-slaves/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Bigtop-trunk",
+      "url" : "https://builds.apache.org/job/Bigtop-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Bigtop-trunk-iTest",
+      "url" : "https://builds.apache.org/job/Bigtop-trunk-iTest/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Bigtop-trunk-test-execution",
+      "url" : "https://builds.apache.org/job/Bigtop-trunk-test-execution/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Bigtop-trunk-testartifacts",
+      "url" : "https://builds.apache.org/job/Bigtop-trunk-testartifacts/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Blur-master-jdk6",
+      "url" : "https://builds.apache.org/job/Blur-master-jdk6/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Blur-master-jdk7",
+      "url" : "https://builds.apache.org/job/Blur-master-jdk7/",
+      "color" : "red"
+    },
+    {
+      "name" : "bookkeeper-debug",
+      "url" : "https://builds.apache.org/job/bookkeeper-debug/",
+      "color" : "red"
+    },
+    {
+      "name" : "bookkeeper-trunk",
+      "url" : "https://builds.apache.org/job/bookkeeper-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "bookkeeper-trunk-find-patches-available",
+      "url" : "https://builds.apache.org/job/bookkeeper-trunk-find-patches-available/",
+      "color" : "blue"
+    },
+    {
+      "name" : "bookkeeper-trunk-precommit-build",
+      "url" : "https://builds.apache.org/job/bookkeeper-trunk-precommit-build/",
+      "color" : "red"
+    },
+    {
+      "name" : "bookkeeper-trunk2",
+      "url" : "https://builds.apache.org/job/bookkeeper-trunk2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Buildr-ci-build-jruby-win32",
+      "url" : "https://builds.apache.org/job/Buildr-ci-build-jruby-win32/",
+      "color" : "red"
+    },
+    {
+      "name" : "Buildr-ci-matrix",
+      "url" : "https://builds.apache.org/job/Buildr-ci-matrix/",
+      "color" : "red"
+    },
+    {
+      "name" : "Buildr-ci-windows-matrix",
+      "url" : "https://builds.apache.org/job/Buildr-ci-windows-matrix/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Buildr-metrics-build",
+      "url" : "https://builds.apache.org/job/Buildr-metrics-build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Buildr-omnibus-build",
+      "url" : "https://builds.apache.org/job/Buildr-omnibus-build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Buildr-website-build",
+      "url" : "https://builds.apache.org/job/Buildr-website-build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "BVal-trunk",
+      "url" : "https://builds.apache.org/job/BVal-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "BVal-trunk-linux-tck-deploy",
+      "url" : "https://builds.apache.org/job/BVal-trunk-linux-tck-deploy/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Cactus",
+      "url" : "https://builds.apache.org/job/Cactus/",
+      "color" : "red"
+    },
+    {
+      "name" : "Camel-2.10.x",
+      "url" : "https://builds.apache.org/job/Camel-2.10.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "Camel-2.7.x",
+      "url" : "https://builds.apache.org/job/Camel-2.7.x/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel-2.8.x",
+      "url" : "https://builds.apache.org/job/Camel-2.8.x/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel-2.9.x",
+      "url" : "https://builds.apache.org/job/Camel-2.9.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Camel.2.10.x.fulltest",
+      "url" : "https://builds.apache.org/job/Camel.2.10.x.fulltest/",
+      "color" : "red"
+    },
+    {
+      "name" : "Camel.2.7.x.fulltest",
+      "url" : "https://builds.apache.org/job/Camel.2.7.x.fulltest/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel.2.8.x.fulltest",
+      "url" : "https://builds.apache.org/job/Camel.2.8.x.fulltest/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel.2.9.x.fulltest",
+      "url" : "https://builds.apache.org/job/Camel.2.9.x.fulltest/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Camel.trunk.fulltest",
+      "url" : "https://builds.apache.org/job/Camel.trunk.fulltest/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Camel.trunk.fulltest.java7",
+      "url" : "https://builds.apache.org/job/Camel.trunk.fulltest.java7/",
+      "color" : "yellow_anime"
+    },
+    {
+      "name" : "Camel.trunk.fulltest.spring3.0",
+      "url" : "https://builds.apache.org/job/Camel.trunk.fulltest.spring3.0/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel.trunk.fulltest.windows",
+      "url" : "https://builds.apache.org/job/Camel.trunk.fulltest.windows/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Camel.trunk.notest",
+      "url" : "https://builds.apache.org/job/Camel.trunk.notest/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Cayenne-30",
+      "url" : "https://builds.apache.org/job/Cayenne-30/",
+      "color" : "red"
+    },
+    {
+      "name" : "Cayenne-31",
+      "url" : "https://builds.apache.org/job/Cayenne-31/",
+      "color" : "red"
+    },
+    {
+      "name" : "Cayenne-doc",
+      "url" : "https://builds.apache.org/job/Cayenne-doc/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Cayenne-doc30",
+      "url" : "https://builds.apache.org/job/Cayenne-doc30/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Cayenne-trunk",
+      "url" : "https://builds.apache.org/job/Cayenne-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "central-indexer-test",
+      "url" : "https://builds.apache.org/job/central-indexer-test/",
+      "color" : "red"
+    },
+    {
+      "name" : "Chemistry - DotCMIS",
+      "url" : "https://builds.apache.org/job/Chemistry%20-%20DotCMIS/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Chemistry - OpenCMIS - install",
+      "url" : "https://builds.apache.org/job/Chemistry%20-%20OpenCMIS%20-%20install/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Chemistry - OpenCMIS - javadoc",
+      "url" : "https://builds.apache.org/job/Chemistry%20-%20OpenCMIS%20-%20javadoc/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Chemistry - OpenCMIS - Release Profile",
+      "url" : "https://builds.apache.org/job/Chemistry%20-%20OpenCMIS%20-%20Release%20Profile/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Chemistry - OpenCMIS - Workbench",
+      "url" : "https://builds.apache.org/job/Chemistry%20-%20OpenCMIS%20-%20Workbench/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Chemistry-Phyton-cmislib-doc",
+      "url" : "https://builds.apache.org/job/Chemistry-Phyton-cmislib-doc/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Chukwa-release",
+      "url" : "https://builds.apache.org/job/Chukwa-release/",
+      "color" : "grey"
+    },
+    {
+      "name" : "Chukwa-trunk",
+      "url" : "https://builds.apache.org/job/Chukwa-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "clerezza-scala-1.6",
+      "url" : "https://builds.apache.org/job/clerezza-scala-1.6/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "clerezza-site",
+      "url" : "https://builds.apache.org/job/clerezza-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "clerezza-trunk-1.6",
+      "url" : "https://builds.apache.org/job/clerezza-trunk-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Click",
+      "url" : "https://builds.apache.org/job/Click/",
+      "color" : "blue"
+    },
+    {
+      "name" : "cloudstack-api_refactor",
+      "url" : "https://builds.apache.org/job/cloudstack-api_refactor/",
+      "color" : "blue"
+    },
+    {
+      "name" : "cloudstack-docs-master-adminguide",
+      "url" : "https://builds.apache.org/job/cloudstack-docs-master-adminguide/",
+      "color" : "red"
+    },
+    {
+      "name" : "cloudstack-javelin",
+      "url" : "https://builds.apache.org/job/cloudstack-javelin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "cloudstack-marvin",
+      "url" : "https://builds.apache.org/job/cloudstack-marvin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "cloudstack-master-maven",
+      "url" : "https://builds.apache.org/job/cloudstack-master-maven/",
+      "color" : "blue"
+    },
+    {
+      "name" : "cloudstack-rat-master",
+      "url" : "https://builds.apache.org/job/cloudstack-rat-master/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Cocoon 3.0",
+      "url" : "https://builds.apache.org/job/Cocoon%203.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CODI (add-ons)",
+      "url" : "https://builds.apache.org/job/CODI%20(add-ons)/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "CODI (deploy)",
+      "url" : "https://builds.apache.org/job/CODI%20(deploy)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CODI (nightly)",
+      "url" : "https://builds.apache.org/job/CODI%20(nightly)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "codi-apache-extras",
+      "url" : "https://builds.apache.org/job/codi-apache-extras/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "codi-apache-extras-addons",
+      "url" : "https://builds.apache.org/job/codi-apache-extras-addons/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "codi-apache-extras-test",
+      "url" : "https://builds.apache.org/job/codi-apache-extras-test/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "codi-mirror",
+      "url" : "https://builds.apache.org/job/codi-mirror/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CODI-test",
+      "url" : "https://builds.apache.org/job/CODI-test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CODI-u1test",
+      "url" : "https://builds.apache.org/job/CODI-u1test/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Commons",
+      "url" : "https://builds.apache.org/job/Commons/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Commons FileUpload",
+      "url" : "https://builds.apache.org/job/Commons%20FileUpload/",
+      "color" : "blue"
+    },
+    {
+      "name" : "commons-collections",
+      "url" : "https://builds.apache.org/job/commons-collections/",
+      "color" : "red"
+    },
+    {
+      "name" : "commons-vfs-trunk",
+      "url" : "https://builds.apache.org/job/commons-vfs-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "CommonsAnt",
+      "url" : "https://builds.apache.org/job/CommonsAnt/",
+      "color" : "blue"
+    },
+    {
+      "name" : "core-integration-testing-maven-3",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-embedded",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-embedded/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-jdk-1.6",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-jdk-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-jdk-1.6-log4j2",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-jdk-1.6-log4j2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-jdk-1.7",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-jdk-1.7/",
+      "color" : "red"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-osx",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-osx/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "core-integration-testing-maven-3-solaris",
+      "url" : "https://builds.apache.org/job/core-integration-testing-maven-3-solaris/",
+      "color" : "red"
+    },
+    {
+      "name" : "core-it-maven-3-win",
+      "url" : "https://builds.apache.org/job/core-it-maven-3-win/",
+      "color" : "red"
+    },
+    {
+      "name" : "Crunch-master",
+      "url" : "https://builds.apache.org/job/Crunch-master/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Crunch-master-integration",
+      "url" : "https://builds.apache.org/job/Crunch-master-integration/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ctakes-trunk-compiletest",
+      "url" : "https://builds.apache.org/job/ctakes-trunk-compiletest/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ctakes-trunk-package",
+      "url" : "https://builds.apache.org/job/ctakes-trunk-package/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.2-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.2-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-2.2.x-JDK15",
+      "url" : "https://builds.apache.org/job/CXF-2.2.x-JDK15/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-2.3-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.3-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.3.x",
+      "url" : "https://builds.apache.org/job/CXF-2.3.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-2.4-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.4-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.4.x",
+      "url" : "https://builds.apache.org/job/CXF-2.4.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.5-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.5-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.5.x",
+      "url" : "https://builds.apache.org/job/CXF-2.5.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-2.6-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.6-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-2.6.x",
+      "url" : "https://builds.apache.org/job/CXF-2.6.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-2.7-deploy",
+      "url" : "https://builds.apache.org/job/CXF-2.7-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-2.7.x",
+      "url" : "https://builds.apache.org/job/CXF-2.7.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-build-tools",
+      "url" : "https://builds.apache.org/job/CXF-build-tools/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-DOSGi",
+      "url" : "https://builds.apache.org/job/CXF-DOSGi/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-DOSGi-deploy",
+      "url" : "https://builds.apache.org/job/CXF-DOSGi-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "CXF-Fediz",
+      "url" : "https://builds.apache.org/job/CXF-Fediz/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-trunk-deploy",
+      "url" : "https://builds.apache.org/job/CXF-trunk-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-Trunk-IBM-JDK16",
+      "url" : "https://builds.apache.org/job/CXF-Trunk-IBM-JDK16/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-Trunk-JDK16",
+      "url" : "https://builds.apache.org/job/CXF-Trunk-JDK16/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-Trunk-JDK17",
+      "url" : "https://builds.apache.org/job/CXF-Trunk-JDK17/",
+      "color" : "blue"
+    },
+    {
+      "name" : "CXF-trunk-windows",
+      "url" : "https://builds.apache.org/job/CXF-trunk-windows/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "CXF-xjc-utils",
+      "url" : "https://builds.apache.org/job/CXF-xjc-utils/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Deploy",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Examples",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Examples/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB (nightly)",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%20(nightly)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.1",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.1/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.2",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.3",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.4",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.4/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.4 (JDK 1.7)",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.4%20(JDK%201.7)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.5",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.5/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.6",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.7",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike OWB 1.1.8-SNAPSHOT",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20OWB%201.1.8-SNAPSHOT/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike RAT-Check",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20RAT-Check/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike TomEE v1",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20TomEE%20v1/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "DeltaSpike Weld (nightly)",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%20(nightly)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.10",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.10/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.3",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.3.SP1",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.3.SP1/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.4",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.4/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.5",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.5/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.5.AS71",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.5.AS71/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.6",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.7",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.8",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.8/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.9",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.9/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.1.9 (JDK 1.7)",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.1.9%20(JDK%201.7)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 1.2.0-SNAPSHOT",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%201.2.0-SNAPSHOT/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike Weld 2.0.0 Beta1",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%202.0.0%20Beta1/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "DeltaSpike Weld 2.0.0 Beta2",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%202.0.0%20Beta2/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "DeltaSpike Weld 2.0.0-SNAPSHOT",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%202.0.0-SNAPSHOT/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "DeltaSpike Weld 2.0.0.Alpha2",
+      "url" : "https://builds.apache.org/job/DeltaSpike%20Weld%202.0.0.Alpha2/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "DeltaSpike_Control_Build",
+      "url" : "https://builds.apache.org/job/DeltaSpike_Control_Build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike_TomEE",
+      "url" : "https://builds.apache.org/job/DeltaSpike_TomEE/",
+      "color" : "blue"
+    },
+    {
+      "name" : "DeltaSpike_TomEE_latest",
+      "url" : "https://builds.apache.org/job/DeltaSpike_TomEE_latest/",
+      "color" : "red"
+    },
+    {
+      "name" : "Derby-10.9-derbyall",
+      "url" : "https://builds.apache.org/job/Derby-10.9-derbyall/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-10.9-suites.All",
+      "url" : "https://builds.apache.org/job/Derby-10.9-suites.All/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-branch-10.5",
+      "url" : "https://builds.apache.org/job/Derby-branch-10.5/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-branch-10.6",
+      "url" : "https://builds.apache.org/job/Derby-branch-10.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-branch-10.7",
+      "url" : "https://builds.apache.org/job/Derby-branch-10.7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-branch-10.8",
+      "url" : "https://builds.apache.org/job/Derby-branch-10.8/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-branch-10.9",
+      "url" : "https://builds.apache.org/job/Derby-branch-10.9/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-docs",
+      "url" : "https://builds.apache.org/job/Derby-docs/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-trunk",
+      "url" : "https://builds.apache.org/job/Derby-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Derby-trunk-suites.All-ARM",
+      "url" : "https://builds.apache.org/job/Derby-trunk-suites.All-ARM/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Derby-trunk_clover",
+      "url" : "https://builds.apache.org/job/Derby-trunk_clover/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Derby-trunk_suites.All",
+      "url" : "https://builds.apache.org/job/Derby-trunk_suites.All/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "dir-apacheds-jdbm-jdk16-ubuntu-deploy",
+      "url" : "https://builds.apache.org/job/dir-apacheds-jdbm-jdk16-ubuntu-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-apacheds-jdbm-jdk16-win",
+      "url" : "https://builds.apache.org/job/dir-apacheds-jdbm-jdk16-win/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-apacheds-jdk16-ubuntu-deploy",
+      "url" : "https://builds.apache.org/job/dir-apacheds-jdk16-ubuntu-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-apacheds-jdk16-ubuntu-installers",
+      "url" : "https://builds.apache.org/job/dir-apacheds-jdk16-ubuntu-installers/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-apacheds-jdk16-win",
+      "url" : "https://builds.apache.org/job/dir-apacheds-jdk16-win/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "dir-apacheds-manuals",
+      "url" : "https://builds.apache.org/job/dir-apacheds-manuals/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-api-manuals",
+      "url" : "https://builds.apache.org/job/dir-api-manuals/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-checkstyle-jdk16-deploy-site",
+      "url" : "https://builds.apache.org/job/dir-checkstyle-jdk16-deploy-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-groovyldap-jdk15-deploy-site",
+      "url" : "https://builds.apache.org/job/dir-groovyldap-jdk15-deploy-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-junit-addons-jdk15-deploy-site",
+      "url" : "https://builds.apache.org/job/dir-junit-addons-jdk15-deploy-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-project-jdk15-deploy",
+      "url" : "https://builds.apache.org/job/dir-project-jdk15-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-shared-jdk16-ubuntu-deploy",
+      "url" : "https://builds.apache.org/job/dir-shared-jdk16-ubuntu-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-shared-jdk16-win",
+      "url" : "https://builds.apache.org/job/dir-shared-jdk16-win/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-skins-jdk15-deploy-site",
+      "url" : "https://builds.apache.org/job/dir-skins-jdk15-deploy-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-studio-jdk16-ubuntu-applications",
+      "url" : "https://builds.apache.org/job/dir-studio-jdk16-ubuntu-applications/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-studio-jdk16-ubuntu-deploy",
+      "url" : "https://builds.apache.org/job/dir-studio-jdk16-ubuntu-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-studio-jdk16-win",
+      "url" : "https://builds.apache.org/job/dir-studio-jdk16-win/",
+      "color" : "blue"
+    },
+    {
+      "name" : "dir-studio-manuals",
+      "url" : "https://builds.apache.org/job/dir-studio-manuals/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "dir-studio-maven-plugin-jdk15-deploy-site",
+      "url" : "https://builds.apache.org/job/dir-studio-maven-plugin-jdk15-deploy-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "directmemory-parent",
+      "url" : "https://builds.apache.org/job/directmemory-parent/",
+      "color" : "blue"
+    },
+    {
+      "name" : "directmemory-trunk",
+      "url" : "https://builds.apache.org/job/directmemory-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "directmemory-windows",
+      "url" : "https://builds.apache.org/job/directmemory-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "doxia",
+      "url" : "https://builds.apache.org/job/doxia/",
+      "color" : "blue"
+    },
+    {
+      "name" : "doxia-eclipse-editor",
+      "url" : "https://builds.apache.org/job/doxia-eclipse-editor/",
+      "color" : "blue"
+    },
+    {
+      "name" : "doxia-sitetools",
+      "url" : "https://builds.apache.org/job/doxia-sitetools/",
+      "color" : "blue"
+    },
+    {
+      "name" : "doxia-tools",
+      "url" : "https://builds.apache.org/job/doxia-tools/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Drill-Physical-Plan",
+      "url" : "https://builds.apache.org/job/Drill-Physical-Plan/",
+      "color" : "blue"
+    },
+    {
+      "name" : "EasyAnt",
+      "url" : "https://builds.apache.org/job/EasyAnt/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Empire-db multios",
+      "url" : "https://builds.apache.org/job/Empire-db%20multios/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Empire-db reports",
+      "url" : "https://builds.apache.org/job/Empire-db%20reports/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Empire-db snapshot",
+      "url" : "https://builds.apache.org/job/Empire-db%20snapshot/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ESME",
+      "url" : "https://builds.apache.org/job/ESME/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "etch-trunk-linux-x86",
+      "url" : "https://builds.apache.org/job/etch-trunk-linux-x86/",
+      "color" : "blue"
+    },
+    {
+      "name" : "etch-trunk-linux-x86-experimental",
+      "url" : "https://builds.apache.org/job/etch-trunk-linux-x86-experimental/",
+      "color" : "red"
+    },
+    {
+      "name" : "etch-trunk-windows-x86",
+      "url" : "https://builds.apache.org/job/etch-trunk-windows-x86/",
+      "color" : "red"
+    },
+    {
+      "name" : "etch-trunk-windows-x86-experimental",
+      "url" : "https://builds.apache.org/job/etch-trunk-windows-x86-experimental/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ExtVal for JSF 1.2 (deploy)",
+      "url" : "https://builds.apache.org/job/ExtVal%20for%20JSF%201.2%20(deploy)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ExtVal for JSF 1.2 (nightly)",
+      "url" : "https://builds.apache.org/job/ExtVal%20for%20JSF%201.2%20(nightly)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ExtVal for JSF 2.0 (deploy)",
+      "url" : "https://builds.apache.org/job/ExtVal%20for%20JSF%202.0%20(deploy)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ExtVal for JSF 2.0 (nightly)",
+      "url" : "https://builds.apache.org/job/ExtVal%20for%20JSF%202.0%20(nightly)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Felix iPOJO API",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20API/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Arch",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Arch/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Arch-Gogo",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Arch-Gogo/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO EventAdmin Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20EventAdmin%20Handler/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Felix iPOJO Extender Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Extender%20Handler/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO JMX Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20JMX%20Handler/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Junit4OSGi",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Junit4OSGi/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Manipulator",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Manipulator/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Metadata",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Metadata/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Runtime",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Runtime/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Felix iPOJO Temporal Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Temporal%20Handler/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Tests",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Tests/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Transaction Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Transaction%20Handler/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Webconsole",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Webconsole/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix iPOJO Whiteboard Handler",
+      "url" : "https://builds.apache.org/job/Felix%20iPOJO%20Whiteboard%20Handler/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Felix-FileInstall",
+      "url" : "https://builds.apache.org/job/Felix-FileInstall/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Felix-Gogo",
+      "url" : "https://builds.apache.org/job/Felix-Gogo/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Felix-WebConsole",
+      "url" : "https://builds.apache.org/job/Felix-WebConsole/",
+      "color" : "red"
+    },
+    {
+      "name" : "Flex_SDK_build",
+      "url" : "https://builds.apache.org/job/Flex_SDK_build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Flex_SDK_checkin_tests",
+      "url" : "https://builds.apache.org/job/Flex_SDK_checkin_tests/",
+      "color" : "blue"
+    },
+    {
+      "name" : "flume-0.9",
+      "url" : "https://builds.apache.org/job/flume-0.9/",
+      "color" : "red"
+    },
+    {
+      "name" : "flume-1.3.0",
+      "url" : "https://builds.apache.org/job/flume-1.3.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "flume-1.4.0",
+      "url" : "https://builds.apache.org/job/flume-1.4.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "flume-trunk",
+      "url" : "https://builds.apache.org/job/flume-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "FontBox-trunk",
+      "url" : "https://builds.apache.org/job/FontBox-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ftpserver-1.0.x-jdk1.5-solaris",
+      "url" : "https://builds.apache.org/job/ftpserver-1.0.x-jdk1.5-solaris/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "ftpserver-1.0.x-jdk1.5-ubuntu",
+      "url" : "https://builds.apache.org/job/ftpserver-1.0.x-jdk1.5-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.5-ibm-ubuntu",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.5-ibm-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.5-solaris",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.5-solaris/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.5-ubuntu",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.5-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-freebsd",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-freebsd/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-ibm-ubuntu",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-ibm-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-osx",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-osx/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-solaris",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-solaris/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-ubuntu",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ftpserver-trunk-jdk1.6-windows",
+      "url" : "https://builds.apache.org/job/ftpserver-trunk-jdk1.6-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Giraph-trunk-Commit",
+      "url" : "https://builds.apache.org/job/Giraph-trunk-Commit/",
+      "color" : "red"
+    },
+    {
+      "name" : "giraph-trunk-hadoop-0.20.203",
+      "url" : "https://builds.apache.org/job/giraph-trunk-hadoop-0.20.203/",
+      "color" : "red"
+    },
+    {
+      "name" : "giraph-trunk-hadoop-0.23",
+      "url" : "https://builds.apache.org/job/giraph-trunk-hadoop-0.23/",
+      "color" : "blue"
+    },
+    {
+      "name" : "giraph-trunk-hadoop-1.0",
+      "url" : "https://builds.apache.org/job/giraph-trunk-hadoop-1.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "giraph-trunk-hadoop-trunk",
+      "url" : "https://builds.apache.org/job/giraph-trunk-hadoop-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "giraph-trunk-non-secure",
+      "url" : "https://builds.apache.org/job/giraph-trunk-non-secure/",
+      "color" : "blue"
+    },
+    {
+      "name" : "gora-trunk",
+      "url" : "https://builds.apache.org/job/gora-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "gora-trunk-ant",
+      "url" : "https://builds.apache.org/job/gora-trunk-ant/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "goraamazon_branch",
+      "url" : "https://builds.apache.org/job/goraamazon_branch/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-0.20-security",
+      "url" : "https://builds.apache.org/job/Hadoop-0.20-security/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-0.20.203-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-0.20.203-Build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-1-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-1-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-1-Code-Coverage",
+      "url" : "https://builds.apache.org/job/Hadoop-1-Code-Coverage/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-1-win",
+      "url" : "https://builds.apache.org/job/Hadoop-1-win/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-1.0-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-1.0-Build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hadoop-Common-0.23-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-Common-0.23-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Common-0.23-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-Common-0.23-Commit/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hadoop-Common-trunk",
+      "url" : "https://builds.apache.org/job/Hadoop-Common-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Hdfs-0.23-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-0.23-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Hdfs-0.23-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-0.23-Commit/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Hdfs-22-branch",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-22-branch/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hadoop-Hdfs-HAbranch-build",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-HAbranch-build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Hdfs-NIFbranch-build",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-NIFbranch-build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Hdfs-Snapshots-Branch-build",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-Snapshots-Branch-build/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Hdfs-trunk",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Hdfs-trunk-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-Hdfs-trunk-Commit/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Mapreduce-0.23-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-Mapreduce-0.23-Build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Mapreduce-0.23-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-Mapreduce-0.23-Commit/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-Mapreduce-22-branch",
+      "url" : "https://builds.apache.org/job/Hadoop-Mapreduce-22-branch/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hadoop-Mapreduce-trunk",
+      "url" : "https://builds.apache.org/job/Hadoop-Mapreduce-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-Mapreduce-trunk-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-Mapreduce-trunk-Commit/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-MR-279-Build",
+      "url" : "https://builds.apache.org/job/Hadoop-MR-279-Build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hadoop-trunk",
+      "url" : "https://builds.apache.org/job/Hadoop-trunk/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Hadoop-trunk-ARM",
+      "url" : "https://builds.apache.org/job/Hadoop-trunk-ARM/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hadoop-trunk-Commit",
+      "url" : "https://builds.apache.org/job/Hadoop-trunk-Commit/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hadoop-Yarn-trunk",
+      "url" : "https://builds.apache.org/job/Hadoop-Yarn-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hama trunk",
+      "url" : "https://builds.apache.org/job/Hama%20trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hama-Nightly",
+      "url" : "https://builds.apache.org/job/Hama-Nightly/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hama-Patch",
+      "url" : "https://builds.apache.org/job/Hama-Patch/",
+      "color" : "red"
+    },
+    {
+      "name" : "Hama-Patch-Admin",
+      "url" : "https://builds.apache.org/job/Hama-Patch-Admin/",
+      "color" : "red"
+    },
+    {
+      "name" : "hbase-0.90",
+      "url" : "https://builds.apache.org/job/hbase-0.90/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-0.92",
+      "url" : "https://builds.apache.org/job/HBase-0.92/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-0.92-security",
+      "url" : "https://builds.apache.org/job/HBase-0.92-security/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-0.94",
+      "url" : "https://builds.apache.org/job/HBase-0.94/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-0.94-deploy",
+      "url" : "https://builds.apache.org/job/HBase-0.94-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HBase-0.94-security",
+      "url" : "https://builds.apache.org/job/HBase-0.94-security/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HBase-0.94-security-on-Hadoop-23",
+      "url" : "https://builds.apache.org/job/HBase-0.94-security-on-Hadoop-23/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-TRUNK",
+      "url" : "https://builds.apache.org/job/HBase-TRUNK/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-TRUNK-on-Hadoop-2.0.0",
+      "url" : "https://builds.apache.org/job/HBase-TRUNK-on-Hadoop-2.0.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "HBase-TRUNK-on-Hadoop-23",
+      "url" : "https://builds.apache.org/job/HBase-TRUNK-on-Hadoop-23/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "HBase-TRUNK-security",
+      "url" : "https://builds.apache.org/job/HBase-TRUNK-security/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hcatalog-0.2-build",
+      "url" : "https://builds.apache.org/job/Hcatalog-0.2-build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hcatalog-0.3-build",
+      "url" : "https://builds.apache.org/job/Hcatalog-0.3-build/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hcatalog-0.4-build",
+      "url" : "https://builds.apache.org/job/Hcatalog-0.4-build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Hcatalog-trunk-build",
+      "url" : "https://builds.apache.org/job/Hcatalog-trunk-build/",
+      "color" : "red"
+    },
+    {
+      "name" : "helix",
+      "url" : "https://builds.apache.org/job/helix/",
+      "color" : "blue"
+    },
+    {
+      "name" : "helix-1.7",
+      "url" : "https://builds.apache.org/job/helix-1.7/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "Hive-0.10.0-SNAPSHOT-h0.20.1",
+      "url" : "https://builds.apache.org/job/Hive-0.10.0-SNAPSHOT-h0.20.1/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Hive-0.9.1-SNAPSHOT-h0.21",
+      "url" : "https://builds.apache.org/job/Hive-0.9.1-SNAPSHOT-h0.21/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Hive-0.9.1-SNAPSHOT-h0.21-keepgoing=false",
+      "url" : "https://builds.apache.org/job/Hive-0.9.1-SNAPSHOT-h0.21-keepgoing=false/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Hive-trunk-h0.21",
+      "url" : "https://builds.apache.org/job/Hive-trunk-h0.21/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "hive-trunk-hadoop1",
+      "url" : "https://builds.apache.org/job/hive-trunk-hadoop1/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Hive-trunk-hadoop2",
+      "url" : "https://builds.apache.org/job/Hive-trunk-hadoop2/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "HttpComponents AsyncClient",
+      "url" : "https://builds.apache.org/job/HttpComponents%20AsyncClient/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HttpComponents Client",
+      "url" : "https://builds.apache.org/job/HttpComponents%20Client/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HttpComponents Client (4.2.x)",
+      "url" : "https://builds.apache.org/job/HttpComponents%20Client%20(4.2.x)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HttpComponents Core",
+      "url" : "https://builds.apache.org/job/HttpComponents%20Core/",
+      "color" : "blue"
+    },
+    {
+      "name" : "HttpComponents Core (4.2.x)",
+      "url" : "https://builds.apache.org/job/HttpComponents%20Core%20(4.2.x)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "hupa-trunk",
+      "url" : "https://builds.apache.org/job/hupa-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "hupa-trunk-site",
+      "url" : "https://builds.apache.org/job/hupa-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "imap-trunk-m2",
+      "url" : "https://builds.apache.org/job/imap-trunk-m2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "imap-trunk-site",
+      "url" : "https://builds.apache.org/job/imap-trunk-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "isis-core-ubuntu",
+      "url" : "https://builds.apache.org/job/isis-core-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ivy",
+      "url" : "https://builds.apache.org/job/Ivy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ivy-2.3-tests",
+      "url" : "https://builds.apache.org/job/Ivy-2.3-tests/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ivy-check",
+      "url" : "https://builds.apache.org/job/Ivy-check/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ivy-tests",
+      "url" : "https://builds.apache.org/job/Ivy-tests/",
+      "color" : "blue"
+    },
+    {
+      "name" : "IvyDE",
+      "url" : "https://builds.apache.org/job/IvyDE/",
+      "color" : "blue"
+    },
+    {
+      "name" : "IvyDE-updatesite",
+      "url" : "https://builds.apache.org/job/IvyDE-updatesite/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jackrabbit-2.2",
+      "url" : "https://builds.apache.org/job/Jackrabbit-2.2/",
+      "color" : "red"
+    },
+    {
+      "name" : "Jackrabbit-trunk",
+      "url" : "https://builds.apache.org/job/Jackrabbit-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Jakarta_BSF3",
+      "url" : "https://builds.apache.org/job/Jakarta_BSF3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "james-mailet",
+      "url" : "https://builds.apache.org/job/james-mailet/",
+      "color" : "blue"
+    },
+    {
+      "name" : "james-project",
+      "url" : "https://builds.apache.org/job/james-project/",
+      "color" : "blue"
+    },
+    {
+      "name" : "james-server-trunk",
+      "url" : "https://builds.apache.org/job/james-server-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "james-server-trunk-site",
+      "url" : "https://builds.apache.org/job/james-server-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "james-server-v2.3",
+      "url" : "https://builds.apache.org/job/james-server-v2.3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "james-server-v2.3-m2",
+      "url" : "https://builds.apache.org/job/james-server-v2.3-m2/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "james-skin",
+      "url" : "https://builds.apache.org/job/james-skin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "jdkim-trunk",
+      "url" : "https://builds.apache.org/job/jdkim-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "jdkim-trunk-site",
+      "url" : "https://builds.apache.org/job/jdkim-trunk-site/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena__Development_Deploy",
+      "url" : "https://builds.apache.org/job/Jena__Development_Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena__Development_Test",
+      "url" : "https://builds.apache.org/job/Jena__Development_Test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena_Development_Test_Windows",
+      "url" : "https://builds.apache.org/job/Jena_Development_Test_Windows/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Jena_LARQ",
+      "url" : "https://builds.apache.org/job/Jena_LARQ/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena_LARQ_Snapshot",
+      "url" : "https://builds.apache.org/job/Jena_LARQ_Snapshot/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena_SDB",
+      "url" : "https://builds.apache.org/job/Jena_SDB/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Jena_SDB_Snapshot",
+      "url" : "https://builds.apache.org/job/Jena_SDB_Snapshot/",
+      "color" : "blue"
+    },
+    {
+      "name" : "JMeter adhoc",
+      "url" : "https://builds.apache.org/job/JMeter%20adhoc/",
+      "color" : "blue"
+    },
+    {
+      "name" : "JMeter-trunk",
+      "url" : "https://builds.apache.org/job/JMeter-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "jsieve-trunk",
+      "url" : "https://builds.apache.org/job/jsieve-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "jsieve-trunk-site",
+      "url" : "https://builds.apache.org/job/jsieve-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "jspf-trunk",
+      "url" : "https://builds.apache.org/job/jspf-trunk/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "jspf-trunk-site",
+      "url" : "https://builds.apache.org/job/jspf-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "JSPWiki",
+      "url" : "https://builds.apache.org/job/JSPWiki/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Kafka-0.7",
+      "url" : "https://builds.apache.org/job/Kafka-0.7/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Kafka-0.8",
+      "url" : "https://builds.apache.org/job/Kafka-0.8/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Kafka-consumer_redesign",
+      "url" : "https://builds.apache.org/job/Kafka-consumer_redesign/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Kafka-trunk",
+      "url" : "https://builds.apache.org/job/Kafka-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Kalumet-trunk",
+      "url" : "https://builds.apache.org/job/Kalumet-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Karaf",
+      "url" : "https://builds.apache.org/job/Karaf/",
+      "color" : "red"
+    },
+    {
+      "name" : "Karaf-2.2.x",
+      "url" : "https://builds.apache.org/job/Karaf-2.2.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Karaf-2.3.x",
+      "url" : "https://builds.apache.org/job/Karaf-2.3.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "Karaf-WebConsole",
+      "url" : "https://builds.apache.org/job/Karaf-WebConsole/",
+      "color" : "red"
+    },
+    {
+      "name" : "kato.api-head",
+      "url" : "https://builds.apache.org/job/kato.api-head/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ki",
+      "url" : "https://builds.apache.org/job/Ki/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "lightning-trunk",
+      "url" : "https://builds.apache.org/job/lightning-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Log4j 2.x",
+      "url" : "https://builds.apache.org/job/Log4j%202.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Artifacts-4.x",
+      "url" : "https://builds.apache.org/job/Lucene-Artifacts-4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Artifacts-trunk",
+      "url" : "https://builds.apache.org/job/Lucene-Artifacts-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-BadApples-trunk-java7",
+      "url" : "https://builds.apache.org/job/Lucene-BadApples-trunk-java7/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Lucene-Solr-Clover-4.x",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Clover-4.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Lucene-Solr-Clover-trunk",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Clover-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Maven-4.x",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Maven-4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Maven-trunk",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Maven-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Lucene-Solr-NightlyTests-4.x",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-NightlyTests-4.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "Lucene-Solr-NightlyTests-trunk",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-NightlyTests-trunk/",
+      "color" : "blue_anime"
+    },
+    {
+      "name" : "Lucene-Solr-SmokeRelease-4.x",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-SmokeRelease-4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-SmokeRelease-trunk",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-SmokeRelease-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Tests-4.x-Java6",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Tests-4.x-Java6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Tests-4.x-java7",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Tests-4.x-java7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Tests-trunk-Java6",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Tests-trunk-Java6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Lucene-Solr-Tests-trunk-java7",
+      "url" : "https://builds.apache.org/job/Lucene-Solr-Tests-trunk-java7/",
+      "color" : "red"
+    },
+    {
+      "name" : "Lucene.Net-Trunk-All-Nightly",
+      "url" : "https://builds.apache.org/job/Lucene.Net-Trunk-All-Nightly/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Lucene.Net-Trunk-All-Poll-Changes",
+      "url" : "https://builds.apache.org/job/Lucene.Net-Trunk-All-Poll-Changes/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Lucene.Net-Trunk-Contrib-Nightly",
+      "url" : "https://builds.apache.org/job/Lucene.Net-Trunk-Contrib-Nightly/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Lucene.Net-Trunk-Contrib-Poll-Changes",
+      "url" : "https://builds.apache.org/job/Lucene.Net-Trunk-Contrib-Poll-Changes/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "mahout-collections-trunk",
+      "url" : "https://builds.apache.org/job/mahout-collections-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Mahout-Examples-Classify-20News",
+      "url" : "https://builds.apache.org/job/Mahout-Examples-Classify-20News/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Mahout-Examples-Cluster-Reuters",
+      "url" : "https://builds.apache.org/job/Mahout-Examples-Cluster-Reuters/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Mahout-Examples-Cluster-Reuters-II",
+      "url" : "https://builds.apache.org/job/Mahout-Examples-Cluster-Reuters-II/",
+      "color" : "red"
+    },
+    {
+      "name" : "mahout-nightly",
+      "url" : "https://builds.apache.org/job/mahout-nightly/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Mahout-Quality",
+      "url" : "https://builds.apache.org/job/Mahout-Quality/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Mahout-Trunk",
+      "url" : "https://builds.apache.org/job/Mahout-Trunk/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "MahoutClover",
+      "url" : "https://builds.apache.org/job/MahoutClover/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "mailbox",
+      "url" : "https://builds.apache.org/job/mailbox/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "mailbox-integration-tests",
+      "url" : "https://builds.apache.org/job/mailbox-integration-tests/",
+      "color" : "blue"
+    },
+    {
+      "name" : "mailbox-integration-tests-site",
+      "url" : "https://builds.apache.org/job/mailbox-integration-tests-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "mailbox-site",
+      "url" : "https://builds.apache.org/job/mailbox-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-2.2.x",
+      "url" : "https://builds.apache.org/job/maven-2.2.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "maven-3.0.x",
+      "url" : "https://builds.apache.org/job/maven-3.0.x/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "maven-ant-tasks",
+      "url" : "https://builds.apache.org/job/maven-ant-tasks/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-archetype-m2",
+      "url" : "https://builds.apache.org/job/maven-archetype-m2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-archetype-m3",
+      "url" : "https://builds.apache.org/job/maven-archetype-m3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-enforcer",
+      "url" : "https://builds.apache.org/job/maven-enforcer/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-indexer",
+      "url" : "https://builds.apache.org/job/maven-indexer/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-jxr",
+      "url" : "https://builds.apache.org/job/maven-jxr/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "maven-parent",
+      "url" : "https://builds.apache.org/job/maven-parent/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-testing",
+      "url" : "https://builds.apache.org/job/maven-plugin-testing/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-testing-mvn-2.x",
+      "url" : "https://builds.apache.org/job/maven-plugin-testing-mvn-2.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools-2.x",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools-2.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools-2.x-m2",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools-2.x-m2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools-jdk-1.7",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools-jdk-1.7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools-m2",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools-m2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugin-tools-windows",
+      "url" : "https://builds.apache.org/job/maven-plugin-tools-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-plugins",
+      "url" : "https://builds.apache.org/job/maven-plugins/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m2",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m2/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m2-with-maven-plugin",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m2-with-maven-plugin/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m3",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m3/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m3-windows",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m3-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m3-with-maven-plugin",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m3-with-maven-plugin/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-plugins-ITs-m3.0.3",
+      "url" : "https://builds.apache.org/job/maven-plugins-ITs-m3.0.3/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-project-resources",
+      "url" : "https://builds.apache.org/job/maven-project-resources/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-release",
+      "url" : "https://builds.apache.org/job/maven-release/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-sandbox-plexus-utils-commons-bridge",
+      "url" : "https://builds.apache.org/job/maven-sandbox-plexus-utils-commons-bridge/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-scm",
+      "url" : "https://builds.apache.org/job/maven-scm/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-scm-1.7",
+      "url" : "https://builds.apache.org/job/maven-scm-1.7/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "maven-scm-mvn-2.2x",
+      "url" : "https://builds.apache.org/job/maven-scm-mvn-2.2x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-scm-provider-svnjava",
+      "url" : "https://builds.apache.org/job/maven-scm-provider-svnjava/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-scm-windows",
+      "url" : "https://builds.apache.org/job/maven-scm-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-shared",
+      "url" : "https://builds.apache.org/job/maven-shared/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-shared-windows",
+      "url" : "https://builds.apache.org/job/maven-shared-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-site-plugin-2.x",
+      "url" : "https://builds.apache.org/job/maven-site-plugin-2.x/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "maven-skins",
+      "url" : "https://builds.apache.org/job/maven-skins/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "maven-surefire",
+      "url" : "https://builds.apache.org/job/maven-surefire/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-surefire-mvn-2.2.1",
+      "url" : "https://builds.apache.org/job/maven-surefire-mvn-2.2.1/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "maven-surefire-windows",
+      "url" : "https://builds.apache.org/job/maven-surefire-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-wagon",
+      "url" : "https://builds.apache.org/job/maven-wagon/",
+      "color" : "blue"
+    },
+    {
+      "name" : "maven-wagon-windows",
+      "url" : "https://builds.apache.org/job/maven-wagon-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "maven-wagon-with-ssh-embedded",
+      "url" : "https://builds.apache.org/job/maven-wagon-with-ssh-embedded/",
+      "color" : "red"
+    },
+    {
+      "name" : "Mesos-Trunk-Ubuntu-Build-In-Src-Set-JAVA_HOME",
+      "url" : "https://builds.apache.org/job/Mesos-Trunk-Ubuntu-Build-In-Src-Set-JAVA_HOME/",
+      "color" : "red"
+    },
+    {
+      "name" : "Mesos-Trunk-Ubuntu-Build-Out-Of-Src-Disable-Java-Disable-Python-Disable-Webui",
+      "url" : "https://builds.apache.org/job/Mesos-Trunk-Ubuntu-Build-Out-Of-Src-Disable-Java-Disable-Python-Disable-Webui/",
+      "color" : "red"
+    },
+    {
+      "name" : "Mesos-Trunk-Ubuntu-Build-Out-Of-Src-Set-JAVA_HOME",
+      "url" : "https://builds.apache.org/job/Mesos-Trunk-Ubuntu-Build-Out-Of-Src-Set-JAVA_HOME/",
+      "color" : "red"
+    },
+    {
+      "name" : "mime4j-trunk",
+      "url" : "https://builds.apache.org/job/mime4j-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "mime4j-trunk-site",
+      "url" : "https://builds.apache.org/job/mime4j-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "MINA-1.0.X",
+      "url" : "https://builds.apache.org/job/MINA-1.0.X/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "MINA-1.1.X",
+      "url" : "https://builds.apache.org/job/MINA-1.1.X/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "MINA-2.0.X-jdk1.5-ubuntu",
+      "url" : "https://builds.apache.org/job/MINA-2.0.X-jdk1.5-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "MINA-trunk-jdk1.6-ubuntu",
+      "url" : "https://builds.apache.org/job/MINA-trunk-jdk1.6-ubuntu/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "MINA-trunk-jdk1.6-windows",
+      "url" : "https://builds.apache.org/job/MINA-trunk-jdk1.6-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "MINA-trunk-jdk1.7-ubuntu",
+      "url" : "https://builds.apache.org/job/MINA-trunk-jdk1.7-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "mpt-trunk",
+      "url" : "https://builds.apache.org/job/mpt-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "mpt-trunk-site",
+      "url" : "https://builds.apache.org/job/mpt-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "mrunit-trunk",
+      "url" : "https://builds.apache.org/job/mrunit-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-commons",
+      "url" : "https://builds.apache.org/job/myfaces-commons/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current-2.0",
+      "url" : "https://builds.apache.org/job/myfaces-current-2.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current-2.0-integration-tests",
+      "url" : "https://builds.apache.org/job/myfaces-current-2.0-integration-tests/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-current11",
+      "url" : "https://builds.apache.org/job/myfaces-current11/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current12",
+      "url" : "https://builds.apache.org/job/myfaces-current12/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current21",
+      "url" : "https://builds.apache.org/job/myfaces-current21/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current21_949",
+      "url" : "https://builds.apache.org/job/myfaces-current21_949/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-current22",
+      "url" : "https://builds.apache.org/job/myfaces-current22/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-ext-scripting",
+      "url" : "https://builds.apache.org/job/myfaces-ext-scripting/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-master-pom",
+      "url" : "https://builds.apache.org/job/myfaces-master-pom/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-maven",
+      "url" : "https://builds.apache.org/job/myfaces-maven/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-maven-achetypes",
+      "url" : "https://builds.apache.org/job/myfaces-maven-achetypes/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-maven2-plugins",
+      "url" : "https://builds.apache.org/job/myfaces-maven2-plugins/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Myfaces-Orchestra",
+      "url" : "https://builds.apache.org/job/Myfaces-Orchestra/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-orchestra-core",
+      "url" : "https://builds.apache.org/job/myfaces-orchestra-core/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-orchestra-core12",
+      "url" : "https://builds.apache.org/job/myfaces-orchestra-core12/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-orchestra-core20",
+      "url" : "https://builds.apache.org/job/myfaces-orchestra-core20/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-orchestra-maven",
+      "url" : "https://builds.apache.org/job/myfaces-orchestra-maven/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-shared",
+      "url" : "https://builds.apache.org/job/myfaces-shared/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-shared-2.0",
+      "url" : "https://builds.apache.org/job/myfaces-shared-2.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-shared-3.0",
+      "url" : "https://builds.apache.org/job/myfaces-shared-3.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "myfaces-site-skin",
+      "url" : "https://builds.apache.org/job/myfaces-site-skin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-test",
+      "url" : "https://builds.apache.org/job/myfaces-test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "myfaces-tomahawk",
+      "url" : "https://builds.apache.org/job/myfaces-tomahawk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "MyFaces-Trinidad-Plugins2",
+      "url" : "https://builds.apache.org/job/MyFaces-Trinidad-Plugins2/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "neethi-2.0",
+      "url" : "https://builds.apache.org/job/neethi-2.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "neethi-trunk",
+      "url" : "https://builds.apache.org/job/neethi-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "NPanday",
+      "url" : "https://builds.apache.org/job/NPanday/",
+      "color" : "blue"
+    },
+    {
+      "name" : "NPanday-dist",
+      "url" : "https://builds.apache.org/job/NPanday-dist/",
+      "color" : "blue"
+    },
+    {
+      "name" : "NPanday-docs",
+      "url" : "https://builds.apache.org/job/NPanday-docs/",
+      "color" : "blue"
+    },
+    {
+      "name" : "NPanday-it-runner",
+      "url" : "https://builds.apache.org/job/NPanday-it-runner/",
+      "color" : "red"
+    },
+    {
+      "name" : "NPanday-its",
+      "url" : "https://builds.apache.org/job/NPanday-its/",
+      "color" : "blue"
+    },
+    {
+      "name" : "npanday-plugin-its",
+      "url" : "https://builds.apache.org/job/npanday-plugin-its/",
+      "color" : "blue"
+    },
+    {
+      "name" : "nutch-2.x-maven",
+      "url" : "https://builds.apache.org/job/nutch-2.x-maven/",
+      "color" : "red"
+    },
+    {
+      "name" : "Nutch-2.x-Windows",
+      "url" : "https://builds.apache.org/job/Nutch-2.x-Windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "Nutch-nutchgora",
+      "url" : "https://builds.apache.org/job/Nutch-nutchgora/",
+      "color" : "red"
+    },
+    {
+      "name" : "Nutch-trunk",
+      "url" : "https://builds.apache.org/job/Nutch-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "nutch-trunk-maven",
+      "url" : "https://builds.apache.org/job/nutch-trunk-maven/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Nutch-trunk-Windows",
+      "url" : "https://builds.apache.org/job/Nutch-trunk-Windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "nuvem",
+      "url" : "https://builds.apache.org/job/nuvem/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ODE-1.x",
+      "url" : "https://builds.apache.org/job/ODE-1.x/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "ODE-trunk",
+      "url" : "https://builds.apache.org/job/ODE-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ODE-trunk-jdk6",
+      "url" : "https://builds.apache.org/job/ODE-trunk-jdk6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ODE-trunk-m2-jdk5-nightly-deploy",
+      "url" : "https://builds.apache.org/job/ODE-trunk-m2-jdk5-nightly-deploy/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ODE-trunk-maven2-jdk5",
+      "url" : "https://builds.apache.org/job/ODE-trunk-maven2-jdk5/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ODFToolkit",
+      "url" : "https://builds.apache.org/job/ODFToolkit/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "ODFToolkit-windows",
+      "url" : "https://builds.apache.org/job/ODFToolkit-windows/",
+      "color" : "blue_anime"
+    },
+    {
+      "name" : "ognl",
+      "url" : "https://builds.apache.org/job/ognl/",
+      "color" : "red"
+    },
+    {
+      "name" : "Onami-Aggregator",
+      "url" : "https://builds.apache.org/job/Onami-Aggregator/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Autobind",
+      "url" : "https://builds.apache.org/job/Onami-Autobind/",
+      "color" : "red"
+    },
+    {
+      "name" : "Onami-Cache",
+      "url" : "https://builds.apache.org/job/Onami-Cache/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Configuration",
+      "url" : "https://builds.apache.org/job/Onami-Configuration/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Guava",
+      "url" : "https://builds.apache.org/job/Onami-Guava/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Lifecycle",
+      "url" : "https://builds.apache.org/job/Onami-Lifecycle/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Logging",
+      "url" : "https://builds.apache.org/job/Onami-Logging/",
+      "color" : "red"
+    },
+    {
+      "name" : "Onami-Parent",
+      "url" : "https://builds.apache.org/job/Onami-Parent/",
+      "color" : "red"
+    },
+    {
+      "name" : "Onami-Scheduler",
+      "url" : "https://builds.apache.org/job/Onami-Scheduler/",
+      "color" : "red"
+    },
+    {
+      "name" : "Onami-SPI",
+      "url" : "https://builds.apache.org/job/Onami-SPI/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Onami-Test",
+      "url" : "https://builds.apache.org/job/Onami-Test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "oodt-trunk",
+      "url" : "https://builds.apache.org/job/oodt-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "oozie-trunk-find-patches-available",
+      "url" : "https://builds.apache.org/job/oozie-trunk-find-patches-available/",
+      "color" : "blue"
+    },
+    {
+      "name" : "oozie-trunk-precommit-build",
+      "url" : "https://builds.apache.org/job/oozie-trunk-precommit-build/",
+      "color" : "red"
+    },
+    {
+      "name" : "oozie-trunk-w-hadoop-1",
+      "url" : "https://builds.apache.org/job/oozie-trunk-w-hadoop-1/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "oozie-trunk-w-hadoop-2",
+      "url" : "https://builds.apache.org/job/oozie-trunk-w-hadoop-2/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "OpenEJB_and_TomEE_Build",
+      "url" : "https://builds.apache.org/job/OpenEJB_and_TomEE_Build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenEJB_deploy_patched_module",
+      "url" : "https://builds.apache.org/job/OpenEJB_deploy_patched_module/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-11x",
+      "url" : "https://builds.apache.org/job/OpenJPA-11x/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "OpenJPA-12x",
+      "url" : "https://builds.apache.org/job/OpenJPA-12x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-13x",
+      "url" : "https://builds.apache.org/job/OpenJPA-13x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-20x-deploy",
+      "url" : "https://builds.apache.org/job/OpenJPA-20x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-21x",
+      "url" : "https://builds.apache.org/job/OpenJPA-21x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-21x-deploy",
+      "url" : "https://builds.apache.org/job/OpenJPA-21x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-21x-docs",
+      "url" : "https://builds.apache.org/job/OpenJPA-21x-docs/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-221x",
+      "url" : "https://builds.apache.org/job/OpenJPA-221x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-221x-deploy",
+      "url" : "https://builds.apache.org/job/OpenJPA-221x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-22x",
+      "url" : "https://builds.apache.org/job/OpenJPA-22x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-22x-deploy",
+      "url" : "https://builds.apache.org/job/OpenJPA-22x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-EclipsePlugin-trunk",
+      "url" : "https://builds.apache.org/job/OpenJPA-EclipsePlugin-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "OpenJPA-trunk",
+      "url" : "https://builds.apache.org/job/OpenJPA-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenJPA-trunk-deploy",
+      "url" : "https://builds.apache.org/job/OpenJPA-trunk-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "openmeetings",
+      "url" : "https://builds.apache.org/job/openmeetings/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings 2.0",
+      "url" : "https://builds.apache.org/job/OpenMeetings%202.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings ATutor Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20ATutor%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Bitrix Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Bitrix%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Drupal 7.x Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Drupal%207.x%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Joomla Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Joomla%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Moodle Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Moodle%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings SugarCRM Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20SugarCRM%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Teambox Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Teambox%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenMeetings Zimbra Plugin",
+      "url" : "https://builds.apache.org/job/OpenMeetings%20Zimbra%20Plugin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenNLP",
+      "url" : "https://builds.apache.org/job/OpenNLP/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenWebBeans-1.1.x-deploy",
+      "url" : "https://builds.apache.org/job/OpenWebBeans-1.1.x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenWebBeans-trunk",
+      "url" : "https://builds.apache.org/job/OpenWebBeans-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenWebBeans-trunk-deploy",
+      "url" : "https://builds.apache.org/job/OpenWebBeans-trunk-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenWebBeans_1.0.x",
+      "url" : "https://builds.apache.org/job/OpenWebBeans_1.0.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "OpenWebBeans_1.1.x",
+      "url" : "https://builds.apache.org/job/OpenWebBeans_1.1.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "org.apache.kato",
+      "url" : "https://builds.apache.org/job/org.apache.kato/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "org.apache.kato.eclipse",
+      "url" : "https://builds.apache.org/job/org.apache.kato.eclipse/",
+      "color" : "red"
+    },
+    {
+      "name" : "org.apache.kato.rc1",
+      "url" : "https://builds.apache.org/job/org.apache.kato.rc1/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "PDFBox-ant",
+      "url" : "https://builds.apache.org/job/PDFBox-ant/",
+      "color" : "blue"
+    },
+    {
+      "name" : "PDFBox-trunk",
+      "url" : "https://builds.apache.org/job/PDFBox-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Pig-0.9",
+      "url" : "https://builds.apache.org/job/Pig-0.9/",
+      "color" : "red"
+    },
+    {
+      "name" : "Pig-trunk",
+      "url" : "https://builds.apache.org/job/Pig-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Pig-trunk-commit",
+      "url" : "https://builds.apache.org/job/Pig-trunk-commit/",
+      "color" : "red"
+    },
+    {
+      "name" : "Pivot-maintenance",
+      "url" : "https://builds.apache.org/job/Pivot-maintenance/",
+      "color" : "red"
+    },
+    {
+      "name" : "Pivot-maintenance on Java 7",
+      "url" : "https://builds.apache.org/job/Pivot-maintenance%20on%20Java%207/",
+      "color" : "red"
+    },
+    {
+      "name" : "Pivot-trunk",
+      "url" : "https://builds.apache.org/job/Pivot-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "Pivot-trunk on Java 7",
+      "url" : "https://builds.apache.org/job/Pivot-trunk%20on%20Java%207/",
+      "color" : "red"
+    },
+    {
+      "name" : "POI",
+      "url" : "https://builds.apache.org/job/POI/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-dbbrowser-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-dbbrowser-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-demo-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-demo-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-gems-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-gems-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-logging-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-logging-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-pom-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-pom-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-rss-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-rss-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-applications-webcontent-trunk",
+      "url" : "https://builds.apache.org/job/portals-applications-webcontent-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-bridges-common-trunk",
+      "url" : "https://builds.apache.org/job/portals-bridges-common-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-bridges-pom-trunk",
+      "url" : "https://builds.apache.org/job/portals-bridges-pom-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-bridges-script-trunk",
+      "url" : "https://builds.apache.org/job/portals-bridges-script-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-bridges-velocity-trunk",
+      "url" : "https://builds.apache.org/job/portals-bridges-velocity-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-jetspeed-2-applications-j2-admin-trunk",
+      "url" : "https://builds.apache.org/job/portals-jetspeed-2-applications-j2-admin-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-jetspeed-2-portal-trunk",
+      "url" : "https://builds.apache.org/job/portals-jetspeed-2-portal-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-pluto-2.0.x",
+      "url" : "https://builds.apache.org/job/portals-pluto-2.0.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-pluto-trunk",
+      "url" : "https://builds.apache.org/job/portals-pluto-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portals-pom-trunk",
+      "url" : "https://builds.apache.org/job/portals-pom-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portlet-bridge-api-documentation-1.0",
+      "url" : "https://builds.apache.org/job/portlet-bridge-api-documentation-1.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portlet-bridge-api-documentation-2.0",
+      "url" : "https://builds.apache.org/job/portlet-bridge-api-documentation-2.0/",
+      "color" : "blue"
+    },
+    {
+      "name" : "portlet-bridge-core-1.0",
+      "url" : "https://builds.apache.org/job/portlet-bridge-core-1.0/",
+      "color" : "red"
+    },
+    {
+      "name" : "portlet-bridge-core-2.0",
+      "url" : "https://builds.apache.org/job/portlet-bridge-core-2.0/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "portlet-bridge-core-3.0",
+      "url" : "https://builds.apache.org/job/portlet-bridge-core-3.0/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "portlet-bridge-master-pom",
+      "url" : "https://builds.apache.org/job/portlet-bridge-master-pom/",
+      "color" : "blue"
+    },
+    {
+      "name" : "postage-trunk",
+      "url" : "https://builds.apache.org/job/postage-trunk/",
+      "color" : "red"
+    },
+    {
+      "name" : "postage-trunk-m2",
+      "url" : "https://builds.apache.org/job/postage-trunk-m2/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-Admin",
+      "url" : "https://builds.apache.org/job/PreCommit-Admin/",
+      "color" : "blue"
+    },
+    {
+      "name" : "PreCommit-FLUME-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-FLUME-Build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "PreCommit-GIRAPH-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-GIRAPH-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-HADOOP-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-HADOOP-Build/",
+      "color" : "red_anime"
+    },
+    {
+      "name" : "PreCommit-HADOOP-Build-Ant-IVY",
+      "url" : "https://builds.apache.org/job/PreCommit-HADOOP-Build-Ant-IVY/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "PreCommit-HBASE-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-HBASE-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-HDFS-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-HDFS-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-MAPREDUCE-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-MAPREDUCE-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-PIG-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-PIG-Build/",
+      "color" : "grey"
+    },
+    {
+      "name" : "PreCommit-YARN-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-YARN-Build/",
+      "color" : "red"
+    },
+    {
+      "name" : "PreCommit-ZOOKEEPER-Build",
+      "url" : "https://builds.apache.org/job/PreCommit-ZOOKEEPER-Build/",
+      "color" : "blue"
+    },
+    {
+      "name" : "protoc-version",
+      "url" : "https://builds.apache.org/job/protoc-version/",
+      "color" : "red"
+    },
+    {
+      "name" : "protocols-trunk",
+      "url" : "https://builds.apache.org/job/protocols-trunk/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "protocols-trunk-site",
+      "url" : "https://builds.apache.org/job/protocols-trunk-site/",
+      "color" : "red"
+    },
+    {
+      "name" : "python-test",
+      "url" : "https://builds.apache.org/job/python-test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Artefact-Release",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Artefact-Release/",
+      "color" : "red"
+    },
+    {
+      "name" : "Qpid-Java-Artefact-Release-0.20",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Artefact-Release-0.20/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Cpp-Test",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Cpp-Test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Java-BDB-TestMatrix",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-BDB-TestMatrix/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Java-DBY-TestMatrix",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-DBY-TestMatrix/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Qpid-Java-Java-MMS-TestMatrix",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-MMS-TestMatrix/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Java-Test-0.20",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-Test-0.20/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Java-Test-IBMJDK1.6",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-Test-IBMJDK1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Java-Java-Test-JDK1.7",
+      "url" : "https://builds.apache.org/job/Qpid-Java-Java-Test-JDK1.7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-proton-j",
+      "url" : "https://builds.apache.org/job/Qpid-proton-j/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-proton-j-Deploy",
+      "url" : "https://builds.apache.org/job/Qpid-proton-j-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Python-Cpp-Test",
+      "url" : "https://builds.apache.org/job/Qpid-Python-Cpp-Test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Qpid-Python-Java-Test",
+      "url" : "https://builds.apache.org/job/Qpid-Python-Java-Test/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Rampart",
+      "url" : "https://builds.apache.org/job/Rampart/",
+      "color" : "blue"
+    },
+    {
+      "name" : "rampart-1.5",
+      "url" : "https://builds.apache.org/job/rampart-1.5/",
+      "color" : "red"
+    },
+    {
+      "name" : "rampart-1.6",
+      "url" : "https://builds.apache.org/job/rampart-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "rat-jdk-1.5-maven-2",
+      "url" : "https://builds.apache.org/job/rat-jdk-1.5-maven-2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "rave-master-pom-trunk",
+      "url" : "https://builds.apache.org/job/rave-master-pom-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "rave-project-trunk",
+      "url" : "https://builds.apache.org/job/rave-project-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Red5 Trunk",
+      "url" : "https://builds.apache.org/job/Red5%20Trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "redback-components",
+      "url" : "https://builds.apache.org/job/redback-components/",
+      "color" : "blue"
+    },
+    {
+      "name" : "redback-components-1.7",
+      "url" : "https://builds.apache.org/job/redback-components-1.7/",
+      "color" : "red"
+    },
+    {
+      "name" : "redback-core",
+      "url" : "https://builds.apache.org/job/redback-core/",
+      "color" : "blue"
+    },
+    {
+      "name" : "redback-core-1.7",
+      "url" : "https://builds.apache.org/job/redback-core-1.7/",
+      "color" : "red"
+    },
+    {
+      "name" : "replay_extcdi117",
+      "url" : "https://builds.apache.org/job/replay_extcdi117/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "River-dev-jdk6",
+      "url" : "https://builds.apache.org/job/River-dev-jdk6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-dev-jdk7",
+      "url" : "https://builds.apache.org/job/River-dev-jdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-QA-arm",
+      "url" : "https://builds.apache.org/job/River-QA-arm/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-bsd",
+      "url" : "https://builds.apache.org/job/River-QA-bsd/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-bsd-jdk7-skunk",
+      "url" : "https://builds.apache.org/job/River-QA-bsd-jdk7-skunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-J9",
+      "url" : "https://builds.apache.org/job/River-QA-J9/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-matrix",
+      "url" : "https://builds.apache.org/job/River-QA-matrix/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "River-QA-OpenJDK",
+      "url" : "https://builds.apache.org/job/River-QA-OpenJDK/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-osx",
+      "url" : "https://builds.apache.org/job/River-QA-osx/",
+      "color" : "red"
+    },
+    {
+      "name" : "river-qa-refactor-arm",
+      "url" : "https://builds.apache.org/job/river-qa-refactor-arm/",
+      "color" : "red"
+    },
+    {
+      "name" : "river-qa-refactor-jdk7",
+      "url" : "https://builds.apache.org/job/river-qa-refactor-jdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "river-qa-refactor-windows",
+      "url" : "https://builds.apache.org/job/river-qa-refactor-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "river-qa-refactoring",
+      "url" : "https://builds.apache.org/job/river-qa-refactoring/",
+      "color" : "blue"
+    },
+    {
+      "name" : "river-qa-refactoring-solaris",
+      "url" : "https://builds.apache.org/job/river-qa-refactoring-solaris/",
+      "color" : "red"
+    },
+    {
+      "name" : "River-QA-solaris",
+      "url" : "https://builds.apache.org/job/River-QA-solaris/",
+      "color" : "red"
+    },
+    {
+      "name" : "River-QA-tree",
+      "url" : "https://builds.apache.org/job/River-QA-tree/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-QA-ubuntu-jdk6",
+      "url" : "https://builds.apache.org/job/River-QA-ubuntu-jdk6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-QA-ubuntu-jdk7",
+      "url" : "https://builds.apache.org/job/River-QA-ubuntu-jdk7/",
+      "color" : "red"
+    },
+    {
+      "name" : "River-QA-ubuntu-jdk7-skunk",
+      "url" : "https://builds.apache.org/job/River-QA-ubuntu-jdk7-skunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-QA-ubuntu-openjdk",
+      "url" : "https://builds.apache.org/job/River-QA-ubuntu-openjdk/",
+      "color" : "red"
+    },
+    {
+      "name" : "River-QA-windows",
+      "url" : "https://builds.apache.org/job/River-QA-windows/",
+      "color" : "red"
+    },
+    {
+      "name" : "River-tck-jdk7",
+      "url" : "https://builds.apache.org/job/River-tck-jdk7/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-trunk-jdk6",
+      "url" : "https://builds.apache.org/job/River-trunk-jdk6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-trunk-jdk7",
+      "url" : "https://builds.apache.org/job/River-trunk-jdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "River-verify",
+      "url" : "https://builds.apache.org/job/River-verify/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "River-verify-generics",
+      "url" : "https://builds.apache.org/job/River-verify-generics/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Roller-For-JavaEE6",
+      "url" : "https://builds.apache.org/job/Roller-For-JavaEE6/",
+      "color" : "red"
+    },
+    {
+      "name" : "Roller-For-JBoss",
+      "url" : "https://builds.apache.org/job/Roller-For-JBoss/",
+      "color" : "blue_anime"
+    },
+    {
+      "name" : "Roller-For-Tomcat",
+      "url" : "https://builds.apache.org/job/Roller-For-Tomcat/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sandesha2-1.4",
+      "url" : "https://builds.apache.org/job/sandesha2-1.4/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sandesha2-1.6",
+      "url" : "https://builds.apache.org/job/sandesha2-1.6/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "sandesha2-trunk",
+      "url" : "https://builds.apache.org/job/sandesha2-trunk/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "santuario-java-1.4.x-fixes",
+      "url" : "https://builds.apache.org/job/santuario-java-1.4.x-fixes/",
+      "color" : "blue"
+    },
+    {
+      "name" : "santuario-java-1.5.x-fixes",
+      "url" : "https://builds.apache.org/job/santuario-java-1.5.x-fixes/",
+      "color" : "blue"
+    },
+    {
+      "name" : "santuario-java-trunk",
+      "url" : "https://builds.apache.org/job/santuario-java-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Servicemix-Archetypes",
+      "url" : "https://builds.apache.org/job/Servicemix-Archetypes/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ServiceMix-Bundles",
+      "url" : "https://builds.apache.org/job/ServiceMix-Bundles/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Components",
+      "url" : "https://builds.apache.org/job/ServiceMix-Components/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Components-2011.02.x",
+      "url" : "https://builds.apache.org/job/ServiceMix-Components-2011.02.x/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "ServiceMix-Components-2011.02.x-Deploy",
+      "url" : "https://builds.apache.org/job/ServiceMix-Components-2011.02.x-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Components-Deploy",
+      "url" : "https://builds.apache.org/job/ServiceMix-Components-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Docs",
+      "url" : "https://builds.apache.org/job/ServiceMix-Docs/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ServiceMix-Features",
+      "url" : "https://builds.apache.org/job/ServiceMix-Features/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "ServiceMix-Features-4.4.x",
+      "url" : "https://builds.apache.org/job/ServiceMix-Features-4.4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Features-Deploy",
+      "url" : "https://builds.apache.org/job/ServiceMix-Features-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-NMR",
+      "url" : "https://builds.apache.org/job/ServiceMix-NMR/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-NMR-Deploy",
+      "url" : "https://builds.apache.org/job/ServiceMix-NMR-Deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Plugins",
+      "url" : "https://builds.apache.org/job/ServiceMix-Plugins/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-POM",
+      "url" : "https://builds.apache.org/job/ServiceMix-POM/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Specs",
+      "url" : "https://builds.apache.org/job/ServiceMix-Specs/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix-Utils",
+      "url" : "https://builds.apache.org/job/ServiceMix-Utils/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ServiceMix3",
+      "url" : "https://builds.apache.org/job/ServiceMix3/",
+      "color" : "red"
+    },
+    {
+      "name" : "Shindig",
+      "url" : "https://builds.apache.org/job/Shindig/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Shindig Assembly",
+      "url" : "https://builds.apache.org/job/Shindig%20Assembly/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Shindig Trunk (IBM 1.6)",
+      "url" : "https://builds.apache.org/job/Shindig%20Trunk%20(IBM%201.6)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Shindig Trunk (JDK 1.5)",
+      "url" : "https://builds.apache.org/job/Shindig%20Trunk%20(JDK%201.5)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Shindig Trunk (JDK 1.6)",
+      "url" : "https://builds.apache.org/job/Shindig%20Trunk%20(JDK%201.6)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Shindig Trunk (JDK 1.7)",
+      "url" : "https://builds.apache.org/job/Shindig%20Trunk%20(JDK%201.7)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Shiro",
+      "url" : "https://builds.apache.org/job/Shiro/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sis-jdk7",
+      "url" : "https://builds.apache.org/job/sis-jdk7/",
+      "color" : "red"
+    },
+    {
+      "name" : "sis-trunk",
+      "url" : "https://builds.apache.org/job/sis-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sling-contrib-1.6",
+      "url" : "https://builds.apache.org/job/sling-contrib-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sling-samples-1.5",
+      "url" : "https://builds.apache.org/job/sling-samples-1.5/",
+      "color" : "blue"
+    },
+    {
+      "name" : "sling-trunk-1.5",
+      "url" : "https://builds.apache.org/job/sling-trunk-1.5/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "sling-trunk-1.6",
+      "url" : "https://builds.apache.org/job/sling-trunk-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Solaris1",
+      "url" : "https://builds.apache.org/job/Solaris1/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Solaris2",
+      "url" : "https://builds.apache.org/job/Solaris2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Solr-Artifacts-4.x",
+      "url" : "https://builds.apache.org/job/Solr-Artifacts-4.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Solr-Artifacts-trunk",
+      "url" : "https://builds.apache.org/job/Solr-Artifacts-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "SpamAssassin-3.3.x",
+      "url" : "https://builds.apache.org/job/SpamAssassin-3.3.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "SpamAssassin-trunk",
+      "url" : "https://builds.apache.org/job/SpamAssassin-trunk/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "SpamAssassin-trunk-FreeBSD",
+      "url" : "https://builds.apache.org/job/SpamAssassin-trunk-FreeBSD/",
+      "color" : "red"
+    },
+    {
+      "name" : "Sqoop-ant-jdk-1.6-hadoop100",
+      "url" : "https://builds.apache.org/job/Sqoop-ant-jdk-1.6-hadoop100/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Sqoop-ant-jdk-1.6-hadoop20",
+      "url" : "https://builds.apache.org/job/Sqoop-ant-jdk-1.6-hadoop20/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Sqoop-ant-jdk-1.6-hadoop200",
+      "url" : "https://builds.apache.org/job/Sqoop-ant-jdk-1.6-hadoop200/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Sqoop-ant-jdk-1.6-hadoop23",
+      "url" : "https://builds.apache.org/job/Sqoop-ant-jdk-1.6-hadoop23/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Sqoop-ant-jdk-1.7-hadoop200",
+      "url" : "https://builds.apache.org/job/Sqoop-ant-jdk-1.7-hadoop200/",
+      "color" : "grey"
+    },
+    {
+      "name" : "Sqoop2-hadoop100",
+      "url" : "https://builds.apache.org/job/Sqoop2-hadoop100/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "Sqoop2-hadoop200",
+      "url" : "https://builds.apache.org/job/Sqoop2-hadoop200/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "stanbol-trunk-1.6",
+      "url" : "https://builds.apache.org/job/stanbol-trunk-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "stdcxx-4.2.2-12d-ubuntu",
+      "url" : "https://builds.apache.org/job/stdcxx-4.2.2-12d-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "stdcxx-4.2.2-12S-freebsd",
+      "url" : "https://builds.apache.org/job/stdcxx-4.2.2-12S-freebsd/",
+      "color" : "blue"
+    },
+    {
+      "name" : "stdcxx-4.2.2-15D-windows",
+      "url" : "https://builds.apache.org/job/stdcxx-4.2.2-15D-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "stdcxx-4.2.2-15s-solaris",
+      "url" : "https://builds.apache.org/job/stdcxx-4.2.2-15s-solaris/",
+      "color" : "blue"
+    },
+    {
+      "name" : "struts-annotations",
+      "url" : "https://builds.apache.org/job/struts-annotations/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "struts-master",
+      "url" : "https://builds.apache.org/job/struts-master/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "struts1",
+      "url" : "https://builds.apache.org/job/struts1/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Struts2-3-x",
+      "url" : "https://builds.apache.org/job/Struts2-3-x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Struts2-JDK5",
+      "url" : "https://builds.apache.org/job/Struts2-JDK5/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Struts2-JDK6",
+      "url" : "https://builds.apache.org/job/Struts2-JDK6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Struts2-JDK7",
+      "url" : "https://builds.apache.org/job/Struts2-JDK7/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "subversion-1.6.x-solaris",
+      "url" : "https://builds.apache.org/job/subversion-1.6.x-solaris/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-1.6.x-ubuntu",
+      "url" : "https://builds.apache.org/job/subversion-1.6.x-ubuntu/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-doxygen",
+      "url" : "https://builds.apache.org/job/subversion-doxygen/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-javadoc",
+      "url" : "https://builds.apache.org/job/subversion-javadoc/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-trunk-solaris",
+      "url" : "https://builds.apache.org/job/subversion-trunk-solaris/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-trunk-ubuntu",
+      "url" : "https://builds.apache.org/job/subversion-trunk-ubuntu/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "subversion-trunk-windows",
+      "url" : "https://builds.apache.org/job/subversion-trunk-windows/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Synapse - Trunk",
+      "url" : "https://builds.apache.org/job/Synapse%20-%20Trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Syncope-1_0_X",
+      "url" : "https://builds.apache.org/job/Syncope-1_0_X/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Syncope-trunk",
+      "url" : "https://builds.apache.org/job/Syncope-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Syncope-windows",
+      "url" : "https://builds.apache.org/job/Syncope-windows/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "taglib-extended",
+      "url" : "https://builds.apache.org/job/taglib-extended/",
+      "color" : "blue"
+    },
+    {
+      "name" : "taglib-parent",
+      "url" : "https://builds.apache.org/job/taglib-parent/",
+      "color" : "blue"
+    },
+    {
+      "name" : "taglib-rdc",
+      "url" : "https://builds.apache.org/job/taglib-rdc/",
+      "color" : "blue"
+    },
+    {
+      "name" : "taglib-standard",
+      "url" : "https://builds.apache.org/job/taglib-standard/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tapestry-4.1-trunk",
+      "url" : "https://builds.apache.org/job/tapestry-4.1-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tapestry-5.1-freestyle",
+      "url" : "https://builds.apache.org/job/tapestry-5.1-freestyle/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tapestry-trunk-freestyle",
+      "url" : "https://builds.apache.org/job/tapestry-trunk-freestyle/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Test",
+      "url" : "https://builds.apache.org/job/Test/",
+      "color" : "grey"
+    },
+    {
+      "name" : "test-ulimit",
+      "url" : "https://builds.apache.org/job/test-ulimit/",
+      "color" : "blue"
+    },
+    {
+      "name" : "TestBuilds",
+      "url" : "https://builds.apache.org/job/TestBuilds/",
+      "color" : "red"
+    },
+    {
+      "name" : "Thrift",
+      "url" : "https://builds.apache.org/job/Thrift/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Thrift-Compiler-Linux32",
+      "url" : "https://builds.apache.org/job/Thrift-Compiler-Linux32/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Thrift-Compiler-Linux64",
+      "url" : "https://builds.apache.org/job/Thrift-Compiler-Linux64/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Thrift-Compiler-Windows",
+      "url" : "https://builds.apache.org/job/Thrift-Compiler-Windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Thrift-cpp",
+      "url" : "https://builds.apache.org/job/Thrift-cpp/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Thrift-Debian-Packages",
+      "url" : "https://builds.apache.org/job/Thrift-Debian-Packages/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-env-test",
+      "url" : "https://builds.apache.org/job/Thrift-env-test/",
+      "color" : "red"
+    },
+    {
+      "name" : "Thrift-env-test_arm",
+      "url" : "https://builds.apache.org/job/Thrift-env-test_arm/",
+      "color" : "red"
+    },
+    {
+      "name" : "Thrift-erlang",
+      "url" : "https://builds.apache.org/job/Thrift-erlang/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-freebsd",
+      "url" : "https://builds.apache.org/job/Thrift-freebsd/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-llvm",
+      "url" : "https://builds.apache.org/job/Thrift-llvm/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-osx",
+      "url" : "https://builds.apache.org/job/Thrift-osx/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-Windows",
+      "url" : "https://builds.apache.org/job/Thrift-Windows/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Thrift-Windows-env-test",
+      "url" : "https://builds.apache.org/job/Thrift-Windows-env-test/",
+      "color" : "red"
+    },
+    {
+      "name" : "Thrift_arm",
+      "url" : "https://builds.apache.org/job/Thrift_arm/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Tika-trunk",
+      "url" : "https://builds.apache.org/job/Tika-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tobago-1.0.x",
+      "url" : "https://builds.apache.org/job/tobago-1.0.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "tobago-1.0.x-deploy",
+      "url" : "https://builds.apache.org/job/tobago-1.0.x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tobago-1.5.x",
+      "url" : "https://builds.apache.org/job/tobago-1.5.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tobago-1.5.x-deploy",
+      "url" : "https://builds.apache.org/job/tobago-1.5.x-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tobago-trunk",
+      "url" : "https://builds.apache.org/job/tobago-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "tobago-trunk-deploy",
+      "url" : "https://builds.apache.org/job/tobago-trunk-deploy/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tomcat-7.x",
+      "url" : "https://builds.apache.org/job/Tomcat-7.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tomcat-7.x-Maven",
+      "url" : "https://builds.apache.org/job/Tomcat-7.x-Maven/",
+      "color" : "yellow"
+    },
+    {
+      "name" : "TomcatMavenPlugin-mvn2.x",
+      "url" : "https://builds.apache.org/job/TomcatMavenPlugin-mvn2.x/",
+      "color" : "red"
+    },
+    {
+      "name" : "TomcatMavenPlugin-mvn3.x",
+      "url" : "https://builds.apache.org/job/TomcatMavenPlugin-mvn3.x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "torque4-test-project-derby",
+      "url" : "https://builds.apache.org/job/torque4-test-project-derby/",
+      "color" : "blue"
+    },
+    {
+      "name" : "torque4-test-project-hsqldb",
+      "url" : "https://builds.apache.org/job/torque4-test-project-hsqldb/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Torque4-trunk",
+      "url" : "https://builds.apache.org/job/Torque4-trunk/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "traffic-trunk",
+      "url" : "https://builds.apache.org/job/traffic-trunk/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Trinidad Core 1.0.x (sanity)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%201.0.x%20(sanity)/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Trinidad Core 1.2.x (sanity)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%201.2.x%20(sanity)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Core 2.0.x (sanity)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%202.0.x%20(sanity)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Core 2.0.x (snapshot)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%202.0.x%20(snapshot)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Core Trunk (sanity)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%20Trunk%20(sanity)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Core Trunk (snapshot)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Core%20Trunk%20(snapshot)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Plugins 1.2.x (snapshot)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Plugins%201.2.x%20(snapshot)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Plugins 2.0.x (snapshot)",
+      "url" : "https://builds.apache.org/job/Trinidad%20Plugins%202.0.x%20(snapshot)/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Trinidad Site",
+      "url" : "https://builds.apache.org/job/Trinidad%20Site/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Turbine Core",
+      "url" : "https://builds.apache.org/job/Turbine%20Core/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Turbine Fulcrum",
+      "url" : "https://builds.apache.org/job/Turbine%20Fulcrum/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Tuscany-1x",
+      "url" : "https://builds.apache.org/job/Tuscany-1x/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tuscany-2.0-Beta2-branch",
+      "url" : "https://builds.apache.org/job/Tuscany-2.0-Beta2-branch/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-2.0-Beta2-tag",
+      "url" : "https://builds.apache.org/job/Tuscany-2.0-Beta2-tag/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tuscany-2x",
+      "url" : "https://builds.apache.org/job/Tuscany-2x/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-2x-all",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-all/",
+      "color" : "grey"
+    },
+    {
+      "name" : "Tuscany-2x-compliance",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-compliance/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tuscany-2x-deploy",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-deploy/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-2x-distributions",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-distributions/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tuscany-2x-temp",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-temp/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Tuscany-2x-tests",
+      "url" : "https://builds.apache.org/job/Tuscany-2x-tests/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "Tuscany-DAS",
+      "url" : "https://builds.apache.org/job/Tuscany-DAS/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-jms-test-runner",
+      "url" : "https://builds.apache.org/job/Tuscany-jms-test-runner/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-oasis-jms-contributions",
+      "url" : "https://builds.apache.org/job/Tuscany-oasis-jms-contributions/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-quick-all-distro",
+      "url" : "https://builds.apache.org/job/Tuscany-quick-all-distro/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Tuscany-SDO",
+      "url" : "https://builds.apache.org/job/Tuscany-SDO/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-test",
+      "url" : "https://builds.apache.org/job/Tuscany-test/",
+      "color" : "red"
+    },
+    {
+      "name" : "Tuscany-test2",
+      "url" : "https://builds.apache.org/job/Tuscany-test2/",
+      "color" : "red"
+    },
+    {
+      "name" : "Ubuntu1",
+      "url" : "https://builds.apache.org/job/Ubuntu1/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Ubuntu2",
+      "url" : "https://builds.apache.org/job/Ubuntu2/",
+      "color" : "blue"
+    },
+    {
+      "name" : "UIMA Addons",
+      "url" : "https://builds.apache.org/job/UIMA%20Addons/",
+      "color" : "red"
+    },
+    {
+      "name" : "UIMA-AS",
+      "url" : "https://builds.apache.org/job/UIMA-AS/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "UIMA-SDK",
+      "url" : "https://builds.apache.org/job/UIMA-SDK/",
+      "color" : "blue"
+    },
+    {
+      "name" : "UIMA-TextMarker",
+      "url" : "https://builds.apache.org/job/UIMA-TextMarker/",
+      "color" : "blue"
+    },
+    {
+      "name" : "UIMA-uimaFIT",
+      "url" : "https://builds.apache.org/job/UIMA-uimaFIT/",
+      "color" : "red"
+    },
+    {
+      "name" : "UIMAJ SDK java7",
+      "url" : "https://builds.apache.org/job/UIMAJ%20SDK%20java7/",
+      "color" : "red"
+    },
+    {
+      "name" : "vysper-trunk-harmony1.5-ubuntu",
+      "url" : "https://builds.apache.org/job/vysper-trunk-harmony1.5-ubuntu/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.5-ibm-ubuntu",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.5-ibm-ubuntu/",
+      "color" : "red"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.5-solaris",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.5-solaris/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.5-ubuntu",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.5-ubuntu/",
+      "color" : "red"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.6-ibm-ubuntu",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.6-ibm-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.6-solaris",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.6-solaris/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.6-ubuntu",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.6-ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "vysper-trunk-jdk1.6-windows",
+      "url" : "https://builds.apache.org/job/vysper-trunk-jdk1.6-windows/",
+      "color" : "blue"
+    },
+    {
+      "name" : "wagon-benchmarks",
+      "url" : "https://builds.apache.org/job/wagon-benchmarks/",
+      "color" : "aborted"
+    },
+    {
+      "name" : "wave-all_tests",
+      "url" : "https://builds.apache.org/job/wave-all_tests/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "wave-small_tests",
+      "url" : "https://builds.apache.org/job/wave-small_tests/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Whirr-Solaris",
+      "url" : "https://builds.apache.org/job/Whirr-Solaris/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Whirr-Ubuntu",
+      "url" : "https://builds.apache.org/job/Whirr-Ubuntu/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Windows1",
+      "url" : "https://builds.apache.org/job/Windows1/",
+      "color" : "red"
+    },
+    {
+      "name" : "Wink-Trunk-JDK1.5",
+      "url" : "https://builds.apache.org/job/Wink-Trunk-JDK1.5/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Wink-Trunk-JDK1.5-itests",
+      "url" : "https://builds.apache.org/job/Wink-Trunk-JDK1.5-itests/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "Wink-Trunk-JDK1.6",
+      "url" : "https://builds.apache.org/job/Wink-Trunk-JDK1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "Wink-Trunk-JDK1.6-itests",
+      "url" : "https://builds.apache.org/job/Wink-Trunk-JDK1.6-itests/",
+      "color" : "disabled"
+    },
+    {
+      "name" : "woden-trunk",
+      "url" : "https://builds.apache.org/job/woden-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ws-axiom-trunk",
+      "url" : "https://builds.apache.org/job/ws-axiom-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "wss4j-1.5",
+      "url" : "https://builds.apache.org/job/wss4j-1.5/",
+      "color" : "blue"
+    },
+    {
+      "name" : "wss4j-1.6",
+      "url" : "https://builds.apache.org/job/wss4j-1.6/",
+      "color" : "blue"
+    },
+    {
+      "name" : "wss4j-trunk",
+      "url" : "https://builds.apache.org/job/wss4j-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "xmlschema-1.4-branch-jdk15",
+      "url" : "https://builds.apache.org/job/xmlschema-1.4-branch-jdk15/",
+      "color" : "blue"
+    },
+    {
+      "name" : "xmlschema-trunk-eclipse-support",
+      "url" : "https://builds.apache.org/job/xmlschema-trunk-eclipse-support/",
+      "color" : "red"
+    },
+    {
+      "name" : "xmlschema-trunk-jdk15",
+      "url" : "https://builds.apache.org/job/xmlschema-trunk-jdk15/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper-3.4-WinVS2008_java",
+      "url" : "https://builds.apache.org/job/ZooKeeper-3.4-WinVS2008_java/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper-trunk",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper-trunk-ibm6",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-ibm6/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper-trunk-jdk7",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-jdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper-trunk-openjdk7",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-openjdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper-trunk-solaris",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-solaris/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper-trunk-WinVS2008",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-WinVS2008/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper-trunk-WinVS2008_java",
+      "url" : "https://builds.apache.org/job/ZooKeeper-trunk-WinVS2008_java/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper_branch33",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch33/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper_branch33_solaris",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch33_solaris/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper_branch34",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch34/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper_branch34_jdk7",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch34_jdk7/",
+      "color" : "red"
+    },
+    {
+      "name" : "ZooKeeper_branch34_openjdk7",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch34_openjdk7/",
+      "color" : "blue"
+    },
+    {
+      "name" : "ZooKeeper_branch34_solaris",
+      "url" : "https://builds.apache.org/job/ZooKeeper_branch34_solaris/",
+      "color" : "aborted_anime"
+    }
+  ],
+  "overallLoad" : {
+    
+  },
+  "primaryView" : {
+    "name" : "All",
+    "url" : "https://builds.apache.org/"
+  },
+  "quietingDown" : false,
+  "slaveAgentPort" : 0,
+  "unlabeledLoad" : {
+    
+  },
+  "useCrumbs" : true,
+  "useSecurity" : true,
+  "views" : [
+    {
+      "name" : "All",
+      "url" : "https://builds.apache.org/"
+    },
+    {
+      "name" : "CloudStack",
+      "url" : "https://builds.apache.org/view/CloudStack/"
+    },
+    {
+      "name" : "Hadoop",
+      "url" : "https://builds.apache.org/view/Hadoop/"
+    },
+    {
+      "name" : "Onami",
+      "url" : "https://builds.apache.org/view/Onami/"
+    }
+  ]
+}

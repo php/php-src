@@ -1,0 +1,26 @@
+{
+    "name": "simdjson",
+    "description": "simdjson",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.0"
+    },
+    "require-dev": {
+        "phpbench/phpbench": "^1.0.0-alpha4"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SimdjsonBench\\": "phpbench/"
+        }
+    },
+    "extra": {
+    },
+    "scripts": {
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "bootstrap": "benchmark/vendor/autoload.php",
+  "path": "benchmark/phpbench",
+  "retry_threshold": 4,
+  "reports": {
+    "table": {
+      "generator": "table",
+      "cols": [
+        "benchmark",
+        "subject",
+        "groups",
+        "mem_peak",
+        "mean",
+        "best",
+        "diff"
+      ],
+      "sort": {
+        "groups": "asc",
+        "mean": "asc"
+      }
+    }
+  }
+}

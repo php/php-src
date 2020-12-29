@@ -37,6 +37,7 @@ extern zend_module_entry json_module_entry;
 #endif
 
 extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
+extern PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 /* error codes */
 typedef enum {
