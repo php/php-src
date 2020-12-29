@@ -8734,7 +8734,7 @@ static int zend_jit_stack_check(dasm_State **Dst, const zend_op *opline, uint32_
 	return 1;
 }
 
-static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zend_function *func, zend_bool is_closure, zend_bool use_this, zend_bool stack_check)
+static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_function *func, zend_bool is_closure, zend_bool use_this, zend_bool stack_check)
 {
 	uint32_t used_stack;
 
@@ -8847,7 +8847,14 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	} else {
 		if (!is_closure) {
 			|	// call->func = func;
-			|	mov aword EX:RX->func, r0
+			if (func
+			 && op_array == &func->op_array
+			 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+			 && (sizeof(void*) != 8 || IS_SIGNED_32BIT(func))) {
+				|	ADDR_OP2_2 mov, aword EX:RX->func, func, r1
+			} else {
+				|	mov aword EX:RX->func, r0
+			}
 		} else {
 			|	// call->func = &closure->func;
 			|	lea r1, aword [r0 + offsetof(zend_closure, func)]
@@ -9209,8 +9216,11 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 #endif
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
-		/* recursive call */
-		|	mov r0, EX->func
+		/* recursive call */		
+		if (!(func->op_array.fn_flags & ZEND_ACC_IMMUTABLE) ||
+		    (sizeof(void*) == 8 && !IS_SIGNED_32BIT(func))) {
+			|	mov r0, EX->func
+		}
 	} else {
 		|	// if (CACHED_PTR(opline->result.num))
 		|	mov r0, EX->run_time_cache
@@ -9298,7 +9308,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|3:
 	}
 
-	if (!zend_jit_push_call_frame(Dst, opline, func, 0, 0, stack_check)) {
+	if (!zend_jit_push_call_frame(Dst, opline, op_array, func, 0, 0, stack_check)) {
 		return 0;
 	}
 
@@ -9543,7 +9553,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	}
 
 	if (!func || (func->common.fn_flags & ZEND_ACC_STATIC) == 0) {
-		if (!zend_jit_push_call_frame(Dst, opline, func, 0, use_this, stack_check)) {
+		if (!zend_jit_push_call_frame(Dst, opline, NULL, func, 0, use_this, stack_check)) {
 			return 0;
 		}
 	}
@@ -9642,7 +9652,7 @@ static int zend_jit_init_closure_call(dasm_State          **Dst,
 		}
 	}
 
-	if (!zend_jit_push_call_frame(Dst, opline, func, 1, 0, stack_check)) {
+	if (!zend_jit_push_call_frame(Dst, opline, NULL, func, 1, 0, stack_check)) {
 		return 0;
 	}
 
