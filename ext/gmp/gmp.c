@@ -429,9 +429,7 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 	zval result;
 
 	gmp_cmp(&result, op1, op2);
-	if (Z_TYPE(result) == IS_FALSE) {
-		return 1;
-	}
+	/* result can only be a zend_long if gmp_cmp hasn't thrown an Error */
 	return Z_LVAL(result);
 }
 /* }}} */
