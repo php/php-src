@@ -507,15 +507,7 @@ PHP_METHOD(SplObjectStorage, count)
 	}
 
 	if (mode == COUNT_RECURSIVE) {
-		zend_long ret;
-
-		if (mode != COUNT_RECURSIVE) {
-			ret = zend_hash_num_elements(&intern->storage);
-		} else {
-			ret = php_count_recursive(&intern->storage);
-		}
-
-		RETURN_LONG(ret);
+		RETURN_LONG(php_count_recursive(&intern->storage));
 		return;
 	}
 
