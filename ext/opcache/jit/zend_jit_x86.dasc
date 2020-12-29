@@ -8807,7 +8807,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 #ifdef _WIN32
 			if (0) {
 #else
-			if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 				|	SET_EX_OPLINE opline, r0
 				|	EXT_CALL zend_jit_int_extend_stack_helper, r0
@@ -8839,7 +8839,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 #ifdef _WIN32
 	if (0) {
 #else
-	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+	if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 		|	// call->func = func;
 		|1:
