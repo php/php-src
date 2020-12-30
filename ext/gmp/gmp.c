@@ -174,7 +174,7 @@ if (IS_GMP(zval)) {                                               \
 	gmp_create(return_value, &gmpnumber)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
+static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
 
 /*
@@ -585,7 +585,7 @@ ZEND_MODULE_INFO_D(gmp)
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
+static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_LONG:
@@ -596,7 +596,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 		zend_bool skip_lead = 0;
 		int ret;
 
-		if (Z_STRLEN_P(val) > 2 && numstr[0] == '0') {
+		if (Z_STRLEN_P(val) >= 2 && numstr[0] == '0') {
 			if ((base == 0 || base == 16) && (numstr[1] == 'x' || numstr[1] == 'X')) {
 				base = 16;
 				skip_lead = 1;
