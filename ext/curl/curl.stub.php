@@ -2,6 +2,10 @@
 
 /** @generate-function-entries */
 
+final class CurlSockaddr
+{
+}
+
 final class CurlHandle
 {
 }

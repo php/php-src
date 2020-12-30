@@ -9,7 +9,7 @@ if (!extension_loaded("sockets")) exit("skip sockets extension not loaded");
 <?php
 function opensocket($handler, $purpose, $address) {
     echo "opensocket", PHP_EOL;
-	return socket_create($address['family'], $address['socktype'], $address['protocol']);
+	return socket_create($address->family, $address->socktype, $address->protocol);
 }
 
 function sockopt($handler, $fd, $purpose) {

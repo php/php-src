@@ -233,6 +233,10 @@ zend_module_entry curl_module_entry = {
 ZEND_GET_MODULE (curl)
 #endif
 
+/* CurlSockaddr class */
+zend_class_entry *curl_sockaddr_ce;
+static zend_object_handlers curl_sockaddr_object_handlers;
+
 /* CurlHandle class */
 
 zend_class_entry *curl_ce;
@@ -1224,6 +1228,16 @@ PHP_MINIT_FUNCTION(curl)
 	curl_share_register_class(class_CurlShareHandle_methods);
 	curlfile_register_class();
 
+	zend_class_entry ce_curl_sockaddr;
+	INIT_CLASS_ENTRY(ce_curl_sockaddr, "CurlSockaddr", class_CurlSockaddr_methods);
+	curl_sockaddr_ce = zend_register_internal_class(&ce_curl_sockaddr);
+	curl_sockaddr_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_declare_property_long(curl_sockaddr_ce, "family", sizeof("family")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_long(curl_sockaddr_ce, "socktype", sizeof("socktype")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_long(curl_sockaddr_ce, "protocol", sizeof("protocol")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_string(curl_sockaddr_ce, "addr", sizeof("addr")-1, "", ZEND_ACC_PUBLIC);
+	memcpy(&curl_sockaddr_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1482,6 +1496,54 @@ static int curl_sockopt(void *ctx, curl_socket_t curlfd, curlsocktype purpose) {
 }
 /* }}} */
 
+static void _curlSockaddrToZval(struct curl_sockaddr *address, zval* obj)
+{
+	object_init_ex(obj, curl_sockaddr_ce);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "family", sizeof("family") - 1, address->family);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "socktype", sizeof("socktype") - 1, address->socktype);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "protocol", sizeof("protocol") - 1, address->protocol);
+	switch (address->addr.sa_family) {
+#if HAVE_IPV6
+		case AF_INET6: {
+			struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
+			char addr[INET6_ADDRSTRLEN];
+			inet_ntop(AF_INET6, &sa->sin6_addr, addr, sizeof(addr));
+			zend_update_property_string(curl_sockaddr_ce, Z_OBJ_P(obj), "addr", sizeof("addr") - 1, addr);
+			break;
+		}
+#endif
+		case AF_INET: {
+			struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
+			char addr[INET_ADDRSTRLEN];
+			inet_ntop(AF_INET, &sa->sin_addr, addr, sizeof(addr));
+			zend_update_property_string(curl_sockaddr_ce, Z_OBJ_P(obj), "addr", sizeof("addr") - 1, addr);
+			break;
+		}
+	}
+}
+
+static void _zvalToCurlSockaddr(struct curl_sockaddr *address, zval* obj)
+{
+	zval *prop, rv;
+	prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(obj), "addr", sizeof("addr")-1, 0, &rv);
+	if (Z_TYPE_P(prop) == IS_STRING) {
+		switch (address->addr.sa_family) {
+#if HAVE_IPV6
+			case AF_INET6: {
+					struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
+					inet_pton(AF_INET6, Z_STRVAL_P(prop), &sa->sin6_addr);
+					break;
+				}
+#endif
+			case AF_INET: {
+					struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
+					inet_pton(AF_INET, Z_STRVAL_P(prop), &sa->sin_addr);
+					break;
+				}
+		}
+	}
+}
+
 /* {{{ curl_opensocket */
 static curl_socket_t curl_opensocket(void *ctx, curlsocktype purpose, struct curl_sockaddr *address)
 {
@@ -1491,36 +1553,13 @@ static curl_socket_t curl_opensocket(void *ctx, curlsocktype purpose, struct cur
 	switch (t->method) {
 		case PHP_CURL_USER: {
 			zval argv[3];
-			zval addrinfo;
 			zval retval;
 			int  error;
 			zend_fcall_info fci;
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
 			ZVAL_LONG(&argv[1], purpose);
-			ZVAL_ARR(&addrinfo, zend_new_array(4));
-			add_assoc_long(&addrinfo, "family", address->family);
-			add_assoc_long(&addrinfo, "socktype", address->socktype);
-			add_assoc_long(&addrinfo, "protocol", address->protocol);
-			switch (address->addr.sa_family) {
-#if HAVE_IPV6
-				case AF_INET6: {
-					struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
-					char addr[INET6_ADDRSTRLEN];
-					inet_ntop(AF_INET6, &sa->sin6_addr, addr, sizeof(addr));
-					add_assoc_string(&addrinfo, "addr", addr);
-					break;
-				}
-#endif
-				case AF_INET: {
-					struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
-					char addr[INET_ADDRSTRLEN];
-					inet_ntop(AF_INET, &sa->sin_addr, addr, sizeof(addr));
-					add_assoc_string(&addrinfo, "addr", addr);
-					break;
-				}
-			}
-			ZVAL_NEW_REF(&argv[2], &addrinfo);
+			_curlSockaddrToZval(address, &argv[2]);
 
 			fci.size = sizeof(fci);
 			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
@@ -1538,25 +1577,7 @@ static curl_socket_t curl_opensocket(void *ctx, curlsocktype purpose, struct cur
 			} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), socket_ce)) {
 				_php_curl_verify_handlers(ch, 1);
 				ZVAL_COPY_VALUE(&ch->handlers->fd, &retval);
-				zval * sin_addr = zend_hash_str_find(Z_ARRVAL(addrinfo), "addr", sizeof("addr")-1);
-				if (sin_addr != NULL && Z_TYPE_P(sin_addr) == IS_STRING) {
-					switch (address->addr.sa_family) {
-#if HAVE_IPV6
-						case AF_INET6:
-							{
-								struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
-								inet_pton(AF_INET6, Z_STRVAL_P(sin_addr), &sa->sin6_addr);
-								break;
-							}
-#endif
-						case AF_INET:
-							{
-								struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
-								inet_pton(AF_INET, Z_STRVAL_P(sin_addr), &sa->sin_addr);
-								break;
-							}
-					}
-				}
+				_zvalToCurlSockaddr(address, &argv[2]);
 				rval = (Z_SOCKET_P(&retval)->bsd_socket);
 			}
 			zval_ptr_dtor(&argv[0]);
