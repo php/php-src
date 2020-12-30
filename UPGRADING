@@ -888,8 +888,8 @@ PHP 8.0 UPGRADE NOTES
     and this function is no longer needed to protect against XXE attacks.
 
 - PGSQL / PDO PGSQL:
-  . The constant PG_VERSION_STR has now the same value as PG_VERSION, and thus
-    is deprecated.
+  . The constant PGSQL_LIBPQ_VERSION_STR has now the same value as
+    PGSQL_LIBPQ_VERSION, and thus is deprecated.
   . Function aliases in the pgsql extension have been deprecated.
 
 - Zip:
