@@ -259,7 +259,7 @@ class ReflectionClass implements Reflector
     /** @return bool */
     public function hasConstant(string $name) {}
 
-    /** @return array|null */
+    /** @return array */
     public function getConstants(?int $filter = null) {}
 
     /** @return ReflectionClassConstant[] */
