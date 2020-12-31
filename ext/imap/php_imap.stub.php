@@ -29,6 +29,12 @@ function imap_headers($imap): array|false {}
 /** @param resource $imap */
 function imap_headerinfo($imap, int $message_num, int $from_length = 0, int $subject_length = 0): stdClass|false {}
 
+/**
+ * @param resource $imap
+ * @alias imap_headerinfo
+ */
+function imap_header($imap, int $message_num, int $from_length = 0, int $subject_length = 0): stdClass|false {}
+
 function imap_rfc822_parse_headers(string $headers, string $default_hostname = "UNKNOWN"): stdClass {}
 
 function imap_rfc822_write_address(string $mailbox, string $hostname, string $personal): string|false {}
