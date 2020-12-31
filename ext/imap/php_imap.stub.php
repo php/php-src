@@ -21,7 +21,7 @@ function imap_close($imap, int $flags = 0): bool {}
 function imap_num_msg($imap): int|false {}
 
 /** @param resource $imap */
-function imap_num_recent($imap): int|false {}
+function imap_num_recent($imap): int {}
 
 /** @param resource $imap */
 function imap_headers($imap): array|false {}
@@ -179,7 +179,7 @@ function imap_sort($imap, int $criteria, bool $reverse, int $flags = 0, ?string 
 function imap_uid($imap, int $message_num): int|false {}
 
 /** @param resource $imap */
-function imap_msgno($imap, int $message_uid): int|false {}
+function imap_msgno($imap, int $message_uid): int {}
 
 /** @param resource $imap */
 function imap_list($imap, string $reference, string $pattern): array|false {}
