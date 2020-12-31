@@ -24,6 +24,8 @@
 # if defined(__linux__)
 #  include <sys/auxv.h>
 #  include <asm/hwcap.h>
+# elif defined(__APPLE__)
+#  include <sys/sysctl.h>
 # endif
 
 static inline int has_crc32_insn() {
@@ -37,6 +39,10 @@ static inline int has_crc32_insn() {
 # elif defined(HWCAP2_CRC32)
 	res = getauxval(AT_HWCAP2) & HWCAP2_CRC32;
 	return res;
+# elif defined(__APPLE__)
+	size_t reslen = sizeof(res);
+	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
+		res = 0;
 # else
 	res = 0;
 	return res;
