@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 326cb0410034aecc702e9397cd88ef91adaa254c */
+ * Stub hash: d6d158112a802d867646b8f85402b8762599180b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -26,7 +26,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_num_msg, 0, 1, MAY_BE_LONG|
 	ZEND_ARG_INFO(0, imap)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imap_num_recent arginfo_imap_num_msg
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_num_recent, 0, 1, IS_LONG, 0)
+	ZEND_ARG_INFO(0, imap)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, imap)
@@ -218,7 +220,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_uid, 0, 2, MAY_BE_LONG|MAY_
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_msgno, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_msgno, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, imap)
 	ZEND_ARG_TYPE_INFO(0, message_uid, IS_LONG, 0)
 ZEND_END_ARG_INFO()
