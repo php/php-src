@@ -390,7 +390,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
-				RETURN_THROWS();
+				return;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
