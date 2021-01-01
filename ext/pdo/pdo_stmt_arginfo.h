@@ -70,6 +70,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PDOStatement_rowCount arginfo_class_PDOStatement_closeCursor
 
+#define arginfo_class_PDOStatement_lastInsertId arginfo_class_PDOStatement_closeCursor
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setAttribute, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, attribute, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -101,6 +103,7 @@ ZEND_METHOD(PDOStatement, getAttribute);
 ZEND_METHOD(PDOStatement, getColumnMeta);
 ZEND_METHOD(PDOStatement, nextRowset);
 ZEND_METHOD(PDOStatement, rowCount);
+ZEND_METHOD(PDOStatement, lastInsertId);
 ZEND_METHOD(PDOStatement, setAttribute);
 ZEND_METHOD(PDOStatement, setFetchMode);
 ZEND_METHOD(PDOStatement, getIterator);
@@ -124,6 +127,7 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_ME(PDOStatement, getColumnMeta, arginfo_class_PDOStatement_getColumnMeta, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, nextRowset, arginfo_class_PDOStatement_nextRowset, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, rowCount, arginfo_class_PDOStatement_rowCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, lastInsertId, arginfo_class_PDOStatement_lastInsertId, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, setAttribute, arginfo_class_PDOStatement_setAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, setFetchMode, arginfo_class_PDOStatement_setFetchMode, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, getIterator, arginfo_class_PDOStatement_getIterator, ZEND_ACC_PUBLIC)

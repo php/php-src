@@ -55,6 +55,9 @@ class PDOStatement implements IteratorAggregate
     /** @return int */
     public function rowCount() {}
 
+    /** @return int */
+    public function lastInsertId() {}
+
     /** @return bool */
     public function setAttribute(int $attribute, mixed $value) {}
 

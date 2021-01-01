@@ -126,6 +126,16 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
+static void pdo_mysql_stmt_set_last_insert_id(pdo_stmt_t *stmt) /* {{{ */
+{
+	pdo_mysql_stmt *S = stmt->driver_data;
+	zend_long last_insert_id = (zend_long) mysql_stmt_insert_id(S->stmt);
+	if (last_insert_id != (zend_long)-1) {
+		stmt->last_insert_id = last_insert_id;
+	}
+}
+/* }}} */
+
 static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;

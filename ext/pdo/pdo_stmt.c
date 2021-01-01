@@ -1524,6 +1524,16 @@ PHP_METHOD(PDOStatement, rowCount)
 }
 /* }}} */
 
+/* {{{ Returns the number of AUTO_INCREMENT by the last execute().  It is not always meaningful. */
+PHP_METHOD(PDOStatement, lastInsertId)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PHP_STMT_GET_OBJ;
+	RETURN_LONG(stmt->last_insert_id);
+}
+/* }}} */
+
 /* {{{ Fetch the error code associated with the last operation on the statement handle */
 PHP_METHOD(PDOStatement, errorCode)
 {
