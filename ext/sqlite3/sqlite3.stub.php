@@ -53,7 +53,7 @@ class SQLite3
     /** @return bool */
     public function exec(string $query) {}
 
-    /** @return SQLite3Result|false|null */
+    /** @return SQLite3Result|false */
     public function query(string $query) {}
 
     /** @return mixed */
