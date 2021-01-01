@@ -268,6 +268,7 @@ static bool pdo_mysql_stmt_after_execute_prepared(pdo_stmt_t *stmt) {
 #endif
 
 	pdo_mysql_stmt_set_row_count(stmt);
+	pdo_mysql_stmt_set_last_insert_id(stmt);
 	return true;
 }
 
