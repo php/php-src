@@ -390,7 +390,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
-				return;
+				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1802,7 +1802,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 		}
 		ZEND_HASH_FOREACH_VAL(ht, val) {
 			if (UNEXPECTED(zval_update_constant_ex(val, fptr->common.scope) != SUCCESS)) {
-				return;
+				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_copy(Z_ARRVAL_P(return_value), ht, zval_add_ref);
@@ -4503,7 +4503,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
-			return;
+			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
 	if ((c = zend_hash_find_ptr(&ce->constants_table, name)) == NULL) {
