@@ -4446,8 +4446,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, constant) {
 		if (UNEXPECTED(zval_update_constant_ex(&constant->value, ce) != SUCCESS)) {
-			zend_array_destroy(Z_ARRVAL_P(return_value));
-			RETURN_NULL();
+			RETURN_THROWS();
 		}
 
 		if (Z_ACCESS_FLAGS(constant->value) & filter) {
