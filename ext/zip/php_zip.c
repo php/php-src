@@ -2449,7 +2449,7 @@ PHP_METHOD(ZipArchive, setMtimeName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l",
 			&name, &name_len, &mtime,  &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
@@ -2483,7 +2483,7 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&index, &mtime, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
