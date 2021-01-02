@@ -65,7 +65,11 @@
 
 #if (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
 # include "ext/sockets/php_sockets.h"
-# include <arpa/inet.h>
+# ifdef PHP_WIN32
+#  include <ws2tcpip.h>
+# else
+#  include <arpa/inet.h>
+# endif
 # define PHPCURL_SOCKETS_SUPPORT
 #endif
 
@@ -1576,10 +1580,16 @@ static curl_socket_t curl_opensocket(void *ctx, curlsocktype purpose, struct cur
 				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_OPENSOCKETFUNCTION");
 			} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), socket_ce)) {
 				_php_curl_verify_handlers(ch, 1);
-				ZVAL_COPY_VALUE(&ch->handlers->fd, &retval);
+
+				if (!Z_ISUNDEF(ch->handlers->fd)) {
+					zval_ptr_dtor(&ch->handlers->fd);
+				}
+
+				ZVAL_COPY(&ch->handlers->fd, &retval);
 				_zvalToCurlSockaddr(address, &argv[2]);
 				rval = (Z_SOCKET_P(&retval)->bsd_socket);
 			}
+			zval_ptr_dtor(&retval);
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
 			zval_ptr_dtor(&argv[2]);
@@ -1635,7 +1645,6 @@ static int curl_closesocket(void *ctx, curl_socket_t curlfd) {
 				}
 				rval = Z_LVAL(retval);
 			}
-			zval_ptr_dtor(&ch->handlers->fd);
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
 			break;
@@ -3122,8 +3131,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				zval_ptr_dtor(&ch->handlers->sockopt->func_name);
 				ch->handlers->sockopt->fci_cache = empty_fcall_info_cache;
 			}
-			zval_add_ref(zvalue);
-			ch->handlers->sockopt->func_name = *zvalue;
+			ZVAL_COPY(&ch->handlers->sockopt->func_name, zvalue);
 			ch->handlers->sockopt->method = PHP_CURL_USER;
 			break;
 
@@ -3148,8 +3156,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				zval_ptr_dtor(&ch->handlers->closesocket->func_name);
 				ch->handlers->closesocket->fci_cache = empty_fcall_info_cache;
 			}
-			zval_add_ref(zvalue);
-			ch->handlers->closesocket->func_name = *zvalue;
+			ZVAL_COPY(&ch->handlers->closesocket->func_name, zvalue);
 			ch->handlers->closesocket->method = PHP_CURL_USER;
 			break;
 #endif
