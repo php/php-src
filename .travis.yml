@@ -11,6 +11,7 @@ addons:
       - language-pack-de
       - re2c
       - ccache
+      - freetds-dev
       - mysql-server
       - libaspell-dev
       - libbz2-dev
@@ -34,9 +35,11 @@ addons:
       - libxpm-dev
       - libxslt1-dev
       - libzip-dev
+      - unixodbc-dev
 
 
 services:
+  - docker
   - mysql
   - postgresql
 
@@ -59,6 +62,9 @@ env:
     global:
       - MYSQL_TEST_HOST=127.0.0.1
       - MYSQL_TEST_USER=travis
+      - PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
+      - PDO_DBLIB_TEST_USER="pdo_test"
+      - PDO_DBLIB_TEST_PASS="password"
       - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
       - PDO_MYSQL_TEST_USER=travis
       - PDO_MYSQL_TEST_PASS=
@@ -90,6 +96,7 @@ before_script:
     # Compile PHP
     - travis_wait ./travis/compile.sh
     # Setup Extensions
+    - ./travis/setup-dblib.sh
     - ./travis/setup-mysql.sh
     - ./travis/setup-pgsql.sh
 

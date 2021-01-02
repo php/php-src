@@ -31,6 +31,7 @@ $S390X_CONFIG \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
+--with-pdo-dblib \
 --enable-intl \
 --without-pear \
 --enable-gd \
