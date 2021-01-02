@@ -40,6 +40,7 @@ steps:
                        postgresql-contrib \
                        snmpd \
                        snmp-mibs-downloader \
+                       freetds-dev \
                        unixodbc-dev \
                        llvm \
                        libc-client-dev \
