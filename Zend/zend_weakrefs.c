@@ -181,8 +181,8 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 	return &wr->std;
 }
 
-static zend_always_inline zend_bool zend_weakref_find(zval *referent, zval *return_value) {
-	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), (zend_ulong) Z_OBJ_P(referent));
+static zend_always_inline zend_bool zend_weakref_find(zend_object *referent, zval *return_value) {
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), (zend_ulong) referent);
 	if (!tagged_ptr) {
 		return 0;
 	}
@@ -209,13 +209,13 @@ found_weakref:
 	return 0;
 }
 
-static zend_always_inline void zend_weakref_create(zval *referent, zval *return_value) {
+static zend_always_inline void zend_weakref_create(zend_object *referent, zval *return_value) {
 	zend_weakref *wr;
 
 	object_init_ex(return_value, zend_ce_weakref);
 
 	wr = zend_weakref_fetch(return_value);
-	wr->referent = Z_OBJ_P(referent);
+	wr->referent = referent;
 
 	zend_weakref_register(wr->referent, ZEND_WEAKREF_ENCODE(wr, ZEND_WEAKREF_TAG_REF));
 }
@@ -245,10 +245,10 @@ ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 
 ZEND_METHOD(WeakReference, create)
 {
-	zval *referent;
+	zend_object *referent;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_OBJECT(referent)
+		Z_PARAM_OBJ(referent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_weakref_find(referent, return_value)) {

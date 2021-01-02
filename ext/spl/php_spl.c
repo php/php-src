@@ -641,13 +641,13 @@ PHP_FUNCTION(spl_object_hash)
 /* {{{ Returns the integer object handle for the given object */
 PHP_FUNCTION(spl_object_id)
 {
-	zval *obj;
+	zend_object *obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT(obj)
+		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG((zend_long)Z_OBJ_HANDLE_P(obj));
+	RETURN_LONG((zend_long)obj->handle);
 }
 /* }}} */
 
