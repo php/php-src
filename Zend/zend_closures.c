@@ -128,6 +128,7 @@ ZEND_METHOD(Closure, call)
 	zend_fcall_info_cache fci_cache;
 	zend_function my_function;
 	zend_object *newobj;
+	zend_class_entry *newclass;
 
 	fci.param_count = 0;
 	fci.params = NULL;
@@ -140,26 +141,27 @@ ZEND_METHOD(Closure, call)
 	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
 
 	newobj = Z_OBJ_P(newthis);
+	newclass = newobj->ce;
 
-	if (!zend_valid_closure_binding(closure, newthis, Z_OBJCE_P(newthis))) {
+	if (!zend_valid_closure_binding(closure, newthis, newclass)) {
 		return;
 	}
 
 	if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;
-		zend_create_closure(&new_closure, &closure->func, Z_OBJCE_P(newthis), closure->called_scope, newthis);
+		zend_create_closure(&new_closure, &closure->func, newclass, closure->called_scope, newthis);
 		closure = (zend_closure *) Z_OBJ(new_closure);
 		fci_cache.function_handler = &closure->func;
 	} else {
 		memcpy(&my_function, &closure->func, closure->func.type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
 		my_function.common.fn_flags &= ~ZEND_ACC_CLOSURE;
 		/* use scope of passed object */
-		my_function.common.scope = Z_OBJCE_P(newthis);
+		my_function.common.scope = newclass;
 		fci_cache.function_handler = &my_function;
 
 		/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
 		if (ZEND_USER_CODE(my_function.type)
-		 && (closure->func.common.scope != Z_OBJCE_P(newthis)
+		 && (closure->func.common.scope != newclass
 		  || (closure->func.common.fn_flags & ZEND_ACC_HEAP_RT_CACHE))) {
 			void *ptr;
 
@@ -172,7 +174,7 @@ ZEND_METHOD(Closure, call)
 		}
 	}
 
-	fci_cache.called_scope = newobj->ce;
+	fci_cache.called_scope = newclass;
 	fci_cache.object = fci.object = newobj;
 
 	fci.size = sizeof(fci);

@@ -769,7 +769,6 @@ ZEND_FUNCTION(get_class_vars)
 /* {{{ Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
 {
-	zval *obj;
 	zval *value;
 	HashTable *properties;
 	zend_string *key;
@@ -777,10 +776,9 @@ ZEND_FUNCTION(get_object_vars)
 	zend_ulong num_key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT(obj)
+		Z_PARAM_OBJ(zobj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj = Z_OBJ_P(obj);
 	properties = zobj->handlers->get_properties(zobj);
 	if (properties == NULL) {
 		RETURN_EMPTY_ARRAY();
@@ -839,22 +837,22 @@ ZEND_FUNCTION(get_object_vars)
 /* {{{ Returns an array of mangled object properties. Does not respect property visibility. */
 ZEND_FUNCTION(get_mangled_object_vars)
 {
-	zval *obj;
+	zend_object *obj;
 	HashTable *properties;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT(obj)
+		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	properties = Z_OBJ_HT_P(obj)->get_properties(Z_OBJ_P(obj));
+	properties = obj->handlers->get_properties(obj);
 	if (!properties) {
 		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	}
 
 	properties = zend_proptable_to_symtable(properties,
-		(Z_OBJCE_P(obj)->default_properties_count ||
-		 Z_OBJ_P(obj)->handlers != &std_object_handlers ||
+		(obj->ce->default_properties_count ||
+		 obj->handlers != &std_object_handlers ||
 		 GC_IS_RECURSIVE(properties)));
 	RETURN_ARR(properties);
 }
