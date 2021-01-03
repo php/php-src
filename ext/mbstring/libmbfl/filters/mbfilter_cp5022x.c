@@ -346,7 +346,6 @@ mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
 	filt->data = &ctx->last;
 	filt->opaque = ctx;
-	vtbl_tl_jisx0201_jisx0208.filter_ctor(filt);
 }
 
 static void
