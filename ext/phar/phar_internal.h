@@ -428,7 +428,7 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 static inline time_t source_date_epoch_time(time_t *tloc)
 {
 	const char *sde = getenv("SOURCE_DATE_EPOCH");
-	time_t ts = (sde) ? strtol(sde, NULL, 10) : time(0);
+	time_t ts = (sde) ? strtoul(sde, NULL, 10) : time(0);
 
 	if (tloc) {
 		*tloc = ts;
