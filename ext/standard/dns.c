@@ -147,7 +147,7 @@ PHP_FUNCTION(gethostbyaddr)
 	zend_string *hostname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_PATH(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	hostname = php_gethostbyaddr(addr);
@@ -207,7 +207,7 @@ PHP_FUNCTION(gethostbyname)
 	size_t hostname_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_PATH(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len > MAXFQDNLEN) {
@@ -230,7 +230,7 @@ PHP_FUNCTION(gethostbynamel)
 	int i;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_PATH(hostname, hostname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len > MAXFQDNLEN) {
