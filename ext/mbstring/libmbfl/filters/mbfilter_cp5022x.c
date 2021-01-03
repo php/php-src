@@ -31,14 +31,8 @@
 #include "unicode_table_jis.h"
 #include "cp932_table.h"
 
-typedef struct _mbfl_filt_conv_wchar_cp50220_ctx {
-	mbfl_filt_tl_jisx0201_jisx0208_param tl_param;
-	mbfl_convert_filter last;
-} mbfl_filt_conv_wchar_cp50220_ctx;
-
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
-static void mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter);
 
 /* Previously, a dubious 'encoding' called 'cp50220raw' was supported
@@ -102,7 +96,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_cp50220 = {
 	mbfl_filt_conv_wchar_cp50220_dtor,
 	mbfl_filt_conv_wchar_cp50221,
 	mbfl_filt_conv_any_jis_flush,
-	mbfl_filt_conv_wchar_cp50220_copy
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
@@ -327,44 +321,27 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 /*
  * wchar => CP50220
  */
-static void
-mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
+static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt)
 {
-	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
+	/* Insert a new convert filter into the chain, after this one, which will
+	 * actually perform the CP50220 conversion. Alter this filter so that it
+	 * converts halfwidth katakana instead */
+	mbfl_convert_filter *cp50220_filt = emalloc(sizeof(mbfl_convert_filter));
+	*cp50220_filt = *filt;
 
+	/* Reinitialize */
 	mbfl_filt_conv_common_ctor(filt);
-
-	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	ctx->tl_param.mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
-
-	ctx->last = *filt;
-	ctx->last.opaque = ctx;
-	ctx->last.data = filt->data;
 	filt->filter_function = vtbl_tl_jisx0201_jisx0208.filter_function;
 	filt->filter_flush = (filter_flush_t)vtbl_tl_jisx0201_jisx0208.filter_flush;
-	filt->output_function = (output_function_t)ctx->last.filter_function;
-	filt->flush_function = (flush_function_t)ctx->last.filter_flush;
-	filt->data = &ctx->last;
-	filt->opaque = ctx;
+	filt->output_function = (output_function_t)cp50220_filt->filter_function;
+	filt->flush_function = (flush_function_t)cp50220_filt->filter_flush;
+	filt->data = cp50220_filt;
+	filt->opaque = (void*)(MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE);
 }
 
-static void
-mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
+static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
 {
-	mbfl_filt_conv_wchar_cp50220_ctx *ctx;
-
-	*dest = *src;
-	ctx = emalloc(sizeof(mbfl_filt_conv_wchar_cp50220_ctx));
-	dest->opaque = ctx;
-	dest->data = &ctx->last;
-}
-
-static void
-mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt)
-{
-	if (filt->opaque != NULL) {
-		efree(filt->opaque);
-	}
+	efree(filt->data);
 }
 
 /*
