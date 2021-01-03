@@ -9,8 +9,8 @@ steps:
       sudo -u postgres psql -c "CREATE DATABASE test;"
       docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=<YourStrong@Passw0rd>" -p 1433:1433 --name sql1 -h sql1 -d mcr.microsoft.com/mssql/server:2019-CU8-ubuntu-16.04
       # create new account since SA account can't be used for unit tests
-      # sleep is necessary to give host time to come up, otherwise timeout is likely
-      sleep 10 && docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "create login pdo_test with password='password', check_policy=off; create user pdo_test for login pdo_test; grant alter, control to pdo_test;"
+      # extended timeout is necessary to give host time to come up
+      docker exec sql1 /opt/mssql-tools/bin/sqlcmd -l 120 -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "create login pdo_test with password='password', check_policy=off; create user pdo_test for login pdo_test; grant alter, control to pdo_test;"
     displayName: 'Setup'
   - script: ./azure/setup-slapd.sh
     displayName: 'Configure slapd'
