@@ -72,7 +72,6 @@
 
 
 typedef struct _mbfl_filt_tl_jisx0201_jisx0208_param {
-	mbfl_convert_filter *next_filter;
 	int mode;
 } mbfl_filt_tl_jisx0201_jisx0208_param;
 
