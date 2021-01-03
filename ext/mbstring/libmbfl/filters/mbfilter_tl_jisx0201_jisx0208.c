@@ -25,12 +25,6 @@
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 
-void
-mbfl_filt_tl_jisx0201_jisx0208_init(mbfl_convert_filter *filt)
-{
-	mbfl_filt_conv_common_ctor(filt);
-}
-
 int
 mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
@@ -291,7 +285,7 @@ mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
 const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_wchar,
-	mbfl_filt_tl_jisx0201_jisx0208_init,
+	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_tl_jisx0201_jisx0208,
 	mbfl_filt_tl_jisx0201_jisx0208_flush,
