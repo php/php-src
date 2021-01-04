@@ -112,6 +112,8 @@ PHP                                                                        NEWS
   . Fixed #62004 (SplFileObject: fgets after seek returns wrong line). (cmb)
 
 - Standard:
+  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo). 
+    (CVE-2020-7071) (cmb)
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
 
 - Tidy:
