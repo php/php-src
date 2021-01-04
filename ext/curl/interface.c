@@ -97,26 +97,14 @@ static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len, zend_bool make_copy)
+static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len)
 {
-	CURLcode error = CURLE_OK;
-
 	if (strlen(str) != len) {
 		zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
 		return FAILURE;
 	}
 
-	if (make_copy) {
-		char *copystr;
-
-		/* Strings passed to libcurl as 'char *' arguments, are copied by the library since 7.17.0 */
-		copystr = estrndup(str, len);
-		error = curl_easy_setopt(ch->cp, option, copystr);
-		zend_llist_add_element(&ch->to_free->str, &copystr);
-	} else {
-		error = curl_easy_setopt(ch->cp, option, str);
-	}
-
+	CURLcode error = curl_easy_setopt(ch->cp, option, str);
 	SAVE_CURL_ERROR(ch, error);
 
 	return error == CURLE_OK ? SUCCESS : FAILURE;
@@ -136,11 +124,11 @@ static int php_curl_option_url(php_curl *ch, const char *url, const size_t len) 
 		memmove(_tmp, "file:///", sizeof("file:///") - 1);
 		memmove(_tmp + sizeof("file:///") - 1, url + sizeof("file://") - 1, len - sizeof("file://") + 1);
 
-		return php_curl_option_str(ch, CURLOPT_URL, _tmp, len + 1, 0);
+		return php_curl_option_str(ch, CURLOPT_URL, _tmp, len + 1);
 	}
 #endif
 
-	return php_curl_option_str(ch, CURLOPT_URL, url, len, 0);
+	return php_curl_option_str(ch, CURLOPT_URL, url, len);
 }
 /* }}} */
 
@@ -1291,6 +1279,7 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 #endif
 
 	zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.std_err);
+	zend_get_gc_buffer_add_zval(gc_buffer, &curl->private_data);
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
@@ -1634,13 +1623,6 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 }
 /* }}} */
 
-/* {{{ curl_free_string */
-static void curl_free_string(void **string)
-{
-	efree((char *)*string);
-}
-/* }}} */
-
 /* {{{ curl_free_post */
 static void curl_free_post(void **post)
 {
@@ -1755,7 +1737,6 @@ void init_curl_handle(php_curl *ch)
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
 	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
 	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
 
@@ -1924,6 +1905,8 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		}
 		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
 	}
+
+	ZVAL_COPY(&ch->private_data, &source->private_data);
 
 	efree(ch->to_free->slist);
 	efree(ch->to_free);
@@ -2447,7 +2430,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		{
 			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
-			int ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str), 0);
+			int ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_tmp_string_release(tmp_str);
 			return ret;
 		}
@@ -2474,7 +2457,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			} else {
 				zend_string *tmp_str;
 				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
-				int ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str), 0);
+				int ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
 				zend_tmp_string_release(tmp_str);
 				return ret;
 			}
@@ -2484,11 +2467,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		/* Curl private option */
 		case CURLOPT_PRIVATE:
 		{
-			zend_string *tmp_str;
-			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
-			int ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str), 1);
-			zend_tmp_string_release(tmp_str);
-			return ret;
+			zval_ptr_dtor(&ch->private_data);
+			ZVAL_COPY(&ch->private_data, zvalue);
+			return SUCCESS;
 		}
 
 		/* Curl url option */
@@ -2794,7 +2775,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				return FAILURE;
 			}
 
-			ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str), 0);
+			ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_tmp_string_release(tmp_str);
 			return ret;
 		}
@@ -3160,6 +3141,13 @@ PHP_FUNCTION(curl_getinfo)
 				}
 				break;
 			}
+			case CURLINFO_PRIVATE:
+				if (!Z_ISUNDEF(ch->private_data)) {
+					RETURN_COPY(&ch->private_data);
+				} else {
+					RETURN_FALSE;
+				}
+				break;
 			default: {
 				int type = CURLINFO_TYPEMASK & option;
 				switch (type) {
@@ -3323,7 +3311,6 @@ static void curl_free_obj(zend_object *object)
 
 	/* cURL destructors should be invoked only by last curl handle */
 	if (--(*ch->clone) == 0) {
-		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
 		zend_llist_clean(&ch->to_free->stream);
 		zend_hash_destroy(ch->to_free->slist);
@@ -3360,6 +3347,7 @@ static void curl_free_obj(zend_object *object)
 	}
 
 	zval_ptr_dtor(&ch->postfields);
+	zval_ptr_dtor(&ch->private_data);
 
 	if (ch->share) {
 		OBJ_RELEASE(&ch->share->std);

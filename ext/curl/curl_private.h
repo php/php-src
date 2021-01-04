@@ -88,7 +88,6 @@ struct _php_curl_send_headers {
 };
 
 struct _php_curl_free {
-	zend_llist str;
 	zend_llist post;
 	zend_llist stream;
 	HashTable *slist;
@@ -103,6 +102,8 @@ typedef struct {
 	zend_bool                     in_callback;
 	uint32_t*                     clone;
 	zval                          postfields;
+	/* For CURLOPT_PRIVATE */
+	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
 	zend_object                   std;
