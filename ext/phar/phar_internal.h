@@ -425,9 +425,11 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
 }
 
+#define SOURCE_DATE_EPOCH	"SOURCE_DATE_EPOCH"
+
 static inline time_t source_date_epoch_time(time_t *tloc)
 {
-	const char *sde = getenv("SOURCE_DATE_EPOCH");
+	const char *sde = php_getenv(SOURCE_DATE_EPOCH, strlen(SOURCE_DATE_EPOCH));
 	time_t ts = (sde) ? strtol(sde, NULL, 10) : time(0);
 
 	if (tloc) {
