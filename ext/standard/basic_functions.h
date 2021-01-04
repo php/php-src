@@ -137,6 +137,8 @@ typedef struct {
 } putenv_entry;
 #endif
 
+PHPAPI zend_string *php_getenv(const char *str, size_t str_len);
+
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
