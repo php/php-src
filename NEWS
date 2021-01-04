@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #80537 (Wrong parameter type in DOMElement::removeAttributeNode
     stub). (Nikita)
 
+- Filter:
+  . Fixed bug #80584 (0x and 0X are considered valid hex numbers by
+    filter_var()). (girgias)
+
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
