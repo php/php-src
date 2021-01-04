@@ -243,12 +243,12 @@ PHP_FUNCTION(curl_multi_getcontent)
 
 	ch = Z_CURL_P(z_ch);
 
-	if (ch->handlers->write->method == PHP_CURL_RETURN) {
-		if (!ch->handlers->write->buf.s) {
+	if (ch->handlers.write->method == PHP_CURL_RETURN) {
+		if (!ch->handlers.write->buf.s) {
 			RETURN_EMPTY_STRING();
 		}
-		smart_str_0(&ch->handlers->write->buf);
-		RETURN_STR_COPY(ch->handlers->write->buf.s);
+		smart_str_0(&ch->handlers.write->buf);
+		RETURN_STR_COPY(ch->handlers.write->buf.s);
 	}
 
 	RETURN_NULL();

@@ -97,7 +97,7 @@ struct _php_curl_free {
 
 typedef struct {
 	CURL                         *cp;
-	php_curl_handlers            *handlers;
+	php_curl_handlers             handlers;
 	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
