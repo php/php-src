@@ -727,11 +727,68 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
+PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
+#ifdef PHP_WIN32
+	{
+		wchar_t *keyw = php_win32_cp_conv_any_to_w(str, str_len, PHP_WIN32_CP_IGNORE_LEN_P);
+		if (!keyw) {
+			return NULL;
+		}
+
+		SetLastError(0);
+		/* If the given buffer is not large enough to hold the data, the return value is
+		 * the buffer size,  in characters, required to hold the string and its terminating
+		 * null character. We use this return value to alloc the final buffer. */
+		wchar_t dummybuf;
+		DWORD size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
+		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+			/* The environment variable doesn't exist. */
+			free(keyw);
+			return NULL;
+		}
+
+		if (size == 0) {
+			/* env exists, but it is empty */
+			free(keyw);
+			return ZSTR_EMPTY_ALLOC();
+		}
+
+		wchar_t *valw = emalloc((size + 1) * sizeof(wchar_t));
+		size = GetEnvironmentVariableW(keyw, valw, size);
+		if (size == 0) {
+			/* has been removed between the two calls */
+			free(keyw);
+			efree(valw);
+			return ZSTR_EMPTY_ALLOC();
+		} else {
+			char *ptr = php_win32_cp_w_to_any(valw);
+			zend_string *result = zend_string_init(ptr, strlen(ptr), 0);
+			free(ptr);
+			free(keyw);
+			efree(valw);
+			return result;
+		}
+	}
+#else
+    tsrm_env_lock();
+
+	/* system method returns a const */
+	char *ptr = getenv(str);
+	zend_string *result = NULL;
+	if (ptr) {
+		result = zend_string_init(ptr, strlen(ptr), 0);
+	}
+
+    tsrm_env_unlock();
+	return result;
+#endif
+}
+
 /* {{{ Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
-	char *ptr, *str = NULL;
+	char *str = NULL;
 	size_t str_len;
 	zend_bool local_only = 0;
 
@@ -749,7 +806,7 @@ PHP_FUNCTION(getenv)
 
 	if (!local_only) {
 		/* SAPI method returns an emalloc()'d string */
-		ptr = sapi_getenv(str, str_len);
+		char *ptr = sapi_getenv(str, str_len);
 		if (ptr) {
 			// TODO: avoid reallocation ???
 			RETVAL_STRING(ptr);
@@ -757,68 +814,11 @@ PHP_FUNCTION(getenv)
 			return;
 		}
 	}
-#ifdef PHP_WIN32
-	{
-		wchar_t dummybuf;
-		DWORD size;
-		wchar_t *keyw, *valw;
 
-		keyw = php_win32_cp_conv_any_to_w(str, str_len, PHP_WIN32_CP_IGNORE_LEN_P);
-		if (!keyw) {
-				RETURN_FALSE;
-		}
-
-		SetLastError(0);
-		/*If the given buffer is not large enough to hold the data, the return value is
-		the buffer size,  in characters, required to hold the string and its terminating
-		null character. We use this return value to alloc the final buffer. */
-		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
-		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
-				/* The environment variable doesn't exist. */
-				free(keyw);
-				RETURN_FALSE;
-		}
-
-		if (size == 0) {
-				/* env exists, but it is empty */
-				free(keyw);
-				RETURN_EMPTY_STRING();
-		}
-
-		valw = emalloc((size + 1) * sizeof(wchar_t));
-		size = GetEnvironmentVariableW(keyw, valw, size);
-		if (size == 0) {
-				/* has been removed between the two calls */
-				free(keyw);
-				efree(valw);
-				RETURN_EMPTY_STRING();
-		} else {
-			ptr = php_win32_cp_w_to_any(valw);
-			RETVAL_STRING(ptr);
-			free(ptr);
-			free(keyw);
-			efree(valw);
-			return;
-		}
+	zend_string *res = php_getenv(str, str_len);
+	if (res) {
+		RETURN_STR(res);
 	}
-#else
-
-    tsrm_env_lock();
-
-	/* system method returns a const */
-	ptr = getenv(str);
-
-	if (ptr) {
-		RETVAL_STRING(ptr);
-	}
-
-    tsrm_env_unlock();
-
-    if (ptr) {
-        return;
-    }
-
-#endif
 	RETURN_FALSE;
 }
 /* }}} */
