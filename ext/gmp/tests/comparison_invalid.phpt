@@ -1,5 +1,5 @@
 --TEST--
-Overloaded GMP comparison in sort() etc
+Invalid comparison with a GMP object
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
 --FILE--
