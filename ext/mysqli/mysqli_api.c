@@ -1325,16 +1325,8 @@ PHP_FUNCTION(mysqli_free_result)
 /* {{{ Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	if (getThis()) {
-		if (zend_parse_parameters_none() == FAILURE) {
-			RETURN_THROWS();
-		}
-	} else {
-		zval *mysql_link;
-
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &mysql_link, mysqli_link_class_entry) == FAILURE) {
-			RETURN_THROWS();
-		}
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	const char * info = mysql_get_client_info();
