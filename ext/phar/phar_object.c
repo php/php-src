@@ -609,7 +609,7 @@ PHP_METHOD(Phar, webPhar)
 			if (NULL == (z_script_name = zend_hash_str_find(_server, "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) ||
 				IS_STRING != Z_TYPE_P(z_script_name) ||
 				!strstr(Z_STRVAL_P(z_script_name), basename)) {
-				return;
+				goto finish;
 			}
 
 			if (NULL != (z_path_info = zend_hash_str_find(_server, "PATH_INFO", sizeof("PATH_INFO")-1)) &&
@@ -634,7 +634,7 @@ PHP_METHOD(Phar, webPhar)
 			testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
 			if (!(pt = strstr(testit, basename))) {
 				efree(testit);
-				return;
+				goto finish;
 			}
 
 			path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1);
@@ -659,7 +659,7 @@ PHP_METHOD(Phar, webPhar)
 
 		if (!(pt = strstr(path_info, basename))) {
 			/* this can happen with rewrite rules - and we have no idea what to do then, so return */
-			return;
+			goto finish;
 		}
 
 		entry_len = strlen(path_info);
@@ -685,7 +685,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 			efree(pt);
 
-			return;
+			goto finish;
 		}
 
 		fci.param_count = 1;
@@ -703,7 +703,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 			efree(pt);
 
-			return;
+			goto finish;
 		}
 
 		if (Z_TYPE_P(fci.retval) == IS_UNDEF || Z_TYPE(retval) == IS_UNDEF) {
@@ -712,7 +712,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 			efree(pt);
-			return;
+			goto finish;
 		}
 
 		switch (Z_TYPE(retval)) {
@@ -731,7 +731,7 @@ PHP_METHOD(Phar, webPhar)
 				efree(pt);
 
 				zend_bailout();
-				return;
+				goto finish;
 			default:
 				if (free_pathinfo) {
 					efree(path_info);
@@ -739,7 +739,7 @@ PHP_METHOD(Phar, webPhar)
 				efree(pt);
 
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
-				return;
+				goto finish;
 		}
 	}
 
@@ -812,9 +812,6 @@ PHP_METHOD(Phar, webPhar)
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len);
-#ifdef PHP_WIN32
-		efree(fname);
-#endif
 		zend_bailout();
 	}
 
@@ -838,10 +835,8 @@ PHP_METHOD(Phar, webPhar)
 							}
 							efree(pt);
 							efree(entry);
-#ifdef PHP_WIN32
-							efree(fname);
-#endif
-							RETURN_FALSE;
+							RETVAL_FALSE;
+							goto finish;
 						}
 						break;
 					case IS_STRING:
@@ -855,10 +850,8 @@ PHP_METHOD(Phar, webPhar)
 						}
 						efree(pt);
 						efree(entry);
-#ifdef PHP_WIN32
-						efree(fname);
-#endif
-						RETURN_FALSE;
+						RETVAL_FALSE;
+						goto finish;
 				}
 			}
 		}
@@ -868,6 +861,11 @@ PHP_METHOD(Phar, webPhar)
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type);
 	}
 	phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len);
+
+finish: ;
+#ifdef PHP_WIN32
+	efree(fname);
+#endif
 }
 /* }}} */
 
