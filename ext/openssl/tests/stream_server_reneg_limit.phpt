@@ -70,6 +70,8 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
+    phpt_wait();
+
     $cmd = 'openssl s_client -connect 127.0.0.1:64321';
     $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
     $process = proc_open($cmd, $descriptorSpec, $pipes);
