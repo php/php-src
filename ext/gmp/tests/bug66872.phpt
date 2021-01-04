@@ -7,7 +7,7 @@ Bug #66872: Crash when passing string to gmp_testbit
 
 try {
     var_dump(gmp_testbit("abc", 1));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

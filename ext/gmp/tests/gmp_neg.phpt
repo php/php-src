@@ -12,7 +12,7 @@ var_dump(gmp_intval(gmp_neg("-1")));
 
 try {
     var_dump(gmp_intval(gmp_neg("")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

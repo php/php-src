@@ -614,7 +614,7 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 					"Cannot convert variable to GMP, it is not an integer string");
 				return FAILURE;
 			}
-			zend_argument_type_error(arg_pos, "is not an integer string");
+			zend_argument_value_error(arg_pos, "is not an integer string");
 			return FAILURE;
 		}
 

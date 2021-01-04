@@ -13,7 +13,7 @@ var_dump(gmp_strval(gmp_and(4545, -20)));
 
 try {
     var_dump(gmp_strval(gmp_and("test", "no test")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
