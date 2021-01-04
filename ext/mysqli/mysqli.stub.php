@@ -51,7 +51,7 @@ class mysqli
      * @return bool
      * @alias mysqli_commit
      */
-    public function commit(int $flags = -1, ?string $name = null) {}
+    public function commit(int $flags = 0, ?string $name = null) {}
 
     /**
      * @return mysqli|null|false
@@ -531,7 +531,7 @@ function mysqli_character_set_name(mysqli $mysqli): ?string {}
 
 function mysqli_close(mysqli $mysqli): bool {}
 
-function mysqli_commit(mysqli $mysqli, int $flags = -1, ?string $name = null): bool {}
+function mysqli_commit(mysqli $mysqli, int $flags = 0, ?string $name = null): bool {}
 
 function mysqli_connect(
     ?string $hostname = null,
