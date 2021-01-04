@@ -66,16 +66,16 @@ typedef struct {
 	zval                  func_name;
 	zend_fcall_info_cache fci_cache;
 	int                   method;
-} php_curl_progress, php_curl_fnmatch, php_curlm_server_push;
+} php_curl_callback;
 
 typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_progress *progress;
+	php_curl_callback *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_fnmatch  *fnmatch;
+	php_curl_callback  *fnmatch;
 #endif
 } php_curl_handlers;
 
@@ -112,7 +112,7 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curlm_server_push	*server_push;
+	php_curl_callback	*server_push;
 } php_curlm_handlers;
 
 typedef struct {

@@ -370,7 +370,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	php_curl 				*parent;
 	php_curlm 				*mh 			= (php_curlm *)userp;
 	size_t 					rval 			= CURL_PUSH_DENY;
-	php_curlm_server_push 	*t 				= mh->handlers->server_push;
+	php_curl_callback 		*t 				= mh->handlers->server_push;
 	zval					*pz_parent_ch 	= NULL;
 	zval 					pz_ch;
 	zval 					headers;
@@ -460,7 +460,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.45.0 */
 		case CURLMOPT_PUSHFUNCTION:
 			if (mh->handlers->server_push == NULL) {
-				mh->handlers->server_push = ecalloc(1, sizeof(php_curlm_server_push));
+				mh->handlers->server_push = ecalloc(1, sizeof(php_curl_callback));
 			} else if (!Z_ISUNDEF(mh->handlers->server_push->func_name)) {
 				zval_ptr_dtor(&mh->handlers->server_push->func_name);
 				mh->handlers->server_push->fci_cache = empty_fcall_info_cache;

@@ -1410,7 +1410,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_fnmatch *t = ch->handlers->fnmatch;
+	php_curl_callback *t = ch->handlers->fnmatch;
 	int rval = CURL_FNMATCHFUNC_FAIL;
 	switch (t->method) {
 		case PHP_CURL_USER: {
@@ -1455,7 +1455,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static size_t curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_progress *t = ch->handlers->progress;
+	php_curl_callback *t = ch->handlers->progress;
 	size_t	rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -1923,7 +1923,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 
 	if (source->handlers->progress) {
-		ch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
+		ch->handlers->progress = ecalloc(1, sizeof(php_curl_callback));
 		if (!Z_ISUNDEF(source->handlers->progress->func_name)) {
 			ZVAL_COPY(&ch->handlers->progress->func_name, &source->handlers->progress->func_name);
 		}
@@ -1932,7 +1932,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	}
 
 	if (source->handlers->fnmatch) {
-		ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
+		ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_callback));
 		if (!Z_ISUNDEF(source->handlers->fnmatch->func_name)) {
 			ZVAL_COPY(&ch->handlers->fnmatch->func_name, &source->handlers->fnmatch->func_name);
 		}
@@ -2737,7 +2737,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
 			if (ch->handlers->progress == NULL) {
-				ch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
+				ch->handlers->progress = ecalloc(1, sizeof(php_curl_callback));
 			} else if (!Z_ISUNDEF(ch->handlers->progress->func_name)) {
 				zval_ptr_dtor(&ch->handlers->progress->func_name);
 				ch->handlers->progress->fci_cache = empty_fcall_info_cache;
@@ -2846,7 +2846,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_FUNCTION, curl_fnmatch);
 			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, ch);
 			if (ch->handlers->fnmatch == NULL) {
-				ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
+				ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_callback));
 			} else if (!Z_ISUNDEF(ch->handlers->fnmatch->func_name)) {
 				zval_ptr_dtor(&ch->handlers->fnmatch->func_name);
 				ch->handlers->fnmatch->fci_cache = empty_fcall_info_cache;
