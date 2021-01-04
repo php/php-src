@@ -7,7 +7,7 @@ gmp_abs() basic tests
 
 try {
     var_dump(gmp_strval(gmp_abs("")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump(gmp_strval(gmp_abs("0")));
@@ -24,13 +24,13 @@ var_dump(gmp_strval(gmp_abs("0000")));
 try {
     // Base 8
     var_dump(gmp_strval(gmp_abs("09876543")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
     // Base 8
     var_dump(gmp_strval(gmp_abs("-099987654")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

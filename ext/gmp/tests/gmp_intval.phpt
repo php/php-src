@@ -16,7 +16,7 @@ var_dump(gmp_intval($g));
 
 try {
     var_dump(gmp_intval(""));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
@@ -31,7 +31,7 @@ try {
 }
 try {
     var_dump(gmp_intval("1.0001"));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 

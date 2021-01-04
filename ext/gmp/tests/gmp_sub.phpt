@@ -7,7 +7,7 @@ gmp_sub() tests
 
 try {
     var_dump(gmp_sub("", ""));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
