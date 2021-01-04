@@ -119,7 +119,7 @@ typedef struct {
 	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
-	php_curlm_handlers	*handlers;
+	php_curlm_handlers handlers;
 	struct {
 		int no;
 	} err;
