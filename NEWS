@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #80457 (stream_get_contents() fails with maxlength=-1 or default).
     (bruno dot premont at restena dot lu)
+  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo). 
+    (CVE-2020-7071) (cmb)
 
 26 Nov 2020, PHP 7.3.25
 
