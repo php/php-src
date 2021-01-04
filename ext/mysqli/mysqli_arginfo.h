@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e0704985c8ce165f984bb189d2104a8f97eaa29e */
+ * Stub hash: fd51ccecde65deb48adf0dcbc30a7b19277838e6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
@@ -200,6 +200,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_options, 0, 3, _IS_BOOL, 
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+#define arginfo_mysqli_set_opt arginfo_mysqli_options
+
 #define arginfo_mysqli_ping arginfo_mysqli_close
 
 #if defined(MYSQLI_USE_MYSQLND)
@@ -242,6 +244,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_escape_string, 0, 2,
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_mysqli_escape_string arginfo_mysqli_real_escape_string
 
 #define arginfo_mysqli_real_query arginfo_mysqli_multi_query
 
@@ -409,10 +413,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_refresh, 0, 2, _IS_BOOL, 
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
-#define arginfo_mysqli_escape_string arginfo_mysqli_real_escape_string
-
-#define arginfo_mysqli_set_opt arginfo_mysqli_options
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hostname, IS_STRING, 1, "null")
@@ -857,6 +857,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_num_fields, arginfo_mysqli_num_fields)
 	ZEND_FE(mysqli_num_rows, arginfo_mysqli_num_rows)
 	ZEND_FE(mysqli_options, arginfo_mysqli_options)
+	ZEND_FALIAS(mysqli_set_opt, mysqli_options, arginfo_mysqli_set_opt)
 	ZEND_FE(mysqli_ping, arginfo_mysqli_ping)
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_poll, arginfo_mysqli_poll)
@@ -866,6 +867,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_query, arginfo_mysqli_query)
 	ZEND_FE(mysqli_real_connect, arginfo_mysqli_real_connect)
 	ZEND_FE(mysqli_real_escape_string, arginfo_mysqli_real_escape_string)
+	ZEND_FALIAS(mysqli_escape_string, mysqli_real_escape_string, arginfo_mysqli_escape_string)
 	ZEND_FE(mysqli_real_query, arginfo_mysqli_real_query)
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FE(mysqli_reap_async_query, arginfo_mysqli_reap_async_query)
@@ -915,8 +917,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_use_result, arginfo_mysqli_use_result)
 	ZEND_FE(mysqli_warning_count, arginfo_mysqli_warning_count)
 	ZEND_FE(mysqli_refresh, arginfo_mysqli_refresh)
-	ZEND_FALIAS(mysqli_escape_string, mysqli_real_escape_string, arginfo_mysqli_escape_string)
-	ZEND_FALIAS(mysqli_set_opt, mysqli_options, arginfo_mysqli_set_opt)
 	ZEND_FE_END
 };
 

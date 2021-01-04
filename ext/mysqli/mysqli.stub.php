@@ -634,6 +634,12 @@ function mysqli_num_rows(mysqli_result $result): int|string {}
 /** @param string|int $value */
 function mysqli_options(mysqli $mysqli, int $option, $value): bool {}
 
+/**
+ * @param string|int $value
+ * @alias mysqli_options
+ */
+function mysqli_set_opt(mysqli $mysqli, int $option, $value): bool {}
+
 function mysqli_ping(mysqli $mysqli): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
@@ -658,6 +664,9 @@ function mysqli_real_connect(
 ): bool {}
 
 function mysqli_real_escape_string(mysqli $mysqli, string $string): string {}
+
+/** @alias mysqli_real_escape_string */
+function mysqli_escape_string(mysqli $mysqli, string $string): string {}
 
 function mysqli_real_query(mysqli $mysqli, string $query): bool {}
 
@@ -757,12 +766,3 @@ function mysqli_use_result(mysqli $mysqli): mysqli_result|false {}
 function mysqli_warning_count(mysqli $mysqli): int {}
 
 function mysqli_refresh(mysqli $mysqli, int $flags): bool {}
-
-/** @alias mysqli_real_escape_string */
-function mysqli_escape_string(mysqli $mysqli, string $string): string {}
-
-/**
- * @param string|int $value
- * @alias mysqli_options
- */
-function mysqli_set_opt(mysqli $mysqli, int $option, $value): bool {}
