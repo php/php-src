@@ -9,7 +9,7 @@ var_dump(gmp_strval(gmp_com(0)));
 var_dump(gmp_strval(gmp_com("0")));
 try {
     var_dump(gmp_strval(gmp_com("test")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump(gmp_strval(gmp_com("2394876545678")));

@@ -15,9 +15,6 @@ $functions1 = [
     'gmp_fact',
     'gmp_sqrt',
     'gmp_sqrtrem',
-    'gmp_root',
-    'gmp_rootrem',
-    'gmp_pow',
     'gmp_perfect_square',
     'gmp_perfect_power',
     'gmp_prob_prime',
@@ -25,12 +22,16 @@ $functions1 = [
     'gmp_random_seed',
     'gmp_popcount',
     'gmp_com',
+    'gmp_nextprime',
 ];
 $functions1_need_int_2 = [
     'gmp_testbit',
     'gmp_scan0',
     'gmp_scan1',
     'gmp_binomial',
+    'gmp_root',
+    'gmp_rootrem',
+    'gmp_pow',
 ];
 $functions2 = [
     'gmp_add',
@@ -55,7 +56,6 @@ $functions2 = [
     'gmp_or',
     'gmp_xor',
     'gmp_hamdist',
-    'gmp_nextprime',
 ];
 $functions3 = [
     'gmp_powm',
@@ -65,24 +65,24 @@ echo 'Explicit base with gmp_init:', \PHP_EOL;
 echo 'Hexadecimal', \PHP_EOL;
 try {
     var_dump(gmp_init('0X', 16));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
 try {
     var_dump(gmp_init('0x', 16));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
 
 echo 'Binary', \PHP_EOL;
 try {
     var_dump(gmp_init('0B', 2));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
 try {
     var_dump(gmp_init('0b', 2));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
 
@@ -91,121 +91,121 @@ foreach ($functions1 as $function) {
     try {
         $function('0B');
         echo $function, ' failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0b');
         echo $function, ' failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0X');
         echo $function, ' failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0x');
         echo $function, ' failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
 }
 foreach ($functions1_need_int_2 as $function) {
     try {
         $function('0B', 1);
         echo $function, ' failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0b', 1);
         echo $function, ' failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0X', 1);
         echo $function, ' failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0x', 1);
         echo $function, ' failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
 }
 foreach ($functions2 as $function) {
     try {
         $function('0B', 1);
         echo $function, ' arg 1 failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0b', 1);
         echo $function, ' arg 1 failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0X', 1);
         echo $function, ' arg 1 failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0x', 1);
         echo $function, ' arg 1 failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0B');
         echo $function, ' arg 2 failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0b');
         echo $function, ' arg 2 failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0X');
         echo $function, ' arg 2 failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0x');
         echo $function, ' arg 2 failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
 }
 foreach ($functions3 as $function) {
     try {
         $function('0B', 1, 1);
         echo $function, ' arg 1 failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0b', 1, 1);
         echo $function, ' arg 1 failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0X', 1, 1);
         echo $function, ' arg 1 failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function('0x', 1, 1);
         echo $function, ' arg 1 failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0B', 1);
         echo $function, ' arg 2 failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0b', 1);
         echo $function, ' arg 2 failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0X', 1);
         echo $function, ' arg 2 failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, '0x', 1);
         echo $function, ' arg 2 failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, 1, '0B');
         echo $function, ' arg 3 failed with 0B', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, 1, '0b');
         echo $function, ' arg 3 failed with 0b', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, 1, '0X');
         echo $function, ' arg 3 failed with 0X', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
     try {
         $function(1, 1, '0x');
         echo $function, ' arg 3 failed with 0x', \PHP_EOL;
-    } catch (\TypeError) { }
+    } catch (\ValueError) { }
 }
 
 echo "Done\n";
