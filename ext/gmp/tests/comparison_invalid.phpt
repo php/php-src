@@ -19,5 +19,5 @@ try {
 
 ?>
 --EXPECT--
-TypeError: main(): Argument #2 is not an integer string
+ValueError: main(): Argument #2 is not an integer string
 TypeError: main(): Argument #2 must be of type GMP|string|int, DateTime given
