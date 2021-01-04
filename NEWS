@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-17 Dec 2020, PHP 7.4.14RC1
+07 Jan 2021, PHP 7.4.14
 
 - Core:
   . Fixed bug #74558 (Can't rebind closure returned by Closure::fromCallable()).
@@ -50,6 +50,8 @@ PHP                                                                        NEWS
     PROCEDURE resultset SIGNAL). (Nikita)
 
 - Standard:
+  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo).
+    (CVE-2020-7071) (cmb)
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
   . Fixed bug #80411 (References to null-serialized object break serialize()).
     (Nikita)
