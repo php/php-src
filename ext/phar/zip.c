@@ -164,7 +164,23 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 static char *phar_find_eocd(const char *s, size_t n)
 {
 	const char *end = s + n + sizeof("PK\5\6") - 1 - sizeof(phar_zip_dir_end);
-	return (char *) zend_memnrstr(s, "PK\5\6", sizeof("PK\5\6") - 1, end);
+
+	/* search backwards for end of central directory signatures */
+	do {
+		uint16_t comment_len;
+		const char *eocd_start = zend_memnrstr(s, "PK\5\6", sizeof("PK\5\6") - 1, end);
+
+		if (eocd_start == NULL) {
+			return NULL;
+		}
+		comment_len = PHAR_GET_16(((phar_zip_dir_end *) eocd_start)->comment_len);
+		if (eocd_start + sizeof(phar_zip_dir_end) + comment_len == s + n) {
+			/* we can't be sure, but this looks like the proper EOCD signature */
+			return (char *) eocd_start;
+		}
+		end = eocd_start;
+	} while (end > s);
+	return NULL;
 }
 
 /**
