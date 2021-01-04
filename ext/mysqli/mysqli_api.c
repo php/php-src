@@ -1329,10 +1329,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 		RETURN_THROWS();
 	}
 
-	const char * info = mysql_get_client_info();
-	if (info) {
-		RETURN_STRING(info);
-	}
+	RETURN_STRING(mysql_get_client_info());
 }
 /* }}} */
 
