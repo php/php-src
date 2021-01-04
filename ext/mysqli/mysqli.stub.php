@@ -36,7 +36,7 @@ class mysqli
     public function change_user(string $username, string $password, ?string $database) {}
 
     /**
-     * @return string|null
+     * @return string
      * @alias mysqli_character_set_name
      */
     public function character_set_name() {}
@@ -101,7 +101,7 @@ class mysqli
 #endif
 
     /**
-     * @return string|null
+     * @return string
      * @alias mysqli_get_server_info
      */
     public function get_server_info() {}
@@ -527,7 +527,7 @@ function mysqli_begin_transaction(mysqli $mysqli, int $flags = 0, ?string $name 
 
 function mysqli_change_user(mysqli $mysqli, string $username, string $password, ?string $database): bool {}
 
-function mysqli_character_set_name(mysqli $mysqli): ?string {}
+function mysqli_character_set_name(mysqli $mysqli): string {}
 
 function mysqli_close(mysqli $mysqli): bool {}
 
@@ -554,7 +554,7 @@ function mysqli_debug(string $options): bool {}
 
 function mysqli_errno(mysqli $mysqli): int {}
 
-function mysqli_error(mysqli $mysqli): ?string {}
+function mysqli_error(mysqli $mysqli): string {}
 
 function mysqli_error_list(mysqli $mysqli): array {}
 
@@ -691,7 +691,7 @@ function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
 function mysqli_stmt_errno(mysqli_stmt $statement): int {}
 
-function mysqli_stmt_error(mysqli_stmt $statement): ?string {}
+function mysqli_stmt_error(mysqli_stmt $statement): string {}
 
 function mysqli_stmt_error_list(mysqli_stmt $statement): array {}
 
@@ -731,9 +731,9 @@ function mysqli_stmt_send_long_data(mysqli_stmt $statement, int $param_num, stri
 
 function mysqli_stmt_store_result(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_sqlstate(mysqli_stmt $statement): ?string {}
+function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 
-function mysqli_sqlstate(mysqli $mysqli): ?string {}
+function mysqli_sqlstate(mysqli $mysqli): string {}
 
 function mysqli_ssl_set(
     mysqli $mysqli,

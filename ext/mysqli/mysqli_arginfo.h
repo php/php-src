@@ -1,41 +1,37 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8cd300f5106294e193fa85adc9c8a18a68d7d322 */
+ * Stub hash: e5817db470fdc79783b99d299c40e0c38cee8a78 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_autocommit, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_begin_transaction, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_change_user, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_character_set_name, 0, 1, IS_STRING, 1)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_character_set_name, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_close, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_commit, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "-1")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_mysqli_commit arginfo_mysqli_begin_transaction
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_connect, 0, 0, mysqli, MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hostname, IS_STRING, 1, "null")
@@ -64,13 +60,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_debug, 0, 1, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_errno, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_error arginfo_mysqli_character_set_name
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_error_list, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_execute, 0, 1, _IS_BOOL, 0)
@@ -135,7 +131,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_connection_stats, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -145,11 +141,11 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_charset, 0, 1, IS_OBJECT, 1)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_client_info, 0, 0, IS_STRING, 1)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mysql, mysqli, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mysqli, mysqli, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_get_client_version arginfo_mysqli_connect_errno
@@ -157,36 +153,36 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_links_stats, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_get_host_info, 0, 1, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_mysqli_get_host_info arginfo_mysqli_character_set_name
 
 #define arginfo_mysqli_get_proto_info arginfo_mysqli_errno
 
-#define arginfo_mysqli_get_server_info arginfo_mysqli_get_host_info
+#define arginfo_mysqli_get_server_info arginfo_mysqli_character_set_name
 
 #define arginfo_mysqli_get_server_version arginfo_mysqli_errno
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_get_warnings, 0, 1, mysqli_warning, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_init, 0, 0, mysqli, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_info arginfo_mysqli_character_set_name
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_info, 0, 1, IS_STRING, 1)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_insert_id arginfo_mysqli_affected_rows
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_kill, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_more_results arginfo_mysqli_close
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_multi_query, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -199,7 +195,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_num_rows, 0, 1, MAY_BE_LO
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_options, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -217,7 +213,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_prepare, 0, 2, mysqli_stmt, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -226,13 +222,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_report, 0, 1, _IS_BOOL, 0
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_query, 0, 2, mysqli_result, MAY_BE_BOOL)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_mode, IS_LONG, 0, "MYSQLI_STORE_RESULT")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_connect, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hostname, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
@@ -243,7 +239,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_connect, 0, 1, _IS_B
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_escape_string, 0, 2, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -251,12 +247,12 @@ ZEND_END_ARG_INFO()
 
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_reap_async_query, 0, 1, mysqli_result, MAY_BE_BOOL)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_release_savepoint, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -265,12 +261,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_mysqli_savepoint arginfo_mysqli_release_savepoint
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_select_db, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_set_charset, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, charset, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -311,7 +307,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_errno, 0, 1, IS_LONG
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_error, 0, 1, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_error, 0, 1, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
 ZEND_END_ARG_INFO()
 
@@ -340,7 +336,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_get_warnings, 0,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_init, 0, 1, mysqli_stmt, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_insert_id arginfo_mysqli_stmt_affected_rows
@@ -381,7 +377,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_mysqli_sqlstate arginfo_mysqli_character_set_name
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 0)
@@ -390,11 +386,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, _IS_BOOL, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_stat, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_store_result, 0, 1, mysqli_result, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -404,13 +400,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_thread_safe, 0, 0, _IS_BO
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_use_result, 0, 1, mysqli_result, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_warning_count arginfo_mysqli_errno
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_refresh, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -447,10 +443,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_close arginfo_class_mysqli_character_set_name
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_commit, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "-1")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_mysqli_commit arginfo_class_mysqli_begin_transaction
 
 #define arginfo_class_mysqli_connect arginfo_class_mysqli___construct
 
@@ -576,7 +569,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, result_mode, IS_LONG, 0, "MYSQLI_STORE_RESULT")
 ZEND_END_ARG_INFO()
 
@@ -621,7 +614,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_mysqli_result_getIterator, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, query, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
