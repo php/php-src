@@ -302,7 +302,7 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
+    public function __construct(mysqli $mysqli, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
      * @return void
@@ -387,7 +387,7 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    public function __construct(mysqli $mysql, ?string $query = null) {}
+    public function __construct(mysqli $mysqli, ?string $query = null) {}
 
     /**
      * @return int|false
@@ -519,19 +519,19 @@ final class mysqli_sql_exception extends RuntimeException
 {
 }
 
-function mysqli_affected_rows(mysqli $mysql): int|string {}
+function mysqli_affected_rows(mysqli $mysqli): int|string {}
 
-function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
+function mysqli_autocommit(mysqli $mysqli, bool $enable): bool {}
 
-function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
+function mysqli_begin_transaction(mysqli $mysqli, int $flags = 0, ?string $name = null): bool {}
 
-function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
+function mysqli_change_user(mysqli $mysqli, string $username, string $password, ?string $database): bool {}
 
-function mysqli_character_set_name(mysqli $mysql): ?string {}
+function mysqli_character_set_name(mysqli $mysqli): ?string {}
 
-function mysqli_close(mysqli $mysql): bool {}
+function mysqli_close(mysqli $mysqli): bool {}
 
-function mysqli_commit(mysqli $mysql, int $flags = -1, ?string $name = null): bool {}
+function mysqli_commit(mysqli $mysqli, int $flags = -1, ?string $name = null): bool {}
 
 function mysqli_connect(
     ?string $hostname = null,
@@ -548,15 +548,15 @@ function mysqli_connect_error(): ?string {}
 
 function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
-function mysqli_dump_debug_info(mysqli $mysql): bool {}
+function mysqli_dump_debug_info(mysqli $mysqli): bool {}
 
 function mysqli_debug(string $options): bool {}
 
-function mysqli_errno(mysqli $mysql): int {}
+function mysqli_errno(mysqli $mysqli): int {}
 
-function mysqli_error(mysqli $mysql): ?string {}
+function mysqli_error(mysqli $mysqli): ?string {}
 
-function mysqli_error_list(mysqli $mysql): array {}
+function mysqli_error_list(mysqli $mysqli): array {}
 
 function mysqli_stmt_execute(mysqli_stmt $statement): bool {}
 
@@ -581,7 +581,7 @@ function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", 
 
 function mysqli_fetch_row(mysqli_result $result): ?array {}
 
-function mysqli_field_count(mysqli $mysql): int {}
+function mysqli_field_count(mysqli $mysqli): int {}
 
 function mysqli_field_seek(mysqli_result $result, int $index): bool {}
 
@@ -590,64 +590,64 @@ function mysqli_field_tell(mysqli_result $result): int {}
 function mysqli_free_result(mysqli_result $result): void {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_get_connection_stats(mysqli $mysql): array {}
+function mysqli_get_connection_stats(mysqli $mysqli): array {}
 
 function mysqli_get_client_stats(): array {}
 #endif
 
-function mysqli_get_charset(mysqli $mysql): ?object {}
+function mysqli_get_charset(mysqli $mysqli): ?object {}
 
-function mysqli_get_client_info(?mysqli $mysql = null): ?string {}
+function mysqli_get_client_info(?mysqli $mysqli = null): ?string {}
 
 function mysqli_get_client_version(): int {}
 
 function mysqli_get_links_stats(): array {}
 
-function mysqli_get_host_info(mysqli $mysql): string {}
+function mysqli_get_host_info(mysqli $mysqli): string {}
 
-function mysqli_get_proto_info(mysqli $mysql): int {}
+function mysqli_get_proto_info(mysqli $mysqli): int {}
 
-function mysqli_get_server_info(mysqli $mysql): string {}
+function mysqli_get_server_info(mysqli $mysqli): string {}
 
-function mysqli_get_server_version(mysqli $mysql): int {}
+function mysqli_get_server_version(mysqli $mysqli): int {}
 
-function mysqli_get_warnings(mysqli $mysql): mysqli_warning|false {}
+function mysqli_get_warnings(mysqli $mysqli): mysqli_warning|false {}
 
 function mysqli_init(): mysqli|false {}
 
-function mysqli_info(mysqli $mysql): ?string {}
+function mysqli_info(mysqli $mysqli): ?string {}
 
-function mysqli_insert_id(mysqli $mysql): int|string {}
+function mysqli_insert_id(mysqli $mysqli): int|string {}
 
-function mysqli_kill(mysqli $mysql, int $process_id): bool {}
+function mysqli_kill(mysqli $mysqli, int $process_id): bool {}
 
-function mysqli_more_results(mysqli $mysql): bool {}
+function mysqli_more_results(mysqli $mysqli): bool {}
 
-function mysqli_multi_query(mysqli $mysql, string $query): bool {}
+function mysqli_multi_query(mysqli $mysqli, string $query): bool {}
 
-function mysqli_next_result(mysqli $mysql): bool {}
+function mysqli_next_result(mysqli $mysqli): bool {}
 
 function mysqli_num_fields(mysqli_result $result): int {}
 
 function mysqli_num_rows(mysqli_result $result): int|string {}
 
 /** @param string|int $value */
-function mysqli_options(mysqli $mysql, int $option, $value): bool {}
+function mysqli_options(mysqli $mysqli, int $option, $value): bool {}
 
-function mysqli_ping(mysqli $mysql): bool {}
+function mysqli_ping(mysqli $mysqli): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
 function mysqli_poll(?array &$read, ?array &$write, array &$error, int $seconds, int $microseconds = 0): int|false {}
 #endif
 
-function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
+function mysqli_prepare(mysqli $mysqli, string $query): mysqli_stmt|false {}
 
 function mysqli_report(int $flags): bool {}
 
-function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
+function mysqli_query(mysqli $mysqli, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
 function mysqli_real_connect(
-    mysqli $mysql,
+    mysqli $mysqli,
     ?string $hostname = null,
     ?string $username = null,
     ?string $password = null,
@@ -657,23 +657,23 @@ function mysqli_real_connect(
     int $flags = 0
 ): bool {}
 
-function mysqli_real_escape_string(mysqli $mysql, string $string): string {}
+function mysqli_real_escape_string(mysqli $mysqli, string $string): string {}
 
-function mysqli_real_query(mysqli $mysql, string $query): bool {}
+function mysqli_real_query(mysqli $mysqli, string $query): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_reap_async_query(mysqli $mysql): mysqli_result|bool {}
+function mysqli_reap_async_query(mysqli $mysqli): mysqli_result|bool {}
 #endif
 
-function mysqli_release_savepoint(mysqli $mysql, string $name): bool {}
+function mysqli_release_savepoint(mysqli $mysqli, string $name): bool {}
 
-function mysqli_rollback(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
+function mysqli_rollback(mysqli $mysqli, int $flags = 0, ?string $name = null): bool {}
 
-function mysqli_savepoint(mysqli $mysql, string $name): bool {}
+function mysqli_savepoint(mysqli $mysqli, string $name): bool {}
 
-function mysqli_select_db(mysqli $mysql, string $database): bool {}
+function mysqli_select_db(mysqli $mysqli, string $database): bool {}
 
-function mysqli_set_charset(mysqli $mysql, string $charset): bool {}
+function mysqli_set_charset(mysqli $mysqli, string $charset): bool {}
 
 function mysqli_stmt_affected_rows(mysqli_stmt $statement): int|string {}
 
@@ -707,7 +707,7 @@ function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
 
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
 
-function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
+function mysqli_stmt_init(mysqli $mysqli): mysqli_stmt|false {}
 
 function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
@@ -733,10 +733,10 @@ function mysqli_stmt_store_result(mysqli_stmt $statement): bool {}
 
 function mysqli_stmt_sqlstate(mysqli_stmt $statement): ?string {}
 
-function mysqli_sqlstate(mysqli $mysql): ?string {}
+function mysqli_sqlstate(mysqli $mysqli): ?string {}
 
 function mysqli_ssl_set(
-    mysqli $mysql,
+    mysqli $mysqli,
     string $key,
     string $certificate,
     string $ca_certificate,
@@ -744,25 +744,25 @@ function mysqli_ssl_set(
     string $cipher_algos
 ): bool {}
 
-function mysqli_stat(mysqli $mysql): string|false {}
+function mysqli_stat(mysqli $mysqli): string|false {}
 
-function mysqli_store_result(mysqli $mysql, int $mode = 0): mysqli_result|false {}
+function mysqli_store_result(mysqli $mysqli, int $mode = 0): mysqli_result|false {}
 
-function mysqli_thread_id(mysqli $mysql): int {}
+function mysqli_thread_id(mysqli $mysqli): int {}
 
 function mysqli_thread_safe(): bool {}
 
-function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
+function mysqli_use_result(mysqli $mysqli): mysqli_result|false {}
 
-function mysqli_warning_count(mysqli $mysql): int {}
+function mysqli_warning_count(mysqli $mysqli): int {}
 
-function mysqli_refresh(mysqli $mysql, int $flags): bool {}
+function mysqli_refresh(mysqli $mysqli, int $flags): bool {}
 
 /** @alias mysqli_real_escape_string */
-function mysqli_escape_string(mysqli $mysql, string $string): string {}
+function mysqli_escape_string(mysqli $mysqli, string $string): string {}
 
 /**
  * @param string|int $value
  * @alias mysqli_options
  */
-function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
+function mysqli_set_opt(mysqli $mysqli, int $option, $value): bool {}
