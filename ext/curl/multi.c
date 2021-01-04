@@ -466,7 +466,6 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 			}
 
 			ZVAL_COPY(&mh->handlers.server_push->func_name, zvalue);
-			mh->handlers.server_push->method = PHP_CURL_USER;
 			error = curl_multi_setopt(mh->multi, option, _php_server_push_callback);
 			if (error != CURLM_OK) {
 				return 0;

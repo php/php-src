@@ -1410,41 +1410,36 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 	php_curl *ch = (php_curl *) ctx;
 	php_curl_callback *t = ch->handlers.fnmatch;
 	int rval = CURL_FNMATCHFUNC_FAIL;
-	switch (t->method) {
-		case PHP_CURL_USER: {
-			zval argv[3];
-			zval retval;
-			int  error;
-			zend_fcall_info fci;
+	zval argv[3];
+	zval retval;
+	int  error;
+	zend_fcall_info fci;
 
-			GC_ADDREF(&ch->std);
-			ZVAL_OBJ(&argv[0], &ch->std);
-			ZVAL_STRING(&argv[1], pattern);
-			ZVAL_STRING(&argv[2], string);
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&argv[0], &ch->std);
+	ZVAL_STRING(&argv[1], pattern);
+	ZVAL_STRING(&argv[2], string);
 
-			fci.size = sizeof(fci);
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.object = NULL;
-			fci.retval = &retval;
-			fci.param_count = 3;
-			fci.params = argv;
-			fci.named_params = NULL;
+	fci.size = sizeof(fci);
+	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
+	fci.object = NULL;
+	fci.retval = &retval;
+	fci.param_count = 3;
+	fci.params = argv;
+	fci.named_params = NULL;
 
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
-			} else if (!Z_ISUNDEF(retval)) {
-				_php_curl_verify_handlers(ch, 1);
-				rval = zval_get_long(&retval);
-			}
-			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
-			break;
-		}
+	ch->in_callback = 1;
+	error = zend_call_function(&fci, &t->fci_cache);
+	ch->in_callback = 0;
+	if (error == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
+	} else if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, 1);
+		rval = zval_get_long(&retval);
 	}
+	zval_ptr_dtor(&argv[0]);
+	zval_ptr_dtor(&argv[1]);
+	zval_ptr_dtor(&argv[2]);
 	return rval;
 }
 /* }}} */
@@ -1461,43 +1456,38 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 	fprintf(stderr, "clientp = %x, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 
-	switch (t->method) {
-		case PHP_CURL_USER: {
-			zval argv[5];
-			zval retval;
-			int  error;
-			zend_fcall_info fci;
+	zval argv[5];
+	zval retval;
+	int  error;
+	zend_fcall_info fci;
 
-			GC_ADDREF(&ch->std);
-			ZVAL_OBJ(&argv[0], &ch->std);
-			ZVAL_LONG(&argv[1], (zend_long)dltotal);
-			ZVAL_LONG(&argv[2], (zend_long)dlnow);
-			ZVAL_LONG(&argv[3], (zend_long)ultotal);
-			ZVAL_LONG(&argv[4], (zend_long)ulnow);
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&argv[0], &ch->std);
+	ZVAL_LONG(&argv[1], (zend_long)dltotal);
+	ZVAL_LONG(&argv[2], (zend_long)dlnow);
+	ZVAL_LONG(&argv[3], (zend_long)ultotal);
+	ZVAL_LONG(&argv[4], (zend_long)ulnow);
 
-			fci.size = sizeof(fci);
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.object = NULL;
-			fci.retval = &retval;
-			fci.param_count = 5;
-			fci.params = argv;
-			fci.named_params = NULL;
+	fci.size = sizeof(fci);
+	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
+	fci.object = NULL;
+	fci.retval = &retval;
+	fci.param_count = 5;
+	fci.params = argv;
+	fci.named_params = NULL;
 
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
-			} else if (!Z_ISUNDEF(retval)) {
-				_php_curl_verify_handlers(ch, 1);
-				if (0 != zval_get_long(&retval)) {
-					rval = 1;
-				}
-			}
-			zval_ptr_dtor(&argv[0]);
-			break;
+	ch->in_callback = 1;
+	error = zend_call_function(&fci, &t->fci_cache);
+	ch->in_callback = 0;
+	if (error == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
+	} else if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, 1);
+		if (0 != zval_get_long(&retval)) {
+			rval = 1;
 		}
 	}
+	zval_ptr_dtor(&argv[0]);
 	return rval;
 }
 /* }}} */
@@ -1924,7 +1914,6 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		if (!Z_ISUNDEF(source->handlers.progress->func_name)) {
 			ZVAL_COPY(&ch->handlers.progress->func_name, &source->handlers.progress->func_name);
 		}
-		ch->handlers.progress->method = source->handlers.progress->method;
 		curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, (void *) ch);
 	}
 
@@ -1933,7 +1922,6 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		if (!Z_ISUNDEF(source->handlers.fnmatch->func_name)) {
 			ZVAL_COPY(&ch->handlers.fnmatch->func_name, &source->handlers.fnmatch->func_name);
 		}
-		ch->handlers.fnmatch->method = source->handlers.fnmatch->method;
 		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
 	}
 
@@ -2740,7 +2728,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				ch->handlers.progress->fci_cache = empty_fcall_info_cache;
 			}
 			ZVAL_COPY(&ch->handlers.progress->func_name, zvalue);
-			ch->handlers.progress->method = PHP_CURL_USER;
 			break;
 
 		case CURLOPT_READFUNCTION:
@@ -2849,7 +2836,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				ch->handlers.fnmatch->fci_cache = empty_fcall_info_cache;
 			}
 			ZVAL_COPY(&ch->handlers.fnmatch->func_name, zvalue);
-			ch->handlers.fnmatch->method = PHP_CURL_USER;
 			break;
 
 		default:

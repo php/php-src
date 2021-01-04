@@ -65,7 +65,6 @@ typedef struct {
 typedef struct {
 	zval                  func_name;
 	zend_fcall_info_cache fci_cache;
-	int                   method;
 } php_curl_callback;
 
 typedef struct {
