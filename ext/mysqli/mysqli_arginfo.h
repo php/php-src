@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ff5834526717c57caaa2f50747cf7169c3e4db56 */
+ * Stub hash: eb8ca1a6d38ba3f9681fd7a970fe5e847109a0e9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
@@ -289,14 +289,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_attr_set, 0, 3, _IS_
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_param, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_param, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
 	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
+	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -627,12 +629,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_attr_set, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_param, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_param, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_result, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_result, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
