@@ -577,10 +577,12 @@ PHP_FUNCTION(bccomp)
 
 	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		RETURN_THROWS();
 	}
 
 	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		RETURN_THROWS();
 	}
 
 	RETVAL_LONG(bc_compare(first, second));
