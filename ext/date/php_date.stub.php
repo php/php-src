@@ -11,11 +11,11 @@ function idate(string $format, ?int $timestamp = null): int|false {}
 function gmdate(string $format, ?int $timestamp = null): string {}
 
 function mktime(
-    int $hour, ?int $minute = null, ?int $second = null,
+    ?int $hour = null, ?int $minute = null, ?int $second = null,
     ?int $month = null, ?int $day = null, ?int $year = null): int|false {}
 
 function gmmktime(
-    int $hour, ?int $minute = null, ?int $second = null,
+    ?int $hour = null, ?int $minute = null, ?int $second = null,
     ?int $month = null, ?int $day = null, ?int $year = null): int|false {}
 
 function checkdate(int $month, int $day, int $year): bool {}

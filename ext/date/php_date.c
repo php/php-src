@@ -1065,21 +1065,27 @@ PHP_FUNCTION(strtotime)
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	zend_long hou, min, sec, mon, day, yea;
-	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
+	zend_bool hou_is_null = 1, min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
 	int epoch_does_not_fit_in_zend_long;
 
-	ZEND_PARSE_PARAMETERS_START(1, 6)
-		Z_PARAM_LONG(hou)
+	ZEND_PARSE_PARAMETERS_START(0, 6)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(hou, hou_is_null)
 		Z_PARAM_LONG_OR_NULL(min, min_is_null)
 		Z_PARAM_LONG_OR_NULL(sec, sec_is_null)
 		Z_PARAM_LONG_OR_NULL(mon, mon_is_null)
 		Z_PARAM_LONG_OR_NULL(day, day_is_null)
 		Z_PARAM_LONG_OR_NULL(yea, yea_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	/* at least one arg is required, although it does not matter which one is given */
+	if (hou_is_null && min_is_null && sec_is_null && mon_is_null && day_is_null && yea_is_null) {
+		zend_argument_count_error("%s() expects at least 1 argument", gmt ? "gmmktime" : "mktime");
+		RETURN_THROWS();
+	}
 
 	/* Initialize structure with current time */
 	now = timelib_time_ctor();
@@ -1092,7 +1098,9 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		timelib_unixtime2local(now, (timelib_sll) php_time());
 	}
 
-	now->h = hou;
+	if (!hou_is_null) {
+		now->h = hou;
+	}
 
 	if (!min_is_null) {
 		now->i = min;
