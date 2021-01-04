@@ -504,7 +504,6 @@ static const func_info_t func_infos[] = {
 	F1("curl_init",                             MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("curl_copy_handle",                      MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("curl_version",                          MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F1("curl_getinfo",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("curl_error",                            MAY_BE_STRING),
 	F1("curl_strerror",                         MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_multi_strerror",                   MAY_BE_NULL | MAY_BE_STRING),
