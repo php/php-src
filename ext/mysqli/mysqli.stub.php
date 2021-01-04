@@ -341,7 +341,7 @@ class mysqli_result implements IteratorAggregate
     public function fetch_field_direct(int $index) {}
 
     /**
-     * @return array|false
+     * @return array
      * @alias mysqli_fetch_all
      */
     public function fetch_all(int $mode = MYSQLI_NUM) {}
@@ -571,15 +571,15 @@ function mysqli_fetch_field_direct(mysqli_result $result, int $index): object|fa
 
 function mysqli_fetch_lengths(mysqli_result $result): array|false {}
 
-function mysqli_fetch_all(mysqli_result $result, int $mode = MYSQLI_NUM): array|false {}
+function mysqli_fetch_all(mysqli_result $result, int $mode = MYSQLI_NUM): array {}
 
 function mysqli_fetch_array(mysqli_result $result, int $mode = MYSQLI_BOTH): array|null|false {}
 
-function mysqli_fetch_assoc(mysqli_result $result): ?array {}
+function mysqli_fetch_assoc(mysqli_result $result): array|null|false {}
 
-function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): ?object {}
+function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
-function mysqli_fetch_row(mysqli_result $result): ?array {}
+function mysqli_fetch_row(mysqli_result $result): array|null|false {}
 
 function mysqli_field_count(mysqli $mysqli): int {}
 
