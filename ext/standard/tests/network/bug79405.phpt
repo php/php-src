@@ -1,5 +1,5 @@
 --TEST--
-Bug #76755 (setcookie does not accept "double" type for expire time)
+Bug #79405 - gethostbyname() silently truncates after a null byte
 --FILE--
 <?php
 $host = "localhost\0.example.com";
