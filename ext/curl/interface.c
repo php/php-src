@@ -63,6 +63,16 @@
 #include "curl_private.h"
 #include "curl_arginfo.h"
 
+#if (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
+# include "ext/sockets/php_sockets.h"
+# ifdef PHP_WIN32
+#  include <ws2tcpip.h>
+# else
+#  include <arpa/inet.h>
+# endif
+# define PHPCURL_SOCKETS_SUPPORT
+#endif
+
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
 static MUTEX_T *php_curl_openssl_tsl = NULL;
 
@@ -226,6 +236,10 @@ zend_module_entry curl_module_entry = {
 #ifdef COMPILE_DL_CURL
 ZEND_GET_MODULE (curl)
 #endif
+
+/* CurlSockaddr class */
+zend_class_entry *curl_sockaddr_ce;
+static zend_object_handlers curl_sockaddr_object_handlers;
 
 /* CurlHandle class */
 
@@ -723,6 +737,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_SSL_CACERT_BADFILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSL_SESSIONID_CACHE);
 	REGISTER_CURL_CONSTANT(CURLMOPT_PIPELINING);
+#ifdef PHPCURL_SOCKETS_SUPPORT
+	REGISTER_CURL_CONSTANT(CURLOPT_SOCKOPTFUNCTION);
+	REGISTER_CURL_CONSTANT(CURLSOCKTYPE_IPCXN);
+#endif
 
 	/* Available since 7.16.1 */
 	REGISTER_CURL_CONSTANT(CURLE_SSH);
@@ -760,6 +778,10 @@ PHP_MINIT_FUNCTION(curl)
 
 	/* Available since 7.17.1 */
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5);
+#if defined(PHPCURL_SOCKETS_SUPPORT)
+	REGISTER_CURL_CONSTANT(CURLOPT_OPENSOCKETFUNCTION);
+	REGISTER_CURL_CONSTANT(CURL_SOCKET_BAD);
+#endif
 
 	/* Available since 7.18.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_TRANSFER_MODE);
@@ -910,6 +932,11 @@ PHP_MINIT_FUNCTION(curl)
 	/* Available since 7.21.6 */
 	REGISTER_CURL_CONSTANT(CURLOPT_ACCEPT_ENCODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_TRANSFER_ENCODING);
+
+	/* Available since 7.21.7 */
+#if defined(PHPCURL_SOCKETS_SUPPORT)
+	REGISTER_CURL_CONSTANT(CURLOPT_CLOSESOCKETFUNCTION);
+#endif
 
 	/* Available since 7.22.0 */
 	REGISTER_CURL_CONSTANT(CURLAUTH_NTLM_WB);
@@ -1205,6 +1232,16 @@ PHP_MINIT_FUNCTION(curl)
 	curl_share_register_class(class_CurlShareHandle_methods);
 	curlfile_register_class();
 
+	zend_class_entry ce_curl_sockaddr;
+	INIT_CLASS_ENTRY(ce_curl_sockaddr, "CurlSockaddr", class_CurlSockaddr_methods);
+	curl_sockaddr_ce = zend_register_internal_class(&ce_curl_sockaddr);
+	curl_sockaddr_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_declare_property_long(curl_sockaddr_ce, "family", sizeof("family")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_long(curl_sockaddr_ce, "socktype", sizeof("socktype")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_long(curl_sockaddr_ce, "protocol", sizeof("protocol")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_string(curl_sockaddr_ce, "addr", sizeof("addr")-1, "", ZEND_ACC_PUBLIC);
+	memcpy(&curl_sockaddr_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1405,6 +1442,219 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	return length;
 }
 /* }}} */
+
+#if defined(PHPCURL_SOCKETS_SUPPORT)
+/* {{{ curl_sockopt */
+static int curl_sockopt(void *ctx, curl_socket_t curlfd, curlsocktype purpose) {
+	php_curl *ch = (php_curl *) ctx;
+	php_curl_callback_function *t = ch->handlers->sockopt;
+	int rval = 0;
+	switch (t->method) {
+		case PHP_CURL_USER: {
+			zval argv[3];
+			zval retval;
+			int  error;
+			zend_fcall_info fci;
+
+			if (Z_ISUNDEF(ch->handlers->fd)) {
+				object_init_ex(&ch->handlers->fd, socket_ce);
+				php_socket *php_sock = Z_SOCKET_P(&ch->handlers->fd);
+				php_sock->bsd_socket = curlfd;
+				php_sock->type       = PF_UNSPEC;
+				php_sock->error      = 0;
+				php_sock->blocking   = 1;
+			}
+
+			GC_ADDREF(&ch->std);
+			ZVAL_OBJ(&argv[0], &ch->std);
+			ZVAL_COPY(&argv[1], &ch->handlers->fd);
+			ZVAL_LONG(&argv[2], purpose);
+
+			fci.size = sizeof(fci);
+			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
+			fci.object = NULL;
+			fci.retval = &retval;
+			fci.param_count = 3;
+			fci.params = argv;
+			fci.named_params = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_SOCKOPTFUNCTION");
+			} else if (!Z_ISUNDEF(retval)) {
+				if (Z_TYPE(retval) != IS_LONG) {
+					convert_to_long_ex(&retval);
+				}
+				rval = Z_LVAL(retval);
+			}
+			zval_ptr_dtor(&argv[0]);
+			zval_ptr_dtor(&argv[1]);
+			zval_ptr_dtor(&argv[2]);
+			break;
+		}
+	}
+
+	return rval;
+}
+/* }}} */
+
+static void _curlSockaddrToZval(struct curl_sockaddr *address, zval* obj)
+{
+	object_init_ex(obj, curl_sockaddr_ce);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "family", sizeof("family") - 1, address->family);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "socktype", sizeof("socktype") - 1, address->socktype);
+	zend_update_property_long(curl_sockaddr_ce, Z_OBJ_P(obj), "protocol", sizeof("protocol") - 1, address->protocol);
+	switch (address->addr.sa_family) {
+#if HAVE_IPV6
+		case AF_INET6: {
+			struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
+			char addr[INET6_ADDRSTRLEN];
+			inet_ntop(AF_INET6, &sa->sin6_addr, addr, sizeof(addr));
+			zend_update_property_string(curl_sockaddr_ce, Z_OBJ_P(obj), "addr", sizeof("addr") - 1, addr);
+			break;
+		}
+#endif
+		case AF_INET: {
+			struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
+			char addr[INET_ADDRSTRLEN];
+			inet_ntop(AF_INET, &sa->sin_addr, addr, sizeof(addr));
+			zend_update_property_string(curl_sockaddr_ce, Z_OBJ_P(obj), "addr", sizeof("addr") - 1, addr);
+			break;
+		}
+	}
+}
+
+static void _zvalToCurlSockaddr(struct curl_sockaddr *address, zval* obj)
+{
+	zval *prop, rv;
+	prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(obj), "addr", sizeof("addr")-1, 0, &rv);
+	if (Z_TYPE_P(prop) == IS_STRING) {
+		switch (address->addr.sa_family) {
+#if HAVE_IPV6
+			case AF_INET6: {
+					struct sockaddr_in6 *sa = (struct sockaddr_in6 *) &address->addr;
+					inet_pton(AF_INET6, Z_STRVAL_P(prop), &sa->sin6_addr);
+					break;
+				}
+#endif
+			case AF_INET: {
+					struct sockaddr_in *sa = (struct sockaddr_in *) &address->addr;
+					inet_pton(AF_INET, Z_STRVAL_P(prop), &sa->sin_addr);
+					break;
+				}
+		}
+	}
+}
+
+/* {{{ curl_opensocket */
+static curl_socket_t curl_opensocket(void *ctx, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	php_curl *ch = (php_curl *) ctx;
+	php_curl_callback_function *t = ch->handlers->opensocket;
+	curl_socket_t rval = CURL_SOCKET_BAD;
+	switch (t->method) {
+		case PHP_CURL_USER: {
+			zval argv[3];
+			zval retval;
+			int  error;
+			zend_fcall_info fci;
+			GC_ADDREF(&ch->std);
+			ZVAL_OBJ(&argv[0], &ch->std);
+			ZVAL_LONG(&argv[1], purpose);
+			_curlSockaddrToZval(address, &argv[2]);
+
+			fci.size = sizeof(fci);
+			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
+			fci.object = NULL;
+			fci.retval = &retval;
+			fci.param_count = 3;
+			fci.params = argv;
+			fci.named_params = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_OPENSOCKETFUNCTION");
+			} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), socket_ce)) {
+				_php_curl_verify_handlers(ch, 1);
+
+				if (!Z_ISUNDEF(ch->handlers->fd)) {
+					zval_ptr_dtor(&ch->handlers->fd);
+				}
+
+				ZVAL_COPY(&ch->handlers->fd, &retval);
+				_zvalToCurlSockaddr(address, &argv[2]);
+				rval = (Z_SOCKET_P(&retval)->bsd_socket);
+			}
+			zval_ptr_dtor(&retval);
+			zval_ptr_dtor(&argv[0]);
+			zval_ptr_dtor(&argv[1]);
+			zval_ptr_dtor(&argv[2]);
+			break;
+		}
+	}
+
+	return rval;
+}
+/* }}} */
+
+/* {{{ curl_closesocket */
+static int curl_closesocket(void *ctx, curl_socket_t curlfd) {
+	php_curl *ch = (php_curl *) ctx;
+	php_curl_callback_function *t = ch->handlers->closesocket;
+	int rval = 0;
+	switch (t->method) {
+		case PHP_CURL_USER: {
+			zval argv[2];
+			zval retval;
+			int  error;
+			zend_fcall_info fci;
+
+			if (Z_ISUNDEF(ch->handlers->fd)) {
+				object_init_ex(&ch->handlers->fd, socket_ce);
+				php_socket *php_sock = Z_SOCKET_P(&ch->handlers->fd);
+				php_sock->bsd_socket = curlfd;
+				php_sock->type       = PF_UNSPEC;
+				php_sock->error      = 0;
+				php_sock->blocking   = 1;
+			}
+
+			GC_ADDREF(&ch->std);
+			ZVAL_OBJ(&argv[0], &ch->std);
+			ZVAL_COPY(&argv[1], &ch->handlers->fd);
+
+			fci.size = sizeof(fci);
+			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
+			fci.object = NULL;
+			fci.retval = &retval;
+			fci.param_count = 2;
+			fci.params = argv;
+			fci.named_params = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_CLOSESOCKETFUNCTION");
+			} else if (!Z_ISUNDEF(retval)) {
+				if (Z_TYPE(retval) != IS_LONG) {
+					convert_to_long_ex(&retval);
+				}
+				rval = Z_LVAL(retval);
+			}
+			zval_ptr_dtor(&argv[0]);
+			zval_ptr_dtor(&argv[1]);
+			break;
+		}
+	}
+
+	return rval;
+}
+/* }}} */
+#endif
 
 /* {{{ curl_fnmatch */
 static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
@@ -1763,6 +2013,9 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers->read         = ecalloc(1, sizeof(php_curl_read));
 	ch->handlers->progress     = NULL;
 	ch->handlers->fnmatch      = NULL;
+	ch->handlers->sockopt      = NULL;
+	ch->handlers->opensocket   = NULL;
+	ch->handlers->closesocket  = NULL;
 	ch->clone 				   = emalloc(sizeof(uint32_t));
 	*ch->clone                 = 1;
 
@@ -1938,6 +2191,33 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		}
 		ch->handlers->fnmatch->method = source->handlers->fnmatch->method;
 		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
+	}
+
+	if (source->handlers->sockopt) {
+		ch->handlers->sockopt = ecalloc(1, sizeof(php_curl_callback_function));
+		if (!Z_ISUNDEF(source->handlers->sockopt->func_name)) {
+			ZVAL_COPY(&ch->handlers->sockopt->func_name, &source->handlers->sockopt->func_name);
+		}
+		ch->handlers->sockopt->method = source->handlers->sockopt->method;
+		curl_easy_setopt(ch->cp, CURLOPT_SOCKOPTDATA, (void *) ch);
+	}
+
+	if (source->handlers->opensocket) {
+		ch->handlers->opensocket = ecalloc(1, sizeof(php_curl_callback_function));
+		if (!Z_ISUNDEF(source->handlers->opensocket->func_name)) {
+			ZVAL_COPY(&ch->handlers->opensocket->func_name, &source->handlers->opensocket->func_name);
+		}
+		ch->handlers->opensocket->method = source->handlers->opensocket->method;
+		curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETDATA, (void *) ch);
+	}
+
+	if (source->handlers->closesocket) {
+		ch->handlers->closesocket = ecalloc(1, sizeof(php_curl_callback_function));
+		if (!Z_ISUNDEF(source->handlers->closesocket->func_name)) {
+			ZVAL_COPY(&ch->handlers->fnmatch->func_name, &source->handlers->closesocket->func_name);
+		}
+		ch->handlers->closesocket->method = source->handlers->closesocket->method;
+		curl_easy_setopt(ch->cp, CURLOPT_CLOSESOCKETDATA, (void *) ch);
 	}
 
 	efree(ch->to_free->slist);
@@ -2841,6 +3121,45 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				}
 			}
 			break;
+#if defined(PHPCURL_SOCKETS_SUPPORT)
+		case CURLOPT_SOCKOPTFUNCTION:
+			curl_easy_setopt(ch->cp, CURLOPT_SOCKOPTFUNCTION, curl_sockopt);
+			curl_easy_setopt(ch->cp, CURLOPT_SOCKOPTDATA, ch);
+			if (ch->handlers->sockopt == NULL) {
+				ch->handlers->sockopt = ecalloc(1, sizeof(php_curl_callback_function));
+			} else if (!Z_ISUNDEF(ch->handlers->sockopt->func_name)) {
+				zval_ptr_dtor(&ch->handlers->sockopt->func_name);
+				ch->handlers->sockopt->fci_cache = empty_fcall_info_cache;
+			}
+			ZVAL_COPY(&ch->handlers->sockopt->func_name, zvalue);
+			ch->handlers->sockopt->method = PHP_CURL_USER;
+			break;
+
+		case CURLOPT_OPENSOCKETFUNCTION:
+			curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETFUNCTION, curl_opensocket);
+			curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETDATA, ch);
+			if (ch->handlers->opensocket == NULL) {
+				ch->handlers->opensocket = ecalloc(1, sizeof(php_curl_callback_function));
+			} else if (!Z_ISUNDEF(ch->handlers->opensocket->func_name)) {
+				zval_ptr_dtor(&ch->handlers->opensocket->func_name);
+				ch->handlers->opensocket->fci_cache = empty_fcall_info_cache;
+			}
+			ZVAL_COPY(&ch->handlers->opensocket->func_name, zvalue);
+			ch->handlers->opensocket->method = PHP_CURL_USER;
+			break;
+		case CURLOPT_CLOSESOCKETFUNCTION:
+			curl_easy_setopt(ch->cp, CURLOPT_CLOSESOCKETFUNCTION, curl_closesocket);
+			curl_easy_setopt(ch->cp, CURLOPT_CLOSESOCKETDATA, ch);
+			if (ch->handlers->closesocket == NULL) {
+				ch->handlers->closesocket = ecalloc(1, sizeof(php_curl_callback_function));
+			} else if (!Z_ISUNDEF(ch->handlers->closesocket->func_name)) {
+				zval_ptr_dtor(&ch->handlers->closesocket->func_name);
+				ch->handlers->closesocket->fci_cache = empty_fcall_info_cache;
+			}
+			ZVAL_COPY(&ch->handlers->closesocket->func_name, zvalue);
+			ch->handlers->closesocket->method = PHP_CURL_USER;
+			break;
+#endif
 
 		case CURLOPT_FNMATCH_FUNCTION:
 			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_FUNCTION, curl_fnmatch);
@@ -3376,6 +3695,23 @@ static void curl_free_obj(zend_object *object)
 		efree(ch->handlers->fnmatch);
 	}
 
+	if (ch->handlers->sockopt) {
+		zval_ptr_dtor(&ch->handlers->sockopt->func_name);
+		efree(ch->handlers->sockopt);
+	}
+
+	if (ch->handlers->opensocket) {
+		zval_ptr_dtor(&ch->handlers->opensocket->func_name);
+		efree(ch->handlers->opensocket);
+	}
+
+	if (ch->handlers->closesocket) {
+		zval_ptr_dtor(&ch->handlers->closesocket->func_name);
+		efree(ch->handlers->closesocket);
+	}
+
+	zval_ptr_dtor(&ch->handlers->fd);
+
 	efree(ch->handlers);
 	zval_ptr_dtor(&ch->postfields);
 
@@ -3449,6 +3785,23 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		ch->handlers->fnmatch = NULL;
 	}
 
+	if (ch->handlers->sockopt) {
+		zval_ptr_dtor(&ch->handlers->sockopt->func_name);
+		efree(ch->handlers->sockopt);
+		ch->handlers->sockopt = NULL;
+	}
+
+	if (ch->handlers->opensocket) {
+		zval_ptr_dtor(&ch->handlers->opensocket->func_name);
+		efree(ch->handlers->opensocket);
+		ch->handlers->opensocket = NULL;
+	}
+
+	if (ch->handlers->closesocket) {
+		zval_ptr_dtor(&ch->handlers->closesocket->func_name);
+		efree(ch->handlers->closesocket);
+		ch->handlers->closesocket = NULL;
+	}
 }
 /* }}} */
 

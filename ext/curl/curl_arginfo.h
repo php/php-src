@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f1d616c644ad366405816cde0384f6f391773ebf */
+ * Stub hash: 90efbdcc7d8dcb5570cdea434261a2a1c85f40ba */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -224,6 +224,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_strerror, arginfo_curl_share_strerror)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)
 	ZEND_FE(curl_version, arginfo_curl_version)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_CurlSockaddr_methods[] = {
 	ZEND_FE_END
 };
 
