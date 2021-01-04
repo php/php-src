@@ -429,9 +429,10 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 
 static inline time_t source_date_epoch_time(time_t *tloc)
 {
-	const char *sde = php_getenv(SOURCE_DATE_EPOCH, strlen(SOURCE_DATE_EPOCH));
-	time_t ts = (sde) ? strtol(sde, NULL, 10) : time(0);
+	zend_string *sde = php_getenv(SOURCE_DATE_EPOCH, strlen(SOURCE_DATE_EPOCH));
+	time_t ts = (ZSTR_LEN(sde)) ? strtol(ZSTR_VAL(sde), NULL, 10) : time(0);
 
+	zend_string_release(sde);
 	if (tloc) {
 		*tloc = ts;
 	}
