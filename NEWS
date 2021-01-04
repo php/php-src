@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #80584 (0x and 0X are considered valid hex numbers by
     filter_var()). (girgias)
 
+- GMP:
+  . Fixed bug #80560 (Strings containing only a base prefix return 0 object).
+    (girgias)
+
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
