@@ -278,6 +278,8 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
+	} else if (c == 0x203E) { /* OVERLINE */
+		s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
 	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
@@ -288,8 +290,6 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 	if (s <= 0) {
 		if (c == 0xa5) {		/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
