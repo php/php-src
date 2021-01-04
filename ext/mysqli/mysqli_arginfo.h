@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e5817db470fdc79783b99d299c40e0c38cee8a78 */
+ * Stub hash: e0704985c8ce165f984bb189d2104a8f97eaa29e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
@@ -204,9 +204,9 @@ ZEND_END_ARG_INFO()
 
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_poll, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(1, error, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(1, reject, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -484,9 +484,9 @@ ZEND_END_ARG_INFO()
 
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_poll, 0, 0, 4)
-	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(1, error, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(1, reject, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()

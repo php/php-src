@@ -152,7 +152,7 @@ class mysqli
      * @return int|false
      * @alias mysqli_poll
      */
-    public static function poll(?array &$read, ?array &$write, array &$error, int $seconds, int $microseconds = 0) {}
+    public static function poll(array &$read, array &$error, array &$reject, int $seconds, int $microseconds = 0) {}
 #endif
 
     /**
@@ -637,7 +637,7 @@ function mysqli_options(mysqli $mysqli, int $option, $value): bool {}
 function mysqli_ping(mysqli $mysqli): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_poll(?array &$read, ?array &$write, array &$error, int $seconds, int $microseconds = 0): int|false {}
+function mysqli_poll(array &$read, array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
 #endif
 
 function mysqli_prepare(mysqli $mysqli, string $query): mysqli_stmt|false {}
