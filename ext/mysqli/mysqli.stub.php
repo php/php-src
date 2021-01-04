@@ -390,7 +390,7 @@ class mysqli_stmt
     public function __construct(mysqli $mysqli, ?string $query = null) {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias mysqli_stmt_attr_get
      */
     public function attr_get(int $attribute) {}

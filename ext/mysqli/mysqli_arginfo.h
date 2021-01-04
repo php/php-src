@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 737d5140625959a8fdf34caf6f745dd9516f695f */
+ * Stub hash: ff5834526717c57caaa2f50747cf7169c3e4db56 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysqli, mysqli, 0)
