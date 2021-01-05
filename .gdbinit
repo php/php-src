@@ -340,7 +340,8 @@ define ____print_ht
 			end
 			printf "[%d] ", $i
 			if $p->key
-				printf "%s => ", $p->key->val
+				____print_str $p->key->val $p->key->len
+				printf " => "
 			else
 				printf "%d => ", $p->h
 			end
