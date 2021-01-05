@@ -665,8 +665,6 @@ foundit:
 		zend_hash_str_add_mem(&mydata->manifest, entry.filename, entry.filename_len, (void *)&entry, sizeof(phar_entry_info));
 	}
 
-	mydata->fp = fp;
-
 	if (zend_hash_str_exists(&(mydata->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		mydata->is_data = 0;
 	} else {
@@ -675,13 +673,10 @@ foundit:
 
 	/* ensure signature set */
 	if (!mydata->is_data && PHAR_G(require_hash) && !mydata->signature) {
-		php_stream_close(fp);
-		phar_destroy_phar_data(mydata);
-		if (error) {
-			spprintf(error, 0, "zip-based phar \"%s\" does not have a signature", fname);
-		}
-		return FAILURE;
+		PHAR_ZIP_FAIL("signature is missing");
 	}
+
+	mydata->fp = fp;
 
 	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 

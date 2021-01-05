@@ -45,7 +45,7 @@ try {
 @unlink(__DIR__ . '/require_hash.zip');
 ?>
 --EXPECTF--
-zip-based phar "%srequire_hash.phar.zip" does not have a signature
+phar error: signature is missing in zip-based phar "%srequire_hash.phar.zip"
 bool(false)
 array(2) {
   ["hash"]=>
