@@ -665,8 +665,6 @@ foundit:
 		zend_hash_str_add_mem(&mydata->manifest, entry.filename, entry.filename_len, (void *)&entry, sizeof(phar_entry_info));
 	}
 
-	mydata->fp = fp;
-
 	if (zend_hash_str_exists(&(mydata->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		mydata->is_data = 0;
 	} else {
@@ -682,6 +680,8 @@ foundit:
 		}
 		return FAILURE;
 	}
+
+	mydata->fp = fp;
 
 	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
