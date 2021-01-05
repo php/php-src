@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #76929 (zip-based phar does not respect phar.require_hash).
     (david at bamsoftware, cmb)
+  . Fixed bug #77565 (Incorrect locator detection in ZIP-based phars). (cmb)
+
 
 07 Jan 2021, PHP 8.0.1
 
