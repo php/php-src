@@ -826,10 +826,14 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	if(input_params) {
 		zval *tmp;
 		unsigned int index;
+		unsigned int hash_num_elements;
+		unsigned int param_count;
 		MYSQLND_PARAM_BIND	*params;
 
-		if(zend_hash_num_elements(Z_ARRVAL_P(input_params)) > mysql_stmt_param_count(stmt->stmt)) {
-			zend_argument_count_error("The number of values must match the number of parameters in the prepared statement");
+		hash_num_elements = zend_hash_num_elements(Z_ARRVAL_P(input_params));
+		param_count = mysql_stmt_param_count(stmt->stmt);
+		if(hash_num_elements != param_count) {
+			zend_argument_value_error(ERROR_ARG_POS(2), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
 			RETURN_THROWS();
 		}
 

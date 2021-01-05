@@ -38,7 +38,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
     try {
         $stmt->execute([&$abc, 42]);
-    } catch (mysqli_sql_exception $e) {
+    } catch (ValueError $e) {
         echo '[001] '.$e->getMessage()."\n";
     }
     $stmt = null;
@@ -47,7 +47,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
     try {
         $stmt->execute([&$abc, null, $id, 24]);
-    } catch (ArgumentCountError $e) {
+    } catch (ValueError $e) {
         echo '[002] '.$e->getMessage()."\n";
     }
     $stmt = null;
@@ -56,7 +56,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
     try {
         $stmt->execute([]);
-    } catch (mysqli_sql_exception $e) {
+    } catch (ValueError $e) {
         echo '[003] '.$e->getMessage()."\n";
     }
     $stmt = null;
@@ -110,7 +110,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
     try {
         $stmt->execute([]); // no params here. PDO doesn't throw an error, but mysqli does
-    } catch (mysqli_sql_exception $e) {
+    } catch (ValueError $e) {
         echo '[007] '.$e->getMessage()."\n";
     }
     $stmt = null;
@@ -137,11 +137,11 @@ if (mysqli_get_server_version($link) <= 40100) {
     require_once("clean_table.inc");
 ?>
 --EXPECT--
-[001] No data supplied for 1 parameter in prepared statement
-[002] The number of values must match the number of parameters in the prepared statement
-[003] No data supplied for 3 parameters in prepared statement
+[001] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 2 present
+[002] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 4 present
+[003] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
 [004] No data supplied for parameters in prepared statement
 [005] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, int given
 [006] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, stdClass given
-[007] No data supplied for 3 parameters in prepared statement
+[007] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
 done!
