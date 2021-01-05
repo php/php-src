@@ -425,18 +425,20 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
 }
 
-#define SOURCE_DATE_EPOCH	"SOURCE_DATE_EPOCH"
-
 static inline time_t source_date_epoch_time(time_t *tloc)
 {
-	zend_string *sde = php_getenv(SOURCE_DATE_EPOCH, strlen(SOURCE_DATE_EPOCH));
-	time_t ts = (ZSTR_LEN(sde)) ? strtol(ZSTR_VAL(sde), NULL, 10) : time(0);
+	zend_string *str = php_getenv("SOURCE_DATE_EPOCH", sizeof("SOURCE_DATE_EPOCH")-1);
 
-	zend_string_release(sde);
-	if (tloc) {
-		*tloc = ts;
+	if (str) {
+		time_t t = strtol(ZSTR_VAL(str), NULL, 10);
+
+		zend_string_release(str);
+		if (tloc) {
+			*tloc = t;
+		}
+		return t;
 	}
-	return ts;
+	return time(tloc);
 }
 
 static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
