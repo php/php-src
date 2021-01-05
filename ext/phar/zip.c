@@ -173,6 +173,7 @@ static char *phar_find_eocd(const char *s, size_t n)
 		if (eocd_start == NULL) {
 			return NULL;
 		}
+		ZEND_ASSERT(eocd_start + sizeof(phar_zip_dir_end) <= s + n);
 		comment_len = PHAR_GET_16(((phar_zip_dir_end *) eocd_start)->comment_len);
 		if (eocd_start + sizeof(phar_zip_dir_end) + comment_len == s + n) {
 			/* we can't be sure, but this looks like the proper EOCD signature */
