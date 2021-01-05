@@ -828,6 +828,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		unsigned int index;
 		MYSQLND_PARAM_BIND	*params;
 
+		if(zend_hash_num_elements(Z_ARRVAL_P(input_params)) > mysql_stmt_param_count(stmt->stmt)) {
+			zend_argument_count_error("The number of values must match the number of parameters in the prepared statement");
+			RETURN_THROWS();
+		}
+
 		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
 		if (!params) {
 			// can we safely return here?
