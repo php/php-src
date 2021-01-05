@@ -587,13 +587,14 @@ mbfl_filt_conv_wchar_cp50220raw(int c, mbfl_convert_filter *filter)
 /*
  * wchar => CP50221
  */
-int
-mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 {
 	int s = 0;
 
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
+	} else if (c == 0x203E) { /* OVERLINE */
+		s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
 	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
@@ -609,8 +610,6 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 	if (s <= 0) {
 		if (c == 0xa5) {			/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
@@ -730,15 +729,14 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 /*
  * wchar => CP50222
  */
-int
-mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 {
-	int s;
-
-	s = 0;
+	int s = 0;
 
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
+	} else if (c == 0x203E) { /* OVERLINE */
+		s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
 	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
@@ -754,8 +752,6 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 	if (s <= 0) {
 		if (c == 0xa5) {			/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
