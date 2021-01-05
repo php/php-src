@@ -1963,6 +1963,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		--len;
 	}
 
+	if (len == 0) {
+		ZVAL_LONG(zendlval, 0);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+	}
+
 	if (contains_underscores) {
 		octal = estrndup(octal, len);
 		strip_underscores(octal, &len);
