@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug #77935 (Crash in mysqlnd_fetch_stmt_row_cursor when calling an SP
     with a cursor). (Nikita)
 
+- Phar:
+  . Fixed bug #77565 (Incorrect locator detection in ZIP-based phars). (cmb)
+
 07 Jan 2021, PHP 7.4.14
 
 - Core:
