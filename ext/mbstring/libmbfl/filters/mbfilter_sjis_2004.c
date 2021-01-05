@@ -401,7 +401,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			goto retry;
 		}
 		break;
@@ -420,7 +420,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			goto retry;
 		}
@@ -442,7 +442,7 @@ retry:
 			filter->status = 0xa0;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
@@ -460,7 +460,7 @@ retry:
 			filter->status = 0;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
 		}
