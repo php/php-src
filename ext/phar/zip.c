@@ -673,12 +673,7 @@ foundit:
 
 	/* ensure signature set */
 	if (!mydata->is_data && PHAR_G(require_hash) && !mydata->signature) {
-		php_stream_close(fp);
-		phar_destroy_phar_data(mydata);
-		if (error) {
-			spprintf(error, 0, "zip-based phar \"%s\" does not have a signature", fname);
-		}
-		return FAILURE;
+		PHAR_ZIP_FAIL("signature is missing");
 	}
 
 	mydata->fp = fp;
