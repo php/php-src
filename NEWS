@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #77935 (Crash in mysqlnd_fetch_stmt_row_cursor when calling an SP
     with a cursor). (Nikita)
 
+- ODBC:
+  . Fixed bug #80592 (all floats are the same in ODBC parameters). (cmb)
+
 - PDO_Firebird:
   . Fixed bug #80521 (Parameters with underscores no longer recognized). (cmb,
     Simonov Denis)
