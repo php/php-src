@@ -262,9 +262,9 @@ typedef bool (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 
 /* fetching of attributes
  * There are 3 return states:
- * ¤ -1 for errors while retrieving a valid attribute
- * ¤ 0 for attempting to retrieve an attribute which is not supported by the driver
- * ¤ any other value for success, *val must be set to the attribute value */
+ * * -1 for errors while retrieving a valid attribute
+ * * 0 for attempting to retrieve an attribute which is not supported by the driver
+ * * any other value for success, *val must be set to the attribute value */
 typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
 /* checking/pinging persistent connections; return SUCCESS if the connection
