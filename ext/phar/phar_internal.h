@@ -430,7 +430,7 @@ static inline time_t source_date_epoch_time(time_t *tloc)
 	zend_string *str = php_getenv("SOURCE_DATE_EPOCH", sizeof("SOURCE_DATE_EPOCH")-1);
 
 	if (str) {
-		time_t t = strtol(ZSTR_VAL(str), NULL, 10);
+		time_t t = strtoul(ZSTR_VAL(str), NULL, 10);
 
 		zend_string_release(str);
 		if (tloc) {
