@@ -239,7 +239,7 @@ typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql
 typedef bool (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype);
 
 /* transaction related (beingTransaction(), commit, rollBack, inTransaction)
- * return true in case of success, false otherwise */
+ * Return true if currently inside a transaction, false otherwise. */
 typedef bool (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
 
 /* setting of attributes
@@ -310,8 +310,8 @@ struct pdo_dbh_methods {
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
-	pdo_dbh_txn_func		in_transaction; /* if defined to NULL, PDO will use
-					                 * its internal transaction tracking state */
+	/* if defined to NULL, PDO will use its internal transaction tracking state */
+	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
 };
 
