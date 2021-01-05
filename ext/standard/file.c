@@ -838,7 +838,7 @@ PHP_FUNCTION(tempnam)
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, 1)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ALWAYS)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
