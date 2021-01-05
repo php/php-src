@@ -963,6 +963,7 @@ PHP_FUNCTION(odbc_prepare)
 typedef struct odbc_params_t {
 	SQLLEN vallen;
 	int fp;
+	zend_string *zstr;
 } odbc_params_t;
 
 static void odbc_release_params(odbc_result *result, odbc_params_t *params) {
@@ -970,6 +971,9 @@ static void odbc_release_params(odbc_result *result, odbc_params_t *params) {
 	for (int i = 0; i < result->numparams; i++) {
 		if (params[i].fp != -1) {
 			close(params[i].fp);
+		}
+		if (params[i].zstr) {
+			zend_string_release(params[i].zstr);
 		}
 	}
 	efree(params);
@@ -1004,6 +1008,7 @@ PHP_FUNCTION(odbc_execute)
 		params = (odbc_params_t *)safe_emalloc(sizeof(odbc_params_t), result->numparams, 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
+			params[i].zstr = NULL;
 		}
 
 		i = 1;
@@ -1017,6 +1022,7 @@ PHP_FUNCTION(odbc_execute)
 
 			params[i-1].vallen = ZSTR_LEN(tmpstr);
 			params[i-1].fp = -1;
+			params[i-1].zstr = tmpstr;
 
 			if (IS_SQL_BINARY(result->param_info[i-1].sqltype)) {
 				ctype = SQL_C_BINARY;
@@ -1030,7 +1036,6 @@ PHP_FUNCTION(odbc_execute)
 
 				if (ZSTR_LEN(tmpstr) != strlen(ZSTR_VAL(tmpstr))) {
 					odbc_release_params(result, params);
-					zend_string_release(tmpstr);
 					RETURN_FALSE;
 				}
 				filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
@@ -1040,14 +1045,12 @@ PHP_FUNCTION(odbc_execute)
 				if (php_check_open_basedir(filename)) {
 					efree(filename);
 					odbc_release_params(result, params);
-					zend_string_release(tmpstr);
 					RETURN_FALSE;
 				}
 
 				if ((params[i-1].fp = open(filename,O_RDONLY)) == -1) {
 					php_error_docref(NULL, E_WARNING,"Can't open file %s", filename);
 					odbc_release_params(result, params);
-					zend_string_release(tmpstr);
 					efree(filename);
 					RETURN_FALSE;
 				}
@@ -1076,10 +1079,8 @@ PHP_FUNCTION(odbc_execute)
 			if (rc == SQL_ERROR) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SQLBindParameter");
 				odbc_release_params(result, params);
-				zend_string_release(tmpstr);
 				RETURN_FALSE;
 			}
-			zend_string_release(tmpstr);
 			if (++i > result->numparams) break;
 		} ZEND_HASH_FOREACH_END();
 	}
