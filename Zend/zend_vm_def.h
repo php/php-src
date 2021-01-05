@@ -1095,6 +1095,150 @@ ZEND_VM_C_LABEL(assign_op_object):
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+ZEND_VM_HANDLER(200, ZEND_INIT_OBJ, VAR, CONST, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
+{
+	USE_OPLINE
+	zval *object, *property, *value, tmp;
+	zend_object *zobj;
+	zend_string *name, *tmp_name;
+
+	SAVE_OPLINE();
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
+			object = Z_REFVAL_P(object);
+			ZEND_VM_C_GOTO(assign_object);
+		}
+		zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+		value = &EG(uninitialized_zval);
+		ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+	}
+
+ZEND_VM_C_LABEL(assign_object):
+	zobj = Z_OBJ_P(object);
+	if (OP2_TYPE == IS_CONST &&
+	    EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
+		void **cache_slot = CACHE_ADDR(opline->extended_value);
+		uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+		zend_object *zobj = Z_OBJ_P(object);
+		zval *property_val;
+
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+			property_val = OBJ_PROP(zobj, prop_offset);
+			if (Z_TYPE_P(property_val) != IS_UNDEF) {
+				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+				if (UNEXPECTED(prop_info != NULL)) {
+					zend_uchar orig_type = IS_UNDEF;
+
+					if (OP_DATA_TYPE == IS_CONST) {
+						orig_type = Z_TYPE_P(value);
+					}
+
+					value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+
+					/* will remain valid, thus no need to check prop_info in future here */
+					if (OP_DATA_TYPE == IS_CONST && Z_TYPE_P(value) == orig_type) {
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
+					ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+				} else {
+ZEND_VM_C_LABEL(fast_assign_obj):
+					value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					ZEND_VM_C_GOTO(exit_assign_obj);
+				}
+			}
+		} else {
+			if (EXPECTED(zobj->properties != NULL)) {
+				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_DELREF(zobj->properties);
+					}
+					zobj->properties = zend_array_dup(zobj->properties);
+				}
+				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
+				if (property_val) {
+					ZEND_VM_C_GOTO(fast_assign_obj);
+				}
+			}
+
+			if (!zobj->ce->__set) {
+
+				if (EXPECTED(zobj->properties == NULL)) {
+					rebuild_object_properties(zobj);
+				}
+				if (OP_DATA_TYPE == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
+					}
+				} else if (OP_DATA_TYPE != IS_TMP_VAR) {
+					if (Z_ISREF_P(value)) {
+						if (OP_DATA_TYPE == IS_VAR) {
+							zend_reference *ref = Z_REF_P(value);
+							if (GC_DELREF(ref) == 0) {
+								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
+								efree_size(ref, sizeof(zend_reference));
+								value = &tmp;
+							} else {
+								value = Z_REFVAL_P(value);
+								Z_TRY_ADDREF_P(value);
+							}
+						} else {
+							value = Z_REFVAL_P(value);
+							Z_TRY_ADDREF_P(value);
+						}
+					} else if (OP_DATA_TYPE == IS_CV) {
+						Z_TRY_ADDREF_P(value);
+					}
+				}
+				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), value);
+				}
+				ZEND_VM_C_GOTO(exit_assign_obj);
+			}
+		}
+	}
+
+	if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
+		ZVAL_DEREF(value);
+	}
+
+	if (OP2_TYPE == IS_CONST) {
+		name = Z_STR_P(property);
+	} else {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
+			FREE_OP_DATA();
+			UNDEF_RESULT();
+			ZEND_VM_C_GOTO(exit_assign_obj);
+		}
+	}
+
+	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+
+	if (OP2_TYPE != IS_CONST) {
+		zend_tmp_string_release(tmp_name);
+	}
+
+ZEND_VM_C_LABEL(free_and_exit_assign_obj):
+	if (EXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), object);
+	}
+	FREE_OP_DATA();
+ZEND_VM_C_LABEL(exit_assign_obj):
+	FREE_OP2();
+	FREE_OP1_VAR_PTR();
+	/* assign_obj has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 /* No specialization for op_types (CONST|TMP|VAR|CV, UNUSED|CONST|TMPVAR) */
 ZEND_VM_HANDLER(29, ZEND_ASSIGN_STATIC_PROP_OP, ANY, ANY, OP)
 {

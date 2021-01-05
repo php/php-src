@@ -1602,6 +1602,11 @@ simple_list:
 		case ZEND_AST_MATCH_ARM_LIST:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 0, 0, indent);
 			break;
+		case ZEND_AST_PROPERTY_INITIALIZER_LIST:
+			smart_str_appends(str, " {");
+			zend_ast_export_list(str, (zend_ast_list*)ast, 0, 0, indent);
+			smart_str_appends(str, " }");
+			break;
 		case ZEND_AST_CLOSURE_USES:
 			smart_str_appends(str, " use(");
 			zend_ast_export_var_list(str, (zend_ast_list*)ast, indent);
@@ -2074,6 +2079,7 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_NAMED_ARG:
+		case ZEND_AST_INITIALIZER_EXPR:
 			smart_str_append(str, zend_ast_get_str(ast->child[0]));
 			smart_str_appends(str, ": ");
 			ast = ast->child[1];
