@@ -682,7 +682,6 @@ PHP_METHOD(SplObjectStorage, unserialize)
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval entry, inf;
 	zval *pcount, *pmembers;
 	spl_SplObjectStorageElement *element;
 	zend_long count;
@@ -715,13 +714,12 @@ PHP_METHOD(SplObjectStorage, unserialize)
 		goto outexcept;
 	}
 
-	ZVAL_UNDEF(&entry);
-	ZVAL_UNDEF(&inf);
-
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
 		zend_hash_key key;
-		zval obj;
+		zval *entry = var_tmp_var(&var_hash);
+		zval inf;
+		ZVAL_UNDEF(&inf);
 
 		if (*p != ';') {
 			goto outexcept;
@@ -731,46 +729,38 @@ PHP_METHOD(SplObjectStorage, unserialize)
 			goto outexcept;
 		}
 		/* store reference to allow cross-references between different elements */
-		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
-			zval_ptr_dtor(&entry);
+		if (!php_var_unserialize(entry, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
 		if (*p == ',') { /* new version has inf */
 			++p;
 			if (!php_var_unserialize(&inf, &p, s + buf_len, &var_hash)) {
-				zval_ptr_dtor(&entry);
 				zval_ptr_dtor(&inf);
 				goto outexcept;
 			}
 		}
-		if (Z_TYPE(entry) != IS_OBJECT) {
-			zval_ptr_dtor(&entry);
+		if (Z_TYPE_P(entry) != IS_OBJECT) {
 			zval_ptr_dtor(&inf);
 			goto outexcept;
 		}
 
-		if (spl_object_storage_get_hash(&key, intern, Z_OBJ(entry)) == FAILURE) {
-			zval_ptr_dtor(&entry);
+		if (spl_object_storage_get_hash(&key, intern, Z_OBJ_P(entry)) == FAILURE) {
 			zval_ptr_dtor(&inf);
 			goto outexcept;
 		}
 		pelement = spl_object_storage_get(intern, &key);
 		spl_object_storage_free_hash(intern, &key);
 		if (pelement) {
+			zval obj;
 			if (!Z_ISUNDEF(pelement->inf)) {
 				var_push_dtor(&var_hash, &pelement->inf);
 			}
 			ZVAL_OBJ(&obj, pelement->obj);
 			var_push_dtor(&var_hash, &obj);
 		}
-		element = spl_object_storage_attach(intern, Z_OBJ(entry), Z_ISUNDEF(inf)?NULL:&inf);
-		ZVAL_OBJ(&obj, element->obj);
-		var_replace(&var_hash, &entry, &obj);
+		element = spl_object_storage_attach(intern, Z_OBJ_P(entry), Z_ISUNDEF(inf)?NULL:&inf);
 		var_replace(&var_hash, &inf, &element->inf);
-		zval_ptr_dtor(&entry);
-		ZVAL_UNDEF(&entry);
 		zval_ptr_dtor(&inf);
-		ZVAL_UNDEF(&inf);
 	}
 
 	if (*p != ';') {
