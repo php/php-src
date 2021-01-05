@@ -66,7 +66,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     try {
         $stmt->execute(42);
     } catch (TypeError $e) {
-		echo '[004] '.$e->getMessage()."\n";
+        echo '[004] '.$e->getMessage()."\n";
     }
     $stmt = null;
 
@@ -100,7 +100,7 @@ if (mysqli_get_server_version($link) <= 40100) {
     $stmt->execute(); // no argument here. Values are already bound
     assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
     try {
-		$stmt->execute([]); // no params here. PDO doesn't throw an error, but mysqli does
+        $stmt->execute([]); // no params here. PDO doesn't throw an error, but mysqli does
     } catch (mysqli_sql_exception $e) {
         echo '[006] '.$e->getMessage()."\n";
     }
@@ -109,14 +109,20 @@ if (mysqli_get_server_version($link) <= 40100) {
     // 10. mixing binding styles not possible. Also, NULL should stay NULL when bound as string
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
     $stmt->bind_param('sss', ...['abc', 42, null]);
-	$stmt->execute([null, null, $id]);
+    $stmt->execute([null, null, $id]);
     assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>null, 'num' => null]);
     $stmt = null;
 
     // 11. array keys are ignored. Even numerical indices are not considered (PDO does a weird thing with the numerical indices)
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
-	$stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
+    $stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
     assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
+    $stmt = null;
+
+    // 12. Too many parameters is not a problem. The redundant ones just get ignored
+    $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+    $stmt->execute(['abc', null, $id, 42]);
+    assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => null]);
     $stmt = null;
 
 
@@ -131,7 +137,7 @@ if (mysqli_get_server_version($link) <= 40100) {
 [001] No data supplied for 1 parameter in prepared statement
 [002] No data supplied for 3 parameters in prepared statement
 [003] No data supplied for parameters in prepared statement
-[004] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, int given
-[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, stdClass given
+[004] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, int given
+[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, stdClass given
 [006] No data supplied for 3 parameters in prepared statement
 done!
