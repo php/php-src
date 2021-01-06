@@ -272,18 +272,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find_ex(ht, str, 1);
-
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
@@ -299,15 +288,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_w(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find_ex(ht, str, 1);
-
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -344,17 +325,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 	} while (0);
 
 	retval = zend_hash_find(ht, str);
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
@@ -395,14 +366,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 	} while (0);
 
 	retval = zend_hash_find(ht, str);
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -482,17 +446,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
-				ZVAL_NULL(result);
-				return;
-			}
-		}
-	} else {
+	if (!retval) {
 		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 		ZVAL_NULL(result);
 		return;
@@ -557,16 +511,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(result);
-				return;
-			}
-		}
-	} else {
+	if (!retval) {
 		ZVAL_NULL(result);
 		return;
 	}
@@ -628,18 +573,13 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-		}
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
-			retval = Z_REFVAL_P(retval);
-		}
-		return (Z_TYPE_P(retval) > IS_NULL);
-	} else {
+	if (!retval) {
 		return 0;
 	}
+	if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+		retval = Z_REFVAL_P(retval);
+	}
+	return Z_TYPE_P(retval) > IS_NULL;
 
 num_index:
 	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
@@ -701,18 +641,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(offset_key);
 		if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
@@ -785,15 +714,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 	}
 	return retval;
