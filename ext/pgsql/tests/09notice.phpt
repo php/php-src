@@ -7,7 +7,7 @@ pgsql
 
 include("skipif.inc");
 
-_skip_lc_messages();
+_skip_lc_messages($conn);
 
 ?>
 --FILE--
@@ -20,7 +20,7 @@ ini_set('pgsql.ignore_notice', FALSE);
 
 $db = pg_connect($conn_str);
 
-_set_lc_messages();
+_set_lc_messages($db);
 
 $res = pg_query($db, 'SET client_min_messages TO NOTICE;');
 var_dump($res);

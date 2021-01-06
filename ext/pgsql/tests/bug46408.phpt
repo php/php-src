@@ -17,7 +17,7 @@ require_once('config.inc');
 $dbh = pg_connect($conn_str);
 setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8");
 echo 3.5 , "\n";
-pg_query_params("SELECT $1::numeric", array(3.5));
+pg_query_params($dbh, "SELECT $1::numeric", array(3.5));
 pg_close($dbh);
 
 echo "Done".PHP_EOL;

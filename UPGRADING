@@ -143,6 +143,9 @@ PHP 8.1 UPGRADE NOTES
   . The PgSQL functions now accept and return, respectively, \PgSql\Lob
     objects instead of "pgsql large object" resources. Return value checks
     using is_resource() should be replaced with checks for `false`.
+  . Not passing the connection argument to PgSQL functions and using the
+    default connection is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - PSpell:
   . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
