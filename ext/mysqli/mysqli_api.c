@@ -823,7 +823,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 
 	// bind-in-execute
 #if defined(MYSQLI_USE_MYSQLND)
-	if(input_params) {
+	if (input_params) {
 		zval *tmp;
 		unsigned int index;
 		unsigned int hash_num_elements;
@@ -832,7 +832,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 
 		hash_num_elements = zend_hash_num_elements(Z_ARRVAL_P(input_params));
 		param_count = mysql_stmt_param_count(stmt->stmt);
-		if(hash_num_elements != param_count) {
+		if (hash_num_elements != param_count) {
 			zend_argument_value_error(ERROR_ARG_POS(2), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
 			RETURN_THROWS();
 		}
@@ -850,7 +850,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			index++;
 		} ZEND_HASH_FOREACH_END();
 
-		if(mysqlnd_stmt_bind_param(stmt->stmt, params)) {
+		if (mysqlnd_stmt_bind_param(stmt->stmt, params)) {
 			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 			RETVAL_FALSE;
 		}
