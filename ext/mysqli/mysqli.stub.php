@@ -36,7 +36,7 @@ class mysqli
     public function change_user(string $username, string $password, ?string $database) {}
 
     /**
-     * @return string|null
+     * @return string
      * @alias mysqli_character_set_name
      */
     public function character_set_name() {}
@@ -51,7 +51,7 @@ class mysqli
      * @return bool
      * @alias mysqli_commit
      */
-    public function commit(int $flags = -1, ?string $name = null) {}
+    public function commit(int $flags = 0, ?string $name = null) {}
 
     /**
      * @return mysqli|null|false
@@ -101,7 +101,7 @@ class mysqli
 #endif
 
     /**
-     * @return string|null
+     * @return string
      * @alias mysqli_get_server_info
      */
     public function get_server_info() {}
@@ -152,7 +152,7 @@ class mysqli
      * @return int|false
      * @alias mysqli_poll
      */
-    public static function poll(?array &$read, ?array &$write, array &$error, int $seconds, int $microseconds = 0) {}
+    public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0) {}
 #endif
 
     /**
@@ -341,7 +341,7 @@ class mysqli_result implements IteratorAggregate
     public function fetch_field_direct(int $index) {}
 
     /**
-     * @return array|false
+     * @return array
      * @alias mysqli_fetch_all
      */
     public function fetch_all(int $mode = MYSQLI_NUM) {}
@@ -390,7 +390,7 @@ class mysqli_stmt
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias mysqli_stmt_attr_get
      */
     public function attr_get(int $attribute) {}
@@ -527,11 +527,11 @@ function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name =
 
 function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
 
-function mysqli_character_set_name(mysqli $mysql): ?string {}
+function mysqli_character_set_name(mysqli $mysql): string {}
 
 function mysqli_close(mysqli $mysql): bool {}
 
-function mysqli_commit(mysqli $mysql, int $flags = -1, ?string $name = null): bool {}
+function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
 function mysqli_connect(
     ?string $hostname = null,
@@ -554,7 +554,7 @@ function mysqli_debug(string $options): bool {}
 
 function mysqli_errno(mysqli $mysql): int {}
 
-function mysqli_error(mysqli $mysql): ?string {}
+function mysqli_error(mysqli $mysql): string {}
 
 function mysqli_error_list(mysqli $mysql): array {}
 
@@ -571,15 +571,15 @@ function mysqli_fetch_field_direct(mysqli_result $result, int $index): object|fa
 
 function mysqli_fetch_lengths(mysqli_result $result): array|false {}
 
-function mysqli_fetch_all(mysqli_result $result, int $mode = MYSQLI_NUM): array|false {}
+function mysqli_fetch_all(mysqli_result $result, int $mode = MYSQLI_NUM): array {}
 
 function mysqli_fetch_array(mysqli_result $result, int $mode = MYSQLI_BOTH): array|null|false {}
 
-function mysqli_fetch_assoc(mysqli_result $result): ?array {}
+function mysqli_fetch_assoc(mysqli_result $result): array|null|false {}
 
-function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): ?object {}
+function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
-function mysqli_fetch_row(mysqli_result $result): ?array {}
+function mysqli_fetch_row(mysqli_result $result): array|null|false {}
 
 function mysqli_field_count(mysqli $mysql): int {}
 
@@ -634,10 +634,16 @@ function mysqli_num_rows(mysqli_result $result): int|string {}
 /** @param string|int $value */
 function mysqli_options(mysqli $mysql, int $option, $value): bool {}
 
+/**
+ * @param string|int $value
+ * @alias mysqli_options
+ */
+function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
+
 function mysqli_ping(mysqli $mysql): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-function mysqli_poll(?array &$read, ?array &$write, array &$error, int $seconds, int $microseconds = 0): int|false {}
+function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
 #endif
 
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
@@ -658,6 +664,9 @@ function mysqli_real_connect(
 ): bool {}
 
 function mysqli_real_escape_string(mysqli $mysql, string $string): string {}
+
+/** @alias mysqli_real_escape_string */
+function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
@@ -691,7 +700,7 @@ function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
 function mysqli_stmt_errno(mysqli_stmt $statement): int {}
 
-function mysqli_stmt_error(mysqli_stmt $statement): ?string {}
+function mysqli_stmt_error(mysqli_stmt $statement): string {}
 
 function mysqli_stmt_error_list(mysqli_stmt $statement): array {}
 
@@ -731,9 +740,9 @@ function mysqli_stmt_send_long_data(mysqli_stmt $statement, int $param_num, stri
 
 function mysqli_stmt_store_result(mysqli_stmt $statement): bool {}
 
-function mysqli_stmt_sqlstate(mysqli_stmt $statement): ?string {}
+function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 
-function mysqli_sqlstate(mysqli $mysql): ?string {}
+function mysqli_sqlstate(mysqli $mysql): string {}
 
 function mysqli_ssl_set(
     mysqli $mysql,
@@ -757,12 +766,3 @@ function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
 function mysqli_warning_count(mysqli $mysql): int {}
 
 function mysqli_refresh(mysqli $mysql, int $flags): bool {}
-
-/** @alias mysqli_real_escape_string */
-function mysqli_escape_string(mysqli $mysql, string $string): string {}
-
-/**
- * @param string|int $value
- * @alias mysqli_options
- */
-function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
