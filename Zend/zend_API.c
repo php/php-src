@@ -2455,10 +2455,40 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			for (i = 0; i < num_args; i++) {
 				if (ZEND_TYPE_HAS_CLASS(new_arg_info[i].type)) {
 					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
-						&& "Only simple classes are currently supported");
+						&& "Should be stored as simple name");
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
-					ZEND_TYPE_SET_PTR(new_arg_info[i].type,
-						zend_string_init_interned(class_name, strlen(class_name), 1));
+
+					size_t num_types = 1;
+					const char *p = class_name;
+					while ((p = strchr(p, '|'))) {
+						num_types++;
+						p++;
+					}
+
+					if (num_types == 1) {
+						/* Simple class type */
+						ZEND_TYPE_SET_PTR(new_arg_info[i].type,
+							zend_string_init_interned(class_name, strlen(class_name), 1));
+					} else {
+						/* Union type */
+						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
+						list->num_types = num_types;
+						ZEND_TYPE_SET_LIST(new_arg_info[i].type, list);
+
+						const char *start = class_name;
+						uint32_t j = 0;
+						while (true) {
+							const char *end = strchr(start, '|');
+							zend_string *str =
+								zend_string_init(start, end ? end - start : strlen(start), 1);
+							list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
+							if (!end) {
+								break;
+							}
+							start = end + 1;
+							j++;
+						}
+					}
 				}
 			}
 		}
