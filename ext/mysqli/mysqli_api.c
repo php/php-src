@@ -822,8 +822,8 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	// bind-in-execute
-#if defined(MYSQLI_USE_MYSQLND)
 	if (input_params) {
+#if defined(MYSQLI_USE_MYSQLND)
 		zval *tmp;
 		unsigned int index;
 		unsigned int hash_num_elements;
@@ -854,8 +854,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 			RETVAL_FALSE;
 		}
-	}
+#else
+		zend_argument_count_error("Binding parameters in execute is not supported with libmysqlclient");
+		RETURN_THROWS();
 #endif
+	}
 
 #ifndef MYSQLI_USE_MYSQLND
 	if (stmt->param.var_cnt) {

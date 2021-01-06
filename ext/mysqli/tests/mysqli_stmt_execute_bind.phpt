@@ -10,6 +10,9 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 if (mysqli_get_server_version($link) <= 40100) {
     die(sprintf('skip Needs MySQL 4.1+, found version %d.', mysqli_get_server_version($link)));
 }
+if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
+    die("skip: only available in mysqlnd");
+}
 ?>
 --FILE--
 <?php
