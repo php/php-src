@@ -355,19 +355,19 @@ class mysqli_result implements IteratorAggregate
     public function fetch_array(int $mode = MYSQLI_BOTH) {}
 
     /**
-     * @return array|null
+     * @return array|null|false
      * @alias mysqli_fetch_assoc
      */
     public function fetch_assoc() {}
 
     /**
-     * @return object|null
+     * @return object|null|false
      * @alias mysqli_fetch_object
      */
     public function fetch_object(string $class = "stdClass", array $constructor_args = []) {}
 
     /**
-     * @return array|null
+     * @return array|null|false
      * @alias mysqli_fetch_row
      */
     public function fetch_row() {}
