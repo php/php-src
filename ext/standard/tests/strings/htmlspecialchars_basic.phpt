@@ -56,7 +56,7 @@ Basic tests
 Test 1: abc&lt;&gt;&quot;&amp;
 Test 2: &amp;&amp;abc&lt;&gt;&quot;&amp;
 Test 3: a&gt;,\&lt;bc&lt;&gt;&quot;&amp;
-Test 4: a\'\'&amp;bc&lt;&gt;&quot;&amp;
+Test 4: a\&#039;\&#039;&amp;bc&lt;&gt;&quot;&amp;
 Test 5: &amp;amp;&amp;lt;
 Test 6: abc&lt;&gt;"&amp;
 Test 7: &amp;&amp;abc&lt;&gt;"&amp;
