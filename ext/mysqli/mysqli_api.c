@@ -811,12 +811,12 @@ PHP_FUNCTION(mysqli_stmt_execute)
 {
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
-	zval		*input_params = NULL;
+	HashTable	*input_params = NULL;
 #ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
 #endif
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|a!", &mysql_stmt, mysqli_stmt_class_entry, &input_params) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|h!", &mysql_stmt, mysqli_stmt_class_entry, &input_params) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
@@ -830,7 +830,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		unsigned int param_count;
 		MYSQLND_PARAM_BIND	*params;
 
-		hash_num_elements = zend_hash_num_elements(Z_ARRVAL_P(input_params));
+		hash_num_elements = zend_hash_num_elements(input_params);
 		param_count = mysql_stmt_param_count(stmt->stmt);
 		if (hash_num_elements != param_count) {
 			zend_argument_value_error(ERROR_ARG_POS(2), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
@@ -844,7 +844,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		}
 
 		index = 0;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input_params), tmp) {
+		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
 			ZVAL_COPY_VALUE(&params[index].zv, tmp);
 			params[index].type = MYSQL_TYPE_VAR_STRING;
 			index++;
