@@ -555,6 +555,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 
 	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
+			SEPARATE_ARRAY(&_readline_array);
 			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {
