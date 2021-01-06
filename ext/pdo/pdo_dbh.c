@@ -148,21 +148,20 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 
 	ZVAL_UNDEF(&info);
 	if (dbh->methods->fetch_err) {
+		zval *item;
 		array_init(&info);
 
 		add_next_index_string(&info, *pdo_err);
 
-		if (dbh->methods->fetch_err(dbh, stmt, &info)) {
-			zval *item;
+		dbh->methods->fetch_err(dbh, stmt, &info);
 
-			if ((item = zend_hash_index_find(Z_ARRVAL(info), 1)) != NULL
-					&& Z_TYPE_P(item) == IS_LONG) {
-				native_code = Z_LVAL_P(item);
-			}
+		if ((item = zend_hash_index_find(Z_ARRVAL(info), 1)) != NULL
+				&& Z_TYPE_P(item) == IS_LONG) {
+			native_code = Z_LVAL_P(item);
+		}
 
-			if ((item = zend_hash_index_find(Z_ARRVAL(info), 2)) != NULL) {
-				supp = estrndup(Z_STRVAL_P(item), Z_STRLEN_P(item));
-			}
+		if ((item = zend_hash_index_find(Z_ARRVAL(info), 2)) != NULL) {
+			supp = estrndup(Z_STRVAL_P(item), Z_STRLEN_P(item));
 		}
 	}
 

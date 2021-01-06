@@ -31,7 +31,7 @@
 /* Cache of the server supported datatypes, initialized in handle_factory */
 zval* pdo_dblib_datatypes;
 
-static bool dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_err *einfo = &H->err;
@@ -55,7 +55,7 @@ static bool dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 
 	/* don't return anything if there's nothing to return */
 	if (msg == NULL && einfo->dberr == 0 && einfo->oserr == 0 && einfo->severity == 0) {
-		return false;
+		return;
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
@@ -69,8 +69,6 @@ static bool dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 	if (einfo->oserrstr) {
 		add_next_index_string(info, einfo->oserrstr);
 	}
-
-	return true;
 }
 
 

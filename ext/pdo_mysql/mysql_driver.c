@@ -117,7 +117,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 /* }}} */
 
 /* {{{ pdo_mysql_fetch_error_func */
-static bool pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_error_info *einfo = &H->einfo;
@@ -134,10 +134,9 @@ static bool pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
-		PDO_DBG_RETURN(true);
 	}
 
-	PDO_DBG_RETURN(false);
+	PDO_DBG_VOID_RETURN;
 }
 /* }}} */
 
