@@ -293,20 +293,17 @@ class Type {
         return null;
     }
 
-    public function tryToRepresentableType(): ?RepresentableType {
-        $classType = null;
+    public function toArginfoType(): ?ArginfoType {
+        $classTypes = [];
         $builtinTypes = [];
         foreach ($this->types as $type) {
             if ($type->isBuiltin) {
                 $builtinTypes[] = $type;
-            } else if ($classType === null) {
-                $classType = $type;
             } else {
-                // We can only represent a single class type.
-                return null;
+                $classTypes[] = $type;
             }
         }
-        return new RepresentableType($classType, $builtinTypes);
+        return new ArginfoType($classTypes, $builtinTypes);
     }
 
     public static function equals(?Type $a, ?Type $b): bool {
@@ -339,18 +336,32 @@ class Type {
     }
 }
 
-class RepresentableType {
-    /** @var ?SimpleType $classType */
-    public $classType;
-    /** @var SimpleType[] $builtinTypes */
-    public $builtinTypes;
+class ArginfoType {
+    /** @var ClassType[] $classTypes */
+    public $classTypes;
 
-    public function __construct(?SimpleType $classType, array $builtinTypes) {
-        $this->classType = $classType;
+    /** @var SimpleType[] $builtinTypes */
+    private $builtinTypes;
+
+    public function __construct(array $classTypes, array $builtinTypes) {
+        $this->classTypes = $classTypes;
         $this->builtinTypes = $builtinTypes;
     }
 
+    public function hasClassType(): bool {
+        return !empty($this->classTypes);
+    }
+
+    public function toClassTypeString(): string {
+        return implode('|', array_map(function(SimpleType $type) {
+            return $type->toEscapedName();
+        }, $this->classTypes));
+    }
+
     public function toTypeMask(): string {
+        if (empty($this->builtinTypes)) {
+            return '0';
+        }
         return implode('|', array_map(function(SimpleType $type) {
             return $type->toTypeMask();
         }, $this->builtinTypes));
@@ -1362,24 +1373,23 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                     $simpleReturnType->toEscapedName(), $returnType->isNullable()
                 );
             }
-        } else if (null !== $representableType = $returnType->tryToRepresentableType()) {
-            if ($representableType->classType !== null) {
+        } else {
+            $arginfoType = $returnType->toArginfoType();
+            if ($arginfoType->hasClassType()) {
                 $code .= sprintf(
                     "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(%s, %d, %d, %s, %s)\n",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
-                    $representableType->classType->toEscapedName(), $representableType->toTypeMask()
+                    $arginfoType->toClassTypeString(), $arginfoType->toTypeMask()
                 );
             } else {
                 $code .= sprintf(
                     "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(%s, %d, %d, %s)\n",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
-                    $representableType->toTypeMask()
+                    $arginfoType->toTypeMask()
                 );
             }
-        } else {
-            throw new Exception('Unimplemented');
         }
     } else {
         $code .= sprintf(
@@ -1409,25 +1419,23 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                         $argInfo->hasProperDefaultValue() ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 }
-            } else if (null !== $representableType = $argType->tryToRepresentableType()) {
-                if ($representableType->classType !== null) {
+            } else {
+                $arginfoType = $argType->toArginfoType();
+                if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s, %s)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
-                        $representableType->classType->toEscapedName(),
-                        $representableType->toTypeMask(),
+                        $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
                         $argInfo->getDefaultValueAsArginfoString()
                     );
                 } else {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
-                        $representableType->toTypeMask(),
+                        $arginfoType->toTypeMask(),
                         $argInfo->getDefaultValueAsArginfoString()
                     );
                 }
-            } else {
-                throw new Exception('Unimplemented');
             }
         } else {
             $code .= sprintf(
