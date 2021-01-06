@@ -180,20 +180,23 @@ PHP_FUNCTION(bcadd)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	bc_add (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -228,20 +231,23 @@ PHP_FUNCTION(bcsub)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	bc_sub (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -276,20 +282,23 @@ PHP_FUNCTION(bcmul)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	bc_multiply (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -324,12 +333,12 @@ PHP_FUNCTION(bcdiv)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	switch (bc_divide(first, second, &result, scale)) {
@@ -341,9 +350,11 @@ PHP_FUNCTION(bcdiv)
 			break;
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -378,12 +389,12 @@ PHP_FUNCTION(bcmod)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	switch (bc_modulo(first, second, &result, scale)) {
@@ -395,9 +406,11 @@ PHP_FUNCTION(bcmod)
 			break;
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -434,27 +447,29 @@ PHP_FUNCTION(bcpowmod)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&mod, ZSTR_VAL(modulus)) == FAILURE) {
 		zend_argument_value_error(3, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (bc_raisemod(first, second, mod, &result, scale) == SUCCESS) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&mod);
-	bc_free_num(&result);
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&mod);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -489,20 +504,23 @@ PHP_FUNCTION(bcpow)
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	bc_raise (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -534,7 +552,7 @@ PHP_FUNCTION(bcsqrt)
 
 	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (bc_sqrt (&result, scale) != 0) {
@@ -543,7 +561,9 @@ PHP_FUNCTION(bcsqrt)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 	}
 
-	bc_free_num(&result);
+	cleanup: {
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -577,18 +597,20 @@ PHP_FUNCTION(bccomp)
 
 	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
 		zend_argument_value_error(1, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
 		zend_argument_value_error(2, "bcmath function argument is not well-formed");
-		RETURN_THROWS();
+		goto cleanup;
 	}
 
 	RETVAL_LONG(bc_compare(first, second));
 
-	bc_free_num(&first);
-	bc_free_num(&second);
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+	};
 }
 /* }}} */
 
