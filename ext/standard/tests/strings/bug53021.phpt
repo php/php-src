@@ -38,4 +38,4 @@ single quotes variations:
 &#39;
 '
 &#39;
-&#39;
+'

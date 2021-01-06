@@ -26,8 +26,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing htmlspecialchars_decode() : basic functionality ***
-string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
-string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
+string(82) "Roy's height > Sam's height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
+string(82) "Roy's height > Sam's height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
 string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
 string(92) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. " double quoted string ""
 string(102) "Roy&#039;s height > Sam&#039;s height. 13 < 25. 1111 & 0000 = 0000. &quot; double quoted string &quot;"

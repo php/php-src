@@ -306,7 +306,7 @@ string(187) "&lt;br&gt;Testing&lt;p&gt;New file.&lt;/p&gt;&lt;p&gt;&lt;br&gt;Fil
 string(46) "&lt;br&gt;Testing&lt;p&gt;New file.&lt;/p&gt; "
 
 *** Testing htmlspecialchars() on a quote...
-string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
+string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
