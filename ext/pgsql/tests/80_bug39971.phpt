@@ -16,7 +16,7 @@ if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-pg_query("CREATE TABLE php_test (id SERIAL, tm timestamp NOT NULL)");
+pg_query($dbh, "CREATE TABLE php_test (id SERIAL, tm timestamp NOT NULL)");
 
 $values = array('tm' => 'now()');
 pg_insert($dbh, 'php_test', $values);

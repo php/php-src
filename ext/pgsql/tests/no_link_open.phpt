@@ -12,5 +12,6 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: pg_dbname(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 No PostgreSQL connection opened yet

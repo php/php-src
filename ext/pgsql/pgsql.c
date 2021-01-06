@@ -78,8 +78,15 @@
 		zend_throw_error(NULL, "No PostgreSQL connection opened yet"); \
 		RETURN_THROWS(); \
 	}
+
+/* This is a bit hacky as the macro usage is "link = FETCH_DEFAULT_LINK();" */
 #define FETCH_DEFAULT_LINK() \
-	(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL)
+		(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL); \
+		php_error_docref(NULL, E_DEPRECATED, "Automatic fetching of PostgreSQL connection is deprecated")
+
+/* Used only when creating a connection */
+#define FETCH_DEFAULT_LINK_NO_WARNING() \
+		(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL)
 
 #define CHECK_PGSQL_LINK(link_handle) \
 	if (link_handle->conn == NULL) { \
@@ -850,7 +857,7 @@ PHP_FUNCTION(pg_close)
 	link = Z_PGSQL_LINK_P(pgsql_link);
 	CHECK_PGSQL_LINK(link);
 
-	if (link == FETCH_DEFAULT_LINK()) {
+	if (link == FETCH_DEFAULT_LINK_NO_WARNING()) {
 		GC_DELREF(PGG(default_link));
 		PGG(default_link) = NULL;
 	}

@@ -42,8 +42,16 @@ pg_exec ("commit");
 
 echo "OK";
 ?>
---EXPECT--
+--EXPECTF--
 create LO from int
 create LO from string
 create LO using default connection
+
+Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_lo_unlink(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OK

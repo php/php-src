@@ -14,7 +14,7 @@ error_reporting(E_ALL);
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-pg_query("SET bytea_output = 'hex'");
+pg_query($db, "SET bytea_output = 'hex'");
 
 $fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
 $ids = array('num'=>'1234');
