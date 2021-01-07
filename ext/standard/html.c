@@ -1316,7 +1316,7 @@ encode_amp:
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	zend_string *str, *hint_charset = NULL;
-	zend_long flags = ENT_QUOTES|ENT_SUBSTITUTE;
+	zend_long flags = ENT_QUOTES|ENT_SUBSTITUTE; /* HTML401, to avoid &apos; - for MS Outlook, and Android 4 */
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
@@ -1367,7 +1367,7 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	zend_string *str;
-	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
+	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5; /* HTML5 to decode &apos; */
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1385,7 +1385,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
-	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
+	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5;
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
