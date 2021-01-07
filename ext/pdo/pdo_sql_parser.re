@@ -76,7 +76,7 @@ struct placeholder {
 };
 
 static void free_param_name(zval *el) {
-	efree(Z_PTR_P(el));
+	zend_string_release(Z_PTR_P(el));
 }
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery)
@@ -352,7 +352,7 @@ rewrite:
 
 		for (plc = placeholders; plc; plc = plc->next) {
 			int skip_map = 0;
-			char *p;
+			zend_string *p;
 			zend_string *idxbuf;
 
 			if (plc->bindno == PDO_PARSER_BINDNO_ESCAPED_CHAR) {
@@ -365,7 +365,7 @@ rewrite:
 			if (!strcmp(name, "?") || (p = zend_hash_str_find_ptr(stmt->bound_param_map, name, plc->len)) == NULL) {
 				idxbuf = zend_strpprintf(0, tmpl, bind_no++);
 			} else {
-				idxbuf = zend_string_init(p, strlen(p), 0);
+				idxbuf = zend_string_copy(p);
 				skip_map = 1;
 			}
 
@@ -374,11 +374,11 @@ rewrite:
 
 			if (!skip_map && stmt->named_rewrite_template) {
 				/* create a mapping */
-				zend_hash_str_update_mem(stmt->bound_param_map, name, plc->len, ZSTR_VAL(plc->quoted), ZSTR_LEN(plc->quoted) + 1);
+				zend_hash_str_update_ptr(stmt->bound_param_map, name, plc->len, zend_string_copy(plc->quoted));
 			}
 
 			/* map number to name */
-			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, ZSTR_VAL(plc->quoted), ZSTR_LEN(plc->quoted) + 1);
+			zend_hash_index_update_ptr(stmt->bound_param_map, plc->bindno, zend_string_copy(plc->quoted));
 
 			efree(name);
 		}
@@ -396,10 +396,8 @@ rewrite:
 		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
-			char *name;
-			name = estrndup(plc->pos, plc->len);
-			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, name, plc->len + 1);
-			efree(name);
+			zend_string *name = zend_string_init(plc->pos, plc->len, 0);
+			zend_hash_index_update_ptr(stmt->bound_param_map, plc->bindno, name);
 			plc->quoted = ZSTR_CHAR('?');
 			newbuffer_len -= plc->len - 1;
 		}
