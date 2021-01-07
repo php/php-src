@@ -339,7 +339,6 @@ rewrite:
 
 	} else if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 		/* rewrite ? to :pdoX */
-		char *name;
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
 		int bind_no = 1;
 
@@ -359,10 +358,10 @@ rewrite:
 				continue;
 			}
 
-			name = estrndup(plc->pos, plc->len);
+			zend_string *name = zend_string_init(plc->pos, plc->len, 0);
 
 			/* check if bound parameter is already available */
-			if (!strcmp(name, "?") || (p = zend_hash_str_find_ptr(stmt->bound_param_map, name, plc->len)) == NULL) {
+			if (zend_string_equals_literal(name, "?") || (p = zend_hash_find_ptr(stmt->bound_param_map, name)) == NULL) {
 				idxbuf = zend_strpprintf(0, tmpl, bind_no++);
 			} else {
 				idxbuf = zend_string_copy(p);
@@ -374,13 +373,13 @@ rewrite:
 
 			if (!skip_map && stmt->named_rewrite_template) {
 				/* create a mapping */
-				zend_hash_str_update_ptr(stmt->bound_param_map, name, plc->len, zend_string_copy(plc->quoted));
+				zend_hash_update_ptr(stmt->bound_param_map, name, zend_string_copy(plc->quoted));
 			}
 
 			/* map number to name */
 			zend_hash_index_update_ptr(stmt->bound_param_map, plc->bindno, zend_string_copy(plc->quoted));
 
-			efree(name);
+			zend_string_release(name);
 		}
 
 		goto rewrite;
