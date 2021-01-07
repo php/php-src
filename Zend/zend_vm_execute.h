@@ -2499,9 +2499,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_UNPACK_SPEC_HANDLER(
 {
 	USE_OPLINE
 	zval *op1;
+	HashTable *result_ht;
 
 	SAVE_OPLINE();
 	op1 = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
+	result_ht = Z_ARRVAL_P(EX_VAR(opline->result.var));
 
 add_unpack_again:
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
@@ -2510,16 +2512,14 @@ add_unpack_again:
 		zend_string *key;
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+			if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
+				val = Z_REFVAL_P(val);
+			}
+			Z_TRY_ADDREF_P(val);
 			if (key) {
-				zend_throw_error(NULL, "Cannot unpack array with string keys");
-				FREE_OP(opline->op1_type, opline->op1.var);
-				HANDLE_EXCEPTION();
+				zend_hash_update(result_ht, key, val);
 			} else {
-				if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-					val = Z_REFVAL_P(val);
-				}
-				Z_TRY_ADDREF_P(val);
-				if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), val)) {
+				if (!zend_hash_next_index_insert(result_ht, val)) {
 					zend_cannot_add_element();
 					zval_ptr_dtor_nogc(val);
 					break;
@@ -2560,32 +2560,42 @@ add_unpack_again:
 					break;
 				}
 
+				zval key;
 				if (iter->funcs->get_current_key) {
-					zval key;
 					iter->funcs->get_current_key(iter, &key);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						break;
 					}
 
-					if (UNEXPECTED(Z_TYPE(key) != IS_LONG)) {
+					if (UNEXPECTED(Z_TYPE(key) != IS_LONG && Z_TYPE(key) != IS_STRING)) {
 						zend_throw_error(NULL,
-							(Z_TYPE(key) == IS_STRING) ?
-								"Cannot unpack Traversable with string keys" :
-								"Cannot unpack Traversable with non-integer keys");
+							"Keys must be of type int|string during array unpacking");
 						zval_ptr_dtor(&key);
 						break;
 					}
+				} else {
+					ZVAL_UNDEF(&key);
 				}
 
 				ZVAL_DEREF(val);
 				Z_TRY_ADDREF_P(val);
 
-				if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), val)) {
-					zend_cannot_add_element();
-					zval_ptr_dtor_nogc(val);
+				zend_ulong num_key;
+				if (Z_TYPE(key) == IS_STRING && !ZEND_HANDLE_NUMERIC(Z_STR(key), num_key)) {
+					zend_hash_update(result_ht, Z_STR(key), val);
+					zval_ptr_dtor_str(&key);
+				} else {
+					if (!zend_hash_next_index_insert(result_ht, val)) {
+						zend_cannot_add_element();
+						zval_ptr_dtor_nogc(val);
+						break;
+					}
 				}
 
 				iter->funcs->move_forward(iter);
+				if (UNEXPECTED(EG(exception))) {
+					break;
+				}
 			}
 
 			zend_iterator_dtor(iter);

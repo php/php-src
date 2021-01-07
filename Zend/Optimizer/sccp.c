@@ -575,9 +575,10 @@ static inline int ct_eval_add_array_unpack(zval *result, zval *array) {
 	SEPARATE_ARRAY(result);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
 		if (key) {
-			return FAILURE;
+			value = zend_hash_update(Z_ARR_P(result), key, value);
+		} else {
+			value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		}
-		value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		if (!value) {
 			return FAILURE;
 		}

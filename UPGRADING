@@ -82,8 +82,11 @@ PHP 8.1 UPGRADE NOTES
 
 - Core:
   . It is now possible to specify octal integer by using the explicit "0o"/"0O"
-    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer literals
+    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer
+    literals.
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
+  . Added support for array unpacking with strings keys.
+    RFC: https://wiki.php.net/rfc/array_unpacking_string_keys
 
 - Curl:
   . Added CURLOPT_DOH_URL option.

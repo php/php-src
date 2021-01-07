@@ -8100,9 +8100,8 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 
 				ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 					if (key) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Cannot unpack array with string keys");
-					}
-					if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
+						zend_hash_update(Z_ARRVAL_P(result), key, val);
+					} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
 						zval_ptr_dtor(result);
 						return 0;
 					}
