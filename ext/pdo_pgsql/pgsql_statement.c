@@ -275,11 +275,11 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						ZEND_ATOL(param->paramno, ZSTR_VAL(param->name) + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
-						char *namevar;
+						zend_string *namevar;
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find_ptr(stmt->bound_param_map,
 								param->name)) != NULL) {
-							ZEND_ATOL(param->paramno, namevar + 1);
+							ZEND_ATOL(param->paramno, ZSTR_VAL(namevar) + 1);
 							param->paramno--;
 						} else {
 							pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", ZSTR_VAL(param->name));

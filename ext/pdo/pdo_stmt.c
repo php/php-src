@@ -50,7 +50,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 		 * we will raise an error, as we can't be sure that it is safe
 		 * to bind multiple parameters onto the same zval in the underlying
 		 * driver */
-		char *name;
+		zend_string *name;
 		int position = 0;
 
 		if (stmt->named_rewrite_template) {
@@ -60,7 +60,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 		if (!param->name) {
 			/* do the reverse; map the parameter number to the name */
 			if ((name = zend_hash_index_find_ptr(stmt->bound_param_map, param->paramno)) != NULL) {
-				param->name = zend_string_init(name, strlen(name), 0);
+				param->name = zend_string_copy(name);
 				return 1;
 			}
 			/* TODO Error? */
@@ -69,7 +69,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 		}
 
 		ZEND_HASH_FOREACH_PTR(stmt->bound_param_map, name) {
-			if (strncmp(name, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1)) {
+			if (!zend_string_equals(name, param->name)) {
 				position++;
 				continue;
 			}
