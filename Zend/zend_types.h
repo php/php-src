@@ -349,9 +349,8 @@ struct _zend_string {
 };
 
 typedef struct _Bucket {
-	zval              val;
-	zend_ulong        h;                /* hash value (or numeric index)   */
-	zend_string      *key;              /* string key or NULL for numerics */
+	zval val; /* Stores Z_NEXT */
+	zval key; /* Stores Z_HASH */
 } Bucket;
 
 typedef struct _zend_array HashTable;
@@ -570,6 +569,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_NEXT(zval)				(zval).u2.next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
+
+#define Z_HASH(zval)				(zval).u2.extra
+#define Z_HASH_P(zval_p)			Z_HASH(*(zval_p))
 
 #define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
 #define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))

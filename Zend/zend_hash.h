@@ -23,10 +23,6 @@
 
 #include "zend.h"
 
-#define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTENT 3
-
 #define HASH_UPDATE 			(1<<0)
 #define HASH_ADD				(1<<1)
 #define HASH_UPDATE_INDIRECT	(1<<2)
@@ -92,7 +88,7 @@ typedef struct _zend_hash_key {
 	zend_string *key;
 } zend_hash_key;
 
-typedef zend_bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_data, zend_hash_key *hash_key, void *pParam);
+typedef zend_bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_data, zval *key, void *pParam);
 
 BEGIN_EXTERN_C()
 
@@ -138,13 +134,21 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, cons
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *p, zend_string *key);
 
+/* zkey APIs require key to have type IS_LONG, IS_STRING or IS_OBJECT,
+ * and u2 of key to already be initialized to the hash value. */
+ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_update(HashTable *ht, zval *key, zval *val);
+ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_add(HashTable *ht, zval *key, zval *val);
+ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_add_new(HashTable *ht, zval *key, zval *val);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_zkey_del(HashTable *ht, zval *key);
+ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_find(const HashTable *ht, zval *key);
+
 #define ZEND_HASH_APPLY_KEEP				0
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1
 
 typedef int (*apply_func_t)(zval *pDest);
 typedef int (*apply_func_arg_t)(zval *pDest, void *argument);
-typedef int (*apply_func_args_t)(zval *pDest, int num_args, va_list args, zend_hash_key *hash_key);
+typedef int (*apply_func_args_t)(zval *pDest, int num_args, va_list args, zval *key);
 
 ZEND_API void ZEND_FASTCALL zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht);
@@ -226,12 +230,15 @@ static zend_always_inline zend_bool zend_hash_index_exists(const HashTable *ht, 
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
-	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
+	(zend_hash_get_current_zkey_ex(ht, pos) != NULL)
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
+
+/* This function populates `key` with a copy of the key, or a null zval if exhausted. */
 ZEND_API void  ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
-ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
+/* This function returns the key zval directly, or NULL if exhausted. */
+ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_zkey_ex(const HashTable *ht, HashPosition *pos);
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
@@ -242,12 +249,10 @@ ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Ha
 	zend_hash_move_forward_ex(ht, &(ht)->nInternalPointer)
 #define zend_hash_move_backwards(ht) \
 	zend_hash_move_backwards_ex(ht, &(ht)->nInternalPointer)
-#define zend_hash_get_current_key(ht, str_index, num_index) \
-	zend_hash_get_current_key_ex(ht, str_index, num_index, &(ht)->nInternalPointer)
 #define zend_hash_get_current_key_zval(ht, key) \
 	zend_hash_get_current_key_zval_ex(ht, key, &(ht)->nInternalPointer)
-#define zend_hash_get_current_key_type(ht) \
-	zend_hash_get_current_key_type_ex(ht, &(ht)->nInternalPointer)
+#define zend_hash_get_current_zkey(ht, key) \
+	zend_hash_get_current_zkey_ex(ht, key, &(ht)->nInternalPointer)
 #define zend_hash_get_current_data(ht) \
 	zend_hash_get_current_data_ex(ht, &(ht)->nInternalPointer)
 #define zend_hash_internal_pointer_reset(ht) \
@@ -261,7 +266,6 @@ ZEND_API void  ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *sourc
 ZEND_API void  ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
 ZEND_API void  zend_hash_bucket_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
-ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 
 typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
 ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
@@ -972,7 +976,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 			__ht->nNumOfElements--; \
 			do { \
 				uint32_t j = HT_IDX_TO_HASH(_idx - 1); \
-				uint32_t nIndex = _p->h | __ht->nTableMask; \
+				uint32_t nIndex = Z_HASH(_p->key) | __ht->nTableMask; \
 				uint32_t i = HT_HASH(__ht, nIndex); \
 				if (UNEXPECTED(j != i)) { \
 					Bucket *prev = HT_HASH_TO_BUCKET(__ht, i); \
@@ -1023,114 +1027,112 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h;
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key);
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h;
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key);
 
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key;
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = _p->key;
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL;
 
-#define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
+#define ZEND_HASH_FOREACH_ZKEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key;
+	_key = &_p->key;
 
-#define ZEND_HASH_REVERSE_FOREACH_KEY(ht, _h, _key) \
+#define ZEND_HASH_REVERSE_FOREACH_ZKEY(ht, _key) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key;
+	_key = &_p->key;
 
 #define ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key); \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key); \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_val = _z;
 
-#define ZEND_HASH_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+#define ZEND_HASH_FOREACH_ZKEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_val = _z;
 
-#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+#define ZEND_HASH_REVERSE_FOREACH_ZKEY_VAL(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_val = _z;
 
-#define ZEND_HASH_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+#define ZEND_HASH_FOREACH_ZKEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_val = _z;
 
-#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+#define ZEND_HASH_REVERSE_FOREACH_ZKEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key); \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
+	ZEND_ASSERT(Z_TYPE(_p->key) == IS_LONG); \
+	_h = Z_LVAL(_p->key); \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = _p->key; \
+	_key = EXPECTED(Z_TYPE(_p->key) == IS_STRING) ? Z_STR(_p->key) : NULL; \
 	_ptr = Z_PTR_P(_z);
 
-#define ZEND_HASH_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
+#define ZEND_HASH_FOREACH_ZKEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_ptr = Z_PTR_P(_z);
 
-#define ZEND_HASH_REVERSE_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
+#define ZEND_HASH_REVERSE_FOREACH_ZKEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	_key = &_p->key; \
 	_ptr = Z_PTR_P(_z);
 
 /* The following macros are useful to insert a sequence of new elements
@@ -1146,6 +1148,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FILL_SET(_val) \
 		ZVAL_COPY_VALUE(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_COPY(_val) \
+		ZVAL_COPY(&__fill_bkt->val, _val)
 
 #define ZEND_HASH_FILL_SET_NULL() \
 		ZVAL_NULL(&__fill_bkt->val)
@@ -1166,8 +1171,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		ZVAL_INTERNED_STR(&__fill_bkt->val, _val)
 
 #define ZEND_HASH_FILL_NEXT() do {\
-		__fill_bkt->h = (__fill_idx); \
-		__fill_bkt->key = NULL; \
+		Z_LVAL(__fill_bkt->key) = __fill_idx; \
+		Z_HASH(__fill_bkt->key) = (uint32_t) __fill_idx; \
+		Z_TYPE_INFO(__fill_bkt->key) = IS_LONG; \
 		__fill_bkt++; \
 		__fill_idx++; \
 	} while (0)
@@ -1200,9 +1206,9 @@ static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string 
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
-	p->key = key;
-	p->h = ZSTR_H(key);
-	nIndex = (uint32_t)p->h | ht->nTableMask;
+	ZVAL_STR(&p->key, key);
+	Z_HASH(p->key) = ZSTR_H(key);
+	nIndex = Z_HASH(p->key) | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumOfElements++;
@@ -1226,9 +1232,9 @@ static zend_always_inline zval *_zend_hash_append_ptr_ex(HashTable *ht, zend_str
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
-	p->key = key;
-	p->h = ZSTR_H(key);
-	nIndex = (uint32_t)p->h | ht->nTableMask;
+	ZVAL_STR(&p->key, key);
+	Z_HASH(p->key) = ZSTR_H(key);
+	nIndex = Z_HASH(p->key) | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumOfElements++;
@@ -1252,12 +1258,31 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
-	p->key = key;
-	p->h = ZSTR_H(key);
-	nIndex = (uint32_t)p->h | ht->nTableMask;
+	ZVAL_STR(&p->key, key);
+	Z_HASH(p->key) = ZSTR_H(key);
+	nIndex = Z_HASH(p->key) | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumOfElements++;
+}
+
+static zend_always_inline zval *_zend_hash_zkey_append(HashTable *ht, zval *key, zval *zv)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_COPY_VALUE(&p->val, zv);
+	if (Z_REFCOUNTED_P(key)) {
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
+		Z_ADDREF_P(key);
+	}
+	ZVAL_COPY_VALUE(&p->key, key);
+	nIndex = Z_HASH(p->key) | ht->nTableMask;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	ht->nNumOfElements++;
+	return &p->val;
 }
 
 #endif							/* ZEND_HASH_H */

@@ -119,7 +119,7 @@ ZEND_API void zend_interned_strings_dtor(void)
 	zend_known_strings = NULL;
 }
 
-static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ulong h, const char *str, size_t size, HashTable *interned_strings)
+static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(uint32_t h, const char *str, size_t size, HashTable *interned_strings)
 {
 	uint32_t nIndex;
 	uint32_t idx;
@@ -129,9 +129,9 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 	idx = HT_HASH(interned_strings, nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(interned_strings, idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == size)) {
-			if (!memcmp(ZSTR_VAL(p->key), str, size)) {
-				return p->key;
+		if (Z_HASH(p->key) == h && Z_STRLEN(p->key) == size) {
+			if (!memcmp(Z_STRVAL(p->key), str, size)) {
+				return Z_STR(p->key);
 			}
 		}
 		idx = Z_NEXT(p->val);
@@ -142,7 +142,7 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 
 static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
-	zend_ulong h = ZSTR_H(str);
+	uint32_t h = ZSTR_H(str);
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
@@ -151,8 +151,8 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_strin
 	idx = HT_HASH(interned_strings, nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(interned_strings, idx);
-		if ((p->h == h) && zend_string_equal_content(p->key, str)) {
-			return p->key;
+		if (Z_HASH(p->key) == h && zend_string_equal_content(Z_STR(p->key), str)) {
+			return Z_STR(p->key);
 		}
 		idx = Z_NEXT(p->val);
 	}

@@ -216,9 +216,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 	if (old_object->properties &&
 	    EXPECTED(zend_hash_num_elements(old_object->properties))) {
-		zval *prop, new_prop;
-		zend_ulong num_key;
-		zend_string *key;
+		zval *key, *prop, new_prop;
 
 		if (!new_object->properties) {
 			new_object->properties = zend_new_array(zend_hash_num_elements(old_object->properties));
@@ -230,18 +228,14 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		HT_FLAGS(new_object->properties) |=
 			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
 
-		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(old_object->properties, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
 				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
 			} else {
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
-			if (EXPECTED(key)) {
-				_zend_hash_append(new_object->properties, key, &new_prop);
-			} else {
-				zend_hash_index_add_new(new_object->properties, num_key, &new_prop);
-			}
+			_zend_hash_zkey_append(new_object->properties, key, &new_prop);
 		} ZEND_HASH_FOREACH_END();
 	}
 

@@ -937,20 +937,17 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /* {{{ */
 {
-	zend_string *string_key;
-	zend_ulong num_key;
-	zval *data;
-
 	if (spl_array_is_object(intern)) {
 		uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, intern);
 
 		do {
-			if (zend_hash_get_current_key_ex(aht, &string_key, &num_key, pos_ptr) == HASH_KEY_IS_STRING) {
-				data = zend_hash_get_current_data_ex(aht, pos_ptr);
+			zval *key = zend_hash_get_current_zkey_ex(aht, pos_ptr);
+			if (Z_TYPE_P(key) == IS_STRING) {
+				zval *data = zend_hash_get_current_data_ex(aht, pos_ptr);
 				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
 				    Z_TYPE_P(data = Z_INDIRECT_P(data)) == IS_UNDEF) {
 					/* skip */
-				} else if (!ZSTR_LEN(string_key) || ZSTR_VAL(string_key)[0]) {
+				} else if (!Z_STRLEN_P(key) || Z_STRVAL_P(key)[0]) {
 					return SUCCESS;
 				}
 			} else {
@@ -1357,13 +1354,12 @@ static zend_long spl_array_object_count_elements_helper(spl_array_object *intern
 	HashTable *aht = spl_array_get_hash_table(intern);
 	if (spl_array_is_object(intern)) {
 		zend_long count = 0;
-		zend_string *key;
-		zval *val;
+		zval *key, *val;
 		/* Count public/dynamic properties */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(aht, key, val) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(aht, key, val) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) continue;
-				if (key && ZSTR_VAL(key)[0] == '\0') continue;
+				if (Z_TYPE_P(key) == IS_STRING && Z_STRVAL_P(key)[0] == '\0') continue;
 			}
 			count++;
 		} ZEND_HASH_FOREACH_END();

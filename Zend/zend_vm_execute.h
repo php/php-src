@@ -6069,10 +6069,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -6183,10 +6183,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -8359,10 +8359,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -8473,10 +8473,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -10744,10 +10744,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -10858,10 +10858,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -15150,10 +15150,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -15264,10 +15264,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -16570,10 +16570,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -16684,10 +16684,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -17882,10 +17882,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -17996,10 +17996,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -21605,11 +21605,7 @@ fe_fetch_r_exit:
 		}
 		Z_FE_POS_P(array) = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 		}
 	} else {
 		zend_object_iterator *iter;
@@ -21634,12 +21630,12 @@ fe_fetch_r_exit:
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), Z_STR(p->key), 0) == SUCCESS)) {
 							break;
 						}
 					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
-							|| !p->key
-							|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
+							|| Z_TYPE(p->key) != IS_STRING
+							|| zend_check_property_access(Z_OBJ_P(array), Z_STR(p->key), 1) == SUCCESS) {
 						break;
 					}
 				}
@@ -21647,16 +21643,14 @@ fe_fetch_r_exit:
 			}
 			EG(ht_iterators)[Z_FE_ITER_P(array)].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
-				if (UNEXPECTED(!p->key)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (ZSTR_VAL(p->key)[0]) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				} else {
+				if (Z_TYPE(p->key) == IS_STRING && Z_STRVAL(p->key)[0] == '\0') {
 					const char *class_name, *prop_name;
 					size_t prop_name_len;
 					zend_unmangle_property_name_ex(
-						p->key, &class_name, &prop_name, &prop_name_len);
+						Z_STR(p->key), &class_name, &prop_name, &prop_name_len);
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
+				} else {
+					ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 				}
 			}
 		} else {
@@ -21750,11 +21744,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 		}
 		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+			ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 		}
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
 		zend_object_iterator *iter;
@@ -21778,7 +21768,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
+						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), Z_STR(p->key), 0) == SUCCESS)) {
 							if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
 								zend_property_info *prop_info =
 									zend_get_typed_property_info_for_slot(Z_OBJ_P(array), value);
@@ -21791,8 +21781,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 							break;
 						}
 					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
-							|| !p->key
-							|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
+							|| Z_TYPE(p->key) != IS_STRING
+							|| zend_check_property_access(Z_OBJ_P(array), Z_STR(p->key), 1) == SUCCESS) {
 						break;
 					}
 				}
@@ -21800,16 +21790,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			}
 			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			if (RETURN_VALUE_USED(opline)) {
-				if (UNEXPECTED(!p->key)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (ZSTR_VAL(p->key)[0]) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				} else {
+				if (Z_TYPE(p->key) == IS_STRING && Z_STRVAL(p->key)[0] == '\0') {
 					const char *class_name, *prop_name;
 					size_t prop_name_len;
 					zend_unmangle_property_name_ex(
-						p->key, &class_name, &prop_name, &prop_name_len);
+						Z_STR(p->key), &class_name, &prop_name, &prop_name_len);
 					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
+				} else {
+					ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 				}
 			}
 		} else {
@@ -30788,11 +30776,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 	}
 	Z_FE_POS_P(array) = pos;
 	if (0) {
-		if (!p->key) {
-			ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-		} else {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-		}
+		ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 	}
 
 	variable_ptr = EX_VAR(opline->op2.var);
@@ -30833,11 +30817,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 	}
 	Z_FE_POS_P(array) = pos;
 	if (1) {
-		if (!p->key) {
-			ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-		} else {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-		}
+		ZVAL_COPY(EX_VAR(opline->result.var), &p->key);
 	}
 
 	variable_ptr = EX_VAR(opline->op2.var);
@@ -31265,10 +31245,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -31422,10 +31402,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -33178,10 +33158,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -33330,10 +33310,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -35677,10 +35657,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -35829,10 +35809,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -39846,10 +39826,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -40003,10 +39983,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -42248,10 +42228,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_C
 		Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-	        (EXPECTED(p->key == varname) ||
-	         (EXPECTED(p->h == ZSTR_H(varname)) &&
-	          EXPECTED(p->key != NULL) &&
-	          EXPECTED(zend_string_equal_content(p->key, varname))))) {
+			EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+	        (EXPECTED(Z_STR(p->key) == varname) ||
+	         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(varname)) &&
+	          EXPECTED(zend_string_equal_content(Z_STR(p->key), varname))))) {
 
 			value = (zval*)p; /* value = &p->val; */
 			goto check_indirect;
@@ -43478,10 +43458,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -43630,10 +43610,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;
@@ -48529,10 +48509,10 @@ fetch_obj_r_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_r_copy;
@@ -48681,10 +48661,10 @@ fetch_obj_is_fast_copy:
 							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
+								EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+						        (EXPECTED(Z_STR(p->key) == name) ||
+						         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+						          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 								retval = &p->val;
 								if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
 									goto fetch_obj_is_copy;

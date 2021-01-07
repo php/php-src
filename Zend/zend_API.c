@@ -1342,13 +1342,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties) /* {{{ */
 {
-    zval *prop, tmp;
-   	zend_string *key;
-   	zend_long h;
+    zval *prop, tmp, *zv_key;
    	zend_property_info *property_info;
 
-   	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
-		if (key) {
+   	ZEND_HASH_FOREACH_ZKEY_VAL(properties, zv_key, prop) {
+		if (Z_TYPE_P(zv_key) == IS_STRING) {
+			zend_string *key = Z_STR_P(zv_key);
 			if (ZSTR_VAL(key)[0] == '\0') {
 				const char *class_name, *prop_name;
 				size_t prop_name_len;
@@ -1391,7 +1390,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 			if (!object->properties) {
 				rebuild_object_properties(object);
 			}
-			prop = zend_hash_index_update(object->properties, h, prop);
+			prop = zend_hash_zkey_update(object->properties, zv_key, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();

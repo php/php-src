@@ -578,10 +578,10 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 					Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-				        (EXPECTED(p->key == name) ||
-				         (EXPECTED(p->h == ZSTR_H(name)) &&
-				          EXPECTED(p->key != NULL) &&
-				          EXPECTED(zend_string_equal_content(p->key, name))))) {
+						EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+				        (EXPECTED(Z_STR(p->key) == name) ||
+				         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+				          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 						retval = &p->val;
 						goto exit;
 					}
@@ -1637,10 +1637,10 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 					Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-				        (EXPECTED(p->key == name) ||
-				         (EXPECTED(p->h == ZSTR_H(name)) &&
-				          EXPECTED(p->key != NULL) &&
-				          EXPECTED(zend_string_equal_content(p->key, name))))) {
+						EXPECTED(Z_TYPE(p->key) == IS_STRING) &&
+				        (EXPECTED(Z_STR(p->key) == name) ||
+				         (EXPECTED(Z_HASH(p->key) == (uint32_t)ZSTR_H(name)) &&
+				          EXPECTED(zend_string_equal_content(Z_STR(p->key), name))))) {
 						value = &p->val;
 						goto found;
 					}

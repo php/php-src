@@ -614,19 +614,18 @@ PHP_METHOD(SplFixedArray, fromArray)
 	num = zend_hash_num_elements(Z_ARRVAL_P(data));
 
 	if (num > 0 && save_indexes) {
-		zval *element;
-		zend_string *str_index;
-		zend_ulong num_index, max_index = 0;
+		zval *element, *key;
+		zend_ulong max_index = 0;
 		zend_long tmp;
 
-		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
-			if (str_index != NULL || (zend_long)num_index < 0) {
+		ZEND_HASH_FOREACH_ZKEY(Z_ARRVAL_P(data), key) {
+			if (Z_TYPE_P(key) != IS_LONG || Z_LVAL_P(key) < 0) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
 				RETURN_THROWS();
 			}
 
-			if (num_index > max_index) {
-				max_index = num_index;
+			if (Z_LVAL_P(key) > max_index) {
+				max_index = Z_LVAL_P(key);
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -637,8 +636,8 @@ PHP_METHOD(SplFixedArray, fromArray)
 		}
 		spl_fixedarray_init(&array, tmp);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
-			ZVAL_COPY_DEREF(&array.elements[num_index], element);
+		ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(data), key, element) {
+			ZVAL_COPY_DEREF(&array.elements[Z_LVAL_P(key)], element);
 		} ZEND_HASH_FOREACH_END();
 
 	} else if (num > 0 && !save_indexes) {

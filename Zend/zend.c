@@ -292,9 +292,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent);
 
 static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_object) /* {{{ */
 {
-	zval *tmp;
-	zend_string *string_key;
-	zend_ulong num_key;
+	zval *tmp, *key;
 	int i;
 
 	for (i = 0; i < indent; i++) {
@@ -302,16 +300,16 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_o
 	}
 	smart_str_appends(buf, "(\n");
 	indent += PRINT_ZVAL_INDENT;
-	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
+	ZEND_HASH_FOREACH_ZKEY_VAL_IND(ht, key, tmp) {
 		for (i = 0; i < indent; i++) {
 			smart_str_appendc(buf, ' ');
 		}
 		smart_str_appendc(buf, '[');
-		if (string_key) {
+		if (Z_TYPE_P(key) == IS_STRING) {
 			if (is_object) {
 				const char *prop_name, *class_name;
 				size_t prop_len;
-				int mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
+				int mangled = zend_unmangle_property_name_ex(Z_STR_P(key), &class_name, &prop_name, &prop_len);
 
 				smart_str_appendl(buf, prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {
@@ -324,10 +322,13 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_o
 					}
 				}
 			} else {
-				smart_str_append(buf, string_key);
+				smart_str_append(buf, Z_STR_P(key));
 			}
+		} else if (Z_TYPE_P(key) == IS_STRING) {
+			smart_str_append_long(buf, Z_LVAL_P(key));
 		} else {
-			smart_str_append_long(buf, num_key);
+			// TODO(OBJ_KEY)
+			ZEND_ASSERT(0 && "Not implemented");
 		}
 		smart_str_appends(buf, "] => ");
 		zend_print_zval_r_to_buf(buf, tmp, indent+PRINT_ZVAL_INDENT);
@@ -343,20 +344,21 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_o
 
 static void print_flat_hash(HashTable *ht) /* {{{ */
 {
-	zval *tmp;
-	zend_string *string_key;
-	zend_ulong num_key;
+	zval *tmp, *key;
 	int i = 0;
 
-	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
+	ZEND_HASH_FOREACH_ZKEY_VAL_IND(ht, key, tmp) {
 		if (i++ > 0) {
 			ZEND_PUTS(",");
 		}
 		ZEND_PUTS("[");
-		if (string_key) {
-			ZEND_WRITE(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
+		if (Z_TYPE_P(key) == IS_STRING) {
+			ZEND_WRITE(Z_STRVAL_P(key), Z_STRLEN_P(key));
+		} else if (Z_TYPE_P(key) == IS_LONG) {
+			zend_printf(ZEND_ULONG_FMT, Z_LVAL_P(key));
 		} else {
-			zend_printf(ZEND_ULONG_FMT, num_key);
+			// TODO(OBJ_KEY)
+			ZEND_ASSERT(0 && "Not implemented");
 		}
 		ZEND_PUTS("] => ");
 		zend_print_flat_zval_r(tmp);
