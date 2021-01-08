@@ -29,10 +29,10 @@ function zip_read($zip) {}
 function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
 
 /**
- * @param resource $zip_ent
+ * @param resource $zip_entry
  * @deprecated
  */
-function zip_entry_close($zip_ent): bool {}
+function zip_entry_close($zip_entry): bool {}
 
 /**
  * @param resource $zip_entry
