@@ -94,11 +94,11 @@ try {
 2
 2
 
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
 
 -1
 -1
@@ -106,8 +106,8 @@ bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
 -1
 -1
 
-bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
-bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
-bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
-bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
-bccomp(): Argument #1 ($num1) bcmath function argument is not well-formed
+bccomp(): Argument #1 ($num1) is not well-formed
+bccomp(): Argument #1 ($num1) is not well-formed
+bccomp(): Argument #1 ($num1) is not well-formed
+bccomp(): Argument #1 ($num1) is not well-formed
+bccomp(): Argument #1 ($num1) is not well-formed

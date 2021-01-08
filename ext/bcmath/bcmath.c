@@ -179,12 +179,12 @@ PHP_FUNCTION(bcadd)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -230,12 +230,12 @@ PHP_FUNCTION(bcsub)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -281,12 +281,12 @@ PHP_FUNCTION(bcmul)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -332,12 +332,12 @@ PHP_FUNCTION(bcdiv)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -388,12 +388,12 @@ PHP_FUNCTION(bcmod)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -446,17 +446,17 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&mod, ZSTR_VAL(modulus)) == FAILURE) {
-		zend_argument_value_error(3, "bcmath function argument is not well-formed");
+		zend_argument_value_error(3, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -503,12 +503,12 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -551,7 +551,7 @@ PHP_FUNCTION(bcsqrt)
 	bc_init_num(&result);
 
 	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
@@ -596,12 +596,12 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&second);
 
 	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
-		zend_argument_value_error(1, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
 	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
-		zend_argument_value_error(2, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 

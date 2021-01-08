@@ -21,5 +21,5 @@ try {
 
 ?>
 --EXPECT--
-bcadd(): Argument #1 ($num1) bcmath function argument is not well-formed
-bcadd(): Argument #2 ($num2) bcmath function argument is not well-formed
+bcadd(): Argument #1 ($num1) is not well-formed
+bcadd(): Argument #2 ($num2) is not well-formed
