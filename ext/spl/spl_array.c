@@ -532,13 +532,9 @@ try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern);
-		if (ht == &EG(symbol_table)) {
-			if (zend_delete_global_variable(Z_STR_P(offset))) {
-				zend_error(E_WARNING,"Undefined array key \"%s\"", Z_STRVAL_P(offset));
-			}
-		} else {
-			zval *data = zend_symtable_find(ht, Z_STR_P(offset));
 
+		{
+			zval *data = zend_symtable_find(ht, Z_STR_P(offset));
 			if (data) {
 				if (Z_TYPE_P(data) == IS_INDIRECT) {
 					data = Z_INDIRECT_P(data);
