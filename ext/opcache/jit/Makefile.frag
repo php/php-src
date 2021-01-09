@@ -5,7 +5,7 @@ $(builddir)/minilua: $(srcdir)/jit/dynasm/minilua.c
 $(builddir)/jit/zend_jit_x86.c: $(srcdir)/jit/zend_jit_x86.dasc $(srcdir)/jit/dynasm/*.lua $(builddir)/minilua
 	$(builddir)/minilua $(srcdir)/jit/dynasm/dynasm.lua  $(DASM_FLAGS) -o $@ $(srcdir)/jit/zend_jit_x86.dasc
 
-jit/zend_jit.lo: \
+$(builddir)jit/zend_jit.lo: \
 	$(builddir)/jit/zend_jit_x86.c \
 	$(srcdir)/jit/zend_jit_helpers.c \
 	$(srcdir)/jit/zend_jit_disasm_x86.c \
@@ -16,3 +16,4 @@ jit/zend_jit.lo: \
 	$(srcdir)/jit/zend_jit_trace.c \
 	$(srcdir)/jit/zend_elf.c
 
+jit/zend_jit.lo: $(builddir)/jit/zend_jit.lo
