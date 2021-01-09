@@ -1997,6 +1997,7 @@ fastcgi_request_done:
 			if (UNEXPECTED(max_requests && (requests == max_requests))) {
 				fcgi_request_set_keep(request, 0);
 				fcgi_finish_request(request, 0);
+				exit_status = FPM_EXIT_MAX_REQUESTS;
 				break;
 			}
 			/* end of fastcgi loop */
