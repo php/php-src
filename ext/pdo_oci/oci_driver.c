@@ -355,6 +355,7 @@ static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquote
 	int qcount = 0;
 	char const *cu, *l, *r;
 	char *c, *quoted;
+	size_t quotedlen;
 	zend_string *quoted_str;
 
 	if (ZSTR_LEN(unquoted) == 0) {
