@@ -103,6 +103,20 @@ PHP 8.1 UPGRADE NOTES
 
     A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
 
+  . Added xxHash. The implementation brings in the following arguments
+
+    - xxh32, 32-bit hash
+    - xxh64, 64-bit hash
+    - xxh3, 64-bit hash
+    - xxh128, 128-bit hash
+
+    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
+
+    ```php
+    $h = hash("xxh3", $data, options: ["seed" => 42]);
+    echo $h, "\n";
+    ```
+
 ========================================
 3. Changes in SAPI modules
 ========================================
