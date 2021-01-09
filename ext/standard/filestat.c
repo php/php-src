@@ -772,12 +772,14 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	};
 	const char *local;
 	php_stream_wrapper *wrapper;
+	int stat_result;
 
 	if (!filename_length) {
 		RETURN_FALSE;
 	}
 
-	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0)) == &php_plain_files_wrapper && php_check_open_basedir(local)) {
+	wrapper = php_stream_locate_url_wrapper(filename, &local, 0);
+	if (wrapper == &php_plain_files_wrapper && php_check_open_basedir(local)) {
 		RETURN_FALSE;
 	}
 
@@ -816,12 +818,13 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		flags |= PHP_STREAM_URL_STAT_QUIET;
 	}
 
-	if (php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL)) {
-		/* Error Occurred */
-		if (!IS_EXISTS_CHECK(type)) {
+	stat_result = php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL);
+	if (stat_result) {
+		if (!IS_EXISTS_CHECK(type) || (stat_result & type) == 0) {
 			php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 		}
-		RETURN_FALSE;
+		/* Error Occurred */
+		if (stat_result == FAILURE) RETURN_FALSE;
 	}
 
 	stat_sb = &ssb.sb;
