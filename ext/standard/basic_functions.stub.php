@@ -139,7 +139,7 @@ function array_fill_keys(array $keys, mixed $value): array {}
  */
 function range($start, $end, int|float $step = 1): array {}
 
-function shuffle(array &$array): bool {}
+function shuffle(array &$array, ?RNG\RNGInterface $rng = null): bool {}
 
 function array_pop(array &$array): mixed {}
 
@@ -231,7 +231,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  */
 function array_multisort(&$array, &...$rest): bool {}
 
-function array_rand(array $array, int $num = 1): int|string|array {}
+function array_rand(array $array, int $num = 1, ?RNG\RNGInterface $rng = null): int|string|array {}
 
 function array_sum(array $array): int|float {}
 
@@ -683,7 +683,7 @@ function sscanf(string $string, string $format, mixed &...$vars): array|int|null
 
 function str_rot13(string $string): string {}
 
-function str_shuffle(string $string): string {}
+function str_shuffle(string $string, ?RNG\RNGInterface $rng = null): string {}
 
 function str_word_count(string $string, int $format = 0, ?string $characters = null): array|int {}
 
@@ -1202,6 +1202,12 @@ function getrandmax(): int {}
 function random_bytes(int $length): string {}
 
 function random_int(int $min, int $max): int {}
+
+/* rng.c */
+
+function rng_rand(RNG\RNGInterface $rng, int $min = UNKNOWN, int $max = UNKNOWN): int {}
+
+function rng_bytes(RNG\RNGInterface $rng, int $length): string {}
 
 /* soundex.c */
 

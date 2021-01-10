@@ -42,6 +42,7 @@
 #include "zend_bitset.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
+#include "php_rng.h"
 
 /* {{{ defines */
 #define EXTR_OVERWRITE			0
@@ -2828,7 +2829,7 @@ err:
 #undef RANGE_CHECK_DOUBLE_INIT_ARRAY
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
-static void php_array_data_shuffle(zval *array) /* {{{ */
+static void php_array_data_shuffle(zval *array, zval *zrng) /* {{{ */
 {
 	uint32_t idx, j, n_elems;
 	Bucket *p, temp;
@@ -2857,7 +2858,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = zrng ? php_rng_range(zrng, 0, n_left) : php_mt_rand_range(0, n_left);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
 				hash->arData[n_left] = hash->arData[rnd_idx];
@@ -2882,7 +2883,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = zrng ? php_rng_range(zrng, 0, n_left) : php_mt_rand_range(0, n_left);
 			if (rnd_idx != n_left) {
 				temp = hash->arData[n_left];
 				hash->arData[n_left] = hash->arData[rnd_idx];
@@ -2912,13 +2913,15 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 /* {{{ Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
-	zval *array;
+	zval *array, *zrng = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(zrng, rng_ce_RNG_RNGInterface)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_data_shuffle(array);
+	php_array_data_shuffle(array, zrng);
 
 	RETURN_TRUE;
 }
@@ -5556,7 +5559,7 @@ PHP_FUNCTION(array_multisort)
 /* {{{ Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
 {
-	zval *input;
+	zval *input, *zrng = NULL;
 	zend_long num_req = 1;
 	zend_string *string_key;
 	zend_ulong num_key;
@@ -5567,10 +5570,11 @@ PHP_FUNCTION(array_rand)
 	uint32_t bitset_len;
 	ALLOCA_FLAG(use_heap)
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(num_req)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(zrng, rng_ce_RNG_RNGInterface)
 	ZEND_PARSE_PARAMETERS_END();
 
 	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
@@ -5586,7 +5590,7 @@ PHP_FUNCTION(array_rand)
 		if ((uint32_t)num_avail < ht->nNumUsed - (ht->nNumUsed>>1)) {
 			/* If less than 1/2 of elements are used, don't sample. Instead search for a
 			 * specific offset using linear scan. */
-			zend_long i = 0, randval = php_mt_rand_range(0, num_avail - 1);
+			zend_long i = 0, randval = zrng ? php_rng_range(zrng, 0, num_avail - 1) : php_mt_rand_range(0, num_avail - 1);
 			ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
 				if (i == randval) {
 					if (string_key) {
@@ -5604,7 +5608,7 @@ PHP_FUNCTION(array_rand)
 		 * probability of hitting N empty elements in a row is (1-1/2)**N.
 		 * For N=10 this becomes smaller than 0.1%. */
 		do {
-			zend_long randval = php_mt_rand_range(0, ht->nNumUsed - 1);
+			zend_long randval = zrng ? php_rng_range(zrng, 0, ht->nNumUsed - 1) : php_mt_rand_range(0, ht->nNumUsed - 1);
 			Bucket *bucket = &ht->arData[randval];
 			if (!Z_ISUNDEF(bucket->val)) {
 				if (bucket->key) {
@@ -5634,7 +5638,7 @@ PHP_FUNCTION(array_rand)
 
 	i = num_req;
 	while (i) {
-		zend_long randval = php_mt_rand_range(0, num_avail - 1);
+		zend_long randval = zrng ? php_rng_range(zrng, 0, num_avail - 1) : php_mt_rand_range(0, num_avail - 1);
 		if (!zend_bitset_in(bitset, randval)) {
 			zend_bitset_incl(bitset, randval);
 			i--;

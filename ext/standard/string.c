@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include "php.h"
 #include "php_rand.h"
+#include "php_rng.h"
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
@@ -5714,7 +5715,7 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-static void php_string_shuffle(char *str, zend_long len) /* {{{ */
+static void php_string_shuffle(char *str, zend_long len, zval *zrng) /* {{{ */
 {
 	zend_long n_elems, rnd_idx, n_left;
 	char temp;
@@ -5729,7 +5730,7 @@ static void php_string_shuffle(char *str, zend_long len) /* {{{ */
 	n_left = n_elems;
 
 	while (--n_left) {
-		rnd_idx = php_mt_rand_range(0, n_left);
+		rnd_idx = zrng ? php_rng_range(zrng, 0, n_left) : php_mt_rand_range(0, n_left);
 		if (rnd_idx != n_left) {
 			temp = str[n_left];
 			str[n_left] = str[rnd_idx];
@@ -5742,15 +5743,18 @@ static void php_string_shuffle(char *str, zend_long len) /* {{{ */
 /* {{{ Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
+	zval *zrng = NULL;
 	zend_string *arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(arg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(zrng, rng_ce_RNG_RNGInterface)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_STRINGL(ZSTR_VAL(arg), ZSTR_LEN(arg));
 	if (Z_STRLEN_P(return_value) > 1) {
-		php_string_shuffle(Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value));
+		php_string_shuffle(Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value), zrng);
 	}
 }
 /* }}} */
