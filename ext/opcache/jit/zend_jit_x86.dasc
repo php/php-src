@@ -5572,10 +5572,6 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				} else {
 					|	jz >9 // NOT_FOUND
 				}
-				|	// if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT))
-				|	IF_NOT_Z_TYPE r0, IS_INDIRECT, >1
-				|	GET_Z_PTR r0, r0
-				|1:
 				break;
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -5602,40 +5598,25 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	jz >7 // NOT_FOUND
 				} else {
 					|	jz >2 // NOT_FOUND
-				}
-				|	// if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT))
-				|	IF_Z_TYPE r0, IS_INDIRECT, >1 // SLOW
-				|.cold_code
-				|1:
-				|	// retval = Z_INDIRECT_P(retval);
-				|	GET_Z_PTR r0, r0
-				|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
-				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
-					|	jmp &exit_addr
-				} else if (type == BP_VAR_IS && not_found_exit_addr) {
-					|	jmp &not_found_exit_addr
-				}
-				|2:
-				switch (type) {
-					case BP_VAR_R:
-						if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+					|.cold_code
+					|2:
+					switch (type) {
+						case BP_VAR_R:
 							// zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 							|	UNDEFINED_INDEX opline
 							|	jmp >9
-						}
-						break;
-					case BP_VAR_IS:
-					case BP_VAR_UNSET:
-						if (!not_found_exit_addr && !found_exit_addr) {
+							break;
+						case BP_VAR_IS:
+						case BP_VAR_UNSET:
 							|	// retval = &EG(uninitialized_zval);
 							|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
 							|	jmp >9
-						}
-						break;
-					default:
-						ZEND_UNREACHABLE();
+							break;
+						default:
+							ZEND_UNREACHABLE();
+					}
+					|.code
 				}
-				|.code
 				break;
 			case BP_VAR_RW:
 				|	SET_EX_OPLINE opline, r0
@@ -14872,23 +14853,11 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	|	add FCARG1d, 1
 	|	// value_type = Z_TYPE_INFO_P(value);
 	|	// if (EXPECTED(value_type != IS_UNDEF)) {
-	|	IF_Z_TYPE r0, IS_UNDEF, >2
 	if (!exit_addr || exit_opcode == ZEND_JMP) {
-		|	IF_NOT_Z_TYPE r0, IS_INDIRECT, >3
-	} else {
-		|	IF_NOT_Z_TYPE r0, IS_INDIRECT, &exit_addr
-	}
-	|	// value = Z_INDIRECT_P(value);
-	|	GET_Z_PTR FCARG2a, r0
-	|	// value_type = Z_TYPE_INFO_P(value);
-	|	// if (EXPECTED(value_type != IS_UNDEF)) {
-	if (!exit_addr || exit_opcode == ZEND_JMP) {
-		|	IF_NOT_Z_TYPE FCARG2a, IS_UNDEF, >4
+		|	IF_NOT_Z_TYPE r0, IS_UNDEF, >3
 	} else {
 		|	IF_NOT_Z_TYPE r0, IS_UNDEF, &exit_addr
 	}
-	|	GET_ZVAL_PTR FCARG2a, op1_addr // reload
-	|2:
 	|	// p++;
 	|	add r0, sizeof(Bucket)
 	|	jmp <1
@@ -14899,8 +14868,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 		zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
 		uint32_t val_info;
 
-		|	mov	FCARG2a, r0
-		|4:
+		|	mov FCARG2a, r0
 		|	// Z_FE_POS_P(array) = pos + 1;
 		|	mov dword [FP + opline->op1.var + offsetof(zval, u2.fe_pos)], FCARG1d
 
