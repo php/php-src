@@ -1625,6 +1625,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						break;
 					}
 					ADD_OP2_TRACE_GUARD();
+					if (op1_type != IS_UNKNOWN
+					 && (tssa->var_info[tssa->ops[idx].op1_use].type & MAY_BE_REF)) {
+						ADD_OP1_TRACE_GUARD();
+					}
 					break;
 				case ZEND_CAST:
 					if (opline->extended_value != op1_type) {
@@ -4506,6 +4510,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
 						op1_addr = OP1_REG_ADDR();
 						op1_def_addr = OP1_DEF_REG_ADDR();
