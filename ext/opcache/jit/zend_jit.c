@@ -3962,15 +3962,24 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE) != 0) {
+		int opts = PROT_READ | PROT_WRITE;
+#ifdef ZTS
+		/* Another thread may be executing JITed code. */
+		opts |= PROT_EXEC;
+#endif
+		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
 #elif _WIN32
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		DWORD old;
-
-		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_READWRITE, &old)) {
+		DWORD old, new;
+#ifdef ZTS
+		new = PAGE_EXECUTE_READWRITE;
+#else
+		new = PAGE_READWRITE;
+#endif
+		if (!VirtualProtect(dasm_buf, dasm_size, new, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
 			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
