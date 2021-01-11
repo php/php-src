@@ -63,13 +63,9 @@ typedef void* yyscan_t;
 %% /* Rules */
 
 input
-	: non_empty_input { $$ = $1; }
-	| /* empty */
-	;
-
-non_empty_input
 	: command { $$ = $1; }
-	| non_empty_input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
+	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
+	| /* empty */
 	;
 
 command

@@ -72,9 +72,6 @@ PHP                                                                        NEWS
   . Fixed bug #76815 (PDOStatement cannot be GCed/closeCursor-ed when a
     PROCEDURE resultset SIGNAL). (Nikita)
 
-- Phpdbg:
-  . Fixed bug #76813 (Access violation near NULL on source operand). (cmb)
-
 - Standard:
   . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo). 
     (CVE-2020-7071) (cmb)
