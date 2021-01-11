@@ -6374,11 +6374,8 @@ ZEND_VM_C_LABEL(offset_again):
 					}
 				}
 ZEND_VM_C_LABEL(str_index_dim):
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_dim):

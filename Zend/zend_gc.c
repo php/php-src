@@ -740,11 +740,8 @@ tail_call:
 			goto next;
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
-		if ((zend_array*)ref != &EG(symbol_table)) {
-			ht = (zend_array*)ref;
-		} else {
-			goto next;
-		}
+		ZEND_ASSERT((zend_array*)ref != &EG(symbol_table));
+		ht = (zend_array*)ref;
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -861,12 +858,8 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				goto next;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			if (((zend_array*)ref) == &EG(symbol_table)) {
-				GC_REF_SET_BLACK(ref);
-				goto next;
-			} else {
-				ht = (zend_array*)ref;
-			}
+			ZEND_ASSERT(((zend_array*)ref) != &EG(symbol_table));
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -1046,12 +1039,8 @@ tail_call:
 					goto next;
 				}
 			} else if (GC_TYPE(ref) == IS_ARRAY) {
-				if ((zend_array*)ref == &EG(symbol_table)) {
-					GC_REF_SET_BLACK(ref);
-					goto next;
-				} else {
-					ht = (zend_array*)ref;
-				}
+				ZEND_ASSERT((zend_array*)ref != &EG(symbol_table));
+				ht = (zend_array*)ref;
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 					ref = Z_COUNTED(((zend_reference*)ref)->val);
