@@ -24360,11 +24360,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
@@ -26513,11 +26510,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
@@ -30527,11 +30521,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
@@ -41794,11 +41785,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
@@ -45240,11 +45228,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
@@ -50365,11 +50350,8 @@ offset_again:
 					}
 				}
 str_index_dim:
-				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(key);
-				} else {
-					zend_hash_del(ht, key);
-				}
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
 			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
 				hval = Z_LVAL_P(offset);
 num_index_dim:
