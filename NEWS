@@ -44,6 +44,9 @@ PHP                                                                        NEWS
     (david at bamsoftware, cmb)
   . Fixed bug #77565 (Incorrect locator detection in ZIP-based phars). (cmb)
 
+- Phpdbg:
+  . Reverted fix for bug #76813 (Access violation near NULL on source operand).
+    (cmb)
 
 07 Jan 2021, PHP 8.0.1
 
