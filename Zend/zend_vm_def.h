@@ -6033,17 +6033,22 @@ ZEND_VM_C_LABEL(add_unpack_again):
 				ZVAL_DEREF(val);
 				Z_TRY_ADDREF_P(val);
 
-				if (Z_TYPE(key) == IS_STRING) {
+				zend_ulong num_key;
+				if (Z_TYPE(key) == IS_STRING && !ZEND_HANDLE_NUMERIC(Z_STR(key), num_key)) {
 					zend_hash_update(result_ht, Z_STR(key), val);
 					zval_ptr_dtor_str(&key);
 				} else {
 					if (!zend_hash_next_index_insert(result_ht, val)) {
 						zend_cannot_add_element();
 						zval_ptr_dtor_nogc(val);
+						break;
 					}
 				}
 
 				iter->funcs->move_forward(iter);
+				if (UNEXPECTED(EG(exception))) {
+					break;
+				}
 			}
 
 			zend_iterator_dtor(iter);

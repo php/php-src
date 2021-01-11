@@ -16,6 +16,12 @@ $array2 = ["foo" => 2];
 var_dump(["foo" => 0, ...$array1, ...$array2]);
 var_dump(["foo" => 0, ...$array1, ...$array2, "foo" => 3]);
 
+// Test numeric string key from iterator.
+function gen() {
+    yield "42" => 42;
+}
+var_dump([...gen()]);
+
 ?>
 --EXPECT--
 array(4) {
@@ -45,4 +51,8 @@ array(1) {
 array(1) {
   ["foo"]=>
   int(3)
+}
+array(1) {
+  [0]=>
+  int(42)
 }

@@ -3163,12 +3163,9 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_ADD_ARRAY_UNPACK:
 			tmp = ssa_var_info[ssa_op->result_use].type;
 			ZEND_ASSERT(tmp & MAY_BE_ARRAY);
-			/* Ignore string keys as they will throw. */
-			if (t1 & MAY_BE_ARRAY_KEY_LONG) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG | (t1 & (MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF));
-			}
+			tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 			if (t1 & MAY_BE_OBJECT) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY;
+				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
