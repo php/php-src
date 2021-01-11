@@ -5911,6 +5911,9 @@ ZEND_VM_C_LABEL(str_index):
 			hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index):
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			ZEND_VM_C_GOTO(add_again);
@@ -5957,6 +5960,7 @@ ZEND_VM_HANDLER(147, ZEND_ADD_ARRAY_UNPACK, ANY, ANY)
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 ZEND_VM_C_LABEL(add_unpack_again):
+	// TODO(OBJ_KEY)
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(op1);
 		zval *val;
@@ -6383,6 +6387,8 @@ ZEND_VM_C_LABEL(str_index_dim):
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_dim):
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(offset_again);
@@ -7076,6 +7082,8 @@ ZEND_VM_C_LABEL(isset_again):
 			hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_prop):
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			ZEND_VM_C_GOTO(isset_again);

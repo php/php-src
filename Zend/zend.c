@@ -324,7 +324,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_o
 			} else {
 				smart_str_append(buf, Z_STR_P(key));
 			}
-		} else if (Z_TYPE_P(key) == IS_STRING) {
+		} else if (Z_TYPE_P(key) == IS_LONG) {
 			smart_str_append_long(buf, Z_LVAL_P(key));
 		} else {
 			// TODO(OBJ_KEY)

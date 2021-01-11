@@ -339,8 +339,8 @@ define ____print_ht
 				set $n = $n - 1
 			end
 			printf "[%d] ", $i
-			if $p->key
-				____print_str $p->key->val $p->key->len
+			if $p->key.u1.v.type == 6
+				____print_str $p->key.value.str->val $p->key.value.str->len
 				printf " => "
 			else
 				printf "%d => ", $p->h

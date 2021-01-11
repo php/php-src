@@ -1905,6 +1905,11 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const
 	zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset));
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_obj_key(const zend_object *obj_key)
+{
+	zend_error(E_WARNING, "Undefined array key %s#%" PRIu32, ZSTR_VAL(obj_key->ce->name), obj_key->handle);
+}
+
 ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval)
 {
 	/* The array may be destroyed while throwing the notice.
@@ -2110,6 +2115,30 @@ str_index:
 					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
+					break;
+			}
+		}
+	} else if (EXPECTED(Z_TYPE_P(dim) == IS_OBJECT)) {
+		zend_object *obj_key = Z_OBJ_P(dim);
+		retval = zend_hash_obj_key_find(ht, obj_key);
+		if (!retval) {
+			switch (type) {
+				case BP_VAR_R:
+					zend_undefined_obj_key(obj_key);
+					/* break missing intentionally */
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_RW:
+					/* Key may be released while throwing warning. */
+					GC_ADDREF(obj_key);
+					retval = zend_hash_obj_key_add_new(ht, obj_key, &EG(uninitialized_zval));
+					zend_undefined_obj_key(obj_key); // TODO(OBJ_KEY)
+					zend_object_release(obj_key);
+					break;
+				case BP_VAR_W:
+					retval = zend_hash_obj_key_add_new(ht, obj_key, &EG(uninitialized_zval));
 					break;
 			}
 		}

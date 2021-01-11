@@ -942,6 +942,10 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 
 		do {
 			zval *key = zend_hash_get_current_zkey_ex(aht, pos_ptr);
+			if (!key) {
+				return FAILURE;
+			}
+
 			if (Z_TYPE_P(key) == IS_STRING) {
 				zval *data = zend_hash_get_current_data_ex(aht, pos_ptr);
 				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
@@ -952,9 +956,6 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 				}
 			} else {
 				return SUCCESS;
-			}
-			if (zend_hash_has_more_elements_ex(aht, pos_ptr) != SUCCESS) {
-				return FAILURE;
 			}
 			zend_hash_move_forward_ex(aht, pos_ptr);
 		} while (1);

@@ -134,8 +134,20 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, cons
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *p, zend_string *key);
 
+static zend_always_inline uint32_t zend_hash_obj_key(const zend_object *obj) {
+	return ((uintptr_t)obj) >> ZEND_MM_ALIGNMENT_LOG2;
+}
+
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_obj_key_add(HashTable *ht, zend_object *obj_key, zval *val);
+ZEND_API zval* ZEND_FASTCALL zend_hash_obj_key_add_new(HashTable *ht, zend_object *obj_key, zval *val);
+ZEND_API zval* ZEND_FASTCALL zend_hash_obj_key_update(HashTable *ht, zend_object *obj_key, zval *val);
+ZEND_API zend_result ZEND_FASTCALL zend_hash_obj_key_del(HashTable *ht, zend_object *obj_key);
+ZEND_API zval* ZEND_FASTCALL zend_hash_obj_key_find(const HashTable *ht, zend_object *obj_key);
+
 /* zkey APIs require key to have type IS_LONG, IS_STRING or IS_OBJECT,
  * and u2 of key to already be initialized to the hash value. */
+// TODO: u2 is not actually used right now?
 ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_update(HashTable *ht, zval *key, zval *val);
 ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_add(HashTable *ht, zval *key, zval *val);
 ZEND_API zval* ZEND_FASTCALL zend_hash_zkey_add_new(HashTable *ht, zval *key, zval *val);
@@ -230,7 +242,7 @@ static zend_always_inline zend_bool zend_hash_index_exists(const HashTable *ht, 
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
-	(zend_hash_get_current_zkey_ex(ht, pos) != NULL)
+	(zend_hash_get_current_zkey_ex(ht, pos) ? SUCCESS : FAILURE)
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 
@@ -1277,7 +1289,7 @@ static zend_always_inline zval *_zend_hash_zkey_append(HashTable *ht, zval *key,
 		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		Z_ADDREF_P(key);
 	}
-	ZVAL_COPY_VALUE(&p->key, key);
+	p->key = *key;
 	nIndex = Z_HASH(p->key) | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);

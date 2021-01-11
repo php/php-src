@@ -44,8 +44,10 @@ static void php_array_element_dump(zval *zv, zval *key, int level) /* {{{ */
 		PHPWRITE(Z_STRVAL_P(key), Z_STRLEN_P(key));
 		php_printf("\"]=>\n");
 	} else {
-		// TODO(OBJ_KEY)
-		ZEND_ASSERT(0 && "Not implemented");
+		ZEND_ASSERT(Z_TYPE_P(key) == IS_OBJECT);
+		// TODO(OBJ_KEY) Determine desired format.
+		php_printf("%*c[%s#%" PRIu32 "]=>\n",
+			level + 1, ' ', ZSTR_VAL(Z_OBJCE_P(key)->name), Z_OBJ_HANDLE_P(key));
 	}
 	php_var_dump(zv, level + 2);
 }
@@ -410,6 +412,7 @@ PHP_FUNCTION(debug_zval_dump)
 
 static void php_array_element_export(zval *zv, zval *key, int level, smart_str *buf) /* {{{ */
 {
+	buffer_append_spaces(buf, level + 1);
 	php_var_export_ex(key, level + 2, buf);
 	smart_str_appendl(buf, " => ", 4);
 	php_var_export_ex(zv, level + 2, buf);

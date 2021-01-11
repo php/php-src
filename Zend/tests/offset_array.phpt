@@ -17,11 +17,7 @@ $fp = fopen(__FILE__, "r");
 var_dump($arr[$fp]);
 
 $obj = new stdClass;
-try {
-    var_dump($arr[$obj]);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump($arr[$obj]);
 
 $arr1 = Array(1,2,3);
 try {
@@ -46,6 +42,8 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Illegal offset type
+
+Warning: Undefined array key stdClass#1 in %s on line %d
+NULL
 Illegal offset type
 Done

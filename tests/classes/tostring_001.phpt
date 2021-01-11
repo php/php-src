@@ -80,7 +80,7 @@ try {
 
 ?>
 ====DONE====
---EXPECT--
+--EXPECTF--
 ====test1====
 test1 Object
 (
@@ -118,7 +118,8 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-Illegal offset type
+
+Warning: Undefined array key test2#3 in %s on line %d
 ====test8====
 test2::__toString()
 string(9) "Converted"
@@ -128,7 +129,7 @@ string(9) "Converted"
 test2::__toString()
 Converted
 ====test10====
-object(test3)#2 (0) {
+object(test3)#1 (0) {
 }
 test3::__toString()
 test3::__toString(): Return value must be of type string, array returned

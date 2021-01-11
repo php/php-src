@@ -2504,6 +2504,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_UNPACK_SPEC_HANDLER(
 	op1 = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
 
 add_unpack_again:
+	// TODO(OBJ_KEY)
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(op1);
 		zval *val;
@@ -6928,6 +6929,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -7018,6 +7022,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -9084,6 +9090,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -9174,6 +9183,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -10004,6 +10015,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -11468,6 +11482,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -11558,6 +11575,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -15704,6 +15723,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -17096,6 +17117,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -18408,6 +18431,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -19400,6 +19425,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -19803,6 +19831,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -20263,6 +20294,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -20662,6 +20696,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -24262,6 +24299,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -24357,6 +24397,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -26415,6 +26457,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -26510,6 +26555,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -28274,6 +28321,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -30429,6 +30479,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -30524,6 +30577,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -41688,6 +41743,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -41783,6 +41841,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -41911,6 +41971,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -45134,6 +45196,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -45229,6 +45294,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -45359,6 +45426,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
@@ -46876,6 +46945,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -50259,6 +50331,9 @@ str_index:
 			hval = Z_LVAL_P(offset);
 num_index:
 			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			zend_hash_obj_key_update(
+				Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_OBJ_P(offset), expr_ptr);
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
@@ -50354,6 +50429,8 @@ str_index_dim:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+				zend_hash_obj_key_del(ht, Z_OBJ_P(offset));
 			} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				goto offset_again;
@@ -50482,6 +50559,8 @@ isset_again:
 			hval = Z_LVAL_P(offset);
 num_index_prop:
 			value = zend_hash_index_find(ht, hval);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_OBJECT)) {
+			value = zend_hash_obj_key_find(ht, Z_OBJ_P(offset));
 		} else if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
 			offset = Z_REFVAL_P(offset);
 			goto isset_again;
