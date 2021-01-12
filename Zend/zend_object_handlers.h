@@ -47,13 +47,9 @@ typedef zval *(*zend_object_read_property_t)(zend_object *object, zend_string *m
 typedef zval *(*zend_object_read_dimension_t)(zend_object *object, zval *offset, int type, zval *rv);
 
 
-/* The following rule applies to write_property() and write_dimension() implementations:
-   If you receive a value zval in write_property/write_dimension, you may only modify it if
-   its reference count is 1.  Otherwise, you must create a copy of that zval before making
-   any changes.  You should NOT modify the reference count of the value passed to you.
+/* Used to set property of the object
    You must return the final value of the assigned property.
 */
-/* Used to set property of the object */
 typedef zval *(*zend_object_write_property_t)(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 
 /* Used to set dimension of the object */
