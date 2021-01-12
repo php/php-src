@@ -11,6 +11,8 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 $link = new mysqli($host, $user, $passwd, $db, $port, $socket);
 var_dump(((array) $link)["affected_rows"]);
+var_dump($link->__debugInfo()["affected_rows"]);
 ?>
 --EXPECT--
+int(0)
 int(0)

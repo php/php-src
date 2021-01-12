@@ -1280,4 +1280,16 @@ PHP_FUNCTION(mysqli_get_links_stats)
 	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
 	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
 }
+
+PHP_METHOD(mysqli, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zval *self = ZEND_THIS;
+	zend_object *obj = Z_OBJ_P(self);
+	HashTable *ht = obj->handlers->get_properties_for(self, ZEND_PROP_PURPOSE_ARRAY_CAST);
+	RETURN_ARR(ht);
+}
 /* }}} */

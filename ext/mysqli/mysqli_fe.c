@@ -593,6 +593,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(thread_safe, mysqli_thread_safe, arginfo_mysqli_no_params)
 	PHP_FALIAS(use_result, mysqli_use_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(refresh,mysqli_refresh, arginfo_class_mysqli_refresh)
+	PHP_ME(mysqli, __debugInfo, arginfo_mysqli_no_params, 0)
 	PHP_FE_END
 };
 /* }}} */
