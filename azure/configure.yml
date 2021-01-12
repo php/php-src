@@ -63,6 +63,7 @@ steps:
         --with-imap-ssl \
         --with-pdo-odbc=unixODBC,/usr \
         --with-pdo-firebird \
+        --with-pdo-dblib \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d

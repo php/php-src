@@ -77,6 +77,6 @@ string(19) "2030-01-01 23:59:59"
 string(1) "0"
 bool(true)
 string(4) "1000"
-string(5) "10.50"
+string(7) "10.5000"
 string(19) "1950-01-18 23:00:00"
 string(1) "1"

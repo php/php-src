@@ -9,6 +9,9 @@ steps:
       export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
       export PDO_MYSQL_TEST_USER=root
       export PDO_MYSQL_TEST_PASS=root
+      export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
+      export PDO_DBLIB_TEST_USER="pdo_test"
+      export PDO_DBLIB_TEST_PASS="password"
       export TEST_PHP_JUNIT=junit.xml
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
