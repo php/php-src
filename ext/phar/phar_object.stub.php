@@ -134,7 +134,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function setSignatureAlgorithm(int $algo, ?string $privateKey = null) {}
 
     /**
-     * @param resource $stub
+     * @param resource|string $stub
      * @return bool
      */
     public function setStub($stub, int $length = -1) {}
