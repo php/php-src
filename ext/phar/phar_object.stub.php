@@ -134,10 +134,10 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function setSignatureAlgorithm(int $algo, ?string $privateKey = null) {}
 
     /**
-     * @param resource $stub
+     * @param resource|string $stub
      * @return bool
      */
-    public function setStub($stub, int $length = -1) {}
+    public function setStub($stub, int $length = UNKNOWN) {}
 
     /** @return void */
     public function startBuffering() {}
@@ -408,11 +408,11 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function setSignatureAlgorithm(int $algo, ?string $privateKey = null) {}
 
     /**
-     * @param resource $newstub
+     * @param resource|string $stub
      * @return bool
      * @implementation-alias Phar::setStub
      */
-    public function setStub($newstub, int $maxlen = -1) {}
+    public function setStub($stub, int $length = UNKNOWN) {}
 
     /**
      * @return void
