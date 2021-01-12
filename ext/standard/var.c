@@ -299,7 +299,11 @@ again:
 	case IS_STRING:
 		php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
 		PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
-		php_printf("\" refcount(%u)\n", Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
+		if (Z_REFCOUNTED_P(struc)) {
+			php_printf("\" refcount(%u)\n", Z_REFCOUNT_P(struc));
+		} else {
+			PUTS("\" interned\n");
+		}
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
@@ -312,7 +316,12 @@ again:
 			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_hash_num_elements(myht);
-		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) - 1 : 1);
+		if (Z_REFCOUNTED_P(struc)) {
+			/* -1 because of ADDREF above. */
+			php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNT_P(struc) - 1);
+		} else {
+			php_printf("%sarray(%d) interned {\n", COMMON, count);
+		}
 		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();

@@ -5,6 +5,8 @@ References to result sets
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+opcache.enable=0
 --FILE--
 <?php
     require_once('connect.inc');
@@ -136,9 +138,9 @@ array(1) refcount(2){
   [0]=>
   array(2) refcount(1){
     ["id"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
     ["label"]=>
-    string(1) "a" refcount(%d)
+    string(1) "a" interned
   }
 }
 done!
