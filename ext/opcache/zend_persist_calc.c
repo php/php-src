@@ -166,10 +166,10 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 	}
 }
 
-static void zend_persist_type_calc(zend_type *type)
+static void zend_persist_type_calc(zend_type *type, zend_bool use_arena)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
-		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class)) {
+		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class) && use_arena) {
 			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 		} else {
 			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
@@ -254,7 +254,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name);
 			}
-			zend_persist_type_calc(&arg_info[i].type);
+			zend_persist_type_calc(&arg_info[i].type, 0);
 		}
 	}
 
@@ -338,7 +338,7 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 {
 	ADD_SIZE_EX(sizeof(zend_property_info));
 	ADD_INTERNED_STRING(prop->name);
-	zend_persist_type_calc(&prop->type);
+	zend_persist_type_calc(&prop->type, 1);
 	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 		ADD_STRING(prop->doc_comment);
 	}

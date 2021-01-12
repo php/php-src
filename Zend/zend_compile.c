@@ -6126,7 +6126,7 @@ static zend_bool zend_type_contains_traversable(zend_type type) {
 // TODO: Ideally we'd canonicalize "iterable" into "array|Traversable" and essentially
 // treat it as a built-in type alias.
 static zend_type zend_compile_typename(
-		zend_ast *ast, zend_bool force_allow_null, zend_bool use_arena) /* {{{ */
+		zend_ast *ast, zend_bool force_allow_null) /* {{{ */
 {
 	zend_bool allow_null = force_allow_null;
 	zend_ast_attr orig_ast_attr = ast->attr;
@@ -6138,6 +6138,12 @@ static zend_type zend_compile_typename(
 
 	if (ast->kind == ZEND_AST_TYPE_UNION) {
 		zend_ast_list *list = zend_ast_get_list(ast);
+		zend_type_list *type_list;
+		ALLOCA_FLAG(use_heap)
+
+		type_list = do_alloca(ZEND_TYPE_LIST_SIZE(list->children), use_heap);
+		type_list->num_types = 0;
+
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
@@ -6163,37 +6169,20 @@ static zend_type zend_compile_typename(
 					ZEND_TYPE_SET_PTR(type, ZEND_TYPE_NAME(single_type));
 					ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_NAME_BIT;
 				} else {
-					zend_type_list *list;
-					if (ZEND_TYPE_HAS_LIST(type)) {
-						/* Add name to existing name list. */
-						zend_type_list *old_list = ZEND_TYPE_LIST(type);
-						if (use_arena) {
-							// TODO: Add a zend_arena_realloc API?
-							list = zend_arena_alloc(
-								&CG(arena), ZEND_TYPE_LIST_SIZE(old_list->num_types + 1));
-							memcpy(list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
-						} else {
-							list = erealloc(old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types + 1));
-						}
-					} else {
+					if (type_list->num_types == 0) {
 						/* Switch from single name to name list. */
-						size_t size = ZEND_TYPE_LIST_SIZE(2);
-						list = use_arena ? zend_arena_alloc(&CG(arena), size) : emalloc(size);
-						list->num_types = 1;
-						list->types[0] = type;
-						ZEND_TYPE_FULL_MASK(list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
+						type_list->num_types = 1;
+						type_list->types[0] = type;
+						ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
+						ZEND_TYPE_SET_LIST(type, type_list);
 					}
 
-					list->types[list->num_types++] = single_type;
-					ZEND_TYPE_SET_LIST(type, list);
-					if (use_arena) {
-						ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
-					}
+					type_list->types[type_list->num_types++] = single_type;
 
 					/* Check for trivially redundant class types */
-					for (size_t i = 0; i < list->num_types - 1; i++) {
+					for (size_t i = 0; i < type_list->num_types - 1; i++) {
 						if (zend_string_equals_ci(
-								ZEND_TYPE_NAME(list->types[i]), ZEND_TYPE_NAME(single_type))) {
+								ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(single_type))) {
 							zend_string *single_type_str = zend_type_to_string(single_type);
 							zend_error_noreturn(E_COMPILE_ERROR,
 								"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
@@ -6202,6 +6191,16 @@ static zend_type zend_compile_typename(
 				}
 			}
 		}
+
+		if (type_list->num_types) {
+			zend_type_list *list = zend_arena_alloc(
+				&CG(arena), ZEND_TYPE_LIST_SIZE(type_list->num_types));
+			memcpy(list, type_list, ZEND_TYPE_LIST_SIZE(type_list->num_types));
+			ZEND_TYPE_SET_LIST(type, list);
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
+		}
+
+		free_alloca(type_list, use_heap);
 	} else {
 		type = zend_compile_single_typename(ast);
 	}
@@ -6378,7 +6377,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		arg_infos->name = NULL;
 		if (return_type_ast) {
 			arg_infos->type = zend_compile_typename(
-				return_type_ast, /* force_allow_null */ 0, /* use_arena */ 0);
+				return_type_ast, /* force_allow_null */ 0);
 			ZEND_TYPE_FULL_MASK(arg_infos->type) |= _ZEND_ARG_INFO_FLAGS(
 				(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0, /* is_variadic */ 0);
 		} else {
@@ -6480,7 +6479,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_bool force_nullable = default_type == IS_NULL && !visibility;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->type = zend_compile_typename(type_ast, force_nullable, /* use_arena */ 0);
+			arg_info->type = zend_compile_typename(type_ast, force_nullable);
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
@@ -6546,7 +6545,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			/* Recompile the type, as it has different memory management requirements. */
 			zend_type type = ZEND_TYPE_INIT_NONE(0);
 			if (type_ast) {
-				type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
+				type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
 			}
 
 			/* Don't give the property an explicit default value. For typed properties this means
@@ -7076,7 +7075,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 
 		if (type_ast) {
-			type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
+			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
 
 			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);

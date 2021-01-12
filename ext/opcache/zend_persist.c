@@ -285,11 +285,11 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-static void zend_persist_type(zend_type *type) {
+static void zend_persist_type(zend_type *type, zend_bool use_arena) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {
-			if (!ZCG(is_immutable_class)) {
+			if (!ZCG(is_immutable_class) && use_arena) {
 				list = zend_shared_memdup_arena_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
 			} else {
 				/* Moved from arena to SHM because type list was fully resolved. */
@@ -575,7 +575,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (arg_info[i].name) {
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
-			zend_persist_type(&arg_info[i].type);
+			zend_persist_type(&arg_info[i].type, 0);
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
@@ -738,7 +738,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	if (prop->attributes) {
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
-	zend_persist_type(&prop->type);
+	zend_persist_type(&prop->type, 1);
 	return prop;
 }
 
