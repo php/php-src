@@ -951,6 +951,13 @@ ZEND_API zend_bool zend_value_instanceof_static(zval *zv) {
 	return instanceof_function(Z_OBJCE_P(zv), called_scope);
 }
 
+/* The cache_slot may only be NULL in debug builds, where arginfo verification of
+ * internal functions is enabled. Avoid unnecessary checks in release builds. */
+#if ZEND_DEBUG
+# define HAVE_CACHE_SLOT (cache_slot != NULL)
+#else
+# define HAVE_CACHE_SLOT 1
+#endif
 
 static zend_always_inline zend_bool zend_check_type_slow(
 		zend_type type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
@@ -962,31 +969,39 @@ static zend_always_inline zend_bool zend_check_type_slow(
 		if (ZEND_TYPE_HAS_LIST(type)) {
 			zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-				if (*cache_slot) {
+				if (HAVE_CACHE_SLOT && *cache_slot) {
 					ce = *cache_slot;
 				} else {
 					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
-						cache_slot++;
+						if (HAVE_CACHE_SLOT) {
+							cache_slot++;
+						}
 						continue;
 					}
-					*cache_slot = ce;
+					if (HAVE_CACHE_SLOT) {
+						*cache_slot = ce;
+					}
 				}
 				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
 					return 1;
 				}
-				cache_slot++;
+				if (HAVE_CACHE_SLOT) {
+					cache_slot++;
+				}
 			} ZEND_TYPE_LIST_FOREACH_END();
 		} else {
-			if (EXPECTED(*cache_slot)) {
+			if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
 				ce = (zend_class_entry *) *cache_slot;
 			} else {
 				ce = zend_fetch_class(ZEND_TYPE_NAME(type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 				if (UNEXPECTED(!ce)) {
 					goto builtin_types;
 				}
-				*cache_slot = (void *) ce;
+				if (HAVE_CACHE_SLOT) {
+					*cache_slot = (void *) ce;
+				}
 			}
 			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
 				return 1;
@@ -1079,8 +1094,6 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 
 	for (i = 0; i < num_args; ++i) {
 		zend_arg_info *cur_arg_info;
-		void *dummy_cache_slot = NULL;
-
 		if (EXPECTED(i < fbc->common.num_args)) {
 			cur_arg_info = &fbc->common.arg_info[i];
 		} else if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
@@ -1090,7 +1103,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 		}
 
 		if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-				&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &dummy_cache_slot, fbc->common.scope, 0, /* is_internal */ 1))) {
+				&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, /* cache_slot */ NULL, fbc->common.scope, 0, /* is_internal */ 1))) {
 			return 0;
 		}
 		arg++;
@@ -1215,8 +1228,6 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
 	zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
-	void *dummy_cache_slot = NULL;
-
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
 			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
@@ -1225,7 +1236,7 @@ static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 		return 1;
 	}
 
-	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &dummy_cache_slot, NULL, 1, /* is_internal */ 1))) {
+	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, /* cache_slot */ NULL, NULL, 1, /* is_internal */ 1))) {
 		zend_verify_internal_return_error(zf, ret);
 		return 0;
 	}
