@@ -5,20 +5,21 @@ Florian Anderiasch
 fa@php.net
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
-        die('skip - sockets extension not available.');
-    }
+if (!extension_loaded('sockets')) {
+    die('skip - sockets extension not available.');
+}
 ?>
 --FILE--
 <?php
-    $rand = rand(1,999);
-    // wrong parameter count
-    $s_c_l = socket_create_listen(31330+$rand);
-    var_dump($s_c_l);
-    // default invocation
-    $s_c_l2 = socket_create_listen(31330+$rand);
-    var_dump($s_c_l2);
-    socket_close($s_c_l);
+$s_c_l = socket_create_listen(0);
+var_dump($s_c_l);
+
+socket_getsockname($s_c_l, $addr, $port);
+
+$s_c_l2 = socket_create_listen($port);
+var_dump($s_c_l2);
+socket_close($s_c_l);
+
 ?>
 --EXPECTF--
 object(Socket)#%d (0) {
