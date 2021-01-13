@@ -1154,7 +1154,7 @@ static zend_string *add_type_string(zend_string *type, zend_string *new_type) {
 	}
 
 	result = zend_string_concat3(
-		ZSTR_VAL(type), ZSTR_LEN(type), "|", 1, ZSTR_VAL(new_type), ZSTR_LEN(new_type));
+		ZSTR_VAL(type), strlen(ZSTR_VAL(type)), "|", 1, ZSTR_VAL(new_type), strlen(ZSTR_VAL(new_type)));
 	zend_string_release(type);
 	return result;
 }
