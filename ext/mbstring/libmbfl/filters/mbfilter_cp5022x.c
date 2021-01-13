@@ -39,6 +39,7 @@ typedef struct _mbfl_filt_conv_wchar_cp50220_ctx {
 static void mbfl_filt_conv_wchar_cp50220_ctor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_dtor(mbfl_convert_filter *filt);
 static void mbfl_filt_conv_wchar_cp50220_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
+static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter);
 
 const mbfl_encoding mbfl_encoding_jis_ms = {
 	mbfl_no_encoding_jis_ms,
@@ -121,7 +122,7 @@ const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_cp5022x_wchar_flush,
 	NULL,
 };
 
@@ -161,7 +162,7 @@ const struct mbfl_convert_vtbl vtbl_cp50221_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_cp5022x_wchar_flush,
 	NULL,
 };
 
@@ -181,7 +182,7 @@ const struct mbfl_convert_vtbl vtbl_cp50222_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_ms_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_cp5022x_wchar_flush,
 	NULL,
 };
 
@@ -367,6 +368,15 @@ retry:
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
+{
+	if ((filter->status & 0xF) == 1) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+	return 0;
 }
 
 /*

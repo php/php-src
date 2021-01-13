@@ -204,6 +204,13 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
   }
 }
 
+/* Try truncated 2-byte characters */
+for ($i = 0x21; $i <= 0x7E; $i++) {
+  testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50220');
+  testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50221');
+  testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50222');
+}
+
 echo "CP932 support OK\n";
 
 /* Unicode codepoint for halfwidth katakana -> kuten code for ordinary katakana */
