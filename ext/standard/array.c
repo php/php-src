@@ -2958,7 +2958,6 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	for (pos = 0, idx = 0; pos < offset && idx < in_hash->nNumUsed; idx++) {
 		p = in_hash->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		/* Get entry and increase reference count */
 		entry = &p->val;
 
 		/* Update output hash depending on key type */
