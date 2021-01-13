@@ -125,6 +125,12 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 	}
 }
 
+/* Try truncated JISX0208 characters */
+for ($i = 0x21; $i <= 0x7E; $i++) {
+	testInvalid("\x1B\$B" . chr($i), "\x00%", 'JIS');
+	testInvalid("\x1B\$B" . chr($i), "\x00%", 'ISO-2022-JP');
+}
+
 echo "JIS X 0208 support OK\n";
 
 /* JIS7 supports escape to switch to JIS X 0212 charset, but ISO-2022-JP does not */
@@ -142,6 +148,11 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 			testInvalid("\x1B\$(D" . $testString, "\x00%", 'JIS');
 		}
 	}
+}
+
+/* Try truncated JISX0212 characters */
+for ($i = 0x21; $i <= 0x7E; $i++) {
+	testInvalid("\x1B\$(D" . chr($i), "\x00%", 'JIS');
 }
 
 echo "JIS X 0212 support OK\n";

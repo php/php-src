@@ -33,6 +33,8 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter);
+
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
 	"JIS",
@@ -61,7 +63,7 @@ const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -81,7 +83,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -262,6 +264,15 @@ retry:
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
+{
+	if ((filter->status & 0xF) == 1) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+	return 0;
 }
 
 /*
