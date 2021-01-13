@@ -482,8 +482,8 @@ int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-int
-mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter) {
+int mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter)
+{
 	int k;
 	int c1, c2, s1, s2;
 
@@ -546,6 +546,12 @@ retry:
 			CK((*filter->output_function)(s2, filter->data));
 			goto retry;
 		}
+	}
+
+	if (s1 <= 0 && filter->to->no_encoding == mbfl_no_encoding_2022jp_2004 && (c == 0x5C || c == 0x7E)) {
+		/* ISO-2022-JP-2004 can represent ASCII characters directly, so there is no need
+		 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde */
+		s1 = c;
 	}
 
 	/* check for major japanese chars: U+4E00 - U+9FFF */
