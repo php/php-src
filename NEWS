@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
   . Fixed bug #80384 (filter buffers entire read until file closed). (Adam
     Seitz, cmb)
+  . Fixed bug #80596 (Invalid union type TypeError in anonymous classes).
+    (Daniil Gentili)
 
 - BCMath:
   . Fixed bug #80545 (bcadd('a', 'a') doesn't throw an exception).
