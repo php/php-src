@@ -599,6 +599,10 @@ function str_starts_with(string $haystack, string $needle): bool {}
 
 function str_ends_with(string $haystack, string $needle): bool {}
 
+function substring(string $haystack, string $from, string $to): string {}
+
+function subistring(string $haystack, string $from, string $to): string {}
+
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
 function substr(string $string, int $offset, ?int $length = null): string {}

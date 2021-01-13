@@ -2078,6 +2078,127 @@ PHP_FUNCTION(strrchr)
 }
 /* }}} */
 
+
+/* {{{ Returns a portion of the string found between two strings */
+PHP_FUNCTION(substring)
+{
+	const char *found_from = NULL, *found_to = NULL;
+	zend_string *haystack, *from, *to, *string, *trim;
+    zend_long offset = 0, length;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(from)
+        Z_PARAM_STR(to)
+	ZEND_PARSE_PARAMETERS_END();
+    
+    if (ZSTR_LEN(from) > 0) {
+        found_from = (char*)php_memnstr(ZSTR_VAL(haystack),
+						ZSTR_VAL(from), ZSTR_LEN(from),
+						ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+
+        if (!found_from) {
+            RETURN_EMPTY_STRING();
+        }
+        
+        offset = found_from - ZSTR_VAL(haystack) + ZSTR_LEN(from);
+        
+    }
+    
+    if (ZSTR_LEN(to) > 0) {
+        found_to = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,
+						ZSTR_VAL(to), ZSTR_LEN(to),
+						ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+                        
+        if (!found_to) {
+            RETURN_EMPTY_STRING();
+        }
+        
+        length = found_to - ZSTR_VAL(haystack) - offset;
+        
+    } else {
+        length = ZSTR_LEN(haystack) - offset;
+    }
+
+    string = zend_string_safe_alloc(1, length, 0, 0);
+    memcpy(ZSTR_VAL(string), ZSTR_VAL(haystack) + offset, length);
+    
+    trim = php_trim_int(string, NULL, 0, 3);
+    
+    if (ZSTR_LEN(trim) == 0) {
+        RETURN_EMPTY_STRING(); 
+    }
+    
+    RETURN_NEW_STR(trim);   
+
+}
+/* }}} */
+
+
+/* {{{ Returns a portion of the string found between two strings */
+PHP_FUNCTION(subistring)
+{
+	const char *found_from = NULL, *found_to = NULL;
+	zend_string *haystack, *haystack_dup, *from, *to, *string, *trim;
+    zend_long offset = 0, length;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(from)
+        Z_PARAM_STR(to)
+	ZEND_PARSE_PARAMETERS_END();
+    
+    haystack_dup = zend_string_safe_alloc(1, ZSTR_LEN(haystack), 0, 0);
+    memcpy(ZSTR_VAL(haystack_dup), ZSTR_VAL(haystack), ZSTR_LEN(haystack));
+    
+    haystack_dup = php_string_tolower(haystack_dup);
+    
+    from = php_string_tolower(from);
+    to = php_string_tolower(to);
+    
+    if (ZSTR_LEN(from) > 0) {
+        found_from = (char*)php_memnstr(ZSTR_VAL(haystack_dup),
+						ZSTR_VAL(from), ZSTR_LEN(from),
+						ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack_dup));
+
+        if (!found_from) {
+            RETURN_EMPTY_STRING();
+        }
+        
+        offset = found_from - ZSTR_VAL(haystack_dup) + ZSTR_LEN(from);
+        
+    }
+    
+    if (ZSTR_LEN(to) > 0) {
+        found_to = (char*)php_memnstr(ZSTR_VAL(haystack_dup) + offset,
+						ZSTR_VAL(to), ZSTR_LEN(to),
+						ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack_dup));
+                        
+        if (!found_to) {
+            RETURN_EMPTY_STRING();
+        }
+        
+        length = found_to - ZSTR_VAL(haystack_dup) - offset;
+        
+    } else {
+        length = ZSTR_LEN(haystack_dup) - offset;
+    }
+
+    string = zend_string_safe_alloc(1, length, 0, 0);
+    memcpy(ZSTR_VAL(string), ZSTR_VAL(haystack) + offset, length);
+    
+    trim = php_trim_int(string, NULL, 0, 3);
+    
+    if (ZSTR_LEN(trim) == 0) {
+        RETURN_EMPTY_STRING(); 
+    }
+    
+    RETURN_NEW_STR(trim);   
+
+}
+/* }}} */
+
+
 /* {{{ php_chunk_split */
 static zend_string *php_chunk_split(const char *src, size_t srclen, const char *end, size_t endlen, size_t chunklen)
 {
