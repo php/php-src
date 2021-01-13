@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : error when passing folder
---CREDITS--
-Anna Filina <me@afilina.com>
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) === "WIN") { print "skip - not valid for Windows"; }
