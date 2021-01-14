@@ -1346,27 +1346,22 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define SEPARATE_ARRAY(zv) do {							\
-		zval *_zv = (zv);								\
-		zend_array *_arr = Z_ARR_P(_zv);				\
+		zval *__zv = (zv);								\
+		zend_array *_arr = Z_ARR_P(__zv);				\
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
-			if (Z_REFCOUNTED_P(_zv)) {					\
+			if (Z_REFCOUNTED_P(__zv)) {					\
 				GC_DELREF(_arr);						\
 			}											\
-			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
-		zval *__zv = (zv);								\
-		if (Z_TYPE_P(__zv) == IS_ARRAY) {				\
-			SEPARATE_ARRAY(__zv);                       \
+			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
 		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
+		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
@@ -1384,7 +1379,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 				break;									\
 			}											\
 		}												\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
+		}												\
 	} while (0)
 
 /* Properties store a flag distinguishing unset and uninitialized properties
