@@ -3717,7 +3717,7 @@ ZEND_METHOD(FFI, free) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS_EX2(zv, zend_ffi_cdata_ce, 0, 1, 0);
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv, zend_ffi_cdata_ce, 0, 1);
 	ZEND_PARSE_PARAMETERS_END();
 
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
@@ -4208,7 +4208,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_OBJECT_OF_CLASS_EX2(zv1, zend_ffi_cdata_ce, 0, 1, 0);
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv1, zend_ffi_cdata_ce, 0, 1);
 		Z_PARAM_ZVAL(zv2)
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
@@ -4338,7 +4338,7 @@ ZEND_METHOD(FFI, memset) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_OBJECT_OF_CLASS_EX2(zv, zend_ffi_cdata_ce, 0, 1, 0);
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv, zend_ffi_cdata_ce, 0, 1);
 		Z_PARAM_LONG(ch)
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
@@ -4370,7 +4370,7 @@ ZEND_METHOD(FFI, string) /* {{{ */
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJECT_OF_CLASS_EX2(zv, zend_ffi_cdata_ce, 0, 1, 0);
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv, zend_ffi_cdata_ce, 0, 1);
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(size, size_is_null)
 	ZEND_PARSE_PARAMETERS_END();

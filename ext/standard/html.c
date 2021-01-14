@@ -1324,7 +1324,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_STR_EX(hint_charset, 1, 0)
+		Z_PARAM_STR_OR_NULL(hint_charset)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
 

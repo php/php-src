@@ -686,7 +686,7 @@ PHP_FUNCTION(get_browser)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_STR_OR_NULL(agent_name)
 		Z_PARAM_BOOL(return_array)
 	ZEND_PARSE_PARAMETERS_END();
 

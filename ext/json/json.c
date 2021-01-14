@@ -273,7 +273,7 @@ PHP_FUNCTION(json_decode)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL_EX(assoc, assoc_null, 1, 0)
+		Z_PARAM_BOOL_OR_NULL(assoc, assoc_null)
 		Z_PARAM_LONG(depth)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();

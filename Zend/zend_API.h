@@ -1415,16 +1415,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_ITERABLE_EX(dest, 1)
 
 /* old "b" */
-#define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_BOOL_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_bool(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_BOOL_OR_NULL : Z_EXPECTED_BOOL; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_BOOL_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_BOOL(dest) \
 	Z_PARAM_BOOL_EX(dest, _dummy, 0, 0)
@@ -1433,15 +1430,12 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_BOOL_EX(dest, is_null, 1, 0)
 
 /* old "C" */
-#define Z_PARAM_CLASS_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_CLASS_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
 			_error_code = ZPP_ERROR_FAILURE; \
 			break; \
 		}
-
-#define Z_PARAM_CLASS_EX(dest, check_null, separate) \
-	Z_PARAM_CLASS_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_CLASS(dest) \
 	Z_PARAM_CLASS_EX(dest, 0, 0)
@@ -1498,16 +1492,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 1);
 
 /* old "d" */
-#define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_DOUBLE_OR_NULL : Z_EXPECTED_DOUBLE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_DOUBLE(dest) \
 	Z_PARAM_DOUBLE_EX(dest, _dummy, 0, 0)
@@ -1516,8 +1507,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_DOUBLE_EX(dest, is_null, 1, 0)
 
 /* old "f" */
-#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
 			if (!_error) { \
 				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
@@ -1527,9 +1518,6 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			} \
 			break; \
 		} \
-
-#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) \
-	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, separate, separate)
 
 #define Z_PARAM_FUNC(dest_fci, dest_fcc) \
 	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0)
@@ -1585,16 +1573,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, 0, 0)
 
 /* old "l" */
-#define Z_PARAM_LONG_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_LONG_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_LONG_OR_NULL : Z_EXPECTED_LONG; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_LONG_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_LONG(dest) \
 	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
@@ -1618,16 +1603,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_NUMBER_EX(dest, 0)
 
 /* old "o" */
-#define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_OBJECT_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_OBJECT_EX(dest, check_null, separate) \
-	Z_PARAM_OBJECT_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_OBJECT(dest) \
 	Z_PARAM_OBJECT_EX(dest, 0, 0)
@@ -1635,17 +1617,14 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_OBJECT_OR_NULL(dest) \
 	Z_PARAM_OBJECT_EX(dest, 1, 0)
 
-/* The same as Z_PARAM_OBJECT_EX2 except that dest is a zend_object rather than a zval */
-#define Z_PARAM_OBJ_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+/* The same as Z_PARAM_OBJECT_EX except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_OBJ_EX(dest, check_null, separate) \
-	Z_PARAM_OBJ_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_OBJ(dest) \
 	Z_PARAM_OBJ_EX(dest, 0, 0)
@@ -1654,8 +1633,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_EX(dest, 1, 0)
 
 /* old "O" */
-#define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
@@ -1668,18 +1647,15 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			} \
 		}
 
-#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, separate) \
-	Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
-
 #define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
 
 #define Z_PARAM_OBJECT_OF_CLASS_OR_NULL(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 1, 0)
 
-/* The same as Z_PARAM_OBJECT_OF_CLASS_EX2 except that dest is a zend_object rather than a zval */
-#define Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+/* The same as Z_PARAM_OBJECT_OF_CLASS_EX except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
@@ -1691,9 +1667,6 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 				break; \
 			} \
 		}
-
-#define Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, check_null, separate) \
-	Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
 
 #define Z_PARAM_OBJ_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, 0, 0)
@@ -1716,16 +1689,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_OF_CLASS_OR_LONG_EX(dest_obj, _ce, dest_long, is_null, 1)
 
 /* old "p" */
-#define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_PATH_EX(dest, dest_len, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_PATH_EX(dest, dest_len, check_null, separate) \
-	Z_PARAM_PATH_EX2(dest, dest_len, check_null, separate, separate)
 
 #define Z_PARAM_PATH(dest, dest_len) \
 	Z_PARAM_PATH_EX(dest, dest_len, 0, 0)
@@ -1734,16 +1704,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_PATH_EX(dest, dest_len, 1, 0)
 
 /* old "P" */
-#define Z_PARAM_PATH_STR_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_PATH_STR_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_PATH_STR_EX(dest, check_null, separate) \
-	Z_PARAM_PATH_STR_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_PATH_STR(dest) \
 	Z_PARAM_PATH_STR_EX(dest, 0, 0)
@@ -1752,16 +1719,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_PATH_STR_EX(dest, 1, 0)
 
 /* old "r" */
-#define Z_PARAM_RESOURCE_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_RESOURCE_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_resource(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_RESOURCE_EX(dest, check_null, separate) \
-	Z_PARAM_RESOURCE_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_RESOURCE(dest) \
 	Z_PARAM_RESOURCE_EX(dest, 0, 0)
@@ -1770,16 +1734,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_RESOURCE_EX(dest, 1, 0)
 
 /* old "s" */
-#define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_STRING_EX(dest, dest_len, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_STRING_EX(dest, dest_len, check_null, separate) \
-	Z_PARAM_STRING_EX2(dest, dest_len, check_null, separate, separate)
 
 #define Z_PARAM_STRING(dest, dest_len) \
 	Z_PARAM_STRING_EX(dest, dest_len, 0, 0)
@@ -1788,16 +1749,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_STRING_EX(dest, dest_len, 1, 0)
 
 /* old "S" */
-#define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_STR_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_STR_EX(dest, check_null, separate) \
-	Z_PARAM_STR_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_STR(dest) \
 	Z_PARAM_STR_EX(dest, 0, 0)
