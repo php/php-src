@@ -1387,13 +1387,6 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
 	} while (0)
 
-#define SEPARATE_ARG_IF_REF(varptr) do { 				\
-		ZVAL_DEREF(varptr);								\
-		if (Z_REFCOUNTED_P(varptr)) { 					\
-			Z_ADDREF_P(varptr); 						\
-		}												\
-	} while (0)
-
 /* Properties store a flag distinguishing unset and uninitialized properties
  * (both use IS_UNDEF type) in the Z_EXTRA space. As such we also need to copy
  * the Z_EXTRA space when copying property default values etc. We define separate

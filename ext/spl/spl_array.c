@@ -401,11 +401,8 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *objec
 			if (!offset) {
 				ZVAL_UNDEF(&tmp);
 				offset = &tmp;
-			} else {
-				SEPARATE_ARG_IF_REF(offset);
 			}
 			zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
-			zval_ptr_dtor(offset);
 
 			if (!Z_ISUNDEF_P(rv)) {
 				return rv;
@@ -447,11 +444,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
-		} else {
-			SEPARATE_ARG_IF_REF(offset);
 		}
 		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
-		zval_ptr_dtor(offset);
 		return;
 	}
 
@@ -517,9 +511,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	spl_array_object *intern = spl_array_from_obj(object);
 
 	if (check_inherited && intern->fptr_offset_del) {
-		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
-		zval_ptr_dtor(offset);
 		return;
 	}
 
@@ -598,9 +590,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, 
 	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
-		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
-		zval_ptr_dtor(offset);
 
 		if (zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);

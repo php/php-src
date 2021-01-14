@@ -350,11 +350,8 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
-		} else {
-			SEPARATE_ARG_IF_REF(offset);
 		}
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_get, "offsetGet", rv, offset);
-		zval_ptr_dtor(offset);
 		if (!Z_ISUNDEF_P(rv)) {
 			return rv;
 		}
@@ -400,13 +397,8 @@ static void spl_fixedarray_object_write_dimension(zend_object *object, zval *off
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
-		} else {
-			SEPARATE_ARG_IF_REF(offset);
 		}
-		SEPARATE_ARG_IF_REF(value);
 		zend_call_method_with_2_params(object, intern->std.ce, &intern->methods->fptr_offset_set, "offsetSet", NULL, offset, value);
-		zval_ptr_dtor(value);
-		zval_ptr_dtor(offset);
 		return;
 	}
 
@@ -439,9 +431,7 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 	intern = spl_fixed_array_from_obj(object);
 
 	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_del)) {
-		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_del, "offsetUnset", NULL, offset);
-		zval_ptr_dtor(offset);
 		return;
 	}
 
@@ -482,9 +472,7 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 		zval rv;
 		zend_bool result;
 
-		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_has, "offsetExists", &rv, offset);
-		zval_ptr_dtor(offset);
 		result = zend_is_true(&rv);
 		zval_ptr_dtor(&rv);
 		return result;
