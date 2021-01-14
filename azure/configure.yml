@@ -69,5 +69,5 @@ steps:
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d \
-        LIBS='-Wl,-rpath,/opt/oracle/instantclient'
+        LDFLAGS='-Wl,-rpath,/opt/oracle/instantclient'
   displayName: 'Configure Build'
