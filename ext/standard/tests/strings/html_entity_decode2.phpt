@@ -3,9 +3,6 @@ html_entity_decode: Handling of &apos;
 --FILE--
 <?php
 
-echo "*** Default (should decode) ***\n";
-echo html_entity_decode("&apos;"), "\n";
-
 echo "*** HTML 4.01 implicit (shouldn't decode) ***\n";
 echo html_entity_decode("&apos;", ENT_QUOTES, "UTF-8"), "\n";
 
@@ -24,8 +21,6 @@ echo html_entity_decode("&apos;", ENT_QUOTES | ENT_XML1, "UTF-8"), "\n";
 echo "Done.\n";
 ?>
 --EXPECT--
-*** Default (should decode) ***
-'
 *** HTML 4.01 implicit (shouldn't decode) ***
 &apos;
 *** HTML 4.01 (shouldn't decode) ***
