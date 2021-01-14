@@ -1167,7 +1167,15 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 			name = scope->parent->name;
 		}
 	}
-	return name;
+
+	/* The resolved name for anonymous classes contains null bytes. Cut off everything after the
+	 * null byte here, to avoid larger parts of the type being omitted by printing code later. */
+	size_t len = strlen(ZSTR_VAL(name));
+	if (len != ZSTR_LEN(name)) {
+		ZEND_ASSERT(scope && "This should only happen with resolved types");
+		return zend_string_init(ZSTR_VAL(name), len, 0);
+	}
+	return zend_string_copy(name);
 }
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
@@ -1179,11 +1187,13 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			if (ZEND_TYPE_HAS_CE(*list_type)) {
 				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name);
 			} else {
-				str = add_type_string(str, resolve_class_name(ZEND_TYPE_NAME(*list_type), scope));
+				zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
+				str = add_type_string(str, resolved);
+				zend_string_release(resolved);
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		str = zend_string_copy(resolve_class_name(ZEND_TYPE_NAME(type), scope));
+		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	} else if (ZEND_TYPE_HAS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
 	}
