@@ -52,3 +52,13 @@ steps:
                        firebird-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
+  - script: |
+      mkdir /opt/oracle
+      wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
+      unzip instantclient-basiclite-linuxx64.zip
+      wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
+      unzip instantclient-sdk-linuxx64.zip
+      mv instantclient_*_* /opt/oracle/instantclient
+      # Interferes with libldap2 headers.
+      rm /opt/oracle/instantclient/sdk/include/ldap.h
+    displayName: 'Install Oracle Instant Client'

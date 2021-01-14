@@ -64,6 +64,8 @@ steps:
         --with-pdo-odbc=unixODBC,/usr \
         --with-pdo-firebird \
         --with-pdo-dblib \
+        --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient \
+        --with-oci8=shared,instantclient,/opt/oracle/instantclient \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d
