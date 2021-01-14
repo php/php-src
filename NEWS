@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     Seitz, cmb)
   . Fixed bug #80596 (Invalid union type TypeError in anonymous classes).
     (Daniil Gentili)
+  . Fixed bug #80617 (GCC throws warning about type narrowing in
+    ZEND_TYPE_INIT_CODE). (Nikita)
 
 - BCMath:
   . Fixed bug #80545 (bcadd('a', 'a') doesn't throw an exception).

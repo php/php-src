@@ -150,7 +150,7 @@ typedef struct {
 /* Type mask excluding the flags above. */
 #define _ZEND_TYPE_MAY_BE_MASK ((1u << 20) - 1)
 /* Must have same value as MAY_BE_NULL */
-#define _ZEND_TYPE_NULLABLE_BIT 0x2
+#define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
