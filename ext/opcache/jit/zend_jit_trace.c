@@ -7629,6 +7629,11 @@ static void zend_jit_trace_init_caches(void)
 static void zend_jit_trace_reset_caches(void)
 {
 	JIT_G(tracing) = 0;
+#ifdef ZTS
+	if (!JIT_G(exit_counters)) {
+		JIT_G(exit_counters) = calloc(JIT_G(max_exit_counters), 1);
+	}
+#endif
 }
 
 static void zend_jit_trace_restart(void)
