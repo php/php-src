@@ -61,5 +61,4 @@ steps:
       mv instantclient_*_* /opt/oracle/instantclient
       # Interferes with libldap2 headers.
       rm /opt/oracle/instantclient/sdk/include/ldap.h
-      echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]/opt/oracle/instantclient:$LD_LIBRARY_PATH"
     displayName: 'Install Oracle Instant Client'
