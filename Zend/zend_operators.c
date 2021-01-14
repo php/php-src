@@ -2954,15 +2954,6 @@ ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
-{
-	zend_string *str;
-
-	str = zend_strpprintf(0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
-	ZVAL_NEW_STR(op, str);
-}
-/* }}} */
-
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 {
 	if ((zend_ulong)num <= 9) {

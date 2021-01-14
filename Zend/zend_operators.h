@@ -442,8 +442,6 @@ ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
 ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
-ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-
 #define convert_to_null_ex(zv) convert_to_null(zv)
 #define convert_to_boolean_ex(zv) convert_to_boolean(zv)
 #define convert_to_long_ex(zv) convert_to_long(zv)
