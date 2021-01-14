@@ -277,7 +277,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 			} else {
-				convert_to_string_ex(&retval);
+				convert_to_string(&retval);
 				valuePush(ctxt, xmlXPathNewString((xmlChar *) Z_STRVAL(retval)));
 			}
 			zval_ptr_dtor(&retval);

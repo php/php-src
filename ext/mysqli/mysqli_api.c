@@ -858,12 +858,12 @@ PHP_FUNCTION(mysqli_stmt_execute)
 						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(param);
 						break;
 					case MYSQL_TYPE_DOUBLE:
-						convert_to_double_ex(param);
+						convert_to_double(param);
 						stmt->stmt->params[i].buffer = &Z_DVAL_P(param);
 						break;
 					case MYSQL_TYPE_LONGLONG:
 					case MYSQL_TYPE_LONG:
-						convert_to_long_ex(param);
+						convert_to_long(param);
 						stmt->stmt->params[i].buffer = &Z_LVAL_P(param);
 						break;
 					default:
@@ -1714,7 +1714,7 @@ PHP_FUNCTION(mysqli_options)
 				}
 				break;
 			case IS_LONG:
-				convert_to_long_ex(mysql_value);
+				convert_to_long(mysql_value);
 				break;
 			default:
 				break;

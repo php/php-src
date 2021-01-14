@@ -414,7 +414,7 @@ static char *_readline_command_generator(const char *text, int state)
 	while ((entry = zend_hash_get_current_data(myht)) != NULL) {
 		zend_hash_move_forward(myht);
 
-		convert_to_string_ex(entry);
+		convert_to_string(entry);
 		if (strncmp (Z_STRVAL_P(entry), text, strlen(text)) == 0) {
 			return (strdup(Z_STRVAL_P(entry)));
 		}

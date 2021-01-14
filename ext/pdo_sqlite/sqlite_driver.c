@@ -496,7 +496,7 @@ static int php_sqlite3_collation_callback(void *context,
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
 	} else if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
-			convert_to_long_ex(&retval);
+			convert_to_long(&retval);
 		}
 		ret = 0;
 		if (Z_LVAL(retval) > 0) {

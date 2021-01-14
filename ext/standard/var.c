@@ -1208,7 +1208,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			zend_string *lcname;
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
-				convert_to_string_ex(entry);
+				convert_to_string(entry);
 				lcname = zend_string_tolower(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
 		        zend_string_release_ex(lcname, 0);

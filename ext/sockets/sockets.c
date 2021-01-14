@@ -1877,7 +1877,7 @@ PHP_FUNCTION(socket_set_option)
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
@@ -1889,8 +1889,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long_ex(l_onoff);
-			convert_to_long_ex(l_linger);
+			convert_to_long(l_onoff);
+			convert_to_long(l_linger);
 
 			lv.l_onoff = (unsigned short)Z_LVAL_P(l_onoff);
 			lv.l_linger = (unsigned short)Z_LVAL_P(l_linger);
@@ -1905,7 +1905,7 @@ PHP_FUNCTION(socket_set_option)
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
@@ -1917,8 +1917,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long_ex(sec);
-			convert_to_long_ex(usec);
+			convert_to_long(sec);
+			convert_to_long(usec);
 #ifndef PHP_WIN32
 			tv.tv_sec = Z_LVAL_P(sec);
 			tv.tv_usec = Z_LVAL_P(usec);
@@ -1946,7 +1946,7 @@ PHP_FUNCTION(socket_set_option)
 
 		default:
 default_case:
-			convert_to_long_ex(arg4);
+			convert_to_long(arg4);
 			ov = Z_LVAL_P(arg4);
 
 			optlen = sizeof(ov);

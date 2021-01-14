@@ -3303,7 +3303,7 @@ PHP_FUNCTION(array_splice)
 
 	if (ZEND_NUM_ARGS() == 4) {
 		/* Make sure the last argument, if passed, is an array */
-		convert_to_array_ex(repl_array);
+		convert_to_array(repl_array);
 	}
 
 	/* Don't create the array of removed elements if it's not going
@@ -3501,10 +3501,10 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				dest_zval = dest_entry;
 
 				if (Z_TYPE_P(dest_zval) == IS_NULL) {
-					convert_to_array_ex(dest_zval);
+					convert_to_array(dest_zval);
 					add_next_index_null(dest_zval);
 				} else {
-					convert_to_array_ex(dest_zval);
+					convert_to_array(dest_zval);
 				}
 				ZVAL_UNDEF(&tmp);
 				if (Z_TYPE_P(src_zval) == IS_OBJECT) {

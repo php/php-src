@@ -158,7 +158,7 @@ int_offset:
 		}
 	} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
 double_offset:
-		convert_to_long_ex(arg);
+		convert_to_long(arg);
 		goto int_offset;
 	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
 		zend_long lval;

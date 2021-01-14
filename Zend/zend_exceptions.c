@@ -478,7 +478,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 {
 	/* the trivial way would be to do
-	 * convert_to_string_ex(arg);
+	 * convert_to_string(arg);
 	 * append it and kill the now tmp arg.
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */

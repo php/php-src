@@ -970,7 +970,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
-					convert_to_string_ex(&retval);
+					convert_to_string(&retval);
 					if (Z_STRLEN(retval)) {
 						context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 						context->out.used = Z_STRLEN(retval);

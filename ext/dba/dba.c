@@ -114,8 +114,8 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		group = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(key), &pos);
 		name = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
-		convert_to_string_ex(group);
-		convert_to_string_ex(name);
+		convert_to_string(group);
+		convert_to_string(name);
 		if (Z_STRLEN_P(group) == 0) {
 			*key_str = Z_STRVAL_P(name);
 			*key_free = NULL;

@@ -1832,7 +1832,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 			bind->array.element_lengths[i] = sizeof(oci_phpsized_int);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_long_ex(entry);
+			convert_to_long(entry);
 			((oci_phpsized_int *)bind->array.elements)[i] = (oci_phpsized_int) Z_LVAL_P(entry);
 			zend_hash_move_forward(hash);
 		} else {
@@ -1873,7 +1873,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 			bind->array.element_lengths[i] = sizeof(double);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_double_ex(entry);
+			convert_to_double(entry);
 			((double *)bind->array.elements)[i] = (double) Z_DVAL_P(entry);
 			zend_hash_move_forward(hash);
 		} else {

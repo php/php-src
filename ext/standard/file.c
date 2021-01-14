@@ -654,7 +654,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:
-			convert_to_string_ex(data);
+			convert_to_string(data);
 
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {

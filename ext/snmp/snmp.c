@@ -705,7 +705,7 @@ static int php_snmp_parse_oid(
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
 		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
-			convert_to_string_ex(tmp_oid);
+			convert_to_string(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
 				if (type_str) {
@@ -720,7 +720,7 @@ static int php_snmp_parse_oid(
 						idx_type++;
 					}
 					if (idx_type < type_ht->nNumUsed) {
-						convert_to_string_ex(tmp_type);
+						convert_to_string(tmp_type);
 						if (Z_STRLEN_P(tmp_type) != 1) {
 							zend_value_error("Type must be a single character");
 							efree(objid_query->vars);
@@ -747,7 +747,7 @@ static int php_snmp_parse_oid(
 						idx_value++;
 					}
 					if (idx_value < value_ht->nNumUsed) {
-						convert_to_string_ex(tmp_value);
+						convert_to_string(tmp_value);
 						objid_query->vars[objid_query->count].value = Z_STRVAL_P(tmp_value);
 						idx_value++;
 					} else {

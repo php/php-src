@@ -1170,7 +1170,7 @@ PHP_FUNCTION(getopt)
 			int optname_int = atoi(optname);
 			if ((args = zend_hash_index_find(Z_ARRVAL_P(return_value), optname_int)) != NULL) {
 				if (Z_TYPE_P(args) != IS_ARRAY) {
-					convert_to_array_ex(args);
+					convert_to_array(args);
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
 			} else {
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(getopt)
 			/* other strings */
 			if ((args = zend_hash_str_find(Z_ARRVAL_P(return_value), optname, strlen(optname))) != NULL) {
 				if (Z_TYPE_P(args) != IS_ARRAY) {
-					convert_to_array_ex(args);
+					convert_to_array(args);
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
 			} else {
@@ -2393,7 +2393,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {
-		convert_to_string_ex(&tick_fe.arguments[0]);
+		convert_to_string(&tick_fe.arguments[0]);
 	}
 
 	if (!BG(user_tick_functions)) {

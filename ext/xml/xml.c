@@ -437,7 +437,7 @@ static void xml_set_handler(zval *handler, zval *data)
 
 	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
 	if (Z_TYPE_P(data) != IS_ARRAY && Z_TYPE_P(data) != IS_OBJECT) {
-		convert_to_string_ex(data);
+		convert_to_string(data);
 		if (Z_STRLEN_P(data) == 0) {
 			ZVAL_UNDEF(handler);
 			return;

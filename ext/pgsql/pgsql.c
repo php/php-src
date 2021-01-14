@@ -3613,7 +3613,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 	}
-	convert_to_boolean_ex(return_value);
+	convert_to_boolean(return_value);
 }
 /* }}} */
 
@@ -4721,7 +4721,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_long_ex(&new_val);
+						convert_to_long(&new_val);
 						break;
 
 					case IS_LONG:
@@ -4837,7 +4837,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_string_ex(&new_val);
+						convert_to_string(&new_val);
 						break;
 
 					case IS_NULL:
@@ -4868,14 +4868,14 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							}
 							else {
 								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								convert_to_long_ex(&new_val);
+								convert_to_long(&new_val);
 							}
 						}
 						break;
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_long_ex(&new_val);
+						convert_to_long(&new_val);
 						break;
 
 					case IS_LONG:
@@ -5140,7 +5140,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(&new_val, Z_DVAL_P(val));
-						convert_to_string_ex(&new_val);
+						convert_to_string(&new_val);
 						break;
 
 					case IS_NULL:

@@ -3157,7 +3157,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			int val;
 
-			convert_to_long_ex(newval);
+			convert_to_long(newval);
 			if (ZEND_LONG_EXCEEDS_INT(Z_LVAL_P(newval))) {
 				zend_argument_value_error(3, "is too large");
 				RETURN_THROWS();
@@ -3172,7 +3172,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			struct timeval timeout;
 
-			convert_to_long_ex(newval);
+			convert_to_long(newval);
 			timeout.tv_sec = Z_LVAL_P(newval);
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
@@ -3184,7 +3184,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			int timeout;
 
-			convert_to_long_ex(newval);
+			convert_to_long(newval);
 			timeout = 1000 * Z_LVAL_P(newval); /* Convert to milliseconds */
 			if (ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
@@ -3196,7 +3196,7 @@ PHP_FUNCTION(ldap_set_option)
 		{
 			struct timeval timeout;
 
-			convert_to_long_ex(newval);
+			convert_to_long(newval);
 			timeout.tv_sec = Z_LVAL_P(newval);
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {

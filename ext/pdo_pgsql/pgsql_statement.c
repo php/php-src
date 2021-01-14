@@ -380,7 +380,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_lengths[param->paramno] = 1;
 						S->param_formats[param->paramno] = 0;
 					} else {
-						convert_to_string_ex(parameter);
+						convert_to_string(parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
 						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
 						S->param_formats[param->paramno] = 0;

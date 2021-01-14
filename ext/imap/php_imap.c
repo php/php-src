@@ -3048,47 +3048,47 @@ PHP_FUNCTION(imap_mail_compose)
 
 	env = mail_newenvelope();
 	if ((pvalue = zend_hash_str_find(envelope, "remail", sizeof("remail") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		env->remail = cpystr(Z_STRVAL_P(pvalue));
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "return_path", sizeof("return_path") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->return_path, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "date", sizeof("date") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		env->date = (unsigned char*)cpystr(Z_STRVAL_P(pvalue));
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "from", sizeof("from") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->from, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "reply_to", sizeof("reply_to") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->reply_to, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "in_reply_to", sizeof("in_reply_to") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		env->in_reply_to = cpystr(Z_STRVAL_P(pvalue));
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "subject", sizeof("subject") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		env->subject = cpystr(Z_STRVAL_P(pvalue));
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "to", sizeof("to") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->to, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "cc", sizeof("cc") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->cc, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "bcc", sizeof("bcc") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		PHP_RFC822_PARSE_ADRLIST(&env->bcc, pvalue);
 	}
 	if ((pvalue = zend_hash_str_find(envelope, "message_id", sizeof("message_id") - 1)) != NULL) {
-		convert_to_string_ex(pvalue);
+		convert_to_string(pvalue);
 		env->message_id=cpystr(Z_STRVAL_P(pvalue));
 	}
 
@@ -3098,7 +3098,7 @@ PHP_FUNCTION(imap_mail_compose)
 			SEPARATE_ARRAY(pvalue);
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pvalue), env_data) {
 				custom_headers_param = mail_newbody_parameter();
-				convert_to_string_ex(env_data);
+				convert_to_string(env_data);
 				custom_headers_param->value = (char *) fs_get(Z_STRLEN_P(env_data) + 1);
 				custom_headers_param->attribute = NULL;
 				memcpy(custom_headers_param->value, Z_STRVAL_P(env_data), Z_STRLEN_P(env_data) + 1);
@@ -3140,7 +3140,7 @@ PHP_FUNCTION(imap_mail_compose)
 				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				tmp_param = mail_newbody_parameter();
 				tmp_param->value = cpystr(Z_STRVAL_P(pvalue));
 				tmp_param->attribute = cpystr("CHARSET");
@@ -3155,7 +3155,7 @@ PHP_FUNCTION(imap_mail_compose)
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
-						convert_to_string_ex(disp_data);
+						convert_to_string(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
 						disp_param->next = tmp_param;
@@ -3165,19 +3165,19 @@ PHP_FUNCTION(imap_mail_compose)
 				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "subtype", sizeof("subtype") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->subtype = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "id", sizeof("id") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->id = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "description", sizeof("description") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->description = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition.type", sizeof("disposition.type") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->disposition.type = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
@@ -3189,7 +3189,7 @@ PHP_FUNCTION(imap_mail_compose)
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
-						convert_to_string_ex(disp_data);
+						convert_to_string(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
 						disp_param->next = tmp_param;
@@ -3202,7 +3202,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->nested.msg = mail_newmsg();
 			} else {
 				if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
-					convert_to_string_ex(pvalue);
+					convert_to_string(pvalue);
 					bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
 					memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 					bod->contents.text.size = Z_STRLEN_P(pvalue);
@@ -3219,7 +3219,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->size.bytes = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
 		} else if (Z_TYPE_P(data) == IS_ARRAY && topbod->type == TYPEMULTIPART) {
@@ -3251,7 +3251,7 @@ PHP_FUNCTION(imap_mail_compose)
 				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				tmp_param = mail_newbody_parameter();
 				tmp_param->value = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
 				memcpy(tmp_param->value, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue) + 1);
@@ -3267,7 +3267,7 @@ PHP_FUNCTION(imap_mail_compose)
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
-						convert_to_string_ex(disp_data);
+						convert_to_string(disp_data);
 						disp_param->value = (char *)fs_get(Z_STRLEN_P(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
 						disp_param->next = tmp_param;
@@ -3277,19 +3277,19 @@ PHP_FUNCTION(imap_mail_compose)
 				}
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "subtype", sizeof("subtype") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->subtype = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "id", sizeof("id") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->id = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "description", sizeof("description") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->description = cpystr(Z_STRVAL_P(pvalue));
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition.type", sizeof("disposition.type") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->disposition.type = (char *) fs_get(Z_STRLEN_P(pvalue) + 1);
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
@@ -3301,7 +3301,7 @@ PHP_FUNCTION(imap_mail_compose)
 						if (key == NULL) continue;
 						disp_param = mail_newbody_parameter();
 						disp_param->attribute = cpystr(ZSTR_VAL(key));
-						convert_to_string_ex(disp_data);
+						convert_to_string(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_P(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_P(disp_data), Z_STRLEN_P(disp_data) + 1);
 						disp_param->next = tmp_param;
@@ -3314,7 +3314,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->nested.msg = mail_newmsg();
 			} else {
 				if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "contents.data", sizeof("contents.data") - 1)) != NULL) {
-					convert_to_string_ex(pvalue);
+					convert_to_string(pvalue);
 					bod->contents.text.data = fs_get(Z_STRLEN_P(pvalue) + 1);
 					memcpy(bod->contents.text.data, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue) + 1);
 					bod->contents.text.size = Z_STRLEN_P(pvalue);
@@ -3331,7 +3331,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->size.bytes = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
-				convert_to_string_ex(pvalue);
+				convert_to_string(pvalue);
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
 		}
