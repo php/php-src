@@ -3,12 +3,12 @@ Trying to use lambda in array offset
 --FILE--
 <?php
 
-try {
-    $test[function(){}] = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$test[function(){}] = 1;
+var_dump($test);
 
 ?>
 --EXPECT--
-Illegal offset type
+array(1) {
+  [Closure#1]=>
+  int(1)
+}

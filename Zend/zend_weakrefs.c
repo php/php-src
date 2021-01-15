@@ -476,14 +476,10 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 	zend_weakmap *wm = zend_weakmap_fetch(&iter->it.data);
 	HashPosition *pos = zend_weakmap_iterator_get_pos_ptr(iter);
 
-	zend_string *string_key;
-	zend_ulong num_key;
-	int key_type = zend_hash_get_current_key_ex(&wm->ht, &string_key, &num_key, pos);
-	if (key_type != HASH_KEY_IS_LONG) {
-		ZEND_ASSERT(0 && "Must have integer key");
-	}
+	zval *ht_key = zend_hash_get_current_zkey_ex(&wm->ht, pos);
+	ZEND_ASSERT(Z_TYPE_P(ht_key) == IS_LONG);
 
-	ZVAL_OBJ_COPY(key, (zend_object *) num_key);
+	ZVAL_OBJ_COPY(key, (zend_object *) Z_LVAL_P(ht_key));
 }
 
 static void zend_weakmap_iterator_move_forward(zend_object_iterator *obj_iter)

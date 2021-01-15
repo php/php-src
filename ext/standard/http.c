@@ -27,12 +27,10 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *key_suffix, size_t key_suffix_len,
 			  zval *type, const char *arg_sep, int enc_type)
 {
-	zend_string *key = NULL;
 	char *newprefix, *p;
 	const char *prop_name;
 	size_t arg_sep_len, newprefix_len, prop_len;
-	zend_ulong idx;
-	zval *zdata = NULL;
+	zval *zdata, *zv_key;
 	ZEND_ASSERT(ht);
 
 	if (GC_IS_RECURSIVE(ht)) {
@@ -48,7 +46,10 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(ht, zv_key, zdata) {
+		zend_string *key;
+		zend_ulong idx;
+
 		zend_bool is_dynamic = 1;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
@@ -57,6 +58,16 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			}
 
 			is_dynamic = 0;
+		}
+
+		if (Z_TYPE_P(zv_key) == IS_STRING) {
+			key = Z_STR_P(zv_key);
+		} else if (Z_TYPE_P(zv_key) == IS_LONG) {
+			key = NULL;
+			idx = Z_LVAL_P(zv_key);
+		} else {
+			// TODO(OBJ_KEY) Probably error
+			ZEND_ASSERT(0 && "Not implemented");
 		}
 
 		/* handling for private & protected object properties */

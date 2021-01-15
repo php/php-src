@@ -147,14 +147,13 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 {
-	zend_ulong idx;
 	zend_string *key;
 	zval *val;
 	smart_str s = {0};
 
-	ZEND_HASH_FOREACH_KEY_VAL(headers, idx, key, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(headers, key, val) {
 		if (!key) {
-			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
+			zend_type_error("Header name must be a string");
 			break;
 		}
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */

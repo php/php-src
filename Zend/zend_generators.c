@@ -621,11 +621,7 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		ZVAL_COPY(&generator->value, value);
 
 		zval_ptr_dtor(&generator->key);
-		if (p->key) {
-			ZVAL_STR_COPY(&generator->key, p->key);
-		} else {
-			ZVAL_LONG(&generator->key, p->h);
-		}
+		ZVAL_COPY(&generator->key, &p->key);
 
 		Z_FE_POS(generator->values) = pos;
 	} else {

@@ -427,6 +427,7 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 
 	GC_PROTECT_RECURSION(ht);
 	ZEND_HASH_FOREACH_VAL(ht, val) {
+		// TODO(OBJ_KEY): Validate no object keys.
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
@@ -454,19 +455,13 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 
 static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 {
-	zend_string *key;
-	zend_ulong idx;
-	zval *new_val, *val;
+	zval *new_val, *val, *key;
 
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(src), idx, key, val) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(src), key, val) {
 		/* constant arrays can't contain references */
 		ZVAL_DEREF(val);
-		if (key) {
-			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
-		} else {
-			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
-		}
+		new_val = zend_hash_zkey_add_new(Z_ARRVAL_P(dst), key, val);
 		if (Z_TYPE_P(val) == IS_ARRAY) {
 			if (Z_REFCOUNTED_P(val)) {
 				copy_constant_array(new_val, val);
@@ -769,11 +764,8 @@ ZEND_FUNCTION(get_class_vars)
 /* {{{ Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
 {
-	zval *value;
 	HashTable *properties;
-	zend_string *key;
 	zend_object *zobj;
-	zend_ulong num_key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ(zobj)
@@ -791,9 +783,10 @@ ZEND_FUNCTION(get_object_vars)
 		}
 		RETURN_ARR(zend_proptable_to_symtable(properties, 1));
 	} else {
+		zval *key, *value;
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
-		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(properties, key, value) {
 			zend_bool is_dynamic = 1;
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
@@ -804,7 +797,8 @@ ZEND_FUNCTION(get_object_vars)
 				is_dynamic = 0;
 			}
 
-			if (key && zend_check_property_access(zobj, key, is_dynamic) == FAILURE) {
+			if (Z_TYPE_P(key) == IS_STRING &&
+					zend_check_property_access(zobj, Z_STR_P(key), is_dynamic) == FAILURE) {
 				continue;
 			}
 
@@ -813,13 +807,13 @@ ZEND_FUNCTION(get_object_vars)
 			}
 			Z_TRY_ADDREF_P(value);
 
-			if (UNEXPECTED(!key)) {
+			if (UNEXPECTED(Z_TYPE_P(key) != IS_STRING)) {
 				/* This case is only possible due to loopholes, e.g. ArrayObject */
-				zend_hash_index_add(Z_ARRVAL_P(return_value), num_key, value);
-			} else if (!is_dynamic && ZSTR_VAL(key)[0] == 0) {
+				zend_hash_zkey_add(Z_ARRVAL_P(return_value), key, value);
+			} else if (!is_dynamic && Z_STRVAL_P(key)[0] == 0) {
 				const char *prop_name, *class_name;
 				size_t prop_len;
-				zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+				zend_unmangle_property_name_ex(Z_STR_P(key), &class_name, &prop_name, &prop_len);
 				/* We assume here that a mangled property name is never
 				 * numeric. This is probably a safe assumption, but
 				 * theoretically someone might write an extension with
@@ -827,7 +821,7 @@ ZEND_FUNCTION(get_object_vars)
 				 */
 				zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 			} else {
-				zend_symtable_add_new(Z_ARRVAL_P(return_value), key, value);
+				zend_symtable_add_new(Z_ARRVAL_P(return_value), Z_STR_P(key), value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1421,9 +1415,7 @@ ZEND_FUNCTION(get_resource_id)
 ZEND_FUNCTION(get_resources)
 {
 	zend_string *type = NULL;
-	zend_string *key;
-	zend_ulong index;
-	zval *val;
+	zval *key, *val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &type) == FAILURE) {
 		RETURN_THROWS();
@@ -1431,18 +1423,18 @@ ZEND_FUNCTION(get_resources)
 
 	if (!type) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
-			if (!key) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(&EG(regular_list), key, val) {
+			if (Z_TYPE_P(key) == IS_LONG) {
 				Z_ADDREF_P(val);
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL_P(key), val);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else if (zend_string_equals_literal(type, "Unknown")) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
-			if (!key && Z_RES_TYPE_P(val) <= 0) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(&EG(regular_list), key, val) {
+			if (Z_TYPE_P(key) == IS_LONG && Z_RES_TYPE_P(val) <= 0) {
 				Z_ADDREF_P(val);
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL_P(key), val);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
@@ -1454,10 +1446,10 @@ ZEND_FUNCTION(get_resources)
 		}
 
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
-			if (!key && Z_RES_TYPE_P(val) == id) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(&EG(regular_list), key, val) {
+			if (Z_TYPE_P(key) == IS_LONG && Z_RES_TYPE_P(val) == id) {
 				Z_ADDREF_P(val);
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL_P(key), val);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

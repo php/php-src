@@ -3,9 +3,11 @@ Using isset() with arrays
 --FILE--
 <?php
 
+$obj = new stdClass;
 $array = [
     0 => true,
     "a" => true,
+    $obj => true,
 ];
 
 var_dump(isset($array[0]));
@@ -15,6 +17,8 @@ var_dump(isset($array["a"]));
 var_dump(isset($array[false]));
 
 var_dump(isset($array[0.6]));
+
+var_dump(isset($array[$obj]));
 
 var_dump(isset($array[true]));
 
@@ -28,13 +32,9 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-try {
-    isset($array[new stdClass()]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
 ?>
 --EXPECTF--
+bool(true)
 bool(true)
 bool(true)
 bool(true)
@@ -44,5 +44,4 @@ bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)
-Illegal offset type in isset or empty
 Illegal offset type in isset or empty

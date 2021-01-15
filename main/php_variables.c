@@ -686,26 +686,19 @@ static inline void php_register_server_variables(void)
 /* {{{ php_autoglobal_merge */
 static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 {
-	zval *src_entry, *dest_entry;
-	zend_string *string_key;
-	zend_ulong num_key;
+	zval *src_entry, *dest_entry, *key;
 	int globals_check = (dest == (&EG(symbol_table)));
 
-	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(src, key, src_entry) {
 		if (Z_TYPE_P(src_entry) != IS_ARRAY
-			|| (string_key && (dest_entry = zend_hash_find(dest, string_key)) == NULL)
-			|| (string_key == NULL && (dest_entry = zend_hash_index_find(dest, num_key)) == NULL)
+			|| (dest_entry = zend_hash_zkey_find(dest, key)) == NULL
 			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
 			Z_TRY_ADDREF_P(src_entry);
-			if (string_key) {
-				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
-						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
-					zend_hash_update(dest, string_key, src_entry);
-				} else {
-					Z_TRY_DELREF_P(src_entry);
-				}
+			if (Z_TYPE_P(key) != IS_STRING || !globals_check
+					|| !zend_string_equals_literal(Z_STR_P(key), "GLOBALS")) {
+				zend_hash_zkey_update(dest, key, src_entry);
 			} else {
-				zend_hash_index_update(dest, num_key, src_entry);
+				Z_TRY_DELREF_P(src_entry);
 			}
 		} else {
 			SEPARATE_ARRAY(dest_entry);

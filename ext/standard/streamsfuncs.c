@@ -642,19 +642,17 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 
 static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 {
-	zval *elem, *dest_elem;
+	zval *elem, *dest_elem, *key;
 	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
-	zend_string *key;
-	zend_ulong num_ind;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(stream_array), key, elem) {
 		php_socket_t this_fd;
 
 		ZVAL_DEREF(elem);
@@ -669,12 +667,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 		 */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
-				if (!key) {
-					dest_elem = zend_hash_index_update(ht, num_ind, elem);
-				} else {
-					dest_elem = zend_hash_update(ht, key, elem);
-				}
-
+				dest_elem = zend_hash_zkey_update(ht, key, elem);
 				zval_add_ref(dest_elem);
 				ret++;
 				continue;
@@ -691,19 +684,17 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 
 static int stream_array_emulate_read_fd_set(zval *stream_array)
 {
-	zval *elem, *dest_elem;
+	zval *elem, *dest_elem, *key;
 	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
-	zend_ulong num_ind;
-	zend_string *key;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(stream_array), key, elem) {
 		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -716,11 +707,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			 * This branch of code also allows blocking streams with buffered data to
 			 * operate correctly in stream_select.
 			 * */
-			if (!key) {
-				dest_elem = zend_hash_index_update(ht, num_ind, elem);
-			} else {
-				dest_elem = zend_hash_update(ht, key, elem);
-			}
+			dest_elem = zend_hash_zkey_update(ht, key, elem);
 			zval_add_ref(dest_elem);
 			ret++;
 			continue;

@@ -168,19 +168,22 @@ ZEND_API void zend_copy_ini_directives(void) /* {{{ */
 
 static int ini_key_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	if (!f->key && !s->key) { /* both numeric */
-		if (f->h > s->h) {
+	ZEND_ASSERT(Z_TYPE(f->key) == IS_LONG || Z_TYPE(f->key) == IS_STRING);
+	ZEND_ASSERT(Z_TYPE(s->key) == IS_LONG || Z_TYPE(s->key) == IS_STRING);
+
+	if (Z_TYPE(f->key) == IS_LONG && Z_TYPE(s->key) == IS_LONG) { /* both numeric */
+		if (Z_LVAL(f->key) > Z_LVAL(s->key)) {
 			return -1;
-		} else if (f->h < s->h) {
+		} else if (Z_LVAL(f->key) < Z_LVAL(s->key)) {
 			return 1;
 		}
 		return 0;
-	} else if (!f->key) { /* f is numeric, s is not */
+	} else if (Z_TYPE(f->key) == IS_LONG) { /* f is numeric, s is not */
 		return -1;
-	} else if (!s->key) { /* s is numeric, f is not */
+	} else if (Z_TYPE(s->key) == IS_LONG) { /* s is numeric, f is not */
 		return 1;
 	} else { /* both strings */
-		return zend_binary_strcasecmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
+		return zend_binary_strcasecmp(Z_STRVAL(f->key), Z_STRLEN(f->key), Z_STRVAL(s->key), Z_STRLEN(s->key));
 	}
 }
 /* }}} */

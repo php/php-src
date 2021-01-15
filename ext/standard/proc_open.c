@@ -1010,8 +1010,6 @@ PHP_FUNCTION(proc_open)
 	int ndesc = 0;
 	int i;
 	zval *descitem = NULL;
-	zend_string *str_index;
-	zend_ulong nindex;
 	descriptorspec_item *descriptors = NULL;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
@@ -1034,6 +1032,7 @@ PHP_FUNCTION(proc_open)
 	int pty_master_fd = -1, pty_slave_fd = -1;
 	php_process_id_t child;
 	php_process_handle *proc;
+	zval *key;
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ARRAY_HT_OR_STR(command_ht, command_str)
@@ -1089,20 +1088,20 @@ PHP_FUNCTION(proc_open)
 	descriptors = alloc_descriptor_array(descriptorspec);
 
 	/* Walk the descriptor spec and set up files/pipes */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
-		if (str_index) {
+	ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(descriptorspec), key, descitem) {
+		if (Z_TYPE_P(key) != IS_LONG) {
 			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
 		}
 
-		descriptors[ndesc].index = (int)nindex;
+		descriptors[ndesc].index = (int) Z_LVAL_P(key);
 
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			if (set_proc_descriptor_from_resource(descitem, &descriptors[ndesc], ndesc) == FAILURE) {
 				goto exit_fail;
 			}
 		} else if (Z_TYPE_P(descitem) == IS_ARRAY) {
-			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, (int)nindex,
+			if (set_proc_descriptor_from_array(descitem, descriptors, ndesc, (int) Z_LVAL_P(key),
 				&pty_master_fd, &pty_slave_fd) == FAILURE) {
 				goto exit_fail;
 			}

@@ -165,16 +165,14 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 /* {{{ php_print_gpcse_array */
 static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 {
-	zval *data, *tmp;
-	zend_string *string_key;
-	zend_ulong num_key;
+	zval *data, *tmp, *array_key;
 	zend_string *key;
 
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
 	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(Z_ARRVAL_P(data), array_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
 				php_info_print("<td class=\"e\">");
@@ -184,14 +182,16 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			php_info_print(name);
 			php_info_print("['");
 
-			if (string_key != NULL) {
+			if (Z_TYPE_P(array_key) == IS_STRING) {
 				if (!sapi_module.phpinfo_as_text) {
-					php_info_print_html_esc(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
+					php_info_print_html_esc(Z_STRVAL_P(array_key), Z_STRLEN_P(array_key));
 				} else {
-					php_info_print(ZSTR_VAL(string_key));
+					php_info_print(Z_STRVAL_P(array_key));
 				}
+			} else if (Z_TYPE_P(array_key) == IS_LONG) {
+				php_info_printf(ZEND_ULONG_FMT, Z_LVAL_P(array_key));
 			} else {
-				php_info_printf(ZEND_ULONG_FMT, num_key);
+				// TODO(OBJ_KEY)
 			}
 			php_info_print("']");
 			if (!sapi_module.phpinfo_as_text) {

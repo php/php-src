@@ -2312,9 +2312,8 @@ PHP_FUNCTION(substr_replace)
 		zend_tmp_string_release(tmp_repl_str);
 		RETURN_NEW_STR(result);
 	} else { /* str is array of strings */
-		zend_string *str_index = NULL;
+		zval *key;
 		size_t result_len;
-		zend_ulong num_index;
 
 		/* TODO
 		if (!len_is_null && from_ht) {
@@ -2329,7 +2328,7 @@ PHP_FUNCTION(substr_replace)
 
 		from_idx = len_idx = repl_idx = 0;
 
-		ZEND_HASH_FOREACH_KEY_VAL(str_ht, num_index, str_index, tmp_str) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(str_ht, key, tmp_str) {
 			zend_string *tmp_orig_str;
 			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
@@ -2439,14 +2438,9 @@ PHP_FUNCTION(substr_replace)
 
 			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
-			if (str_index) {
-				zval tmp;
-
-				ZVAL_NEW_STR(&tmp, result);
-				zend_symtable_update(Z_ARRVAL_P(return_value), str_index, &tmp);
-			} else {
-				add_index_str(return_value, num_index, result);
-			}
+			zval tmp;
+			ZVAL_NEW_STR(&tmp, result);
+			zend_hash_zkey_add_new(Z_ARRVAL_P(return_value), key, &tmp);
 
 			zend_tmp_string_release(tmp_orig_str);
 		} ZEND_HASH_FOREACH_END();
@@ -2724,15 +2718,13 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 {
 	const char *str = ZSTR_VAL(input);
 	size_t slen = ZSTR_LEN(input);
-	zend_ulong num_key;
 	zend_string *str_key;
 	size_t len, pos, old_pos;
-	int num_keys = 0;
+	bool non_string_keys = 0;
 	size_t minlen = 128*1024;
 	size_t maxlen = 0;
 	HashTable str_hash;
 	zval *entry;
-	const char *key;
 	smart_str result = {0};
 	zend_ulong bitset[256/sizeof(zend_ulong)];
 	zend_ulong *num_bitset;
@@ -2744,7 +2736,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	/* check if original array has numeric keys */
 	ZEND_HASH_FOREACH_STR_KEY(pats, str_key) {
 		if (UNEXPECTED(!str_key)) {
-			num_keys = 1;
+			non_string_keys = 1;
 		} else {
 			len = ZSTR_LEN(str_key);
 			if (UNEXPECTED(len < 1)) {
@@ -2766,13 +2758,14 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (UNEXPECTED(num_keys)) {
-		zend_string *key_used;
+	if (UNEXPECTED(non_string_keys)) {
 		/* we have to rebuild HashTable with numeric keys */
+		zval *key;
 		zend_hash_init(&str_hash, zend_hash_num_elements(pats), NULL, NULL, 0);
-		ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
-			if (UNEXPECTED(!str_key)) {
-				key_used = zend_long_to_str(num_key);
+		ZEND_HASH_FOREACH_ZKEY_VAL(pats, key, entry) {
+			zend_string *key_used;
+			if (UNEXPECTED(Z_TYPE_P(key) != IS_STRING)) {
+				key_used = zval_get_string(key);
 				len = ZSTR_LEN(key_used);
 				if (UNEXPECTED(len > slen)) {
 					/* skip long patterns */
@@ -2797,7 +2790,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 				}
 			}
 			zend_hash_add(&str_hash, key_used, entry);
-			if (UNEXPECTED(!str_key)) {
+			if (UNEXPECTED(Z_TYPE_P(key) != IS_STRING)) {
 				zend_string_release_ex(key_used, 0);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -2815,7 +2808,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 
 	old_pos = pos = 0;
 	while (pos <= slen - minlen) {
-		key = str + pos;
+		const char *key = str + pos;
 		if (bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & (Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong)))) {
 			len = maxlen;
 			if (len > slen - pos) {
@@ -3199,16 +3192,12 @@ PHP_FUNCTION(strtr)
 		if (zend_hash_num_elements(from_ht) < 1) {
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(from_ht) == 1) {
-			zend_long num_key;
-			zend_string *str_key, *tmp_str, *replace, *tmp_replace;
-			zval *entry;
+			zval *key, *entry;
 
-			ZEND_HASH_FOREACH_KEY_VAL(from_ht, num_key, str_key, entry) {
-				tmp_str = NULL;
-				if (UNEXPECTED(!str_key)) {
-					str_key = tmp_str = zend_long_to_str(num_key);
-				}
-				replace = zval_get_tmp_string(entry, &tmp_replace);
+			ZEND_HASH_FOREACH_ZKEY_VAL(from_ht, key, entry) {
+				zend_string *tmp_str_key, *tmp_replace;
+				zend_string *str_key = zval_get_tmp_string(key, &tmp_str_key);
+				zend_string *replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
 					php_error_docref(NULL, E_WARNING, "Ignoring replacement of empty string");
 					RETVAL_STR_COPY(str);
@@ -3225,7 +3214,7 @@ PHP_FUNCTION(strtr)
 								ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 								ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
 				}
-				zend_tmp_string_release(tmp_str);
+				zend_tmp_string_release(tmp_str_key);
 				zend_tmp_string_release(tmp_replace);
 				return;
 			} ZEND_HASH_FOREACH_END();
@@ -4215,9 +4204,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	HashTable *subject_ht;
 	zval *subject_entry, *zcount = NULL;
 	zval result;
-	zend_string *string_key;
-	zend_ulong num_key;
 	zend_long count = 0;
+	zval *key;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_ARRAY_HT_OR_STR(search_ht, search_str)
@@ -4241,7 +4229,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
+		ZEND_HASH_FOREACH_ZKEY_VAL(subject_ht, key, subject_entry) {
 			zend_string *tmp_subject_str;
 			ZVAL_DEREF(subject_entry);
 			subject_str = zval_get_tmp_string(subject_entry, &tmp_subject_str);
@@ -4249,11 +4237,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			zend_tmp_string_release(tmp_subject_str);
 
 			/* Add to return array */
-			if (string_key) {
-				zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &result);
-			} else {
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &result);
-			}
+			zend_hash_zkey_add_new(Z_ARRVAL_P(return_value), key, &result);
 		} ZEND_HASH_FOREACH_END();
 	} else {	/* if subject is not an array */
 		count = php_str_replace_in_subject(search_str, search_ht, replace_str, replace_ht, subject_str, return_value, case_sensitivity);

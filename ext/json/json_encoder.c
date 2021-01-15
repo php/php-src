@@ -41,21 +41,20 @@ static int php_json_determine_array_type(zval *val) /* {{{ */
 
 	i = myht ? zend_hash_num_elements(myht) : 0;
 	if (i > 0) {
-		zend_string *key;
-		zend_ulong index, idx;
+		zval *key;
+		zend_ulong idx;
 
 		if (HT_IS_PACKED(myht) && HT_IS_WITHOUT_HOLES(myht)) {
 			return PHP_JSON_OUTPUT_ARRAY;
 		}
 
 		idx = 0;
-		ZEND_HASH_FOREACH_KEY(myht, index, key) {
-			if (key) {
+		ZEND_HASH_FOREACH_ZKEY(myht, key) {
+			if (Z_TYPE_P(key) != IS_LONG) {
 				return PHP_JSON_OUTPUT_OBJECT;
-			} else {
-				if (index != idx) {
-					return PHP_JSON_OUTPUT_OBJECT;
-				}
+			}
+			if (idx != Z_LVAL_P(key)) {
+				return PHP_JSON_OUTPUT_OBJECT;
 			}
 			idx++;
 		} ZEND_HASH_FOREACH_END();
@@ -159,11 +158,9 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 	i = myht ? zend_hash_num_elements(myht) : 0;
 
 	if (i > 0) {
-		zend_string *key;
-		zval *data;
-		zend_ulong index;
+		zval *key, *data;
 
-		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
+		ZEND_HASH_FOREACH_ZKEY_VAL_IND(myht, key, data) {
 			if (r == PHP_JSON_OUTPUT_ARRAY) {
 				if (need_comma) {
 					smart_str_appendc(buf, ',');
@@ -174,8 +171,8 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 				php_json_pretty_print_char(buf, options, '\n');
 				php_json_pretty_print_indent(buf, options, encoder);
 			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
-				if (key) {
-					if (ZSTR_VAL(key)[0] == '\0' && ZSTR_LEN(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
+				if (Z_TYPE_P(key) == IS_STRING) {
+					if (Z_STRVAL_P(key)[0] == '\0' && Z_STRLEN_P(key) > 0 && Z_TYPE_P(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
 						continue;
 					}
@@ -189,14 +186,14 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options, encoder);
 
-					if (php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key),
+					if (php_json_escape_string(buf, Z_STRVAL_P(key), Z_STRLEN_P(key),
 								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
 							(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
 							buf->s) {
 						ZSTR_LEN(buf->s) -= 4;
 						smart_str_appendl(buf, "\"\"", 2);
 					}
-				} else {
+				} else if (Z_TYPE_P(key) == IS_LONG) {
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
 					} else {
@@ -207,8 +204,10 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 					php_json_pretty_print_indent(buf, options, encoder);
 
 					smart_str_appendc(buf, '"');
-					smart_str_append_long(buf, (zend_long) index);
+					smart_str_append_long(buf, Z_LVAL_P(key));
 					smart_str_appendc(buf, '"');
+				} else {
+					// TODO(OBJ_KEY): Generate error.
 				}
 
 				smart_str_appendc(buf, ':');
