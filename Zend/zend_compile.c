@@ -2773,6 +2773,10 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	znode var_node, dim_node;
 
 	if (is_globals_fetch(var_ast)) {
+		if (dim_ast == NULL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot append to $GLOBALS");
+		}
+
 		zend_compile_expr(&dim_node, dim_ast);
 		if (dim_node.op_type == IS_CONST) {
 			convert_to_string(&dim_node.u.constant);
