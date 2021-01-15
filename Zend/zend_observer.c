@@ -29,7 +29,7 @@
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
 #define ZEND_OBSERVABLE_FN(fn_flags) \
-	(!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE)))
+	(!(fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 
 typedef struct _zend_observer_fcall_data {
 	// points after the last handler
