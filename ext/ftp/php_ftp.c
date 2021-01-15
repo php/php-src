@@ -495,7 +495,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
-	zend_bool	recursive = 0;
+	bool	recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &z_ftp, php_ftp_ce, &dir, &dir_len, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -662,7 +662,7 @@ PHP_FUNCTION(ftp_pasv)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	zend_bool	pasv;
+	bool	pasv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &z_ftp, php_ftp_ce, &pasv) == FAILURE) {
 		RETURN_THROWS();

@@ -304,7 +304,7 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	zend_bool use_national_character_set = 0;
+	bool use_national_character_set = 0;
 	char *quoted;
 	size_t quotedlen;
 	zend_string *quoted_str;
@@ -398,7 +398,7 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	zend_long lval = zval_get_long(val);
-	zend_bool bval = lval ? 1 : 0;
+	bool bval = lval ? 1 : 0;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("attr=%l", attr);

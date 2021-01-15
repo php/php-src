@@ -807,7 +807,7 @@ static inline void php_output_context_reset(php_output_context *context)
 
 /* {{{ static void php_output_context_feed(php_output_context *context, char *, size_t, size_t)
  * Feed output contexts input buffer */
-static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, zend_bool free)
+static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, bool free)
 {
 	if (context->in.free && context->in.data) {
 		efree(context->in.data);
@@ -1491,7 +1491,7 @@ PHP_FUNCTION(ob_list_handlers)
 /* {{{ Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
 {
-	zend_bool full_status = 0;
+	bool full_status = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_status) == FAILURE) {
 		RETURN_THROWS();

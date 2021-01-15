@@ -518,7 +518,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	ub2 dtype, data_size, precis;
 	ub4 namelen;
 	struct pdo_column_data *col = &stmt->columns[colno];
-	zend_bool dyn = FALSE;
+	bool dyn = FALSE;
 
 	/* describe the column */
 	STMT_CALL(OCIParamGet, (S->stmt, OCI_HTYPE_STMT, S->err, (dvoid*)&param, colno+1));

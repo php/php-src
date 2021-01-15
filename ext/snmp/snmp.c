@@ -1101,7 +1101,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
 	char *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
-	zend_bool use_orignames = 0, suffix_keys = 0;
+	bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
@@ -1324,7 +1324,7 @@ PHP_FUNCTION(snmp_get_quick_print)
 /* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	zend_bool a1;
+	bool a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
 		RETURN_THROWS();
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 /* {{{ Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	zend_bool a1;
+	bool a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
 		RETURN_THROWS();

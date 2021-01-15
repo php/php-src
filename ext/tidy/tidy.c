@@ -205,7 +205,7 @@ static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
 /* }}} */
 
 /* {{{ ext/tidy prototypes */
-static zend_string *php_tidy_file_to_mem(char *, zend_bool);
+static zend_string *php_tidy_file_to_mem(char *, bool);
 static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
@@ -335,7 +335,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 	return FAILURE;
 }
 
-static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
+static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -345,7 +345,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	HashTable *config_ht = NULL;
 
 	if (is_file) {
-		zend_bool use_include_path = 0;
+		bool use_include_path = 0;
 
 		ZEND_PARSE_PARAMETERS_START(1, 4)
 			Z_PARAM_PATH_STR(arg1)
@@ -432,7 +432,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	tidyRelease(doc);
 }
 
-static zend_string *php_tidy_file_to_mem(char *filename, zend_bool use_include_path)
+static zend_string *php_tidy_file_to_mem(char *filename, bool use_include_path)
 {
 	php_stream *stream;
 	zend_string *data = NULL;
@@ -895,16 +895,16 @@ static PHP_MINFO_FUNCTION(tidy)
 static PHP_INI_MH(php_tidy_set_clean_output)
 {
 	int status;
-	zend_bool value;
+	bool value;
 
 	if (ZSTR_LEN(new_value)==2 && strcasecmp("on", ZSTR_VAL(new_value))==0) {
-		value = (zend_bool) 1;
+		value = (bool) 1;
 	} else if (ZSTR_LEN(new_value)==3 && strcasecmp("yes", ZSTR_VAL(new_value))==0) {
-		value = (zend_bool) 1;
+		value = (bool) 1;
 	} else if (ZSTR_LEN(new_value)==4 && strcasecmp("true", ZSTR_VAL(new_value))==0) {
-		value = (zend_bool) 1;
+		value = (bool) 1;
 	} else {
-		value = (zend_bool) atoi(ZSTR_VAL(new_value));
+		value = (bool) atoi(ZSTR_VAL(new_value));
 	}
 
 	if (stage == PHP_INI_STAGE_RUNTIME) {
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(tidy_parse_file)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zend_string *inputfile, *contents, *options_str = NULL;
 	HashTable *options_ht = NULL;
 
@@ -1357,7 +1357,7 @@ PHP_METHOD(tidy, __construct)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	HashTable *options_ht = NULL;
 	zend_string *contents, *inputfile = NULL, *options_str = NULL;
 	PHPTidyObj *obj;
@@ -1396,7 +1396,7 @@ PHP_METHOD(tidy, parseFile)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	HashTable *options_ht = NULL;
 	zend_string *inputfile, *contents, *options_str = NULL;
 	PHPTidyObj *obj;

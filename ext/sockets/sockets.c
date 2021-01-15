@@ -726,7 +726,7 @@ PHP_FUNCTION(socket_select)
 	PHP_SOCKET		max_fd = 0;
 	int				retval, sets = 0;
 	zend_long		sec, usec = 0;
-	zend_bool		sec_is_null = 0;
+	bool		sec_is_null = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!l!|l", &r_array, &w_array, &e_array, &sec, &sec_is_null, &usec) == FAILURE) {
 		RETURN_THROWS();
@@ -978,7 +978,7 @@ PHP_FUNCTION(socket_write)
 	int			retval;
 	size_t      str_len;
 	zend_long	length = 0;
-	zend_bool   length_is_null = 1;
+	bool   length_is_null = 1;
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l!", &arg1, socket_ce, &str, &str_len, &length, &length_is_null) == FAILURE) {
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(socket_connect)
 	int					retval;
 	size_t              addr_len;
 	zend_long				port;
-	zend_bool				port_is_null = 1;
+	bool				port_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l!", &resource_socket, socket_ce, &addr, &addr_len, &port, &port_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -1641,7 +1641,7 @@ PHP_FUNCTION(socket_sendto)
 	int					retval;
 	size_t              buf_len, addr_len;
 	zend_long			len, flags, port;
-	zend_bool           port_is_null = 1;
+	bool           port_is_null = 1;
 	char				*buf, *addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oslls|l!", &arg1, socket_ce, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port, &port_is_null) == FAILURE) {

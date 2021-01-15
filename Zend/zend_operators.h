@@ -54,7 +54,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
+ZEND_API bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
 
 ZEND_API zend_result ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2);
@@ -63,10 +63,10 @@ ZEND_API zend_result ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1
 ZEND_API zend_result ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API zend_bool ZEND_FASTCALL zend_class_implements_interface(const zend_class_entry *class_ce, const zend_class_entry *interface_ce);
-ZEND_API zend_bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *instance_ce, const zend_class_entry *ce);
+ZEND_API bool ZEND_FASTCALL zend_class_implements_interface(const zend_class_entry *class_ce, const zend_class_entry *interface_ce);
+ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *instance_ce, const zend_class_entry *ce);
 
-static zend_always_inline zend_bool instanceof_function(
+static zend_always_inline bool instanceof_function(
 		const zend_class_entry *instance_ce, const zend_class_entry *ce) {
 	return instance_ce == ce || instanceof_function_slow(instance_ce, ce);
 }
@@ -321,8 +321,8 @@ static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_st
 
 /* Like convert_to_string(), but returns whether the conversion succeeded and does not modify the
  * zval in-place if it fails. */
-ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op);
-static zend_always_inline zend_bool try_convert_to_string(zval *op) {
+ZEND_API bool ZEND_FASTCALL _try_convert_to_string(zval *op);
+static zend_always_inline bool try_convert_to_string(zval *op) {
 	if (Z_TYPE_P(op) == IS_STRING) {
 		return 1;
 	}
@@ -408,7 +408,7 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
-ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive);
+ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, bool case_insensitive);
 ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
@@ -843,7 +843,7 @@ static zend_always_inline bool fast_equal_check_string(zval *op1, zval *op2)
 	return zend_compare(op1, op2) == 0;
 }
 
-static zend_always_inline zend_bool fast_is_identical_function(zval *op1, zval *op2)
+static zend_always_inline bool fast_is_identical_function(zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;
@@ -853,7 +853,7 @@ static zend_always_inline zend_bool fast_is_identical_function(zval *op1, zval *
 	return zend_is_identical(op1, op2);
 }
 
-static zend_always_inline zend_bool fast_is_not_identical_function(zval *op1, zval *op2)
+static zend_always_inline bool fast_is_not_identical_function(zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 1;

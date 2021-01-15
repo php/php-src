@@ -107,8 +107,8 @@ typedef struct _zend_file_context {
 	zend_declarables declarables;
 
 	zend_string *current_namespace;
-	zend_bool in_namespace;
-	zend_bool has_bracketed_namespaces;
+	bool in_namespace;
+	bool has_bracketed_namespaces;
 
 	HashTable *imports;
 	HashTable *imports_function;
@@ -158,7 +158,7 @@ typedef struct _zend_brk_cont_element {
 	int cont;
 	int brk;
 	int parent;
-	zend_bool is_switch;
+	bool is_switch;
 } zend_brk_cont_element;
 
 typedef struct _zend_label {
@@ -765,7 +765,7 @@ zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_bool zend_handle_encoding_declaration(zend_ast *ast);
+bool zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
@@ -803,7 +803,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
-ZEND_API void zend_type_release(zend_type type, zend_bool persistent);
+ZEND_API void zend_type_release(zend_type type, bool persistent);
 ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name);
 
 
@@ -837,30 +837,30 @@ static zend_always_inline const char *zend_get_unmangled_property_name(const zen
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
-typedef zend_bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *opline);
+typedef bool (*zend_needs_live_range_cb)(zend_op_array *op_array, zend_op *opline);
 ZEND_API void zend_recalc_live_ranges(
 	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
 
 ZEND_API void pass_two(zend_op_array *op_array);
-ZEND_API zend_bool zend_is_compiling(void);
+ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
-ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
+ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
-typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
+typedef bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
 	zend_string *name;
 	zend_auto_global_callback auto_global_callback;
-	zend_bool jit;
-	zend_bool armed;
+	bool jit;
+	bool armed;
 } zend_auto_global;
 
-ZEND_API zend_result zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
+ZEND_API zend_result zend_register_auto_global(zend_string *name, bool jit, zend_auto_global_callback auto_global_callback);
 ZEND_API void zend_activate_auto_globals(void);
-ZEND_API zend_bool zend_is_auto_global(zend_string *name);
-ZEND_API zend_bool zend_is_auto_global_str(const char *name, size_t len);
+ZEND_API bool zend_is_auto_global(zend_string *name);
+ZEND_API bool zend_is_auto_global_str(const char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
@@ -1131,6 +1131,6 @@ END_EXTERN_C()
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
-ZEND_API zend_bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2);
+ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2);
 
 #endif /* ZEND_COMPILE_H */

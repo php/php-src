@@ -555,7 +555,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 
 #ifdef PDO_USE_MYSQLND
-	zend_bool fetched_anything;
+	bool fetched_anything;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);

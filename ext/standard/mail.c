@@ -57,7 +57,7 @@
 
 extern zend_long php_getuid(void);
 
-static zend_bool php_mail_build_headers_check_field_value(zval *val)
+static bool php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;
 	zend_string *value = Z_STR_P(val);
@@ -83,7 +83,7 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 }
 
 
-static zend_bool php_mail_build_headers_check_field_name(zend_string *key)
+static bool php_mail_build_headers_check_field_name(zend_string *key)
 {
 	size_t len = 0;
 

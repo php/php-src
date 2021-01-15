@@ -24,10 +24,10 @@
 ZEND_BEGIN_MODULE_GLOBALS(assert)
 	zval callback;
 	char *cb;
-	zend_bool active;
-	zend_bool bail;
-	zend_bool warning;
-	zend_bool exception;
+	bool active;
+	bool bail;
+	bool warning;
+	bool exception;
 ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
@@ -208,7 +208,7 @@ PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
 	zend_long what;
-	zend_bool oldint;
+	bool oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 

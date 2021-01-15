@@ -1130,7 +1130,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #endif
 
 #if ZEND_RC_DEBUG
-extern ZEND_API zend_bool zend_rc_debug;
+extern ZEND_API bool zend_rc_debug;
 # define ZEND_RC_MOD_CHECK(p) do { \
 		if (zend_rc_debug && zval_gc_type((p)->u.type_info) != IS_OBJECT) { \
 			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \

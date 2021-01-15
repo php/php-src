@@ -3169,8 +3169,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
-	zend_bool has_proxy_authorization = 0;
-	zend_bool has_authorization = 0;
+	bool has_proxy_authorization = 0;
+	bool has_authorization = 0;
 
 	ZVAL_UNDEF(&orig_context);
 	ZVAL_UNDEF(&new_context);

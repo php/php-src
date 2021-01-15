@@ -367,7 +367,7 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
     char buf[SAPI_LSAPI_MAX_HEADER_LENGTH];
     sapi_header_struct *h;
     zend_llist_position pos;
-    zend_bool ignore_status = 0;
+    bool ignore_status = 0;
     int response_status = SG(sapi_headers).http_response_code;
 
     if (SG(request_info).no_headers == 1) {
@@ -378,7 +378,7 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
     if (SG(sapi_headers).http_response_code != 200)
     {
         int len;
-        zend_bool has_status = 0;
+        bool has_status = 0;
 
         char *s;
 

@@ -470,7 +470,7 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 
 	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_has)) {
 		zval rv;
-		zend_bool result;
+		bool result;
 
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_has, "offsetExists", &rv, offset);
 		result = zend_is_true(&rv);
@@ -593,7 +593,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 	spl_fixedarray array;
 	spl_fixedarray_object *intern;
 	int num;
-	zend_bool save_indexes = 1;
+	bool save_indexes = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|b", &data, &save_indexes) == FAILURE) {
 		RETURN_THROWS();

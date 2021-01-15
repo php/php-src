@@ -260,7 +260,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable watch_free;                        /* pointers to watch for being freed */
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
-	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
+	bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
@@ -270,8 +270,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zval retval;                                 /* return value */
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
-	zend_bool in_execution;                      /* in execution? */
-	zend_bool unclean_eval;                      /* do not check for memory leaks when we needed to bail out during eval */
+	bool in_execution;                      /* in execution? */
+	bool unclean_eval;                      /* do not check for memory leaks when we needed to bail out during eval */
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
@@ -291,7 +291,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	ssize_t (*php_stdiop_write)(php_stream *, const char *, size_t);
 	int in_script_xml;                           /* in <stream> output mode */
 	struct {
-		zend_bool active;
+		bool active;
 		int type;
 		int fd;
 		char *tag;
@@ -305,7 +305,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 	char *buffer;                                /* buffer */
-	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
+	bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
 
 	FILE *stdin_file;                            /* FILE pointer to stdin source file */
 	const php_stream_wrapper *orig_url_wrap_php;

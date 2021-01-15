@@ -137,7 +137,7 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 
 /* {{{ mysqlnd_handle_local_infile */
 enum_func_status
-mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning)
+mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, bool * is_warning)
 {
 	zend_uchar			*buf = NULL;
 	zend_uchar			empty_packet[MYSQLND_HEADER_SIZE];

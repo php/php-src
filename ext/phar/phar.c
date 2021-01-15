@@ -33,7 +33,7 @@ zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len
  */
 static int phar_set_writeable_bit(zval *zv, void *argument) /* {{{ */
 {
-	zend_bool keep = *(zend_bool *)argument;
+	bool keep = *(bool *)argument;
 	phar_archive_data *phar = (phar_archive_data *)Z_PTR_P(zv);
 
 	if (!phar->is_data) {
@@ -47,7 +47,7 @@ static int phar_set_writeable_bit(zval *zv, void *argument) /* {{{ */
 /* if the original value is 0 (disabled), then allow setting/unsetting at will. Otherwise only allow 1 (enabled), and error on disabling */
 ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
-	zend_bool old, ini;
+	bool old, ini;
 
 	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 		old = PHAR_G(readonly_orig);
@@ -56,16 +56,16 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 	}
 
 	if (ZSTR_LEN(new_value) == 2 && !strcasecmp("on", ZSTR_VAL(new_value))) {
-		ini = (zend_bool) 1;
+		ini = (bool) 1;
 	}
 	else if (ZSTR_LEN(new_value) == 3 && !strcasecmp("yes", ZSTR_VAL(new_value))) {
-		ini = (zend_bool) 1;
+		ini = (bool) 1;
 	}
 	else if (ZSTR_LEN(new_value) == 4 && !strcasecmp("true", ZSTR_VAL(new_value))) {
-		ini = (zend_bool) 1;
+		ini = (bool) 1;
 	}
 	else {
-		ini = (zend_bool) atoi(ZSTR_VAL(new_value));
+		ini = (bool) atoi(ZSTR_VAL(new_value));
 	}
 
 	/* do not allow unsetting in runtime */
@@ -495,7 +495,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 /**
  * Open an already loaded phar
  */
-int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
 #ifdef PHP_WIN32
@@ -601,7 +601,7 @@ void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker 
  */
 int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker *tracker, zval *metadata, int persistent, HashTable *unserialize_options, const char* method_name) /* {{{ */
 {
-	const zend_bool has_unserialize_options = unserialize_options != NULL && zend_hash_num_elements(unserialize_options) > 0;
+	const bool has_unserialize_options = unserialize_options != NULL && zend_hash_num_elements(unserialize_options) > 0;
 	/* It should be impossible to create a zval in a persistent phar/entry. */
 	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
 
@@ -640,7 +640,7 @@ int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker *tracker, zv
 /**
  * Check if this has any data, serialized or as a raw value.
  */
-zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker *tracker, int persistent) /* {{{ */
+bool phar_metadata_tracker_has_data(const phar_metadata_tracker *tracker, int persistent) /* {{{ */
 {
 	ZEND_ASSERT(!persistent || Z_ISUNDEF(tracker->val));
 	return !Z_ISUNDEF(tracker->val) || tracker->str != NULL;
@@ -1116,11 +1116,11 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
-		zend_get_hash_value, destroy_phar_manifest_entry, (zend_bool)mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, (bool)mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
-		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
 	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
@@ -1311,7 +1311,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 /**
  * Create or open a phar for writing
  */
-int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	const char *ext_str, *z;
 	char *my_error;
@@ -1388,7 +1388,7 @@ check_file:
 }
 /* }}} */
 
-int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *mydata;
 	php_stream *fp;
@@ -1473,7 +1473,7 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
+		zend_get_hash_value, NULL, (bool)mydata->is_persistent);
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;

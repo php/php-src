@@ -39,7 +39,7 @@ typedef _Bool       my_bool;
 #define PDO_DBG_INF_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
 #define PDO_DBG_ERR_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 #define PDO_DBG_ENTER(func_name) \
-	zend_bool dbg_skip_trace = TRUE; \
+	bool dbg_skip_trace = TRUE; \
 	((void) dbg_skip_trace); \
 	if (PDO_MYSQL_G(dbg)) \
 		dbg_skip_trace = !PDO_MYSQL_G(dbg)->m->func_enter(PDO_MYSQL_G(dbg), __LINE__, __FILE__, func_name, strlen(func_name));

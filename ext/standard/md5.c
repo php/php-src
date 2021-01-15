@@ -42,7 +42,7 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 PHP_FUNCTION(md5)
 {
 	zend_string *arg;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 
@@ -70,7 +70,7 @@ PHP_FUNCTION(md5_file)
 {
 	char          *arg;
 	size_t           arg_len;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;

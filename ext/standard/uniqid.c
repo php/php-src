@@ -41,7 +41,7 @@ ZEND_TLS struct timeval prev_tv = { 0, 0 };
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
-	zend_bool more_entropy = 0;
+	bool more_entropy = 0;
 	zend_string *uniqid;
 	int sec, usec;
 	size_t prefix_len = 0;

@@ -200,7 +200,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 	if (args) {
 		const zend_function *func = NULL;
 		const zend_arg_info *arginfo = NULL;
-		zend_bool is_variadic = 0;
+		bool is_variadic = 0;
 		int j = 0, m;
 
 		phpdbg_try_access {

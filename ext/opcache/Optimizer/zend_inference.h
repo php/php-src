@@ -40,7 +40,7 @@
 	|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE)
 
 #define DEFINE_SSA_OP_HAS_RANGE(opN) \
-	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -239,11 +239,11 @@ DEFINE_SSA_OP_DEF_INFO(result)
 #define OP2_DATA_DEF_INFO()  (_ssa_op2_def_info(op_array, ssa, (opline+1), (ssa_op+1)))
 #define RES_INFO()           (_ssa_result_def_info(op_array, ssa, opline, ssa_op))
 
-static zend_always_inline zend_bool zend_add_will_overflow(zend_long a, zend_long b) {
+static zend_always_inline bool zend_add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
 		|| (b < 0 && a < ZEND_LONG_MIN - b);
 }
-static zend_always_inline zend_bool zend_sub_will_overflow(zend_long a, zend_long b) {
+static zend_always_inline bool zend_sub_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a < ZEND_LONG_MIN + b)
 		|| (b < 0 && a > ZEND_LONG_MAX + b);
 }
@@ -258,7 +258,7 @@ uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
 int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow);
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow);
 int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array);

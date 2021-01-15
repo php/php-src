@@ -40,7 +40,7 @@ extern PHPAPI zend_class_entry *php_ce_incomplete_class;
 
 #define PHP_CLASS_ATTRIBUTES											\
 	zend_string *class_name;											\
-	zend_bool incomplete_class ZEND_ATTRIBUTE_UNUSED = 0
+	bool incomplete_class ZEND_ATTRIBUTE_UNUSED = 0
 
 #define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
 #define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"

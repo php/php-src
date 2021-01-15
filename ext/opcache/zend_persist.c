@@ -285,7 +285,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-static void zend_persist_type(zend_type *type, zend_bool use_arena) {
+static void zend_persist_type(zend_type *type, bool use_arena) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {

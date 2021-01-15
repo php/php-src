@@ -345,7 +345,7 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
-	zend_bool no_length = 1;
+	bool no_length = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
 		RETURN_THROWS();
@@ -546,7 +546,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	const char *found;
 	size_t haystack_len, needle_len;
 	int32_t ret_pos, uchar_pos;
-	zend_bool part = 0;
+	bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
 		RETURN_THROWS();

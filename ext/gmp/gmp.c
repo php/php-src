@@ -72,7 +72,7 @@ PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 
 typedef struct _gmp_temp {
 	mpz_t num;
-	zend_bool is_used;
+	bool is_used;
 } gmp_temp_t;
 
 #define GMP_ROUND_ZERO      0
@@ -598,7 +598,7 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 		return SUCCESS;
 	case IS_STRING: {
 		char *numstr = Z_STRVAL_P(val);
-		zend_bool skip_lead = 0;
+		bool skip_lead = 0;
 		int ret;
 
 		if (Z_STRLEN_P(val) >= 2 && numstr[0] == '0') {
@@ -677,7 +677,7 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
 {
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
-	zend_bool use_si = 0;
+	bool use_si = 0;
 	zend_long res;
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
@@ -1627,7 +1627,7 @@ ZEND_FUNCTION(gmp_kronecker)
 	zval *a_arg, *b_arg;
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
-	zend_bool use_a_si = 0, use_b_si = 0;
+	bool use_a_si = 0, use_b_si = 0;
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
@@ -1864,7 +1864,7 @@ ZEND_FUNCTION(gmp_setbit)
 {
 	zval *a_arg;
 	zend_long index;
-	zend_bool set = 1;
+	bool set = 1;
 	mpz_ptr gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {

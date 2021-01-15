@@ -2996,7 +2996,7 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 PHP_METHOD(ZipArchive, isCompressionMethodSupported)
 {
 	zend_long method;
-	zend_bool enc = 1;
+	bool enc = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &method, &enc) == FAILURE) {
 		return;
@@ -3009,7 +3009,7 @@ PHP_METHOD(ZipArchive, isCompressionMethodSupported)
 PHP_METHOD(ZipArchive, isEncryptionMethodSupported)
 {
 	zend_long method;
-	zend_bool enc = 1;
+	bool enc = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &method, &enc) == FAILURE) {
 		return;

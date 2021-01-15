@@ -1471,7 +1471,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	zend_object *cert_obj;
 	zend_string *cert_str;
 
-	zend_bool notext = 1;
+	bool notext = 1;
 	BIO * bio_out;
 	char * filename;
 	size_t filename_len;
@@ -1781,7 +1781,7 @@ PHP_FUNCTION(openssl_x509_export)
 	zend_object *cert_obj;
 	zend_string *cert_str;
 	zval *zout;
-	zend_bool notext = 1;
+	bool notext = 1;
 	BIO * bio_out;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -1827,7 +1827,7 @@ cleanup:
 }
 /* }}} */
 
-zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw)
+zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
@@ -1859,7 +1859,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 	X509 *cert;
 	zend_object *cert_obj;
 	zend_string *cert_str;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	char *method = "sha1";
 	size_t method_len;
 	zend_string *fingerprint;
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	zend_object *cert_obj;
 	zend_string *cert_str;
 	int i, sig_nid;
-	zend_bool useshortnames = 1;
+	bool useshortnames = 1;
 	char * tmpstr;
 	zval subitem;
 	X509_EXTENSION *extension;
@@ -3034,7 +3034,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	X509_REQ *csr;
 	zend_object *csr_obj;
 	zend_string *csr_str;
-	zend_bool notext = 1;
+	bool notext = 1;
 	char * filename = NULL;
 	size_t filename_len;
 	BIO * bio_out;
@@ -3088,7 +3088,7 @@ PHP_FUNCTION(openssl_csr_export)
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	zval *zout;
-	zend_bool notext = 1;
+	bool notext = 1;
 	BIO * bio_out;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -3375,7 +3375,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	X509_REQ *csr;
 	zend_object *csr_obj;
 	zend_string *csr_str;
-	zend_bool use_shortnames = 1;
+	bool use_shortnames = 1;
 	X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -3406,7 +3406,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	X509_REQ *orig_csr, *csr;
 	zend_object *csr_obj;
 	zend_string *csr_str;
-	zend_bool use_shortnames = 1;
+	bool use_shortnames = 1;
 
 	php_openssl_pkey_object *key_object;
 	EVP_PKEY *tpubkey;
@@ -3874,7 +3874,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 	} while (0);
 
 /* {{{ php_openssl_pkey_init_rsa */
-static zend_bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, zval *data)
+static bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, zval *data)
 {
 	BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
 
@@ -3907,7 +3907,7 @@ static zend_bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, 
 }
 
 /* {{{ php_openssl_pkey_init_dsa */
-static zend_bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
+static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 {
 	BIGNUM *p, *q, *g, *priv_key, *pub_key;
 	const BIGNUM *priv_key_const, *pub_key_const;
@@ -3985,7 +3985,7 @@ static BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM 
 /* }}} */
 
 /* {{{ php_openssl_pkey_init_dh */
-static zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
+static bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 {
 	BIGNUM *p, *q, *g, *priv_key, *pub_key;
 
@@ -6763,7 +6763,7 @@ static void php_openssl_add_method(const OBJ_NAME *name, void *arg) /* {{{ */
 /* {{{ Return array of available digest algorithms */
 PHP_FUNCTION(openssl_get_md_methods)
 {
-	zend_bool aliases = 0;
+	bool aliases = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -6778,7 +6778,7 @@ PHP_FUNCTION(openssl_get_md_methods)
 /* {{{ Return array of available cipher algorithms */
 PHP_FUNCTION(openssl_get_cipher_methods)
 {
-	zend_bool aliases = 0;
+	bool aliases = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -6823,7 +6823,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 /* {{{ Computes digest hash value for given data using given method, returns raw or binhex encoded string */
 PHP_FUNCTION(openssl_digest)
 {
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	char *data, *method;
 	size_t data_len, method_len;
 	const EVP_MD *mdtype;
@@ -6872,10 +6872,10 @@ PHP_FUNCTION(openssl_digest)
 
 /* Cipher mode info */
 struct php_openssl_cipher_mode {
-	zend_bool is_aead;
-	zend_bool is_single_run_aead;
-	zend_bool set_tag_length_always;
-	zend_bool set_tag_length_when_encrypting;
+	bool is_aead;
+	bool is_single_run_aead;
+	bool set_tag_length_always;
+	bool set_tag_length_when_encrypting;
 	int aead_get_tag_flag;
 	int aead_set_tag_flag;
 	int aead_ivlen_flag;
@@ -6927,7 +6927,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 /* }}} */
 
 static int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
-		zend_bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode) /* {{{ */
+		bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode) /* {{{ */
 {
 	char *iv_new;
 
@@ -6980,8 +6980,8 @@ static int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_
 
 static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
-		const char **ppassword, size_t *ppassword_len, zend_bool *free_password,
-		const char **piv, size_t *piv_len, zend_bool *free_iv,
+		const char **ppassword, size_t *ppassword_len, bool *free_password,
+		const char **piv, size_t *piv_len, bool *free_iv,
 		const char *tag, int tag_len, zend_long options, int enc)  /* {{{ */
 {
 	unsigned char *key;
@@ -7106,7 +7106,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
 	int i = 0, outlen;
-	zend_bool free_iv = 0, free_password = 0;
+	bool free_iv = 0, free_password = 0;
 	zend_string *outbuf = NULL;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(data_len, data);
@@ -7220,7 +7220,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	struct php_openssl_cipher_mode mode;
 	int i = 0, outlen;
 	zend_string *base64_str = NULL;
-	zend_bool free_iv = 0, free_password = 0;
+	bool free_iv = 0, free_password = 0;
 	zend_string *outbuf = NULL;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(data_len, data);

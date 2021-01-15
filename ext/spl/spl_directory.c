@@ -478,7 +478,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval arg1, arg2;
 	zend_error_handling error_handling;
 
@@ -1467,7 +1467,7 @@ PHP_METHOD(FilesystemIterator, setFlags)
 /* {{{ Returns whether current entry is a directory and not '.' or '..' */
 PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
-	zend_bool allow_links = 0;
+	bool allow_links = 0;
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &allow_links) == FAILURE) {
@@ -2051,7 +2051,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	char *p1, *p2;
 	char *tmp_path;
 	size_t   tmp_path_len;

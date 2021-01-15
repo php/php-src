@@ -145,7 +145,7 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	zend_bool use_national_character_set = 0;
+	bool use_national_character_set = 0;
 	size_t i;
 	char *q;
 	size_t quotedlen = 0;

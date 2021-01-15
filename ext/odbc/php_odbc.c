@@ -1661,7 +1661,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	RETCODE rc;
 	zval *pv_res;
 	zend_long pv_row;
-	zend_bool pv_row_is_null = 1;
+	bool pv_row_is_null = 1;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
@@ -2540,7 +2540,7 @@ PHP_FUNCTION(odbc_autocommit)
 	odbc_connection *conn;
 	RETCODE rc;
 	zval *pv_conn;
-	zend_bool pv_onoff = 0;
+	bool pv_onoff = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &pv_conn, &pv_onoff) == FAILURE) {
 		RETURN_THROWS();

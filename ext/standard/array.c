@@ -849,7 +849,7 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 {
 	zval args[2];
 	zval retval;
-	zend_bool call_failed;
+	bool call_failed;
 
 	ZVAL_COPY(&args[0], &f->val);
 	ZVAL_COPY(&args[1], &s->val);
@@ -915,7 +915,7 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
-static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, zend_bool renumber) /* {{{ */
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, bool renumber) /* {{{ */
 {
 	zval *array;
 	zend_array *arr;
@@ -965,7 +965,7 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 {
 	zval args[2];
 	zval retval;
-	zend_bool call_failed;
+	bool call_failed;
 
 	if (f->key == NULL) {
 		ZVAL_LONG(&args[0], f->h);
@@ -1459,7 +1459,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		 *entry;				/* pointer to array entry */
 	zend_ulong num_idx;
 	zend_string *str_idx;
-	zend_bool strict = 0;		/* strict comparison or not */
+	bool strict = 0;		/* strict comparison or not */
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ZVAL(value)
@@ -1621,7 +1621,7 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore) /* {{{ */
 {
 	ZVAL_NEW_STR(result, zend_string_alloc(ZSTR_LEN(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), ZSTR_VAL(prefix), ZSTR_LEN(prefix));
@@ -3284,7 +3284,7 @@ PHP_FUNCTION(array_splice)
 	HashTable  *rem_hash = NULL;
 	zend_long offset,
 			length = 0;
-	zend_bool length_is_null = 1;
+	bool length_is_null = 1;
 	int		num_in;				/* Number of elements in the input array */
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -3372,8 +3372,8 @@ PHP_FUNCTION(array_slice)
 	zval *entry;                  /* An array entry */
 	zend_long offset;             /* Offset to get elements from */
 	zend_long length = 0;         /* How many elements to get */
-	zend_bool length_is_null = 1; /* Whether an explicit length has been omitted */
-	zend_bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
+	bool length_is_null = 1; /* Whether an explicit length has been omitted */
+	bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
 	uint32_t num_in;              /* Number of elements in the input array */
 	zend_string *string_key;
 	zend_ulong num_key;
@@ -3727,7 +3727,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 					return;
 				}
 			} else {
-				zend_bool copy = 1;
+				bool copy = 1;
 				zend_string *string_key;
 
 				ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(ret), string_key) {
@@ -3826,7 +3826,7 @@ PHP_FUNCTION(array_keys)
 	     *search_value = NULL,	/* Value to search for */
 	     *entry,				/* An entry in the input array */
 	       new_val;				/* New value */
-	zend_bool strict = 0;		/* do strict comparison */
+	bool strict = 0;		/* do strict comparison */
 	zend_ulong num_idx;
 	zend_string *str_idx;
 	zend_array *arrval;
@@ -4069,10 +4069,10 @@ PHP_FUNCTION(array_column)
 	zval *colval, *data, rv;
 	zend_string *column_str = NULL;
 	zend_long column_long;
-	zend_bool column_is_null = 0;
+	bool column_is_null = 0;
 	zend_string *index_str = NULL;
 	zend_long index_long;
-	zend_bool index_is_null = 1;
+	bool index_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT(input)
@@ -4129,7 +4129,7 @@ PHP_FUNCTION(array_reverse)
 			 *entry;				/* An entry in the input array */
 	zend_string *string_key;
 	zend_ulong	  num_key;
-	zend_bool preserve_keys = 0;	/* whether to preserve keys */
+	bool preserve_keys = 0;	/* whether to preserve keys */
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(input)
@@ -4475,7 +4475,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	int argc, i;
 	zval *args;
 	int (*intersect_data_compare_func)(zval *, zval *) = NULL;
-	zend_bool ok;
+	bool ok;
 	zval *val, *data;
 	char *param_spec;
 	zend_string *key;
@@ -4854,7 +4854,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	int argc, i;
 	zval *args;
 	int (*diff_data_compare_func)(zval *, zval *) = NULL;
-	zend_bool ok;
+	bool ok;
 	zval *val, *data;
 	zend_string *key;
 	zend_ulong h;
@@ -5789,7 +5789,7 @@ PHP_FUNCTION(array_filter)
 	zval *key;
 	zval args[2];
 	zval retval;
-	zend_bool have_callback = 0;
+	bool have_callback = 0;
 	zend_long use_type = 0;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
@@ -6069,7 +6069,7 @@ PHP_FUNCTION(array_chunk)
 	zend_long size, current = 0;
 	zend_string *str_key;
 	zend_ulong num_key;
-	zend_bool preserve_keys = 0;
+	bool preserve_keys = 0;
 	zval *input = NULL;
 	zval chunk;
 	zval *entry;

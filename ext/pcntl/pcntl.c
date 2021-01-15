@@ -885,8 +885,8 @@ PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle;
 	zend_long signo;
-	zend_bool restart_syscalls = 1;
-	zend_bool restart_syscalls_is_null = 1;
+	bool restart_syscalls = 1;
+	bool restart_syscalls_is_null = 1;
 	char *error = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b!", &signo, &handle, &restart_syscalls, &restart_syscalls_is_null) == FAILURE) {
@@ -1185,7 +1185,7 @@ PHP_FUNCTION(pcntl_getpriority)
 {
 	zend_long who = PRIO_PROCESS;
 	zend_long pid;
-	zend_bool pid_is_null = 1;
+	bool pid_is_null = 1;
 	int pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l", &pid, &pid_is_null, &who) == FAILURE) {
@@ -1224,7 +1224,7 @@ PHP_FUNCTION(pcntl_setpriority)
 {
 	zend_long who = PRIO_PROCESS;
 	zend_long pid;
-	zend_bool pid_is_null = 1;
+	bool pid_is_null = 1;
 	zend_long pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &pri, &pid, &pid_is_null, &who) == FAILURE) {
@@ -1387,7 +1387,7 @@ void pcntl_signal_dispatch()
 /* {{{ Enable/disable asynchronous signal handling and return the old setting. */
 PHP_FUNCTION(pcntl_async_signals)
 {
-	zend_bool on, on_is_null = 1;
+	bool on, on_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b!", &on, &on_is_null) == FAILURE) {
 		RETURN_THROWS();

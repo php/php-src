@@ -161,7 +161,7 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 	}
 }
 
-zend_bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
+bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;

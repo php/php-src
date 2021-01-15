@@ -55,7 +55,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zend_long	time_type	= 0;
 	zend_object *calendar_obj = NULL;
 	zend_long calendar_long = 0;
-	zend_bool calendar_is_null = 1;
+	bool calendar_is_null = 1;
 	Calendar *cal = NULL;
 	zend_long	calendar_type;
 	bool		calendar_owned;

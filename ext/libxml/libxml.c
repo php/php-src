@@ -939,7 +939,7 @@ PHP_FUNCTION(libxml_set_streams_context)
 PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
-	zend_bool use_errors, use_errors_is_null = 1, retval;
+	bool use_errors, use_errors_is_null = 1, retval;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -1059,9 +1059,9 @@ PHP_FUNCTION(libxml_clear_errors)
 }
 /* }}} */
 
-PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /* {{{ */
+PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
 {
-	zend_bool old = LIBXML(entity_loader_disabled);
+	bool old = LIBXML(entity_loader_disabled);
 
 	LIBXML(entity_loader_disabled) = disable;
 	return old;
@@ -1070,7 +1070,7 @@ PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /* 
 /* {{{ Disable/Enable ability to load external entities */
 PHP_FUNCTION(libxml_disable_entity_loader)
 {
-	zend_bool disable = 1;
+	bool disable = 1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL

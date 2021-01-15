@@ -716,12 +716,12 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 	zend_string_release(need_msg);
 }
 
-static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
+static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 {
 	zend_long lval;
 	double dval;
 	zend_string *str;
-	zend_bool bval;
+	bool bval;
 
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
@@ -775,11 +775,11 @@ static bool can_convert_to_string(zval *zv) {
 }
 
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
-static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, zval *arg)
+static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, zval *arg)
 {
 	zend_long lval;
 	double dval;
-	zend_bool bval;
+	bool bval;
 
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval)) {
 		return 1;
@@ -797,7 +797,7 @@ static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_m
 }
 #endif
 
-ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, zend_bool strict, zend_bool is_internal_arg)
+ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg)
 {
 	if (UNEXPECTED(strict)) {
 		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
@@ -851,7 +851,7 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 	}
 }
 
-static zend_bool zend_check_and_resolve_property_class_type(
+static bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	zend_class_entry *ce;
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
@@ -890,7 +890,7 @@ static zend_bool zend_check_and_resolve_property_class_type(
 	}
 }
 
-static zend_always_inline zend_bool i_zend_check_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_always_inline bool i_zend_check_property_type(zend_property_info *info, zval *property, bool strict)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
@@ -910,7 +910,7 @@ static zend_always_inline zend_bool i_zend_check_property_type(zend_property_inf
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
-static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_always_inline bool i_zend_verify_property_type(zend_property_info *info, zval *property, bool strict)
 {
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
@@ -920,7 +920,7 @@ static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_in
 	return 0;
 }
 
-ZEND_API zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict) {
+ZEND_API bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, bool strict) {
 	return i_zend_verify_property_type(info, property, strict);
 }
 
@@ -939,7 +939,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
 
-ZEND_API zend_bool zend_value_instanceof_static(zval *zv) {
+ZEND_API bool zend_value_instanceof_static(zval *zv) {
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return 0;
 	}
@@ -959,9 +959,9 @@ ZEND_API zend_bool zend_value_instanceof_static(zval *zv) {
 # define HAVE_CACHE_SLOT 1
 #endif
 
-static zend_always_inline zend_bool zend_check_type_slow(
+static zend_always_inline bool zend_check_type_slow(
 		zend_type type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
-		zend_bool is_return_type, zend_bool is_internal)
+		bool is_return_type, bool is_internal)
 {
 	uint32_t type_mask;
 	if (ZEND_TYPE_HAS_CLASS(type) && Z_TYPE_P(arg) == IS_OBJECT) {
@@ -1039,9 +1039,9 @@ builtin_types:
 	 * because this case is already checked at compile-time. */
 }
 
-static zend_always_inline zend_bool zend_check_type(
+static zend_always_inline bool zend_check_type(
 		zend_type type, zval *arg, void **cache_slot, zend_class_entry *scope,
-		zend_bool is_return_type, zend_bool is_internal)
+		bool is_return_type, bool is_internal)
 {
 	zend_reference *ref = NULL;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
@@ -1115,7 +1115,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 /* Determine whether an internal call should throw, because the passed arguments violate
  * an arginfo constraint. This is only checked in debug builds. In release builds, we
  * trust that arginfo matches what is enforced by zend_parse_parameters. */
-static zend_always_inline zend_bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
+static zend_always_inline bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
 	if (fbc->internal_function.handler == ZEND_FN(pass)) {
 		/* Be lenient about the special pass function. */
@@ -2552,7 +2552,7 @@ str_offset:
 	}
 }
 
-static zend_never_inline zend_bool ZEND_FASTCALL zend_array_key_exists_fast(HashTable *ht, zval *key OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline bool ZEND_FASTCALL zend_array_key_exists_fast(HashTable *ht, zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_string *str;
 	zend_ulong hval;
@@ -2612,12 +2612,12 @@ static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 	}
 }
 
-static zend_always_inline zend_bool promotes_to_array(zval *val) {
+static zend_always_inline bool promotes_to_array(zval *val) {
 	return Z_TYPE_P(val) <= IS_FALSE
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
 }
 
-static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
@@ -2625,7 +2625,7 @@ static zend_always_inline zend_bool check_type_array_assignable(zend_type type) 
 }
 
 /* Checks whether an array can be assigned to the reference. Throws error if not assignable. */
-ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref) {
+ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref) {
 	zend_property_info *prop;
 	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
@@ -2653,7 +2653,7 @@ static zend_property_info *zend_object_fetch_property_type_info(
 	return zend_get_typed_property_info_for_slot(obj, slot);
 }
 
-static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
+static zend_never_inline bool zend_handle_fetch_obj_flags(
 		zval *result, zval *ptr, zend_object *obj, zend_property_info *prop_info, uint32_t flags)
 {
 	switch (flags) {
@@ -2698,7 +2698,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 	return 1;
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags, zend_bool init_undef OPLINE_DC EXECUTE_DATA_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t flags, bool init_undef OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *ptr;
 	zend_object *zobj;
@@ -3039,7 +3039,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 
 /* 1: valid, 0: invalid, -1: may be valid after type coercion */
 static zend_always_inline int i_zend_verify_type_assignable_zval(
-		zend_property_info *info, zval *zv, zend_bool strict) {
+		zend_property_info *info, zval *zv, bool strict) {
 	zend_type type = info->type;
 	uint32_t type_mask;
 	zend_uchar zv_type = Z_TYPE_P(zv);
@@ -3082,7 +3082,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	return -1;
 }
 
-ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
+ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, bool strict)
 {
 	zend_property_info *prop;
 
@@ -3161,9 +3161,9 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, zend_bool strict)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict)
 {
-	zend_bool ret;
+	bool ret;
 	zval value;
 	zend_refcounted *ref = NULL;
 
@@ -3194,7 +3194,7 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ze
 	return variable_ptr;
 }
 
-ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
 		int result;
@@ -3501,7 +3501,7 @@ static zend_always_inline void zend_init_cvs(uint32_t first, uint32_t last EXECU
 	}
 }
 
-static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array, zval *return_value, zend_bool may_be_trampoline EXECUTE_DATA_DC) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array, zval *return_value, bool may_be_trampoline EXECUTE_DATA_DC) /* {{{ */
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
@@ -4238,11 +4238,11 @@ already_compiled:
 }
 /* }}} */
 
-static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
+static zend_never_inline bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 	zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, by_ref);
-	zend_bool is_empty;
+	bool is_empty;
 
 	if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 		if (iter) {

@@ -163,7 +163,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 PHP_FUNCTION(hrtime)
 {
 #if HRTIME_AVAILABLE
-	zend_bool get_as_num = 0;
+	bool get_as_num = 0;
 	php_hrtime_t t = _timer_current();
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)

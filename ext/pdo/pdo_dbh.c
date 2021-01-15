@@ -224,7 +224,7 @@ PHP_METHOD(PDO, __construct)
 {
 	zval *object = ZEND_THIS;
 	pdo_dbh_t *dbh = NULL;
-	zend_bool is_persistent = 0;
+	bool is_persistent = 0;
 	char *data_source;
 	size_t data_source_len;
 	char *colon;
@@ -1050,7 +1050,7 @@ PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	zend_string *statement;
 	zend_long fetch_mode;
-	zend_bool fetch_mode_is_null = 1;
+	bool fetch_mode_is_null = 1;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
@@ -1399,7 +1399,7 @@ void pdo_dbh_init(void)
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
 }
 
-static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
+static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 {
 	int i;
 

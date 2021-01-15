@@ -764,7 +764,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 PHP_METHOD(SplDoublyLinkedList, offsetSet)
 {
 	zend_long index;
-	zend_bool index_is_null = 1;
+	bool index_is_null = 1;
 	zval *value;
 	spl_dllist_object *intern;
 

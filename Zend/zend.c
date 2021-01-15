@@ -60,7 +60,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
 ZEND_API zend_utility_values zend_uv;
-ZEND_API zend_bool zend_dtrace_enabled;
+ZEND_API bool zend_dtrace_enabled;
 
 /* version information */
 static char *zend_version_info;
@@ -92,7 +92,7 @@ static void (*zend_message_dispatcher_p)(zend_long message, const void *data);
 static zval *(*zend_get_configuration_directive_p)(zend_string *name);
 
 #if ZEND_RC_DEBUG
-ZEND_API zend_bool zend_rc_debug = 0;
+ZEND_API bool zend_rc_debug = 0;
 #endif
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
@@ -108,7 +108,7 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
-	zend_bool val;
+	bool val;
 
 	val = zend_ini_parse_bool(new_value);
 	gc_enable(val);
@@ -290,7 +290,7 @@ ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *form
 
 static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent);
 
-static void print_hash(smart_str *buf, HashTable *ht, int indent, zend_bool is_object) /* {{{ */
+static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object) /* {{{ */
 {
 	zval *tmp;
 	zend_string *string_key;
@@ -524,7 +524,7 @@ static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path)
 /* }}} */
 
 #ifdef ZTS
-static zend_bool short_tags_default      = 1;
+static bool short_tags_default      = 1;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define short_tags_default			1
@@ -784,7 +784,7 @@ static void module_destructor_zval(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
+static bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	/* While we keep registering $GLOBALS as an auto-global, we do not create an
 	 * actual variable for it. Access to it handled specially by the compiler. */
@@ -1287,7 +1287,7 @@ static ZEND_COLD void zend_error_impl(
 	zval params[4];
 	zval retval;
 	zval orig_user_error_handler;
-	zend_bool in_compilation;
+	bool in_compilation;
 	zend_class_entry *saved_class_entry;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
@@ -1591,7 +1591,7 @@ ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
 	va_end(va);
 } /* }}} */
 
-ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_output_debug_string(bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
 	va_list args;

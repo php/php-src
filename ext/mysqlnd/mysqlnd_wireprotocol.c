@@ -1436,7 +1436,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
-									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
+									  const bool as_int_or_float, MYSQLND_STATS * const stats)
 {
 	unsigned int i;
 	const zend_uchar * p = row_buffer->ptr;
@@ -1527,7 +1527,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats)
+									bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	unsigned int i;
 	zval *current_field, *end_field, *start_field;
@@ -1631,7 +1631,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 #else
 						(uint64_t) _atoi64((char *) p);
 #endif
-					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
+					bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_ZEND_LONG==8
 					if (uns == TRUE && v > 9223372036854775807L)
@@ -2436,7 +2436,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum php_mysqlnd_server_command command,
 		const zend_uchar * const arg, const size_t arg_len,
-		const zend_bool silent,
+		const bool silent,
 
 		struct st_mysqlnd_connection_state * connection_state,
 		MYSQLND_ERROR_INFO * error_info,
@@ -2502,7 +2502,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
 						MYSQLND_ERROR_INFO * const error_info,
 						MYSQLND_UPSERT_STATUS * const upsert_status,
-						const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+						const bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 						MYSQLND_STRING * const last_message)
 {
 	enum_func_status ret = FAIL;
@@ -2596,9 +2596,9 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum mysqlnd_packet_type ok_packet,
-		const zend_bool silent,
+		const bool silent,
 		const enum php_mysqlnd_server_command command,
-		const zend_bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+		const bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
 		MYSQLND_ERROR_INFO	* error_info,
 		MYSQLND_UPSERT_STATUS * upsert_status,
@@ -2658,7 +2658,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_protocol_payload_decoder_factory_init */
 PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
-mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
+mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const bool persistent)
 {
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * ret;
 	DBG_ENTER("mysqlnd_protocol_payload_decoder_factory_init");
@@ -2675,7 +2675,7 @@ mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_F
 	DBG_ENTER("mysqlnd_protocol_payload_decoder_factory_free");
 
 	if (factory) {
-		zend_bool pers = factory->persistent;
+		bool pers = factory->persistent;
 		mnd_pefree(factory, pers);
 	}
 	DBG_VOID_RETURN;

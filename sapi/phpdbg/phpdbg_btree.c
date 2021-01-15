@@ -224,10 +224,10 @@ check_branch_existence:
 	return SUCCESS;
 }
 
-void phpdbg_btree_clean_recursive(phpdbg_btree_branch *branch, zend_ulong depth, zend_bool persistent) {
+void phpdbg_btree_clean_recursive(phpdbg_btree_branch *branch, zend_ulong depth, bool persistent) {
 	phpdbg_btree_branch *start = branch;
 	while (depth--) {
-		zend_bool use_branch = branch + 1 == branch->branches[0];
+		bool use_branch = branch + 1 == branch->branches[0];
 		if (branch->branches[use_branch]) {
 			phpdbg_btree_clean_recursive(branch->branches[use_branch], depth, persistent);
 		}

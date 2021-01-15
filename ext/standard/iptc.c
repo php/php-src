@@ -179,7 +179,7 @@ PHP_FUNCTION(iptcembed)
 	zend_string *spoolbuf = NULL;
 	unsigned char *poi = NULL;
 	zend_stat_t sb;
-	zend_bool written = 0;
+	bool written = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(iptcdata, iptcdata_len)

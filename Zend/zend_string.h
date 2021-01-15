@@ -47,7 +47,7 @@ ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
-ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
+ZEND_API void zend_interned_strings_switch_storage(bool request);
 
 ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
@@ -332,21 +332,21 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }

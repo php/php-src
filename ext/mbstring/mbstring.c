@@ -73,9 +73,9 @@ static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *lis
 
 static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 
-static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc);
+static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc);
 
-static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
+static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -252,14 +252,14 @@ static size_t count_commas(const char *p, const char *end) {
  */
 static zend_result php_mb_parse_encoding_list(const char *value, size_t value_length,
 	const mbfl_encoding ***return_list, size_t *return_size, bool persistent, uint32_t arg_num,
-	zend_bool allow_pass_encoding)
+	bool allow_pass_encoding)
 {
 	if (value == NULL || value_length == 0) {
 		*return_list = NULL;
 		*return_size = 0;
 		return SUCCESS;
 	} else {
-		zend_bool included_auto;
+		bool included_auto;
 		size_t n, size;
 		char *p1, *endp, *tmpstr;
 		const mbfl_encoding **entry, **list;
@@ -347,7 +347,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
 	const mbfl_encoding **list = ecalloc(size, sizeof(mbfl_encoding*));
 	const mbfl_encoding **entry = list;
-	zend_bool included_auto = 0;
+	bool included_auto = 0;
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
@@ -1421,7 +1421,7 @@ PHP_FUNCTION(mb_substitute_character)
 {
 	zend_string *substitute_character = NULL;
 	zend_long substitute_codepoint;
-	zend_bool substitute_is_null = 1;
+	bool substitute_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -2000,7 +2000,7 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 	char *haystack_val, *needle_val;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	zend_string *encoding_name = NULL;
-	zend_bool part = 0;
+	bool part = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(haystack_val, haystack.len)
@@ -2124,7 +2124,7 @@ PHP_FUNCTION(mb_substr)
 	zend_long from, len;
 	size_t real_from, real_len;
 	size_t str_len;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -2188,7 +2188,7 @@ PHP_FUNCTION(mb_strcut)
 	zend_string *encoding = NULL;
 	char *string_val;
 	zend_long from, len;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -2332,7 +2332,7 @@ PHP_FUNCTION(mb_strimwidth)
 
 
 /* See mbfl_no_encoding definition for list of unsupported encodings */
-static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc)
+static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc)
 {
 	return ((no_enc >= mbfl_no_encoding_invalid && no_enc <= mbfl_no_encoding_qprint)
 			|| (no_enc >= mbfl_no_encoding_utf7 && no_enc <= mbfl_no_encoding_utf7imap)
@@ -2342,7 +2342,7 @@ static inline zend_bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding 
 
 
 /* See mbfl_no_encoding definition for list of UTF-8 encodings */
-static inline zend_bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
+static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 {
 	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
 }
@@ -2501,7 +2501,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	HashTable *input_ht, *from_encodings_ht = NULL;
 	const mbfl_encoding **from_encodings;
 	size_t num_from_encodings;
-	zend_bool free_from_encodings;
+	bool free_from_encodings;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT_OR_STR(input_ht, input_str)
@@ -2673,13 +2673,13 @@ PHP_FUNCTION(mb_detect_encoding)
 	size_t str_len;
 	zend_string *encoding_str = NULL;
 	HashTable *encoding_ht = NULL;
-	zend_bool strict = 0;
+	bool strict = 0;
 
 	mbfl_string string;
 	const mbfl_encoding *ret;
 	const mbfl_encoding **elist;
 	size_t size;
-	zend_bool free_elist;
+	bool free_elist;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STRING(str, str_len)
@@ -3184,7 +3184,7 @@ PHP_FUNCTION(mb_encode_numericentity)
 	zend_string *encoding = NULL;
 	int mapsize;
 	HashTable *target_hash;
-	zend_bool is_hex = 0;
+	bool is_hex = 0;
 	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)

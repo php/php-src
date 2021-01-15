@@ -103,7 +103,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	zend_function_dtor(&tmp);
 }
 
-ZEND_API void zend_type_release(zend_type type, zend_bool persistent) {
+ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
@@ -754,14 +754,14 @@ static void emit_live_range(
 	emit_live_range_raw(op_array, var_num, kind, start, end);
 }
 
-static zend_bool is_fake_def(zend_op *opline) {
+static bool is_fake_def(zend_op *opline) {
 	/* These opcodes only modify the result, not create it. */
 	return opline->opcode == ZEND_ROPE_ADD
 		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT
 		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK;
 }
 
-static zend_bool keeps_op1_alive(zend_op *opline) {
+static bool keeps_op1_alive(zend_op *opline) {
 	/* These opcodes don't consume their OP1 operand,
 	 * it is later freed by something else. */
 	if (opline->opcode == ZEND_CASE

@@ -7,14 +7,14 @@
 
 typedef struct {
 	char *mem;
-	zend_bool allocated;
+	bool allocated;
 	zend_mm_heap *heap;
 	zend_mm_heap *old_heap;
 } phpdbg_signal_safe_mem;
 
 #include "phpdbg.h"
 
-zend_bool phpdbg_active_sigsafe_mem(void);
+bool phpdbg_active_sigsafe_mem(void);
 
 void phpdbg_set_sigsafe_mem(char *mem);
 void phpdbg_clear_sigsafe_mem(void);

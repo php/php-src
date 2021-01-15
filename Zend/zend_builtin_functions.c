@@ -370,7 +370,7 @@ ZEND_FUNCTION(strncasecmp)
 ZEND_FUNCTION(error_reporting)
 {
 	zend_long err;
-	zend_bool err_is_null = 1;
+	bool err_is_null = 1;
 	int old_error_reporting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
@@ -483,7 +483,7 @@ ZEND_FUNCTION(define)
 {
 	zend_string *name;
 	zval *val, val_free;
-	zend_bool non_cs = 0;
+	bool non_cs = 0;
 	zend_constant c;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -631,14 +631,14 @@ ZEND_FUNCTION(get_parent_class)
 }
 /* }}} */
 
-static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* {{{ */
+static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ */
 {
 	zval *obj;
 	zend_string *class_name;
 	zend_class_entry *instance_ce;
 	zend_class_entry *ce;
-	zend_bool allow_string = only_subclass;
-	zend_bool retval;
+	bool allow_string = only_subclass;
+	bool retval;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ZVAL(obj)
@@ -794,7 +794,7 @@ ZEND_FUNCTION(get_object_vars)
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
 		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
-			zend_bool is_dynamic = 1;
+			bool is_dynamic = 1;
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
 				if (UNEXPECTED(Z_ISUNDEF_P(value))) {
@@ -1007,7 +1007,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 	zend_string *name;
 	zend_string *lcname;
 	zend_class_entry *ce;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
@@ -1063,7 +1063,7 @@ ZEND_FUNCTION(trait_exists)
 ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
-	zend_bool exists;
+	bool exists;
 	zend_string *lcname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1092,7 +1092,7 @@ ZEND_FUNCTION(class_alias)
 	char *alias_name;
 	zend_class_entry *ce;
 	size_t alias_name_len;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ss|b", &class_name, &alias_name, &alias_name_len, &autoload) == FAILURE) {
 		RETURN_THROWS();
@@ -1326,7 +1326,7 @@ ZEND_FUNCTION(get_defined_functions)
 	zval internal, user;
 	zend_string *key;
 	zend_function *func;
-	zend_bool exclude_disabled = 1;
+	bool exclude_disabled = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		RETURN_THROWS();
@@ -1474,7 +1474,7 @@ static void add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 /* {{{ Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	zend_bool zendext = 0;
+	bool zendext = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &zendext) == FAILURE) {
 		RETURN_THROWS();
@@ -1497,7 +1497,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 /* {{{ Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
-	zend_bool categorize = 0;
+	bool categorize = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
 		RETURN_THROWS();
@@ -1666,7 +1666,7 @@ void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 }
 /* }}} */
 
-static inline zend_bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
+static inline bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
 {
 	return !(skip->func && ZEND_USER_CODE(skip->func->common.type))
 			&& skip->prev_execute_data
@@ -1778,7 +1778,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			zend_bool build_filename_arg = 1;
+			bool build_filename_arg = 1;
 			uint32_t include_kind = 0;
 			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
 				include_kind = ptr->opline->extended_value;
@@ -2009,7 +2009,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			zend_bool build_filename_arg = 1;
+			bool build_filename_arg = 1;
 			zend_string *pseudo_function_name;
 			uint32_t include_kind = 0;
 			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {

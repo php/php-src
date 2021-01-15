@@ -115,7 +115,7 @@ static void zend_generator_cleanup_unfinished_execution(
 }
 /* }}} */
 
-ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution) /* {{{ */
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;

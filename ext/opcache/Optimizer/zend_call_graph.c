@@ -53,7 +53,7 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 	int call = 0;
 	zend_call_info **call_stack;
 	ALLOCA_FLAG(use_heap);
-	zend_bool is_prototype;
+	bool is_prototype;
 
 	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
 	call_info = NULL;

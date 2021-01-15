@@ -25,14 +25,14 @@
 #include "zend_inference.h"
 #include "Optimizer/zend_optimizer_internal.h"
 
-static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
+static bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
 	}
 	return a == b;
 }
 
-static zend_bool will_rejoin(
+static bool will_rejoin(
 		const zend_cfg *cfg, const zend_dfg *dfg, const zend_basic_block *block,
 		int other_successor, int exclude, int var) {
 	int i;
@@ -58,7 +58,7 @@ static zend_bool will_rejoin(
 	return 0;
 }
 
-static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
 	zend_basic_block *from_block, *to_block;
 	int other_successor;
@@ -1508,7 +1508,7 @@ static void propagate_phi_type_widening(zend_ssa *ssa, int var) /* {{{ */
 }
 /* }}} */
 
-void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_types) /* {{{ */
+void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types) /* {{{ */
 {
 	zend_ssa_var *old_var = &ssa->vars[old];
 	zend_ssa_var *new_var = &ssa->vars[new];
@@ -1527,7 +1527,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_
 
 		/* If the op already uses the new var, don't add the op to the use
 		 * list again. Instead move the use_chain to the correct operand. */
-		zend_bool add_to_use_chain = 1;
+		bool add_to_use_chain = 1;
 		if (ssa_op->result_use == new) {
 			add_to_use_chain = 0;
 		} else if (ssa_op->op1_use == new) {
@@ -1579,7 +1579,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, zend_bool update_
 	/* Update phi use chains */
 	FOREACH_PHI_USE(old_var, phi) {
 		int j;
-		zend_bool after_first_new_source = 0;
+		bool after_first_new_source = 0;
 
 		/* If the phi already uses the new var, find its use chain, as we may
 		 * need to move it to a different source operand. */

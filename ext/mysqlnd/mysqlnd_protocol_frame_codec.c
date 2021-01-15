@@ -387,7 +387,7 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			pfc->data->flags |= MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION;
 			break;
 		case MYSQL_SERVER_PUBLIC_KEY: {
-			const zend_bool pers = pfc->persistent;
+			const bool pers = pfc->persistent;
 			if (pfc->data->sha256_server_public_key) {
 				mnd_pefree(pfc->data->sha256_server_public_key, pers);
 			}
@@ -498,7 +498,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_PFC * pfc;

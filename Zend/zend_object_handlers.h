@@ -134,7 +134,7 @@ typedef int (*zend_object_cast_t)(zend_object *readobj, zval *retval, int type);
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
 typedef int (*zend_object_count_elements_t)(zend_object *object, zend_long *count);
 
-typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
+typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
@@ -187,7 +187,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *ce);
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
+ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
@@ -206,12 +206,12 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset);
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key);
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic);
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 

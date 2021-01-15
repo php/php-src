@@ -344,7 +344,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
+bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;

@@ -24,7 +24,7 @@ typedef struct _zend_ptr_stack {
 	int top, max;
 	void **elements;
 	void **top_element;
-	zend_bool persistent;
+	bool persistent;
 } zend_ptr_stack;
 
 
@@ -32,13 +32,13 @@ typedef struct _zend_ptr_stack {
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack);
-ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent);
+ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, bool persistent);
 ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_reverse_apply(zend_ptr_stack *stack, void (*func)(void *));
-ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
+ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
 END_EXTERN_C()
 

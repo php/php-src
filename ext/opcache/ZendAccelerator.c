@@ -109,12 +109,12 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 #ifdef ZEND_WIN32
 char accel_uname_id[32];
 #endif
-zend_bool accel_startup_ok = 0;
+bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
-zend_bool file_cache_only = 0;  /* process uses file cache only */
+bool file_cache_only = 0;  /* process uses file cache only */
 #if ENABLE_FILE_CACHE_FALLBACK
-zend_bool fallback_process = 0; /* process uses file cache fallback */
+bool fallback_process = 0; /* process uses file cache fallback */
 #endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
@@ -1278,7 +1278,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 	return (char*)path;
 }
 
-int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool force)
+int zend_accel_invalidate(const char *filename, size_t filename_len, bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
@@ -1353,7 +1353,7 @@ static void zend_accel_add_key(const char *key, unsigned int key_length, zend_ac
 	}
 }
 
-static zend_always_inline zend_bool is_phar_file(zend_string *filename)
+static zend_always_inline bool is_phar_file(zend_string *filename)
 {
 	return filename && ZSTR_LEN(filename) >= sizeof(".phar") &&
 		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (sizeof(".phar")-1), ".phar", sizeof(".phar")-1) &&
@@ -2968,7 +2968,7 @@ static zend_result accel_post_startup(void)
 		size_t shm_size = ZCG(accel_directives).memory_consumption;
 #ifdef HAVE_JIT
 		size_t jit_size = 0;
-		zend_bool reattached = 0;
+		bool reattached = 0;
 
 		if (JIT_G(enabled) && JIT_G(buffer_size)
 		 && zend_jit_check_support() == SUCCESS) {
@@ -3138,7 +3138,7 @@ static void accel_post_shutdown(void)
 void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
-	zend_bool _file_cache_only = 0;
+	bool _file_cache_only = 0;
 
 #ifdef HAVE_JIT
 	zend_jit_shutdown();
@@ -3504,7 +3504,7 @@ static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, 
 	} ZEND_HASH_FOREACH_END();
 }
 
-static zend_bool preload_needed_types_known(zend_class_entry *ce);
+static bool preload_needed_types_known(zend_class_entry *ce);
 static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
 	zend_class_entry *p;
 	*kind = "Unknown reason";
@@ -3561,9 +3561,9 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 	}
 }
 
-static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
+static bool preload_try_resolve_constants(zend_class_entry *ce)
 {
-	zend_bool ok, changed;
+	bool ok, changed;
 	zend_class_constant *c;
 	zval *val;
 
@@ -3635,9 +3635,9 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class
 	return ce;
 }
 
-static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
+static bool preload_try_resolve_property_types(zend_class_entry *ce)
 {
-	zend_bool ok = 1;
+	bool ok = 1;
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		zend_property_info *prop;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
@@ -3659,7 +3659,7 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 	return ok;
 }
 
-static zend_bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
+static bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
 	if (zend_string_equals_literal_ci(name, "self") ||
 		zend_string_equals_literal_ci(name, "parent") ||
 		zend_string_equals_ci(name, ce->name)) {
@@ -3667,12 +3667,12 @@ static zend_bool preload_is_class_type_known(zend_class_entry *ce, zend_string *
 	}
 
 	zend_string *lcname = zend_string_tolower(name);
-	zend_bool known = zend_hash_exists(EG(class_table), lcname);
+	bool known = zend_hash_exists(EG(class_table), lcname);
 	zend_string_release(lcname);
 	return known;
 }
 
-static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
+static bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(*type, single_type) {
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
@@ -3684,7 +3684,7 @@ static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
 	return 1;
 }
 
-static zend_bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {
+static bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {
 	zend_class_entry *p;
 	if (ce->trait_aliases || ce->trait_precedences) {
 		return 1;
@@ -3722,7 +3722,7 @@ static zend_bool preload_is_method_maybe_override(zend_class_entry *ce, zend_str
 	return 0;
 }
 
-static zend_bool preload_needed_types_known(zend_class_entry *ce) {
+static bool preload_needed_types_known(zend_class_entry *ce) {
 	zend_function *fptr;
 	zend_string *lcname;
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
@@ -3749,7 +3749,7 @@ static void preload_link(void)
 	zend_persistent_script *script;
 	zend_class_entry *ce, *parent, *p;
 	zend_string *key;
-	zend_bool found, changed;
+	bool found, changed;
 	uint32_t i;
 	dtor_func_t orig_dtor;
 	zend_function *function;
@@ -4052,7 +4052,7 @@ static zend_string *preload_resolve_path(zend_string *filename)
 static void preload_remove_empty_includes(void)
 {
 	zend_persistent_script *script;
-	zend_bool changed;
+	bool changed;
 
 	/* mark all as empty */
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
@@ -4359,7 +4359,7 @@ static zend_result preload_autoload(zend_string *filename)
 	zend_op_array *op_array;
 	zend_execute_data *old_execute_data;
 	zend_class_entry *old_fake_scope;
-	zend_bool do_bailout = 0;
+	bool do_bailout = 0;
 	int ret = SUCCESS;
 
 	if (zend_hash_exists(&EG(included_files), filename)) {
@@ -4422,7 +4422,7 @@ static zend_result preload_autoload(zend_string *filename)
 	return ret;
 }
 
-static int accel_preload(const char *config, zend_bool in_child)
+static int accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
 	int ret;
@@ -4795,7 +4795,7 @@ static int accel_finish_startup(void)
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
 #ifdef ZEND_SIGNALS
-		zend_bool old_reset_signals = SIGG(reset);
+		bool old_reset_signals = SIGG(reset);
 #endif
 
 		if (UNEXPECTED(file_cache_only)) {
@@ -4901,7 +4901,7 @@ static int accel_finish_startup(void)
 		EG(error_reporting) = orig_error_reporting;
 
 		if (rc == SUCCESS) {
-			zend_bool orig_report_memleaks;
+			bool orig_report_memleaks;
 
 			/* don't send headers */
 			SG(headers_sent) = 1;

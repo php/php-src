@@ -480,7 +480,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_temp_dir)
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_temp_dir)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 

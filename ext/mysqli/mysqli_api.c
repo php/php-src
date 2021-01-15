@@ -71,7 +71,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 {
 	char * ret = NULL;
 	if (name) {
-		zend_bool warned = FALSE;
+		bool warned = FALSE;
 		const char * p_orig = name;
 		char * p_copy;
 		p_copy = ret = emalloc(strlen(name) + 1 + 2 + 2 + 1); /* space, open, close, NullS */
@@ -107,7 +107,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 /* }}} */
 
 /* {{{ mysqli_commit_or_rollback_libmysql */
-static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const uint32_t mode, const char * const name)
+static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, bool commit, const uint32_t mode, const char * const name)
 {
 	int ret;
 	smart_str tmp_str = {0};
@@ -161,7 +161,7 @@ PHP_FUNCTION(mysqli_autocommit)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-	zend_bool	automode;
+	bool	automode;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &mysql_link, mysqli_link_class_entry, &automode) == FAILURE) {
 		RETURN_THROWS();
@@ -1057,7 +1057,7 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 {
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
-	zend_bool	fetched_anything;
+	bool	fetched_anything;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		RETURN_THROWS();
@@ -1426,7 +1426,7 @@ PHP_FUNCTION(mysqli_info)
 /* }}} */
 
 /* {{{ php_mysqli_init() */
-void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;

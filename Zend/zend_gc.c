@@ -209,10 +209,10 @@ typedef struct _gc_root_buffer {
 typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 
-	zend_bool         gc_enabled;
-	zend_bool         gc_active;        /* GC currently running, forbid nested GC */
-	zend_bool         gc_protected;     /* GC protected, forbid root additions */
-	zend_bool         gc_full;
+	bool         gc_enabled;
+	bool         gc_active;        /* GC currently running, forbid nested GC */
+	bool         gc_protected;     /* GC protected, forbid root additions */
+	bool         gc_full;
 
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
@@ -493,9 +493,9 @@ void gc_reset(void)
 	}
 }
 
-ZEND_API zend_bool gc_enable(zend_bool enable)
+ZEND_API bool gc_enable(bool enable)
 {
-	zend_bool old_enabled = GC_G(gc_enabled);
+	bool old_enabled = GC_G(gc_enabled);
 	GC_G(gc_enabled) = enable;
 	if (enable && !old_enabled && GC_G(buf) == NULL) {
 		GC_G(buf) = (gc_root_buffer*) pemalloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE, 1);
@@ -507,19 +507,19 @@ ZEND_API zend_bool gc_enable(zend_bool enable)
 	return old_enabled;
 }
 
-ZEND_API zend_bool gc_enabled(void)
+ZEND_API bool gc_enabled(void)
 {
 	return GC_G(gc_enabled);
 }
 
-ZEND_API zend_bool gc_protect(zend_bool protect)
+ZEND_API bool gc_protect(bool protect)
 {
-	zend_bool old_protected = GC_G(gc_protected);
+	bool old_protected = GC_G(gc_protected);
 	GC_G(gc_protected) = protect;
 	return old_protected;
 }
 
-ZEND_API zend_bool gc_protected(void)
+ZEND_API bool gc_protected(void)
 {
 	return GC_G(gc_protected);
 }

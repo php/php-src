@@ -90,7 +90,7 @@ static unsigned get_xcr0_eax() {
 # endif
 }
 
-static zend_bool is_avx_supported() {
+static bool is_avx_supported() {
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
 		/* No support for AVX */
 		return 0;
@@ -106,7 +106,7 @@ static zend_bool is_avx_supported() {
 	return 1;
 }
 #else
-static zend_bool is_avx_supported() {
+static bool is_avx_supported() {
 	return 0;
 }
 #endif

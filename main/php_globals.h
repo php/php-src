@@ -51,11 +51,11 @@ typedef struct _arg_separators {
 } arg_separators;
 
 struct _php_core_globals {
-	zend_bool implicit_flush;
+	bool implicit_flush;
 
 	zend_long output_buffering;
 
-	zend_bool enable_dl;
+	bool enable_dl;
 
 	char *output_handler;
 
@@ -66,12 +66,12 @@ struct _php_core_globals {
 	zend_long max_input_time;
 
 	zend_uchar display_errors;
-	zend_bool display_startup_errors;
-	zend_bool log_errors;
+	bool display_startup_errors;
+	bool log_errors;
 	zend_long      log_errors_max_len;
-	zend_bool ignore_repeated_errors;
-	zend_bool ignore_repeated_source;
-	zend_bool report_memleaks;
+	bool ignore_repeated_errors;
+	bool ignore_repeated_source;
+	bool report_memleaks;
 	char *error_log;
 
 	char *doc_root;
@@ -102,7 +102,7 @@ struct _php_core_globals {
 	HashTable rfc1867_protected_variables;
 
 	short connection_status;
-	zend_bool ignore_user_abort;
+	bool ignore_user_abort;
 
 	unsigned char header_is_being_sent;
 
@@ -110,27 +110,27 @@ struct _php_core_globals {
 
 	zval http_globals[6];
 
-	zend_bool expose_php;
+	bool expose_php;
 
-	zend_bool register_argc_argv;
-	zend_bool auto_globals_jit;
+	bool register_argc_argv;
+	bool auto_globals_jit;
 
 	char *docref_root;
 	char *docref_ext;
 
-	zend_bool html_errors;
-	zend_bool xmlrpc_errors;
+	bool html_errors;
+	bool xmlrpc_errors;
 
 	zend_long xmlrpc_error_number;
 
-	zend_bool activated_auto_globals[8];
+	bool activated_auto_globals[8];
 
-	zend_bool modules_activated;
-	zend_bool file_uploads;
-	zend_bool during_request_startup;
-	zend_bool allow_url_fopen;
-	zend_bool enable_post_data_reading;
-	zend_bool report_zend_debug;
+	bool modules_activated;
+	bool file_uploads;
+	bool during_request_startup;
+	bool allow_url_fopen;
+	bool enable_post_data_reading;
+	bool report_zend_debug;
 
 	int last_error_type;
 	zend_string *last_error_message;
@@ -140,31 +140,31 @@ struct _php_core_globals {
 	char *php_sys_temp_dir;
 
 	char *disable_classes;
-	zend_bool allow_url_include;
+	bool allow_url_include;
 #ifdef PHP_WIN32
-	zend_bool com_initialized;
+	bool com_initialized;
 #endif
 	zend_long max_input_nesting_level;
 	zend_long max_input_vars;
-	zend_bool in_user_include;
+	bool in_user_include;
 
 	char *user_ini_filename;
 	zend_long user_ini_cache_ttl;
 
 	char *request_order;
 
-	zend_bool mail_x_header;
+	bool mail_x_header;
 	char *mail_log;
 
-	zend_bool in_error_log;
+	bool in_error_log;
 
 #ifdef PHP_WIN32
-	zend_bool windows_show_crt_warning;
+	bool windows_show_crt_warning;
 #endif
 
 	zend_long syslog_facility;
 	char *syslog_ident;
-	zend_bool have_called_openlog;
+	bool have_called_openlog;
 	zend_long syslog_filter;
 };
 

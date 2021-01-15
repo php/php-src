@@ -88,7 +88,7 @@ typedef struct {
 	zval			li_read;
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
-	zend_bool		persistent;
+	bool		persistent;
 #ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
 #endif
@@ -124,7 +124,7 @@ struct st_mysqli_warning {
 typedef struct _mysqli_property_entry {
 	const char *pname;
 	size_t pname_length;
-	int (*r_func)(mysqli_object *obj, zval *retval, zend_bool quiet);
+	int (*r_func)(mysqli_object *obj, zval *retval, bool quiet);
 	int (*w_func)(mysqli_object *obj, zval *value);
 } mysqli_property_entry;
 
@@ -289,7 +289,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_long			report_mode;
 	HashTable		*report_ht;
 	zend_ulong	multi_query;
-	zend_bool 		rollback_on_cached_plink;
+	bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 #define MyG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqli, v)

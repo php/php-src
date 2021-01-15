@@ -2423,7 +2423,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			const zend_op *opline = p->opline;
 			int len;
-			zend_bool support_opline;
+			bool support_opline;
 
 			support_opline =
 				zend_jit_opline_supports_reg(op_array, ssa, opline, ssa_op, p);
@@ -3085,7 +3085,7 @@ static void zend_jit_trace_setup_ret_counter(const zend_op *opline, size_t offse
 	}
 }
 
-static zend_bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ssa_opcodes, int var)
+static bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ssa_opcodes, int var)
 {
 	int i;
 	int use = ssa->vars[var].use_chain;
@@ -3176,11 +3176,11 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
                                          zend_ssa                *ssa,
                                          zend_jit_trace_stack    *stack,
                                          zend_lifetime_interval **ra,
-                                         zend_bool                polymorphic_side_trace)
+                                         bool                polymorphic_side_trace)
 {
 	int i;
-	zend_bool has_constants = 0;
-	zend_bool has_unsaved_vars = 0;
+	bool has_constants = 0;
+	bool has_unsaved_vars = 0;
 
 	// TODO: Merge this loop with the following register LOAD loop to implement parallel move ???
 	for (i = 0; i < parent_vars_count; i++) {
@@ -3317,7 +3317,7 @@ static void zend_jit_trace_set_var_range(zend_ssa_var_info *info, zend_long min,
 	info->range.overflow = 0;
 }
 
-static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, zend_bool exit_if_true)
+static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, bool exit_if_true)
 {
 	zend_long op1_min, op1_max, op2_min, op2_max;
 
@@ -3435,7 +3435,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 	}
 }
 
-static zend_bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op **ssa_opcodes)
+static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op **ssa_opcodes)
 {
 	zend_uchar prev_opcode;
 
@@ -3537,14 +3537,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	zend_uchar smart_branch_opcode;
 	const void *exit_addr;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info, op1_data_info;
-	zend_bool send_result = 0;
-	zend_bool skip_comparison;
+	bool send_result = 0;
+	bool skip_comparison;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
-	zend_bool ce_is_instanceof;
-	zend_bool delayed_fetch_this = 0;
-	zend_bool avoid_refcounting = 0;
-	zend_bool polymorphic_side_trace =
+	bool ce_is_instanceof;
+	bool delayed_fetch_this = 0;
+	bool avoid_refcounting = 0;
+	bool polymorphic_side_trace =
 		parent_trace &&
 		(zend_jit_traces[parent_trace].exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL);
 	uint32_t i;
@@ -3817,7 +3817,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			uint8_t op3_type = p->op3_type;
 			uint8_t orig_op1_type = op1_type;
 			uint8_t orig_op2_type = op2_type;
-			zend_bool op1_indirect;
+			bool op1_indirect;
 			zend_class_entry *op1_ce = NULL;
 			zend_class_entry *op2_ce = NULL;
 
@@ -4773,7 +4773,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_TRACE_TYPE();
 						CHECK_OP2_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point;
 
@@ -4821,7 +4821,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_TRACE_TYPE();
 						CHECK_OP2_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point;
 
@@ -4861,7 +4861,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_DEFINED:
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
 
@@ -4885,7 +4885,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_info = OP1_INFO();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point;
 
@@ -4925,7 +4925,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else {
 							int j;
 							int may_throw = 0;
-							zend_bool left_frame = 0;
+							bool left_frame = 0;
 
 							if (!zend_jit_return(&dasm_state, opline, op_array,
 									op1_info, OP1_REG_ADDR())) {
@@ -5081,7 +5081,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							CHECK_OP1_TRACE_TYPE();
 						}
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
 
@@ -5111,7 +5111,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
 
@@ -5274,7 +5274,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							zend_bool exit_if_true = 0;
+							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point;
 
@@ -6408,7 +6408,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	const zend_op *opline;
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack;
-	zend_bool original_handler = 0;
+	bool original_handler = 0;
 
 	if (!zend_jit_trace_exit_needs_deoptimization(trace_num, exit_num)) {
 		return dasm_labels[zend_lbtrace_escape];
@@ -6589,7 +6589,7 @@ static void zend_jit_blacklist_root_trace(const zend_op *opline, size_t offset)
 	zend_shared_alloc_unlock();
 }
 
-static zend_bool zend_jit_trace_is_bad_root(const zend_op *opline, zend_jit_trace_stop stop, size_t offset)
+static bool zend_jit_trace_is_bad_root(const zend_op *opline, zend_jit_trace_stop stop, size_t offset)
 {
 	const zend_op **cache_opline = JIT_G(bad_root_cache_opline);
 	uint8_t *cache_count = JIT_G(bad_root_cache_count);
@@ -7054,7 +7054,7 @@ static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
 	zend_shared_alloc_unlock();
 }
 
-static zend_bool zend_jit_trace_exit_is_bad(uint32_t trace_num, uint32_t exit_num)
+static bool zend_jit_trace_exit_is_bad(uint32_t trace_num, uint32_t exit_num)
 {
 	uint8_t *counter = JIT_G(exit_counters) +
 		zend_jit_traces[trace_num].exit_counters + exit_num;
@@ -7066,7 +7066,7 @@ static zend_bool zend_jit_trace_exit_is_bad(uint32_t trace_num, uint32_t exit_nu
 	return 0;
 }
 
-static zend_bool zend_jit_trace_exit_is_hot(uint32_t trace_num, uint32_t exit_num)
+static bool zend_jit_trace_exit_is_hot(uint32_t trace_num, uint32_t exit_num)
 {
 	uint8_t *counter = JIT_G(exit_counters) +
 		zend_jit_traces[trace_num].exit_counters + exit_num;

@@ -147,7 +147,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_error_info_init */
 PHPAPI void
-mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persistent)
+mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const bool persistent)
 {
 	DBG_ENTER("mysqlnd_error_info_init");
 	info->m = mysqlnd_error_info_get_methods();
@@ -219,7 +219,7 @@ mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
 {
-	zend_bool pers = conn->persistent;
+	bool pers = conn->persistent;
 
 	if (conn->options->charset_name) {
 		mnd_pefree(conn->options->charset_name, pers);
@@ -259,7 +259,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 {
-	zend_bool pers = conn->persistent;
+	bool pers = conn->persistent;
 
 	DBG_ENTER("mysqlnd_conn_data::free_contents");
 
@@ -544,7 +544,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 
 /* {{{ mysqlnd_conn_data::get_scheme */
 static MYSQLND_STRING
-MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
+MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, bool * unix_socket, bool * named_pipe)
 {
 	MYSQLND_STRING transport;
 	DBG_ENTER("mysqlnd_conn_data::get_scheme");
@@ -592,11 +592,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 					)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), connect);
-	zend_bool unix_socket = FALSE;
-	zend_bool named_pipe = FALSE;
-	zend_bool reconnect = FALSE;
-	zend_bool saved_compression = FALSE;
-	zend_bool local_tx_started = FALSE;
+	bool unix_socket = FALSE;
+	bool named_pipe = FALSE;
+	bool reconnect = FALSE;
+	bool saved_compression = FALSE;
+	bool local_tx_started = FALSE;
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_STRING transport = { NULL, 0 };
 
@@ -1441,7 +1441,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 
 
 /* {{{ mysqlnd_conn_data::more_results */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_conn_data, more_results)(const MYSQLND_CONN_DATA * const conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::more_results");
@@ -1559,7 +1559,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 											   const char * user,
 											   const char * passwd,
 											   const char * db,
-											   zend_bool silent,
+											   bool silent,
 											   size_t passwd_len
 			)
 {
@@ -1977,7 +1977,7 @@ mysqlnd_escape_string_for_tx_name_in_comment(const char * const name)
 	char * ret = NULL;
 	DBG_ENTER("mysqlnd_escape_string_for_tx_name_in_comment");
 	if (name) {
-		zend_bool warned = FALSE;
+		bool warned = FALSE;
 		const char * p_orig = name;
 		char * p_copy;
 		p_copy = ret = mnd_emalloc(strlen(name) + 1 + 2 + 2 + 1); /* space, open, close, NullS */
@@ -2015,7 +2015,7 @@ mysqlnd_escape_string_for_tx_name_in_comment(const char * const name)
 
 /* {{{ mysqlnd_conn_data::tx_commit_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name)
+MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const bool commit, const unsigned int flags, const char * const name)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), tx_commit_or_rollback);
 	enum_func_status ret = FAIL;
@@ -2485,7 +2485,7 @@ mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
 	unsigned int ret = 0;
-	zend_bool disproportion = FALSE;
+	bool disproportion = FALSE;
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
 
@@ -2612,7 +2612,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
 						)
 {
 	enum_func_status ret = FAIL;
-	zend_bool self_alloced = FALSE;
+	bool self_alloced = FALSE;
 	MYSQLND_CSTRING hostname = { host, host? strlen(host) : 0 };
 	MYSQLND_CSTRING username = { user, user? strlen(user) : 0 };
 	MYSQLND_CSTRING password = { passwd, passwd_len };
@@ -2649,7 +2649,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
 
 /* {{{ mysqlnd_connection_init */
 PHPAPI MYSQLND *
-mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory)
+mysqlnd_connection_init(const size_t client_flags, const bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND * ret;

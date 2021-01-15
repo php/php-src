@@ -250,7 +250,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 	void *handlepp;
 	ub4 typep, iterp, idxp;
 	ub1 in_outp, piecep;
-	zend_bool piecewisecols = 0;
+	bool piecewisecols = 0;
 	php_oci_out_column *column;
 	sword errstatus;
 

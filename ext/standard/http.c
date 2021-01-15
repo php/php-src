@@ -49,7 +49,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	arg_sep_len = strlen(arg_sep);
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		zend_bool is_dynamic = 1;
+		bool is_dynamic = 1;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {

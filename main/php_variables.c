@@ -62,7 +62,7 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 	char *var, *var_orig;
 	size_t var_len, index_len;
 	zval gpc_element, *gpc_element_p;
-	zend_bool is_array = 0;
+	bool is_array = 0;
 	HashTable *symtable1 = NULL;
 	ALLOCA_FLAG(use_heap)
 
@@ -276,7 +276,7 @@ typedef struct post_var_data {
 	size_t already_scanned;
 } post_var_data_t;
 
-static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
+static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 {
 	char *start, *ksep, *vsep, *val;
 	size_t klen, vlen;
@@ -327,7 +327,7 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
 	return 1;
 }
 
-static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof)
+static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
 	uint64_t max_vars = PG(max_input_vars);
 
@@ -581,7 +581,7 @@ void _php_import_environment_variables(zval *array_ptr)
 	tsrm_env_unlock();
 }
 
-zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
+bool php_std_auto_global_callback(char *name, uint32_t name_len)
 {
 	zend_printf("%s\n", name);
 	return 0; /* don't rearm */
@@ -727,7 +727,7 @@ PHPAPI int php_hash_environment(void)
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_get(zend_string *name)
+static bool php_auto_globals_create_get(zend_string *name)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'G') || strchr(PG(variables_order),'g'))) {
 		sapi_module.treat_data(PARSE_GET, NULL, NULL);
@@ -742,7 +742,7 @@ static zend_bool php_auto_globals_create_get(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_post(zend_string *name)
+static bool php_auto_globals_create_post(zend_string *name)
 {
 	if (PG(variables_order) &&
 			(strchr(PG(variables_order),'P') || strchr(PG(variables_order),'p')) &&
@@ -761,7 +761,7 @@ static zend_bool php_auto_globals_create_post(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_cookie(zend_string *name)
+static bool php_auto_globals_create_cookie(zend_string *name)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'C') || strchr(PG(variables_order),'c'))) {
 		sapi_module.treat_data(PARSE_COOKIE, NULL, NULL);
@@ -776,7 +776,7 @@ static zend_bool php_auto_globals_create_cookie(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_files(zend_string *name)
+static bool php_auto_globals_create_files(zend_string *name)
 {
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_FILES]) == IS_UNDEF) {
 		array_init(&PG(http_globals)[TRACK_VARS_FILES]);
@@ -804,7 +804,7 @@ static void check_http_proxy(HashTable *var_table)
 	}
 }
 
-static zend_bool php_auto_globals_create_server(zend_string *name)
+static bool php_auto_globals_create_server(zend_string *name)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables();
@@ -841,7 +841,7 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_env(zend_string *name)
+static bool php_auto_globals_create_env(zend_string *name)
 {
 	zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_ENV]);
 	array_init(&PG(http_globals)[TRACK_VARS_ENV]);
@@ -857,7 +857,7 @@ static zend_bool php_auto_globals_create_env(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_request(zend_string *name)
+static bool php_auto_globals_create_request(zend_string *name)
 {
 	zval form_variables;
 	unsigned char _gpc_flags[3] = {0, 0, 0};

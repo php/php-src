@@ -80,7 +80,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 #define mysqlnd_connect(conn, host, user, pass, pass_len, db, db_len, port, socket, mysql_flags, client_api_flags) \
 			mysqlnd_connection_connect((conn), (host), (user), (pass), (pass_len), (db), (db_len), (port), (socket), (mysql_flags), (client_api_flags))
 
-PHPAPI MYSQLND * mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory);
+PHPAPI MYSQLND * mysqlnd_connection_init(const size_t client_flags, const bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory);
 PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 											const char * const host,
 											const char * const user,
@@ -308,8 +308,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_long		net_read_timeout;
 	zend_long		mempool_default_size;
 	char *			sha256_server_public_key;
-	zend_bool		collect_statistics;
-	zend_bool		collect_memory_statistics;
+	bool		collect_statistics;
+	bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

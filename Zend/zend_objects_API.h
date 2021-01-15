@@ -54,7 +54,7 @@ BEGIN_EXTERN_C()
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size);
 ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_store *objects);
 ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_store *objects);
-ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown);
+ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_store *objects, bool fast_shutdown);
 ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objects);
 
 /* Store API functions */

@@ -379,7 +379,7 @@ PHP_FUNCTION(get_meta_tags)
 {
 	char *filename;
 	size_t filename_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	int in_tag = 0, done = 0;
 	int looking_for_val = 0, have_name = 0, have_content = 0;
 	int saw_name = 0, saw_content = 0;
@@ -523,11 +523,11 @@ PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	size_t filename_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = 0;
 	zend_long maxlen;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -728,9 +728,9 @@ PHP_FUNCTION(file)
 	register int i = 0;
 	char eol_marker = '\n';
 	zend_long flags = 0;
-	zend_bool use_include_path;
-	zend_bool include_new_line;
-	zend_bool skip_blank_lines;
+	bool use_include_path;
+	bool include_new_line;
+	bool skip_blank_lines;
 	php_stream *stream;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -869,7 +869,7 @@ PHP_FUNCTION(fopen)
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
@@ -1018,7 +1018,7 @@ PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
 	zend_long len = 1024;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 	char *buf = NULL;
 	size_t line_len = 0;
 	zend_string *str;
@@ -1141,7 +1141,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(mkdir)
 	size_t dir_len;
 	zval *zcontext = NULL;
 	zend_long mode = 0777;
-	zend_bool recursive = 0;
+	bool recursive = 0;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1329,7 +1329,7 @@ PHP_FUNCTION(readfile)
 	char *filename;
 	size_t filename_len;
 	size_t size = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
@@ -1358,7 +1358,7 @@ PHP_FUNCTION(readfile)
 PHP_FUNCTION(umask)
 {
 	zend_long mask = 0;
-	zend_bool mask_is_null = 1;
+	bool mask_is_null = 1;
 	int oldumask;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
@@ -1931,7 +1931,7 @@ PHP_FUNCTION(fgetcsv)
 
 	{
 		zval *fd;
-		zend_bool len_is_null = 1;
+		bool len_is_null = 1;
 		char *delimiter_str = NULL;
 		size_t delimiter_str_len = 0;
 		char *enclosure_str = NULL;
@@ -2013,7 +2013,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
 	int inc_len;
-	zend_bool first_field = 1;
+	bool first_field = 1;
 
 	ZEND_ASSERT((escape_char >= 0 && escape_char <= UCHAR_MAX) || escape_char == PHP_CSV_NO_ESCAPE);
 

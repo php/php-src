@@ -32,7 +32,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout;
-	zend_bool timeout_is_null = 1;
+	bool timeout_is_null = 1;
 #ifndef PHP_WIN32
 	time_t conv;
 #else

@@ -248,7 +248,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	zend_string *s11, *s22;
 	zend_long start = 0, len = 0;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(s11)
@@ -886,7 +886,7 @@ PHP_FUNCTION(wordwrap)
 	size_t alloced;
 	zend_long current = 0, laststart = 0, lastspace = 0;
 	zend_long linelength = 75;
-	zend_bool docut = 0;
+	bool docut = 0;
 	zend_string *newtext;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1739,7 +1739,7 @@ PHP_FUNCTION(stristr)
 	size_t  found_offset;
 	char *haystack_dup;
 	char *orig_needle;
-	zend_bool part = 0;
+	bool part = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
@@ -1774,7 +1774,7 @@ PHP_FUNCTION(strstr)
 	zend_string *haystack, *needle;
 	const char *found = NULL;
 	zend_long found_offset;
-	zend_bool part = 0;
+	bool part = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
@@ -2164,7 +2164,7 @@ PHP_FUNCTION(substr)
 {
 	zend_string *str;
 	zend_long l = 0, f;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
@@ -2220,7 +2220,7 @@ PHP_FUNCTION(substr_replace)
 	zend_long from_long;
 	HashTable *len_ht = NULL;
 	zend_long len_long;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 	zend_long l = 0;
 	zend_long f;
 	zend_string *result;
@@ -4451,7 +4451,7 @@ PHP_FUNCTION(nl2br)
 	zend_string *str;
 	char *target;
 	size_t	repl_cnt = 0;
-	zend_bool	is_xhtml = 1;
+	bool	is_xhtml = 1;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -4798,7 +4798,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t a
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, bool allow_tag_spaces)
 {
 	char *tbuf, *tp, *rp, c, lc;
 	const char *buf, *p, *end;
@@ -5286,7 +5286,7 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 }
 /* }}} */
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive) /* {{{ */
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive) /* {{{ */
 {
 	zend_string *tmp_str1, *tmp_str2;
 	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
@@ -5385,7 +5385,7 @@ PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
 	zend_long offset = 0, length = 0;
-	zend_bool length_is_null = 1;
+	bool length_is_null = 1;
 	zend_long count = 0;
 	size_t haystack_len, needle_len;
 	const char *p, *endp;
@@ -5859,8 +5859,8 @@ PHP_FUNCTION(substr_compare)
 {
 	zend_string *s1, *s2;
 	zend_long offset, len=0;
-	zend_bool len_is_default=1;
-	zend_bool cs=0;
+	bool len_is_default=1;
+	bool cs=0;
 	size_t cmp_len;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)

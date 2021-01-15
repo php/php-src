@@ -265,8 +265,8 @@ PHP_FUNCTION(json_decode)
 {
 	char *str;
 	size_t str_len;
-	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-	zend_bool assoc_null = 1;
+	bool assoc = 0; /* return JS objects as PHP objects by default */
+	bool assoc_null = 1;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 

@@ -217,7 +217,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 
 		switch (rset_header.field_count) {
 			case MYSQLND_NULL_LENGTH: {	/* LOAD DATA LOCAL INFILE */
-				zend_bool is_warning;
+				bool is_warning;
 				DBG_INF("LOAD DATA");
 				conn->last_query_type = QUERY_LOAD_LOCAL;
 				conn->field_count = 0; /* overwrite previous value, or the last value could be used and lead to bug#53503 */
@@ -407,7 +407,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_result_unbuffered::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, bool * fetched_anything)
 {
 	enum_func_status ret;
 	MYSQLND_PACKET_ROW	*row_packet = result->unbuf->row_packet;
@@ -548,7 +548,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, MYSQLND_STMT
 
 /* {{{ mysqlnd_result_buffered::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, bool * fetched_anything)
 {
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
@@ -601,7 +601,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **
 
 /* {{{ mysqlnd_res::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES *result, zval **row_ptr, const unsigned int flags, zend_bool *fetched_anything)
+MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES *result, zval **row_ptr, const unsigned int flags, bool *fetched_anything)
 {
 	const mysqlnd_fetch_row_func f =
 		result->stored_data ? result->stored_data->m.fetch_row :
@@ -620,7 +620,7 @@ enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA * meta,
 													MYSQLND_ROW_BUFFER **row_buffers,
-													zend_bool binary_protocol)
+													bool binary_protocol)
 {
 	enum_func_status ret;
 	uint64_t total_allocated_rows = 0;
@@ -785,7 +785,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 
 	DBG_ENTER("mysqlnd_res::skip_result");
 	/*
@@ -814,7 +814,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_res::free_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool implicit)
+MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const bool implicit)
 {
 	DBG_ENTER("mysqlnd_res::free_result");
 
@@ -966,7 +966,7 @@ static void
 MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int flags,
 										zval *return_value ZEND_FILE_LINE_DC)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 	zval *row_data;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
@@ -1023,7 +1023,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 static MYSQLND_ROW_C
 MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 	zval *row_data;
 	MYSQLND_ROW_C ret = NULL;
 	DBG_ENTER("mysqlnd_res::fetch_row_c");

@@ -187,7 +187,7 @@ MYSQLND_METHOD(mysqlnd_command, statistics)(MYSQLND_CONN_DATA * const conn, zend
 
 /* {{{ mysqlnd_command::process_kill */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const zend_bool read_response)
+MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const bool read_response)
 {
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
@@ -333,7 +333,7 @@ MYSQLND_METHOD(mysqlnd_command, query)(MYSQLND_CONN_DATA * const conn, MYSQLND_C
 
 /* {{{ mysqlnd_command::change_user */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const zend_bool silent)
+MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const bool silent)
 {
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 	enum_func_status ret = FAIL;
@@ -558,7 +558,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 #ifdef MYSQLND_SSL_SUPPORTED
 	if (client_capabilities & CLIENT_SSL) {
-		const zend_bool server_has_ssl = (server_capabilities & CLIENT_SSL)? TRUE:FALSE;
+		const bool server_has_ssl = (server_capabilities & CLIENT_SSL)? TRUE:FALSE;
 		if (server_has_ssl == FALSE) {
 			goto close_conn;
 		} else {

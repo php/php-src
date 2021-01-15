@@ -893,7 +893,7 @@ optimize_const_unary_op:
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
 						zend_op *op = src + 1;
-						zend_bool optimize = 1;
+						bool optimize = 1;
 
 						while (op < opline) {
 							if ((op->op1_type == opline->op1_type

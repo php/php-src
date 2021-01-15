@@ -1207,7 +1207,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 PHP_FUNCTION(image_type_to_extension)
 {
 	zend_long image_type;
-	zend_bool inc_dot=1;
+	bool inc_dot=1;
 	const char *imgext = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)

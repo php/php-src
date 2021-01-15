@@ -144,7 +144,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline zend_bool is_handle_exception_set() {
+static zend_always_inline bool is_handle_exception_set() {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return !execute_data->func
 		|| !ZEND_USER_CODE(execute_data->func->common.type)
@@ -339,7 +339,7 @@ ZEND_METHOD(ErrorException, __construct)
 {
 	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
-	zend_bool lineno_is_null = 1;
+	bool lineno_is_null = 1;
 	zval   tmp, *object, *previous = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|SllS!l!O!", &message, &code, &severity, &filename, &lineno, &lineno_is_null, &previous, zend_ce_throwable) == FAILURE) {
@@ -1017,7 +1017,7 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 	EG(current_execute_data)->opline = EG(exception_op);
 }
 
-ZEND_API zend_bool zend_is_unwind_exit(zend_object *ex)
+ZEND_API bool zend_is_unwind_exit(zend_object *ex)
 {
 	return ex->ce == &zend_ce_unwind_exit;
 }

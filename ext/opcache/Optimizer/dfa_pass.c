@@ -280,7 +280,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 	free_alloca(shiftlist, use_heap);
 }
 
-static zend_bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	if (ce1 == ce2) {
 		return 1;
 	}
@@ -291,7 +291,7 @@ static zend_bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return instanceof_function(ce1, ce2);
 }
 
-static inline zend_bool can_elide_return_type_check(
+static inline bool can_elide_return_type_check(
 		zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *info = &op_array->arg_info[-1];
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
@@ -322,7 +322,7 @@ static inline zend_bool can_elide_return_type_check(
 	return 1;
 }
 
-static zend_bool opline_supports_assign_contraction(
+static bool opline_supports_assign_contraction(
 		zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
 		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
@@ -380,7 +380,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 
 				zend_op *send_array;
 				zend_op *send_needly;
-				zend_bool strict = 0;
+				bool strict = 0;
 
 				if (call_info->caller_init_opline->extended_value == 2) {
 					send_array = call_info->caller_call_opline - 1;
@@ -924,7 +924,7 @@ optimize_jmpnz:
 					if (opline->op1_type == IS_CONST) {
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
 						zend_uchar type = Z_TYPE_P(zv);
-						zend_bool correct_type =
+						bool correct_type =
 							(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
 							|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
 							|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));

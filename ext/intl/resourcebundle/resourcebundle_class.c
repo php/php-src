@@ -80,7 +80,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	size_t		bundlename_len = 0;
 	const char *locale;
 	size_t		locale_len = 0;
-	zend_bool	fallback = 1;
+	bool	fallback = 1;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
@@ -167,7 +167,7 @@ static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
-    zend_bool    is_numeric = 0;
+    bool    is_numeric = 0;
 	char         *pbuf;
 	ResourceBundle_object *rb;
 
@@ -231,7 +231,7 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 /* {{{ Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
 {
-	zend_bool   fallback = 1;
+	bool   fallback = 1;
 	zval *		offset;
 	zval *      object;
 

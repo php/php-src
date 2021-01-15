@@ -79,7 +79,7 @@ typedef struct st_mysqlnd_cmd_buffer
 typedef struct st_mysqlnd_field
 {
 	zend_string *sname;			/* Name of column */
-	zend_bool    is_numeric;
+	bool    is_numeric;
 	zend_ulong	 num_key;
 	const char  *name;          /* Name of column in C string */
 	const char  *org_name;		/* Original column name, if an alias */
@@ -149,7 +149,7 @@ struct st_mysqlnd_error_info
 	unsigned int error_no;
 	zend_llist error_list;
 
-	zend_bool persistent;
+	bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
 };
 
@@ -230,7 +230,7 @@ typedef struct st_mysqlnd_session_options
 	/* maximum allowed packet size for communication */
 	unsigned int		max_allowed_packet;
 
-	zend_bool	int_and_float_native;
+	bool	int_and_float_native;
 } MYSQLND_SESSION_OPTIONS;
 
 
@@ -289,7 +289,7 @@ typedef MYSQLND_RES* (*mysqlnd_stmt_use_or_store_func)(MYSQLND_STMT * const);
 typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 													zval **row,
 													const unsigned int flags,
-													zend_bool * fetched_anything
+													bool * fetched_anything
 													);
 
 
@@ -302,7 +302,7 @@ struct st_mysqlnd_stats
 	uint64_t				*values;
 	mysqlnd_stat_trigger	*triggers;
 	size_t					count;
-	zend_bool				in_trigger;
+	bool				in_trigger;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
@@ -314,12 +314,12 @@ typedef enum_func_status (*func_mysqlnd_execute_com_debug)(MYSQLND_CONN_DATA * c
 typedef enum_func_status (*func_mysqlnd_execute_com_init_db)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING db);
 typedef enum_func_status (*func_mysqlnd_execute_com_ping)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_statistics)(MYSQLND_CONN_DATA * const conn, zend_string ** message);
-typedef enum_func_status (*func_mysqlnd_execute_com_process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const zend_bool read_response);
+typedef enum_func_status (*func_mysqlnd_execute_com_process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const bool read_response);
 typedef enum_func_status (*func_mysqlnd_execute_com_refresh)(MYSQLND_CONN_DATA * const conn, const uint8_t options);
 typedef enum_func_status (*func_mysqlnd_execute_com_shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level);
 typedef enum_func_status (*func_mysqlnd_execute_com_quit)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_query)(MYSQLND_CONN_DATA * const conn, MYSQLND_CSTRING query);
-typedef enum_func_status (*func_mysqlnd_execute_com_change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const zend_bool silent);
+typedef enum_func_status (*func_mysqlnd_execute_com_change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const bool silent);
 typedef enum_func_status (*func_mysqlnd_execute_com_reap_result)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_stmt_prepare)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING query);
 typedef enum_func_status (*func_mysqlnd_execute_com_stmt_execute)(MYSQLND_CONN_DATA * conn, const MYSQLND_CSTRING payload);
@@ -360,13 +360,13 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command)
 typedef enum_func_status	(*func_mysqlnd_vio__init)(MYSQLND_VIO * const vio, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info);
 typedef void				(*func_mysqlnd_vio__dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 
-typedef enum_func_status	(*func_mysqlnd_vio__connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef enum_func_status	(*func_mysqlnd_vio__connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 
 typedef void				(*func_mysqlnd_vio__close_stream)(MYSQLND_VIO * const vio, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef php_stream *		(*func_mysqlnd_vio__open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef php_stream *		(*func_mysqlnd_vio__open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef php_stream *		(*func_mysqlnd_vio__get_stream)(const MYSQLND_VIO * const vio);
 typedef enum_func_status	(*func_mysqlnd_vio__set_stream)(MYSQLND_VIO * const vio, php_stream * vio_stream);
-typedef zend_bool			(*func_mysqlnd_vio__has_valid_stream)(const MYSQLND_VIO * const vio);
+typedef bool			(*func_mysqlnd_vio__has_valid_stream)(const MYSQLND_VIO * const vio);
 typedef func_mysqlnd_vio__open_stream (*func_mysqlnd_vio__get_open_stream)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, MYSQLND_ERROR_INFO * const error_info);
 
 typedef enum_func_status	(*func_mysqlnd_vio__set_client_option)(MYSQLND_VIO * const vio, enum_mysqlnd_client_option option, const char * const value);
@@ -414,12 +414,12 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio)
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 
-typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * factory, const zend_bool persistent);
+typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * factory, const bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn);
-typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
-typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
-typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
+typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(const bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(const bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const bool persistent);
 
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory)
@@ -442,7 +442,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__reap_query)(MYSQLND_CONN_DATA
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__use_result)(MYSQLND_CONN_DATA * const conn);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__store_result)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__next_result)(MYSQLND_CONN_DATA * const conn);
-typedef zend_bool			(*func_mysqlnd_conn_data__more_results)(const MYSQLND_CONN_DATA * const conn);
+typedef bool			(*func_mysqlnd_conn_data__more_results)(const MYSQLND_CONN_DATA * const conn);
 
 typedef MYSQLND_STMT *		(*func_mysqlnd_conn_data__stmt_init)(MYSQLND_CONN_DATA * const conn);
 
@@ -453,7 +453,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__ping)(MYSQLND_CONN_DATA * con
 typedef enum_func_status	(*func_mysqlnd_conn_data__kill_connection)(MYSQLND_CONN_DATA * conn, unsigned int pid);
 typedef enum_func_status	(*func_mysqlnd_conn_data__select_db)(MYSQLND_CONN_DATA * const conn, const char * const db, const size_t db_len);
 typedef enum_func_status	(*func_mysqlnd_conn_data__server_dump_debug_information)(MYSQLND_CONN_DATA * const conn);
-typedef enum_func_status	(*func_mysqlnd_conn_data__change_user)(MYSQLND_CONN_DATA * const conn, const char * user, const char * passwd, const char * db, zend_bool silent, size_t passwd_len);
+typedef enum_func_status	(*func_mysqlnd_conn_data__change_user)(MYSQLND_CONN_DATA * const conn, const char * user, const char * passwd, const char * db, bool silent, size_t passwd_len);
 
 typedef unsigned int		(*func_mysqlnd_conn_data__get_error_no)(const MYSQLND_CONN_DATA * const conn);
 typedef const char *		(*func_mysqlnd_conn_data__get_error_str)(const MYSQLND_CONN_DATA * const conn);
@@ -488,8 +488,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__query_read_result_set_header)
 typedef MYSQLND_CONN_DATA *	(*func_mysqlnd_conn_data__get_reference)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_DATA * const conn);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const zend_bool silent, const zend_bool ignore_upsert_status);
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const zend_bool silent, const enum php_mysqlnd_server_command command, const zend_bool ignore_upsert_status);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const bool silent, const bool ignore_upsert_status);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const bool silent, const enum php_mysqlnd_server_command command, const bool ignore_upsert_status);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__end_psession)(MYSQLND_CONN_DATA * conn);
@@ -503,7 +503,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name);
-typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const bool commit, const unsigned int flags, const char * const name);
 typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * tmp_str, const unsigned int mode);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name);
@@ -521,7 +521,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND
 typedef size_t				(*func_mysqlnd_conn_data__negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags);
 typedef size_t				(*func_mysqlnd_conn_data__get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn);
 
-typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe);
+typedef MYSQLND_STRING		(*func_mysqlnd_conn_data__get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, bool * unix_socket, bool * named_pipe);
 
 
 
@@ -633,7 +633,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn)
 	/* for decoding - binary or text protocol */
 typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 															 const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
-															 const zend_bool as_int_or_float, MYSQLND_STATS * const stats);
+															 const bool as_int_or_float, MYSQLND_STATS * const stats);
 
 
 typedef MYSQLND_RES *		(*func_mysqlnd_res__use_result)(MYSQLND_RES * const result, MYSQLND_STMT_DATA *stmt);
@@ -652,10 +652,10 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * con
 
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn);
 typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(const MYSQLND_RES * const result);
-typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_ROW_BUFFER ** row_buffers, zend_bool binary_protocol);
+typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_ROW_BUFFER ** row_buffers, bool binary_protocol);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
-typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, const zend_bool implicit);
+typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, const bool implicit);
 typedef void				(*func_mysqlnd_res__free_result_contents)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result);
 
@@ -753,14 +753,14 @@ typedef enum_func_status	(*func_mysqlnd_stmt__execute)(MYSQLND_STMT * const stmt
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__use_result)(MYSQLND_STMT * const stmt);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__store_result)(MYSQLND_STMT * const stmt);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__get_result)(MYSQLND_STMT * const stmt);
-typedef zend_bool			(*func_mysqlnd_stmt__more_results)(const MYSQLND_STMT * const stmt);
+typedef bool			(*func_mysqlnd_stmt__more_results)(const MYSQLND_STMT * const stmt);
 typedef enum_func_status	(*func_mysqlnd_stmt__next_result)(MYSQLND_STMT * const stmt);
 typedef enum_func_status	(*func_mysqlnd_stmt__free_result)(MYSQLND_STMT * const stmt);
 typedef enum_func_status	(*func_mysqlnd_stmt__seek_data)(const MYSQLND_STMT * const stmt, uint64_t row);
 typedef enum_func_status	(*func_mysqlnd_stmt__reset)(MYSQLND_STMT * const stmt);
-typedef enum_func_status	(*func_mysqlnd_stmt__close_on_server)(MYSQLND_STMT * const stmt, zend_bool implicit); /* private */
-typedef enum_func_status	(*func_mysqlnd_stmt__dtor)(MYSQLND_STMT * const stmt, zend_bool implicit); /* use this for mysqlnd_stmt_close */
-typedef enum_func_status	(*func_mysqlnd_stmt__fetch)(MYSQLND_STMT * const stmt, zend_bool * const fetched_anything);
+typedef enum_func_status	(*func_mysqlnd_stmt__close_on_server)(MYSQLND_STMT * const stmt, bool implicit); /* private */
+typedef enum_func_status	(*func_mysqlnd_stmt__dtor)(MYSQLND_STMT * const stmt, bool implicit); /* use this for mysqlnd_stmt_close */
+typedef enum_func_status	(*func_mysqlnd_stmt__fetch)(MYSQLND_STMT * const stmt, bool * const fetched_anything);
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_parameters)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * const param_bind);
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_one_parameter)(MYSQLND_STMT * const stmt, unsigned int param_no, zval * const zv, zend_uchar	type);
 typedef enum_func_status	(*func_mysqlnd_stmt__refresh_bind_param)(MYSQLND_STMT * const stmt);
@@ -785,7 +785,7 @@ typedef MYSQLND_RESULT_BIND*(*func_mysqlnd_stmt__alloc_result_bind)(MYSQLND_STMT
 typedef	void 				(*func_mysqlnd_stmt__free_parameter_bind)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND *);
 typedef	void 				(*func_mysqlnd_stmt__free_result_bind)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND *);
 typedef unsigned int		(*func_mysqlnd_stmt__server_status)(const MYSQLND_STMT * const stmt);
-typedef enum_func_status 	(*func_mysqlnd_stmt__generate_execute_request)(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer);
+typedef enum_func_status 	(*func_mysqlnd_stmt__generate_execute_request)(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, bool * free_buffer);
 typedef enum_func_status	(*func_mysqlnd_stmt__parse_execute_response)(MYSQLND_STMT * const s, enum_mysqlnd_parse_exec_response_type type);
 typedef void 				(*func_mysqlnd_stmt__free_stmt_content)(MYSQLND_STMT * const s);
 typedef enum_func_status	(*func_mysqlnd_stmt__flush)(MYSQLND_STMT * const stmt);
@@ -854,7 +854,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt)
 struct st_mysqlnd_vio_data
 {
 	php_stream			*stream;
-	zend_bool			ssl;
+	bool			ssl;
 	MYSQLND_VIO_OPTIONS	options;
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	zend_uchar			last_command;
@@ -862,7 +862,7 @@ struct st_mysqlnd_vio_data
 	zend_uchar			unused_pad1;
 #endif
 
-	zend_bool			persistent;
+	bool			persistent;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) m;
 };
@@ -872,7 +872,7 @@ struct st_mysqlnd_vio
 {
 	struct st_mysqlnd_vio_data * data;
 
-	zend_bool persistent;
+	bool persistent;
 };
 
 
@@ -957,22 +957,22 @@ struct st_mysqlnd_connection_data
 
 	zval			async_read_cb;
 	zval			async_err_cb;
-	zend_bool		in_async_read_cb;
-	zend_bool		in_async_err_cb;
+	bool		in_async_read_cb;
+	bool		in_async_err_cb;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) object_factory;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * command;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * m;
 
 	/* persistent connection */
-	zend_bool		persistent;
+	bool		persistent;
 };
 
 
 struct st_mysqlnd_connection
 {
 	MYSQLND_CONN_DATA * data;
-	zend_bool persistent;
+	bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * m;
 };
 
@@ -1017,7 +1017,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 			const enum php_mysqlnd_server_command command,
 			const zend_uchar * const arg, const size_t arg_len,
-			const zend_bool silent,
+			const bool silent,
 
 			MYSQLND_CONNECTION_STATE * connection_state,
 			MYSQLND_ERROR_INFO	* error_info,
@@ -1030,7 +1030,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
 			MYSQLND_ERROR_INFO * const error_info,
 			MYSQLND_UPSERT_STATUS * const upsert_status,
-			const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+			const bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 			MYSQLND_STRING * const last_message);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_EOF)(
@@ -1041,9 +1041,9 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 			const enum mysqlnd_packet_type ok_packet,
-			const zend_bool silent,
+			const bool silent,
 			const enum php_mysqlnd_server_command command,
-			const zend_bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+			const bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
 			MYSQLND_ERROR_INFO	* error_info,
 			MYSQLND_UPSERT_STATUS * upsert_status,
@@ -1078,7 +1078,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
 struct st_mysqlnd_protocol_payload_decoder_factory
 {
 	MYSQLND_CONN_DATA * conn;
-	zend_bool persistent;
+	bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) m;
 };
 
@@ -1088,7 +1088,7 @@ typedef struct st_mysqlnd_read_buffer {
 	size_t 		offset;
 	size_t 		size;
 	size_t		len;
-	zend_bool	(*is_empty)(const struct st_mysqlnd_read_buffer *);
+	bool	(*is_empty)(const struct st_mysqlnd_read_buffer *);
 	void		(*read)(struct st_mysqlnd_read_buffer *, size_t count, zend_uchar * dest);
 	size_t		(*bytes_left)(const struct st_mysqlnd_read_buffer *);
 	void		(*free_buffer)(struct st_mysqlnd_read_buffer **);
@@ -1129,8 +1129,8 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec)
 struct st_mysqlnd_protocol_frame_codec_data
 {
 	php_stream		*stream;
-	zend_bool		compressed;
-	zend_bool		ssl;
+	bool		compressed;
+	bool		ssl;
 	uint64_t		flags;
 	char *			sha256_server_public_key;
 
@@ -1144,7 +1144,7 @@ struct st_mysqlnd_protocol_frame_codec_data
 	zend_uchar		packet_no;
 	zend_uchar		compressed_envelope_packet_no;
 
-	zend_bool		persistent;
+	bool		persistent;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) m;
 };
@@ -1156,7 +1156,7 @@ struct st_mysqlnd_protocol_frame_codec
 
 	struct st_mysqlnd_protocol_frame_codec_data * data;
 
-	zend_bool 		persistent;
+	bool 		persistent;
 };
 
 
@@ -1218,7 +1218,7 @@ struct st_mysqlnd_unbuffered_result
 
 	unsigned int		field_count;
 
-	zend_bool			eof_reached;
+	bool			eof_reached;
 
 	MYSQLND_STMT_DATA	*stmt;
 };
@@ -1256,7 +1256,7 @@ struct st_mysqlnd_param_bind
 struct st_mysqlnd_result_bind
 {
 	zval		zv;
-	zend_bool	bound;
+	bool	bound;
 };
 
 
@@ -1279,16 +1279,16 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_ERROR_INFO *		error_info;
 	MYSQLND_ERROR_INFO			error_info_impl;
 
-	zend_bool					update_max_length;
+	bool					update_max_length;
 	zend_ulong					prefetch_rows;
 
-	zend_bool					cursor_exists;
+	bool					cursor_exists;
 	mysqlnd_stmt_use_or_store_func default_rset_handler;
 
 	zval						execute_read_cb;
 	zval						execute_err_cb;
-	zend_bool					in_execute_read_cb;
-	zend_bool					in_execute_err_cb;
+	bool					in_execute_read_cb;
+	bool					in_execute_err_cb;
 
 	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */

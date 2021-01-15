@@ -532,7 +532,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(zend_bool no_close) /* {{{ */
+static void cli_register_file_handles(bool no_close) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;

@@ -111,13 +111,13 @@ static int is_userinfo_valid(const char *str, size_t len)
 /* {{{ php_url_parse */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
-	zend_bool has_port;
+	bool has_port;
 	return php_url_parse_ex2(str, length, &has_port);
 }
 
 /* {{{ php_url_parse_ex2
  */
-PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, zend_bool *has_port)
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
@@ -355,7 +355,7 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 	zval tmp;
-	zend_bool has_port;
+	bool has_port;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
@@ -478,7 +478,7 @@ static int php_htoi(char *s)
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
-static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
+static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
 	register unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
@@ -703,7 +703,7 @@ PHP_FUNCTION(get_headers)
 	size_t url_len;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL;
-	zend_bool format = 0;
+	bool format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 

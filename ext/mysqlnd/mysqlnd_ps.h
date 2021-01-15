@@ -26,14 +26,14 @@ struct st_mysqlnd_perm_bind {
 	/* should be signed int */
 	int					pack_len;
 	unsigned int		php_type;
-	zend_bool			is_possibly_blob;
-	zend_bool			can_ret_as_str_in_uni;
+	bool			is_possibly_blob;
+	bool			can_ret_as_str_in_uni;
 };
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
-enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, zval **row_data, const unsigned int flags, zend_bool * fetched_anything);
-enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_data, const unsigned int flags, zend_bool * fetched_anything);
+enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, zval **row_data, const unsigned int flags, bool * fetched_anything);
+enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_data, const unsigned int flags, bool * fetched_anything);
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
 void _mysqlnd_init_ps_fetch_subsystem();

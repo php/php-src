@@ -61,7 +61,7 @@
 
 /* Pop elements in unspecified order from worklist until it is empty */
 #define WHILE_WORKLIST(worklist, len, i) do { \
-	zend_bool _done = 0; \
+	bool _done = 0; \
 	while (!_done) { \
 		_done = 1; \
 		ZEND_BITSET_FOREACH(worklist, len, i) { \
@@ -158,12 +158,12 @@
 		} \
 	} while (0)
 
-static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
+static inline bool add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
 		|| (b < 0 && a < ZEND_LONG_MIN - b);
 }
 #if 0
-static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
+static inline bool sub_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a < ZEND_LONG_MIN + b)
 		|| (b < 0 && a > ZEND_LONG_MAX + b);
 }
@@ -513,7 +513,7 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	}
 }
 
-static inline zend_bool zend_abs_range(
+static inline bool zend_abs_range(
 		zend_long min, zend_long max, zend_long *abs_min, zend_long *abs_max) {
 	if (min == ZEND_LONG_MIN) {
 		/* Cannot take absolute value of LONG_MIN  */
@@ -539,7 +539,7 @@ static inline zend_long safe_shift_left(zend_long n, zend_long s) {
 	return (zend_long) ((zend_ulong) n << (zend_ulong) s);
 }
 
-static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
+static inline bool shift_left_overflows(zend_long n, zend_long s) {
 	/* This considers shifts that shift in the sign bit to be overflowing as well */
 	if (n >= 0) {
 		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;
@@ -1504,7 +1504,7 @@ int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa,
 	return 0;
 }
 
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow)
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
 {
 	if (underflow) {
 		min = ZEND_LONG_MIN;
@@ -2346,7 +2346,7 @@ static zend_always_inline int _zend_update_type_info(
 			zend_ssa_op         *ssa_op,
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level,
-			zend_bool            update_worklist)
+			bool            update_worklist)
 {
 	uint32_t t1, t2;
 	uint32_t tmp, orig;
@@ -3479,7 +3479,7 @@ static zend_always_inline int _zend_update_type_info(
 				}
 
 				zend_class_entry *ce;
-				zend_bool ce_is_instanceof;
+				bool ce_is_instanceof;
 				tmp = zend_get_func_info(call_info, ssa, &ce, &ce_is_instanceof);
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				if (ce) {
@@ -3662,7 +3662,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
 	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
-	zend_bool update_worklist = 1;
+	bool update_worklist = 1;
 
 	while (!zend_bitset_empty(worklist, worklist_len)) {
 		j = zend_bitset_first(worklist, worklist_len);
@@ -3733,18 +3733,18 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	return SUCCESS;
 }
 
-static zend_bool is_narrowable_instr(zend_op *opline)  {
+static bool is_narrowable_instr(zend_op *opline)  {
 	return opline->opcode == ZEND_ADD || opline->opcode == ZEND_SUB
 		|| opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV;
 }
 
-static zend_bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
+static bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_SUB && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_MUL && Z_LVAL_P(op2) == 1)
 		|| (opline->opcode == ZEND_DIV && Z_LVAL_P(op2) == 1);
 }
-static zend_bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
+static bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
 	/* In PHP it holds that (double)(0-$int) is bitwise identical to 0.0-(double)$int,
 	 * so allowing SUB here is fine. */
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op1) == 0)
@@ -3771,7 +3771,7 @@ static zend_bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
  * avoid infinite loops. An iterative, worklist driven approach would be possible, but the state
  * management more cumbersome to implement, so we don't bother for now.
  */
-static zend_bool can_convert_to_double(
+static bool can_convert_to_double(
 		const zend_op_array *op_array, zend_ssa *ssa, int var_num,
 		zval *value, zend_bitset visited) {
 	zend_ssa_var *var = &ssa->vars[var_num];
@@ -3909,7 +3909,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	zend_bitset visited, worklist;
 	int i, v;
 	zend_op *opline;
-	zend_bool narrowed = 0;
+	bool narrowed = 0;
 	ALLOCA_FLAG(use_heap)
 
 	visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);

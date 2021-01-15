@@ -55,7 +55,7 @@ static PHP_GINIT_FUNCTION(spl)
 }
 /* }}} */
 
-static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autoload)
+static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 {
 	zend_class_entry *ce;
 
@@ -80,7 +80,7 @@ PHP_FUNCTION(class_parents)
 {
 	zval *obj;
 	zend_class_entry *parent_class, *ce;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
@@ -112,7 +112,7 @@ PHP_FUNCTION(class_parents)
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -140,7 +140,7 @@ PHP_FUNCTION(class_implements)
 PHP_FUNCTION(class_uses)
 {
 	zval *obj;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -404,7 +404,7 @@ static autoload_func_info *autoload_func_info_from_fci(
 	return alfi;
 }
 
-static zend_bool autoload_func_info_equals(
+static bool autoload_func_info_equals(
 		const autoload_func_info *alfi1, const autoload_func_info *alfi2) {
 	return alfi1->func_ptr == alfi2->func_ptr
 		&& alfi1->obj == alfi2->obj
@@ -492,8 +492,8 @@ static Bucket *spl_find_registered_function(autoload_func_info *find_alfi) {
 /* {{{ Register given function as autoloader */
 PHP_FUNCTION(spl_autoload_register)
 {
-	zend_bool do_throw = 1;
-	zend_bool prepend  = 0;
+	bool do_throw = 1;
+	bool prepend  = 0;
 	zend_fcall_info fci = {0};
 	zend_fcall_info_cache fcc;
 	autoload_func_info *alfi;

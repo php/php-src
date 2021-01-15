@@ -785,7 +785,7 @@ static zend_class_entry *get_class_entry_from_op1(
 }
 
 zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool *is_prototype)
+		zend_script *script, zend_op_array *op_array, zend_op *opline, bool *is_prototype)
 {
 	*is_prototype = 0;
 	switch (opline->opcode) {
@@ -832,8 +832,8 @@ zend_function *zend_optimizer_get_called_func(
 					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 					zend_function *fbc = zend_hash_find_ptr(&ce->function_table, func_name);
 					if (fbc) {
-						zend_bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
-						zend_bool same_scope = fbc->common.scope == op_array->scope;
+						bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
+						bool same_scope = fbc->common.scope == op_array->scope;
 						if (is_public || same_scope) {
 							return fbc;
 						}
@@ -851,9 +851,9 @@ zend_function *zend_optimizer_get_called_func(
 				zend_function *fbc = zend_hash_find_ptr(
 					&op_array->scope->function_table, method_name);
 				if (fbc) {
-					zend_bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
-					zend_bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
-					zend_bool same_scope = fbc->common.scope == op_array->scope;
+					bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
+					bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
+					bool same_scope = fbc->common.scope == op_array->scope;
 					if (is_private) {
 						/* Only use private method if in the same scope. We can't even use it
 						 * as a prototype, as it may be overridden with changed signature. */
@@ -1347,7 +1347,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 	}
 }
 
-static zend_bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
+static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 	zend_ssa_op *ssa_op = &func_info->ssa.ops[def_opline - op_array->opcodes];
 	int ssa_var = ssa_op->result_def;

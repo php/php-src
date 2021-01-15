@@ -92,24 +92,24 @@ typedef struct _zend_hash_key {
 	zend_string *key;
 } zend_hash_key;
 
-typedef zend_bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_data, zend_hash_key *hash_key, void *pParam);
+typedef bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_data, zend_hash_key *hash_key, void *pParam);
 
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
-ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
+ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent);
 ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht);
 
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent) \
 	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
 
-ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed);
+ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_packed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_mixed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht);
-ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed);
+ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed);
 
 /* additions/updates/changes */
@@ -178,7 +178,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 /* The same as zend_hash_find(), but hash value of the key must be already calculated */
 ZEND_API zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
 
-static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, zend_bool known_hash)
+static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	if (known_hash) {
 		return _zend_hash_find_known_hash(ht, key);
@@ -207,17 +207,17 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 
 
 /* Misc */
-static zend_always_inline zend_bool zend_hash_exists(const HashTable *ht, zend_string *key)
+static zend_always_inline bool zend_hash_exists(const HashTable *ht, zend_string *key)
 {
 	return zend_hash_find(ht, key) != NULL;
 }
 
-static zend_always_inline zend_bool zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline bool zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
 {
 	return zend_hash_str_find(ht, str, len) != NULL;
 }
 
-static zend_always_inline zend_bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
+static zend_always_inline bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 {
 	return zend_hash_index_find(ht, h) != NULL;
 }
@@ -257,15 +257,15 @@ ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Ha
 
 /* Copying, merging and sorting */
 ZEND_API void  ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor);
-ZEND_API void  ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, zend_bool overwrite);
+ZEND_API void  ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite);
 ZEND_API void  ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
 ZEND_API void  zend_hash_bucket_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 
 typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
-ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, zend_bool renumber);
+ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered);
+ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compare_func_t compar, uint32_t flag);
 
 #define zend_hash_sort(ht, compare_func, renumber) \
@@ -303,7 +303,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht);
-ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate);
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool always_duplicate);
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
@@ -386,7 +386,7 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 }
 
 
-static zend_always_inline zval *zend_hash_find_ex_ind(const HashTable *ht, zend_string *key, zend_bool known_hash)
+static zend_always_inline zval *zend_hash_find_ex_ind(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	zval *zv;
 
@@ -839,7 +839,7 @@ static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_str
 	}
 }
 
-static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, zend_bool known_hash)
+static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	zval *zv;
 

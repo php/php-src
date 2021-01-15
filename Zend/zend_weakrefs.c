@@ -181,7 +181,7 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 	return &wr->std;
 }
 
-static zend_always_inline zend_bool zend_weakref_find(zend_object *referent, zval *return_value) {
+static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *return_value) {
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), (zend_ulong) referent);
 	if (!tagged_ptr) {
 		return 0;

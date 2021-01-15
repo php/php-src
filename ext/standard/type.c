@@ -390,8 +390,8 @@ PHP_FUNCTION(is_callable)
 	zval *var, *callable_name = NULL;
 	zend_string *name;
 	char *error;
-	zend_bool retval;
-	zend_bool syntax_only = 0;
+	bool retval;
+	bool syntax_only = 0;
 	int check_flags = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)

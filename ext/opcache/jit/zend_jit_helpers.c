@@ -1373,7 +1373,7 @@ check_indirect:
 	return ref;
 }
 
-static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
+static zend_always_inline bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
 
@@ -1431,12 +1431,12 @@ builtin_types:
 	return 0;
 }
 
-static zend_bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
+static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
 	void **cache_slot = CACHE_ADDR(opline->extended_value);
-	zend_bool ret;
+	bool ret;
 
 	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
 	if (UNEXPECTED(!ret)) {
@@ -1569,12 +1569,12 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 	zend_jit_fetch_obj_is_slow(zobj);
 }
 
-static zend_always_inline zend_bool promotes_to_array(zval *val) {
+static zend_always_inline bool promotes_to_array(zval *val) {
 	return Z_TYPE_P(val) <= IS_FALSE
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
 }
 
-static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
@@ -1616,7 +1616,7 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 		zend_get_unmangled_property_name(prop->name));
 }
 
-static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
+static zend_never_inline bool zend_handle_fetch_obj_flags(
 		zval *result, zval *ptr, zend_object *obj, zend_property_info *prop_info, uint32_t flags)
 {
 	switch (flags) {
@@ -1799,7 +1799,7 @@ static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference
 	return NULL;
 }
 
-static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, zend_bool inc)
+static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, bool inc)
 {
 	zend_property_info *error_prop = zend_jit_get_prop_not_accepting_double(ref);
 	/* Currently there should be no way for a typed reference to accept both int and double.

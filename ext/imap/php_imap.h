@@ -142,7 +142,7 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 #endif
 	/* php_stream for php_mail_gets() */
 	php_stream *gets_stream;
-	zend_bool enable_rsh;
+	bool enable_rsh;
 ZEND_END_MODULE_GLOBALS(imap)
 
 #if defined(ZTS) && defined(COMPILE_DL_IMAP)

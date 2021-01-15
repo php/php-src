@@ -2967,7 +2967,7 @@ PHP_FUNCTION(curl_getinfo)
 	zval		*zid;
 	php_curl	*ch;
 	zend_long	option;
-	zend_bool option_is_null = 1;
+	bool option_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)

@@ -48,7 +48,7 @@
 /* Key used to avoid leaking addresses in ReflectionProperty::getId() */
 #define REFLECTION_KEY_LEN 16
 ZEND_BEGIN_MODULE_GLOBALS(reflection)
-	zend_bool key_initialized;
+	bool key_initialized;
 	unsigned char key[REFLECTION_KEY_LEN];
 ZEND_END_MODULE_GLOBALS(reflection)
 ZEND_DECLARE_MODULE_GLOBALS(reflection)
@@ -125,7 +125,7 @@ typedef struct _property_reference {
 /* Struct for parameters */
 typedef struct _parameter_reference {
 	uint32_t offset;
-	zend_bool required;
+	bool required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -134,7 +134,7 @@ typedef struct _parameter_reference {
 typedef struct _type_reference {
 	zend_type type;
 	/* Whether to use backwards compatible null representation */
-	zend_bool legacy_behavior;
+	bool legacy_behavior;
 } type_reference;
 
 /* Struct for attributes */
@@ -180,7 +180,7 @@ static zend_always_inline uint32_t prop_get_flags(property_reference *ref) {
 	return ref->prop ? ref->prop->flags : ZEND_ACC_PUBLIC;
 }
 
-static inline zend_bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) {
+static inline bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) {
 	return ce == zend_ce_closure
 		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
 }
@@ -645,13 +645,13 @@ static int format_default_value(smart_str *str, zval *value, zend_class_entry *s
 	return SUCCESS;
 }
 
-static inline zend_bool has_internal_arg_info(const zend_function *fptr) {
+static inline bool has_internal_arg_info(const zend_function *fptr) {
 	return fptr->type == ZEND_INTERNAL_FUNCTION
 		&& !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 }
 
 /* {{{ _parameter_string */
-static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, char* indent)
+static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, bool required, char* indent)
 {
 	smart_str_append_printf(str, "Parameter #%d [ ", offset);
 	if (!required) {
@@ -1277,7 +1277,7 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, zval *object)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -1309,7 +1309,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 /* For backwards compatibility reasons, we need to return T|null style unions
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
-static zend_bool is_union_type(zend_type type) {
+static bool is_union_type(zend_type type) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		return 1;
 	}
@@ -1325,12 +1325,12 @@ static zend_bool is_union_type(zend_type type) {
 }
 
 /* {{{ reflection_type_factory */
-static void reflection_type_factory(zend_type type, zval *object, zend_bool legacy_behavior)
+static void reflection_type_factory(zend_type type, zval *object, bool legacy_behavior)
 {
 	reflection_object *intern;
 	type_reference *reference;
-	zend_bool is_union = is_union_type(type);
-	zend_bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
+	bool is_union = is_union_type(type);
+	bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
 
 	reflection_instantiate(is_union && !is_mixed ? reflection_union_type_ptr : reflection_named_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
@@ -2240,7 +2240,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	struct _zend_arg_info *arg_info;
 	uint32_t num_args;
 	zend_class_entry *ce = NULL;
-	zend_bool is_closure = 0;
+	bool is_closure = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(reference)
@@ -3508,7 +3508,7 @@ ZEND_METHOD(ReflectionMethod, getPrototype)
 ZEND_METHOD(ReflectionMethod, setAccessible)
 {
 	reflection_object *intern;
-	zend_bool visible;
+	bool visible;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		RETURN_THROWS();
@@ -3755,7 +3755,7 @@ ZEND_METHOD(ReflectionClass, __construct)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, zend_bool statics, zval *return_value)
+static void add_class_vars(zend_class_entry *ce, bool statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -3767,7 +3767,7 @@ static void add_class_vars(zend_class_entry *ce, zend_bool statics, zval *return
 			continue;
 		}
 
-		zend_bool is_static = (prop_info->flags & ZEND_ACC_STATIC) != 0;
+		bool is_static = (prop_info->flags & ZEND_ACC_STATIC) != 0;
 		if (statics != is_static) {
 			continue;
 		}
@@ -4199,7 +4199,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zend_long filter;
-	zend_bool filter_is_null = 1;
+	bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4217,7 +4217,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	} ZEND_HASH_FOREACH_END();
 
 	if (instanceof_function(ce, zend_ce_closure)) {
-		zend_bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
+		bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
 		zval obj_tmp;
 		zend_object *obj;
 		if (!has_obj) {
@@ -4375,7 +4375,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_string *key;
 	zend_property_info *prop_info;
 	zend_long filter;
-	zend_bool filter_is_null = 1;
+	bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4431,7 +4431,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	zend_class_constant *constant;
 	zval val;
 	zend_long filter;
-	zend_bool filter_is_null = 1;
+	bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4465,7 +4465,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	zend_string *name;
 	zend_class_constant *constant;
 	zend_long filter;
-	zend_bool filter_is_null = 1;
+	bool filter_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -5511,7 +5511,7 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 ZEND_METHOD(ReflectionProperty, setAccessible)
 {
 	reflection_object *intern;
-	zend_bool visible;
+	bool visible;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		RETURN_THROWS();
@@ -5789,7 +5789,7 @@ ZEND_METHOD(ReflectionExtension, getINIEntries)
 /* }}} */
 
 /* {{{ add_extension_class */
-static void add_extension_class(zend_class_entry *ce, zend_string *key, zval *class_array, zend_module_entry *module, zend_bool add_reflection_class)
+static void add_extension_class(zend_class_entry *ce, zend_string *key, zval *class_array, zend_module_entry *module, bool add_reflection_class)
 {
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
 		zend_string *name;
@@ -6108,7 +6108,7 @@ ZEND_METHOD(ReflectionReference, __construct)
 }
 /* }}} */
 
-static zend_bool is_ignorable_reference(HashTable *ht, zval *ref) {
+static bool is_ignorable_reference(HashTable *ht, zval *ref) {
 	if (Z_REFCOUNT_P(ref) != 1) {
 		return 0;
 	}

@@ -111,7 +111,7 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 }
 /* }}} */
 
-static inline zend_bool spl_array_is_object(spl_array_object *intern) /* {{{ */
+static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 {
 	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		intern = Z_SPLARRAY_P(&intern->array);
@@ -659,7 +659,7 @@ num_index:
 	}
 
 	{
-		zend_bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+		bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
 		if (value == &rv) {
 			zval_ptr_dtor(&rv);
 		}
@@ -755,7 +755,7 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	HashTable *ht;
-	zend_bool dup;
+	bool dup;
 
 	if (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) {
 		return zend_std_get_properties_for(object, purpose);

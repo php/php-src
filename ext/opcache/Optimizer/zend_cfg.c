@@ -279,7 +279,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	int blocks_count = 0;
 	zend_basic_block *blocks;
 	zval *zv;
-	zend_bool extra_entry_block = 0;
+	bool extra_entry_block = 0;
 
 	cfg->flags = build_flags & (ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
 

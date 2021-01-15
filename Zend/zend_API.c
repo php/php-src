@@ -426,7 +426,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
 		*dest = zend_is_true(arg);
@@ -437,7 +437,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest)
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, bool *dest) /* {{{ */
 {
 	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
 		return 0;
@@ -644,10 +644,10 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 		case 'l':
 			{
 				zend_long *p = va_arg(*va, zend_long *);
-				zend_bool *is_null = NULL;
+				bool *is_null = NULL;
 
 				if (check_null) {
-					is_null = va_arg(*va, zend_bool *);
+					is_null = va_arg(*va, bool *);
 				}
 
 				if (!zend_parse_arg_long(arg, p, is_null, check_null)) {
@@ -659,10 +659,10 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
-				zend_bool *is_null = NULL;
+				bool *is_null = NULL;
 
 				if (check_null) {
-					is_null = va_arg(*va, zend_bool *);
+					is_null = va_arg(*va, bool *);
 				}
 
 				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
@@ -731,11 +731,11 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 
 		case 'b':
 			{
-				zend_bool *p = va_arg(*va, zend_bool *);
-				zend_bool *is_null = NULL;
+				bool *p = va_arg(*va, bool *);
+				bool *is_null = NULL;
 
 				if (check_null) {
-					is_null = va_arg(*va, zend_bool *);
+					is_null = va_arg(*va, bool *);
 				}
 
 				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
@@ -956,8 +956,8 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 	uint32_t max_num_args = 0;
 	uint32_t post_varargs = 0;
 	zval *arg;
-	zend_bool have_varargs = 0;
-	zend_bool have_optional_args = 0;
+	bool have_varargs = 0;
+	bool have_optional_args = 0;
 	zval **varargs = NULL;
 	int *n_varargs = NULL;
 
@@ -1130,7 +1130,7 @@ ZEND_API zend_result zend_parse_method_parameters(uint32_t num_args, zval *this_
 	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
 	 * In that case EG(This) would still be the $this from the calling code and we'd take the
 	 * wrong branch here. */
-	zend_bool is_method = EG(current_execute_data)->func->common.scope != NULL;
+	bool is_method = EG(current_execute_data)->func->common.scope != NULL;
 
 	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		va_start(va, type_spec);
@@ -1681,7 +1681,7 @@ ZEND_API zend_result add_next_index_null(zval *arg) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_result add_next_index_bool(zval *arg, zend_bool b) /* {{{ */
+ZEND_API zend_result add_next_index_bool(zval *arg, bool b) /* {{{ */
 {
 	zval tmp;
 
@@ -2949,7 +2949,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 /* }}} */
 
 // TODO num_symbol_tables as unsigned int?
-ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, zend_bool is_ref, int num_symbol_tables, ...) /* {{{ */
+ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...) /* {{{ */
 {
 	HashTable *symbol_table;
 	va_list symbol_table_list;
@@ -3448,11 +3448,11 @@ ZEND_API zend_string *zend_get_callable_name(zval *callable) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_at_frame(
+ZEND_API bool zend_is_callable_at_frame(
 		zval *callable, zend_object *object, zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
-	zend_bool ret;
+	bool ret;
 	zend_fcall_info_cache fcc_local;
 	bool strict_class = 0;
 
@@ -3569,7 +3569,7 @@ check_func:
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error) /* {{{ */
+ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
 	/* Determine callability at the first parent user frame. */
 	zend_execute_data *frame = EG(current_execute_data);
@@ -3577,20 +3577,20 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 		frame = frame->prev_execute_data;
 	}
 
-	zend_bool ret = zend_is_callable_at_frame(callable, object, frame, check_flags, fcc, error);
+	bool ret = zend_is_callable_at_frame(callable, object, frame, check_flags, fcc, error);
 	if (callable_name) {
 		*callable_name = zend_get_callable_name_ex(callable, object);
 	}
 	return ret;
 }
 
-ZEND_API zend_bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name) /* {{{ */
+ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name) /* {{{ */
 {
 	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
 }
 /* }}} */
 
-ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name) /* {{{ */
+ZEND_API bool zend_make_callable(zval *callable, zend_string **callable_name) /* {{{ */
 {
 	zend_fcall_info_cache fcc;
 
@@ -3790,7 +3790,7 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 	return Z_STR_P(zv);
 }
 
-static zend_always_inline zend_bool is_persistent_class(zend_class_entry *ce) {
+static zend_always_inline bool is_persistent_class(zend_class_entry *ce) {
 	return (ce->type & ZEND_INTERNAL_CLASS)
 		&& ce->info.internal.module->type == MODULE_PERSISTENT;
 }
@@ -3898,7 +3898,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 }
 /* }}} */
 
-ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val, zend_bool strict) /* {{{ */
+ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *val, bool strict) /* {{{ */
 {
 	if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, val, strict))) {
 		zval_ptr_dtor(val);
@@ -3926,7 +3926,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_null(zend_reference *ref) /* {{{ 
 }
 /* }}} */
 
-ZEND_API zend_result zend_try_assign_typed_ref_bool(zend_reference *ref, zend_bool val) /* {{{ */
+ZEND_API zend_result zend_try_assign_typed_ref_bool(zend_reference *ref, bool val) /* {{{ */
 {
 	zval tmp;
 
@@ -4016,7 +4016,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval(zend_reference *ref, zval *z
 }
 /* }}} */
 
-ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, zend_bool strict) /* {{{ */
+ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, bool strict) /* {{{ */
 {
 	zval tmp;
 
@@ -4167,7 +4167,7 @@ ZEND_API void zend_declare_class_constant_long(zend_class_entry *ce, const char 
 }
 /* }}} */
 
-ZEND_API void zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_bool value) /* {{{ */
+ZEND_API void zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, bool value) /* {{{ */
 {
 	zval constant;
 
@@ -4408,7 +4408,7 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zend_bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -4422,7 +4422,7 @@ ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *objec
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	zend_string *str;
@@ -4434,7 +4434,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent) /* {{{ */
 {
 	zval *property;
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -4447,7 +4447,7 @@ ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string
 }
 /* }}} */
 
-ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, bool silent) /* {{{ */
 {
 	zend_string *key = zend_string_init(name, name_length, 0);
 	zval *property = zend_read_static_property_ex(scope, key, silent);
@@ -4493,7 +4493,7 @@ ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) 
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
+ZEND_API bool zend_is_iterable(zval *iterable) /* {{{ */
 {
 	switch (Z_TYPE_P(iterable)) {
 		case IS_ARRAY:
@@ -4506,7 +4506,7 @@ ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_countable(zval *countable) /* {{{ */
+ZEND_API bool zend_is_countable(zval *countable) /* {{{ */
 {
 	switch (Z_TYPE_P(countable)) {
 		case IS_ARRAY:

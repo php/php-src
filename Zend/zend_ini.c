@@ -311,7 +311,7 @@ ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
 	uint8_t modifiable;
-	zend_bool modified;
+	bool modified;
 
 	if ((ini_entry = zend_hash_find_ptr(EG(ini_directives), name)) == NULL) {
 		return FAILURE;
@@ -431,7 +431,7 @@ ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig) 
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, zend_bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -457,7 +457,7 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig
 
 ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /* {{{ */
 {
-	zend_bool exists = 1;
+	bool exists = 1;
 	char *return_value;
 
 	return_value = zend_ini_string_ex(name, name_length, orig, &exists);
@@ -483,7 +483,7 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_ini_parse_bool(zend_string *str)
+ZEND_API bool zend_ini_parse_bool(zend_string *str)
 {
 	if ((ZSTR_LEN(str) == 4 && strcasecmp(ZSTR_VAL(str), "true") == 0)
 	  || (ZSTR_LEN(str) == 3 && strcasecmp(ZSTR_VAL(str), "yes") == 0)
@@ -573,7 +573,7 @@ ZEND_INI_DISP(display_link_numbers) /* {{{ */
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 {
-	zend_bool *p = (zend_bool *) ZEND_INI_GET_ADDR();
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	return SUCCESS;
 }

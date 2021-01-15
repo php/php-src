@@ -25,8 +25,8 @@
 typedef struct _zend_ssa_range {
 	zend_long              min;
 	zend_long              max;
-	zend_bool              underflow;
-	zend_bool              overflow;
+	bool              underflow;
+	bool              overflow;
 } zend_ssa_range;
 
 typedef enum _zend_ssa_negative_lat {
@@ -155,7 +155,7 @@ void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
 void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int b);
-void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, zend_bool update_types);
+void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, bool update_types);
 
 static zend_always_inline void _zend_ssa_remove_def(zend_ssa_var *var)
 {
@@ -215,7 +215,7 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 	return NULL;
 }
 
-static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
+static zend_always_inline bool zend_ssa_is_no_val_use(const zend_op *opline, const zend_ssa_op *ssa_op, int var)
 {
 	if (opline->opcode == ZEND_ASSIGN
 			 || opline->opcode == ZEND_UNSET_CV

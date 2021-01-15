@@ -45,12 +45,12 @@ mysqlnd_run_authentication(
 			const unsigned int charset_no,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
 			const zend_ulong mysql_flags,
-			const zend_bool silent,
-			const zend_bool is_change_user
+			const bool silent,
+			const bool is_change_user
 			)
 {
 	enum_func_status ret = FAIL;
-	zend_bool first_call = TRUE;
+	bool first_call = TRUE;
 
 	char * switch_to_auth_protocol = NULL;
 	size_t switch_to_auth_protocol_len = 0;
@@ -242,7 +242,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const MYSQLND_SESSION_OPTIONS * const session_options,
 							  const zend_ulong mysql_flags,
 							  const unsigned int server_charset_no,
-							  const zend_bool use_full_blown_auth_packet,
+							  const bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
 							  struct st_mysqlnd_authentication_plugin * auth_plugin,
 							  const zend_uchar * const orig_auth_plugin_data,
@@ -371,8 +371,8 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const size_t passwd_len,
 								const char * const db,
 								const size_t db_len,
-								const zend_bool silent,
-								const zend_bool use_full_blown_auth_packet,
+								const bool silent,
+								const bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
 								struct st_mysqlnd_authentication_plugin * auth_plugin,
 								const zend_uchar * const orig_auth_plugin_data,

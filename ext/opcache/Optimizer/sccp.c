@@ -142,7 +142,7 @@ static void dup_partial_object(zval *dst, zval *src)
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
 }
 
-static inline zend_bool value_known(zval *zv) {
+static inline bool value_known(zval *zv) {
 	return !IS_TOP(zv) && !IS_BOT(zv);
 }
 
@@ -207,7 +207,7 @@ static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 	}
 }
 
-static zend_bool can_replace_op1(
+static bool can_replace_op1(
 		const zend_op_array *op_array, zend_op *opline, zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_PRE_INC:
@@ -276,7 +276,7 @@ static zend_bool can_replace_op1(
 	return 1;
 }
 
-static zend_bool can_replace_op2(
+static bool can_replace_op2(
 		const zend_op_array *op_array, zend_op *opline, zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		/* Do not accept CONST */
@@ -289,7 +289,7 @@ static zend_bool can_replace_op2(
 	return 1;
 }
 
-static zend_bool try_replace_op1(
+static bool try_replace_op1(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
 	if (ssa_op->op1_use == var && can_replace_op1(ctx->scdf.op_array, opline, ssa_op)) {
 		zval zv;
@@ -339,7 +339,7 @@ replace_op1_simple:
 	return 0;
 }
 
-static zend_bool try_replace_op2(
+static bool try_replace_op2(
 		sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op, int var, zval *value) {
 	if (ssa_op->op2_use == var && can_replace_op2(ctx->scdf.op_array, opline, ssa_op)) {
 		zval zv;
@@ -728,7 +728,7 @@ static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
 	HashTable *ht;
-	zend_bool res;
+	bool res;
 
 	if (Z_TYPE_P(op2) != IS_ARRAY) {
 		return FAILURE;
@@ -781,7 +781,7 @@ static inline int ct_eval_array_key_exists(zval *result, zval *op1, zval *op2) {
 	return SUCCESS;
 }
 
-static zend_bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
+static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
 	/* Functions that can be evaluated independently of what the arguments are.
 	 * It's okay if these functions throw on invalid arguments, but they should not warn. */
 	if (false
@@ -1957,9 +1957,9 @@ static void sccp_mark_feasible_successors(
 		case ZEND_SWITCH_STRING:
 		case ZEND_MATCH:
 		{
-			zend_bool strict_comparison = opline->opcode == ZEND_MATCH;
+			bool strict_comparison = opline->opcode == ZEND_MATCH;
 			zend_uchar type = Z_TYPE_P(op1);
-			zend_bool correct_type =
+			bool correct_type =
 				(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
 				|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
 				|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
@@ -2055,7 +2055,7 @@ static int join_partial_objects(zval *a, zval *b)
 	return SUCCESS;
 }
 
-static void join_phi_values(zval *a, zval *b, zend_bool escape) {
+static void join_phi_values(zval *a, zval *b, bool escape) {
 	if (IS_BOT(a) || IS_TOP(b)) {
 		return;
 	}

@@ -28,7 +28,7 @@ PHP_FUNCTION(unixtojd)
 {
 	time_t ts;
 	zend_long tl = 0;
-	zend_bool tl_is_null = 1;
+	bool tl_is_null = 1;
 	struct tm *ta, tmbuf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &tl, &tl_is_null) == FAILURE) {

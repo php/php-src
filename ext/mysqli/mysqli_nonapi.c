@@ -47,7 +47,7 @@ static void php_mysqli_set_error(zend_long mysql_errno, char *mysql_err)
 }
 /* }}} */
 
-void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor) /* {{{ */
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, bool in_ctor) /* {{{ */
 {
 	MY_MYSQL			*mysql = NULL;
 	MYSQLI_RESOURCE		*mysqli_resource = NULL;
@@ -56,14 +56,14 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 						*ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL,
 						*ssl_cipher = NULL;
 	size_t				hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	zend_bool			persistent = FALSE, ssl = FALSE;
+	bool			persistent = FALSE, ssl = FALSE;
 	zend_long			port = 0, flags = 0;
-	zend_bool           port_is_null = 1;
+	bool           port_is_null = 1;
 	zend_string			*hash_key = NULL;
-	zend_bool			new_connection = FALSE;
+	bool			new_connection = FALSE;
 	zend_resource		*le;
 	mysqli_plist_entry *plist = NULL;
-	zend_bool			self_alloced = 0;
+	bool			self_alloced = 0;
 
 
 #if !defined(MYSQL_USE_MYSQLND)
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 
 #ifndef MYSQLI_USE_MYSQLND
 /* {{{ */
-static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, zend_bool release)
+static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, bool release)
 {
 	int ret;
 	char * query;

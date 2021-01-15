@@ -26,16 +26,16 @@ PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 struct st_mysqlnd_allocator_methods
 {
 	void *	(*m_emalloc)(size_t size MYSQLND_MEM_D);
-	void *	(*m_pemalloc)(size_t size, zend_bool persistent MYSQLND_MEM_D);
+	void *	(*m_pemalloc)(size_t size, bool persistent MYSQLND_MEM_D);
 	void *	(*m_ecalloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-	void *	(*m_pecalloc)(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+	void *	(*m_pecalloc)(unsigned int nmemb, size_t size, bool persistent MYSQLND_MEM_D);
 	void *	(*m_erealloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
-	void *	(*m_perealloc)(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
+	void *	(*m_perealloc)(void *ptr, size_t new_size, bool persistent MYSQLND_MEM_D);
 	void	(*m_efree)(void *ptr MYSQLND_MEM_D);
-	void	(*m_pefree)(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-	char *	(*m_pememdup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
-	char *	(*m_pestrndup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
-	char *	(*m_pestrdup)(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
+	void	(*m_pefree)(void *ptr, bool persistent MYSQLND_MEM_D);
+	char *	(*m_pememdup)(const char * const ptr, size_t size, bool persistent MYSQLND_MEM_D);
+	char *	(*m_pestrndup)(const char * const ptr, size_t size, bool persistent MYSQLND_MEM_D);
+	char *	(*m_pestrdup)(const char * const ptr, bool persistent MYSQLND_MEM_D);
 	int		(*m_sprintf)(char **pbuf, size_t max_len, const char *format, ...);
 	int		(*m_vsprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 	void	(*m_sprintf_free)(char * p);
@@ -58,7 +58,7 @@ PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 #define mnd_vsprintf(p, mx_len, fmt,ap) mysqlnd_allocator.m_vsprintf((p), (mx_len), (fmt), (ap))
 #define mnd_sprintf_free(p)				mysqlnd_allocator.m_sprintf_free((p))
 
-static inline MYSQLND_STRING mnd_dup_cstring(const MYSQLND_CSTRING str, const zend_bool persistent)
+static inline MYSQLND_STRING mnd_dup_cstring(const MYSQLND_CSTRING str, const bool persistent)
 {
 	const MYSQLND_STRING ret = {(char*) mnd_pemalloc(str.l + 1, persistent), str.l};
 	if (ret.s) {

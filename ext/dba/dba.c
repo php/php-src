@@ -542,8 +542,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_string *opened_path = NULL;
 	char *lock_name;
 #ifdef PHP_WIN32
-	zend_bool restarted = 0;
-	zend_bool need_creation = 0;
+	bool restarted = 0;
+	bool need_creation = 0;
 #endif
 
 	if (ac < 2) {
@@ -860,7 +860,7 @@ restart:
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #elif defined(PHP_WIN32)
 			} else if (modenr == DBA_CREAT && need_creation && !restarted) {
-				zend_bool close_both;
+				bool close_both;
 
 				close_both = (info->fp != info->lock.fp);
 				php_stream_close(info->lock.fp);
@@ -1155,7 +1155,7 @@ PHP_FUNCTION(dba_sync)
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
-	zend_bool full_info = 0;
+	bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_THROWS();

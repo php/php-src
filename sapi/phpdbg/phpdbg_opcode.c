@@ -141,7 +141,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	return result;
 } /* }}} */
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
 {
 	/* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
@@ -186,7 +186,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 	}
 } /* }}} */
 
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
 {
 	phpdbg_print_opline_ex(execute_data, ignore_flags);
 } /* }}} */

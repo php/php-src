@@ -166,7 +166,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 	}
 }
 
-static void zend_persist_type_calc(zend_type *type, zend_bool use_arena)
+static void zend_persist_type_calc(zend_type *type, bool use_arena)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class) && use_arena) {

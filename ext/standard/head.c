@@ -31,7 +31,7 @@
 /* {{{ Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
-	zend_bool rep = 1;
+	bool rep = 1;
 	sapi_header_line ctr = {0};
 	char *line;
 	size_t len;
@@ -193,7 +193,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 }
 
 static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_long *expires, zend_string **path,
-		zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite)
+		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite)
 {
 	zend_string *key;
 	zval *value;
@@ -228,7 +228,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	HashTable *options = NULL;
 	zend_long expires = 0;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	zend_bool secure = 0, httponly = 0;
+	bool secure = 0, httponly = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 7)
 		Z_PARAM_STR(name)

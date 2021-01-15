@@ -154,7 +154,7 @@ PHP_FUNCTION(bcadd)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -205,7 +205,7 @@ PHP_FUNCTION(bcsub)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -256,7 +256,7 @@ PHP_FUNCTION(bcmul)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -307,7 +307,7 @@ PHP_FUNCTION(bcdiv)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -363,7 +363,7 @@ PHP_FUNCTION(bcmod)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -419,7 +419,7 @@ PHP_FUNCTION(bcpowmod)
 {
 	zend_string *left, *right, *modulus;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, mod, result;
 	int scale = BCG(bc_precision);
 
@@ -478,7 +478,7 @@ PHP_FUNCTION(bcpow)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -529,7 +529,7 @@ PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num result;
 	int scale = BCG(bc_precision);
 
@@ -572,7 +572,7 @@ PHP_FUNCTION(bccomp)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second;
 	int scale = BCG(bc_precision);
 
@@ -618,7 +618,7 @@ PHP_FUNCTION(bccomp)
 PHP_FUNCTION(bcscale)
 {
 	zend_long old_scale, new_scale;
-	zend_bool new_scale_is_null = 1;
+	bool new_scale_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL

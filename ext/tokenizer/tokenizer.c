@@ -89,7 +89,7 @@ static zend_string *php_token_get_text(zval *obj) {
 	return Z_STR_P(text_zval);
 }
 
-static zend_bool tokenize_common(
+static bool tokenize_common(
 		zval *return_value, zend_string *source, zend_long flags, zend_class_entry *token_class);
 
 PHP_METHOD(PhpToken, tokenize)
@@ -345,7 +345,7 @@ static void add_token(
 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
 }
 
-static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
 {
 	zval source_zval;
 	zend_lex_state original_lex_state;
@@ -477,15 +477,15 @@ void on_event(
 	}
 }
 
-static zend_bool tokenize_parse(
+static bool tokenize_parse(
 		zval *return_value, zend_string *source, zend_class_entry *token_class)
 {
 	zval source_zval;
 	struct event_context ctx;
 	zval token_stream;
 	zend_lex_state original_lex_state;
-	zend_bool original_in_compilation;
-	zend_bool success;
+	bool original_in_compilation;
+	bool success;
 
 	ZVAL_STR_COPY(&source_zval, source);
 
@@ -523,7 +523,7 @@ static zend_bool tokenize_parse(
 	return success;
 }
 
-static zend_bool tokenize_common(
+static bool tokenize_common(
 		zval *return_value, zend_string *source, zend_long flags, zend_class_entry *token_class)
 {
 	if (flags & TOKEN_PARSE) {

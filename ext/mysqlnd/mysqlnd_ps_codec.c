@@ -40,7 +40,7 @@ struct st_mysqlnd_time
 {
   unsigned int  year, month, day, hour, minute, second;
   zend_ulong second_part;
-  zend_bool     neg;
+  bool     neg;
   enum mysqlnd_timestamp_type time_type;
 };
 
@@ -57,7 +57,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 {
 	char tmp[22];
 	size_t tmp_len = 0;
-	zend_bool is_bit = field->type == MYSQL_TYPE_BIT;
+	bool is_bit = field->type == MYSQL_TYPE_BIT;
 	DBG_ENTER("ps_fetch_from_1_to_8_bytes");
 	DBG_INF_FMT("zv=%p byte_count=%u", zv, byte_count);
 	if (field->flags & UNSIGNED_FLAG) {
@@ -219,7 +219,7 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
-		t.neg			= (zend_bool) to[0];
+		t.neg			= (bool) to[0];
 
 		t.day			= (zend_ulong) sint4korr(to+1);
 		t.hour			= (unsigned int) to[5];
@@ -905,7 +905,7 @@ end:
 
 /* {{{ mysqlnd_stmt_execute_generate_request */
 enum_func_status
-mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer)
+mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, bool * free_buffer)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	zend_uchar	*p = stmt->execute_cmd_buffer.buffer,

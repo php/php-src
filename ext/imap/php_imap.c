@@ -2661,7 +2661,7 @@ PHP_FUNCTION(imap_sort)
 	zval *imap_conn_obj;
 	zend_string *criteria = NULL, *charset = NULL;
 	zend_long sort, flags = 0;
-	zend_bool rev;
+	bool rev;
 	php_imap_object *imap_conn_struct;
 	unsigned long *slst, *sl;
 	char *search_criteria;

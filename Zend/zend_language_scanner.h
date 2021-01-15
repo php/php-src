@@ -63,7 +63,7 @@ typedef struct _zend_heredoc_label {
 	char *label;
 	int length;
 	int indentation;
-	zend_bool indentation_uses_spaces;
+	bool indentation_uses_spaces;
 } zend_heredoc_label;
 
 /* Track locations of unclosed {, [, (, etc. for better syntax error reporting */

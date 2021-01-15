@@ -279,7 +279,7 @@ static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 	return NULL;
 }
 
-static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
+static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 	xmlNodePtr node_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
@@ -344,7 +344,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 	return 0;
 }
 
-static zend_bool soap_check_xml_ref(zval *data, xmlNodePtr node)
+static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 {
 	zval *data_ptr;
 

@@ -620,7 +620,7 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
-	zend_bool return_output = 0;
+	bool return_output = 0;
 	smart_str buf = {0};
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -647,7 +647,7 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 {
 	zval *zv;
 	zend_ulong key;
-	zend_bool is_ref = Z_ISREF_P(var);
+	bool is_ref = Z_ISREF_P(var);
 
 	data->n += 1;
 
@@ -707,7 +707,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 }
 /* }}} */
 
-static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
+static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
 {
 	PHP_CLASS_ATTRIBUTES;
 
@@ -877,7 +877,7 @@ static int php_var_serialize_get_sleep_props(
 }
 /* }}} */
 
-static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
 {
 	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
@@ -998,7 +998,7 @@ again:
 
 		case IS_OBJECT: {
 				zend_class_entry *ce = Z_OBJCE_P(struc);
-				zend_bool incomplete_class;
+				bool incomplete_class;
 				uint32_t count;
 
 				if (ce->__serialize) {
@@ -1309,7 +1309,7 @@ PHP_FUNCTION(unserialize)
 
 /* {{{ Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
-	zend_bool real_usage = 0;
+	bool real_usage = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -1322,7 +1322,7 @@ PHP_FUNCTION(memory_get_usage) {
 
 /* {{{ Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
-	zend_bool real_usage = 0;
+	bool real_usage = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL

@@ -1225,7 +1225,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-	zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+	bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 	ret = 0 ? EX_VAR(opline->result.var) : &retval;
@@ -1286,7 +1286,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-	zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+	bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 	ret = 1 ? EX_VAR(opline->result.var) : &retval;
@@ -1451,7 +1451,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
@@ -1545,7 +1545,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
@@ -1640,7 +1640,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
@@ -1744,7 +1744,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
@@ -1852,7 +1852,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
@@ -1960,7 +1960,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
@@ -2115,7 +2115,7 @@ send_again:
 		HashTable *ht = Z_ARRVAL_P(args);
 		zval *arg, *top;
 		zend_string *name;
-		zend_bool have_named_params = 0;
+		bool have_named_params = 0;
 
 		zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht));
 
@@ -2186,7 +2186,7 @@ send_again:
 	} else if (EXPECTED(Z_TYPE_P(args) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(args);
 		zend_object_iterator *iter;
-		zend_bool have_named_params = 0;
+		bool have_named_params = 0;
 
 		if (!ce || !ce->get_iterator) {
 			zend_type_error("Only arrays and Traversables can be unpacked");
@@ -2348,7 +2348,7 @@ send_array:
 				arg_num = 1;
 				param = ZEND_CALL_ARG(EX(call), 1);
 				ZEND_HASH_FOREACH_VAL(ht, arg) {
-					zend_bool must_wrap = 0;
+					bool must_wrap = 0;
 					if (skip > 0) {
 						skip--;
 						continue;
@@ -2384,7 +2384,7 @@ send_array:
 			FREE_OP(opline->op2_type, opline->op2.var);
 		} else {
 			zend_string *name;
-			zend_bool have_named_params;
+			bool have_named_params;
 			zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
 			arg_num = 1;
 			param = ZEND_CALL_ARG(EX(call), 1);
@@ -2405,7 +2405,7 @@ send_array:
 					HANDLE_EXCEPTION();
 				}
 
-				zend_bool must_wrap = 0;
+				bool must_wrap = 0;
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 					if (UNEXPECTED(!Z_ISREF_P(arg))) {
 						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
@@ -3167,7 +3167,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		if (ret == NULL) {
@@ -3303,7 +3303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 		EG(current_execute_data) = call;
 
 #if ZEND_DEBUG
-		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+		bool should_throw = zend_internal_call_should_throw(fbc, call);
 #endif
 
 		if (ret == NULL) {
@@ -4851,7 +4851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -4943,7 +4943,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_CONST == IS_VAR) {
 
@@ -5254,7 +5254,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST
 
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		zend_bool strict;
+		bool strict;
 
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -5624,7 +5624,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
@@ -5639,7 +5639,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
@@ -7121,7 +7121,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CO
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -9277,7 +9277,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_TM
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -11661,7 +11661,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CV
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -14426,7 +14426,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		zend_bool strict;
+		bool strict;
 
 		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -15807,7 +15807,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -15838,7 +15838,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_CONST_H
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -17199,7 +17199,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_T
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -17231,7 +17231,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_VAR_HAN
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -17514,7 +17514,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_UNUSED_
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -18511,7 +18511,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -18875,7 +18875,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			if (UNEXPECTED(EG(exception))) {
@@ -18968,7 +18968,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_TMP_VAR == IS_VAR) {
 
@@ -19137,7 +19137,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HA
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -19152,7 +19152,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_TMP_CONST_HAN
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -19166,7 +19166,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_CONS
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -19989,7 +19989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HAND
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -20004,7 +20004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_TMP_TMP_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -20018,7 +20018,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -20033,7 +20033,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_TMP_VAR_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -20466,7 +20466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_TMP_CV_HANDLE
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
@@ -21450,7 +21450,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			if (UNEXPECTED(EG(exception))) {
@@ -21543,7 +21543,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_VAR == IS_VAR) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -22034,7 +22034,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HA
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -22049,7 +22049,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_VAR_CONST_HAN
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -22063,7 +22063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_CONS
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26743,7 +26743,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HAND
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26758,7 +26758,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_VAR_TMP_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26772,7 +26772,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26827,7 +26827,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HAND
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26842,7 +26842,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_VAR_VAR_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -26856,7 +26856,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_VAR_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -28554,7 +28554,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_STRICT_SPEC_VAR_CV_HANDLE
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
@@ -38151,7 +38151,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -38243,7 +38243,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
+			bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_CV == IS_VAR) {
 
@@ -38510,7 +38510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		zend_bool strict;
+		bool strict;
 
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
@@ -38915,7 +38915,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CONST_HAN
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -38930,7 +38930,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -42022,7 +42022,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CONST
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -42053,7 +42053,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_CONST_HANDL
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = EX_VAR(opline->op1.var);
@@ -42341,7 +42341,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_NOTHROW_SPEC_CV_C
 	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = RT_CONSTANT(opline, opline->op2);
@@ -42354,7 +42354,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_NOTHROW_SPEC_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = RT_CONSTANT(opline, opline->op2);
@@ -45467,7 +45467,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_TMPVA
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -45623,7 +45623,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -45638,7 +45638,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_H
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -45693,7 +45693,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDL
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -45708,7 +45708,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_VAR_H
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -45798,7 +45798,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_VAR_HANDLER
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = EX_VAR(opline->op1.var);
@@ -47092,7 +47092,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_UNUSED_HAND
 {
 	USE_OPLINE
 	zval *expr;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	expr = EX_VAR(opline->op1.var);
@@ -47592,7 +47592,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLE
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -47607,7 +47607,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HA
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
@@ -50587,7 +50587,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CV_HA
 
 	zval *key, *subject;
 	HashTable *ht;
-	zend_bool result;
+	bool result;
 
 	SAVE_OPLINE();
 
@@ -50744,7 +50744,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_NOTHROW_SPEC_CV_C
 	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = EX_VAR(opline->op2.var);
@@ -50757,7 +50757,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_NOTHROW_SPEC_
 {
 	USE_OPLINE
 	zval *op1, *op2;
-	zend_bool result;
+	bool result;
 
 	op1 = EX_VAR(opline->op1.var);
 	op2 = EX_VAR(opline->op2.var);

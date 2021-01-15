@@ -365,7 +365,7 @@ static inline unsigned int get_next_char(
 /* {{{ entity_charset determine_charset
  * Returns the charset identifier based on an explicitly provided charset,
  * the internal_encoding and default_charset ini settings, or UTF-8 by default. */
-static enum entity_charset determine_charset(const char *charset_hint, zend_bool quiet)
+static enum entity_charset determine_charset(const char *charset_hint, bool quiet)
 {
 	if (!charset_hint || !*charset_hint) {
 		charset_hint = get_default_charset();
@@ -1100,7 +1100,7 @@ static inline void find_entity_for_char_basic(
 /* }}} */
 
 /* {{{ php_escape_html_entities */
-PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, zend_bool double_encode, zend_bool quiet)
+PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
 {
 	size_t cursor, maxlen, len;
 	zend_string *replaced;
@@ -1318,7 +1318,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	zend_string *str, *hint_charset = NULL;
 	zend_long flags = ENT_COMPAT;
 	zend_string *replaced;
-	zend_bool double_encode = 1;
+	bool double_encode = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)

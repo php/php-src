@@ -1547,7 +1547,7 @@ PHP_FUNCTION(pg_field_table)
 	zval *result;
 	pgsql_result_handle *pg_result;
 	zend_long fnum = -1;
-	zend_bool return_oid = 0;
+	bool return_oid = 0;
 	Oid oid;
 	smart_str hash_key = {0};
 	char *table_name;
@@ -2614,7 +2614,7 @@ PHP_FUNCTION(pg_lo_write)
   	zval *pgsql_id;
   	char *str;
   	zend_long z_len;
-  	zend_bool z_len_is_null = 1;
+  	bool z_len_is_null = 1;
 	size_t str_len, nbytes;
 	size_t len;
 	pgLofp *pgsql;
@@ -4240,7 +4240,7 @@ PHP_FUNCTION(pg_flush)
  * table_name must not be empty
  * TODO: Add meta_data cache for better performance
  */
-PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended)
+PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended)
 {
 	PGresult *pg_result;
 	char *src, *tmp_name, *tmp_name2 = NULL;
@@ -4355,7 +4355,7 @@ PHP_FUNCTION(pg_meta_data)
 	zval *pgsql_link;
 	char *table_name;
 	size_t table_name_len;
-	zend_bool extended=0;
+	bool extended=0;
 	PGconn *pgsql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b",
@@ -4527,7 +4527,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 /* {{{ php_pgsql_add_quote
  * add quotes around string.
  */
-static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
+static int php_pgsql_add_quotes(zval *src, bool should_free)
 {
 	smart_str str = {0};
 

@@ -99,7 +99,7 @@ typedef struct {
 	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
-	zend_bool                     in_callback;
+	bool                     in_callback;
 	uint32_t*                     clone;
 	zval                          postfields;
 	/* For CURLOPT_PRIVATE */

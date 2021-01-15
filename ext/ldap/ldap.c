@@ -3563,7 +3563,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	int rc, msgid;
 	char *dn, *newrdn, *newparent;
 	size_t dn_len, newrdn_len, newparent_len;
-	zend_bool deleteoldrdn;
+	bool deleteoldrdn;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|a!", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
 		RETURN_THROWS();
@@ -3748,7 +3748,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 /* }}} */
 #endif
 
-static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, zend_long flags)
+static zend_string* php_ldap_do_escape(const bool *map, const char *value, size_t valuelen, zend_long flags)
 {
 	char hex[] = "0123456789abcdef";
 	size_t i, p = 0;
@@ -3785,7 +3785,7 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 	return ret;
 }
 
-static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const size_t charslen, char escape)
+static void php_ldap_escape_map_set_chars(bool *map, const char *chars, const size_t charslen, char escape)
 {
 	size_t i = 0;
 	while (i < charslen) {
@@ -3799,7 +3799,7 @@ PHP_FUNCTION(ldap_escape)
 	size_t valuelen = 0, ignoreslen = 0;
 	int i;
 	zend_long flags = 0;
-	zend_bool map[256] = {0}, havecharlist = 0;
+	bool map[256] = {0}, havecharlist = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sl", &value, &valuelen, &ignores, &ignoreslen, &flags) != SUCCESS) {
 		RETURN_THROWS();

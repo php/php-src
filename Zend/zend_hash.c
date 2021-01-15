@@ -246,7 +246,7 @@ ZEND_API const HashTable zend_empty_array = {
 	.pDestructor = ZVAL_PTR_DTOR
 };
 
-static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
+static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
 {
 	GC_SET_REFCOUNT(ht, 1);
 	GC_TYPE_INFO(ht) = GC_ARRAY | (persistent ? ((GC_PERSISTENT|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT) : 0);
@@ -261,7 +261,7 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 	ht->nTableSize = zend_hash_check_size(nSize);
 }
 
-ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
+ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
 {
 	_zend_hash_init_int(ht, nSize, pDestructor, persistent);
 }
@@ -310,7 +310,7 @@ static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 	HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), HT_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed)
+ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, bool packed)
 {
 	IS_CONSISTENT(ht);
 
@@ -365,7 +365,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed)
+ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed)
 {
 	HT_ASSERT_RC1(ht);
 	if (nSize == 0) return;
@@ -636,7 +636,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterators_advance(HashTable *ht, HashPosit
 	}
 }
 
-static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key, zend_bool known_hash)
+static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	zend_ulong h;
 	uint32_t nIndex;
@@ -2145,7 +2145,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 }
 
 
-ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, zend_bool overwrite)
+ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {
     uint32_t idx;
 	Bucket *p;
@@ -2203,7 +2203,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source
 }
 
 
-static zend_bool ZEND_FASTCALL zend_hash_replace_checker_wrapper(HashTable *target, zval *source_data, Bucket *p, void *pParam, merge_checker_func_t merge_checker_func)
+static bool ZEND_FASTCALL zend_hash_replace_checker_wrapper(HashTable *target, zval *source_data, Bucket *p, void *pParam, merge_checker_func_t merge_checker_func)
 {
 	zend_hash_key hash_key;
 
@@ -2494,7 +2494,7 @@ ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
 	q->h = h;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, zend_bool renumber)
+ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, bucket_compare_func_t compar, bool renumber)
 {
 	Bucket *p;
 	uint32_t i, j;
@@ -2566,7 +2566,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 	}
 }
 
-static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered) {
+static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered) {
 	uint32_t idx1, idx2;
 
 	if (ht1->nNumOfElements != ht2->nNumOfElements) {
@@ -2644,7 +2644,7 @@ static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *
 	return 0;
 }
 
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered)
+ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered)
 {
 	int result;
 	IS_CONSISTENT(ht1);
@@ -2803,7 +2803,7 @@ convert:
  * a "symtable" (contains integer and non-numeric string keys).
  * If the proptable didn't need duplicating, its refcount is incremented.
  */
-ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend_bool always_duplicate)
+ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool always_duplicate)
 {
 	zend_ulong num_key;
 	zend_string *str_key;

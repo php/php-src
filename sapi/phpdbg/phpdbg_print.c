@@ -320,7 +320,7 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	zend_function *method;
 	zend_string *method_name;
-	zend_bool first = 1;
+	bool first = 1;
 
 	phpdbg_out("%s %s: %s\n",
 		(ce->type == ZEND_USER_CLASS) ?

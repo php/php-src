@@ -293,7 +293,7 @@ static FbTokenType getToken(const char** begin, const char* end)
 
 int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_params)
 {
-	zend_bool passAsIs = 1, execBlock = 0;
+	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
 	char pname[254], ident[253], ident2[253];
 	unsigned int l;
@@ -825,7 +825,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			{
-				zend_bool bval = zval_get_long(val)? 1 : 0;
+				bool bval = zval_get_long(val)? 1 : 0;
 
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {

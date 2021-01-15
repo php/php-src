@@ -933,7 +933,7 @@ PHP_METHOD(MultipleIterator, attachIterator)
 	zval zinfo;
 	zend_string *info_str;
 	zend_long info_long;
-	zend_bool info_is_null = 1;
+	bool info_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(iterator, zend_ce_iterator)

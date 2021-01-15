@@ -258,9 +258,9 @@ void shutdown_executor(void) /* {{{ */
 	zend_string *key;
 	zval *zv;
 #if ZEND_DEBUG
-	zend_bool fast_shutdown = 0;
+	bool fast_shutdown = 0;
 #else
-	zend_bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
+	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
 
 	zend_try {
@@ -604,7 +604,7 @@ ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_executing(void) /* {{{ */
+ZEND_API bool zend_is_executing(void) /* {{{ */
 {
 	return EG(current_execute_data) != 0;
 }
@@ -759,7 +759,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	for (i=0; i<fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
-		zend_bool must_wrap = 0;
+		bool must_wrap = 0;
 		if (UNEXPECTED(Z_ISUNDEF_P(arg))) {
 			/* Allow forwarding undef slots. This is only used by Closure::__invoke(). */
 			ZVAL_UNDEF(param);
@@ -806,9 +806,9 @@ cleanup_args:
 		zend_string *name;
 		zval *arg;
 		uint32_t arg_num = ZEND_CALL_NUM_ARGS(call) + 1;
-		zend_bool have_named_params = 0;
+		bool have_named_params = 0;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
-			zend_bool must_wrap = 0;
+			bool must_wrap = 0;
 			zval *target;
 			if (name) {
 				void *cache_slot[2] = {NULL, NULL};
@@ -1017,7 +1017,7 @@ static const uint32_t valid_chars[8] = {
 	0xffffffff,
 };
 
-ZEND_API zend_bool zend_is_valid_class_name(zend_string *name) {
+ZEND_API bool zend_is_valid_class_name(zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
 		if (!ZEND_BIT_TEST(valid_chars, c)) {

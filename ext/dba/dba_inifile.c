@@ -120,7 +120,7 @@ DBA_EXISTS_FUNC(inifile)
 DBA_DELETE_FUNC(inifile)
 {
 	int res;
-	zend_bool found = 0;
+	bool found = 0;
 
 	INIFILE_DATA;
 	INIFILE_GKEY;

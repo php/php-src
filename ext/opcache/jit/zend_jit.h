@@ -81,8 +81,8 @@ typedef struct _zend_jit_trace_stack_frame zend_jit_trace_stack_frame;
 typedef struct _sym_node zend_sym_node;
 
 typedef struct _zend_jit_globals {
-	zend_bool enabled;
-	zend_bool on;
+	bool enabled;
+	bool on;
 	uint8_t   trigger;
 	uint8_t   opt_level;
 	uint32_t  opt_flags;
@@ -108,7 +108,7 @@ typedef struct _zend_jit_globals {
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
-	zend_bool tracing;
+	bool tracing;
 
 	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
@@ -137,7 +137,7 @@ ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
 ZEND_EXT_API int  zend_jit_check_support(void);
-ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, zend_bool reattached);
+ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);

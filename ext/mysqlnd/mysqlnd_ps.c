@@ -32,8 +32,8 @@ const char * const mysqlnd_not_bound_as_blob = "Can't send long data for non-str
 const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 
 /* Exported by mysqlnd_ps_codec.c */
-enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer);
-enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer);
+enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, bool * free_buffer);
+enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, bool * free_buffer);
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt);
 
@@ -54,7 +54,7 @@ static enum_func_status mysqlnd_stmt_send_cursor_fetch_command(
 	return PASS;
 }
 
-static zend_bool mysqlnd_stmt_check_state(const MYSQLND_STMT_DATA *stmt)
+static bool mysqlnd_stmt_check_state(const MYSQLND_STMT_DATA *stmt)
 {
 	const MYSQLND_CONN_DATA *conn = stmt->conn;
 	if (stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
@@ -207,7 +207,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 
 
 /* {{{ mysqlnd_stmt::more_results */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_stmt, more_results)(const MYSQLND_STMT * s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
@@ -653,7 +653,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	enum_func_status ret;
 	zend_uchar *request = NULL;
 	size_t		request_len;
-	zend_bool	free_request;
+	bool	free_request;
 
 	DBG_ENTER("mysqlnd_stmt::send_execute");
 	if (!stmt || !conn) {
@@ -770,7 +770,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
-mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, zend_bool * fetched_anything)
+mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, bool * fetched_anything)
 {
 	enum_func_status ret;
 	MYSQLND_STMT_DATA * stmt = result->unbuf->stmt;
@@ -865,7 +865,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 
 /* {{{ mysqlnd_stmt::fetch */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fetched_anything)
+MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, bool * const fetched_anything)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
@@ -1616,7 +1616,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 
 	switch (attr_type) {
 		case STMT_ATTR_UPDATE_MAX_LENGTH:
-			*(zend_bool *) value= stmt->update_max_length;
+			*(bool *) value= stmt->update_max_length;
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
 			*(unsigned long *) value= stmt->flags;
@@ -1790,7 +1790,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s)
 
 /* {{{ mysqlnd_stmt::close_on_server */
 static enum_func_status
-MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, zend_bool implicit)
+MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bool implicit)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
@@ -1874,7 +1874,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, ze
 
 /* {{{ mysqlnd_stmt::dtor */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit)
+MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, bool implicit)
 {
 	MYSQLND_STMT_DATA * stmt = (s != NULL) ? s->data:NULL;
 	enum_func_status ret = FAIL;

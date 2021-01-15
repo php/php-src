@@ -69,7 +69,7 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		charset_no;
 	uint16_t	server_status;
 	/* 13 byte pad, in 5.5 first 2 bytes are more capabilities followed by 1 byte scramble_length */
-	zend_bool	pre41;
+	bool	pre41;
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
@@ -90,9 +90,9 @@ typedef struct st_mysqlnd_packet_auth {
 	uint32_t	max_packet_size;
 	uint8_t		charset_no;
 	/* Here the packet ends. This is user supplied data */
-	zend_bool	send_auth_data;
-	zend_bool	is_change_user_packet;
-	zend_bool	silent;
+	bool	send_auth_data;
+	bool	is_change_user_packet;
+	bool	silent;
 	HashTable	*connect_attr;
 	size_t		db_len;
 } MYSQLND_PACKET_AUTH;
@@ -197,7 +197,7 @@ typedef struct st_mysqlnd_packet_res_field {
 	MYSQLND_MEMORY_POOL		*memory_pool;
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
-	zend_bool				skip_parsing;
+	bool				skip_parsing;
 
 	MYSQLND_ERROR_INFO		error_info;
 } MYSQLND_PACKET_RES_FIELD;
@@ -207,7 +207,7 @@ typedef struct st_mysqlnd_packet_res_field {
 typedef struct st_mysqlnd_packet_row {
 	MYSQLND_PACKET_HEADER	header;
 	uint32_t	field_count;
-	zend_bool	eof;
+	bool	eof;
 	/*
 	  These are, of course, only for SELECT in the EOF packet,
 	  which is detected by this packet
@@ -218,7 +218,7 @@ typedef struct st_mysqlnd_packet_row {
 	MYSQLND_ROW_BUFFER	row_buffer;
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
-	zend_bool		binary_protocol;
+	bool		binary_protocol;
 	MYSQLND_FIELD	*fields_metadata;
 
 	/* If error packet, we use these */
@@ -257,7 +257,7 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
-	zend_bool			server_asked_323_auth;
+	bool			server_asked_323_auth;
 
 	char		*new_auth_protocol;
 	size_t		new_auth_protocol_len;
@@ -305,15 +305,15 @@ PHPAPI extern const char * const mysqlnd_empty_string;
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
+										 bool as_int_or_float, MYSQLND_STATS * stats);
 
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
+										 bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
+PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const bool persistent);
 PHPAPI void mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */

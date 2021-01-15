@@ -601,7 +601,7 @@ END_EXTERN_C()
 static zend_op_array *zend_compile(int type)
 {
 	zend_op_array *op_array = NULL;
-	zend_bool original_in_compilation = CG(in_compilation);
+	bool original_in_compilation = CG(in_compilation);
 
 	CG(in_compilation) = 1;
 	CG(ast) = NULL;
@@ -671,7 +671,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, zend_arena **ast_arena, const char *filename) {
 	zval code_zv;
-	zend_bool original_in_compilation;
+	bool original_in_compilation;
 	zend_lex_state original_lex_state;
 	zend_ast *ast;
 
@@ -1017,7 +1017,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 						/* cache where we started so we can parse after validating */
 						char *start = s + 1;
 						size_t len = 0;
-						zend_bool valid = 1;
+						bool valid = 1;
 						unsigned long codepoint;
 
 						if (*start != '{') {
@@ -1157,9 +1157,9 @@ static const char *next_newline(const char *str, const char *end, size_t *newlin
 	return NULL;
 }
 
-static zend_bool strip_multiline_string_indentation(
-	zval *zendlval, int indentation, zend_bool using_spaces,
-	zend_bool newline_at_start, zend_bool newline_at_end)
+static bool strip_multiline_string_indentation(
+	zval *zendlval, int indentation, bool using_spaces,
+	bool newline_at_start, bool newline_at_end)
 {
 	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
@@ -1913,7 +1913,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* The +/- 2 skips "0b" */
 	size_t len = yyleng - 2;
 	char *end, *bin = yytext + 2;
-	zend_bool contains_underscores;
+	bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*bin == '0' || *bin == '_')) {
@@ -1955,7 +1955,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* The +/- 2 skips "0o" */
 	size_t len = yyleng - 2;
 	char *end, *octal = yytext + 2;
-	zend_bool contains_underscores = (memchr(octal, '_', len) != NULL);
+	bool contains_underscores = (memchr(octal, '_', len) != NULL);
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*octal == '0' || *octal == '_')) {
@@ -2004,8 +2004,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>{LNUM} {
 	size_t len = yyleng;
 	char *end, *lnum = yytext;
-	zend_bool is_octal = lnum[0] == '0';
-	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
+	bool is_octal = lnum[0] == '0';
+	bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
 	if (contains_underscores) {
 		lnum = estrndup(lnum, len);
@@ -2068,7 +2068,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* The +/- 2 skips "0x" */
 	size_t len = yyleng - 2;
 	char *end, *hex = yytext + 2;
-	zend_bool contains_underscores;
+	bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*hex == '0' || *hex == '_')) {
@@ -2135,7 +2135,7 @@ string:
 	const char *end;
 	size_t len = yyleng;
 	char *dnum = yytext;
-	zend_bool contains_underscores = (memchr(dnum, '_', len) != NULL);
+	bool contains_underscores = (memchr(dnum, '_', len) != NULL);
 
 	if (contains_underscores) {
 		dnum = estrndup(dnum, len);
@@ -2573,7 +2573,7 @@ skip_escape_conversion:
 	unsigned char *saved_cursor;
 	int bprefix = (yytext[0] != '<') ? 1 : 0, spacing = 0, indentation = 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
-	zend_bool is_heredoc = 1;
+	bool is_heredoc = 1;
 
 	CG(zend_lineno)++;
 	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -2954,7 +2954,7 @@ heredoc_scan_done:
 	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
-		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		zend_string *copy = Z_STR_P(zendlval);
 
 		if (!strip_multiline_string_indentation(
@@ -3055,7 +3055,7 @@ nowdoc_scan_done:
 	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!EG(exception) && spacing != -1 && PARSER_MODE()) {
-		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		if (!strip_multiline_string_indentation(
 				zendlval, indentation, spacing == HEREDOC_USING_SPACES,
 				newline_at_start, newline != 0)) {

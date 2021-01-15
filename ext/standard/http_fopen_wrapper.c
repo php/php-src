@@ -103,7 +103,7 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 	}
 }
 
-static zend_bool check_has_header(const char *headers, const char *header) {
+static bool check_has_header(const char *headers, const char *header) {
 	const char *s = headers;
 	while ((s = strstr(s, header))) {
 		if (s == headers || *(s-1) == '\n') {
@@ -136,16 +136,16 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	zend_string *errstr = NULL;
 	size_t transport_len;
 	int have_header = 0;
-	zend_bool request_fulluri = 0, ignore_errors = 0;
+	bool request_fulluri = 0, ignore_errors = 0;
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
-	zend_bool follow_location = 1;
+	bool follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
 	smart_str req_buf = {0};
-	zend_bool custom_request_method;
+	bool custom_request_method;
 
 	tmp_line[0] = '\0';
 

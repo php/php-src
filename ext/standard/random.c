@@ -84,7 +84,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ php_random_bytes */
-PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
@@ -222,7 +222,7 @@ PHP_FUNCTION(random_bytes)
 /* }}} */
 
 /* {{{ */
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
 {
 	zend_ulong umax;
 	zend_ulong trial;

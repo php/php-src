@@ -163,7 +163,7 @@ ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
 	return smart_str_extract(&str);
 }
 
-ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr)
+ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr)
 {
 	zend_attribute *other;
 

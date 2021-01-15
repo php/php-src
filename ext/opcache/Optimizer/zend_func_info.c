@@ -861,7 +861,7 @@ static uint32_t get_internal_func_info(
 
 uint32_t zend_get_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa,
-		zend_class_entry **ce, zend_bool *ce_is_instanceof)
+		zend_class_entry **ce, bool *ce_is_instanceof)
 {
 	uint32_t ret = 0;
 	const zend_function *callee_func = call_info->callee_func;

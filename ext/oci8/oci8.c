@@ -923,8 +923,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str hashed_details = {0};
 	time_t timestamp;
 	php_oci_spool *session_pool = NULL;
-	zend_bool use_spool = 1;	   /* Default is to use client-side session pool */
-	zend_bool ping_done = 0;
+	bool use_spool = 1;	   /* Default is to use client-side session pool */
+	bool ping_done = 0;
 
 	ub2 charsetid = 0;
 	ub2 charsetid_nls_lang = 0;
@@ -1042,7 +1042,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
-		zend_bool found = 0;
+		bool found = 0;
 
 		if (persistent && ((zvp = zend_hash_find(&EG(persistent_list), hashed_details.s))) != NULL) {
 			zend_resource *le = Z_RES_P(zvp);
@@ -1190,7 +1190,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	 * a last resort, return a non-persistent connection.
 	 */
 	if (persistent) {
-		zend_bool alloc_non_persistent = 0;
+		bool alloc_non_persistent = 0;
 
 		if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 			/* try to find an idle connection and kill it */
@@ -1436,7 +1436,7 @@ int php_oci_connection_commit(php_oci_connection *connection)
 static int php_oci_connection_close(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECTION_CLOSE_ENABLED()) {
@@ -1528,7 +1528,7 @@ static int php_oci_connection_close(php_oci_connection *connection)
 int php_oci_connection_release(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 	time_t timestamp = time(NULL);
 
 	if (connection->is_stub) {
@@ -1989,7 +1989,7 @@ static int php_oci_persistent_helper(zval *zv)
 static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid)
 {
 	php_oci_spool *session_pool = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	ub4 poolmode = OCI_DEFAULT;	/* Mode to be passed to OCISessionPoolCreate */
 	OCIAuthInfo *spoolAuth = NULL;
 	sword errstatus;
@@ -2128,7 +2128,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
 	zend_resource *spool_out_le = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	zval *spool_out_zv = NULL;
 
 	/* {{{ Create the spool hash key */
