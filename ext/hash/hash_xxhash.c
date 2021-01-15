@@ -17,6 +17,11 @@
 #include "php_hash.h"
 #include "php_hash_xxhash.h"
 
+static int php_hash_xxh32_unserialize(
+		php_hashcontext_object *hash, zend_long magic, const zval *zv);
+static int php_hash_xxh64_unserialize(
+		php_hashcontext_object *hash, zend_long magic, const zval *zv);
+
 const php_hash_ops php_hash_xxh32_ops = {
 	"xxh32",
 	(php_hash_init_func_t) PHP_XXH32Init,
@@ -24,7 +29,7 @@ const php_hash_ops php_hash_xxh32_ops = {
 	(php_hash_final_func_t) PHP_XXH32Final,
 	(php_hash_copy_func_t) PHP_XXH32Copy,
 	php_hash_serialize,
-	php_hash_unserialize,
+	php_hash_xxh32_unserialize,
 	PHP_XXH32_SPEC,
 	4,
 	4,
@@ -72,6 +77,20 @@ PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_cont
 	return SUCCESS;
 }
 
+static int php_hash_xxh32_unserialize(
+		php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_XXH32_CTX *ctx = (PHP_XXH32_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH32_SPEC)) == SUCCESS
+		&& ctx->s.memsize < 32) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
+}
+
 const php_hash_ops php_hash_xxh64_ops = {
 	"xxh64",
 	(php_hash_init_func_t) PHP_XXH64Init,
@@ -79,7 +98,7 @@ const php_hash_ops php_hash_xxh64_ops = {
 	(php_hash_final_func_t) PHP_XXH64Final,
 	(php_hash_copy_func_t) PHP_XXH64Copy,
 	php_hash_serialize,
-	php_hash_unserialize,
+	php_hash_xxh64_unserialize,
 	PHP_XXH64_SPEC,
 	8,
 	8,
@@ -186,6 +205,20 @@ PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
+}
+
+static int php_hash_xxh64_unserialize(
+		php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_XXH64_CTX *ctx = (PHP_XXH64_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_XXH64_SPEC)) == SUCCESS
+		&& ctx->s.memsize < 32) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
 }
 
 const php_hash_ops php_hash_xxh3_128_ops = {
