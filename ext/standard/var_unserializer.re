@@ -29,6 +29,10 @@
 #define VAR_WAKEUP_FLAG 1
 #define VAR_UNSERIALIZE_FLAG 2
 
+/* Each element is encoded using at least 2 characters. */
+#define IS_FAKE_ELEM_COUNT(num_elems, serialized_len) \
+	((num_elems) > (serialized_len) / 2)
+
 typedef struct {
 	zend_long used_slots;
 	void *next;
@@ -1001,7 +1005,7 @@ use_double:
 	*p = YYCURSOR;
     if (!var_hash) return 0;
 
-	if (elements < 0 || elements >= HT_MAX_SIZE || elements > max - YYCURSOR) {
+	if (elements < 0 || elements >= HT_MAX_SIZE || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		return 0;
 	}
 
@@ -1169,7 +1173,7 @@ object ":" uiv ":" ["]	{
 	}
 
 	elements = parse_iv2(*p + 2, p);
-	if (elements < 0 || elements > max - YYCURSOR) {
+	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
