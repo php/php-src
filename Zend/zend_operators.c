@@ -424,14 +424,6 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, ze
 
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op) /* {{{ */
 {
-	if (Z_TYPE_P(op) != IS_LONG) {
-		convert_to_long_base(op, 10);
-	}
-}
-/* }}} */
-
-ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base) /* {{{ */
-{
 	zend_long tmp;
 
 try_again:
@@ -456,11 +448,7 @@ try_again:
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
-				if (base == 10) {
-					ZVAL_LONG(op, zval_get_long(op));
-				} else {
-					ZVAL_LONG(op, ZEND_STRTOL(ZSTR_VAL(str), NULL, base));
-				}
+				ZVAL_LONG(op, zval_get_long(op));
 				zend_string_release_ex(str, 0);
 			}
 			break;
