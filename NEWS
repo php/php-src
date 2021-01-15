@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #80384 (filter buffers entire read until file closed). (Adam
     Seitz, cmb)
 
+- Curl:
+  . Fixed bug #80595 (Resetting POSTFIELDS to empty array breaks request). (cmb)
+
 - Date:
   . Fixed bug #80376 (last day of the month causes runway cpu usage. (Derick)
 
