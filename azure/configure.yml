@@ -69,5 +69,7 @@ steps:
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d \
-        LDFLAGS='-Wl,-rpath,/opt/oracle/instantclient'
+        LIBS='-Wl,--disable-new-dtags'
+     # --disable-new-dtags forces use of RPATH instead of RUNPATH, which applies to dlopened
+     # libraries as well, allowing OCI to work.
   displayName: 'Configure Build'
