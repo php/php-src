@@ -120,6 +120,10 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
+- Posix:
+  . Added POSIX_RLIMIT_KQUEUES and POSIX_RLIMIT_NPTS. These rlimits are only
+    available on FreeBSD.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
