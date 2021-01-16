@@ -34,12 +34,6 @@
 
 static double _timer_scale = .0;
 
-#elif PHP_HRTIME_PLATFORM_APPLE
-
-# include <mach/mach_time.h>
-# include <string.h>
-static mach_timebase_info_data_t _timerlib_info;
-
 #elif PHP_HRTIME_PLATFORM_HPUX
 
 # include <sys/time.h>
@@ -66,9 +60,7 @@ static int _timer_init()
 
 #elif PHP_HRTIME_PLATFORM_APPLE
 
-	if (mach_timebase_info(&_timerlib_info)) {
-		return -1;
-	}
+	/* pass */
 
 #elif PHP_HRTIME_PLATFORM_POSIX
 
@@ -115,7 +107,8 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 	QueryPerformanceCounter(&lt);
 	return (php_hrtime_t)((php_hrtime_t)lt.QuadPart * _timer_scale);
 #elif PHP_HRTIME_PLATFORM_APPLE
-	return (php_hrtime_t)mach_absolute_time() * _timerlib_info.numer / _timerlib_info.denom;
+	/* the value is of php_hrtime_t type already */
+	return clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW);
 #elif PHP_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
 	if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
