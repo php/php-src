@@ -37,6 +37,8 @@ resource(%d) of type (process)
 Interactive shell
 
 
+bool(true)
+
 int(2)
 test
 

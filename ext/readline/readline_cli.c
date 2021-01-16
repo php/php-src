@@ -236,11 +236,17 @@ recompile_without_block_expression:
 static void php_readline_try_interactive_eval(const char* code, const size_t codelen, const char* string_name) /* {{{ */
 {
 	zval returned_zv;
-	const zend_bool should_dump = CLIR_G(enable_interactive_shell_result_function) && php_readline_should_dump_interactive_result();
+	/* The snippet that's evaluated depends on whether the result would be dumped */
+	const bool should_dump = CLIR_G(enable_interactive_shell_result_function) && php_readline_should_dump_interactive_result();
 	ZVAL_UNDEF(&returned_zv);
 	zend_try {
 		php_readline_eval_stringl(code, codelen, should_dump ? &returned_zv : NULL, string_name);
 		if (!EG(exception) && should_dump && !Z_ISUNDEF(returned_zv)) {
+			/* If the evaluated expression caused output, and that output did not add in a newline,
+			 * append a newline before possibly dumping the result expression */
+			if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
+				PHPWRITE("\n", 1);
+			}
 			php_readline_dump_interactive_result(code, codelen, &returned_zv);
 		}
 	} zend_end_try();

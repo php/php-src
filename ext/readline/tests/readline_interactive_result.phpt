@@ -50,6 +50,8 @@ php (         if (isset($result)) {
 php (             echo "\n";
 php (             var_dump($result);
 php (         }});
+
+bool(true)
 php > 1+1;
 
 int(2)

@@ -42,6 +42,12 @@ php (         if (isset($result)) {
 php (             echo "\n";
 php (             var_dump($result);
 php (         }});
+
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function {closure}(), 2 passed and exactly 3 expected in php shell code:2
+Stack trace:
+#0 [internal function]: {closure}('readline_intera...', true)
+#1 {main}
+  thrown in php shell code on line 2
 php > sprintf('hello, %s', 'world');;
 
 Fatal error: Uncaught ArgumentCountError: Too few arguments to function {closure}(), 2 passed and exactly 3 expected in php shell code:2

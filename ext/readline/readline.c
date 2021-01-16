@@ -24,6 +24,9 @@
 #include "php_readline.h"
 #include "readline_cli.h"
 #include "readline_arginfo.h"
+#include "main/php_output.h"
+#include <ext/standard/php_var.h>
+#include "zend_smart_str.h"
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
@@ -81,7 +84,7 @@ PHP_MINIT_FUNCTION(readline)
 	using_history();
 #endif
 	ZVAL_UNDEF(&_readline_completion);
-	ZVAL_UNDEF(&_readline_interactive_shell_result_function);
+	ZVAL_NULL(&_readline_interactive_shell_result_function);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
@@ -113,7 +116,6 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 PHP_MINFO_FUNCTION(readline)
 {
 	PHP_MINFO(cli_readline)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
-	DISPLAY_INI_ENTRIES();
 }
 
 /* }}} */
@@ -494,14 +496,31 @@ PHP_FUNCTION(readline_completion_function)
 	RETURN_TRUE;
 }
 
-zend_bool php_readline_should_dump_interactive_result()
+bool php_readline_should_dump_interactive_result()
 {
 	return Z_TYPE(_readline_interactive_shell_result_function) != IS_UNDEF;
 }
 
 void php_readline_dump_interactive_result(const char* code, const size_t codelen, zval *returned_zv)
 {
-	if (Z_TYPE(_readline_interactive_shell_result_function) != IS_UNDEF) {
+	if (Z_TYPE(_readline_interactive_shell_result_function) == IS_NULL) {
+		ZVAL_DEREF(returned_zv);
+		if (Z_TYPE_P(returned_zv) > IS_NULL) {
+			if (Z_TYPE_P(returned_zv) >= IS_ARRAY) {
+				/* Use var_dump to dump arrays, objects, and resources.
+				 * var_dump's representation distinguishes between ints/floats and can show recursive data structures. */
+				PHPWRITE("=> ", sizeof("=> ") - 1);
+				php_var_dump(returned_zv, 1);
+			} else {
+				/* Use var_export to dump scalars */
+				smart_str buf = {0};
+				php_var_export_ex(returned_zv, 1, &buf);
+				PHPWRITE("=> ", sizeof("=> ") - 1);
+				PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+				smart_str_free(&buf);
+			}
+		}
+	} else if (Z_TYPE(_readline_interactive_shell_result_function) != IS_UNDEF) {
 		zval dump_result;
 		zval args[2];
 		ZVAL_STRINGL(&args[0], code, codelen);
@@ -509,17 +528,6 @@ void php_readline_dump_interactive_result(const char* code, const size_t codelen
 		call_user_function(NULL, NULL, &_readline_interactive_shell_result_function, &dump_result, 2, args);
 		zval_ptr_dtor(&dump_result);
 		zval_ptr_dtor(&args[0]);
-	/*
-	} else if (Z_TYPE_P(returned_zv) > IS_NULL) {
-		// Calling var_dump() may be useful to enable via a config setting.
-		zval dump_result;
-		zval var_dump_name;
-		ZVAL_STRINGL(&var_dump_name, "var_dump", sizeof("var_dump") - 1);
-		call_user_function(CG(function_table), NULL, &var_dump_name, &dump_result, 1, returned_zv);
-		zval_ptr_dtor(&dump_result);
-		zval_ptr_dtor_nogc(&var_dump_name);
-	}
-	*/
 	}
 	zval_ptr_dtor(returned_zv);
 	ZVAL_UNDEF(returned_zv);

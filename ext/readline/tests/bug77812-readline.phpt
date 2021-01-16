@@ -33,6 +33,7 @@ php > print(<<<FOO
 <<< > xx
 <<< > FOO);
 xx
+=> 1
 php > echo <<<FOO
 <<< >     xxx
 <<< >     FOO;

@@ -22,7 +22,7 @@ ZEND_BEGIN_MODULE_GLOBALS(cli_readline)
 	char *pager;
 	char *prompt;
 	smart_str *prompt_str;
-	zend_bool enable_interactive_shell_result_function;
+	bool enable_interactive_shell_result_function;
 ZEND_END_MODULE_GLOBALS(cli_readline)
 
 #ifdef ZTS
@@ -37,6 +37,6 @@ extern PHP_MINFO_FUNCTION(cli_readline);
 
 char **php_readline_completion_cb(const char *text, int start, int end);
 void php_readline_dump_interactive_result(const char* code, const size_t codelen, zval *returned_zv);
-zend_bool php_readline_should_dump_interactive_result();
+bool php_readline_should_dump_interactive_result();
 
 ZEND_EXTERN_MODULE_GLOBALS(cli_readline)
