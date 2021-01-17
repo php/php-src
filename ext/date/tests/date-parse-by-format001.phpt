@@ -15,7 +15,7 @@ Array
     [hour] => 0
     [minute] => 0
     [second] => 0
-    [fraction] => 0
+    [fraction] => 0.0
     [warning_count] => 0
     [warnings] => Array
         (
@@ -36,7 +36,7 @@ Array
     [hour] => 0
     [minute] => 0
     [second] => 0
-    [fraction] => 0
+    [fraction] => 0.0
     [warning_count] => 0
     [warnings] => Array
         (

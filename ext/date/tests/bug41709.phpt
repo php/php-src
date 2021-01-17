@@ -17,7 +17,7 @@ Array
     [hour] => 0
     [minute] => 0
     [second] => 0
-    [fraction] => 0
+    [fraction] => 0.0
     [warning_count] => 1
     [warnings] => Array
         (

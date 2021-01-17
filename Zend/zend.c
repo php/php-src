@@ -480,6 +480,23 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(expr));
 			break;
+		case IS_DOUBLE:
+			{
+				zend_string *str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(expr));
+				smart_str_appends(buf, ZSTR_VAL(str));
+				/* Without a decimal point, this can be mistaken for an integer, so add one.
+				 * This check even works for scientific notation, because the
+				 * mantissa always contains a decimal point.
+				 * We need to check for finiteness, because INF, -INF and NAN
+				 * must not have a decimal point added.
+				 * (copied from php_var_export_ex, changed to only use helpers defined in Zend/)
+				 */
+				if (zend_finite(Z_DVAL_P(expr)) && NULL == strchr(ZSTR_VAL(str), '.')) {
+					smart_str_appendl(buf, ".0", 2);
+				}
+				zend_string_release_ex(str, 0);
+				break;
+			}
 		case IS_REFERENCE:
 			zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
 			break;
