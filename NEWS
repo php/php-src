@@ -14,7 +14,7 @@ PHP                                                                        NEWS
 
 - hash:
   . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
-  . Implemented xxhash support. (Anatol)
+  . Implemented xxHash support. (Anatol)
 
 - MySQLi:
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
