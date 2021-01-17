@@ -731,6 +731,12 @@ static const struct pdo_dbh_methods sqlite_methods = {
 
 static char *make_filename_safe(const char *filename)
 {
+	if (*filename && strncasecmp(filename, "file:", 5) == 0) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
+			return NULL;
+		}
+		return estrdup(filename);
+	}
 	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
 		char *fullpath = expand_filepath(filename, NULL);
 
@@ -803,6 +809,9 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 
 	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
+	if (!(PG(open_basedir) && *PG(open_basedir))) {
+		flags |= SQLITE_OPEN_URI;
+	}
 	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
 
 	efree(filename);

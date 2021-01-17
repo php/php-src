@@ -126,6 +126,13 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
+- PDO SQLite:
+  . SQLite's "file:" DSN syntax is now supported, which allows specifying
+    additional flags. This feature is not available if open_basedir is set.
+    Example:
+
+        new PDO('sqlite:file:path/to/sqlite.db?mode=ro')
+
 - Posix:
   . Added POSIX_RLIMIT_KQUEUES and POSIX_RLIMIT_NPTS. These rlimits are only
     available on FreeBSD.
