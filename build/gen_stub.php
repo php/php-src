@@ -1881,7 +1881,7 @@ if ($verify) {
     $errors = [];
 
     foreach ($funcMap as $aliasFunc) {
-        if ($aliasFunc->aliasType !== "alias") {
+        if (!$aliasFunc->alias) {
             continue;
         }
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 61a684b6c221a15538a5f8cc32bc4e7d4cf3c8fd */
+ * Stub hash: 2abe77016e7a595f1687be34e52bba6aa477e7ae */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
