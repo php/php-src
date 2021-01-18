@@ -1027,7 +1027,7 @@ class DocCommentTag {
         if ($this->name === "param") {
             preg_match('/^\s*([\w\|\\\\\[\]]+)\s*\$\w+.*$/', $value, $matches);
         } elseif ($this->name === "return") {
-            preg_match('/^\s*([\w\|\\\\\[\]]+)\s*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]]+)(\s+|$)/', $value, $matches);
         }
 
         if (isset($matches[1]) === false) {
