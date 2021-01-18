@@ -1870,6 +1870,7 @@ foreach ($fileInfos as $fileInfo) {
         /** @var FuncInfo $funcInfo */
         $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
+        // TODO: Don't use aliasMap for methodsynopsis?
         if ($funcInfo->aliasType === "alias") {
             $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
         }
@@ -1879,7 +1880,11 @@ foreach ($fileInfos as $fileInfo) {
 if ($verify) {
     $errors = [];
 
-    foreach ($aliasMap as $aliasFunc) {
+    foreach ($funcMap as $aliasFunc) {
+        if ($aliasFunc->aliasType !== "alias") {
+            continue;
+        }
+
         if (!isset($funcMap[$aliasFunc->alias->__toString()])) {
             $errors[] = "Aliased function {$aliasFunc->alias}() cannot be found";
             continue;
