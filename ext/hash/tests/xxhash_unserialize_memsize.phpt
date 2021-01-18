@@ -4,7 +4,7 @@ xxhash memsize must be in range when unserializing
 <?php
 try {
     $str = <<<'STR'
-    O:11:"HashContext":5:{i:0;s:5:"xxh32";i:1;i:0;i:2;a:12:{i:0;i:0;i:1;i:0;i:2;i:606290984;i:3;i:-2048144777;i:4;i:0;i:5;i:1640531535;i:6;i:0;i:7;i:0;i:8;i:0;i:9;i:0;i:10;i:80;i:11;i:0;}i:3;i:2;i:4;a:0:{}}
+    O:11:"HashContext":5:{i:0;s:5:"xxh32";i:1;i:0;i:2;a:12:{i:0;i:0;i:1;i:0;i:2;i:606290984;i:3;i:-2048144777;i:4;i:0;i:5;i:1640531535;i:6;i:0;i:7;i:0;i:8;i:0;i:9;i:0;i:10;i:30;i:11;i:0;}i:3;i:2;i:4;a:0:{}}
     STR;
     $hash = unserialize($str);
     hash_update($hash, '');
