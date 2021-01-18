@@ -212,7 +212,7 @@ static bool odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 	return true;
 }
 
-static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -225,7 +225,7 @@ static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return -1;
 	}
 
-	rc = SQLExecDirect(stmt, (SQLCHAR *) sql, sql_len);
+	rc = SQLExecDirect(stmt, (SQLCHAR *) ZSTR_VAL(sql), ZSTR_LEN(sql));
 
 	if (rc == SQL_NO_DATA) {
 		/* If SQLExecDirect executes a searched update or delete statement that

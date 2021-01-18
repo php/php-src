@@ -106,14 +106,14 @@ static bool dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	return true;
 }
 
-static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret, resret;
 
 	dbsetuserdata(H->link, (BYTE*)&H->err);
 
-	if (FAIL == dbcmd(H->link, sql)) {
+	if (FAIL == dbcmd(H->link, ZSTR_VAL(sql))) {
 		return -1;
 	}
 

@@ -249,14 +249,14 @@ end:
 /* }}} */
 
 /* {{{ mysql_handle_doer */
-static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_doer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", (int)sql_len, sql);
+	PDO_DBG_INF_FMT("sql=%.*s", (int)ZSTR_LEN(sql), ZSTR_VAL(sql));
 
-	if (mysql_real_query(H->server, sql, sql_len)) {
+	if (mysql_real_query(H->server, ZSTR_VAL(sql), ZSTR_LEN(sql))) {
 		pdo_mysql_error(dbh);
 		PDO_DBG_RETURN(-1);
 	} else {
@@ -348,9 +348,16 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 /* {{{ mysql_handle_begin */
 static bool mysql_handle_begin(pdo_dbh_t *dbh)
 {
+	zend_long return_value;
+	zend_string *command;
+
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("START TRANSACTION")));
+
+	command = zend_string_init("START TRANSACTION", strlen("START TRANSACTION"), 0);
+	return_value = mysql_handle_doer(dbh, command);
+	zend_string_release_ex(command, 0);
+	PDO_DBG_RETURN(0 <= return_value);
 }
 /* }}} */
 

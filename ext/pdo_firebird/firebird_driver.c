@@ -29,7 +29,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*, isc_stmt_handle*,
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
 
 const char CHR_LETTER = 1;
@@ -291,13 +291,13 @@ static FbTokenType getToken(const char** begin, const char* end)
 	return ret;
 }
 
-int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_params)
+int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 {
 	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
 	char pname[254], ident[253], ident2[253];
 	unsigned int l;
-	const char* p = sql, * end = sql + sql_len;
+	const char* p = ZSTR_VAL(sql), * end = ZSTR_VAL(sql) + ZSTR_LEN(sql);
 	const char* start = p;
 	FbTokenType tok = getToken(&p, end);
 
@@ -363,7 +363,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 
 	if (passAsIs)
 	{
-		strcpy(sql_out, sql);
+		strcpy(sql_out, ZSTR_VAL(sql));
 		return 1;
 	}
 
@@ -522,7 +522,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		zend_hash_init(np, 8, NULL, NULL, 0);
 
 		/* allocate and prepare statement */
-		if (!firebird_alloc_prepare_stmt(dbh, ZSTR_VAL(sql), ZSTR_LEN(sql), &num_sqlda, &s, np)) {
+		if (!firebird_alloc_prepare_stmt(dbh, sql, &num_sqlda, &s, np)) {
 			break;
 		}
 
@@ -587,7 +587,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 /* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = PDO_FIREBIRD_HANDLE_INITIALIZER;
@@ -602,7 +602,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 	out_sqlda.sqln = 1;
 
 	/* allocate and prepare statement */
-	if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &out_sqlda, &stmt, 0)) {
+	if (!firebird_alloc_prepare_stmt(dbh, sql, &out_sqlda, &stmt, 0)) {
 		return -1;
 	}
 
@@ -767,14 +767,14 @@ static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
 
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > 65536) {
+	if (ZSTR_LEN(sql) > 65536) {
 		strcpy(dbh->error_code, "01004");
 		return 0;
 	}
@@ -797,9 +797,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 
 	/* in order to support named params, which Firebird itself doesn't,
 	   we need to replace :foo by ?, and store the name we just replaced */
-	new_sql = emalloc(sql_len+1);
+	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
-	if (!preprocess(sql, sql_len, new_sql, named_params)) {
+	if (!preprocess(sql, new_sql, named_params)) {
 		strcpy(dbh->error_code, "07000");
 		efree(new_sql);
 		return 0;
@@ -815,7 +815,6 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 	efree(new_sql);
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to set a driver-specific dbh attribute */
 static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
