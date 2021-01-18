@@ -2722,7 +2722,14 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
-				return build_mime_structure_from_hash(ch, zvalue);
+				if (zend_hash_num_elements(HASH_OF(zvalue)) == 0) {
+					/* no need to build the mime structure for empty hashtables;
+					   also works around https://github.com/curl/curl/issues/6455 */
+					curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, "");
+					error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, 0);
+				} else {
+					return build_mime_structure_from_hash(ch, zvalue);
+				}
 			} else {
 				zend_string *tmp_str;
 				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
