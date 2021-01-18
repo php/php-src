@@ -222,12 +222,14 @@ static bool dblib_handle_rollback(pdo_dbh_t *dbh)
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh);
 }
 
-char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
 	char *id = NULL;
+	size_t len;
+	zend_string *ret_id;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
@@ -260,10 +262,12 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 	}
 
 	id = emalloc(32);
-	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
-
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
 	dbcancel(H->link);
-	return id;
+
+	ret_id = zend_string_init(id, len, 0);
+	efree(id);
+	return ret_id;
 }
 
 static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)

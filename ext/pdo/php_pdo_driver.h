@@ -33,7 +33,7 @@ typedef unsigned __int64 pdo_uint64_t;
 typedef long long int pdo_int64_t;
 typedef unsigned long long int pdo_uint64_t;
 #endif
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
+PDO_API zend_string *php_pdo_int64_to_str(pdo_int64_t i64);
 
 #ifndef TRUE
 # define TRUE 1
@@ -247,9 +247,9 @@ typedef bool (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
  * Return true on success and false in case of failure */
 typedef bool (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
-/* return last insert id.  NULL indicates error condition, otherwise, the return value
- * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, size_t *len);
+/* return last insert id.  NULL indicates error condition.
+ * name MIGHT be NULL */
+typedef zend_string *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const zend_string *name);
 
 /* Fetch error information.
  * If stmt is not null, fetch information pertaining to the statement,

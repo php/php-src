@@ -285,13 +285,11 @@ static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 /* }}} */
 
 /* {{{ pdo_mysql_last_insert_id */
-static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	char *id = php_pdo_int64_to_str(mysql_insert_id(H->server));
 	PDO_DBG_ENTER("pdo_mysql_last_insert_id");
-	*len = strlen(id);
-	PDO_DBG_RETURN(id);
+	PDO_DBG_RETURN(php_pdo_int64_to_str(mysql_insert_id(H->server)));
 }
 /* }}} */
 

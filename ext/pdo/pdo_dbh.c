@@ -941,12 +941,12 @@ PHP_METHOD(PDO, exec)
 PHP_METHOD(PDO, lastInsertId)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	char *name = NULL;
-	size_t namelen;
+	zend_string *name = NULL;
+	zend_string *last_id = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(name, namelen)
+		Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_CONSTRUCT_CHECK;
@@ -956,19 +956,13 @@ PHP_METHOD(PDO, lastInsertId)
 	if (!dbh->methods->last_id) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()");
 		RETURN_FALSE;
-	} else {
-		size_t id_len;
-		char *id;
-		id = dbh->methods->last_id(dbh, name, &id_len);
-		if (!id) {
-			PDO_HANDLE_DBH_ERR();
-			RETURN_FALSE;
-		} else {
-			//??? use zend_string ?
-			RETVAL_STRINGL(id, id_len);
-			efree(id);
-		}
 	}
+	last_id = dbh->methods->last_id(dbh, name);
+	if (!last_id) {
+		PDO_HANDLE_DBH_ERR();
+		RETURN_FALSE;
+	}
+	RETURN_STR(last_id);
 }
 /* }}} */
 
