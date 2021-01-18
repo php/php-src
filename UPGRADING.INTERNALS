@@ -58,3 +58,6 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       char* and size_t length.
     - The doer handler now accepts a zend_string* instead of char* + size_t
       pair for the SQL statement.
+    - The last_id handler now returns a zend_string* instead of returning a
+      char* and the length as an out param, and accepts a zend_string* instead
+      of char* for the optional sequence/table name.

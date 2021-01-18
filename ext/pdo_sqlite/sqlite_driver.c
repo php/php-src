@@ -216,14 +216,11 @@ static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	}
 }
 
-static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-	char *id;
 
-	id = php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db));
-	*len = strlen(id);
-	return id;
+	return php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db));
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */

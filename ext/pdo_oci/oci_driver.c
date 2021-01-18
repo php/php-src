@@ -696,7 +696,7 @@ static const struct pdo_dbh_methods oci_methods = {
 	oci_handle_commit,
 	oci_handle_rollback,
 	oci_handle_set_attribute,
-	NULL,
+	NULL, /* last_id not supported */
 	pdo_oci_fetch_error_func,
 	oci_handle_get_attribute,
 	pdo_oci_check_liveness,	/* check_liveness */

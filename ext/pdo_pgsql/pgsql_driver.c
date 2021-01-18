@@ -352,10 +352,10 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	return quoted_str;
 }
 
-static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+static zend_string *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
-	char *id = NULL;
+	zend_string *id = NULL;
 	PGresult *res;
 	ExecStatusType status;
 
@@ -363,15 +363,14 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		const char *q[1];
-		q[0] = name;
+		q[0] = ZSTR_VAL(name);
 
 		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
 	}
 	status = PQresultStatus(res);
 
 	if (res && (status == PGRES_TUPLES_OK)) {
-		id = estrdup((char *)PQgetvalue(res, 0, 0));
-		*len = PQgetlength(res, 0, 0);
+		id = zend_string_init((char *)PQgetvalue(res, 0, 0), PQgetlength(res, 0, 0), 0);
 	} else {
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
 	}

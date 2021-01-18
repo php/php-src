@@ -248,8 +248,9 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 }
 /* }}} */
 
+/* TODO Refactor */
 static const char digit_vec[] = "0123456789";
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
+PDO_API zend_string *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 {
 	char buffer[65];
 	char outbuf[65] = "";
@@ -257,15 +258,13 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 	zend_long long_val;
 	char *dst = outbuf;
 
+	if (i64 == 0) {
+		return ZSTR_CHAR('0');
+	}
+
 	if (i64 < 0) {
 		i64 = -i64;
 		*dst++ = '-';
-	}
-
-	if (i64 == 0) {
-		*dst++ = '0';
-		*dst++ = '\0';
-		return estrdup(outbuf);
 	}
 
 	p = &buffer[sizeof(buffer)-1];
@@ -286,7 +285,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 	while ((*dst++ = *p++) != 0)
 		;
 	*dst = '\0';
-	return estrdup(outbuf);
+	return zend_string_init(outbuf, strlen(outbuf), 0);
 }
 /* }}} */
 
