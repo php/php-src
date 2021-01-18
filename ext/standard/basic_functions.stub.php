@@ -1475,6 +1475,8 @@ function var_export(mixed $value, bool $return = false): ?string {}
 
 function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
+function var_representation(mixed $value, int $flags = 0): string {}
+
 function serialize(mixed $value): string {}
 
 function unserialize(string $data, array $options = []): mixed {}

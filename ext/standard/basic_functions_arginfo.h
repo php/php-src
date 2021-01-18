@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7540039937587f05584660bc1a1a8a80aa5ccbd1 */
+ * Stub hash: 533808ec59e5d4713134fe8c76a5a4df2ee872cb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2157,6 +2157,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_debug_zval_dump arginfo_var_dump
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_representation, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 #define arginfo_serialize arginfo_gettype
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_unserialize, 0, 1, IS_MIXED, 0)
@@ -2811,6 +2816,7 @@ ZEND_FUNCTION(convert_uudecode);
 ZEND_FUNCTION(var_dump);
 ZEND_FUNCTION(var_export);
 ZEND_FUNCTION(debug_zval_dump);
+ZEND_FUNCTION(var_representation);
 ZEND_FUNCTION(serialize);
 ZEND_FUNCTION(unserialize);
 ZEND_FUNCTION(memory_get_usage);
@@ -3463,6 +3469,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(var_dump, arginfo_var_dump)
 	ZEND_FE(var_export, arginfo_var_export)
 	ZEND_FE(debug_zval_dump, arginfo_debug_zval_dump)
+	ZEND_FE(var_representation, arginfo_var_representation)
 	ZEND_FE(serialize, arginfo_serialize)
 	ZEND_FE(unserialize, arginfo_unserialize)
 	ZEND_FE(memory_get_usage, arginfo_memory_get_usage)

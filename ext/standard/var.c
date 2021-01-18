@@ -35,6 +35,8 @@ struct php_serialize_data {
 
 #define COMMON (is_ref ? "&" : "")
 
+static const int VAR_REPRESENTATION_SINGLE_LINE = 1;
+
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
@@ -468,6 +470,142 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 }
 /* }}} */
 
+static zend_string* php_var_representation_string_double_quotes(const char *str, size_t len) { /* {{{ */
+	/* NOTE: This needs to be thread safe, which is why I gave up and used a constant */
+	/* '\1'(0x01) means to use the hexadecimal representation, others mean to use a backslash followed by that character */
+	static const char lookup[256] = {
+		1,  1,  1,  1,  1,  1,  1,  1,  1,'t','n',  1,  1,'r',  1,  1,  /* 0x00-0x0f '\r', '\n', '\t' */
+		1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  /* 0x10-0x1f                  */
+		0,  0,'"',  0,'$',  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x20-0x2f '"', '$'         */
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x30-0x3f                  */
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x40-0x4f                  */
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,'\\', 0,  0,  0,  /* 0x50-0x5f - '\\'           */
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* 0x60-0x6f                  */
+		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  /* 0x70-0x7f backspace (\x7f) */
+		/* don't escape 0x80-0xff for now in case it's valid in whatever encoding the application is using,
+		   the missing values are filled with zeroes by the compiler */
+	};
+	/* Copied from php_bin2hex */
+	ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
+
+	/* based on php_addcslashes_str - allocate a buffer to encode the worst case of 4 bytes per byte */
+	zend_string *new_str = zend_string_safe_alloc(4, len, 0, 0);
+	const char *source, *end;
+	char *target;
+	for (source = str, end = source + len, target = ZSTR_VAL(new_str); source < end; source++) {
+		const char c = *source;
+		const char replacement = lookup[(unsigned char) c];
+		if (replacement) {
+			*target++ = '\\';
+			if (replacement == '\1') {
+				/* encode \x00-\x1f and \x7f excluding \r, \n, \t */
+				target[0] = 'x';
+				target[1] = hexconvtab[((unsigned char) c) >> 4];
+				target[2] = hexconvtab[((unsigned char) c) & 15];
+				target += 3;
+			} else {
+				/* encode \r, \n, \t, \$, \", \\ */
+				*target++ = replacement;
+			}
+			continue;
+		}
+		*target++ = c;
+	}
+	*target = 0;
+	size_t newlen = target - ZSTR_VAL(new_str);
+	if (newlen < len * 4) {
+		new_str = zend_string_truncate(new_str, newlen, 0);
+	}
+	return new_str;
+}
+/* }}} */
+
+
+static void php_var_representation_string(smart_str *buf, const char *str, size_t len) /* {{{ */
+{
+	for (size_t i = 0; i < len; i++) {
+		const unsigned char c = (unsigned char)str[i];
+		/* escape using double quotes if the string contains control characters such as newline/tab and backspaces(\x7f) */
+		if (c < 0x20 || c == 0x7f) {
+			/* This needs to escape the previously scanned characters because this didn't check for $ and \\ */
+			smart_str_appendc(buf, '"');
+			zend_string *ztmp = php_var_representation_string_double_quotes(str, len);
+			smart_str_append(buf, ztmp);
+			smart_str_appendc(buf, '"');
+			zend_string_free(ztmp);
+			return;
+		}
+	}
+	/* guaranteed not to have '\0' characters at this point. */
+	zend_string *ztmp = php_addcslashes_str(str, len, "'\\", 2);
+
+	smart_str_appendc(buf, '\'');
+	smart_str_append(buf, ztmp);
+	smart_str_appendc(buf, '\'');
+
+	zend_string_free(ztmp);
+}
+/* }}} */
+
+static void php_object_element_var_representation(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf, bool is_list) /* {{{ */
+{
+	bool multiline = level >= 0;
+	if (multiline) {
+		buffer_append_spaces(buf, level + 1);
+	}
+	if (is_list) {
+		ZEND_ASSERT(!key);
+	} else {
+		if (key != NULL) {
+			const char *class_name, *prop_name;
+			size_t prop_name_len;
+
+			zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
+			php_var_representation_string(buf, prop_name, prop_name_len);
+		} else {
+			smart_str_append_long(buf, (zend_long) index);
+		}
+		smart_str_appendl(buf, " => ", 4);
+	}
+
+	php_var_representation_ex(zv, multiline ? level + 2 : -1, buf);
+	if (multiline) {
+		smart_str_appendc(buf, ',');
+		smart_str_appendc(buf, '\n');
+	}
+}
+/* }}} */
+
+static void php_array_element_var_representation(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf, bool is_list) /* {{{ */
+{
+	bool multiline = level >= 0;
+	if (key == NULL) { /* numeric key */
+		if (multiline) {
+			buffer_append_spaces(buf, level+1);
+		}
+		if (!is_list)  {
+			smart_str_append_long(buf, (zend_long) index);
+			smart_str_appendl(buf, " => ", 4);
+		}
+	} else { /* string key */
+		ZEND_ASSERT(!is_list);
+
+		if (multiline) {
+			buffer_append_spaces(buf, level+1);
+		}
+
+		php_var_representation_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
+		smart_str_appendl(buf, " => ", 4);
+	}
+	php_var_representation_ex(zv, multiline ? level + 2 : -1, buf);
+
+	if (multiline) {
+		smart_str_appendc(buf, ',');
+		smart_str_appendc(buf, '\n');
+	}
+}
+/* }}} */
+
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
@@ -605,6 +743,155 @@ again:
 }
 /* }}} */
 
+PHPAPI void php_var_representation_ex(zval *struc, int level, smart_str *buf) /* {{{ */
+{
+	HashTable *myht;
+	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
+	zend_ulong index;
+	zend_string *key;
+	zval *val;
+	bool first, is_list;
+
+again:
+	switch (Z_TYPE_P(struc)) {
+		case IS_FALSE:
+			smart_str_appendl(buf, "false", 5);
+			break;
+		case IS_TRUE:
+			smart_str_appendl(buf, "true", 4);
+			break;
+		case IS_NULL:
+			smart_str_appendl(buf, "null", 4);
+			break;
+		case IS_LONG:
+			/* INT_MIN as a literal will be parsed as a float. Emit something like
+			 * -9223372036854775807-1 to avoid this. */
+			if (Z_LVAL_P(struc) == ZEND_LONG_MIN) {
+				smart_str_append_long(buf, ZEND_LONG_MIN+1);
+				smart_str_appends(buf, "-1");
+				break;
+			}
+			smart_str_append_long(buf, Z_LVAL_P(struc));
+			break;
+		case IS_DOUBLE:
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			smart_str_appends(buf, tmp_str);
+			/* Without a decimal point, PHP treats a number literal as an int.
+			 * This check even works for scientific notation, because the
+			 * mantissa always contains a decimal point.
+			 * We need to check for finiteness, because INF, -INF and NAN
+			 * must not have a decimal point added.
+			 */
+			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
+				smart_str_appendl(buf, ".0", 2);
+			}
+			break;
+		case IS_STRING:
+			php_var_representation_string(buf, Z_STRVAL_P(struc), Z_STRLEN_P(struc));
+			break;
+		case IS_ARRAY: {
+			myht = Z_ARRVAL_P(struc);
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				if (GC_IS_RECURSIVE(myht)) {
+					smart_str_appendl(buf, "null", 4);
+					zend_error(E_WARNING, "var_representation does not handle circular references");
+					return;
+				}
+				GC_ADDREF(myht);
+				GC_PROTECT_RECURSION(myht);
+			}
+			smart_str_appendc(buf, '[');
+			first = true;
+			is_list = zend_array_is_list(myht);
+			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
+				if (level < 0) {
+					if (first) {
+						first = false;
+					} else {
+						smart_str_appendl(buf, ", ", 2);
+					}
+				} else if (first) {
+					smart_str_appendc(buf, '\n');
+					first = false;
+				}
+				php_array_element_var_representation(val, index, key, level, buf, is_list);
+			} ZEND_HASH_FOREACH_END();
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				GC_UNPROTECT_RECURSION(myht);
+				GC_DELREF(myht);
+			}
+			if (level > 1 && !first) {
+				buffer_append_spaces(buf, level - 1);
+			}
+			smart_str_appendc(buf, ']');
+
+			break;
+		}
+		case IS_OBJECT:
+			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
+			if (myht) {
+				if (GC_IS_RECURSIVE(myht)) {
+					smart_str_appendl(buf, "null", 4);
+					zend_error(E_WARNING, "var_representation does not handle circular references");
+					zend_release_properties(myht);
+					return;
+				} else {
+					GC_TRY_PROTECT_RECURSION(myht);
+				}
+			}
+
+			/* stdClass has no __set_state method, but can be casted to */
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendl(buf, "(object) [", 10);
+			} else {
+				smart_str_appendc(buf, '\\');
+				smart_str_append(buf, Z_OBJCE_P(struc)->name);
+				smart_str_appendl(buf, "::__set_state([", 15);
+			}
+
+			first = true;
+			if (myht) {
+				is_list = zend_array_is_list(myht);
+				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
+					if (level < 0) {
+						if (first) {
+							first = false;
+						} else {
+							smart_str_appendl(buf, ", ", 2);
+						}
+					} else if (first) {
+						smart_str_appendc(buf, '\n');
+						first = false;
+					}
+					php_object_element_var_representation(val, index, key, level, buf, is_list);
+				} ZEND_HASH_FOREACH_END();
+				GC_TRY_UNPROTECT_RECURSION(myht);
+				zend_release_properties(myht);
+			}
+			if (level > 1 && !first) {
+				buffer_append_spaces(buf, level - 1);
+			}
+			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
+				smart_str_appendc(buf, ']');
+			} else {
+				smart_str_appendl(buf, "])", 2);
+			}
+
+			break;
+		case IS_REFERENCE:
+			struc = Z_REFVAL_P(struc);
+			goto again;
+			break;
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "var_representation does not handle resources");
+			/* fall through */
+		default:
+			smart_str_appendl(buf, "null", 4);
+			break;
+	}
+}
+/* }}} */
+
 /* FOR BC reasons, this will always perform and then print */
 PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 {
@@ -638,6 +925,26 @@ PHP_FUNCTION(var_export)
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 		smart_str_free(&buf);
 	}
+}
+/* }}} */
+
+/* {{{ Returns a short, readable string representation of a variable */
+PHP_FUNCTION(var_representation)
+{
+	zval *var;
+	zend_long flags = 0;
+	smart_str buf = {0};
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_var_representation_ex(var, (flags & 1) ? -1 : 1, &buf);
+	smart_str_0 (&buf);
+
+	RETURN_NEW_STR(buf.s);
 }
 /* }}} */
 
@@ -1340,5 +1647,6 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(var)
 {
 	REGISTER_INI_ENTRIES();
+	REGISTER_LONG_CONSTANT("VAR_REPRESENTATION_SINGLE_LINE", VAR_REPRESENTATION_SINGLE_LINE, CONST_CS|CONST_PERSISTENT);
 	return SUCCESS;
 }
