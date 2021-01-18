@@ -1932,11 +1932,12 @@ if ($verify) {
             $aliasArgs, $aliasedArgs
         );
 
-        if ((!$aliasedFunc->isMethod() || $aliasedFunc->isFinalMethod()) &&
-            (!$aliasFunc->isMethod() || $aliasFunc->isFinalMethod()) &&
-            $aliasFunc->return != $aliasedFunc->return
-        ) {
-            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same return type";
+        if (!$aliasedFunc->name->isConstructor() && !$aliasFunc->name->isConstructor()) {
+            $aliasedReturnType = $aliasedFunc->return->type ?? $aliasedFunc->return->phpDocType;
+            $aliasReturnType = $aliasFunc->return->type ?? $aliasFunc->return->phpDocType;
+            if ($aliasReturnType != $aliasedReturnType) {
+                $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same return type";
+            }
         }
     }
 
