@@ -607,7 +607,7 @@ static PHP_GINIT_FUNCTION(zend_test)
 PHP_MINFO_FUNCTION(zend_test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "zend-test extension", "enabled");
+	php_info_print_table_header(2, "zend_test extension", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -615,7 +615,7 @@ PHP_MINFO_FUNCTION(zend_test)
 
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"zend-test",
+	"zend_test",
 	ext_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),
