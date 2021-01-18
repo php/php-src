@@ -238,7 +238,7 @@ class DateTime implements DateTimeInterface
     public function getTimestamp() {}
 
     /**
-     * @return DateInterval|false
+     * @return DateInterval
      * @alias date_diff
      */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
@@ -291,7 +291,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getTimestamp() {}
 
     /**
-     * @return DateInterval|false
+     * @return DateInterval
      * @alias date_diff
      */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
