@@ -2196,7 +2196,7 @@ PHP_METHOD(SplFileObject, fgets)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 } /* }}} */

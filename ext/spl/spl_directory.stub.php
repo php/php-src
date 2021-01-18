@@ -199,7 +199,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return bool */
     public function valid() {}
 
-    /** @return string|false */
+    /** @return string */
     public function fgets() {}
 
     /** @return string|false */
@@ -281,7 +281,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function seek(int $line) {}
 
     /**
-     * @return string|false
+     * @return string
      * @alias SplFileObject::fgets
      */
     public function getCurrentLine() {}
