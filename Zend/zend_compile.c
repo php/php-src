@@ -4692,6 +4692,10 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(var_ast);
 
 	if (is_global_var_fetch(var_ast)) {
+		if (!var_ast->child[1]) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for unsetting");
+		}
+
 		zend_compile_expr(&var_node, var_ast->child[1]);
 		if (var_node.op_type == IS_CONST) {
 			convert_to_string(&var_node.u.constant);
@@ -8790,6 +8794,10 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	if (is_global_var_fetch(var_ast)) {
+		if (!var_ast->child[1]) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+		}
+
 		zend_compile_expr(&var_node, var_ast->child[1]);
 		if (var_node.op_type == IS_CONST) {
 			convert_to_string(&var_node.u.constant);
