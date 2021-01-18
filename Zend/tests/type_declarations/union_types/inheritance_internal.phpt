@@ -2,7 +2,7 @@
 Inheritance of union type from internal class
 --SKIPIF--
 <?php
-if (!extension_loaded('zend-test')) die('skip requires zend-test extension');
+if (!extension_loaded('zend_test')) die('skip requires zend_test extension');
 ?>
 --FILE--
 <?php

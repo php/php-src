@@ -1,7 +1,7 @@
 --TEST--
 Observer: Calls that go through zend_call_function are observed
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1

@@ -8,7 +8,7 @@ zend_test.replace_zend_execute_ex=1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php if (!isset(opcache_get_status()["jit"])) die('skip: JIT is not available'); ?>
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Overloaded function 001
 --SKIPIF--
 <?php
-if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
+if (!extension_loaded('zend_test')) die('skip zend_test extension not loaded');
 ?>
 --FILE--
 <?php

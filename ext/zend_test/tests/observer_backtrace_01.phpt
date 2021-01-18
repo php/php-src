@@ -1,7 +1,7 @@
 --TEST--
 Observer: Show backtrace on init
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
