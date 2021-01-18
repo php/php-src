@@ -298,7 +298,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return mixed
      * @implementation-alias Phar::getMetadata
      */
-    public function getMetadata(array $unserialize_options = []) {}
+    public function getMetadata(array $unserializeOptions = []) {}
 
     /**
      * @return bool
