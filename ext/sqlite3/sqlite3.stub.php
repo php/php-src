@@ -4,7 +4,10 @@
 
 class SQLite3
 {
-    /** @implementation-alias SQLite3::open */
+    /**
+     * @implementation-alias SQLite3::open
+     * @no-verify SQLite3::open should really be static
+     */
     public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
 
     /** @return void */
