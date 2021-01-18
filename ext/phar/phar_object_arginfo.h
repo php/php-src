@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 05d4689eb65b244c41c68c13ff39feca6a79a7e1 */
+ * Stub hash: 3575a0330ff6102461655bc84add44e8b08b585f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -254,9 +254,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_getPath arginfo_class_Phar___destruct
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData_getMetadata, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize_options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
+#define arginfo_class_PharData_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharData_getModified arginfo_class_Phar___destruct
 
