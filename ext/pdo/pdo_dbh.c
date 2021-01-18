@@ -913,23 +913,22 @@ PHP_METHOD(PDO, getAttribute)
 PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	char *statement;
-	size_t statement_len;
+	zend_string *statement;
 	zend_long ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(statement, statement_len)
+		Z_PARAM_STR(statement)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (statement_len == 0) {
+	if (ZSTR_LEN(statement) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
-	ret = dbh->methods->doer(dbh, statement, statement_len);
-	if(ret == -1) {
+	ret = dbh->methods->doer(dbh, statement);
+	if (ret == -1) {
 		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
 	} else {

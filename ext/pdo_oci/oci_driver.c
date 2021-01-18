@@ -306,7 +306,7 @@ static bool oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 }
 /* }}} */
 
-static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long oci_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -316,7 +316,7 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 
 	OCIHandleAlloc(H->env, (dvoid*)&stmt, OCI_HTYPE_STMT, 0, NULL);
 
-	H->last_err = OCIStmtPrepare(stmt, H->err, (text*)sql, (ub4) sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
+	H->last_err = OCIStmtPrepare(stmt, H->err, (text*)ZSTR_VAL(sql), (ub4) ZSTR_LEN(sql), OCI_NTV_SYNTAX, OCI_DEFAULT);
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCIStmtPrepare");
 		OCIHandleFree(stmt, OCI_HTYPE_STMT);

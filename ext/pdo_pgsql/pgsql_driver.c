@@ -288,14 +288,14 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	return true;
 }
 
-static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
 	zend_long ret = 1;
 	ExecStatusType qs;
 
-	if (!(res = PQexec(H->server, sql))) {
+	if (!(res = PQexec(H->server, ZSTR_VAL(sql)))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 		return -1;

@@ -56,3 +56,5 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       of returning a boolean, and the quoted string as a pair of out params.
       Similarly the unquoted string is now a zend_string* instead of a pair of
       char* and size_t length.
+    - The doer handler now accepts a zend_string* instead of char* + size_t
+      pair for the SQL statement.
