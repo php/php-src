@@ -735,7 +735,17 @@ static const struct pdo_dbh_methods sqlite_methods = {
 static char *make_filename_safe(const char *filename)
 {
 	if (*filename && strncasecmp(filename, "file:", 5) == 0) {
-		char *fullpath = expand_filepath(filename+5, NULL);
+		char *fullpath;
+		if (strncasecmp(filename+5, "///", 3) == 0) {
+			fullpath = expand_filepath(filename+7, NULL);
+		} else if (strncasecmp(filename+5, "//localhost/", 12) == 0) {
+			fullpath = expand_filepath(filename+16, NULL);
+		} else if (strncasecmp(filename+5, "//", 2) == 0) {
+			// authority error on sqlite3_open_v2
+			return filename;
+		} else {
+			fullpath = expand_filepath(filename+5, NULL);
+		}
 
 		if (!fullpath) {
 			return NULL;
