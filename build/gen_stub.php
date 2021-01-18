@@ -1081,129 +1081,132 @@ function parseFunctionLike(
     Node\FunctionLike $func,
     ?string $cond
 ): FuncInfo {
-    $comment = $func->getDocComment();
-    $paramMeta = [];
-    $aliasType = null;
-    $alias = null;
-    $isDeprecated = false;
-    $verify = true;
-    $docReturnType = null;
-    $docParamTypes = [];
+    try {
+        $comment = $func->getDocComment();
+        $paramMeta = [];
+        $aliasType = null;
+        $alias = null;
+        $isDeprecated = false;
+        $verify = true;
+        $docReturnType = null;
+        $docParamTypes = [];
 
-    if ($comment) {
-        $tags = parseDocComment($comment);
-        foreach ($tags as $tag) {
-            if ($tag->name === 'prefer-ref') {
-                $varName = $tag->getVariableName();
-                if (!isset($paramMeta[$varName])) {
-                    $paramMeta[$varName] = [];
+        if ($comment) {
+            $tags = parseDocComment($comment);
+            foreach ($tags as $tag) {
+                if ($tag->name === 'prefer-ref') {
+                    $varName = $tag->getVariableName();
+                    if (!isset($paramMeta[$varName])) {
+                        $paramMeta[$varName] = [];
+                    }
+                    $paramMeta[$varName]['preferRef'] = true;
+                } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
+                    $aliasType = $tag->name;
+                    $aliasParts = explode("::", $tag->getValue());
+                    if (count($aliasParts) === 1) {
+                        $alias = new FunctionName(new Name($aliasParts[0]));
+                    } else {
+                        $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
+                    }
+                } else if ($tag->name === 'deprecated') {
+                    $isDeprecated = true;
+                }  else if ($tag->name === 'no-verify') {
+                    $verify = false;
+                } else if ($tag->name === 'return') {
+                    $docReturnType = $tag->getType();
+                } else if ($tag->name === 'param') {
+                    $docParamTypes[$tag->getVariableName()] = $tag->getType();
                 }
-                $paramMeta[$varName]['preferRef'] = true;
-            } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
-                $aliasType = $tag->name;
-                $aliasParts = explode("::", $tag->getValue());
-                if (count($aliasParts) === 1) {
-                    $alias = new FunctionName(new Name($aliasParts[0]));
-                } else {
-                    $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
-                }
-            } else if ($tag->name === 'deprecated') {
-                $isDeprecated = true;
-            }  else if ($tag->name === 'no-verify') {
-                $verify = false;
-            } else if ($tag->name === 'return') {
-                $docReturnType = $tag->getType();
-            } else if ($tag->name === 'param') {
-                $docParamTypes[$tag->getVariableName()] = $tag->getType();
-            }
-        }
-    }
-
-    $varNameSet = [];
-    $args = [];
-    $numRequiredArgs = 0;
-    $foundVariadic = false;
-    foreach ($func->getParams() as $i => $param) {
-        $varName = $param->var->name;
-        $preferRef = !empty($paramMeta[$varName]['preferRef']);
-        unset($paramMeta[$varName]);
-
-        if (isset($varNameSet[$varName])) {
-            throw new Exception("Duplicate parameter name $varName for function $name");
-        }
-        $varNameSet[$varName] = true;
-
-        if ($preferRef) {
-            $sendBy = ArgInfo::SEND_PREFER_REF;
-        } else if ($param->byRef) {
-            $sendBy = ArgInfo::SEND_BY_REF;
-        } else {
-            $sendBy = ArgInfo::SEND_BY_VAL;
-        }
-
-        if ($foundVariadic) {
-            throw new Exception("Error in function $name: only the last parameter can be variadic");
-        }
-
-        $type = $param->type ? Type::fromNode($param->type) : null;
-        if ($type === null && !isset($docParamTypes[$varName])) {
-            throw new Exception("Missing parameter type for function $name()");
-        }
-
-        if ($param->default instanceof Expr\ConstFetch &&
-            $param->default->name->toLowerString() === "null" &&
-            $type && !$type->isNullable()
-        ) {
-            $simpleType = $type->tryToSimpleType();
-            if ($simpleType === null) {
-                throw new Exception(
-                    "Parameter $varName of function $name has null default, but is not nullable");
             }
         }
 
-        $foundVariadic = $param->variadic;
+        $varNameSet = [];
+        $args = [];
+        $numRequiredArgs = 0;
+        $foundVariadic = false;
+        foreach ($func->getParams() as $i => $param) {
+            $varName = $param->var->name;
+            $preferRef = !empty($paramMeta[$varName]['preferRef']);
+            unset($paramMeta[$varName]);
 
-        $args[] = new ArgInfo(
-            $varName,
-            $sendBy,
-            $param->variadic,
-            $type,
-            isset($docParamTypes[$varName]) ? Type::fromPhpDoc($docParamTypes[$varName]) : null,
-            $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null
+            if (isset($varNameSet[$varName])) {
+                throw new Exception("Duplicate parameter name $varName");
+            }
+            $varNameSet[$varName] = true;
+
+            if ($preferRef) {
+                $sendBy = ArgInfo::SEND_PREFER_REF;
+            } else if ($param->byRef) {
+                $sendBy = ArgInfo::SEND_BY_REF;
+            } else {
+                $sendBy = ArgInfo::SEND_BY_VAL;
+            }
+
+            if ($foundVariadic) {
+                throw new Exception("Only the last parameter can be variadic");
+            }
+
+            $type = $param->type ? Type::fromNode($param->type) : null;
+            if ($type === null && !isset($docParamTypes[$varName])) {
+                throw new Exception("Missing parameter type");
+            }
+
+            if ($param->default instanceof Expr\ConstFetch &&
+                $param->default->name->toLowerString() === "null" &&
+                $type && !$type->isNullable()
+            ) {
+                $simpleType = $type->tryToSimpleType();
+                if ($simpleType === null) {
+                    throw new Exception("Parameter $varName has null default, but is not nullable");
+                }
+            }
+
+            $foundVariadic = $param->variadic;
+
+            $args[] = new ArgInfo(
+                $varName,
+                $sendBy,
+                $param->variadic,
+                $type,
+                isset($docParamTypes[$varName]) ? Type::fromPhpDoc($docParamTypes[$varName]) : null,
+                $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null
+            );
+            if (!$param->default && !$param->variadic) {
+                $numRequiredArgs = $i + 1;
+            }
+        }
+
+        foreach (array_keys($paramMeta) as $var) {
+            throw new Exception("Found metadata for invalid param $var");
+        }
+
+        $returnType = $func->getReturnType();
+        if ($returnType === null && $docReturnType === null && !$name->isConstructor() && !$name->isDestructor()) {
+            throw new Exception("Missing return type");
+        }
+
+        $return = new ReturnInfo(
+            $func->returnsByRef(),
+            $returnType ? Type::fromNode($returnType) : null,
+            $docReturnType ? Type::fromPhpDoc($docReturnType) : null
         );
-        if (!$param->default && !$param->variadic) {
-            $numRequiredArgs = $i + 1;
-        }
+
+        return new FuncInfo(
+            $name,
+            $classFlags,
+            $flags,
+            $aliasType,
+            $alias,
+            $isDeprecated,
+            $verify,
+            $args,
+            $return,
+            $numRequiredArgs,
+            $cond
+        );
+    } catch (Exception $e) {
+        throw new Exception($name . "(): " .$e->getMessage());
     }
-
-    foreach (array_keys($paramMeta) as $var) {
-        throw new Exception("Found metadata for invalid param $var of function $name");
-    }
-
-    $returnType = $func->getReturnType();
-    if ($returnType === null && $docReturnType === null && !$name->isConstructor() && !$name->isDestructor()) {
-        throw new Exception("Missing return type for function $name()");
-    }
-
-    $return = new ReturnInfo(
-        $func->returnsByRef(),
-        $returnType ? Type::fromNode($returnType) : null,
-        $docReturnType ? Type::fromPhpDoc($docReturnType) : null
-    );
-
-    return new FuncInfo(
-        $name,
-        $classFlags,
-        $flags,
-        $aliasType,
-        $alias,
-        $isDeprecated,
-        $verify,
-        $args,
-        $return,
-        $numRequiredArgs,
-        $cond
-    );
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
