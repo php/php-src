@@ -118,7 +118,9 @@ typedef struct _zend_file_context {
 } zend_file_context;
 
 typedef struct {
-	uint32_t offset;
+	/* Offset in bytes relative to the file start */
+	size_t offset;
+	/* This uses 32-bit integers to avoid doubling the size of the parser stack elements. */
 	uint32_t len;
 } zend_lexer_ident_ref;
 
