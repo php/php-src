@@ -23,8 +23,8 @@ foo(); // Retval unused
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_retval_by_ref_%d.php' -->
-<file '%s/observer_retval_by_ref_%d.php'>
+<!-- init '%s%eobserver_retval_by_ref_%d.php' -->
+<file '%s%eobserver_retval_by_ref_%d.php'>
   <!-- init foo() -->
   <foo>
     <!-- init getMessage() -->
@@ -40,4 +40,4 @@ Notice: Only variable references should be returned by reference in %s on line %
 Notice: Only variable references should be returned by reference in %s on line %d
   </foo:'I should be observable'>
 Done
-</file '%s/observer_retval_by_ref_%d.php'>
+</file '%s%eobserver_retval_by_ref_%d.php'>
