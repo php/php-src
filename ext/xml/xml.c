@@ -253,7 +253,7 @@ static void php_xml_free_wrapper(void *ptr)
 
 PHP_MINIT_FUNCTION(xml)
 {
-	xml_parser_ce = register_class_XmlParser();
+	xml_parser_ce = register_class_XMLParser();
 	xml_parser_ce->create_object = xml_parser_create_object;
 	xml_parser_ce->serialize = zend_class_serialize_deny;
 	xml_parser_ce->unserialize = zend_class_unserialize_deny;
