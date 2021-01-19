@@ -655,8 +655,9 @@ struct _pdo_row_t {
 	pdo_stmt_t *stmt;
 };
 
-/* call this in MINIT to register your PDO driver */
-PDO_API int php_pdo_register_driver(const pdo_driver_t *driver);
+/* Call this in MINIT to register the PDO driver.
+ * Registering the driver might fail and should be reported accordingly in MINIT. */
+PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
 PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
 

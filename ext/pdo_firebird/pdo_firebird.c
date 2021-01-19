@@ -58,7 +58,9 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
 
-	php_pdo_register_driver(&pdo_firebird_driver);
+	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
+		return FAILURE;
+	}
 
 #ifdef ZEND_SIGNALS
 	/* firebird replaces some signals at runtime, suppress warnings. */
