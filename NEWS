@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #80560 (Strings containing only a base prefix return 0 object).
     (girgias)
 
+- Intl:
+  . Fixed bug #80644 (Missing resource causes subsequent get() calls to fail).
+    (Nikita)
+
 - MySQLi:
   . Fixed bug #67983 (mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to
     interpret bit columns). (Nikita)
