@@ -117,11 +117,21 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 			return path;
 		}
 
-		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
-			/* i is the position of . or :, add 1 for / */
+		if (i >= 1 && path[i - 1] == ':') {
 			path_begin = path + i + 1;
 			break;
 		}
+
+		if (i == 2 && path[i - 2] == '.' && path[i - 1] == '.') {
+			path_begin = path + 3;
+			break;
+		}
+
+		if (i >= 3 && IS_SLASH(path[i - 3]) && path[i - 2] == '.' && path[i - 1] == '.') {
+			path_begin = path + i + 1;
+			break;
+		}
+
 		i--;
 	}
 
