@@ -4238,7 +4238,7 @@ static int phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest,
 		return FAILURE;
 	}
 
-	if (!phar_get_efp(entry, 0)) {
+	if ((phar_get_fp_type(entry) == PHAR_FP && (entry->flags & PHAR_ENT_COMPRESSION_MASK)) || !phar_get_efp(entry, 0)) {
 		if (FAILURE == phar_open_entry_fp(entry, error, 1)) {
 			if (error) {
 				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", entry->filename, fullpath, *error);
