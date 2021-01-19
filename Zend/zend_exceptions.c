@@ -53,18 +53,17 @@ static zend_object_handlers default_exception_handlers;
 /* {{{ zend_implement_throwable */
 static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	/* During the registration of Exception/Error themselves, this may be called before
-	 * zend_ce_exception and zend_ce_error have been initialized, so handle these explicitly. */
-	if (zend_ce_exception && instanceof_function(class_type, zend_ce_exception)) {
+	/* zend_ce_exception and zend_ce_error may not be initialized yet when this is caleld (e.g when
+	 * implementing Throwable for Exception itself). Perform a manual inheritance check. */
+	zend_class_entry *root = class_type;
+	while (root->parent) {
+		root = root->parent;
+	}
+	if (zend_string_equals_literal(root->name, "Exception")
+			|| zend_string_equals_literal(root->name, "Error")) {
 		return SUCCESS;
 	}
-	if (zend_ce_error && instanceof_function(class_type, zend_ce_error)) {
-		return SUCCESS;
-	}
-	if (zend_string_equals_literal(class_type->name, "Exception")
-			|| zend_string_equals_literal(class_type->name, "Error")) {
-		return SUCCESS;
-	}
+
 	zend_error_noreturn(E_ERROR,
 		"Class %s cannot implement interface %s, extend Exception or Error instead",
 		ZSTR_VAL(class_type->name),
