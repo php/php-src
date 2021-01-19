@@ -1033,21 +1033,16 @@ class PropertyInfo
         }
 
         if ($this->type) {
-            $typeFlags = $this->type->tryToRepresentableType();
-            if ($typeFlags === null) {
-                echo "Skipping code generation for property $this->name, because it has an unimplemented type\n";
-                return "";
-            }
-
-            if ($typeFlags->classType) {
+            $arginfoType = $this->type->toArginfoType();
+            if ($arginfoType->hasClassType()) {
                 $simpleType = $this->type->tryToSimpleType();
                 if ($simpleType) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CE(class_entry_" . str_replace("\\", "_", $typeFlags->classType->name) . ", " .  ((int) $this->type->isNullable()) . ", 0)";
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CE(class_entry_" . str_replace("\\", "_", $arginfoType->classTypes[0]->name) . ", " .  ((int) $this->type->isNullable()) . ", 0)";
                 } else {
                     throw new Exception("Property $this->name has an unsupported union type");
                 }
             } else {
-                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $typeFlags->toTypeMask() . ")";
+                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
             }
 
             $code .= $this->initializeValue($defaultValueType, $defaultValue);
@@ -1261,9 +1256,9 @@ class ClassInfo {
                 continue;
             }
 
-            $representableType = $type->tryToRepresentableType();
-            if ($representableType && $representableType->classType) {
-                $params[] = "zend_class_entry *class_entry_" . str_replace("\\", "_", $representableType->classType->name);
+            $arginfoType = $type->toArginfoType();
+            if (count($arginfoType->classTypes) == 1) {
+                $params[] = "zend_class_entry *class_entry_" . str_replace("\\", "_", $arginfoType->classTypes[0]->name);
             }
         }
         $params = array_unique($params);
