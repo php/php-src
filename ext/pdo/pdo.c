@@ -80,7 +80,7 @@ PHP_FUNCTION(pdo_drivers)
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
-		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
+		add_next_index_stringl(return_value, pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -127,7 +127,7 @@ PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
+	return zend_hash_str_add_ptr(&pdo_driver_hash, driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -137,13 +137,13 @@ PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 		return;
 	}
 
-	zend_hash_str_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
+	zend_hash_str_del(&pdo_driver_hash, driver->driver_name, driver->driver_name_len);
 }
 /* }}} */
 
 pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 {
-	return zend_hash_str_find_ptr(&pdo_driver_hash, (char*)name, namelen);
+	return zend_hash_str_find_ptr(&pdo_driver_hash, name, namelen);
 }
 /* }}} */
 
