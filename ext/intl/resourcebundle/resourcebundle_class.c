@@ -171,8 +171,9 @@ static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *
 	char         *pbuf;
 	ResourceBundle_object *rb;
 
-	intl_error_reset( NULL );
 	rb = php_intl_resourcebundle_fetch_object(object);
+	intl_error_reset(NULL);
+	intl_error_reset(INTL_DATA_ERROR_P(rb));
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
 		is_numeric = 1;
