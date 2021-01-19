@@ -26,8 +26,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_generator_%d.php' -->
-<file '%s/observer_generator_%d.php'>
+<!-- init '%s%eobserver_generator_%d.php' -->
+<file '%s%eobserver_generator_%d.php'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init fooResults() -->
@@ -43,11 +43,11 @@ echo doSomething() . PHP_EOL;
     <!-- Exception: RuntimeException -->
   </doSomething:NULL>
   <!-- Exception: RuntimeException -->
-</file '%s/observer_generator_%d.php'>
+</file '%s%eobserver_generator_%d.php'>
 
-Fatal error: Uncaught RuntimeException: Oops! in %s/observer_generator_%d.php:%d
+Fatal error: Uncaught RuntimeException: Oops! in %s%eobserver_generator_%d.php:%d
 Stack trace:
-#0 %s/observer_generator_%d.php(%d): fooResults()
-#1 %s/observer_generator_%d.php(%d): doSomething()
+#0 %s%eobserver_generator_%d.php(%d): fooResults()
+#1 %s%eobserver_generator_%d.php(%d): doSomething()
 #2 {main}
-  thrown in %s/observer_generator_%d.php on line %d
+  thrown in %s%eobserver_generator_%d.php on line %d

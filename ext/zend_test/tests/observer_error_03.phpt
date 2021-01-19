@@ -24,8 +24,8 @@ main();
 echo 'Done.' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_error_%d.php' -->
-<file '%s/observer_error_%d.php'>
+<!-- init '%s%eobserver_error_%d.php' -->
+<file '%s%eobserver_error_%d.php'>
   <!-- init main() -->
   <main>
     <!-- init foo() -->
@@ -36,4 +36,4 @@ Warning: Undefined variable $this_does_not_exit in %s on line %d
 After error.
   </main:NULL>
 Done.
-</file '%s/observer_error_%d.php'>
+</file '%s%eobserver_error_%d.php'>

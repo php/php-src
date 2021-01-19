@@ -33,8 +33,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_generator_%d.php' -->
-<file '%s/observer_generator_%d.php'>
+<!-- init '%s%eobserver_generator_%d.php' -->
+<file '%s%eobserver_generator_%d.php'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init fooResults() -->
@@ -61,4 +61,4 @@ Starting generator
     </fooResults:NULL>
   </doSomething:'Done'>
 Done
-</file '%s/observer_generator_%d.php'>
+</file '%s%eobserver_generator_%d.php'>

@@ -24,13 +24,13 @@ function foo() {
 echo 'Done: ' . bar(40) . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_shutdown_%d.php' -->
-<file '%s/observer_shutdown_%d.php'>
+<!-- init '%s%eobserver_shutdown_%d.php' -->
+<file '%s%eobserver_shutdown_%d.php'>
   <!-- init bar() -->
   <bar>
   </bar:40>
 Done: 40
-</file '%s/observer_shutdown_%d.php'>
+</file '%s%eobserver_shutdown_%d.php'>
 <!-- init {closure}() -->
 <{closure}>
   <!-- init foo() -->

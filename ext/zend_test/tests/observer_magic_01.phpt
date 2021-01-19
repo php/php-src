@@ -28,8 +28,8 @@ $test->bar();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_magic_01.php' -->
-<file '%s/observer_magic_01.php'>
+<!-- init '%s%eobserver_magic_01.php' -->
+<file '%s%eobserver_magic_01.php'>
   <!-- init MagicTest::foo() -->
   <MagicTest::foo>
 test
@@ -42,4 +42,4 @@ bar
     </MagicTest::foo>
   </MagicTest::__call>
 DONE
-</file '%s/observer_magic_01.php'>
+</file '%s%eobserver_magic_01.php'>

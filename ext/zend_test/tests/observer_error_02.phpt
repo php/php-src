@@ -18,11 +18,11 @@ foo();
 echo 'You should not see this.';
 ?>
 --EXPECTF--
-<!-- init '%s/observer_error_%d.php' -->
-<file '%s/observer_error_%d.php'>
+<!-- init '%s%eobserver_error_%d.php' -->
+<file '%s%eobserver_error_%d.php'>
   <!-- init foo() -->
   <foo>
 
 Fatal error: Foo error in %s on line %d
   </foo:NULL>
-</file '%s/observer_error_%d.php'>
+</file '%s%eobserver_error_%d.php'>
