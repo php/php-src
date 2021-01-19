@@ -250,7 +250,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 
 /* TODO Refactor */
 static const char digit_vec[] = "0123456789";
-PDO_API zend_string *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
+PDO_API zend_string *php_pdo_int64_to_str(int64_t i64) /* {{{ */
 {
 	char buffer[65];
 	char outbuf[65] = "";
@@ -270,11 +270,11 @@ PDO_API zend_string *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 	p = &buffer[sizeof(buffer)-1];
 	*p = '\0';
 
-	while ((pdo_uint64_t)i64 > (pdo_uint64_t)ZEND_LONG_MAX) {
-		pdo_uint64_t quo = (pdo_uint64_t)i64 / (unsigned int)10;
+	while ((uint64_t)i64 > (uint64_t)ZEND_LONG_MAX) {
+		uint64_t quo = (uint64_t)i64 / (unsigned int)10;
 		unsigned int rem = (unsigned int)(i64 - quo*10U);
 		*--p = digit_vec[rem];
-		i64 = (pdo_int64_t)quo;
+		i64 = (int64_t)quo;
 	}
 	long_val = (zend_long)i64;
 	while (long_val != 0) {
