@@ -297,8 +297,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 		int i;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			if (ZSTR_LEN(stmt->columns[i].name) == ZSTR_LEN(param->name) &&
-				strncmp(ZSTR_VAL(stmt->columns[i].name), ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1) == 0) {
+			if (zend_string_equals(stmt->columns[i].name, param->name)) {
 				param->paramno = i;
 				break;
 			}
@@ -2276,8 +2275,7 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 			/* TODO: replace this with a hash of available column names to column
 			 * numbers */
 			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
-					strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+				if (zend_string_equals(stmt->columns[colno].name, name)) {
 					fetch_value(stmt, rv, colno, NULL);
 					return rv;
 				}
@@ -2317,8 +2315,7 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 			/* TODO: replace this with a hash of available column names to column
 			 * numbers */
 			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
-					strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
+				if (zend_string_equals(stmt->columns[colno].name, Z_STR_P(member))) {
 					fetch_value(stmt, rv, colno, NULL);
 					return rv;
 				}
@@ -2358,16 +2355,15 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 		/* TODO: replace this with a hash of available column names to column
 		 * numbers */
 		for (colno = 0; colno < stmt->column_count; colno++) {
-			if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
-				strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
-					int res;
-					zval val;
+			if (zend_string_equals(stmt->columns[colno].name, name)) {
+				int res;
+				zval val;
 
-					fetch_value(stmt, &val, colno, NULL);
-					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-					zval_ptr_dtor_nogc(&val);
+				fetch_value(stmt, &val, colno, NULL);
+				res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
+				zval_ptr_dtor_nogc(&val);
 
-					return res;
+				return res;
 			}
 		}
 	}
@@ -2398,16 +2394,15 @@ static int row_dim_exists(zend_object *object, zval *member, int check_empty)
 		/* TODO: replace this with a hash of available column names to column
 		 * numbers */
 		for (colno = 0; colno < stmt->column_count; colno++) {
-			if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
-				strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
-					int res;
-					zval val;
+			if (zend_string_equals(stmt->columns[colno].name, Z_STR_P(member))) {
+				int res;
+				zval val;
 
-					fetch_value(stmt, &val, colno, NULL);
-					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-					zval_ptr_dtor_nogc(&val);
+				fetch_value(stmt, &val, colno, NULL);
+				res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
+				zval_ptr_dtor_nogc(&val);
 
-					return res;
+				return res;
 			}
 		}
 	}
