@@ -37,15 +37,15 @@ function foo()
 var_dump(foo());
 ?>
 --EXPECTF--
-<!-- init '%s/observer_backtrace_%d.php' -->
+<!-- init '%s%eobserver_backtrace_%d.php' -->
 <!--
-    {main} %s/observer_backtrace_%d.php
+    {main} %s%eobserver_backtrace_%d.php
 -->
-<file '%s/observer_backtrace_%d.php'>
+<file '%s%eobserver_backtrace_%d.php'>
   <!-- init foo() -->
   <!--
       foo()
-      {main} %s/observer_backtrace_%d.php
+      {main} %s%eobserver_backtrace_%d.php
   -->
   <foo>
     <!-- init gen() -->
@@ -53,7 +53,7 @@ var_dump(foo());
         gen()
         Generator::current()
         foo()
-        {main} %s/observer_backtrace_%d.php
+        {main} %s%eobserver_backtrace_%d.php
     -->
     <gen>
       <!-- init TestClass::foo() -->
@@ -62,7 +62,7 @@ var_dump(foo());
           gen()
           Generator::current()
           foo()
-          {main} %s/observer_backtrace_%d.php
+          {main} %s%eobserver_backtrace_%d.php
       -->
       <TestClass::foo>
         <!-- init TestClass::{closure}() -->
@@ -73,7 +73,7 @@ var_dump(foo());
             gen()
             Generator::current()
             foo()
-            {main} %s/observer_backtrace_%d.php
+            {main} %s%eobserver_backtrace_%d.php
         -->
         <TestClass::{closure}>
           <!-- init TestClass::bar() -->
@@ -85,7 +85,7 @@ var_dump(foo());
               gen()
               Generator::current()
               foo()
-              {main} %s/observer_backtrace_%d.php
+              {main} %s%eobserver_backtrace_%d.php
           -->
           <TestClass::bar>
           </TestClass::bar>
@@ -103,4 +103,4 @@ array(2) {
   [1]=>
   int(1337)
 }
-</file '%s/observer_backtrace_%d.php'>
+</file '%s%eobserver_backtrace_%d.php'>

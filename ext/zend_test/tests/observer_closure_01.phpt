@@ -23,8 +23,8 @@ $foo($bar);
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_closure_%d.php' -->
-<file '%s/observer_closure_%d.php'>
+<!-- init '%s%eobserver_closure_%d.php' -->
+<file '%s%eobserver_closure_%d.php'>
   <!-- init {closure}() -->
   <{closure}>
 Answer
@@ -46,4 +46,4 @@ int(42)
     </{closure}>
   </{closure}>
 DONE
-</file '%s/observer_closure_%d.php'>
+</file '%s%eobserver_closure_%d.php'>

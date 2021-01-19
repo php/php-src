@@ -17,14 +17,14 @@ include __DIR__ . '/observer.inc';
 foo();
 ?>
 --EXPECTF--
-<!-- init '%s/observer_basic_04.php' -->
-<file '%s/observer_basic_04.php'>
+<!-- init '%s%eobserver_basic_04.php' -->
+<file '%s%eobserver_basic_04.php'>
   <!-- init foo() -->
 Foo
-  <!-- init '%s/observer.inc' -->
-  <file '%s/observer.inc'>
+  <!-- init '%s%eobserver.inc' -->
+  <file '%s%eobserver.inc'>
     <!-- init foo_observer_test() -->
 foo_observer_test
-  </file '%s/observer.inc'>
+  </file '%s%eobserver.inc'>
 Foo
-</file '%s/observer_basic_04.php'>
+</file '%s%eobserver_basic_04.php'>

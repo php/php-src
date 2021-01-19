@@ -26,8 +26,8 @@ foo();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_basic_01.php' -->
-<file '%s/observer_basic_01.php'>
+<!-- init '%s%eobserver_basic_01.php' -->
+<file '%s%eobserver_basic_01.php'>
   <!-- init foo() -->
   <foo>
 Foo
@@ -52,4 +52,4 @@ int(6)
     </bar>
   </foo>
 DONE
-</file '%s/observer_basic_01.php'>
+</file '%s%eobserver_basic_01.php'>

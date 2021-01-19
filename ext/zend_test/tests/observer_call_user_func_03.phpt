@@ -26,8 +26,8 @@ namespace Test {
 }
 ?>
 --EXPECTF--
-<!-- init '%s/observer_call_user_func_%d.php' -->
-<file '%s/observer_call_user_func_%d.php'>
+<!-- init '%s%eobserver_call_user_func_%d.php' -->
+<file '%s%eobserver_call_user_func_%d.php'>
   <!-- init Test\MyClass::myMethod() -->
   <Test\MyClass::myMethod>
 MyClass::myMethod called
@@ -36,4 +36,4 @@ MyClass::myMethod called
   <Test\my_function>
 my_function called
   </Test\my_function>
-</file '%s/observer_call_user_func_%d.php'>
+</file '%s%eobserver_call_user_func_%d.php'>

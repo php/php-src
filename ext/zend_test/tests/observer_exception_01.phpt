@@ -23,8 +23,8 @@ foo();
 echo 'You should not see this' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_exception_%d.php' -->
-<file '%s/observer_exception_%d.php'>
+<!-- init '%s%eobserver_exception_%d.php' -->
+<file '%s%eobserver_exception_%d.php'>
   <!-- init foo() -->
   <foo>
 Call #0
@@ -37,10 +37,10 @@ Call #2
     <!-- Exception: RuntimeException -->
   </foo>
   <!-- Exception: RuntimeException -->
-</file '%s/observer_exception_%d.php'>
+</file '%s%eobserver_exception_%d.php'>
 
-Fatal error: Uncaught RuntimeException: Third time is a charm in %s/observer_exception_%d.php:%d
+Fatal error: Uncaught RuntimeException: Third time is a charm in %s%eobserver_exception_%d.php:%d
 Stack trace:
-#0 %s/observer_exception_%d.php(%d): foo()
+#0 %s%eobserver_exception_%d.php(%d): foo()
 #1 {main}
-  thrown in %s/observer_exception_%d.php on line %d
+  thrown in %s%eobserver_exception_%d.php on line %d

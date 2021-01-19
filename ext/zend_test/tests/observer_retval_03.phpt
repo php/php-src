@@ -21,12 +21,12 @@ foo(); // Retval unused
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_retval_%d.php' -->
-<file '%s/observer_retval_%d.php'>
+<!-- init '%s%eobserver_retval_%d.php' -->
+<file '%s%eobserver_retval_%d.php'>
   <!-- init foo() -->
   <foo>
   </foo:object(MyRetval)#%d>
   <foo>
   </foo:object(MyRetval)#%d>
 Done
-</file '%s/observer_retval_%d.php'>
+</file '%s%eobserver_retval_%d.php'>

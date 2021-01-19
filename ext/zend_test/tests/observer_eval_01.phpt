@@ -11,11 +11,11 @@ echo eval("return 'Foo eval' . PHP_EOL;");
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_eval_%d.php' -->
-<file '%s/observer_eval_%d.php'>
-  <!-- init '%s/observer_eval_%d.php(%d) : eval()'d code' -->
-  <file '%s/observer_eval_%d.php(%d) : eval()'d code'>
-  </file '%s/observer_eval_%d.php(%d) : eval()'d code'>
+<!-- init '%s%eobserver_eval_%d.php' -->
+<file '%s%eobserver_eval_%d.php'>
+  <!-- init '%s%eobserver_eval_%d.php(%d) : eval()'d code' -->
+  <file '%s%eobserver_eval_%d.php(%d) : eval()'d code'>
+  </file '%s%eobserver_eval_%d.php(%d) : eval()'d code'>
 Foo eval
 DONE
-</file '%s/observer_eval_%d.php'>
+</file '%s%eobserver_eval_%d.php'>

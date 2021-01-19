@@ -18,8 +18,8 @@ var_dump(array_reduce($a, 'sum'));
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_zend_call_function_%d.php' -->
-<file '%s/observer_zend_call_function_%d.php'>
+<!-- init '%s%eobserver_zend_call_function_%d.php' -->
+<file '%s%eobserver_zend_call_function_%d.php'>
   <!-- init sum() -->
   <sum>
   </sum>
@@ -33,4 +33,4 @@ echo 'Done' . PHP_EOL;
   </sum>
 int(15)
 Done
-</file '%s/observer_zend_call_function_%d.php'>
+</file '%s%eobserver_zend_call_function_%d.php'>

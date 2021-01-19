@@ -31,8 +31,8 @@ bar('freed'); // Retval unused
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_retval_%d.php' -->
-<file '%s/observer_retval_%d.php'>
+<!-- init '%s%eobserver_retval_%d.php' -->
+<file '%s%eobserver_retval_%d.php'>
   <!-- init foo() -->
   <foo>
     <!-- init getObj() -->
@@ -49,4 +49,4 @@ echo 'Done' . PHP_EOL;
   <bar>
   </bar:'This gets freed in the return handler when unused'>
 Done
-</file '%s/observer_retval_%d.php'>
+</file '%s%eobserver_retval_%d.php'>

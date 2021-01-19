@@ -30,8 +30,8 @@ $test->foo();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_basic_02.php' -->
-<file '%s/observer_basic_02.php'>
+<!-- init '%s%eobserver_basic_02.php' -->
+<file '%s%eobserver_basic_02.php'>
   <!-- init TestClass::foo() -->
   <TestClass::foo>
 Foo
@@ -56,4 +56,4 @@ int(6)
     </TestClass::bar>
   </TestClass::foo>
 DONE
-</file '%s/observer_basic_02.php'>
+</file '%s%eobserver_basic_02.php'>

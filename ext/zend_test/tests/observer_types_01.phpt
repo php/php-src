@@ -12,17 +12,17 @@ function foo(array $a) { return 1; }
 foo(42);
 ?>
 --EXPECTF--
-<!-- init '%s/observer_types_%d.php' -->
-<file '%s/observer_types_%d.php'>
+<!-- init '%s%eobserver_types_%d.php' -->
+<file '%s%eobserver_types_%d.php'>
   <!-- init foo() -->
   <foo>
     <!-- Exception: TypeError -->
   </foo:NULL>
   <!-- Exception: TypeError -->
-</file '%s/observer_types_%d.php'>
+</file '%s%eobserver_types_%d.php'>
 
 Fatal error: Uncaught TypeError: foo(): Argument #1 ($a) must be of type array, int given, called in %s:%d
 Stack trace:
-#0 %s/observer_types_%d.php(%d): foo(42)
+#0 %s%eobserver_types_%d.php(%d): foo(42)
 #1 {main}
-  thrown in %s/observer_types_%d.php on line %d
+  thrown in %s%eobserver_types_%d.php on line %d
