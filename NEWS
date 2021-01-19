@@ -58,6 +58,8 @@ PHP                                                                        NEWS
   . Fixed bug #76929 (zip-based phar does not respect phar.require_hash).
     (david at bamsoftware, cmb)
   . Fixed bug #77565 (Incorrect locator detection in ZIP-based phars). (cmb)
+  . Fixed bug #69279 (Compressed ZIP Phar extractTo() creates garbage files).
+    (cmb)
 
 - Phpdbg:
   . Reverted fix for bug #76813 (Access violation near NULL on source operand).
