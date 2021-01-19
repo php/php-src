@@ -6,6 +6,7 @@ Observer: Retvals are observable that are: IS_CONST
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
+opcache.optimization_level=0
 --FILE--
 <?php
 function foo() {
