@@ -806,6 +806,7 @@ static void zend_persist_class_entry(zval *zv)
 			ZCG(is_immutable_class) = 0;
 			ce = Z_PTR_P(zv) = zend_shared_memdup_arena_put(ce, sizeof(zend_class_entry));
 		}
+		ce->ce_flags |= ZEND_ACC_CACHED;
 		zend_accel_store_interned_string(ce->name);
 		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_accel_store_interned_string(ce->parent_name);

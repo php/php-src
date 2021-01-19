@@ -333,13 +333,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	}
 
 	if (ce->num_interfaces) {
-		zend_class_name *interface_names;
-
-		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-			interface_names = emalloc(sizeof(zend_class_name) * ce->num_interfaces);
-			memcpy(interface_names, ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
-			ce->interface_names = interface_names;
-		} else {
+		if (ce->ce_flags & ZEND_ACC_LINKED) {
 			zend_class_entry **interfaces = emalloc(sizeof(zend_class_entry*) * ce->num_interfaces);
 			uint32_t i;
 
@@ -367,50 +361,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__debugInfo);
 	zend_update_inherited_handler(__serialize);
 	zend_update_inherited_handler(__unserialize);
-
-/* 5.4 traits */
-	if (ce->num_traits) {
-		zend_class_name *trait_names = emalloc(sizeof(zend_class_name) * ce->num_traits);
-
-		memcpy(trait_names, ce->trait_names, sizeof(zend_class_name) * ce->num_traits);
-		ce->trait_names = trait_names;
-
-		if (ce->trait_aliases) {
-			zend_trait_alias **trait_aliases;
-			int i = 0;
-
-			while (ce->trait_aliases[i]) {
-				i++;
-			}
-			trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
-			i = 0;
-			while (ce->trait_aliases[i]) {
-				trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
-				memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
-				i++;
-			}
-			trait_aliases[i] = NULL;
-			ce->trait_aliases = trait_aliases;
-		}
-
-		if (ce->trait_precedences) {
-			zend_trait_precedence **trait_precedences;
-			int i = 0;
-
-			while (ce->trait_precedences[i]) {
-				i++;
-			}
-			trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
-			i = 0;
-			while (ce->trait_precedences[i]) {
-				trait_precedences[i] = emalloc(sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-				memcpy(trait_precedences[i], ce->trait_precedences[i], sizeof(zend_trait_precedence) + (ce->trait_precedences[i]->num_excludes - 1) * sizeof(zend_string*));
-				i++;
-			}
-			trait_precedences[i] = NULL;
-			ce->trait_precedences = trait_precedences;
-		}
-	}
 }
 
 static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)

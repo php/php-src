@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 22...)                            |     |     |     */
+/* Class Flags (unused: 23...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -286,6 +286,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Whether this class was used in its unlinked state.     |     |     |     */
 #define ZEND_ACC_HAS_UNLINKED_USES       (1 << 21) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* stored in opcache (may be partially)                   |     |     |     */
+#define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */

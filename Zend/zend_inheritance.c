@@ -1549,11 +1549,13 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 		}
 	}
 
-	for (i = 0; i < ce->num_interfaces; i++) {
-		zend_string_release_ex(ce->interface_names[i].name, 0);
-		zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+	if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+		for (i = 0; i < ce->num_interfaces; i++) {
+			zend_string_release_ex(ce->interface_names[i].name, 0);
+			zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+		}
+		efree(ce->interface_names);
 	}
-	efree(ce->interface_names);
 
 	ce->num_interfaces = num_interfaces;
 	ce->interfaces = interfaces;
