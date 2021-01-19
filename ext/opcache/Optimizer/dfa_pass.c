@@ -435,31 +435,50 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 						uint32_t op_num = send_needly - op_array->opcodes;
 						zend_ssa_op *ssa_op = ssa->ops + op_num;
 
-						if (ssa_op->op1_use >= 0) {
-							/* Reconstruct SSA */
-							int var_num = ssa_op->op1_use;
-							zend_ssa_var *var = ssa->vars + var_num;
+						if (zend_hash_num_elements(src) == 0 &&
+							!(ssa->var_info[ssa_op->op1_use].type & MAY_BE_UNDEF)) {
+							if (ssa_op->op1_use >= 0) {
+								/* Reconstruct SSA - the needle is no longer used by any part of the call */
+								ZEND_ASSERT(ssa_op->op1_def < 0);
+								zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
+								ssa_op->op1_use = -1;
+								ssa_op->op1_use_chain = -1;
+							}
+							/* TODO remove needle from the uses of ssa graph? */
+							ZVAL_FALSE(&tmp);
+							zend_array_destroy(dst);
 
-							ZEND_ASSERT(ssa_op->op1_def < 0);
-							zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
-							ssa_op->op1_use = -1;
-							ssa_op->op1_use_chain = -1;
-							op_num = call_info->caller_call_opline - op_array->opcodes;
-							ssa_op = ssa->ops + op_num;
-							ssa_op->op1_use = var_num;
-							ssa_op->op1_use_chain = var->use_chain;
-							var->use_chain = op_num;
+							call_info->caller_call_opline->opcode = ZEND_QM_ASSIGN;
+							call_info->caller_call_opline->extended_value = 0;
+							call_info->caller_call_opline->op1_type = IS_CONST;
+							call_info->caller_call_opline->op1.constant = zend_optimizer_add_literal(op_array, &tmp);
+							call_info->caller_call_opline->op2_type = IS_UNUSED;
+						} else {
+							if (ssa_op->op1_use >= 0) {
+								/* Reconstruct SSA - the needle is now used by the ZEND_IN_ARRAY opline */
+								int var_num = ssa_op->op1_use;
+								zend_ssa_var *var = ssa->vars + var_num;
+
+								ZEND_ASSERT(ssa_op->op1_def < 0);
+								zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
+								ssa_op->op1_use = -1;
+								ssa_op->op1_use_chain = -1;
+								op_num = call_info->caller_call_opline - op_array->opcodes;
+								ssa_op = ssa->ops + op_num;
+								ssa_op->op1_use = var_num;
+								ssa_op->op1_use_chain = var->use_chain;
+								var->use_chain = op_num;
+							}
+							ZVAL_ARR(&tmp, dst);
+
+							/* Update opcode */
+							call_info->caller_call_opline->opcode = ZEND_IN_ARRAY;
+							call_info->caller_call_opline->extended_value = strict;
+							call_info->caller_call_opline->op1_type = send_needly->op1_type;
+							call_info->caller_call_opline->op1.num = send_needly->op1.num;
+							call_info->caller_call_opline->op2_type = IS_CONST;
+							call_info->caller_call_opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
 						}
-
-						ZVAL_ARR(&tmp, dst);
-
-						/* Update opcode */
-						call_info->caller_call_opline->opcode = ZEND_IN_ARRAY;
-						call_info->caller_call_opline->extended_value = strict;
-						call_info->caller_call_opline->op1_type = send_needly->op1_type;
-						call_info->caller_call_opline->op1.num = send_needly->op1.num;
-						call_info->caller_call_opline->op2_type = IS_CONST;
-						call_info->caller_call_opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
 						if (call_info->caller_init_opline->extended_value == 3) {
 							MAKE_NOP(call_info->caller_call_opline - 1);
 						}
