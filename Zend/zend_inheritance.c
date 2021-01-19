@@ -1876,9 +1876,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				}
 
 				aliases[i] = trait;
-
-				/* TODO: try to avoid this assignment (it's necessary only for reflection) */
-				cur_method_ref->class_name = zend_string_copy(trait->name);
 			}
 			zend_string_release_ex(lcname, 0);
 			i++;

@@ -4913,9 +4913,30 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 			zend_trait_method_reference *cur_ref = &ce->trait_aliases[i]->trait_method;
 
 			if (ce->trait_aliases[i]->alias) {
+				zend_string *class_name = cur_ref->class_name;
 
-				mname = zend_string_alloc(ZSTR_LEN(cur_ref->class_name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
-				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(cur_ref->class_name), ZSTR_VAL(cur_ref->method_name));
+				if (!class_name) {
+					uint32_t j = 0;
+					zval *zv;
+					zend_class_entry *trait;
+					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
+
+					for (j = 0; j < ce->num_traits; j++) {
+						zv = zend_hash_find_ex(CG(class_table), ce->trait_names[j].lc_name, 1);
+						if (zv) {
+							trait = Z_CE_P(zv);
+							if (zend_hash_exists(&trait->function_table, lcname)) {
+								class_name = trait->name;
+								break;
+							}
+						}
+					}
+					zend_string_release_ex(lcname, 0);
+					ZEND_ASSERT(class_name != NULL);
+				}
+
+				mname = zend_string_alloc(ZSTR_LEN(class_name) + ZSTR_LEN(cur_ref->method_name) + 2, 0);
+				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(cur_ref->method_name));
 				add_assoc_str_ex(return_value, ZSTR_VAL(ce->trait_aliases[i]->alias), ZSTR_LEN(ce->trait_aliases[i]->alias), mname);
 			}
 			i++;
