@@ -11431,6 +11431,13 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		return_value_used = -1;
 	}
 
+	if (ZEND_OBSERVER_ENABLED) {
+		|	LOAD_ZVAL_ADDR FCARG2a, op1_addr
+		|	mov FCARG1a, FP
+		|	SET_EX_OPLINE opline, r0
+		|	EXT_CALL zend_observer_fcall_end, r0
+	}
+
 	// if (!EX(return_value))
 	if (Z_MODE(op1_addr) == IS_REG && Z_REG(op1_addr) == ZREG_R1) {
 		if (return_value_used != 0) {
@@ -11497,12 +11504,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 
 	if (return_value_used == 0) {
 		|9:
-		if (ZEND_OBSERVER_ENABLED) {
-			|	xor FCARG2a, FCARG2a
-			|	mov FCARG1a, FP
-			|	SET_EX_OPLINE opline, r0
-			|	EXT_CALL zend_observer_fcall_end, r0
-		}
 		return 1;
 	}
 
@@ -11571,12 +11572,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	|9:
-	if (ZEND_OBSERVER_ENABLED) {
-		|	LOAD_ZVAL_ADDR FCARG2a, ret_addr
-		|	mov FCARG1a, FP
-		|	SET_EX_OPLINE opline, r0
-		|	EXT_CALL zend_observer_fcall_end, r0
-	}
 	return 1;
 }
 
