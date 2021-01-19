@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.2RC1
+?? ??? 2021, PHP 8.0.2
 
 - Core:
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
