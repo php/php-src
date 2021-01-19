@@ -16,33 +16,33 @@ class MyClass
     }
 }
 
-function bar() {
-    return 42;
+function bar($arg) {
+    return $arg;
 }
 
 function foo() {
-    bar();
-    return bar();
+    bar(41);
+    return bar(42);
 }
 
 $mc = new MyClass();
 
-echo 'Done: ' . bar() . PHP_EOL;
+echo 'Done: ' . bar(40) . PHP_EOL;
 ?>
 --EXPECTF--
 <!-- init '%s/observer_shutdown_%d.php' -->
 <file '%s/observer_shutdown_%d.php'>
   <!-- init bar() -->
   <bar>
-  </bar:42>
-Done: 42
+  </bar:40>
+Done: 40
 </file '%s/observer_shutdown_%d.php'>
 <!-- init MyClass::__destruct() -->
 <MyClass::__destruct>
   <!-- init foo() -->
   <foo>
     <bar>
-    </bar:42>
+    </bar:41>
     <bar>
     </bar:42>
   </foo:42>
