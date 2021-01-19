@@ -735,27 +735,9 @@ static const struct pdo_dbh_methods sqlite_methods = {
 static char *make_filename_safe(const char *filename)
 {
 	if (*filename && strncasecmp(filename, "file:", 5) == 0) {
-		char *fullpath;
-		if (strncasecmp(filename+5, "///", 3) == 0) {
-			fullpath = expand_filepath(filename+7, NULL);
-		} else if (strncasecmp(filename+5, "//localhost/", 12) == 0) {
-			fullpath = expand_filepath(filename+16, NULL);
-		} else if (strncasecmp(filename+5, "//", 2) == 0) {
-			// authority error on sqlite3_open_v2
-			return filename;
-		} else {
-			fullpath = expand_filepath(filename+5, NULL);
-		}
-
-		if (!fullpath) {
+		if (PG(open_basedir) && *PG(open_basedir)) {
 			return NULL;
 		}
-
-		if (php_check_open_basedir(fullpath)) {
-			efree(fullpath);
-			return NULL;
-		}
-		efree(fullpath);
 		return estrdup(filename);
 	}
 	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
@@ -830,7 +812,10 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 
 	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
-	i = sqlite3_open_v2(filename, &H->db, flags | SQLITE_OPEN_URI, NULL);
+	if (!(PG(open_basedir) && *PG(open_basedir))) {
+		flags |= SQLITE_OPEN_URI;
+	}
+	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
 
 	efree(filename);
 
