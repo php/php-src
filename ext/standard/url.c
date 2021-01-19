@@ -260,17 +260,13 @@ parse_host:
 			ret->pass = zend_string_init(pp, (p-pp), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->pass), ZSTR_LEN(ret->pass));
 		} else {
-            if (!is_userinfo_valid(s, p-s)) {
-                goto check_port;
-            }
-            ret->user = zend_string_init(s, (p-s), 0);
+			ret->user = zend_string_init(s, (p-s), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
 		}
 
 		s = p + 1;
 	}
 
-check_port:
 	/* check for port */
 	if (s < ue && *s == '[' && *(e-1) == ']') {
 		/* Short circuit portscan,
