@@ -72,4 +72,6 @@
 
 extern const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208;
 
+int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode);
+
 #endif /* MBFILTER_TL_KANA_JISX0201_JISX0208_H */
