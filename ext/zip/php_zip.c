@@ -1473,24 +1473,21 @@ static ZIPARCHIVE_METHOD(open)
 		ze_obj->filename = NULL;
 	}
 
-#ifdef HAVE_LIBZIP_VERSION
-	/* zip_libzip_version() is available as of 1.3.1;
-	   older versions don't need a workaround */
-	if (php_version_compare(zip_libzip_version(), "1.6.0") >= 0) {
-		/* reduce BC break introduced in libzip 1.6.0
-		   "Do not accept empty files as valid zip archives any longer" */
+	/* open for write without option to empty the archive */
+#ifdef ZIP_RDONLY
+	if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
+#else
+	if ((flags & ZIP_TRUNCATE) == 0) {
+#endif
+		zend_stat_t st;
 
-		/* open for write without option to empty the archive */
-		if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
-			zend_stat_t st;
-
-			/* exists and is empty */
-			if (VCWD_STAT(resolved_path, &st) == 0 && st.st_size == 0) {
-				flags |= ZIP_TRUNCATE;
-			}
+		/* exists and is empty */
+		if (VCWD_STAT(resolved_path, &st) == 0 && st.st_size == 0) {
+			/* reduce BC break introduced in libzip 1.6.0
+			   "Do not accept empty files as valid zip archives any longer" */
+			flags |= ZIP_TRUNCATE;
 		}
 	}
-#endif
 
 	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {
