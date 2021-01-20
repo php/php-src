@@ -75,6 +75,11 @@ PHP 8.1 UPGRADE NOTES
     internally previously.
   . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
   . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
+  . The default error handling mode has been changed from "silent" to
+    "exceptions". See https://www.php.net/manual/en/mysqli-driver.report-mode.php
+    for details of behavior changes and how to explicitly set this attribute. To
+    keep the old behavior, use mysqli_report(MYSQLI_REPORT_OFF);
+    RFC: https://wiki.php.net/rfc/mysqli_default_errmode
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
