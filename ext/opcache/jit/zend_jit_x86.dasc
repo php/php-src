@@ -12607,7 +12607,10 @@ static zend_property_info* zend_get_known_property_info(zend_class_entry *ce, ze
 {
 	zend_property_info *info = NULL;
 
-	if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || (ce->ce_flags & ZEND_ACC_TRAIT)) {
+	if (!ce ||
+	    !(ce->ce_flags & ZEND_ACC_LINKED) ||
+	    (ce->ce_flags & ZEND_ACC_TRAIT) ||
+	    ce->create_object) {
 		return NULL;
 	}
 
