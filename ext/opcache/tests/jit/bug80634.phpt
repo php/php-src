@@ -9,7 +9,10 @@ opcache.protect_memory=1
 opcache.jit=function
 opcache.preload={PWD}/preload_bug80634.inc
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --FILE--
 <?php
 $v = new SomeClass(5);
