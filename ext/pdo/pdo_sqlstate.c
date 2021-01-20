@@ -83,7 +83,7 @@ static const struct pdo_sqlstate_info err_initializer[] = {
 	{ "22003",	"Numeric value out of range" },
 	{ "22004",	"Null value not allowed" },
 	{ "22005",	"Error in assignment" },
-	{ "22007",	"Invalid datetime format" },
+	{ "22007",	"Invalid or truncated value" },
 	{ "22008",	"Datetime field overflow" },
 	{ "22009",	"Invalid time zone displacement value" },
 	{ "2200B",	"Escape character conflict" },
