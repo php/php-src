@@ -7,6 +7,7 @@
     */
 
     $driver    = new mysqli_driver;
+    $driver->report_mode = MYSQLI_REPORT_OFF;
 
     $host      = getenv("MYSQL_TEST_HOST")     ?: "127.0.0.1";
     $port      = getenv("MYSQL_TEST_PORT")     ?: 3306;
