@@ -143,7 +143,8 @@ static void zend_persist_zval_calc(zval *z)
 
 static void zend_persist_attributes_calc(HashTable *attributes)
 {
-	if (!zend_shared_alloc_get_xlat_entry(attributes)) {
+	if (!zend_shared_alloc_get_xlat_entry(attributes)
+	 && !zend_accel_in_shm(attributes)) {
 		zend_attribute *attr;
 		uint32_t i;
 
@@ -198,10 +199,14 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
     }
 
-	if (op_array->scope && zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
-		/* already stored */
-		ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
-		return;
+	if (op_array->scope) {
+		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
+			/* already stored */
+			ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
+			return;
+		} else if (op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+			return;
+		}
 	}
 
 	if (op_array->static_variables) {
@@ -364,7 +369,7 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
-static void check_property_type_resolution(zend_class_entry *ce) {
+void check_property_type_resolution(zend_class_entry *ce) {
 	zend_property_info *prop;
 	if (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED) {
 		/* Preloading might have computed this already. */
@@ -384,9 +389,8 @@ static void check_property_type_resolution(zend_class_entry *ce) {
 	ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 }
 
-static void zend_persist_class_entry_calc(zval *zv)
+void zend_persist_class_entry_calc(zend_class_entry *ce)
 {
-	zend_class_entry *ce = Z_PTR_P(zv);
 	Bucket *p;
 
 	if (ce->type == ZEND_USER_CLASS) {
@@ -399,16 +403,14 @@ static void zend_persist_class_entry_calc(zval *zv)
 		check_property_type_resolution(ce);
 
 		ZCG(is_immutable_class) =
-			(ce->ce_flags & ZEND_ACC_LINKED) &&
-			(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
-			(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED) &&
-			!ZCG(current_persistent_script)->corrupted;
+			!ZCG(current_persistent_script)->corrupted &&
+			// TODO: get rid of CONSTANTS_UPDATED and PROPERTY_TYPES_RESOLVED limitations ???
+			(!(ce->ce_flags & ZEND_ACC_LINKED) ||
+				((ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
+				(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)));
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));
-		ADD_INTERNED_STRING(ce->name);
-		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			ADD_INTERNED_STRING(ce->parent_name);
-		}
+
 		zend_hash_persist_calc(&ce->function_table);
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
@@ -440,16 +442,6 @@ static void zend_persist_class_entry_calc(zval *zv)
 			zend_persist_class_constant_calc(&p->val);
 		} ZEND_HASH_FOREACH_END();
 
-		if (ce->info.user.filename) {
-			ADD_STRING(ce->info.user.filename);
-		}
-		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
-			ADD_STRING(ce->info.user.doc_comment);
-		}
-		if (ce->attributes) {
-			zend_persist_attributes_calc(ce->attributes);
-		}
-
 		zend_hash_persist_calc(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
 			zend_property_info *prop = Z_PTR(p->val);
@@ -464,6 +456,31 @@ static void zend_persist_class_entry_calc(zval *zv)
 			ADD_SIZE_EX(sizeof(zend_property_info *) * ce->default_properties_count);
 		}
 
+		if (ce->num_interfaces && (ce->ce_flags & ZEND_ACC_LINKED)) {
+			ADD_SIZE(sizeof(zend_class_entry*) * ce->num_interfaces);
+		}
+
+		if (ce->ce_flags & ZEND_ACC_CACHED) {
+			return;
+		}
+
+		ADD_INTERNED_STRING(ce->name);
+		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+			ADD_INTERNED_STRING(ce->parent_name);
+		}
+
+		if (ce->info.user.filename) {
+			ADD_STRING(ce->info.user.filename);
+		}
+
+		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
+			ADD_STRING(ce->info.user.doc_comment);
+		}
+
+		if (ce->attributes) {
+			zend_persist_attributes_calc(ce->attributes);
+		}
+
 		if (ce->num_interfaces) {
 			uint32_t i;
 
@@ -473,8 +490,6 @@ static void zend_persist_class_entry_calc(zval *zv)
 					ADD_INTERNED_STRING(ce->interface_names[i].lc_name);
 				}
 				ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
-			} else {
-				ADD_SIZE(sizeof(zend_class_entry*) * ce->num_interfaces);
 			}
 		}
 
@@ -538,7 +553,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
-		zend_persist_class_entry_calc(&p->val);
+		zend_persist_class_entry_calc(Z_CE(p->val));
 	} ZEND_HASH_FOREACH_END();
 }
 

@@ -1136,7 +1136,8 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 		return FAILURE;
 	}
 
-	if (zend_do_link_class(ce, lc_parent_name) == FAILURE) {
+	ce = zend_do_link_class(&Z_CE_P(zv), lc_parent_name);
+	if (!ce) {
 		/* Reload bucket pointer, the hash table may have been reallocated */
 		zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
 		zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(rtd_key));
@@ -1354,9 +1355,11 @@ ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t fi
 				zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), lc_parent_name, 1);
 
 				if (parent_ce) {
-					if (zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv)) {
+					ce = zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv);
+					if (ce) {
 						/* Store in run-time cache */
 						((void**)((char*)run_time_cache + opline->extended_value))[0] = ce;
+						Z_CE_P(zv) = ce;
 					}
 				}
 			}

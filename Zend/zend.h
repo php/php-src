@@ -107,6 +107,15 @@ typedef struct _zend_trait_alias {
 	uint32_t modifiers;
 } zend_trait_alias;
 
+typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
+
+struct _zend_inheritance_cache_entry {
+	zend_inheritance_cache_entry *next;
+	zend_class_entry             *ce;
+	zend_class_entry             *parent;
+	zend_class_entry             *traits_and_interfaces[1];
+};
+
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
@@ -171,6 +180,7 @@ struct _zend_class_entry {
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
+	zend_inheritance_cache_entry *inheritance_cache;
 
 	union {
 		struct {

@@ -118,6 +118,8 @@ bool fallback_process = 0; /* process uses file cache fallback */
 #endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
+static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
+static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 static zend_result (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -2249,6 +2251,124 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	return zend_accel_load_script(persistent_script, from_shared_memory);
 }
 
+static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+{
+	uint32_t i;
+	zend_inheritance_cache_entry *entry;
+
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
+
+	entry = ce->inheritance_cache;
+	while (entry) {
+		bool found = 1;
+
+		if (entry->parent != parent) {
+			found = 0;
+		} else {
+			for (i = 0; i < ce->num_traits + ce->num_interfaces; i++) {
+				if (entry->traits_and_interfaces[i] != traits_and_interfaces[i]) {
+					found = 0;
+					break;
+				}
+			}
+		}
+		if (found) {
+			return entry->ce;
+		} else {
+			entry = entry->next;
+		}
+	}
+
+	return NULL;
+}
+
+static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+{
+	zend_persistent_script dummy;
+	size_t size;
+	uint32_t i;
+	zend_class_entry *new_ce;
+	zend_inheritance_cache_entry *entry;
+
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_IMMUTABLE));
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
+
+	if (!ZCG(accelerator_enabled) ||
+        (ZCSG(restart_in_progress) && accel_restart_is_active())) {
+		return ce;
+	}
+
+	check_property_type_resolution(ce);
+	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
+	 || !(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+		return ce;
+	}
+
+	SHM_UNPROTECT();
+	zend_shared_alloc_lock();
+
+	new_ce = zend_accel_inheritance_cache_get(proto, parent, traits_and_interfaces);
+	if (new_ce) {
+		zend_shared_alloc_unlock();
+		SHM_PROTECT();
+		return new_ce;
+	}
+
+	zend_shared_alloc_init_xlat_table();
+
+	memset(&dummy, 0, sizeof(dummy));
+	dummy.size =
+		sizeof(zend_inheritance_cache_entry) -
+		sizeof(void*) +
+		(sizeof(void*) * (proto->num_traits + proto->num_interfaces));
+	ZCG(current_persistent_script) = &dummy;
+	zend_persist_class_entry_calc(ce);
+	size = dummy.size;
+
+	zend_shared_alloc_clear_xlat_table();
+
+	ZCG(mem) = zend_shared_alloc(size);
+	if (!ZCG(mem)) {
+		zend_shared_alloc_unlock();
+		SHM_PROTECT();
+		return ce;
+	}
+
+	memset(ZCG(mem), 0, size);
+	entry = (zend_inheritance_cache_entry*)ZCG(mem);
+	ZCG(mem) = (char*)ZCG(mem) +
+		(sizeof(zend_inheritance_cache_entry) -
+		 sizeof(void*) +
+		 (sizeof(void*) * (proto->num_traits + proto->num_interfaces)));
+	entry->ce = new_ce = zend_persist_class_entry(ce);
+	zend_update_parent_ce(new_ce);
+	entry->parent = parent;
+	for (i = 0; i < proto->num_traits + proto->num_interfaces; i++) {
+		entry->traits_and_interfaces[i] = traits_and_interfaces[i];
+	}
+	entry->next = proto->inheritance_cache;
+	proto->inheritance_cache = entry;
+
+	zend_shared_alloc_destroy_xlat_table();
+
+	zend_shared_alloc_unlock();
+	SHM_PROTECT();
+
+	/* Consistency check */
+	if ((char*)entry + size != (char*)ZCG(mem)) {
+		zend_accel_error(
+			((char*)entry + size < (char*)ZCG(mem)) ? ACCEL_LOG_ERROR : ACCEL_LOG_WARNING,
+			"Internal error: wrong class size calculation: %s start=" ZEND_ADDR_FMT ", end=" ZEND_ADDR_FMT ", real=" ZEND_ADDR_FMT "\n",
+			ZSTR_VAL(ce->name),
+			(size_t)entry,
+			(size_t)((char *)entry + size),
+			(size_t)ZCG(mem));
+	}
+
+	return new_ce;
+}
+
 #ifdef ZEND_WIN32
 static int accel_gen_uname_id(void)
 {
@@ -3123,7 +3243,19 @@ file_cache_fallback:
 		accel_use_shm_interned_strings();
 	}
 
-	return accel_finish_startup();
+	if (accel_finish_startup() != SUCCESS) {
+		return FAILURE;
+	}
+
+	if (ZCG(enabled) && accel_startup_ok) {
+		/* Override inheritance cache callbaks */
+		accelerator_orig_inheritance_cache_get = zend_inheritance_cache_get;
+		accelerator_orig_inheritance_cache_add = zend_inheritance_cache_add;
+		zend_inheritance_cache_get = zend_accel_inheritance_cache_get;
+		zend_inheritance_cache_add = zend_accel_inheritance_cache_add;
+	}
+
+	return SUCCESS;
 }
 
 static void (*orig_post_shutdown_cb)(void);
@@ -3170,6 +3302,8 @@ void accel_shutdown(void)
 	}
 
 	zend_compile_file = accelerator_orig_compile_file;
+	zend_inheritance_cache_get = accelerator_orig_inheritance_cache_get;
+	zend_inheritance_cache_add = accelerator_orig_inheritance_cache_add;
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
 		ini_entry->on_modify = orig_include_path_on_modify;
@@ -3842,7 +3976,8 @@ static void preload_link(void)
 					} else {
 						CG(zend_lineno) = ce->info.user.line_start;
 					}
-					if (zend_do_link_class(ce, NULL) == FAILURE) {
+					ce = zend_do_link_class(&ce, NULL);
+					if (!ce) {
 						ZEND_ASSERT(0 && "Class linking failed?");
 					}
 					CG(in_compilation) = 0;
