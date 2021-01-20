@@ -3,6 +3,7 @@ Bug #79912 (Phar::decompressFiles not working)
 --SKIPIF--
 <?php
 if (!extension_loaded('phar')) die('skip phar extension is not available');
+if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --INI--
 phar.readonly=0
