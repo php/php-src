@@ -2132,31 +2132,31 @@ premature_end:
 static size_t
 php_mysqlnd_sasl_pk_request_write(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	DBG_ENTER("php_mysqlnd_sasl_pk_request_write");
+    DBG_ENTER("php_mysqlnd_sasl_pk_request_write");
 
-	MYSQLND_ERROR_INFO * error_info = conn->error_info;
-	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
-	MYSQLND_VIO * vio = conn->vio;
-	MYSQLND_STATS * stats = conn->stats;
-	MYSQLND_PACKET_SASL_PK_REQUEST* pkt_req = (MYSQLND_PACKET_SASL_PK_REQUEST*)_packet;
-	size_t  sent = 0;
-	zend_uchar* buffer = (zend_uchar*)malloc(pkt_req->data_len + MYSQLND_HEADER_SIZE);
-	if( !buffer ) {
-		DBG_RETURN(0);
-	}
-	memset(buffer,0,sizeof(*buffer));
-	memcpy(buffer + MYSQLND_HEADER_SIZE, pkt_req->data, pkt_req->data_len);
+    MYSQLND_ERROR_INFO * error_info = conn->error_info;
+    MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+    MYSQLND_VIO * vio = conn->vio;
+    MYSQLND_STATS * stats = conn->stats;
+    MYSQLND_PACKET_SASL_PK_REQUEST* pkt_req = (MYSQLND_PACKET_SASL_PK_REQUEST*)_packet;
+    size_t  sent = 0;
+    zend_uchar* buffer = (zend_uchar*)malloc(pkt_req->data_len + MYSQLND_HEADER_SIZE);
+    if( !buffer ) {
+        DBG_RETURN(0);
+    }
+    memset(buffer,0,sizeof(*buffer));
+    memcpy(buffer + MYSQLND_HEADER_SIZE, pkt_req->data, pkt_req->data_len);
 
 
-	sent = pfc->data->m.send(pfc, vio,
-							 buffer,
-							 pkt_req->data_len,
-							 stats, error_info);
+    sent = pfc->data->m.send(pfc, vio,
+                             buffer,
+                             pkt_req->data_len,
+                             stats, error_info);
 
-	if(buffer) {
-		free( buffer );
-	}
-	DBG_RETURN(sent);
+    if(buffer) {
+        free( buffer );
+    }
+    DBG_RETURN(sent);
 }
 /* }}} */
 
@@ -2165,35 +2165,35 @@ php_mysqlnd_sasl_pk_request_write(MYSQLND_CONN_DATA * conn, void * _packet)
 static enum_func_status
 php_mysqlnd_sasl_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	DBG_ENTER("php_mysqlnd_sasl_pk_request_response_read");
+    DBG_ENTER("php_mysqlnd_sasl_pk_request_response_read");
 
-	MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE * packet= (MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE *) _packet;
-	MYSQLND_ERROR_INFO * error_info = conn->error_info;
-	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
-	MYSQLND_VIO * vio = conn->vio;
-	MYSQLND_STATS * stats = conn->stats;
-	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar  buffer[SASL_PK_REQUEST_RESP_BUFFER_SIZE];
-	if( packet->data_len > SASL_PK_REQUEST_RESP_BUFFER_SIZE ) {
-		DBG_ERR_FMT("Not able to handle response, max packet size is %d",
-					SASL_PK_REQUEST_RESP_BUFFER_SIZE);
-		DBG_RETURN(FAIL);
-	}
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header),
-													pfc,
-													vio,
-													stats,
-													error_info,
-													connection_state,
-													buffer,
-													sizeof(buffer),
-													"SASL_PK_REQUEST_RESPONSE",
-													PROT_SASL_PK_REQUEST_RESPONSE_PACKET)) {
-		DBG_RETURN(FAIL);
-	}
-	memcpy(packet->data, buffer + 1, packet->header.size - 1);
-	packet->data_len = packet->header.size - 1;
-	DBG_RETURN(PASS);
+    MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE * packet= (MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE *) _packet;
+    MYSQLND_ERROR_INFO * error_info = conn->error_info;
+    MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+    MYSQLND_VIO * vio = conn->vio;
+    MYSQLND_STATS * stats = conn->stats;
+    MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
+    zend_uchar  buffer[SASL_PK_REQUEST_RESP_BUFFER_SIZE];
+    if( packet->data_len > SASL_PK_REQUEST_RESP_BUFFER_SIZE ) {
+        DBG_ERR_FMT("Not able to handle response, max packet size is %d",
+                    SASL_PK_REQUEST_RESP_BUFFER_SIZE);
+        DBG_RETURN(FAIL);
+    }
+    if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header),
+                                                    pfc,
+                                                    vio,
+                                                    stats,
+                                                    error_info,
+                                                    connection_state,
+                                                    buffer,
+                                                    sizeof(buffer),
+                                                    "SASL_PK_REQUEST_RESPONSE",
+                                                    PROT_SASL_PK_REQUEST_RESPONSE_PACKET)) {
+        DBG_RETURN(FAIL);
+    }
+    memcpy(packet->data, buffer + 1, packet->header.size - 1);
+    packet->data_len = packet->header.size - 1;
+    DBG_RETURN(PASS);
 }
 /* }}} */
 

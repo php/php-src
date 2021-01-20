@@ -19,6 +19,14 @@ PHP_ARG_ENABLE([mysqlnd_sasl_support],
     [Enable support for the sasl protocol in mysqlnd])],
   [no],
   [yes])
+  
+  
+PHP_ARG_ENABLE([mysqlnd_ldap_krb_support],
+  [whether to enable ldap kerberos support in mysqlnd],
+  [AS_HELP_STRING([--enable-mysqlnd-ldap-krb-support],
+    [Enable support for the ldap kerberos protocol in mysqlnd])],
+  [no],
+  [yes])
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
@@ -42,6 +50,13 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
     PHP_EVAL_LIBLINE($SASL_LIBS, MYSQLND_SHARED_LIBADD)
     PHP_EVAL_INCLINE($SASL_CFLAGS)
     AC_DEFINE([MYSQLND_HAVE_SASL], 1, [SASL protocol support])
+  fi
+  
+  if test "$PHP_MYSQLND_LDAP_KRB_SUPPORT" != "no"; then
+    PKG_CHECK_MODULES([KRB5], [libkrb5])
+    PHP_EVAL_LIBLINE($KRB5_LIBS, MYSQLND_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($KRB5_CFLAGS)
+    AC_DEFINE([MYSQLND_HAVE_KRB5], 1, [LDAP Kerberos protocol support])
   fi
 
   AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable core mysqlnd SSL code])
