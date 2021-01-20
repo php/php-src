@@ -19,21 +19,41 @@ if (!$archive->open($zipfile, ZipArchive::CREATE)) {
 }
 
 // (string) Entry path in the ZIP => (string) Expected actual target path
-$paths = [
-    '.a/b/c/file01.txt' => '.a/b/c/file01.txt',
-    'a./b/c/file02.txt' => 'a./b/c/file02.txt',
-    'a/.b/c/file03.txt' => 'a/.b/c/file03.txt',
-    'a/b./c/file04.txt' => 'a/b./c/file04.txt',
-    'a/b../c/file05.txt' => 'a/b../c/file05.txt',
-    'a/b.../c/file06.txt' => 'a/b.../c/file06.txt',
-    'a/..b/c/file07.txt' => 'a/..b/c/file07.txt',
-    'a/...b/c/file08.txt' => 'a/...b/c/file08.txt',
-    'a/../b./c./file09.txt' => 'b./c./file09.txt',
-    '//../b./c./file10.txt' => 'b./c./file10.txt',
-    '/../b./c./file11.txt' => 'b./c./file11.txt',
-    'C:/a./b./file12.txt' => 'a./b./file12.txt',
-    'a/b:/c/file13.txt' => 'c/file13.txt',
-];
+if (PHP_OS_FAMILY === 'Windows') {
+    $paths = [
+        '.a/b/c/file01.txt' => '.a/b/c/file01.txt',
+        'a./b/c/file02.txt' => 'a_/b/c/file02.txt',
+        'a/.b/c/file03.txt' => 'a/.b/c/file03.txt',
+        'a/b./c/file04.txt' => 'a/b_/c/file04.txt',
+        'a/b../c/file05.txt' => 'a/b._/c/file05.txt',
+        'a/b.../c/file06.txt' => 'a/b.._/c/file06.txt',
+        'a/..b/c/file07.txt' => 'a/..b/c/file07.txt',
+        'a/...b/c/file08.txt' => 'a/...b/c/file08.txt',
+        'a/../b./c./file09.txt' => 'b_/c_/file09.txt',
+        '//../b./c./file10.txt' => 'b_/c_/file10.txt',
+        '/../b./c./file11.txt' => 'b_/c_/file11.txt',
+        'C:/a./b./file12.txt' => 'a_/b_/file12.txt',
+        'a/b:/c/file13.txt' => 'c/file13.txt',
+        'a/b/c/file14.' => 'a/b/c/file14_',
+    ];
+} else {
+    $paths = [
+        '.a/b/c/file01.txt' => '.a/b/c/file01.txt',
+        'a./b/c/file02.txt' => 'a./b/c/file02.txt',
+        'a/.b/c/file03.txt' => 'a/.b/c/file03.txt',
+        'a/b./c/file04.txt' => 'a/b./c/file04.txt',
+        'a/b../c/file05.txt' => 'a/b../c/file05.txt',
+        'a/b.../c/file06.txt' => 'a/b.../c/file06.txt',
+        'a/..b/c/file07.txt' => 'a/..b/c/file07.txt',
+        'a/...b/c/file08.txt' => 'a/...b/c/file08.txt',
+        'a/../b./c./file09.txt' => 'b./c./file09.txt',
+        '//../b./c./file10.txt' => 'b./c./file10.txt',
+        '/../b./c./file11.txt' => 'b./c./file11.txt',
+        'C:/a./b./file12.txt' => 'a./b./file12.txt',
+        'a/b:/c/file13.txt' => 'c/file13.txt',
+        'a/b/c/file14.' => 'a/b/c/file14.',
+    ];
+}
 
 foreach ($paths as $zippath => $realpath) {
     $archive->addFromString($zippath, $zippath . ' => ' . $realpath);
