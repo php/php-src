@@ -2318,29 +2318,41 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	zend_shared_alloc_init_xlat_table();
 
 	memset(&dummy, 0, sizeof(dummy));
-	dummy.size =
+	dummy.size = ZEND_ALIGNED_SIZE(
 		sizeof(zend_inheritance_cache_entry) -
 		sizeof(void*) +
-		(sizeof(void*) * (proto->num_traits + proto->num_interfaces));
+		(sizeof(void*) * (proto->num_traits + proto->num_interfaces)));
 	ZCG(current_persistent_script) = &dummy;
 	zend_persist_class_entry_calc(ce);
 	size = dummy.size;
 
 	zend_shared_alloc_clear_xlat_table();
 
+#if ZEND_MM_ALIGNMENT < 8
+	/* Align to 8-byte boundary */
+	ZCG(mem) = zend_shared_alloc(size + 8);
+#else
 	ZCG(mem) = zend_shared_alloc(size);
+#endif
+
 	if (!ZCG(mem)) {
 		zend_shared_alloc_unlock();
 		SHM_PROTECT();
 		return ce;
 	}
 
+#if ZEND_MM_ALIGNMENT < 8
+	/* Align to 8-byte boundary */
+	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
+#endif
+
 	memset(ZCG(mem), 0, size);
 	entry = (zend_inheritance_cache_entry*)ZCG(mem);
 	ZCG(mem) = (char*)ZCG(mem) +
-		(sizeof(zend_inheritance_cache_entry) -
-		 sizeof(void*) +
-		 (sizeof(void*) * (proto->num_traits + proto->num_interfaces)));
+		ZEND_ALIGNED_SIZE(
+			(sizeof(zend_inheritance_cache_entry) -
+			 sizeof(void*) +
+			 (sizeof(void*) * (proto->num_traits + proto->num_interfaces))));
 	entry->ce = new_ce = zend_persist_class_entry(ce);
 	zend_update_parent_ce(new_ce);
 	entry->parent = parent;
