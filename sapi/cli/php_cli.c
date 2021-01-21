@@ -898,6 +898,7 @@ do_repeat:
 			php_optind++;
 		}
 		if (script_file) {
+			virtual_cwd_activate();
 			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
 				goto err;
 			} else {
