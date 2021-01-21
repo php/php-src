@@ -911,6 +911,10 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			}
 		}
 
+		if (ce->iterator_funcs_ptr) {
+			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
+		}
+
 		if (ce->ce_flags & ZEND_ACC_CACHED) {
 			return ce;
 		}
@@ -1000,10 +1004,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 				ce->trait_precedences = zend_shared_memdup_free(
 					ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 			}
-		}
-
-		if (ce->iterator_funcs_ptr) {
-			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
 		}
 	}
 

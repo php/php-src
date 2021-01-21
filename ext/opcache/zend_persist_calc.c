@@ -460,6 +460,10 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			ADD_SIZE(sizeof(zend_class_entry*) * ce->num_interfaces);
 		}
 
+		if (ce->iterator_funcs_ptr) {
+			ADD_SIZE(sizeof(zend_class_iterator_funcs));
+		}
+
 		if (ce->ce_flags & ZEND_ACC_CACHED) {
 			return;
 		}
@@ -537,10 +541,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				}
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
-		}
-
-		if (ce->iterator_funcs_ptr) {
-			ADD_SIZE(sizeof(zend_class_iterator_funcs));
 		}
 	}
 }
