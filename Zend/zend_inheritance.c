@@ -2523,6 +2523,19 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	return ce;
 }
 
+#ifndef ZEND_WIN32
+# define UPDATE_IS_CACHABLE(ce) do { \
+			if ((ce)->type == ZEND_USER_CLASS) { \
+				is_cachable &= (ce)->ce_flags; \
+			} \
+		} while (0)
+#else
+// TODO: ASLR may cause different addresses in different workers ???
+# define UPDATE_IS_CACHABLE(ce) do { \
+			is_cachable &= (ce)->ce_flags; \
+		} while (0)
+#endif
+
 ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_string *lc_parent_name) /* {{{ */
 {
 	/* Load parent/interface dependencies first, so we can still gracefully abort linking
@@ -2544,7 +2557,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 			check_unrecoverable_load_failure(ce);
 			return NULL;
 		}
-		is_cachable &= parent->ce_flags & ZEND_ACC_IMMUTABLE;
+		UPDATE_IS_CACHABLE(parent);
 	}
 
 	if (ce->num_traits || ce->num_interfaces) {
@@ -2571,7 +2584,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 			}
 			traits_and_interfaces[i] = trait;
 			if (trait) {
-				is_cachable &= trait->ce_flags & ZEND_ACC_IMMUTABLE;
+				UPDATE_IS_CACHABLE(trait);
 			}
 		}
 	}
@@ -2599,7 +2612,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 			interfaces[num_parent_interfaces + i] = iface;
 			traits_and_interfaces[ce->num_traits + i] = iface;
 			if (iface) {
-				is_cachable &= iface->ce_flags & ZEND_ACC_IMMUTABLE;
+				UPDATE_IS_CACHABLE(iface);
 			}
 		}
 	}
@@ -2726,8 +2739,9 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 	zend_class_entry *proto = NULL;
 
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
-		uint32_t is_cachable = ce->ce_flags & parent_ce->ce_flags & ZEND_ACC_IMMUTABLE;
+		uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
+		UPDATE_IS_CACHABLE(parent_ce);
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
