@@ -358,7 +358,7 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	ZVAL_STR_COPY(&source_zval, source);
 	zend_save_lexical_state(&original_lex_state);
 
-	zend_prepare_string_for_scanning(&source_zval, "");
+	zend_prepare_string_for_scanning(&source_zval, ZSTR_EMPTY_ALLOC());
 
 	LANG_SCNG(yy_state) = yycINITIAL;
 	zend_hash_init(&interned_strings, 0, NULL, NULL, 0);
@@ -493,7 +493,7 @@ static bool tokenize_parse(
 	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state);
 
-	zend_prepare_string_for_scanning(&source_zval, "");
+	zend_prepare_string_for_scanning(&source_zval, ZSTR_EMPTY_ALLOC());
 	array_init(&token_stream);
 
 	ctx.tokens = &token_stream;

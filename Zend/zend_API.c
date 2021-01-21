@@ -4530,7 +4530,7 @@ static zend_result get_default_via_ast(zval *default_value_zval, const char *def
 	zend_string *code = zend_string_concat3(
 		"<?php ", sizeof("<?php ") - 1, default_value, strlen(default_value), ";", 1);
 
-	ast = zend_compile_string_to_ast(code, &ast_arena, "");
+	ast = zend_compile_string_to_ast(code, &ast_arena, ZSTR_EMPTY_ALLOC());
 	zend_string_release(code);
 
 	if (!ast) {
