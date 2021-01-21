@@ -2735,13 +2735,33 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 
 zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
-	inheritance_status status = zend_can_early_bind(ce, parent_ce);
+	inheritance_status status;
 	zend_class_entry *proto = NULL;
+	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
+	UPDATE_IS_CACHABLE(parent_ce);
+	if (is_cachable) {
+		if (zend_inheritance_cache_get) {
+			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
+			if (ret) {
+				if (delayed_early_binding) {
+					if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+						return NULL;
+					}
+				} else {
+					if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ret) == NULL)) {
+						return NULL;
+					}
+				}
+				return ret;
+			}
+		}
+		proto = ce;
+	}
+
+	status = zend_can_early_bind(ce, parent_ce);
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
-		uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
-
-		UPDATE_IS_CACHABLE(parent_ce);
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
@@ -2754,15 +2774,6 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		}
 
 		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-			if (is_cachable) {
-				if (zend_inheritance_cache_get) {
-					zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
-					if (ret) {
-						return ret;
-					}
-				}
-				proto = ce;
-			}
 			/* Lazy class loading */
 			ce = zend_lazy_class_load(ce);
 		}
