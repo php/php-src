@@ -1059,7 +1059,15 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
 					(ce->ce_flags & ZEND_ACC_NEARLY_LINKED))) {
-				ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+				if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+					if (!CG(unlinked_uses)) {
+						ALLOC_HASHTABLE(CG(unlinked_uses));
+						zend_hash_init(CG(unlinked_uses), 0, NULL, NULL, 0);
+					}
+					zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce);
+				} else {
+					ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+				}
 				return ce;
 			}
 			return NULL;
