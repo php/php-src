@@ -163,11 +163,11 @@ PHP_FUNCTION(dcgettext)
 /* {{{ Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_FUNCTION(bindtextdomain)
 {
-	char *domain, *dir;
+	char *domain, *dir = NULL;
 	size_t domain_len, dir_len;
 	char *retval, dir_name[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss!", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -176,6 +176,10 @@ PHP_FUNCTION(bindtextdomain)
 	if (domain[0] == '\0') {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
+	}
+
+	if (dir == NULL) {
+		RETURN_STRING(bindtextdomain(domain, NULL));
 	}
 
 	if (dir[0] != '\0' && strcmp(dir, "0")) {
@@ -272,10 +276,10 @@ PHP_FUNCTION(dcngettext)
 /* {{{ Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
 PHP_FUNCTION(bind_textdomain_codeset)
 {
-	char *domain, *codeset, *retval = NULL;
+	char *domain, *codeset = NULL, *retval = NULL;
 	size_t domain_len, codeset_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss!", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

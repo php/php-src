@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.3
 
+- Gettext:
+  . Fixed bug #53251 (bindtextdomain with null dir doesn't return old value).
+    (cmb)
+
 - Opcache:
   . Fixed bug #80634 (write_property handler of internal classes is skipped on
     preloaded JITted code). (Dmitry)
