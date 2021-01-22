@@ -34,11 +34,22 @@ PHP_FUNCTION( numfmt_format )
 	int32_t formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
+	object = getThis();
+
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
-		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
-	{
-		RETURN_THROWS();
+	if (object) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_STR_OR_NUMBER(number)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(type)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_OBJECT_OF_CLASS(object, NumberFormatter_ce_ptr)
+			Z_PARAM_STR_OR_NUMBER(number)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(type)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	/* Fetch the object. */
@@ -53,9 +64,22 @@ PHP_FUNCTION( numfmt_format )
 			case IS_DOUBLE:
 				type = FORMAT_TYPE_DOUBLE;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			case IS_STRING:
+				type = FORMAT_TYPE_DECIMAL;
+				break;
+			default:
+				zend_argument_type_error(1, "must be of type int|float|string, %s given", zend_zval_type_name(number));
+				RETURN_THROWS();
 		}
 	}
+
+	// Avoid losing precision on 32-bit platforms where PHP's "long" isn't
+	// as long as the FORMAT_TYPE_INT64 which is requested.
+#if SIZEOF_ZEND_LONG < 8
+	if (Z_TYPE_P(number) == IS_STRING && type == FORMAT_TYPE_INT64) {
+		type = FORMAT_TYPE_DECIMAL;
+	}
+#endif
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
@@ -76,7 +100,13 @@ PHP_FUNCTION( numfmt_format )
 
 		case FORMAT_TYPE_INT64:
 		{
-			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
+			int64_t value;
+			if (Z_TYPE_P(number) == IS_DOUBLE) {
+				value = (int64_t)Z_DVAL_P(number);
+			} else {
+				convert_to_long(number);
+				value = Z_LVAL_P(number);
+			}
 			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
@@ -103,6 +133,24 @@ PHP_FUNCTION( numfmt_format )
 			}
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
+
+		case FORMAT_TYPE_DECIMAL:
+			if (!try_convert_to_string(number)) {
+				RETURN_THROWS();
+			}
+			// Convert string as a DecimalNumber, so we don't lose precision
+			formatted_len = unum_formatDecimal(FORMATTER_OBJECT(nfo), Z_STRVAL_P(number), Z_STRLEN_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
+				intl_error_reset(INTL_DATA_ERROR_P(nfo));
+				formatted = eumalloc(formatted_len);
+				unum_formatDecimal(FORMATTER_OBJECT(nfo), Z_STRVAL_P(number), Z_STRLEN_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
+					efree(formatted);
+				}
+			}
+			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+			break;
+
 		case FORMAT_TYPE_CURRENCY:
 			if (getThis()) {
 				const char *space;
@@ -113,6 +161,7 @@ PHP_FUNCTION( numfmt_format )
 				zend_argument_value_error(3, "cannot be NumberFormatter::TYPE_CURRENCY constant, use numfmt_format_currency() function instead");
 			}
 			RETURN_THROWS();
+
 		default:
 			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			RETURN_THROWS();

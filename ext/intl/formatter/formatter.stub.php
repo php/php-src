@@ -392,6 +392,11 @@ class NumberFormatter
     public const TYPE_DOUBLE = UNKNOWN;
     /**
      * @var int
+     * @cvalue FORMAT_TYPE_DECIMAL
+     */
+    public const TYPE_DECIMAL = UNKNOWN;
+    /**
+     * @var int
      * @cvalue FORMAT_TYPE_CURRENCY
      */
     public const TYPE_CURRENCY = UNKNOWN;
@@ -408,7 +413,7 @@ class NumberFormatter
      * @tentative-return-type
      * @alias numfmt_format
      */
-    public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
+    public function format(int|float|string $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
     /**
      * @param int $offset

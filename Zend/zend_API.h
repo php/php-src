@@ -1488,6 +1488,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
+	_(Z_EXPECTED_STRING_OR_NUMBER,	"of type string|int|float") \
+	_(Z_EXPECTED_STRING_OR_NUMBER_OR_NULL,	"of type string|int|float|null") \
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME,	"an object or a valid class name") \
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL, "an object, a valid class name, or null") \
 	_(Z_EXPECTED_OBJECT_OR_STRING,	"of type object|string") \
@@ -2095,6 +2097,17 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_STR_OR_LONG_OR_NULL(dest_str, dest_long, is_null) \
 	Z_PARAM_STR_OR_LONG_EX(dest_str, dest_long, is_null, 1);
 
+#define Z_PARAM_STR_OR_NUMBER_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_str_or_number(_arg, &dest, check_null, _i))) { \
+		_expected_type = check_null ? Z_EXPECTED_STRING_OR_NUMBER_OR_NULL : Z_EXPECTED_STRING_OR_NUMBER; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_STR_OR_NUMBER(dest) \
+	Z_PARAM_STR_OR_NUMBER_EX(dest, 0)
+
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -2427,6 +2440,18 @@ static zend_always_inline bool zend_parse_arg_str_or_long(zval *arg, zend_string
 		*is_null = 1;
 	} else {
 		return zend_parse_arg_str_or_long_slow(arg, dest_str, dest_long, arg_num);
+	}
+	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_str_or_number(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE || Z_TYPE_P(arg) == IS_STRING)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return zend_parse_arg_number_slow(arg, dest, arg_num);
 	}
 	return 1;
 }

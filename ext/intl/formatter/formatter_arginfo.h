@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: de64db0e66d2113dd10c556cd61324a7a7952973 */
+ * Stub hash: f975c515ccdbc6d6df579b760d64110fc3ce05c0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -14,7 +14,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_NumberFormatter_c
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_NumberFormatter_format, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "NumberFormatter::TYPE_DEFAULT")
 ZEND_END_ARG_INFO()
 
@@ -567,6 +567,12 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_TYPE_DOUBLE_name = zend_string_init_interned("TYPE_DOUBLE", sizeof("TYPE_DOUBLE") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_TYPE_DOUBLE_name, &const_TYPE_DOUBLE_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_TYPE_DOUBLE_name);
+
+	zval const_TYPE_DECIMAL_value;
+	ZVAL_LONG(&const_TYPE_DECIMAL_value, FORMAT_TYPE_DECIMAL);
+	zend_string *const_TYPE_DECIMAL_name = zend_string_init_interned("TYPE_DECIMAL", sizeof("TYPE_DECIMAL") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TYPE_DECIMAL_name, &const_TYPE_DECIMAL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TYPE_DECIMAL_name);
 
 	zval const_TYPE_CURRENCY_value;
 	ZVAL_LONG(&const_TYPE_CURRENCY_value, FORMAT_TYPE_CURRENCY);
