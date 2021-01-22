@@ -2274,6 +2274,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 			}
 		}
 		if (found) {
+			zend_map_ptr_extend(ZCSG(map_ptr_last));
 			return entry->ce;
 		} else {
 			entry = entry->next;
@@ -2377,6 +2378,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 			(size_t)((char *)entry + size),
 			(size_t)ZCG(mem));
 	}
+
+	zend_map_ptr_extend(ZCSG(map_ptr_last));
 
 	return new_ce;
 }
