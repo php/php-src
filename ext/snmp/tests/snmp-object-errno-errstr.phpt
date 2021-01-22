@@ -15,6 +15,7 @@ snmp_set_enum_print(false);
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 snmp_set_oid_output_format(SNMP_OID_OUTPUT_FULL);
+snmp_set_string_output_format(SNMP_STRING_OUTPUT_GUESS);
 
 echo "SNMP::ERRNO_NOERROR\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);

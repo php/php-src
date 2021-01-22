@@ -48,6 +48,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_oid_numeric_print arginfo_snmp_set_oid_output_format
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_string_output_format, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_snmp_set_string_output_format
+
 #define arginfo_snmp2_get arginfo_snmpget
 
 #define arginfo_snmp2_getnext arginfo_snmpget
@@ -171,6 +177,7 @@ ZEND_FUNCTION(snmp_get_quick_print);
 ZEND_FUNCTION(snmp_set_quick_print);
 ZEND_FUNCTION(snmp_set_enum_print);
 ZEND_FUNCTION(snmp_set_oid_output_format);
+ZEND_FUNCTION(snmp_set_string_output_format);
 ZEND_FUNCTION(snmp2_get);
 ZEND_FUNCTION(snmp2_getnext);
 ZEND_FUNCTION(snmp2_walk);
@@ -207,6 +214,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp_set_enum_print, arginfo_snmp_set_enum_print)
 	ZEND_FE(snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
 	ZEND_FALIAS(snmp_set_oid_numeric_print, snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print)
+	ZEND_FE(snmp_set_string_output_format, arginfo_snmp_set_string_output_format)
 	ZEND_FE(snmp2_get, arginfo_snmp2_get)
 	ZEND_FE(snmp2_getnext, arginfo_snmp2_getnext)
 	ZEND_FE(snmp2_walk, arginfo_snmp2_walk)

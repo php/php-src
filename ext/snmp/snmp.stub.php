@@ -23,6 +23,8 @@ function snmp_set_enum_print(bool $enable): bool {}
 
 function snmp_set_oid_output_format(int $format): bool {}
 
+function snmp_set_string_output_format(int $format): bool {}
+
 /** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $format): bool {}
 
