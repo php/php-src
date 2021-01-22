@@ -376,6 +376,11 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *proto_scope, zend_type proto_type,
 		bool register_unresolved) {
 	bool have_unresolved = 0;
+
+	if (CG(current_linking_class)) {
+		CG(current_linking_class)->ce_flags |= ZEND_ACC_NEEDS_VARIANCE_CHECKS;
+	}
+
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
 		 * for forward-compatibility reasons, as we may have named types in the future that
@@ -2378,7 +2383,10 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	 * to remove the class from the class table and throw an exception, because there is already
 	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
 	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
-	if (ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES)
+	 || ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+	  && CG(unlinked_uses)
+	  && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce) == SUCCESS)) {
 		zend_string *exception_str;
 		zval exception_zv;
 		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
@@ -2546,6 +2554,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 	zend_class_entry **interfaces = NULL;
 	zend_class_entry **traits_and_interfaces = NULL;
 	zend_class_entry *proto = NULL;
+	zend_class_entry *orig_linking_class;
 	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
 
@@ -2637,7 +2646,14 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 		}
 		/* Lazy class loading */
 		*pce = ce = zend_lazy_class_load(ce);
+		if (CG(unlinked_uses)
+		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
+			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+		}
 	}
+
+	orig_linking_class = CG(current_linking_class);
+	CG(current_linking_class) = ce;
 
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -2672,6 +2688,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 				report_variance_errors(ce);
 			}
 		}
+	}
+
+	CG(current_linking_class) = orig_linking_class;
+
+	if (ce->ce_flags & ZEND_ACC_NEEDS_VARIANCE_CHECKS) {
+		// TODO: Don't give up. Track and then re-play variance dependency checks ???
+		is_cachable = 0;
 	}
 
 	if (is_cachable) {
@@ -2737,6 +2760,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 {
 	inheritance_status status;
 	zend_class_entry *proto = NULL;
+	zend_class_entry *orig_linking_class;
 	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
 	UPDATE_IS_CACHABLE(parent_ce);
@@ -2778,6 +2802,9 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 			ce = zend_lazy_class_load(ce);
 		}
 
+		orig_linking_class = CG(current_linking_class);
+		CG(current_linking_class) = ce;
+
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 		if (parent_ce && parent_ce->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent_ce);
@@ -2788,6 +2815,8 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		}
 		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
 		ce->ce_flags |= ZEND_ACC_LINKED;
+
+		CG(current_linking_class) = orig_linking_class;
 
 		if (is_cachable) {
 			if (zend_inheritance_cache_add) {

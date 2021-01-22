@@ -285,6 +285,9 @@ typedef struct _zend_oparray_context {
 /* stored in opcache (may be partially)                   |     |     |     */
 #define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class needs variance checks.                           |     |     |     */
+#define ZEND_ACC_NEEDS_VARIANCE_CHECKS   (1 << 23) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
