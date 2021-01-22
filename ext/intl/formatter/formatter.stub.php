@@ -17,7 +17,7 @@ class NumberFormatter
      * @tentative-return-type
      * @alias numfmt_format
      */
-    public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
+    public function format(int|float|string $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
     /**
      * @param int $offset
