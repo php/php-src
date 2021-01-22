@@ -12,11 +12,11 @@ Erwin Poeze <erwin.poeze@gmail.com>
 //line 5
 $s = new SplFileObject(__FILE__);
 
-$s->seek(12);
+$s->seek(13);
 $s->next();
 var_dump($s->key());
 var_dump($s->valid());
 ?>
 --EXPECT--
-int(13)
+int(14)
 bool(false)

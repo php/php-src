@@ -87,14 +87,14 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-is_writable(): Argument #1 ($filename) must not contain any null bytes
-is_writeable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
+bool(false)
 -- Iteration 8 --
-is_writable(): Argument #1 ($filename) must not contain any null bytes
-is_writeable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
+bool(false)
 -- Iteration 9 --
-is_writable(): Argument #1 ($filename) must not contain any null bytes
-is_writeable(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
+bool(false)
 -- Iteration 10 --
 bool(true)
 bool(true)

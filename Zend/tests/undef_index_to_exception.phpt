@@ -42,5 +42,5 @@ array(0) {
 Undefined array key "key"
 array(0) {
 }
-Undefined array key "test"
+Undefined global variable $test
 Undefined variable $test

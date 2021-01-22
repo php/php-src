@@ -43,6 +43,9 @@ $fromUnicode["\x00\x00\x00\x7E"] = "\x7E";
 /* Likewise with 0x005C */
 $fromUnicode["\x00\x00\x00\x5C"] = "\x5C";
 
+/* U+203E is OVERLINE; convert to FULLWIDTH MACRON */
+$fromUnicode["\x00\x00\x20\x3E"] = "\xA1\xB1";
+
 findInvalidChars($validChars, $invalidChars, $truncated, array_fill_keys(range(0xA1, 0xFE), 2) + array(0x8E => 2, 0x8F => 3));
 
 /* In the JIS X 0212 character set, kuten code 0x2237 (EUC-JP 0x8FA2B7)

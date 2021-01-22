@@ -177,7 +177,7 @@ static void yy_pop_state(void)
 	zend_stack_del_top(&SCNG(state_stack));
 }
 
-static void yy_scan_buffer(char *str, unsigned int len)
+static void yy_scan_buffer(char *str, size_t len)
 {
 	YYCURSOR       = (YYCTYPE*)str;
 	YYLIMIT        = YYCURSOR + len;
@@ -571,7 +571,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 			}
 		}
 		SCNG(yy_start) = (unsigned char *)buf;
-		yy_scan_buffer(buf, (unsigned int)size);
+		yy_scan_buffer(buf, size);
 	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
 	}
@@ -601,7 +601,7 @@ END_EXTERN_C()
 static zend_op_array *zend_compile(int type)
 {
 	zend_op_array *op_array = NULL;
-	zend_bool original_in_compilation = CG(in_compilation);
+	bool original_in_compilation = CG(in_compilation);
 
 	CG(in_compilation) = 1;
 	CG(ast) = NULL;
@@ -669,9 +669,9 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 }
 
 ZEND_API zend_ast *zend_compile_string_to_ast(
-		zend_string *code, zend_arena **ast_arena, const char *filename) {
+		zend_string *code, zend_arena **ast_arena, zend_string *filename) {
 	zval code_zv;
-	zend_bool original_in_compilation;
+	bool original_in_compilation;
 	zend_lex_state original_lex_state;
 	zend_ast *ast;
 
@@ -737,11 +737,10 @@ zend_op_array *compile_filename(int type, zval *filename)
 	return retval;
 }
 
-ZEND_API void zend_prepare_string_for_scanning(zval *str, const char *filename)
+ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename)
 {
 	char *buf;
 	size_t size, old_len;
-	zend_string *new_compiled_filename;
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
@@ -772,11 +771,8 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, const char *filename)
 		}
 	}
 
-	yy_scan_buffer(buf, (unsigned int)size);
-
-	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
-	zend_set_compiled_filename(new_compiled_filename);
-	zend_string_release_ex(new_compiled_filename, 0);
+	yy_scan_buffer(buf, size);
+	zend_set_compiled_filename(filename);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
@@ -809,6 +805,7 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
 	zval tmp;
+	zend_string *filename_str;
 
 	if (ZSTR_LEN(source_string) == 0) {
 		return NULL;
@@ -817,7 +814,9 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 	ZVAL_STR_COPY(&tmp, source_string);
 
 	zend_save_lexical_state(&original_lex_state);
-	zend_prepare_string_for_scanning(&tmp, filename);
+	filename_str = zend_string_init(filename, strlen(filename), 0);
+	zend_prepare_string_for_scanning(&tmp, filename_str);
+	zend_string_release(filename_str);
 	BEGIN(ST_IN_SCRIPTING);
 	op_array = zend_compile(ZEND_EVAL_CODE);
 
@@ -851,13 +850,15 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 	return SUCCESS;
 }
 
-void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *str_name)
+void highlight_string(zend_string *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, const char *filename)
 {
 	zend_lex_state original_lex_state;
 	zval str_zv;
+	zend_string *filename_str = zend_string_init(filename, strlen(filename), 0);
 	ZVAL_STR_COPY(&str_zv, str);
 	zend_save_lexical_state(&original_lex_state);
-	zend_prepare_string_for_scanning(&str_zv, str_name);
+	zend_prepare_string_for_scanning(&str_zv, filename_str);
+	zend_string_release(filename_str);
 	BEGIN(INITIAL);
 	zend_highlight(syntax_highlighter_ini);
 	if (SCNG(script_filtered)) {
@@ -1017,7 +1018,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 						/* cache where we started so we can parse after validating */
 						char *start = s + 1;
 						size_t len = 0;
-						zend_bool valid = 1;
+						bool valid = 1;
 						unsigned long codepoint;
 
 						if (*start != '{') {
@@ -1157,9 +1158,9 @@ static const char *next_newline(const char *str, const char *end, size_t *newlin
 	return NULL;
 }
 
-static zend_bool strip_multiline_string_indentation(
-	zval *zendlval, int indentation, zend_bool using_spaces,
-	zend_bool newline_at_start, zend_bool newline_at_end)
+static bool strip_multiline_string_indentation(
+	zval *zendlval, int indentation, bool using_spaces,
+	bool newline_at_start, bool newline_at_end)
 {
 	const char *str = Z_STRVAL_P(zendlval), *end = str + Z_STRLEN_P(zendlval);
 	char *copy = Z_STRVAL_P(zendlval);
@@ -1366,6 +1367,7 @@ DNUM	({LNUM}?"."{LNUM})|({LNUM}"."{LNUM}?)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
 BNUM	"0b"[01]+(_[01]+)*
+ONUM	"0o"[0-7]+(_[0-7]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
@@ -1558,7 +1560,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"?->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
-	return T_NULLSAFE_OBJECT_OPERATOR;
+	RETURN_TOKEN(T_NULLSAFE_OBJECT_OPERATOR);
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
@@ -1912,7 +1914,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* The +/- 2 skips "0b" */
 	size_t len = yyleng - 2;
 	char *end, *bin = yytext + 2;
-	zend_bool contains_underscores;
+	bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*bin == '0' || *bin == '_')) {
@@ -1950,11 +1952,61 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
+<ST_IN_SCRIPTING>{ONUM} {
+	/* The +/- 2 skips "0o" */
+	size_t len = yyleng - 2;
+	char *end, *octal = yytext + 2;
+	bool contains_underscores = (memchr(octal, '_', len) != NULL);
+
+	/* Skip any leading 0s */
+	while (len > 0 && (*octal == '0' || *octal == '_')) {
+		++octal;
+		--len;
+	}
+
+	if (len == 0) {
+		ZVAL_LONG(zendlval, 0);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+	}
+
+	if (contains_underscores) {
+		octal = estrndup(octal, len);
+		strip_underscores(octal, &len);
+	}
+
+	errno = 0;
+
+	ZVAL_LONG(zendlval, ZEND_STRTOL(octal, &end, 8));
+
+	ZEND_ASSERT(end == octal + len);
+
+	if (!errno) {
+		if (contains_underscores) {
+			efree(octal);
+		}
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+	}
+
+	/* Overflow */
+	ZEND_ASSERT(errno == ERANGE);
+	/* Reset errno */
+	errno = 0;
+
+	/* zend_oct_strtod skips leading '0' */
+	ZVAL_DOUBLE(zendlval, zend_oct_strtod(octal, (const char **)&end));
+	ZEND_ASSERT(!errno);
+	ZEND_ASSERT(end == octal + len);
+	if (contains_underscores) {
+		efree(octal);
+	}
+	RETURN_TOKEN_WITH_VAL(T_DNUMBER);
+}
+
 <ST_IN_SCRIPTING>{LNUM} {
 	size_t len = yyleng;
 	char *end, *lnum = yytext;
-	zend_bool is_octal = lnum[0] == '0';
-	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
+	bool is_octal = lnum[0] == '0';
+	bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
 	if (contains_underscores) {
 		lnum = estrndup(lnum, len);
@@ -2017,7 +2069,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	/* The +/- 2 skips "0x" */
 	size_t len = yyleng - 2;
 	char *end, *hex = yytext + 2;
-	zend_bool contains_underscores;
+	bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*hex == '0' || *hex == '_')) {
@@ -2071,7 +2123,7 @@ string:
 	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
 
-<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
+<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM}|{ONUM} { /* Offset must be treated as a string */
 	if (yyleng == 1) {
 		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext)));
 	} else {
@@ -2084,7 +2136,7 @@ string:
 	const char *end;
 	size_t len = yyleng;
 	char *dnum = yytext;
-	zend_bool contains_underscores = (memchr(dnum, '_', len) != NULL);
+	bool contains_underscores = (memchr(dnum, '_', len) != NULL);
 
 	if (contains_underscores) {
 		dnum = estrndup(dnum, len);
@@ -2522,7 +2574,7 @@ skip_escape_conversion:
 	unsigned char *saved_cursor;
 	int bprefix = (yytext[0] != '<') ? 1 : 0, spacing = 0, indentation = 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
-	zend_bool is_heredoc = 1;
+	bool is_heredoc = 1;
 
 	CG(zend_lineno)++;
 	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -2903,7 +2955,7 @@ heredoc_scan_done:
 	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
-		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		zend_string *copy = Z_STR_P(zendlval);
 
 		if (!strip_multiline_string_indentation(
@@ -3004,7 +3056,7 @@ nowdoc_scan_done:
 	ZVAL_STRINGL(zendlval, yytext, yyleng - newline);
 
 	if (!EG(exception) && spacing != -1 && PARSER_MODE()) {
-		zend_bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+		bool newline_at_start = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
 		if (!strip_multiline_string_indentation(
 				zendlval, indentation, spacing == HEREDOC_USING_SPACES,
 				newline_at_start, newline != 0)) {

@@ -218,7 +218,7 @@ next_iter:
 /* }}} */
 
 /* {{{ sxe_prop_dim_read() */
-static zval *sxe_prop_dim_read(zend_object *object, zval *member, zend_bool elements, zend_bool attribs, int type, zval *rv)
+static zval *sxe_prop_dim_read(zend_object *object, zval *member, bool elements, bool attribs, int type, zval *rv)
 {
 	php_sxe_object *sxe;
 	char           *name;
@@ -386,7 +386,7 @@ static void change_node_zval(xmlNodePtr node, zend_string *value)
 /* }}} */
 
 /* {{{ sxe_property_write() */
-static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, zend_bool elements, zend_bool attribs, xmlNodePtr *pnewnode)
+static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, bool elements, bool attribs, xmlNodePtr *pnewnode)
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -674,7 +674,7 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 /* }}} */
 
 /* {{{ sxe_prop_dim_exists() */
-static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empty, zend_bool elements, zend_bool attribs)
+static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empty, bool elements, bool attribs)
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -795,7 +795,7 @@ static int sxe_dimension_exists(zend_object *object, zval *member, int check_emp
 /* }}} */
 
 /* {{{ sxe_prop_dim_delete() */
-static void sxe_prop_dim_delete(zend_object *object, zval *member, zend_bool elements, zend_bool attribs)
+static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements, bool attribs)
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -1479,7 +1479,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{
 }
 /* }}} */
 
-static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool recursive, zval *return_value) /* {{{ */
+static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, bool recursive, zval *return_value) /* {{{ */
 {
 	xmlAttrPtr  attr;
 
@@ -1509,7 +1509,7 @@ static void sxe_add_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool r
 /* {{{ Return all namespaces in use */
 SXE_METHOD(getNamespaces)
 {
-	zend_bool           recursive = 0;
+	bool           recursive = 0;
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
 
@@ -1533,7 +1533,7 @@ SXE_METHOD(getNamespaces)
 }
 /* }}} */
 
-static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, zend_bool recursive, zval *return_value) /* {{{ */
+static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, bool recursive, zval *return_value) /* {{{ */
 {
 	xmlNsPtr ns;
 
@@ -1557,7 +1557,7 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 /* {{{ Return all namespaces registered with document */
 SXE_METHOD(getDocNamespaces)
 {
-	zend_bool           recursive = 0, from_root = 1;
+	bool           recursive = 0, from_root = 1;
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
 
@@ -1593,7 +1593,7 @@ SXE_METHOD(children)
 	char           *nsprefix = NULL;
 	size_t             nsprefix_len = 0;
 	xmlNodePtr      node;
-	zend_bool       isprefix = 0;
+	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -1647,7 +1647,7 @@ SXE_METHOD(attributes)
 	char           *nsprefix = NULL;
 	size_t             nsprefix_len = 0;
 	xmlNodePtr      node;
-	zend_bool       isprefix = 0;
+	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2109,7 +2109,7 @@ sxe_object_clone(zend_object *object)
 	php_sxe_object *clone;
 	xmlNodePtr nodep = NULL;
 	xmlDocPtr docp = NULL;
-	zend_bool is_root_element = sxe->node && sxe->node->node && sxe->node->node->parent
+	bool is_root_element = sxe->node && sxe->node->node && sxe->node->node->parent
 		&& (sxe->node->node->parent->type == XML_DOCUMENT_NODE || sxe->node->node->parent->type == XML_HTML_DOCUMENT_NODE);
 
 	clone = php_sxe_object_new(sxe->zo.ce, sxe->fptr_count);
@@ -2267,7 +2267,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 	zend_function    *fptr_count;
-	zend_bool       isprefix = 0;
+	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2312,7 +2312,7 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 	zend_function    *fptr_count;
-	zend_bool       isprefix = 0;
+	bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
 		RETURN_THROWS();
@@ -2361,7 +2361,7 @@ SXE_METHOD(__construct)
 	size_t             data_len, ns_len = 0;
 	xmlDocPtr       docp;
 	zend_long            options = 0;
-	zend_bool       is_url = 0, isprefix = 0;
+	bool       is_url = 0, isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
 		RETURN_THROWS();

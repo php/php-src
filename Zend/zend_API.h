@@ -352,12 +352,12 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);
 ZEND_API zend_string *zend_get_callable_name(zval *callable);
-ZEND_API zend_bool zend_is_callable_at_frame(
+ZEND_API bool zend_is_callable_at_frame(
 		zval *callable, zend_object *object, zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
-ZEND_API zend_bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
-ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name);
+ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
+ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
+ZEND_API bool zend_make_callable(zval *callable, zend_string **callable_name);
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API int zend_get_module_started(const char *module_name);
 
@@ -376,7 +376,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 ZEND_API void zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value);
 ZEND_API void zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length);
 ZEND_API void zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value);
-ZEND_API void zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_bool value);
+ZEND_API void zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, bool value);
 ZEND_API void zend_declare_class_constant_double(zend_class_entry *ce, const char *name, size_t name_length, double value);
 ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_length);
 ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value);
@@ -403,11 +403,11 @@ ZEND_API zend_result zend_update_static_property_double(zend_class_entry *scope,
 ZEND_API zend_result zend_update_static_property_string(zend_class_entry *scope, const char *name, size_t name_length, const char *value);
 ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope, const char *name, size_t name_length, const char *value, size_t value_length);
 
-ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zend_bool silent, zval *rv);
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_bool silent, zval *rv);
+ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv);
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv);
 
-ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, zend_bool silent);
-ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent);
+ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent);
+ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, bool silent);
 
 ZEND_API const char *zend_get_type_by_const(int type);
 
@@ -445,6 +445,9 @@ ZEND_API void add_assoc_double_ex(zval *arg, const char *key, size_t key_len, do
 ZEND_API void add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
 ZEND_API void add_assoc_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
 ZEND_API void add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, const char *str, size_t length);
+ZEND_API void add_assoc_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr);
+ZEND_API void add_assoc_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj);
+ZEND_API void add_assoc_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key), __n)
@@ -455,6 +458,9 @@ ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval
 #define add_assoc_str(__arg, __key, __str) add_assoc_str_ex(__arg, __key, strlen(__key), __str)
 #define add_assoc_string(__arg, __key, __str) add_assoc_string_ex(__arg, __key, strlen(__key), __str)
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
+#define add_assoc_array(__arg, __key, __arr) add_assoc_array_ex(__arg, __key, strlen(__key), __arr)
+#define add_assoc_object(__arg, __key, __obj) add_assoc_object_ex(__arg, __key, strlen(__key), __obj)
+#define add_assoc_reference(__arg, __key, __ref) add_assoc_object_ex(__arg, __key, strlen(__key), __ref)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
 ZEND_API void add_index_long(zval *arg, zend_ulong index, zend_long n);
@@ -465,6 +471,9 @@ ZEND_API void add_index_double(zval *arg, zend_ulong index, double d);
 ZEND_API void add_index_str(zval *arg, zend_ulong index, zend_string *str);
 ZEND_API void add_index_string(zval *arg, zend_ulong index, const char *str);
 ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
+ZEND_API void add_index_array(zval *arg, zend_ulong index, zend_array *arr);
+ZEND_API void add_index_object(zval *arg, zend_ulong index, zend_object *obj);
+ZEND_API void add_index_reference(zval *arg, zend_ulong index, zend_reference *ref);
 
 static zend_always_inline zend_result add_index_zval(zval *arg, zend_ulong index, zval *value)
 {
@@ -473,12 +482,15 @@ static zend_always_inline zend_result add_index_zval(zval *arg, zend_ulong index
 
 ZEND_API zend_result add_next_index_long(zval *arg, zend_long n);
 ZEND_API zend_result add_next_index_null(zval *arg);
-ZEND_API zend_result add_next_index_bool(zval *arg, zend_bool b);
+ZEND_API zend_result add_next_index_bool(zval *arg, bool b);
 ZEND_API zend_result add_next_index_resource(zval *arg, zend_resource *r);
 ZEND_API zend_result add_next_index_double(zval *arg, double d);
 ZEND_API zend_result add_next_index_str(zval *arg, zend_string *str);
 ZEND_API zend_result add_next_index_string(zval *arg, const char *str);
 ZEND_API zend_result add_next_index_stringl(zval *arg, const char *str, size_t length);
+ZEND_API zend_result add_next_index_array(zval *arg, zend_array *arr);
+ZEND_API zend_result add_next_index_object(zval *arg, zend_object *obj);
+ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref);
 
 static zend_always_inline zend_result add_next_index_zval(zval *arg, zval *value)
 {
@@ -495,6 +507,9 @@ ZEND_API void add_property_double_ex(zval *arg, const char *key, size_t key_len,
 ZEND_API void add_property_str_ex(zval *arg, const char *key, size_t key_len, zend_string *str);
 ZEND_API void add_property_string_ex(zval *arg, const char *key, size_t key_len, const char *str);
 ZEND_API void add_property_stringl_ex(zval *arg, const char *key, size_t key_len,  const char *str, size_t length);
+ZEND_API void add_property_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr);
+ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj);
+ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key), __n)
@@ -505,6 +520,9 @@ ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, z
 #define add_property_str(__arg, __key, __str) add_property_str_ex(__arg, __key, strlen(__key), __str)
 #define add_property_string(__arg, __key, __str) add_property_string_ex(__arg, __key, strlen(__key), __str)
 #define add_property_stringl(__arg, __key, __str, __length) add_property_stringl_ex(__arg, __key, strlen(__key), __str, __length)
+#define add_property_array(__arg, __key, __arr) add_property_array_ex(__arg, __key, strlen(__key), __arr)
+#define add_property_object(__arg, __key, __obj) add_property_object_ex(__arg, __key, strlen(__key), __obj)
+#define add_property_reference(__arg, __key, __ref) add_property_reference_ex(__arg, __key, strlen(__key), __ref)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key), __value)
 
 
@@ -605,7 +623,7 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2);
 
-ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, zend_bool is_ref, int num_symbol_tables, ...);
+ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API zend_result zend_delete_global_variable(zend_string *name);
 
@@ -630,9 +648,9 @@ static zend_always_inline zend_result zend_forbid_dynamic_call(const char *func_
 
 ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce);
 
-ZEND_API zend_bool zend_is_iterable(zval *iterable);
+ZEND_API bool zend_is_iterable(zval *iterable);
 
-ZEND_API zend_bool zend_is_countable(zval *countable);
+ZEND_API bool zend_is_countable(zval *countable);
 
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
 		zval *default_value_zval, zend_internal_arg_info *arg_info);
@@ -779,11 +797,11 @@ END_EXTERN_C()
 
 /* May modify arg in-place. Will free arg in failure case (and take ownership in success case).
  * Prefer using the ZEND_TRY_ASSIGN_* macros over these APIs. */
-ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_result zend_try_assign_typed_ref_ex(zend_reference *ref, zval *zv, bool strict);
 ZEND_API zend_result zend_try_assign_typed_ref(zend_reference *ref, zval *zv);
 
 ZEND_API zend_result zend_try_assign_typed_ref_null(zend_reference *ref);
-ZEND_API zend_result zend_try_assign_typed_ref_bool(zend_reference *ref, zend_bool val);
+ZEND_API zend_result zend_try_assign_typed_ref_bool(zend_reference *ref, bool val);
 ZEND_API zend_result zend_try_assign_typed_ref_long(zend_reference *ref, zend_long lval);
 ZEND_API zend_result zend_try_assign_typed_ref_double(zend_reference *ref, double dval);
 ZEND_API zend_result zend_try_assign_typed_ref_empty_string(zend_reference *ref);
@@ -793,7 +811,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_stringl(zend_reference *ref, cons
 ZEND_API zend_result zend_try_assign_typed_ref_arr(zend_reference *ref, zend_array *arr);
 ZEND_API zend_result zend_try_assign_typed_ref_res(zend_reference *ref, zend_resource *res);
 ZEND_API zend_result zend_try_assign_typed_ref_zval(zend_reference *ref, zval *zv);
-ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, zend_bool strict);
+ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, bool strict);
 
 #define _ZEND_TRY_ASSIGN_NULL(zv, is_ref) do { \
 	zval *_zv = zv; \
@@ -1282,8 +1300,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
 		char *_error = NULL; \
-		ZEND_ATTRIBUTE_UNUSED zend_bool _dummy; \
-		zend_bool _optional = 0; \
+		ZEND_ATTRIBUTE_UNUSED bool _dummy; \
+		bool _optional = 0; \
 		int _error_code = ZPP_ERROR_OK; \
 		((void)_i); \
 		((void)_real_arg); \
@@ -1397,16 +1415,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_ITERABLE_EX(dest, 1)
 
 /* old "b" */
-#define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_BOOL_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_bool(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_BOOL_OR_NULL : Z_EXPECTED_BOOL; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_BOOL_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_BOOL(dest) \
 	Z_PARAM_BOOL_EX(dest, _dummy, 0, 0)
@@ -1415,15 +1430,12 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_BOOL_EX(dest, is_null, 1, 0)
 
 /* old "C" */
-#define Z_PARAM_CLASS_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_CLASS_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
 			_error_code = ZPP_ERROR_FAILURE; \
 			break; \
 		}
-
-#define Z_PARAM_CLASS_EX(dest, check_null, separate) \
-	Z_PARAM_CLASS_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_CLASS(dest) \
 	Z_PARAM_CLASS_EX(dest, 0, 0)
@@ -1480,16 +1492,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 1);
 
 /* old "d" */
-#define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_DOUBLE_OR_NULL : Z_EXPECTED_DOUBLE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_DOUBLE(dest) \
 	Z_PARAM_DOUBLE_EX(dest, _dummy, 0, 0)
@@ -1498,8 +1507,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_DOUBLE_EX(dest, is_null, 1, 0)
 
 /* old "f" */
-#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
 			if (!_error) { \
 				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
@@ -1509,9 +1518,6 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			} \
 			break; \
 		} \
-
-#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, separate) \
-	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, separate, separate)
 
 #define Z_PARAM_FUNC(dest_fci, dest_fcc) \
 	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0)
@@ -1567,16 +1573,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_ARRAY_OR_OBJECT_HT_EX(dest, 0, 0)
 
 /* old "l" */
-#define Z_PARAM_LONG_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_LONG_EX(dest, is_null, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_LONG_OR_NULL : Z_EXPECTED_LONG; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_LONG_EX2(dest, is_null, check_null, separate, separate)
 
 #define Z_PARAM_LONG(dest) \
 	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
@@ -1600,16 +1603,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_NUMBER_EX(dest, 0)
 
 /* old "o" */
-#define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_OBJECT_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_OBJECT_EX(dest, check_null, separate) \
-	Z_PARAM_OBJECT_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_OBJECT(dest) \
 	Z_PARAM_OBJECT_EX(dest, 0, 0)
@@ -1617,17 +1617,14 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_OBJECT_OR_NULL(dest) \
 	Z_PARAM_OBJECT_EX(dest, 1, 0)
 
-/* The same as Z_PARAM_OBJECT_EX2 except that dest is a zend_object rather than a zval */
-#define Z_PARAM_OBJ_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+/* The same as Z_PARAM_OBJECT_EX except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_OBJ_EX(dest, check_null, separate) \
-	Z_PARAM_OBJ_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_OBJ(dest) \
 	Z_PARAM_OBJ_EX(dest, 0, 0)
@@ -1636,8 +1633,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_EX(dest, 1, 0)
 
 /* old "O" */
-#define Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
@@ -1650,18 +1647,15 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			} \
 		}
 
-#define Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, check_null, separate) \
-	Z_PARAM_OBJECT_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
-
 #define Z_PARAM_OBJECT_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 0, 0)
 
 #define Z_PARAM_OBJECT_OF_CLASS_OR_NULL(dest, _ce) \
 	Z_PARAM_OBJECT_OF_CLASS_EX(dest, _ce, 1, 0)
 
-/* The same as Z_PARAM_OBJECT_OF_CLASS_EX2 except that dest is a zend_object rather than a zval */
-#define Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+/* The same as Z_PARAM_OBJECT_OF_CLASS_EX except that dest is a zend_object rather than a zval */
+#define Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
@@ -1673,9 +1667,6 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 				break; \
 			} \
 		}
-
-#define Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, check_null, separate) \
-	Z_PARAM_OBJ_OF_CLASS_EX2(dest, _ce, check_null, separate, separate)
 
 #define Z_PARAM_OBJ_OF_CLASS(dest, _ce) \
 	Z_PARAM_OBJ_OF_CLASS_EX(dest, _ce, 0, 0)
@@ -1698,16 +1689,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_OBJ_OF_CLASS_OR_LONG_EX(dest_obj, _ce, dest_long, is_null, 1)
 
 /* old "p" */
-#define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_PATH_EX(dest, dest_len, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_PATH_EX(dest, dest_len, check_null, separate) \
-	Z_PARAM_PATH_EX2(dest, dest_len, check_null, separate, separate)
 
 #define Z_PARAM_PATH(dest, dest_len) \
 	Z_PARAM_PATH_EX(dest, dest_len, 0, 0)
@@ -1716,16 +1704,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_PATH_EX(dest, dest_len, 1, 0)
 
 /* old "P" */
-#define Z_PARAM_PATH_STR_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_PATH_STR_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_PATH_STR_EX(dest, check_null, separate) \
-	Z_PARAM_PATH_STR_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_PATH_STR(dest) \
 	Z_PARAM_PATH_STR_EX(dest, 0, 0)
@@ -1734,16 +1719,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_PATH_STR_EX(dest, 1, 0)
 
 /* old "r" */
-#define Z_PARAM_RESOURCE_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_RESOURCE_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_resource(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_RESOURCE_EX(dest, check_null, separate) \
-	Z_PARAM_RESOURCE_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_RESOURCE(dest) \
 	Z_PARAM_RESOURCE_EX(dest, 0, 0)
@@ -1752,16 +1734,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_RESOURCE_EX(dest, 1, 0)
 
 /* old "s" */
-#define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_STRING_EX(dest, dest_len, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_STRING_EX(dest, dest_len, check_null, separate) \
-	Z_PARAM_STRING_EX2(dest, dest_len, check_null, separate, separate)
 
 #define Z_PARAM_STRING(dest, dest_len) \
 	Z_PARAM_STRING_EX(dest, dest_len, 0, 0)
@@ -1770,16 +1749,13 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_STRING_EX(dest, dest_len, 1, 0)
 
 /* old "S" */
-#define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
+#define Z_PARAM_STR_EX(dest, check_null, deref) \
+		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
-
-#define Z_PARAM_STR_EX(dest, check_null, separate) \
-	Z_PARAM_STR_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_STR(dest) \
 	Z_PARAM_STR_EX(dest, 0, 0)
@@ -1871,8 +1847,8 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 /* Inlined implementations shared by new and old parameter parsing APIs */
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, bool *dest);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest);
@@ -1882,7 +1858,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **des
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long);
 
-static zend_always_inline bool zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, bool check_null)
+static zend_always_inline bool zend_parse_arg_bool(zval *arg, bool *dest, bool *is_null, bool check_null)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1900,7 +1876,7 @@ static zend_always_inline bool zend_parse_arg_bool(zval *arg, zend_bool *dest, z
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_long(zval *arg, zend_long *dest, zend_bool *is_null, bool check_null)
+static zend_always_inline bool zend_parse_arg_long(zval *arg, zend_long *dest, bool *is_null, bool check_null)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1916,7 +1892,7 @@ static zend_always_inline bool zend_parse_arg_long(zval *arg, zend_long *dest, z
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_double(zval *arg, double *dest, zend_bool *is_null, bool check_null)
+static zend_always_inline bool zend_parse_arg_double(zval *arg, double *dest, bool *is_null, bool check_null)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -2051,7 +2027,7 @@ static zend_always_inline bool zend_parse_arg_array_ht(zval *arg, HashTable **de
 }
 
 static zend_always_inline bool zend_parse_arg_array_ht_or_long(
-	zval *arg, HashTable **dest_ht, zend_long *dest_long, zend_bool *is_null, bool allow_null
+	zval *arg, HashTable **dest_ht, zend_long *dest_long, bool *is_null, bool allow_null
 ) {
 	if (allow_null) {
 		*is_null = 0;
@@ -2100,7 +2076,7 @@ static zend_always_inline bool zend_parse_arg_obj(zval *arg, zend_object **dest,
 }
 
 static zend_always_inline bool zend_parse_arg_obj_or_long(
-	zval *arg, zend_object **dest_obj, zend_class_entry *ce, zend_long *dest_long, zend_bool *is_null, bool allow_null
+	zval *arg, zend_object **dest_obj, zend_class_entry *ce, zend_long *dest_long, bool *is_null, bool allow_null
 ) {
 	if (allow_null) {
 		*is_null = 0;
@@ -2183,7 +2159,7 @@ static zend_always_inline bool zend_parse_arg_array_ht_or_str(
 }
 
 static zend_always_inline bool zend_parse_arg_str_or_long(zval *arg, zend_string **dest_str, zend_long *dest_long,
-	zend_bool *is_null, bool allow_null)
+	bool *is_null, bool allow_null)
 {
 	if (allow_null) {
 		*is_null = 0;

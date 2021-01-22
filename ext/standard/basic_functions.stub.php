@@ -248,6 +248,8 @@ function array_chunk(array $array, int $length, bool $preserve_keys = false): ar
 
 function array_combine(array $keys, array $values): array {}
 
+function array_is_list(array $array): bool {}
+
 /* base64.c */
 
 function base64_encode(string $string): string {}
@@ -512,15 +514,15 @@ function headers_list(): array {}
 
 /* {{{ html.c */
 
-function htmlspecialchars(string $string, int $flags = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $flags = ENT_COMPAT): string {}
+function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE): string {}
 
-function html_entity_decode(string $string, int $flags = ENT_COMPAT, ?string $encoding = null): string {}
+function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null): string {}
 
-function htmlentities(string $string, int $flags = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
-function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_COMPAT, string $encoding = "UTF-8"): array {}
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, string $encoding = "UTF-8"): array {}
 
 /* }}} */
 
@@ -1012,7 +1014,7 @@ function iptcparse(string $iptc_block): array|false {}
 
 /* levenshtein.c */
 
-function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $repetition_cost = 1, int $deletion_cost = 1): int {}
+function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int {}
 
 /* link.c */
 

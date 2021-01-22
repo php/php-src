@@ -61,7 +61,7 @@
 
 /* Pop elements in unspecified order from worklist until it is empty */
 #define WHILE_WORKLIST(worklist, len, i) do { \
-	zend_bool _done = 0; \
+	bool _done = 0; \
 	while (!_done) { \
 		_done = 1; \
 		ZEND_BITSET_FOREACH(worklist, len, i) { \
@@ -158,12 +158,12 @@
 		} \
 	} while (0)
 
-static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
+static inline bool add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
 		|| (b < 0 && a < ZEND_LONG_MIN - b);
 }
 #if 0
-static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
+static inline bool sub_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a < ZEND_LONG_MIN + b)
 		|| (b < 0 && a > ZEND_LONG_MAX + b);
 }
@@ -513,7 +513,7 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	}
 }
 
-static inline zend_bool zend_abs_range(
+static inline bool zend_abs_range(
 		zend_long min, zend_long max, zend_long *abs_min, zend_long *abs_max) {
 	if (min == ZEND_LONG_MIN) {
 		/* Cannot take absolute value of LONG_MIN  */
@@ -539,12 +539,25 @@ static inline zend_long safe_shift_left(zend_long n, zend_long s) {
 	return (zend_long) ((zend_ulong) n << (zend_ulong) s);
 }
 
-static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
+static inline bool shift_left_overflows(zend_long n, zend_long s) {
 	/* This considers shifts that shift in the sign bit to be overflowing as well */
 	if (n >= 0) {
 		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;
 	} else {
 		return s >= SIZEOF_ZEND_LONG * 8 || safe_shift_left(n, s) > n;
+	}
+}
+
+/* If b does not divide a exactly, return the two adjacent values between which the real result
+ * lies. */
+static void float_div(zend_long a, zend_long b, zend_long *r1, zend_long *r2) {
+	*r1 = *r2 = a / b;
+	if (a % b != 0) {
+		if (*r2 < 0) {
+			(*r2)--;
+		} else {
+			(*r2)++;
+		}
 	}
 }
 
@@ -644,32 +657,36 @@ static int zend_inference_calc_binary_op_range(
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
 				if (op2_min <= 0 && op2_max >= 0) {
+					/* If op2 crosses zero, then floating point values close to zero might be
+					 * possible, which will result in arbitrarily large results. As such, we can't
+					 * do anything useful in that case. */
 					break;
 				}
 				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
 					/* Avoid ill-defined division, which may trigger SIGFPE. */
 					break;
 				}
-				t1 = op1_min / op2_min;
-				t2 = op1_min / op2_max;
-				t3 = op1_max / op2_min;
-				t4 = op1_max / op2_max;
-				// FIXME: more careful overflow checks?
+
+				zend_long t1_, t2_, t3_, t4_;
+				float_div(op1_min, op2_min, &t1, &t1_);
+				float_div(op1_min, op2_max, &t2, &t2_);
+				float_div(op1_max, op2_min, &t3, &t3_);
+				float_div(op1_max, op2_max, &t4, &t4_);
+
+				/* The only case in which division can "overflow" either a division by an absolute
+				 * value smaller than one, or LONG_MIN / -1 in particular. Both cases have already
+				 * been excluded above. */
 				if (OP1_RANGE_UNDERFLOW() ||
 					OP2_RANGE_UNDERFLOW() ||
 					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()  ||
-					t1 != (zend_long)((double)op1_min / (double)op2_min) ||
-					t2 != (zend_long)((double)op1_min / (double)op2_max) ||
-					t3 != (zend_long)((double)op1_max / (double)op2_min) ||
-					t4 != (zend_long)((double)op1_max / (double)op2_max)) {
+					OP2_RANGE_OVERFLOW()) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+					tmp->min = MIN(MIN(MIN(t1, t2), MIN(t3, t4)), MIN(MIN(t1_, t2_), MIN(t3_, t4_)));
+					tmp->max = MAX(MAX(MAX(t1, t2), MAX(t3, t4)), MAX(MAX(t1_, t2_), MAX(t3_, t4_)));
 				}
 				return 1;
 			}
@@ -1487,7 +1504,7 @@ int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa,
 	return 0;
 }
 
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, zend_bool underflow, zend_long min, zend_long max, zend_bool overflow)
+void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
 {
 	if (underflow) {
 		min = ZEND_LONG_MIN;
@@ -2329,7 +2346,7 @@ static zend_always_inline int _zend_update_type_info(
 			zend_ssa_op         *ssa_op,
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level,
-			zend_bool            update_worklist)
+			bool            update_worklist)
 {
 	uint32_t t1, t2;
 	uint32_t tmp, orig;
@@ -3462,7 +3479,7 @@ static zend_always_inline int _zend_update_type_info(
 				}
 
 				zend_class_entry *ce;
-				zend_bool ce_is_instanceof;
+				bool ce_is_instanceof;
 				tmp = zend_get_func_info(call_info, ssa, &ce, &ce_is_instanceof);
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				if (ce) {
@@ -3645,7 +3662,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
 	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
-	zend_bool update_worklist = 1;
+	bool update_worklist = 1;
 
 	while (!zend_bitset_empty(worklist, worklist_len)) {
 		j = zend_bitset_first(worklist, worklist_len);
@@ -3716,18 +3733,18 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	return SUCCESS;
 }
 
-static zend_bool is_narrowable_instr(zend_op *opline)  {
+static bool is_narrowable_instr(zend_op *opline)  {
 	return opline->opcode == ZEND_ADD || opline->opcode == ZEND_SUB
 		|| opline->opcode == ZEND_MUL || opline->opcode == ZEND_DIV;
 }
 
-static zend_bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
+static bool is_effective_op1_double_cast(zend_op *opline, zval *op2) {
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_SUB && Z_LVAL_P(op2) == 0)
 		|| (opline->opcode == ZEND_MUL && Z_LVAL_P(op2) == 1)
 		|| (opline->opcode == ZEND_DIV && Z_LVAL_P(op2) == 1);
 }
-static zend_bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
+static bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
 	/* In PHP it holds that (double)(0-$int) is bitwise identical to 0.0-(double)$int,
 	 * so allowing SUB here is fine. */
 	return (opline->opcode == ZEND_ADD && Z_LVAL_P(op1) == 0)
@@ -3754,7 +3771,7 @@ static zend_bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
  * avoid infinite loops. An iterative, worklist driven approach would be possible, but the state
  * management more cumbersome to implement, so we don't bother for now.
  */
-static zend_bool can_convert_to_double(
+static bool can_convert_to_double(
 		const zend_op_array *op_array, zend_ssa *ssa, int var_num,
 		zval *value, zend_bitset visited) {
 	zend_ssa_var *var = &ssa->vars[var_num];
@@ -3892,7 +3909,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	zend_bitset visited, worklist;
 	int i, v;
 	zend_op *opline;
-	zend_bool narrowed = 0;
+	bool narrowed = 0;
 	ALLOCA_FLAG(use_heap)
 
 	visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
@@ -4374,6 +4391,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_BEGIN_SILENCE:
 		case ZEND_END_SILENCE:
 		case ZEND_FREE:
+		case ZEND_FE_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:

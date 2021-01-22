@@ -7,7 +7,7 @@ gmp_strval() tests
 
 try {
     var_dump(gmp_strval(""));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {

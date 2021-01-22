@@ -47,6 +47,20 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+echo "\n\n-- Testing ( (low < high) && (high-low < step) ) for characters --\n";
+try {
+    var_dump(range('a', 'z', 100));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+echo "\n\n-- Testing ( (low > high) && (low-high < step) ) for characters --\n";
+try {
+    var_dump(range('z', 'a', 100));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 echo "\n-- Testing other conditions --\n";
 try {
     var_dump( range(-1, -2, 2) );
@@ -95,6 +109,14 @@ range(): Argument #3 ($step) must not exceed the specified range
 
 
 -- Testing ( (low > high) && (low-high < step) ) --
+range(): Argument #3 ($step) must not exceed the specified range
+
+
+-- Testing ( (low < high) && (high-low < step) ) for characters --
+range(): Argument #3 ($step) must not exceed the specified range
+
+
+-- Testing ( (low > high) && (low-high < step) ) for characters --
 range(): Argument #3 ($step) must not exceed the specified range
 
 -- Testing other conditions --

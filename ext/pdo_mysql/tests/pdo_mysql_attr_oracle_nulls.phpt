@@ -40,7 +40,7 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 1);
     $stmt = $db->query('SELECT VERSION() as _version');
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ((int)substr($row['_version'], 0, 1) >= 5)
+    if ((int)strtok($row['_version'], '.') >= 5)
         $have_procedures = true;
     else
         $have_procedures = false;
@@ -53,31 +53,13 @@ MySQLPDOTest::skip();
         // requires MySQL 5+
         $stmt = $db->prepare('CALL p()');
         $stmt->execute();
-        $expected = array(
-            array(
-                "z" => NULL,
-                "a" => NULL,
-                "b" => " ",
-                "c" => NULL,
-                "d" => " d",
-                "e" => " e",
-            ),
-        );
         do {
-            $tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if ($tmp != $expected) {
-                printf("[004] Expecting %s got %s\n",
-                    var_export($expected, true), var_export($tmp, true));
-            }
+            var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowset());
 
         $stmt->execute();
         do {
-            $tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if ($tmp != $expected) {
-                printf("[005] Expecting %s got %s\n",
-                    var_export($expected, true), var_export($tmp, true));
-            }
+            var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowset());
 
     }
@@ -123,5 +105,43 @@ array(1) {
     ["e"]=>
     string(3) "%se"
   }
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["z"]=>
+    NULL
+    ["a"]=>
+    NULL
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
+    NULL
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(2) " e"
+  }
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["z"]=>
+    NULL
+    ["a"]=>
+    NULL
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
+    NULL
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(2) " e"
+  }
+}
+array(0) {
 }
 done!

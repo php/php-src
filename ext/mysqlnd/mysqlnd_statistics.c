@@ -212,7 +212,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const bool persistent)
 {
 	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
@@ -228,7 +228,7 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const z
 
 /* {{{ mysqlnd_stats_end */
 PHPAPI void
-mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent)
+mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);

@@ -34,9 +34,9 @@ struct _zend_call_info {
 	zend_function          *callee_func;
 	zend_call_info         *next_caller;
 	zend_call_info         *next_callee;
-	zend_bool               recursive;
-	zend_bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
-	zend_bool               named_args;   /* Function has named arguments */
+	bool               recursive;
+	bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
+	bool               named_args;   /* Function has named arguments */
 	int                     num_args;
 	zend_send_arg_info      arg_info[1];
 };

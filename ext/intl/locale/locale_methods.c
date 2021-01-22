@@ -1171,7 +1171,7 @@ PHP_FUNCTION(locale_filter_matches)
 	char*       	cur_lang_tag    = NULL;
 	char*       	cur_loc_range   = NULL;
 
-	zend_bool 	boolCanonical 	= 0;
+	bool 	boolCanonical 	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 
 	intl_error_reset( NULL );
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(locale_lookup)
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;
-	zend_bool	boolCanonical	= 0;
+	bool	boolCanonical	= 0;
 	zend_string* 	result_str	= NULL;
 
 	intl_error_reset( NULL );

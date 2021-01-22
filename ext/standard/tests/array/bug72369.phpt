@@ -12,5 +12,5 @@ debug_zval_dump($a);
 --EXPECTF--
 array(1) refcount(%d){
   ["test"]=>
-  string(3) "xxx" refcount(%d)
+  string(3) "xxx" interned
 }

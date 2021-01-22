@@ -82,7 +82,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 }
 /* }}} */
 
-static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_error_info *einfo = &H->einfo;
@@ -91,8 +91,6 @@ static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
-
-	return 1;
 }
 
 static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
@@ -148,7 +146,7 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 	}
 }
 
-static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -171,11 +169,10 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
-	return 0;
 }
 /* }}} */
 
-static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static bool sqlite_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_stmt *S = ecalloc(1, sizeof(pdo_sqlite_stmt));
@@ -190,25 +187,25 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 	if (PDO_CURSOR_FWDONLY != pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY)) {
 		H->einfo.errcode = SQLITE_ERROR;
 		pdo_sqlite_error(dbh);
-		return 0;
+		return false;
 	}
 
-	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &S->stmt, &tail);
 	if (i == SQLITE_OK) {
-		return 1;
+		return true;
 	}
 
 	pdo_sqlite_error(dbh);
 
-	return 0;
+	return false;
 }
 
-static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
 
-	if (sqlite3_exec(H->db, sql, NULL, NULL, &errmsg) != SQLITE_OK) {
+	if (sqlite3_exec(H->db, ZSTR_VAL(sql), NULL, NULL, &errmsg) != SQLITE_OK) {
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
@@ -219,26 +216,25 @@ static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 	}
 }
 
-static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-	char *id;
 
-	id = php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db));
-	*len = strlen(id);
-	return id;
+	return php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db));
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */
-static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
+static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	*quoted = safe_emalloc(2, unquotedlen, 3);
-	sqlite3_snprintf(2*unquotedlen + 3, *quoted, "'%q'", unquoted);
-	*quotedlen = strlen(*quoted);
-	return 1;
+	char *quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+	/* TODO use %Q format? */
+	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
+	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);
+	efree(quoted);
+	return quoted_str;
 }
 
-static int sqlite_handle_begin(pdo_dbh_t *dbh)
+static bool sqlite_handle_begin(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -247,12 +243,12 @@ static int sqlite_handle_begin(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
-static int sqlite_handle_commit(pdo_dbh_t *dbh)
+static bool sqlite_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -261,12 +257,12 @@ static int sqlite_handle_commit(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
-static int sqlite_handle_rollback(pdo_dbh_t *dbh)
+static bool sqlite_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -275,9 +271,9 @@ static int sqlite_handle_rollback(pdo_dbh_t *dbh)
 		pdo_sqlite_error(dbh);
 		if (errmsg)
 			sqlite3_free(errmsg);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
@@ -295,19 +291,19 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 	return 1;
 }
 
-static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
 			sqlite3_busy_timeout(H->db, zval_get_long(val) * 1000);
-			return 1;
+			return true;
 		case PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES:
 			sqlite3_extended_result_codes(H->db, zval_get_long(val));
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 typedef struct {
@@ -497,7 +493,7 @@ static int php_sqlite3_collation_callback(void *context,
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
 	} else if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
-			convert_to_long_ex(&retval);
+			convert_to_long(&retval);
 		}
 		ret = 0;
 		if (Z_LVAL(retval) > 0) {
@@ -729,7 +725,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
-	NULL, /* in_transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	pdo_sqlite_get_gc
 };
 

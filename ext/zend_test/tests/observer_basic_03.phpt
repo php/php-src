@@ -1,7 +1,7 @@
 --TEST--
 Observer: Basic observability of includes
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -17,20 +17,20 @@ include __DIR__ . '/observer.inc';
 foo();
 ?>
 --EXPECTF--
-<!-- init '%s/observer_basic_03.php' -->
-<file '%s/observer_basic_03.php'>
+<!-- init '%s%eobserver_basic_03.php' -->
+<file '%s%eobserver_basic_03.php'>
   <!-- init foo() -->
   <foo>
 Foo
   </foo>
-  <!-- init '%s/observer.inc' -->
-  <file '%s/observer.inc'>
+  <!-- init '%s%eobserver.inc' -->
+  <file '%s%eobserver.inc'>
     <!-- init foo_observer_test() -->
     <foo_observer_test>
 foo_observer_test
     </foo_observer_test>
-  </file '%s/observer.inc'>
+  </file '%s%eobserver.inc'>
   <foo>
 Foo
   </foo>
-</file '%s/observer_basic_03.php'>
+</file '%s%eobserver_basic_03.php'>

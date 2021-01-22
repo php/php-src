@@ -190,12 +190,6 @@ dnl LIBZEND_OTHER_CHECKS
 dnl
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_ENABLE([zts],
-  [AS_HELP_STRING([--enable-zts],
-    [Enable thread safety])],
-  [ZEND_ZTS=$enableval],
-  [ZEND_ZTS=no])
-
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
 

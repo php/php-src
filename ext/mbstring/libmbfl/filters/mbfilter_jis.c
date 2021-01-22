@@ -33,13 +33,15 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter);
+
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
 	"JIS",
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_wchar,
 	&vtbl_wchar_jis
 };
@@ -50,7 +52,7 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_wchar,
 	&vtbl_wchar_2022jp
 };
@@ -61,7 +63,7 @@ const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -81,7 +83,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -170,10 +172,6 @@ retry:
 				}
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if (c == 0x1b) {
-			filter->status += 2;
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
 			w = (c1 << 8) | c;
 			w &= MBFL_WCSGROUP_MASK;
@@ -195,7 +193,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			goto retry;
 		}
 		break;
@@ -213,7 +211,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			goto retry;
 		}
@@ -232,7 +230,7 @@ retry:
 			filter->status = 0x90;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
@@ -254,7 +252,7 @@ retry:
 			filter->status = 0x20;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
 		}
@@ -268,17 +266,27 @@ retry:
 	return c;
 }
 
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
+{
+	if ((filter->status & 0xF) == 1) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+	return 0;
+}
+
 /*
  * wchar => JIS
  */
 int
 mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 {
-	int c1, s;
+	int s = 0;
 
-	s = 0;
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
+	} else if (c == 0x203E) { /* OVERLINE */
+		s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
 	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
@@ -287,20 +295,10 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
 	}
 	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s = c & MBFL_WCSPLANE_MASK;
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s = c & MBFL_WCSPLANE_MASK;
-			s |= 0x8080;
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */
@@ -396,8 +394,6 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */

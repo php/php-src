@@ -2944,25 +2944,25 @@ function toolset_setup_compiler()
 
 			WARNING("Using unknown MSVC version " + tmp);
 
-			AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 			DEFINE("PHP_COMPILER_SHORT", tmp);
 			AC_DEFINE('PHP_COMPILER_ID', tmp, "Compiler compatibility ID");
 		} else {
-			AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 			DEFINE("PHP_COMPILER_SHORT", COMPILER_NAME_SHORT.toLowerCase());
 			AC_DEFINE('PHP_COMPILER_ID', COMPILER_NAME_SHORT.toUpperCase(), "Compiler compatibility ID");
 		}
 	} else if (CLANG_TOOLSET) {
 		CLANGVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 		DEFINE("PHP_COMPILER_SHORT", "clang");
 		AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
 
 	} else if (ICC_TOOLSET) {
 		INTELVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 		DEFINE("PHP_COMPILER_SHORT", "icc");
 		AC_DEFINE('PHP_COMPILER_ID', "icc"); /* XXX something better were to write here */
 	}
@@ -3162,7 +3162,7 @@ function toolset_setup_arch()
 	} else {
 		STDOUT.WriteLine("  Detected 32-bit compiler");
 	}
-	AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+	AC_DEFINE('PHP_BUILD_ARCH', X64 ? 'x64' : 'x86', "Detected compiler architecture");
 	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 }
 

@@ -203,7 +203,7 @@ typedef struct _zend_utility_functions {
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
-	zend_bool html_errors;
+	bool html_errors;
 } zend_utility_values;
 
 typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
@@ -255,7 +255,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr);
 #define zend_print_variable(var) \
 	zend_print_zval((var), 0)
 
-ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD void zend_output_debug_string(bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);
 ZEND_API void zend_deactivate(void);
@@ -316,7 +316,7 @@ extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 
 /* If DTrace is available and enabled */
-extern ZEND_API zend_bool zend_dtrace_enabled;
+extern ZEND_API bool zend_dtrace_enabled;
 END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)

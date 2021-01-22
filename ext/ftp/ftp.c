@@ -232,7 +232,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 	SSL_CTX	*ctx = NULL;
 	long ssl_ctx_options = SSL_OP_ALL;
 	int err, res;
-	zend_bool retry;
+	bool retry;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -1361,7 +1361,7 @@ ftp_getresp(ftpbuf_t *ftp)
 int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
-	zend_bool retry = 0;
+	bool retry = 0;
 	SSL *handle = NULL;
 	php_socket_t fd;
 	size_t sent;
@@ -1460,7 +1460,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	int		n, nr_bytes;
 #ifdef HAVE_FTP_SSL
 	int err;
-	zend_bool retry = 0;
+	bool retry = 0;
 	SSL *handle = NULL;
 	php_socket_t fd;
 #endif
@@ -1745,7 +1745,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	SSL_CTX		*ctx;
 	SSL_SESSION *session;
 	int err, res;
-	zend_bool retry;
+	bool retry;
 #endif
 
 	if (data->fd != -1) {

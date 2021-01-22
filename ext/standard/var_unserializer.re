@@ -29,6 +29,10 @@
 #define VAR_WAKEUP_FLAG 1
 #define VAR_UNSERIALIZE_FLAG 2
 
+/* Each element is encoded using at least 2 characters. */
+#define IS_FAKE_ELEM_COUNT(num_elems, serialized_len) \
+	((num_elems) > (serialized_len) / 2)
+
 typedef struct {
 	zend_long used_slots;
 	void *next;
@@ -217,7 +221,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	zend_long i;
 	var_entries *var_hash = (*var_hashx)->entries.next;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
-	zend_bool delayed_call_failed = 0;
+	bool delayed_call_failed = 0;
 	zval wakeup_name;
 	ZVAL_UNDEF(&wakeup_name);
 
@@ -556,21 +560,22 @@ string_key:
 						/* This is a property with a declaration */
 						old_data = Z_INDIRECT_P(old_data);
 						info = zend_get_typed_property_info_for_slot(obj, old_data);
+						if (info) {
+							if (Z_ISREF_P(old_data)) {
+								/* If the value is overwritten, remove old type source from ref. */
+								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
+							}
+
+							if ((*var_hash)->ref_props) {
+								/* Remove old entry from ref_props table, if it exists. */
+								zend_hash_index_del(
+									(*var_hash)->ref_props, (zend_uintptr_t) old_data);
+							}
+						}
 						var_push_dtor(var_hash, old_data);
 						Z_TRY_DELREF_P(old_data);
 						ZVAL_COPY_VALUE(old_data, &d);
 						data = old_data;
-
-						if (UNEXPECTED(info)) {
-							/* Remember to which property this slot belongs, so we can add a
-							 * type source if it is turned into a reference lateron. */
-							if (!(*var_hash)->ref_props) {
-								(*var_hash)->ref_props = emalloc(sizeof(HashTable));
-								zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
-							}
-							zend_hash_index_update_ptr(
-								(*var_hash)->ref_props, (zend_uintptr_t) data, info);
-						}
 					} else {
 						var_push_dtor(var_hash, old_data);
 						data = zend_hash_update_ind(ht, Z_STR(key), &d);
@@ -589,6 +594,11 @@ string_key:
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
+			if (info && Z_ISREF_P(data)) {
+				/* Add type source even if we failed to unserialize.
+				 * The data is still stored in the property. */
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			}
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
@@ -600,8 +610,18 @@ string_key:
 				zval_ptr_dtor_nogc(&key);
 				goto failure;
 			}
+
 			if (Z_ISREF_P(data)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			} else {
+				/* Remember to which property this slot belongs, so we can add a
+				 * type source if it is turned into a reference lateron. */
+				if (!(*var_hash)->ref_props) {
+					(*var_hash)->ref_props = emalloc(sizeof(HashTable));
+					zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
+				}
+				zend_hash_index_update_ptr(
+					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
 			}
 		}
 
@@ -672,10 +692,10 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 #ifdef PHP_WIN32
 # pragma optimize("", off)
 #endif
-static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_bool has_unserialize)
+static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool has_unserialize)
 {
 	HashTable *ht;
-	zend_bool has_wakeup;
+	bool has_wakeup;
 
 	if (has_unserialize) {
 		zval ary, *tmp;
@@ -985,7 +1005,7 @@ use_double:
 	*p = YYCURSOR;
     if (!var_hash) return 0;
 
-	if (elements < 0 || elements >= HT_MAX_SIZE || elements > max - YYCURSOR) {
+	if (elements < 0 || elements >= HT_MAX_SIZE || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		return 0;
 	}
 
@@ -1018,9 +1038,9 @@ object ":" uiv ":" ["]	{
 	char *str;
 	zend_string *class_name;
 	zend_class_entry *ce;
-	zend_bool incomplete_class = 0;
-	zend_bool custom_object = 0;
-	zend_bool has_unserialize = 0;
+	bool incomplete_class = 0;
+	bool custom_object = 0;
+	bool has_unserialize = 0;
 
 	zval user_func;
 	zval retval;
@@ -1153,7 +1173,7 @@ object ":" uiv ":" ["]	{
 	}
 
 	elements = parse_iv2(*p + 2, p);
-	if (elements < 0 || elements > max - YYCURSOR) {
+	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}

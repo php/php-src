@@ -35,19 +35,19 @@ function ldap_sasl_bind($ldap, ?string $dn = null, ?string $password = null, ?st
 
 /**
  * @param resource|array $ldap
- * @return resource|false
+ * @return resource|array|false
  */
 function ldap_read($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
 
 /**
  * @param resource|array $ldap
- * @return resource|false
+ * @return resource|array|false
  */
 function ldap_list($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
 
 /**
  * @param resource|array $ldap
- * @return resource|false
+ * @return resource|array|false
  */
 function ldap_search($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
 
@@ -293,7 +293,7 @@ function ldap_exop_passwd($ldap, string $user = "", string $old_password = "", s
 
 #ifdef HAVE_LDAP_WHOAMI_S
 /** @param resource $ldap */
-function ldap_exop_whoami($ldap): string|bool {}
+function ldap_exop_whoami($ldap): string|false {}
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S

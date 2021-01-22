@@ -244,7 +244,7 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
 	return hash;
 } /* }}} */
 
-PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r) /* {{{ */
+PHPDBG_API bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r) /* {{{ */
 {
 	if (l && r) {
 		if (l->type == r->type) {
@@ -471,7 +471,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 		size_t least = 0L,
 		       received = 0L,
 		       current = 0L;
-		zend_bool optional = 0;
+		bool optional = 0;
 
 		/* check for arg spec */
 		if (!(arg) || !(*arg)) {
@@ -659,7 +659,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	return NULL;
 } /* }}} */
 
-static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
+static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, bool allow_async_unsafe) {
 	const phpdbg_command_t *handler = NULL;
 	phpdbg_param_t *top = (phpdbg_param_t *) stack->next;
 
@@ -712,7 +712,7 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, zend_bool allow_
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, bool allow_async_unsafe) {
 	phpdbg_param_t *top = stack;
 
 	if (stack->type != STACK_PARAM) {

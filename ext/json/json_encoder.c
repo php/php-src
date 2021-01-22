@@ -36,29 +36,10 @@ static int php_json_escape_string(
 
 static int php_json_determine_array_type(zval *val) /* {{{ */
 {
-	int i;
-	HashTable *myht = Z_ARRVAL_P(val);
+	zend_array *myht = Z_ARRVAL_P(val);
 
-	i = myht ? zend_hash_num_elements(myht) : 0;
-	if (i > 0) {
-		zend_string *key;
-		zend_ulong index, idx;
-
-		if (HT_IS_PACKED(myht) && HT_IS_WITHOUT_HOLES(myht)) {
-			return PHP_JSON_OUTPUT_ARRAY;
-		}
-
-		idx = 0;
-		ZEND_HASH_FOREACH_KEY(myht, index, key) {
-			if (key) {
-				return PHP_JSON_OUTPUT_OBJECT;
-			} else {
-				if (index != idx) {
-					return PHP_JSON_OUTPUT_OBJECT;
-				}
-			}
-			idx++;
-		} ZEND_HASH_FOREACH_END();
+	if (myht) {
+		return zend_array_is_list(myht) ? PHP_JSON_OUTPUT_ARRAY : PHP_JSON_OUTPUT_OBJECT;
 	}
 
 	return PHP_JSON_OUTPUT_ARRAY;

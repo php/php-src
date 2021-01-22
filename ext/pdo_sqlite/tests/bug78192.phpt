@@ -29,7 +29,7 @@ array(1) {
   [0]=>
   array(2) {
     ["id"]=>
-    string(2) "10"
+    int(10)
     ["name"]=>
     string(4) "test"
   }
@@ -38,7 +38,7 @@ array(1) {
   [0]=>
   array(3) {
     ["id"]=>
-    string(2) "10"
+    int(10)
     ["name"]=>
     string(4) "test"
     ["new_col"]=>

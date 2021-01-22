@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECTF--
-phar error: corrupt zip archive, zip file comment truncated in zip-based phar "%sfilecomment.zip"
+phar error: end of central directory not found in zip-based phar "%sfilecomment.zip"

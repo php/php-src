@@ -230,7 +230,7 @@ int fuzzer_shutdown_php()
 }
 
 int fuzzer_do_request_from_buffer(
-		char *filename, const char *data, size_t data_len, zend_bool execute)
+		char *filename, const char *data, size_t data_len, bool execute)
 {
 	int retval = FAILURE; /* failure by default */
 

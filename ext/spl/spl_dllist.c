@@ -764,7 +764,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 PHP_METHOD(SplDoublyLinkedList, offsetSet)
 {
 	zend_long index;
-	zend_bool index_is_null = 1;
+	bool index_is_null = 1;
 	zval *value;
 	spl_dllist_object *intern;
 
@@ -1193,8 +1193,8 @@ PHP_METHOD(SplDoublyLinkedList, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
 	/* members */
-	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
-	Z_TRY_ADDREF(tmp);
+	ZVAL_ARR(&tmp, zend_proptable_to_symtable(
+		zend_std_get_properties(&intern->std), /* always_duplicate */ 1));
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 } /* }}} */
 

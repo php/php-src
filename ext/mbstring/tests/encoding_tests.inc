@@ -158,7 +158,7 @@ function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array())
             $prefixes[substr($char, 0, $len)] = true;
     }
 
-    $varLength = function($prefix) use($valid, &$invalid, &$truncated) {
+    $varLength = function($prefix) use($valid, $prefixes, &$invalid, &$truncated, &$varLength) {
         for ($byte = 0; $byte < 256; $byte++) {
             $str = $prefix . chr($byte);
             if (!isset($valid[$str])) {
@@ -172,7 +172,7 @@ function findInvalidChars($valid, &$invalid, &$truncated, $startBytes = array())
         }
     };
 
-    $fixedLength = function($prefix, $remaining) use($valid, &$invalid, &$truncated, &$fixedLength) {
+    $fixedLength = function($prefix, $remaining) use($valid, $prefixes, &$invalid, &$truncated, &$fixedLength) {
         if ($remaining == 0) {
             if (!isset($valid[$prefix]))
                 $invalid[$prefix] = true;

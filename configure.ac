@@ -222,12 +222,6 @@ case $host_alias in
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
     ;;
-  *darwin*)
-    if test -n "$GCC"; then
-      AX_CHECK_COMPILE_FLAG([-no-cpp-precomp],
-                            [CPPFLAGS="$CPPFLAGS -no-cpp-precomp"])
-    fi
-    ;;
   *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV"
     ;;
@@ -797,6 +791,19 @@ if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
   ZEND_DEBUG=yes
 fi
 
+AC_ARG_ENABLE([zts],
+  [AS_HELP_STRING([--enable-zts],
+    [Enable thread safety])],
+  [ZEND_ZTS=$enableval],
+  [ZEND_ZTS=no])
+
+if test "$ZEND_ZTS" = "yes"; then
+  AC_DEFINE(ZTS, 1,[ ])
+  PHP_THREAD_SAFETY=yes
+else
+  PHP_THREAD_SAFETY=no
+fi
+
 PHP_ARG_ENABLE([rtld-now],
   [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
   [AS_HELP_STRING([--enable-rtld-now],
@@ -1136,13 +1143,6 @@ LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
 
-if test "$ZEND_ZTS" = "yes"; then
-  AC_DEFINE(ZTS,1,[ ])
-  PHP_THREAD_SAFETY=yes
-else
-  PHP_THREAD_SAFETY=no
-fi
-
 INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
 INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
 
@@ -1283,10 +1283,10 @@ if test -n "${PHP_BUILD_PROVIDER}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
 fi
 if test -n "${PHP_BUILD_COMPILER}"; then
-  AC_DEFINE_UNQUOTED(COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
+  AC_DEFINE_UNQUOTED(PHP_BUILD_COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
 fi
 if test -n "${PHP_BUILD_ARCH}"; then
-  AC_DEFINE_UNQUOTED(ARCHITECTURE,"$PHP_BUILD_ARCH",[build architecture])
+  AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)

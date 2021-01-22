@@ -125,13 +125,13 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql, 0);
+	result = mysql->m->use_result(mysql);
 
 	for (;;) {
 		zval *entry;
 		int errno;
 
-		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQLI);
+		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row);
 		if (Z_TYPE(row) != IS_ARRAY) {
 			zval_ptr_dtor(&row);
 			break;
@@ -195,7 +195,7 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -215,7 +215,7 @@ static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool qu
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -235,7 +235,7 @@ static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 

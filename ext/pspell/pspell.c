@@ -645,7 +645,7 @@ PHP_FUNCTION(pspell_config_create)
 PHP_FUNCTION(pspell_config_runtogether)
 {
 	zval *zcfg;
-	zend_bool runtogether;
+	bool runtogether;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &runtogether) == FAILURE) {
@@ -773,7 +773,7 @@ PHP_FUNCTION(pspell_config_repl)
 PHP_FUNCTION(pspell_config_save_repl)
 {
 	zval *zcfg;
-	zend_bool save;
+	bool save;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &save) == FAILURE) {

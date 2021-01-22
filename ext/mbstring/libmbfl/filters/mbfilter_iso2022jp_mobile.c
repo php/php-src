@@ -45,7 +45,7 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	"ISO-2022-JP",
 	mbfl_encoding_2022jp_kddi_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_kddi_wchar,
 	&vtbl_wchar_2022jp_kddi
 };
@@ -71,13 +71,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-#define sjistoidx(c1, c2) \
-        (((c1) > 0x9f) \
-        ? (((c1) - 0xc1) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)) \
-        : (((c1) - 0x81) * 188 + (c2) - (((c2) > 0x7e) ? 0x41 : 0x40)))
-#define idxtojis1(c) (((c) / 94) + 0x21)
-#define idxtojis2(c) (((c) % 94) + 0x21)
 
 #define SJIS_ENCODE(c1,c2,s1,s2)	\
 		do {						\
@@ -330,16 +323,7 @@ mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 		s1 = (c1 << 8) | c2;
 	}
 	if (s1 <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_WINCP932) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			s2 = 1;
-		} else if (c1 == MBFL_WCSPLANE_JIS0208) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-		} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-			s1 |= 0x8080;
-		} else if (c == 0xa5) {		/* YEN SIGN */
+		if (c == 0xa5) {		/* YEN SIGN */
 			s1 = 0x216f;	            /* FULLWIDTH YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
 			s1 = 0x2131;	/* FULLWIDTH MACRON */

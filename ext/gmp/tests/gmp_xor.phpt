@@ -13,7 +13,7 @@ var_dump(gmp_strval(gmp_xor(4545, -20)));
 
 try {
     var_dump(gmp_strval(gmp_xor("test", "no test")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

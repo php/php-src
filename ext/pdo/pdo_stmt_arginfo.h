@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 574055f1dbb6a1bee10e4476642a759e53ca2802 */
+ * Stub hash: 9d890849a08b43cb35e2cd8468aeaabfc0a7f218 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)

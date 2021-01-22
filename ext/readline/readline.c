@@ -414,7 +414,7 @@ static char *_readline_command_generator(const char *text, int state)
 	while ((entry = zend_hash_get_current_data(myht)) != NULL) {
 		zend_hash_move_forward(myht);
 
-		convert_to_string_ex(entry);
+		convert_to_string(entry);
 		if (strncmp (Z_STRVAL_P(entry), text, strlen(text)) == 0) {
 			return (strdup(Z_STRVAL_P(entry)));
 		}
@@ -448,6 +448,7 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 
 	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
+			SEPARATE_ARRAY(&_readline_array);
 			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {

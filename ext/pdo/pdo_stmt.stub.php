@@ -40,7 +40,7 @@ class PDOStatement implements IteratorAggregate
     /** @return mixed */
     public function fetchColumn(int $column = 0) {}
 
-    /** @return mixed */
+    /** @return object|false */
     public function fetchObject(?string $class = "stdClass", ?array $ctorArgs = null) {}
 
     /** @return mixed */

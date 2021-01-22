@@ -77,7 +77,7 @@ static ssize_t write_compressed_packet(
 #ifdef WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 	if (res == Z_OK) {
 		size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
-		zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
+		zend_uchar * decompressed_data = mnd_emalloc(decompressed_size);
 		int error = pfc->data->m.decode(decompressed_data, decompressed_size,
 										compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 		if (error == Z_OK) {
@@ -93,7 +93,7 @@ static ssize_t write_compressed_packet(
 		} else {
 			DBG_INF("error decompressing");
 		}
-		mnd_free(decompressed_data);
+		mnd_efree(decompressed_data);
 	}
 #endif /* WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY */
 	DBG_RETURN(bytes_sent);
@@ -387,7 +387,7 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			pfc->data->flags |= MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION;
 			break;
 		case MYSQL_SERVER_PUBLIC_KEY: {
-			const zend_bool pers = pfc->persistent;
+			const bool pers = pfc->persistent;
 			if (pfc->data->sha256_server_public_key) {
 				mnd_pefree(pfc->data->sha256_server_public_key, pers);
 			}
@@ -498,7 +498,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_PFC * pfc;

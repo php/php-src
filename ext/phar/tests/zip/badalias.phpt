@@ -1,5 +1,7 @@
 --TEST--
 Phar: invalid aliases
+--INI--
+phar.require_hash=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip no zlib"); ?>

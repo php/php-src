@@ -29,10 +29,10 @@ function zip_read($zip) {}
 function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
 
 /**
- * @param resource $zip_ent
+ * @param resource $zip_entry
  * @deprecated
  */
-function zip_entry_close($zip_ent): bool {}
+function zip_entry_close($zip_entry): bool {}
 
 /**
  * @param resource $zip_entry
@@ -111,17 +111,17 @@ class ZipArchive
     /** @return string|false */
     public function getArchiveComment(int $flags = 0) {}
 
-    /** @return bool|null */
+    /** @return bool */
     public function setCommentIndex(int $index, string $comment) {}
 
-    /** @return bool|null */
+    /** @return bool */
     public function setCommentName(string $name, string $comment) {}
 
 #ifdef HAVE_SET_MTIME
-    /** @return bool|null */
+    /** @return bool */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0) {}
 
-    /** @return bool|null */
+    /** @return bool */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0) {}
 #endif
 

@@ -21,7 +21,11 @@
 #include "php.h"
 
 #ifdef PHP_WIN32
-# define PHP_CURL_API __declspec(dllexport)
+# ifdef PHP_CURL_EXPORTS
+#  define PHP_CURL_API __declspec(dllexport)
+# else
+#  define PHP_CURL_API __declspec(dllimport)
+# endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 # define PHP_CURL_API __attribute__ ((visibility("default")))
 #else

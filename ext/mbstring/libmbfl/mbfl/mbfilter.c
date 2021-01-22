@@ -484,9 +484,9 @@ mbfl_strlen(const mbfl_string *string)
 	len = 0;
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 		len = string->len;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		len = string->len/2;
-	} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		len = string->len/4;
 	} else if (encoding->mblen_table != NULL) {
 		const unsigned char *mbtab = encoding->mblen_table;
@@ -837,14 +837,14 @@ mbfl_substr(
 	mbfl_string_init(result);
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
+	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4)) ||
 	   encoding->mblen_table != NULL) {
 		len = string->len;
 		if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 			start = from;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 			start = from*2;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 			start = from*4;
 		} else {
 			const unsigned char *mbtab = encoding->mblen_table;
@@ -869,9 +869,9 @@ mbfl_substr(
 			end = len;
 		} else if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 			end = start + length;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 			end = start + length*2;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 			end = start + length*4;
 		} else {
 			const unsigned char *mbtab = encoding->mblen_table;
@@ -984,18 +984,13 @@ mbfl_strcut(
 	mbfl_string_init(result);
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS
-				| MBFL_ENCTYPE_WCS2BE
-				| MBFL_ENCTYPE_WCS2LE
-				| MBFL_ENCTYPE_WCS4BE
-				| MBFL_ENCTYPE_WCS4LE))
-			|| encoding->mblen_table != NULL) {
+	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4)) || encoding->mblen_table != NULL) {
 		const unsigned char *start = NULL;
 		const unsigned char *end = NULL;
 		unsigned char *w;
 		size_t sz;
 
-		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+		if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 			from &= -2;
 
 			if (length >= string->len - from) {
@@ -1004,7 +999,7 @@ mbfl_strcut(
 
 			start = string->val + from;
 			end   = start + (length & -2);
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+		} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 			from &= -4;
 
 			if (length >= string->len - from) {

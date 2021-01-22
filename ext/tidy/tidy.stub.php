@@ -75,13 +75,13 @@ class tidy
     public function parseString(string $string, array|string|null $config = null, ?string $encoding = null) {}
 
     /**
-     * @return bool
+     * @return string|false
      * @alias tidy_repair_string
      */
     public static function repairString(string $string, array|string|null $config = null, ?string $encoding = null) {}
 
     /**
-     * @return bool
+     * @return string|false
      * @alias tidy_repair_file
      */
     public static function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}

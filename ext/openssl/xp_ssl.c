@@ -115,7 +115,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
 #endif
 
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
-extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw);
+extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
 extern int php_openssl_get_ssl_stream_data_index();
 static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b);
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
@@ -196,7 +196,7 @@ static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ 
 }
 /* }}} */
 
-static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init) /* {{{ */
+static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool is_init) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
@@ -334,7 +334,7 @@ static int php_openssl_x509_fingerprint_cmp(X509 *peer, const char *method, cons
 	return result;
 }
 
-static zend_bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
+static bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 {
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
@@ -378,7 +378,7 @@ static zend_bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 	return 0;
 }
 
-static zend_bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
+static bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
 	char *wildcard = NULL;
 	ptrdiff_t prefix_len;
@@ -413,7 +413,7 @@ static zend_bool php_openssl_matches_wildcard_name(const char *subjectname, cons
 }
 /* }}} */
 
-static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
+static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
 {
 	int i, len;
 	unsigned char *cert_name = NULL;
@@ -473,11 +473,11 @@ static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_na
 }
 /* }}} */
 
-static zend_bool php_openssl_matches_common_name(X509 *peer, const char *subject_name) /* {{{ */
+static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name) /* {{{ */
 {
 	char buf[1024];
 	X509_NAME *cert_name;
-	zend_bool is_match = 0;
+	bool is_match = 0;
 	int cert_name_len;
 
 	cert_name = X509_get_subject_name(peer);
@@ -627,7 +627,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 	zval *val;
-	zend_bool is_self_signed = 0;
+	bool is_self_signed = 0;
 
 
 	stream = (php_stream*)arg;
@@ -2292,7 +2292,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		php_stream_xport_param *xparam STREAMS_DC)  /* {{{ */
 {
 	int clisock;
-	zend_bool nodelay = 0;
+	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;

@@ -6,8 +6,7 @@ PDO_Firebird: Bug #74462 Returns only NULLs for boolean fields
 <?php
 require 'testdb.inc';
 
-@$dbh->exec('drop table atable');
-$dbh->exec('create table atable (id integer not null, abool boolean)');
+$dbh->exec('recreate table atable (id integer not null, abool boolean)');
 $dbh->exec('insert into atable (id, abool) values (1, true)');
 $dbh->exec('insert into atable (id, abool) values (2, false)');
 $dbh->exec('insert into atable (id, abool) values (3, null)');

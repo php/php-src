@@ -423,7 +423,7 @@ ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind ki
 }
 #endif
 
-static inline zend_bool is_power_of_two(uint32_t n) {
+static inline bool is_power_of_two(uint32_t n) {
 	return ((n != 0) && (n == (n & (~n + 1))));
 }
 
@@ -1375,7 +1375,7 @@ static ZEND_COLD void zend_ast_export_attribute_group(smart_str *str, zend_ast *
 	}
 }
 
-static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, int indent, zend_bool newlines) {
+static ZEND_COLD void zend_ast_export_attributes(smart_str *str, zend_ast *ast, int indent, bool newlines) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 
@@ -1497,7 +1497,7 @@ tail_call:
 		case ZEND_AST_METHOD:
 			decl = (zend_ast_decl *) ast;
 			if (decl->child[4]) {
-				zend_bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
+				bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
 				zend_ast_export_attributes(str, decl->child[4], indent, newlines);
 			}
 

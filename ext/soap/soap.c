@@ -71,7 +71,7 @@ static void delete_hashtable(void *hashtable);
 static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 
 #define SOAP_SERVER_BEGIN_CODE() \
-	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
+	bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
 	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
@@ -86,11 +86,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	SOAP_GLOBAL(soap_version) = _old_soap_version;
 
 #define SOAP_CLIENT_BEGIN_CODE() \
-	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
+	bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
 	zend_object* _old_error_object = Z_OBJ(SOAP_GLOBAL(error_object));\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
-	zend_bool _old_in_compilation = CG(in_compilation); \
+	bool _old_in_compilation = CG(in_compilation); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
 	zval *_old_stack_top = EG(vm_stack_top); \
 	int _bailout = 0;\
@@ -544,10 +544,10 @@ PHP_METHOD(SoapHeader, __construct)
 	zval *data = NULL;
 	zend_string *actor_str = NULL;
 	zend_long actor_long;
-	zend_bool actor_is_null = 1;
+	bool actor_is_null = 1;
 	char *name, *ns;
 	size_t name_len, ns_len;
-	zend_bool must_understand = 0;
+	bool must_understand = 0;
 	zval *this_ptr;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
@@ -689,7 +689,7 @@ PHP_METHOD(SoapVar, __construct)
 {
 	zval *data, *this_ptr;
 	zend_long type;
-	zend_bool type_is_null = 1;
+	bool type_is_null = 1;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
 	size_t stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
 
@@ -1823,7 +1823,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 
 static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
-	zend_bool _old_in_compilation;
+	bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
 	int _old_http_response_code;
 	char *_old_http_status_line;
@@ -1935,7 +1935,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 /* {{{ */
 PHP_FUNCTION(use_soap_error_handler)
 {
-	zend_bool handler = 1;
+	bool handler = 1;
 
 	ZVAL_BOOL(return_value, SOAP_GLOBAL(use_soap_error_handler));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &handler) == SUCCESS) {
@@ -2188,7 +2188,7 @@ PHP_METHOD(SoapClient, __construct)
 }
 /* }}} */
 
-static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, zend_bool one_way, zval *response) /* {{{ */
+static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, bool one_way, zval *response) /* {{{ */
 {
 	int    ret = TRUE;
 	char  *buf;
@@ -2361,7 +2361,7 @@ static void do_soap_call(zend_execute_data *execute_data,
  			fn = get_function(sdl, function);
  			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
-				zend_bool one_way = 0;
+				bool one_way = 0;
 
 				if (fn->responseName == NULL &&
 				    fn->responseParameters == NULL &&
@@ -2501,7 +2501,7 @@ static void verify_soap_headers_array(HashTable *ht) /* {{{ */
 /* }}} */
 
 /* {{{ Calls a SOAP function */
-void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_soap_call)
+void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 {
 	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
 	size_t function_len;
@@ -2515,7 +2515,7 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_soap_call)
 	zval *param;
 	int arg_count;
 	zval *tmp;
-	zend_bool free_soap_headers = 0;
+	bool free_soap_headers = 0;
 	zval *this_ptr;
 
 	if (is_soap_call) {
@@ -2758,7 +2758,7 @@ PHP_METHOD(SoapClient, __doRequest)
 	char      *location, *action;
 	size_t     location_size, action_size;
 	zend_long  version;
-	zend_bool  one_way = 0;
+	bool  one_way = 0;
 	zval      *this_ptr = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",

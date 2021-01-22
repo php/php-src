@@ -971,7 +971,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	const unsigned int error_reporting = EG(error_reporting);
 	size_t sent = 0;
 
 	DBG_ENTER("php_mysqlnd_cmd_write");
@@ -980,10 +979,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	  Every command starts a new TX and packet numbers are reset to 0.
 	*/
 	pfc->data->m.reset(pfc, stats, error_info);
-
-	if (error_reporting) {
-		EG(error_reporting) = 0;
-	}
 
 	MYSQLND_INC_CONN_STATISTIC(stats, STAT_PACKETS_SENT_CMD);
 
@@ -1017,10 +1012,6 @@ size_t php_mysqlnd_cmd_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		}
 	}
 end:
-	if (error_reporting) {
-		/* restore error reporting */
-		EG(error_reporting) = error_reporting;
-	}
 	if (!sent) {
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 	}
@@ -1083,14 +1074,9 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			*/
 			len = packet->header.size - 1;
 			packet->info_or_local_file.s = mnd_emalloc(len + 1);
-			if (packet->info_or_local_file.s) {
-				memcpy(packet->info_or_local_file.s, p, len);
-				packet->info_or_local_file.s[len] = '\0';
-				packet->info_or_local_file.l = len;
-			} else {
-				SET_OOM_ERROR(error_info);
-				ret = FAIL;
-			}
+			memcpy(packet->info_or_local_file.s, p, len);
+			packet->info_or_local_file.s[len] = '\0';
+			packet->info_or_local_file.l = len;
 			break;
 		case 0x00:
 			DBG_INF("UPSERT");
@@ -1110,14 +1096,9 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			/* Check for additional textual data */
 			if (packet->header.size  > (size_t) (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
 				packet->info_or_local_file.s = mnd_emalloc(len + 1);
-				if (packet->info_or_local_file.s) {
-					memcpy(packet->info_or_local_file.s, p, len);
-					packet->info_or_local_file.s[len] = '\0';
-					packet->info_or_local_file.l = len;
-				} else {
-					SET_OOM_ERROR(error_info);
-					ret = FAIL;
-				}
+				memcpy(packet->info_or_local_file.s, p, len);
+				packet->info_or_local_file.s[len] = '\0';
+				packet->info_or_local_file.l = len;
 			}
 			DBG_INF_FMT("affected_rows=%llu last_insert_id=%llu server_status=%u warning_count=%u",
 						packet->affected_rows, packet->last_insert_id,
@@ -1388,7 +1369,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	*/
 
 	/*
-	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol_aux
+	  We're allocating an extra byte, as php_mysqlnd_rowp_read_text_protocol
 	  needs to be able to append a terminating \0 for atoi/atof.
 	*/
 	prealloc_more_bytes = 1;
@@ -1455,7 +1436,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
-									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
+									  const bool as_int_or_float, MYSQLND_STATS * const stats)
 {
 	unsigned int i;
 	const zend_uchar * p = row_buffer->ptr;
@@ -1544,9 +1525,9 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
-php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
+php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats)
+									bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	unsigned int i;
 	zval *current_field, *end_field, *start_field;
@@ -1554,7 +1535,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 	const size_t data_size = row_buffer->size;
 	const zend_uchar * const packet_end = (zend_uchar*) p + data_size;
 
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
+	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
 
 	if (!fields) {
 		DBG_RETURN(FAIL);
@@ -1574,10 +1555,8 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 											  " bytes after end of packet", (p + len) - packet_end - 1);
 			DBG_RETURN(FAIL);
 		} else {
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			struct st_mysqlnd_perm_bind perm_bind =
 					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
-#endif
 			if (MYSQLND_G(collect_statistics)) {
 				enum_mysqlnd_collected_stats statistic;
 				switch (fields_metadata[i].type) {
@@ -1613,8 +1592,26 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				}
 				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
-			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
+				/*
+				  BIT fields are specially handled. As they come as bit mask, they have
+				  to be converted to human-readable representation.
+				*/
+				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
+				/*
+				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
+				  later in this function there will be an advancement.
+				*/
+				p -= len;
+				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
+					/* we are using the text protocol, so convert to string */
+					char tmp[22];
+					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
+					ZVAL_STRINGL(current_field, tmp, tmp_len);
+				} else if (Z_TYPE_P(current_field) == IS_STRING) {
+					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
+				}
+			} else if (as_int_or_float && perm_bind.php_type == IS_LONG) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
@@ -1634,7 +1631,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 #else
 						(uint64_t) _atoi64((char *) p);
 #endif
-					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
+					bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_ZEND_LONG==8
 					if (uns == TRUE && v > 9223372036854775807L)
@@ -1658,27 +1655,6 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				*(p + len) = '\0';
 				ZVAL_DOUBLE(current_field, atof((char *) p));
 				*(p + len) = save;
-			} else
-#endif /* MYSQLND_STRING_TO_INT_CONVERSION */
-			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
-				/*
-				  BIT fields are specially handled. As they come as bit mask, they have
-				  to be converted to human-readable representation.
-				*/
-				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, (const zend_uchar **) &p, len);
-				/*
-				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
-				  later in this function there will be an advancement.
-				*/
-				p -= len;
-				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
-					/* we are using the text protocol, so convert to string */
-					char tmp[22];
-					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
-					ZVAL_STRINGL(current_field, tmp, tmp_len);
-				} else if (Z_TYPE_P(current_field) == IS_STRING) {
-					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
-				}
 			} else {
 				ZVAL_STRINGL_FAST(current_field, (char *)p, len);
 			}
@@ -1691,39 +1667,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 /* }}} */
 
 
-/* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
-enum_func_status
-php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-										 const unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 const zend_bool as_int_or_float, MYSQLND_STATS * stats)
-{
-	enum_func_status ret;
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_rowp_read_text_protocol_c */
-enum_func_status
-php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
-									  const unsigned int field_count, const MYSQLND_FIELD * const fields_metadata,
-									  const zend_bool as_int_or_float, MYSQLND_STATS * const stats)
-{
-	enum_func_status ret;
-	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ php_mysqlnd_rowp_read */
-/*
-  if normal statements => packet->fields is created by this function,
-  if PS => packet->fields is passed from outside
-*/
 static enum_func_status
 php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
@@ -1784,33 +1728,10 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			DBG_INF_FMT("server_status=%u warning_count=%u", packet->server_status, packet->warning_count);
 		}
 	} else {
+		packet->eof = FALSE;
 		MYSQLND_INC_CONN_STATISTIC(stats,
 									packet->binary_protocol? STAT_ROWS_FETCHED_FROM_SERVER_PS:
 															 STAT_ROWS_FETCHED_FROM_SERVER_NORMAL);
-
-		packet->eof = FALSE;
-		/* packet->field_count is set by the user of the packet */
-
-		if (!packet->skip_extraction) {
-			if (!packet->fields) {
-				DBG_INF("Allocating packet->fields");
-				/*
-				  old-API will probably set packet->fields to NULL every time, though for
-				  unbuffered sets it makes not much sense as the zvals in this buffer matter,
-				  not the buffer. Constantly allocating and deallocating brings nothing.
-
-				  For PS - if stmt_store() is performed, thus we don't have a cursor, it will
-				  behave just like old-API buffered. Cursors will behave like a bit different,
-				  but mostly like old-API unbuffered and thus will populate this array with
-				  value.
-				*/
-				packet->fields = mnd_ecalloc(packet->field_count, sizeof(zval));
-			}
-		} else {
-			MYSQLND_INC_CONN_STATISTIC(stats,
-										packet->binary_protocol? STAT_ROWS_SKIPPED_PS:
-																 STAT_ROWS_SKIPPED_NORMAL);
-		}
 	}
 
 end:
@@ -1831,13 +1752,6 @@ php_mysqlnd_rowp_free_mem(void * _packet)
 		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer.ptr);
 		p->row_buffer.ptr = NULL;
 	}
-	/*
-	  Don't free packet->fields :
-	  - normal queries -> store_result() | fetch_row_unbuffered() will transfer
-	    the ownership and NULL it.
-	  - PS will pass in it the bound variables, we have to use them! and of course
-	    not free the array. As it is passed to us, we should not clean it ourselves.
-	*/
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2522,7 +2436,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum php_mysqlnd_server_command command,
 		const zend_uchar * const arg, const size_t arg_len,
-		const zend_bool silent,
+		const bool silent,
 
 		struct st_mysqlnd_connection_state * connection_state,
 		MYSQLND_ERROR_INFO * error_info,
@@ -2588,7 +2502,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
 						MYSQLND_ERROR_INFO * const error_info,
 						MYSQLND_UPSERT_STATUS * const upsert_status,
-						const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+						const bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 						MYSQLND_STRING * const last_message)
 {
 	enum_func_status ret = FAIL;
@@ -2682,9 +2596,9 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum mysqlnd_packet_type ok_packet,
-		const zend_bool silent,
+		const bool silent,
 		const enum php_mysqlnd_server_command command,
-		const zend_bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+		const bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
 		MYSQLND_ERROR_INFO	* error_info,
 		MYSQLND_UPSERT_STATUS * upsert_status,
@@ -2744,7 +2658,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_protocol_payload_decoder_factory_init */
 PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
-mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
+mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const bool persistent)
 {
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * ret;
 	DBG_ENTER("mysqlnd_protocol_payload_decoder_factory_init");
@@ -2761,7 +2675,7 @@ mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_F
 	DBG_ENTER("mysqlnd_protocol_payload_decoder_factory_free");
 
 	if (factory) {
-		zend_bool pers = factory->persistent;
+		bool pers = factory->persistent;
 		mnd_pefree(factory, pers);
 	}
 	DBG_VOID_RETURN;

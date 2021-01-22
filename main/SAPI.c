@@ -606,7 +606,7 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;

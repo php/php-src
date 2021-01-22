@@ -66,7 +66,7 @@ if test "$PHP_OPCACHE" != "no"; then
       esac
     fi
 
-    if test "$enable_zts" = "yes"; then
+    if test "$PHP_THREAD_SAFETY" = "yes"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 

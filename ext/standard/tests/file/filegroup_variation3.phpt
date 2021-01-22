@@ -75,8 +75,12 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-filegroup(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: filegroup(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-filegroup(): Argument #1 ($filename) must not contain any null bytes
+
+Warning: filegroup(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

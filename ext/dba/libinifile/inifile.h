@@ -45,9 +45,9 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip);
 int inifile_firstkey(inifile *dba);
 int inifile_nextkey(inifile *dba);
 int inifile_delete(inifile *dba, const key_type *key);
-int inifile_delete_ex(inifile *dba, const key_type *key, zend_bool *found);
+int inifile_delete_ex(inifile *dba, const key_type *key, bool *found);
 int inifile_replace(inifile *dba, const key_type *key, const val_type *val);
-int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *val, zend_bool *found);
+int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *val, bool *found);
 int inifile_append(inifile *dba, const key_type *key, const val_type *val);
 char *inifile_version();
 

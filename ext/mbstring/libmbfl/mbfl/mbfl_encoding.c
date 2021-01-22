@@ -161,11 +161,9 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_koi8u,
 	&mbfl_encoding_armscii8,
 	&mbfl_encoding_cp850,
-	&mbfl_encoding_jis_ms,
 	&mbfl_encoding_2022jp_2004,
 	&mbfl_encoding_2022jp_kddi,
 	&mbfl_encoding_cp50220,
-	&mbfl_encoding_cp50220raw,
 	&mbfl_encoding_cp50221,
 	&mbfl_encoding_cp50222,
 	NULL

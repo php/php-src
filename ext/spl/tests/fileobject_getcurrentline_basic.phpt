@@ -15,5 +15,5 @@ echo $s->getCurrentLine();
 echo $s->getCurrentLine();
 ?>
 --EXPECT--
+//line 2
 //line 3
-//line 4

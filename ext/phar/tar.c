@@ -242,11 +242,11 @@ int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alia
 	myphar->is_persistent = PHAR_G(persist);
 	/* estimate number of entries, can't be certain with tar files */
 	zend_hash_init(&myphar->manifest, 2 + (totalsize >> 12),
-		zend_get_hash_value, destroy_phar_manifest_entry, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, (bool)myphar->is_persistent);
 	zend_hash_init(&myphar->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
 	zend_hash_init(&myphar->virtual_dirs, 4 + (totalsize >> 11),
-		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -267,6 +267,15 @@ int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alia
 		}
 		memset(hdr->checksum, ' ', sizeof(hdr->checksum));
 		sum2 = phar_tar_checksum(buf, old?sizeof(old_tar_header):sizeof(tar_header));
+
+		if (old && sum2 != sum1) {
+			uint32_t sum3 = phar_tar_checksum(buf, sizeof(tar_header));
+			if (sum3 == sum1) {
+				/* apparently a broken tar which is in ustar format w/o setting the ustar marker */
+				sum2 = sum3;
+				old = 0;
+			}
+		}
 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));

@@ -22,7 +22,7 @@ typedef struct {
 } PHP_JOAAT_CTX;
 #define PHP_JOAAT_SPEC "l."
 
-PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context);
+PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args);
 PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, size_t inputLen);
 PHP_HASH_API void PHP_JOAATFinal(unsigned char digest[16], PHP_JOAAT_CTX * context);
 

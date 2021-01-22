@@ -128,7 +128,7 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context, const unsigned char 
 	ZEND_SECURE_ZERO(&context->state[8], sizeof(uint32_t) * 8);
 }
 
-PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context)
+PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 }

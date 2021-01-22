@@ -51,6 +51,7 @@ MySQLPDOTest::skip();
         }
 
         $db = new MyPDO(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS);
+        $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
         $db->exec('DROP TABLE IF EXISTS test');
         $db->exec('CREATE TABLE test(id INT)');
         $db->exec('INSERT INTO test(id) VALUES (1), (2)');

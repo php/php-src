@@ -85,7 +85,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue)
 	pefree(entry, 1);
 }
 
-static inline zend_bool is_placeholder(char c) {
+static inline bool is_placeholder(char c) {
 	return c == '?' || c == '*';
 }
 
@@ -221,7 +221,7 @@ typedef struct _browscap_parser_ctx {
 } browscap_parser_ctx;
 
 static zend_string *browscap_intern_str(
-		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
+		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
 	zend_string *interned = zend_hash_find_ptr(&ctx->str_interned, str);
 	if (interned) {
 		zend_string_addref(interned);
@@ -237,7 +237,7 @@ static zend_string *browscap_intern_str(
 }
 
 static zend_string *browscap_intern_str_ci(
-		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
+		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
 	zend_string *lcname;
 	zend_string *interned;
 	ALLOCA_FLAG(use_heap);
@@ -261,7 +261,7 @@ static zend_string *browscap_intern_str_ci(
 }
 
 static void browscap_add_kv(
-		browser_data *bdata, zend_string *key, zend_string *value, zend_bool persistent) {
+		browser_data *bdata, zend_string *key, zend_string *value, bool persistent) {
 	if (bdata->kv_used == bdata->kv_size) {
 		bdata->kv_size *= 2;
 		bdata->kv = safe_perealloc(bdata->kv, sizeof(browscap_kv), bdata->kv_size, 0, persistent);
@@ -679,14 +679,14 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 PHP_FUNCTION(get_browser)
 {
 	zend_string *agent_name = NULL, *lookup_browser_name;
-	zend_bool return_array = 0;
+	bool return_array = 0;
 	browser_data *bdata;
 	browscap_entry *found_entry = NULL;
 	HashTable *agent_ht;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_STR_OR_NULL(agent_name)
 		Z_PARAM_BOOL(return_array)
 	ZEND_PARSE_PARAMETERS_END();
 

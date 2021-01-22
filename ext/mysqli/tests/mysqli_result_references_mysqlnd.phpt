@@ -59,14 +59,14 @@ array(1) refcount(%d){
     ["row_copy"]=>
     array(2) refcount(1){
       ["id"]=>
-      string(1) "1" refcount(%d)
+      string(1) "1" interned
       ["label"]=>
-      string(1) "a" refcount(%d)
+      string(1) "a" interned
     }
     ["id_ref"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
     ["id_copy"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
   }
 }
 array(2) refcount(%d){
@@ -77,35 +77,35 @@ array(2) refcount(%d){
     ["row_copy"]=>
     array(2) refcount(%d){
       ["id"]=>
-      string(1) "1" refcount(%d)
+      string(1) "1" interned
       ["label"]=>
-      string(1) "a" refcount(%d)
+      string(1) "a" interned
     }
     ["id_ref"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
     ["id_copy"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
   }
   [1]=>
   array(5) refcount(%d){
     ["row_ref"]=>
     &array(2) refcount(%d){
       ["id"]=>
-      &string(1) "2" refcount(%d)
+      &string(1) "2" interned
       ["label"]=>
-      string(1) "b" refcount(%d)
+      string(1) "b" interned
     }
     ["row_copy"]=>
     array(2) refcount(%d){
       ["id"]=>
-      string(1) "2" refcount(%d)
+      string(1) "2" interned
       ["label"]=>
-      string(1) "b" refcount(%d)
+      string(1) "b" interned
     }
     ["id_ref"]=>
-    &string(1) "2" refcount(%d)
+    &string(1) "2" interned
     ["id_copy"]=>
-    string(1) "2" refcount(%d)
+    string(1) "2" interned
     ["id_copy_mod"]=>
     int(2)
   }

@@ -128,8 +128,8 @@ typedef struct _php_session_rfc1867_progress {
 	zend_long      update_step;
 	zend_long      next_update;
 	double    next_update_time;
-	zend_bool cancel_upload;
-	zend_bool apply_trans_sid;
+	bool cancel_upload;
+	bool apply_trans_sid;
 	size_t    content_length;
 
 	zval      data;                 /* the array exported to session data */
@@ -148,8 +148,8 @@ typedef struct _php_ps_globals {
 	zend_long cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
-	zend_bool  cookie_secure;
-	zend_bool  cookie_httponly;
+	bool  cookie_secure;
+	bool  cookie_httponly;
 	char *cookie_samesite;
 	const ps_module *mod;
 	const ps_module *default_mod;
@@ -178,10 +178,10 @@ typedef struct _php_ps_globals {
 	int mod_user_is_open;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
-	zend_bool auto_start;
-	zend_bool use_cookies;
-	zend_bool use_only_cookies;
-	zend_bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
+	bool auto_start;
+	bool use_cookies;
+	bool use_only_cookies;
+	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 
 	zend_long sid_length;
 	zend_long sid_bits_per_character;
@@ -189,17 +189,17 @@ typedef struct _php_ps_globals {
 	int define_sid;
 
 	php_session_rfc1867_progress *rfc1867_progress;
-	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
-	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
+	bool rfc1867_enabled; /* session.upload_progress.enabled */
+	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	char *rfc1867_prefix;  /* session.upload_progress.prefix */
 	char *rfc1867_name;    /* session.upload_progress.name */
 	zend_long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 
-	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	zend_bool lazy_write; /* omit session write when it is possible */
-	zend_bool in_save_handler; /* state if session is in save handler or not */
-	zend_bool set_handler;     /* state if session module i setting handler or not */
+	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	bool lazy_write; /* omit session write when it is possible */
+	bool in_save_handler; /* state if session is in save handler or not */
+	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 

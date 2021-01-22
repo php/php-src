@@ -80,7 +80,7 @@ PHP_FUNCTION(pdo_drivers)
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
-		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
+		add_next_index_stringl(return_value, pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -115,7 +115,7 @@ zend_module_entry pdo_module_entry = {
 ZEND_GET_MODULE(pdo)
 #endif
 
-PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
+PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
 		zend_error(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
@@ -127,7 +127,7 @@ PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
+	return zend_hash_str_add_ptr(&pdo_driver_hash, driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -137,13 +137,13 @@ PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 		return;
 	}
 
-	zend_hash_str_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
+	zend_hash_str_del(&pdo_driver_hash, driver->driver_name, driver->driver_name_len);
 }
 /* }}} */
 
 pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 {
-	return zend_hash_str_find_ptr(&pdo_driver_hash, (char*)name, namelen);
+	return zend_hash_str_find_ptr(&pdo_driver_hash, name, namelen);
 }
 /* }}} */
 
@@ -248,8 +248,9 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 }
 /* }}} */
 
+/* TODO Refactor */
 static const char digit_vec[] = "0123456789";
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
+PDO_API zend_string *php_pdo_int64_to_str(int64_t i64) /* {{{ */
 {
 	char buffer[65];
 	char outbuf[65] = "";
@@ -257,25 +258,23 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 	zend_long long_val;
 	char *dst = outbuf;
 
+	if (i64 == 0) {
+		return ZSTR_CHAR('0');
+	}
+
 	if (i64 < 0) {
 		i64 = -i64;
 		*dst++ = '-';
 	}
 
-	if (i64 == 0) {
-		*dst++ = '0';
-		*dst++ = '\0';
-		return estrdup(outbuf);
-	}
-
 	p = &buffer[sizeof(buffer)-1];
 	*p = '\0';
 
-	while ((pdo_uint64_t)i64 > (pdo_uint64_t)ZEND_LONG_MAX) {
-		pdo_uint64_t quo = (pdo_uint64_t)i64 / (unsigned int)10;
+	while ((uint64_t)i64 > (uint64_t)ZEND_LONG_MAX) {
+		uint64_t quo = (uint64_t)i64 / (unsigned int)10;
 		unsigned int rem = (unsigned int)(i64 - quo*10U);
 		*--p = digit_vec[rem];
-		i64 = (pdo_int64_t)quo;
+		i64 = (int64_t)quo;
 	}
 	long_val = (zend_long)i64;
 	while (long_val != 0) {
@@ -286,7 +285,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 	while ((*dst++ = *p++) != 0)
 		;
 	*dst = '\0';
-	return estrdup(outbuf);
+	return zend_string_init(outbuf, strlen(outbuf), 0);
 }
 /* }}} */
 

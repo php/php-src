@@ -46,7 +46,7 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	"Shift_JIS",
 	mbfl_encoding_sjis2004_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis2004_wchar,
 	&vtbl_wchar_sjis2004
 };
@@ -206,9 +206,14 @@ retry:
 				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 				break;
 			}
-		} else {
-			s1 = c1;
-			s2 = c;
+		} else { /* ISO-2022-JP-2004 */
+			if (c >= 0x21 && c <= 0x7E) {
+				s1 = c1;
+				s2 = c;
+			} else {
+				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+				break;
+			}
 		}
 		w1 = (s1 << 8) | s2;
 
@@ -316,6 +321,13 @@ retry:
 		} else {
 			c2 = c;
 		}
+
+		if (c2 < 0x21 || c2 > 0x7E) {
+			w = (c1 << 8) | c2 | MBFL_WCSGROUP_THROUGH;
+			CK((*filter->output_function)(w, filter->data));
+			break;
+		}
+
 		s1 = c1 - 0x21;
 		s2 = c2 - 0x21;
 
@@ -401,7 +413,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			goto retry;
 		}
 		break;
@@ -420,7 +432,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			goto retry;
 		}
@@ -442,7 +454,7 @@ retry:
 			filter->status = 0xa0;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
@@ -460,7 +472,7 @@ retry:
 			filter->status = 0;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
 		}
@@ -482,8 +494,8 @@ int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-int
-mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter) {
+int mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter)
+{
 	int k;
 	int c1, c2, s1, s2;
 
@@ -548,6 +560,12 @@ retry:
 		}
 	}
 
+	if (s1 <= 0 && filter->to->no_encoding == mbfl_no_encoding_2022jp_2004 && (c == 0x5C || c == 0x7E)) {
+		/* ISO-2022-JP-2004 can represent ASCII characters directly, so there is no need
+		 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde */
+		s1 = c;
+	}
+
 	/* check for major japanese chars: U+4E00 - U+9FFF */
 	if (s1 <= 0) {
 		for (k=0; k < uni2jis_tbl_len ;k++) {
@@ -590,10 +608,6 @@ retry:
 	}
 
 	if (s1 <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_JIS0213) {
-			s1 = c & MBFL_WCSPLANE_MASK;
-		}
 		if (c == 0) {
 			s1 = 0;
 		} else if (s1 <= 0) {
@@ -709,7 +723,9 @@ mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(s2, filter->data));
 	}
 
-	/* back to latin */
+	/* If we had switched to a different charset, go back to ASCII mode
+	 * This makes it possible to concatenate arbitrary valid strings
+	 * together and get a valid string */
 	if ((filter->status & 0xff00) != 0) {
 		CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
 		CK((*filter->output_function)(0x28, filter->data));		/* '(' */

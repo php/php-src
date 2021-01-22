@@ -1174,7 +1174,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 {
 	int color = 0, effective_status = status;
 	char *basic_buf, *message_buf = "", *error_buf = "";
-	zend_bool append_error_message = 0;
+	bool append_error_message = 0;
 
 	if (PG(last_error_message)) {
 		if (PG(last_error_type) & E_FATAL_ERRORS) {
@@ -2744,7 +2744,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
-		zend_bool ipv6 = strchr(server.host, ':');
+		bool ipv6 = strchr(server.host, ':');
 		php_cli_server_logf(
 			PHP_CLI_SERVER_LOG_PROCESS,
 			"PHP %s Development Server (http://%s%s%s:%d) started",

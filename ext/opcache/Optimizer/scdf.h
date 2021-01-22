@@ -89,7 +89,7 @@ static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
 	ZEND_UNREACHABLE();
 }
 
-static inline zend_bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {
+static inline bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {
 	uint32_t edge = scdf_edge(&scdf->ssa->cfg, from, to);
 	return zend_bitset_in(scdf->feasible_edges, edge);
 }

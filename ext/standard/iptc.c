@@ -179,7 +179,7 @@ PHP_FUNCTION(iptcembed)
 	zend_string *spoolbuf = NULL;
 	unsigned char *poi = NULL;
 	zend_stat_t sb;
-	zend_bool written = 0;
+	bool written = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(iptcdata, iptcdata_len)
@@ -203,7 +203,9 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		zend_fstat(fileno(fp), &sb);
+		if (zend_fstat(fileno(fp), &sb) != 0) {
+			RETURN_FALSE;
+		}
 
 		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
 		poi = (unsigned char*)ZSTR_VAL(spoolbuf);

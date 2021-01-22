@@ -1,7 +1,5 @@
 --TEST--
 PDO MySQL Bug #41997 (stored procedure call returning single rowset blocks future queries)
---XFAIL--
-nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
@@ -23,6 +21,7 @@ if ($version < 50000)
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $db->exec('DROP PROCEDURE IF EXISTS p');
 $db->exec('CREATE PROCEDURE p() BEGIN SELECT 1 AS "one"; END');
@@ -45,6 +44,8 @@ array(1) {
     ["one"]=>
     string(1) "1"
   }
+}
+array(0) {
 }
 array(3) {
   [0]=>

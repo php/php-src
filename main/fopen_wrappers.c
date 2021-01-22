@@ -342,7 +342,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	char *filename = NULL;
 	zend_string *resolved_path = NULL;
 	size_t length;
-	zend_bool orig_display_errors;
+	bool orig_display_errors;
 
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H

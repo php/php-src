@@ -21,7 +21,6 @@ jobs:
         ./configure ${{ parameters.configurationParameters }} \
             --enable-option-checking=fatal \
             --prefix=/usr/local \
-            --disable-phpdbg \
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \

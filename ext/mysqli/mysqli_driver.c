@@ -27,7 +27,7 @@
 #include "zend_exceptions.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
+static int name(mysqli_object *obj, zval *retval, bool quiet) \
 { \
 	ZVAL_BOOL(retval, MyG(value)); \
 	return SUCCESS; \
@@ -41,7 +41,7 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
+static int name(mysqli_object *obj, zval *retval, bool quiet) \
 { \
 	ZVAL_LONG(retval, MyG(value)); \
 	return SUCCESS; \
@@ -55,7 +55,7 @@ static int name(mysqli_object *obj, zval *value) \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
+static int name(mysqli_object *obj, zval *retval, bool quiet) \
 { \
 	ZVAL_STRING(retval, MyG(value)); \
 	return SUCCESS; \
@@ -79,7 +79,7 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, mysql_get_client_version());
 
@@ -88,7 +88,7 @@ static int driver_client_version_read(mysqli_object *obj, zval *retval, zend_boo
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static int driver_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 
@@ -97,7 +97,7 @@ static int driver_client_info_read(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static int driver_driver_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 

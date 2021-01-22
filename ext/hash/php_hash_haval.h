@@ -30,7 +30,7 @@ typedef struct {
 } PHP_HAVAL_CTX;
 #define PHP_HAVAL_SPEC "l8l2b128"
 
-#define PHP_HASH_HAVAL_INIT_DECL(p,b)	PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *); \
+#define PHP_HASH_HAVAL_INIT_DECL(p,b)	PHP_HASH_API void PHP_##p##HAVAL##b##Init(PHP_HAVAL_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *); \
 										PHP_HASH_API void PHP_HAVAL##b##Final(unsigned char*, PHP_HAVAL_CTX *);
 
 PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *, const unsigned char *, size_t);

@@ -1,7 +1,7 @@
 --TEST--
 Observer: Retvals are observable that are: refcounted, IS_VAR
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -31,8 +31,8 @@ bar('freed'); // Retval unused
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_retval_%d.php' -->
-<file '%s/observer_retval_%d.php'>
+<!-- init '%s%eobserver_retval_%d.php' -->
+<file '%s%eobserver_retval_%d.php'>
   <!-- init foo() -->
   <foo>
     <!-- init getObj() -->
@@ -49,4 +49,4 @@ echo 'Done' . PHP_EOL;
   <bar>
   </bar:'This gets freed in the return handler when unused'>
 Done
-</file '%s/observer_retval_%d.php'>
+</file '%s%eobserver_retval_%d.php'>

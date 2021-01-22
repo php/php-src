@@ -2,7 +2,7 @@
 Internal static methods should not be confused with global functions
 --SKIPIF--
 <?php
-if (!extension_loaded('zend-test')) die('skip requires zend-test');
+if (!extension_loaded('zend_test')) die('skip requires zend_test');
 ?>
 --FILE--
 <?php

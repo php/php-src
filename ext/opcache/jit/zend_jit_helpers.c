@@ -272,18 +272,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find_ex(ht, str, 1);
-
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
@@ -299,15 +288,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_w(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find_ex(ht, str, 1);
-
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -344,17 +325,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 	} while (0);
 
 	retval = zend_hash_find(ht, str);
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(str);
 		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
@@ -395,14 +366,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 	} while (0);
 
 	retval = zend_hash_find(ht, str);
-	if (retval) {
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -482,17 +446,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
-				ZVAL_NULL(result);
-				return;
-			}
-		}
-	} else {
+	if (!retval) {
 		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 		ZVAL_NULL(result);
 		return;
@@ -557,16 +511,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(result);
-				return;
-			}
-		}
-	} else {
+	if (!retval) {
 		ZVAL_NULL(result);
 		return;
 	}
@@ -628,18 +573,13 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-		}
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
-			retval = Z_REFVAL_P(retval);
-		}
-		return (Z_TYPE_P(retval) > IS_NULL);
-	} else {
+	if (!retval) {
 		return 0;
 	}
+	if (UNEXPECTED(Z_TYPE_P(retval) == IS_REFERENCE)) {
+		retval = Z_REFVAL_P(retval);
+	}
+	return Z_TYPE_P(retval) > IS_NULL;
 
 num_index:
 	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
@@ -701,18 +641,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
-					return NULL;
-				}
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		zend_string_addref(offset_key);
 		if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
@@ -785,15 +714,7 @@ str_index:
 		goto num_index;
 	}
 	retval = zend_hash_find(ht, offset_key);
-	if (retval) {
-		/* support for $GLOBALS[...] */
-		if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
-			retval = Z_INDIRECT_P(retval);
-			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-				ZVAL_NULL(retval);
-			}
-		}
-	} else {
+	if (!retval) {
 		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 	}
 	return retval;
@@ -1452,7 +1373,7 @@ check_indirect:
 	return ref;
 }
 
-static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
+static zend_always_inline bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
 
@@ -1510,12 +1431,12 @@ builtin_types:
 	return 0;
 }
 
-static zend_bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
+static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
 	void **cache_slot = CACHE_ADDR(opline->extended_value);
-	zend_bool ret;
+	bool ret;
 
 	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
 	if (UNEXPECTED(!ret)) {
@@ -1648,12 +1569,12 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 	zend_jit_fetch_obj_is_slow(zobj);
 }
 
-static zend_always_inline zend_bool promotes_to_array(zval *val) {
+static zend_always_inline bool promotes_to_array(zval *val) {
 	return Z_TYPE_P(val) <= IS_FALSE
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
 }
 
-static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
+static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
@@ -1695,7 +1616,7 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 		zend_get_unmangled_property_name(prop->name));
 }
 
-static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
+static zend_never_inline bool zend_handle_fetch_obj_flags(
 		zval *result, zval *ptr, zend_object *obj, zend_property_info *prop_info, uint32_t flags)
 {
 	switch (flags) {
@@ -1878,7 +1799,7 @@ static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference
 	return NULL;
 }
 
-static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, zend_bool inc)
+static ZEND_COLD void zend_jit_throw_incdec_ref_error(zend_reference *ref, bool inc)
 {
 	zend_property_info *error_prop = zend_jit_get_prop_not_accepting_double(ref);
 	/* Currently there should be no way for a typed reference to accept both int and double.

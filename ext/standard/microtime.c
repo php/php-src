@@ -45,7 +45,7 @@
 #ifdef HAVE_GETTIMEOFDAY
 static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zend_bool get_as_float = 0;
+	bool get_as_float = 0;
 	struct timeval tp = {0};
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)

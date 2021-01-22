@@ -117,7 +117,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
 	zend_ini_entry *ini_entry;
-	zend_bool first = 1;
+	bool first = 1;
 
 	if (module) {
 		module_number = module->module_number;

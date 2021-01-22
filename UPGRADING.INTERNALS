@@ -5,6 +5,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 2. Build system changes
 
 3. Module changes
+  a. ext/hash
 
 ========================
 1. Internal API changes
@@ -17,3 +18,46 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+  a. ext/hash
+    - The init signatures are extended with an additional `HashTable*`
+      argument. The passed HT is to contain the algorithm specific
+      configuration. If the an algorithm doesn't make use of any
+      additional configuration, the argument is to be marked with
+      ZEND_ATTRIBUTE_UNUSED.
+
+  b. ext/pdo
+    - The "preparer" callback now accepts a zend_string* instead of
+      char* + size_t pair the query string. Similarly, the query_string and
+      active_query_string members of pdo_stmt_t are now zend_string*.
+    - The way in which drivers provide results has changed: Previously,
+      the "describer" callback populated the "pdo_type" member in the
+      pdo_column_data structure, and the "get_col" callback then had to return
+      pointers to data of appropriate type.
+
+      In PHP 8.1, the "describer" callback no longer determines the pdo_type
+      (and this member has been removed from pdo_column_data). Instead, the
+      "get_col" callback accepts a zval pointer that may be populated with a
+      value of arbitrary type. This gives drivers more flexibility in
+      determining result types (e.g. based on whether a specific integer fits
+      the PHP integer type) and avoid awkward juggling of temporary buffers.
+
+      As the "describer" no longer determines pdo_type, the "get_column_meta"
+      function is now responsible for providing this information for use by
+      getColumnMeta(). The type provided here does not need to match the type
+      returned by get_col (in fact no corresponding type might exist, e.g. for
+      floats). It should be the closest logical equivalent for the column type.
+    - The transaction, set_attribute, and preparer handler's return type
+      has been formalized to bool instead of int.
+    - The check_liveness handler's return type has been formalized to zend_return
+      instead of int.
+    - The closer, and fetch_error handlers have been voidified.
+    - The quoter handler now returns the quoted string as zend_string* instead
+      of returning a boolean, and the quoted string as a pair of out params.
+      Similarly the unquoted string is now a zend_string* instead of a pair of
+      char* and size_t length.
+    - The doer handler now accepts a zend_string* instead of char* + size_t
+      pair for the SQL statement.
+    - The last_id handler now returns a zend_string* instead of returning a
+      char* and the length as an out param, and accepts a zend_string* instead
+      of char* for the optional sequence/table name.

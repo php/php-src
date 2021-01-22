@@ -1,7 +1,7 @@
 --TEST--
 Observer: Basic observability of closures
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -23,8 +23,8 @@ $foo($bar);
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_closure_%d.php' -->
-<file '%s/observer_closure_%d.php'>
+<!-- init '%s%eobserver_closure_%d.php' -->
+<file '%s%eobserver_closure_%d.php'>
   <!-- init {closure}() -->
   <{closure}>
 Answer
@@ -46,4 +46,4 @@ int(42)
     </{closure}>
   </{closure}>
 DONE
-</file '%s/observer_closure_%d.php'>
+</file '%s%eobserver_closure_%d.php'>

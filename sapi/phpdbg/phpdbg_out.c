@@ -122,7 +122,7 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static int format_converter(register buffy *odp, const char *fmt, zend_bool escape_xml, va_list ap) {
+static int format_converter(register buffy *odp, const char *fmt, bool escape_xml, va_list ap) {
 	char *sp;
 	char *bep;
 	int cc = 0;
@@ -130,7 +130,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 
 	char *s = NULL, *free_s = NULL;
 	size_t s_len;
-	zend_bool free_zcopy;
+	bool free_zcopy;
 	zval *zvp, zcopy;
 
 	int min_width = 0;
@@ -803,7 +803,7 @@ skip_output:
 	return (cc);
 }
 
-static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap) {
+static void strx_printv(int *ccp, char *buf, size_t len, const char *format, bool escape_xml, va_list ap) {
 	buffy od;
 	int cc;
 
@@ -832,14 +832,14 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zen
 	}
 }
 
-static int phpdbg_xml_vsnprintf(char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap) {
+static int phpdbg_xml_vsnprintf(char *buf, size_t len, const char *format, bool escape_xml, va_list ap) {
 	int cc;
 
 	strx_printv(&cc, buf, len, format, escape_xml, ap);
 	return (cc);
 }
 
-PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape_xml, va_list ap) {
+PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, bool escape_xml, va_list ap) {
 	va_list ap2;
 	int cc;
 
@@ -1137,7 +1137,7 @@ PHPDBG_API void phpdbg_free_err_buf(void) {
 	}
 }
 
-PHPDBG_API void phpdbg_activate_err_buf(zend_bool active) {
+PHPDBG_API void phpdbg_activate_err_buf(bool active) {
 	PHPDBG_G(err_buf).active = active;
 }
 

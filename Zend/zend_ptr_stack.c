@@ -21,7 +21,7 @@
 #include "zend_ptr_stack.h"
 #include <stdarg.h>
 
-ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent)
+ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, bool persistent)
 {
 	stack->top_element = stack->elements = NULL;
 	stack->top = stack->max = 0;
@@ -96,7 +96,7 @@ ZEND_API void zend_ptr_stack_reverse_apply(zend_ptr_stack *stack, void (*func)(v
 }
 
 
-ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements)
+ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), bool free_elements)
 {
 	zend_ptr_stack_apply(stack, func);
 	if (free_elements) {

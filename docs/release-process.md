@@ -278,15 +278,13 @@
     * If that fails for any non-trivially fixable reason, you can manually copy
       the old information to `include/releases.inc`.
 
- 2. Update `phpweb/include/version.inc` (X_Y=major_minor release number):
+ 2. Update $data['X.Y'] in `phpweb/include/version.inc`
+    (X.Y=major.minor release, e.g. '8.0'):
 
-    * `$PHP_X_Y_VERSION` to the correct version
-    * `$PHP_X_Y_DATE` to the release date
-    * `$PHP_X_Y_SHA256` array and update all the SHA256 sums
-    * `$PHP_X_Y_TAGS` array should include `security` if this is a security
-      release
-    * Make sure there are no outdated "notes" or edited "date" keys in the
-      `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
+    * `version` to the full version number (e.g. '8.0.1')
+    * `date` to the release date in `j M Y` format (e.g. '5 Jan 2021')
+    * `tags` array should include `security` if this is a security release
+    * `sha256` array and sub-elements for all SHA256 sums
 
  3. Create the release file (`releases/x_y_z.php`):
 
@@ -357,14 +355,13 @@
 
  1. Commit the new binaries to `phpweb/distributions/`
 
- 2. Update `phpweb/include/version.inc` (X_Y=major_minor release number):
+ 2. Update $data['X.Y'] in `phpweb/include/version.inc`
+    (X.Y=major.minor release, e.g. '8.0'):
 
-    * If only releasing for one OS, make sure you edit only those variables.
-    * `$PHP_X_Y_VERSION` to the correct version
-    * `$PHP_X_Y_DATE` to the release date
-    * `$PHP_X_Y_SHA256` array and update all the SHA256 sums
-    * Make sure there are no outdated "notes" or edited "date" keys in the
-      `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
+    * `version` to the full version number (e.g. '8.0.1-pl1')
+    * `date` to the release date in `j M Y` format (e.g. '9 Jan 2021')
+    * `tags` array should include `security` if this is a security release
+    * `sha256` array and sub-elements for all SHA256 sums
 
  3. Add a short notice to phpweb stating that there is a new release, and
     highlight the major important things (security fixes) and when it is

@@ -795,7 +795,7 @@ PHP_METHOD(DOMDocument, importNode)
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
 	int ret;
-	zend_bool recursive = 0;
+	bool recursive = 0;
 	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
 	int extended_recursive;
 

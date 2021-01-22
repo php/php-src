@@ -310,7 +310,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	zval args[4];
 	int call_result;
 	php_stream *stream = NULL;
-	zend_bool old_in_user_include;
+	bool old_in_user_include;
 
 	/* Try to catch bad usage without preventing flexibility */
 	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {

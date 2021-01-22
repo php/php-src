@@ -40,18 +40,18 @@ foreach ([false, true] as $emulate) {
 --EXPECT--
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 ==OK==

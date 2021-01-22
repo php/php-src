@@ -1,7 +1,7 @@
 --TEST--
 Observer: Basic observability of userland functions
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -26,8 +26,8 @@ foo();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_basic_01.php' -->
-<file '%s/observer_basic_01.php'>
+<!-- init '%s%eobserver_basic_01.php' -->
+<file '%s%eobserver_basic_01.php'>
   <!-- init foo() -->
   <foo>
 Foo
@@ -52,4 +52,4 @@ int(6)
     </bar>
   </foo>
 DONE
-</file '%s/observer_basic_01.php'>
+</file '%s%eobserver_basic_01.php'>

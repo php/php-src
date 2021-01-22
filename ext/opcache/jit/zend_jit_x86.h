@@ -318,7 +318,7 @@ static zend_always_inline zend_jit_addr _zend_jit_decode_op(zend_uchar op_type, 
 #define OP1_DATA_DEF_REG_ADDR() \
 	OP_REG_ADDR(opline + 1, op1_type, op1, op1_def)
 
-static zend_always_inline zend_bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
+static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
 {
 	if (addr1 == addr2) {
 		return 1;

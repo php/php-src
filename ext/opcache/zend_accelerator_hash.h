@@ -50,7 +50,7 @@ struct _zend_accel_hash_entry {
 	zend_accel_hash_entry *next;
 	void                  *data;
 	uint32_t               key_length;
-	zend_bool              indirect;
+	bool              indirect;
 };
 
 typedef struct _zend_accel_hash {
@@ -68,7 +68,7 @@ zend_accel_hash_entry* zend_accel_hash_update(
 		zend_accel_hash        *accel_hash,
 		const char             *key,
 		uint32_t               key_length,
-		zend_bool               indirect,
+		bool               indirect,
 		void                   *data);
 
 void* zend_accel_hash_find(
@@ -94,7 +94,7 @@ int zend_accel_hash_unlink(
 		const char             *key,
 		uint32_t               key_length);
 
-static inline zend_bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
+static inline bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
 {
 	if (accel_hash->num_entries == accel_hash->max_num_entries) {
 		return 1;

@@ -40,7 +40,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat);
 /* Compatibility. */
 typedef size_t php_stat_len;
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
+PHPAPI void php_clear_stat_cache(bool clear_realpath_cache, const char *filename, size_t filename_len);
 PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
 
 /* Switches for various filestat functions: */

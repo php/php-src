@@ -93,7 +93,7 @@ The following characters also have a meaning in the specifier string:
 * `|` - indicates that the remaining parameters are optional, they should be
   initialized to default values by the extension since they will not be touched
   by the parsing function if they are not passed to it.
-* `/` - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
+* `/` - use SEPARATE_ZVAL() on the parameter it follows
 * `!` - the parameter it follows can be of specified type or NULL. If NULL is
   passed and the output for such type is a pointer, then the output pointer is
   set to a native NULL pointer. For 'b', 'l' and 'd', an extra argument of type

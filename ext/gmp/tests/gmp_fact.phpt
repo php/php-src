@@ -8,7 +8,7 @@ gmp_fact() basic tests
 var_dump(gmp_strval(gmp_fact(0)));
 try {
     var_dump(gmp_strval(gmp_fact("")));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump(gmp_strval(gmp_fact("0")));

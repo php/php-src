@@ -26,7 +26,7 @@
 #define MYSQL_RES				MYSQLND_RES
 #define MYSQL_ROW				MYSQLND_ROW_C
 #define MYSQL					MYSQLND
-#define my_bool					zend_bool
+#define my_bool					bool
 #define my_ulonglong			uint64_t
 
 #define MYSQL_VERSION_ID		MYSQLND_VERSION_ID
@@ -80,7 +80,7 @@
 #define mysql_stmt_param_count(s)		mysqlnd_stmt_param_count((s))
 #define mysql_stmt_num_rows(s)			mysqlnd_stmt_num_rows((s))
 #define mysql_stmt_insert_id(s)			mysqlnd_stmt_insert_id((s))
-#define mysql_stmt_close(s)				mysqlnd_stmt_close((s))
+#define mysql_stmt_close(s)				mysqlnd_stmt_close((s), 0)
 #define mysql_stmt_bind_param(s,b)		mysqlnd_stmt_bind_param((s), (b))
 #define mysql_stmt_bind_result(s,b)		mysqlnd_stmt_bind_result((s), (b))
 #define mysql_stmt_errno(s)				mysqlnd_stmt_errno((s))

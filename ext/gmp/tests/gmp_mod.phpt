@@ -7,7 +7,7 @@ gmp_mod tests()
 
 try {
     var_dump(gmp_mod("",""));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump(gmp_mod(0,1));

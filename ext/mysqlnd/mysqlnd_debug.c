@@ -26,7 +26,7 @@ static const char * const mysqlnd_debug_empty_string = "";
 
 /* {{{ mysqlnd_debug::open */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, zend_bool reopen)
+MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, bool reopen)
 {
 	if (!self->file_name) {
 		return FAIL;
@@ -239,7 +239,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 
 /* FALSE - The DBG_ calls won't be traced, TRUE - will be traced */
 /* {{{ mysqlnd_debug::func_enter */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
 										  const char * const func_name, unsigned int func_name_len)
@@ -313,7 +313,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	char **func_name;
 	uint64_t * parent_non_own_time_ptr = NULL, * mine_non_own_time_ptr = NULL;
 	uint64_t mine_non_own_time = 0;
-	zend_bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
+	bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
 
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;

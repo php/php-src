@@ -478,7 +478,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval arg1, arg2;
 	zend_error_handling error_handling;
 
@@ -1467,7 +1467,7 @@ PHP_METHOD(FilesystemIterator, setFlags)
 /* {{{ Returns whether current entry is a directory and not '.' or '..' */
 PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
-	zend_bool allow_links = 0;
+	bool allow_links = 0;
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &allow_links) == FAILURE) {
@@ -2051,7 +2051,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	char *p1, *p2;
 	char *tmp_path;
 	size_t   tmp_path_len;
@@ -2196,7 +2196,7 @@ PHP_METHOD(SplFileObject, fgets)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 } /* }}} */
@@ -2727,7 +2727,7 @@ PHP_METHOD(SplFileObject, ftruncate)
 PHP_METHOD(SplFileObject, seek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zend_long line_pos;
+	zend_long line_pos, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &line_pos) == FAILURE) {
 		RETURN_THROWS();
@@ -2742,10 +2742,14 @@ PHP_METHOD(SplFileObject, seek)
 
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
-	while(intern->u.file.current_line_num < line_pos) {
+	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, 1) == FAILURE) {
-			break;
+			return;
 		}
+	}
+	if (line_pos > 0) {
+		intern->u.file.current_line_num++;
+		spl_filesystem_file_free_line(intern);
 	}
 } /* }}} */
 

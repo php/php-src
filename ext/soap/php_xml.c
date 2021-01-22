@@ -78,7 +78,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 {
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
-	zend_bool old_allow_url_fopen;
+	bool old_allow_url_fopen;
 
 /*
 	xmlInitParser();
@@ -89,7 +89,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	ctxt = xmlCreateFileParserCtxt(filename);
 	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
-		zend_bool old;
+		bool old;
 
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
@@ -137,7 +137,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 */
 	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	if (ctxt) {
-		zend_bool old;
+		bool old;
 
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;

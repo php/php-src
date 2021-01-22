@@ -35,7 +35,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char		*rules;
 	size_t		rules_len;
-	zend_bool	compiled	= 0;
+	bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;

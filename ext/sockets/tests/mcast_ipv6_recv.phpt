@@ -12,7 +12,8 @@ $s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
 if ($s === false) {
   die("skip unable to create socket");
 }
-$br = socket_bind($s, '::', 3000);
+$br = socket_bind($s, '::', 0);
+socket_getsockname($s, $unused, $port);
 /* On Linux, there is no route ff00::/8 by default on lo, which makes it
  * troublesome to send multicast traffic from lo, which we must since
  * we're dealing with interface-local traffic... */
@@ -23,7 +24,7 @@ $so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
 if ($so === false) {
     die('skip unable to join multicast group on any interface.');
 }
-$r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', 3000);
+$r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', $port);
 if ($r === false) {
     die('skip unable to send multicast packet.');
 }
@@ -59,8 +60,9 @@ var_dump($sends1);
 echo "creating receive socket\n";
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP) or die("err");
 var_dump($s);
-$br = socket_bind($s, '::0', 3000) or die("err");
+$br = socket_bind($s, '::0', 0) or die("err");
 var_dump($br);
+socket_getsockname($s, $unused, $port);
 
 $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
     "group"	=> $mcastaddr,
@@ -68,14 +70,14 @@ $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
 )) or die("err");
 var_dump($so);
 
-$r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $mcastaddr, 3000);
+$r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $mcastaddr, $port);
 var_dump($r);
 checktimeout($s, 500);
 $r = socket_recvfrom($s, $str, 2000, 0, $from, $fromPort);
 var_dump($r, $str, $from);
 $sblock = $from;
 
-$r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, 3000);
+$r = socket_sendto($sends1, $m = "initial packet", strlen($m), 0, $mcastaddr, $port);
 var_dump($r);
 
 $i = 0;
@@ -91,9 +93,9 @@ if ($i == 1) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", $port);
     var_dump($r);
 }
 if ($i == 2) {
@@ -103,7 +105,7 @@ if ($i == 2) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 3) {
@@ -114,9 +116,9 @@ if ($i == 3) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", $port);
     var_dump($r);
 }
 if ($i == 4) {
@@ -127,7 +129,7 @@ if ($i == 4) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 5) {
@@ -137,9 +139,9 @@ if ($i == 5) {
         "interface" => $interface,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", $port);
     var_dump($r);
 }
 if ($i == 6) {
@@ -150,7 +152,7 @@ if ($i == 6) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "mcast packet from desired source", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "mcast packet from desired source", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
 }
 if ($i == 7) {
@@ -161,9 +163,9 @@ if ($i == 7) {
         "source" => $sblock,
     ));
     var_dump($so);
-    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, $port);
     var_dump($r);
-    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", $port);
     var_dump($r);
 }
 if ($i == 8) {

@@ -37,10 +37,10 @@ PHP_MSHUTDOWN_FUNCTION(password);
 typedef struct _php_password_algo {
 	const char *name;
 	zend_string *(*hash)(const zend_string *password, zend_array *options);
-	zend_bool (*verify)(const zend_string *password, const zend_string *hash);
-	zend_bool (*needs_rehash)(const zend_string *password, zend_array *options);
+	bool (*verify)(const zend_string *password, const zend_string *hash);
+	bool (*needs_rehash)(const zend_string *password, zend_array *options);
 	int (*get_info)(zval *return_value, const zend_string *hash);
-	zend_bool (*valid)(const zend_string *hash);
+	bool (*valid)(const zend_string *hash);
 } php_password_algo;
 
 extern const php_password_algo php_password_algo_bcrypt;

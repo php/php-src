@@ -388,7 +388,7 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 	int ssa_vars_count = ssa->vars_count;
 	int i, root, use;
 	int *ees;
-	zend_bool has_allocations;
+	bool has_allocations;
 	int num_non_escaped;
 	ALLOCA_FLAG(use_heap)
 
@@ -469,7 +469,7 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 
 	/* 4. Process referential dependencies */
 	if (num_non_escaped) {
-		zend_bool changed;
+		bool changed;
 
 		do {
 			changed = 0;

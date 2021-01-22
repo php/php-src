@@ -34,8 +34,8 @@ typedef struct {
 #define php_random_int_silent(min, max, result) \
 	php_random_int((min), (max), (result), 0)
 
-PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw);
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw);
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
 #ifdef ZTS
 # define RANDOM_G(v) ZEND_TSRMG(random_globals_id, php_random_globals *, v)

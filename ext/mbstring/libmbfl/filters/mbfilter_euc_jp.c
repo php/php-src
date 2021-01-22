@@ -62,7 +62,7 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	"EUC-JP",
 	mbfl_encoding_euc_jp_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_eucjp_wchar,
 	&vtbl_wchar_eucjp
 };
@@ -192,10 +192,11 @@ static int mbfl_filt_conv_eucjp_wchar_flush(mbfl_convert_filter *filter)
 int
 mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 {
-	int s;
+	int s = 0;
 
-	s = 0;
-	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
+	if (c == 0xAF) { /* U+00AF is MACRON */
+		s = 0xA2B4; /* Use JIS X 0212 overline */
+	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];

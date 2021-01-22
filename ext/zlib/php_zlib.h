@@ -57,7 +57,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
 	zend_long output_compression_default;
-	zend_bool handler_registered;
+	bool handler_registered;
 	int compression_coding;
 ZEND_END_MODULE_GLOBALS(zlib);
 

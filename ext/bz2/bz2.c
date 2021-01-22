@@ -496,7 +496,7 @@ PHP_FUNCTION(bzdecompress)
 	zend_string *dest;
 	size_t source_len;
 	int error;
-	zend_bool small = 0;
+	bool small = 0;
 #ifdef PHP_WIN32
 	unsigned __int64 size = 0;
 #else

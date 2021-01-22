@@ -20,8 +20,10 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 ?>
 --EXPECTF--
 finfo_open(): Argument #2 ($magic_database) must not contain any null bytes
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
 
 Warning: finfo_open(%s123): Failed to open stream: No such file or directory in %s on line %d
 

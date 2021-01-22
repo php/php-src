@@ -47,14 +47,21 @@ MySQLPDOTest::skip();
                     $db = new PDO($uri, $user, $pass);
                 } catch (PDOException $e) {
                     $expected = array(
-                        "SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'",
-                        "SQLSTATE[42000] [1049] Unknown database 'letshopeinvalid'",
-                        "SQLSTATE[HY000] [2002] No such file or directory"
+                        "SQLSTATE[HY000] [1049]",
+                        "SQLSTATE[42000] [1049]",
+                        "SQLSTATE[HY000] [2002]"
                     );
+                    $isExpected = false;
+                    foreach ($expected as $prefix) {
+                        if (str_starts_with($e->getMessage(), $prefix)) {
+                            $isExpected = true;
+                        }
+                    }
+
                     printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), chr(0) test, %s\n",
                     $uri, $dsn,
                     $file, filesize($file), file_get_contents($file),
-                    (in_array($e->getMessage(), $expected) ? 'EXPECTED ERROR' : $e->getMessage()));
+                    ($isExpected ? 'EXPECTED ERROR' : $e->getMessage()));
                 }
                 unlink($file);
             }

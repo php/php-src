@@ -31,7 +31,7 @@ array(10) {
   ["native_usertype_id"]=>
   int(%d)
   ["pdo_type"]=>
-  int(2)
+  int(3)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>

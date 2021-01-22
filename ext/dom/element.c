@@ -1014,7 +1014,7 @@ PHP_METHOD(DOMElement, hasAttributeNS)
 }
 /* }}} end dom_element_has_attribute_ns */
 
-static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
+static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id) /* {{{ */
 {
 	if (is_id == 1 && attrp->atype != XML_ATTRIBUTE_ID) {
 		xmlChar *id_val;
@@ -1044,7 +1044,7 @@ PHP_METHOD(DOMElement, setIdAttribute)
 	dom_object *intern;
 	char *name;
 	size_t name_len;
-	zend_bool is_id;
+	bool is_id;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sb", &name, &name_len, &is_id) == FAILURE) {
@@ -1080,7 +1080,7 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 	dom_object *intern;
 	size_t uri_len, name_len;
 	char *uri, *name;
-	zend_bool is_id;
+	bool is_id;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb", &uri, &uri_len, &name, &name_len, &is_id) == FAILURE) {
@@ -1114,7 +1114,7 @@ PHP_METHOD(DOMElement, setIdAttributeNode)
 	xmlNode *nodep;
 	xmlAttrPtr attrp;
 	dom_object *intern, *attrobj;
-	zend_bool is_id;
+	bool is_id;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &node, dom_attr_class_entry, &is_id) == FAILURE) {

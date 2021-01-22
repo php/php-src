@@ -1,7 +1,7 @@
 --TEST--
 Observer: Calls that go through zend_call_function are observed
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -18,8 +18,8 @@ var_dump(array_reduce($a, 'sum'));
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_zend_call_function_%d.php' -->
-<file '%s/observer_zend_call_function_%d.php'>
+<!-- init '%s%eobserver_zend_call_function_%d.php' -->
+<file '%s%eobserver_zend_call_function_%d.php'>
   <!-- init sum() -->
   <sum>
   </sum>
@@ -33,4 +33,4 @@ echo 'Done' . PHP_EOL;
   </sum>
 int(15)
 Done
-</file '%s/observer_zend_call_function_%d.php'>
+</file '%s%eobserver_zend_call_function_%d.php'>

@@ -168,7 +168,7 @@ std:
 		return PHP_JSON_T_FALSE;
 	}
 	<JS>INT                  {
-		zend_bool bigint = 0, negative = s->token[0] == '-';
+		bool bigint = 0, negative = s->token[0] == '-';
 		size_t digits = (size_t) (s->cursor - s->token - negative);
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {

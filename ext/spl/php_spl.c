@@ -55,7 +55,7 @@ static PHP_GINIT_FUNCTION(spl)
 }
 /* }}} */
 
-static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autoload)
+static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 {
 	zend_class_entry *ce;
 
@@ -80,7 +80,7 @@ PHP_FUNCTION(class_parents)
 {
 	zval *obj;
 	zend_class_entry *parent_class, *ce;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
@@ -112,7 +112,7 @@ PHP_FUNCTION(class_parents)
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -140,7 +140,7 @@ PHP_FUNCTION(class_implements)
 PHP_FUNCTION(class_uses)
 {
 	zval *obj;
-	zend_bool autoload = 1;
+	bool autoload = 1;
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -404,7 +404,7 @@ static autoload_func_info *autoload_func_info_from_fci(
 	return alfi;
 }
 
-static zend_bool autoload_func_info_equals(
+static bool autoload_func_info_equals(
 		const autoload_func_info *alfi1, const autoload_func_info *alfi2) {
 	return alfi1->func_ptr == alfi2->func_ptr
 		&& alfi1->obj == alfi2->obj
@@ -492,8 +492,8 @@ static Bucket *spl_find_registered_function(autoload_func_info *find_alfi) {
 /* {{{ Register given function as autoloader */
 PHP_FUNCTION(spl_autoload_register)
 {
-	zend_bool do_throw = 1;
-	zend_bool prepend  = 0;
+	bool do_throw = 1;
+	bool prepend  = 0;
 	zend_fcall_info fci = {0};
 	zend_fcall_info_cache fcc;
 	autoload_func_info *alfi;
@@ -604,17 +604,15 @@ PHP_FUNCTION(spl_autoload_functions)
 	if (SPL_G(autoload_functions)) {
 		ZEND_HASH_FOREACH_PTR(SPL_G(autoload_functions), alfi) {
 			if (alfi->closure) {
-				zval obj_zv;
-				ZVAL_OBJ_COPY(&obj_zv, alfi->closure);
-				add_next_index_zval(return_value, &obj_zv);
+				GC_ADDREF(alfi->closure);
+				add_next_index_object(return_value, alfi->closure);
 			} else if (alfi->func_ptr->common.scope) {
 				zval tmp;
 
 				array_init(&tmp);
 				if (alfi->obj) {
-					zval obj_zv;
-					ZVAL_OBJ_COPY(&obj_zv, alfi->obj);
-					add_next_index_zval(&tmp, &obj_zv);
+					GC_ADDREF(alfi->obj);
+					add_next_index_object(&tmp, alfi->obj);
 				} else {
 					add_next_index_str(&tmp, zend_string_copy(alfi->ce->name));
 				}
@@ -630,11 +628,11 @@ PHP_FUNCTION(spl_autoload_functions)
 /* {{{ Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
 {
-	zval *obj;
+	zend_object *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
 }
@@ -643,17 +641,17 @@ PHP_FUNCTION(spl_object_hash)
 /* {{{ Returns the integer object handle for the given object */
 PHP_FUNCTION(spl_object_id)
 {
-	zval *obj;
+	zend_object *obj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT(obj)
+		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG((zend_long)Z_OBJ_HANDLE_P(obj));
+	RETURN_LONG((zend_long)obj->handle);
 }
 /* }}} */
 
-PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
+PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
 {
 	intptr_t hash_handle, hash_handlers;
 
@@ -663,7 +661,7 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj) /* {{{*/
 		SPL_G(hash_mask_init) = 1;
 	}
 
-	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)Z_OBJ_HANDLE_P(obj);
+	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)obj->handle;
 	hash_handlers = SPL_G(hash_mask_handlers);
 
 	return strpprintf(32, "%016zx%016zx", hash_handle, hash_handlers);

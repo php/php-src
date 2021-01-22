@@ -19,6 +19,6 @@ var_dump($stmt->bindValue(':test', 1, PDO::PARAM_INT));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: PDOStatement::bindValue(): SQLSTATE[HY093]: Invalid parameter number: :test in %sbug36727.php on line %d
+Warning: PDOStatement::bindValue(): SQLSTATE[HY093]: Invalid parameter number: :test in %s on line %d
 bool(false)
 Done

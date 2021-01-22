@@ -141,9 +141,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         persist;
 	int         has_zlib;
 	int         has_bz2;
-	zend_bool   readonly_orig;
-	zend_bool   require_hash_orig;
-	zend_bool   intercepted;
+	bool   readonly_orig;
+	bool   require_hash_orig;
+	bool   intercepted;
 	int         request_init;
 	int         require_hash;
 	int         request_done;
@@ -532,12 +532,12 @@ void phar_destroy_phar_data(phar_archive_data *phar);
 int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_open_executed_filename(char *alias, size_t alias_len, char **error);
 int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
 int phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
-int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
 int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 
@@ -553,7 +553,7 @@ zend_string *phar_find_in_include_path(char *file, size_t file_len, phar_archive
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);
-zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
+bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
 /* If this has data, free it and set all values to undefined. */
 void phar_metadata_tracker_free(phar_metadata_tracker* val, int persistent);
 void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, int persistent);

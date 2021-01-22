@@ -76,9 +76,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-is_dir(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 
 -- Iteration 10 --
-is_dir(): Argument #1 ($filename) must not contain any null bytes
+bool(false)
 
 *** Done ***

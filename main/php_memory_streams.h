@@ -28,8 +28,8 @@
 
 #define php_stream_memory_create(mode) _php_stream_memory_create((mode) STREAMS_CC)
 #define php_stream_memory_create_rel(mode) _php_stream_memory_create((mode) STREAMS_REL_CC)
-#define php_stream_memory_open(mode, buf, length) _php_stream_memory_open((mode), (buf), (length) STREAMS_CC)
-#define php_stream_memory_get_buffer(stream, length) _php_stream_memory_get_buffer((stream), (length) STREAMS_CC)
+#define php_stream_memory_open(mode, str) _php_stream_memory_open((mode), (str) STREAMS_CC)
+#define php_stream_memory_get_buffer(stream) _php_stream_memory_get_buffer((stream) STREAMS_CC)
 
 #define php_stream_temp_new() php_stream_temp_create(TEMP_STREAM_DEFAULT, PHP_STREAM_MAX_MEM)
 #define php_stream_temp_create(mode, max_memory_usage) _php_stream_temp_create((mode), (max_memory_usage) STREAMS_CC)
@@ -40,8 +40,8 @@
 BEGIN_EXTERN_C()
 
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC);
-PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t length STREAMS_DC);
-PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC);
+PHPAPI php_stream *_php_stream_memory_open(int mode, zend_string *buf STREAMS_DC);
+PHPAPI zend_string *_php_stream_memory_get_buffer(php_stream *stream STREAMS_DC);
 
 PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC);
 PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC);

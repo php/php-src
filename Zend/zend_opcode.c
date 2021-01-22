@@ -103,7 +103,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	zend_function_dtor(&tmp);
 }
 
-ZEND_API void zend_type_release(zend_type type, zend_bool persistent) {
+ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
@@ -280,9 +280,37 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_RESOLVED_PARENT)) {
-				zend_string_release_ex(ce->parent_name, 0);
+			if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+				if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_RESOLVED_PARENT)) {
+					zend_string_release_ex(ce->parent_name, 0);
+				}
+
+				zend_string_release_ex(ce->name, 0);
+				zend_string_release_ex(ce->info.user.filename, 0);
+
+				if (ce->info.user.doc_comment) {
+					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				}
+
+				if (ce->attributes) {
+					zend_hash_release(ce->attributes);
+				}
+
+				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
+					uint32_t i;
+
+					for (i = 0; i < ce->num_interfaces; i++) {
+						zend_string_release_ex(ce->interface_names[i].name, 0);
+						zend_string_release_ex(ce->interface_names[i].lc_name, 0);
+					}
+					efree(ce->interface_names);
+				}
+
+				if (ce->num_traits > 0) {
+					_destroy_zend_class_traits_info(ce);
+				}
 			}
+
 			if (ce->default_properties_table) {
 				zval *p = ce->default_properties_table;
 				zval *end = p + ce->default_properties_count;
@@ -325,7 +353,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
-			zend_string_release_ex(ce->name, 0);
 			zend_hash_destroy(&ce->function_table);
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
@@ -343,29 +370,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 			}
 			zend_hash_destroy(&ce->constants_table);
-			if (ce->num_interfaces > 0) {
-				if (!(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
-					uint32_t i;
-
-					for (i = 0; i < ce->num_interfaces; i++) {
-						zend_string_release_ex(ce->interface_names[i].name, 0);
-						zend_string_release_ex(ce->interface_names[i].lc_name, 0);
-					}
-				}
+			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
 			}
-			zend_string_release_ex(ce->info.user.filename, 0);
-			if (ce->info.user.doc_comment) {
-				zend_string_release_ex(ce->info.user.doc_comment, 0);
-			}
-			if (ce->attributes) {
-				zend_hash_release(ce->attributes);
-			}
-
-			if (ce->num_traits > 0) {
-				_destroy_zend_class_traits_info(ce);
-			}
-
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
@@ -754,14 +761,14 @@ static void emit_live_range(
 	emit_live_range_raw(op_array, var_num, kind, start, end);
 }
 
-static zend_bool is_fake_def(zend_op *opline) {
+static bool is_fake_def(zend_op *opline) {
 	/* These opcodes only modify the result, not create it. */
 	return opline->opcode == ZEND_ROPE_ADD
 		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT
 		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK;
 }
 
-static zend_bool keeps_op1_alive(zend_op *opline) {
+static bool keeps_op1_alive(zend_op *opline) {
 	/* These opcodes don't consume their OP1 operand,
 	 * it is later freed by something else. */
 	if (opline->opcode == ZEND_CASE

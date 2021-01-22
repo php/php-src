@@ -116,7 +116,7 @@ static ZEND_INI_MH(OnEnable)
 		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
 		/* It may be only temporary disabled */
-		zend_bool *p = (zend_bool *) ZEND_INI_GET_ADDR();
+		bool *p = (bool *) ZEND_INI_GET_ADDR();
 		if ((ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) ||
 		    (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) ||
 		    (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) ||
@@ -572,7 +572,7 @@ ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
-	zend_bool fetch_scripts = 1;
+	bool fetch_scripts = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
@@ -839,7 +839,7 @@ ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
 	size_t script_name_len;
-	zend_bool force = 0;
+	bool force = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &script_name, &script_name_len, &force) == FAILURE) {
 		RETURN_THROWS();

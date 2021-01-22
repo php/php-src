@@ -28,7 +28,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
-	zend_bool year_is_null = 1;
+	bool year_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|l!l", &year, &year_is_null, &method) == FAILURE) {

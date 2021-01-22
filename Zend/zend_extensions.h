@@ -75,11 +75,11 @@ typedef size_t (*op_array_persist_calc_func_t)(zend_op_array *op_array);
 typedef size_t (*op_array_persist_func_t)(zend_op_array *op_array, void *mem);
 
 struct _zend_extension {
-	char *name;
-	char *version;
-	char *author;
-	char *URL;
-	char *copyright;
+	const char *name;
+	const char *version;
+	const char *author;
+	const char *URL;
+	const char *copyright;
 
 	startup_func_t startup;
 	shutdown_func_t shutdown;

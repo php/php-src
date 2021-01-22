@@ -51,7 +51,7 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 	"UTF-7",
 	mbfl_encoding_utf7_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_utf7_wchar,
 	&vtbl_wchar_utf7
 };

@@ -30,7 +30,7 @@ ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
-	zend_bool rand_initialized;
+	bool rand_initialized;
 	gmp_randstate_t rand_state;
 ZEND_END_MODULE_GLOBALS(gmp)
 

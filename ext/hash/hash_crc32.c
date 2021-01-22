@@ -20,7 +20,7 @@
 #include "php_hash_crc32_tables.h"
 #include "ext/standard/crc32_x86.h"
 
-PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context)
+PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = ~0;
 }

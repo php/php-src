@@ -259,7 +259,7 @@ class PharCommand extends CLICommand
                     self::error($msg);
                 }
             }
-            $arg = $found;
+            return null;
         }
         return self::cli_arg_typ_file($arg);
     }

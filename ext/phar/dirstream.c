@@ -22,7 +22,7 @@
 #include "dirstream.h"
 
 BEGIN_EXTERN_C()
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_dir);
 END_EXTERN_C()
 
 const php_stream_ops phar_dir_ops = {

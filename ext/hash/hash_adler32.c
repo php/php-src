@@ -18,7 +18,7 @@
 #include "php_hash.h"
 #include "php_hash_adler32.h"
 
-PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context)
+PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = 1;
 }

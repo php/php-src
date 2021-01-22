@@ -92,16 +92,32 @@ static const char *binary_strcspn(const char *s, const char *e, const char *char
 	return e;
 }
 
+static int is_userinfo_valid(const char *str, size_t len)
+{
+	const char *valid = "-._~!$&'()*+,;=:";
+	const char *p = str;
+	while (p - str < len) {
+		if (isalpha(*p) || isdigit(*p) || strchr(valid, *p)) {
+			p++;
+		} else if (*p == '%' && p - str <= len - 3 && isdigit(*(p+1)) && isxdigit(*(p+2))) {
+			p += 3;
+		} else {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 /* {{{ php_url_parse */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
-	zend_bool has_port;
+	bool has_port;
 	return php_url_parse_ex2(str, length, &has_port);
 }
 
 /* {{{ php_url_parse_ex2
  */
-PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, zend_bool *has_port)
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
@@ -233,13 +249,17 @@ parse_host:
 			ret->pass = zend_string_init(pp, (p-pp), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->pass), ZSTR_LEN(ret->pass));
 		} else {
-			ret->user = zend_string_init(s, (p-s), 0);
-			php_replace_controlchars_ex(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
+			if (!is_userinfo_valid(s, p-s)) {
+				goto check_port;
+			}
+            ret->user = zend_string_init(s, (p-s), 0);
+            php_replace_controlchars_ex(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
 		}
 
 		s = p + 1;
 	}
 
+check_port:
 	/* check for port */
 	if (s < ue && *s == '[' && *(e-1) == ']') {
 		/* Short circuit portscan,
@@ -335,7 +355,7 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 	zval tmp;
-	zend_bool has_port;
+	bool has_port;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
@@ -458,7 +478,7 @@ static int php_htoi(char *s)
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
-static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
+static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
 	register unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
@@ -683,7 +703,7 @@ PHP_FUNCTION(get_headers)
 	size_t url_len;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL;
-	zend_bool format = 0;
+	bool format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 

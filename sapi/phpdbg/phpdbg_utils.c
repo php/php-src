@@ -424,13 +424,13 @@ static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyna
 	return callback(name, len, keyname, keylen, parent, zv);
 }
 
-PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent) {
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, bool silent) {
 	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, NULL, silent, callback);
 }
 
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, bool silent, void *arg) {
 	int ret = FAILURE;
-	zend_bool new_index = 1;
+	bool new_index = 1;
 	char *last_index = NULL;
 	size_t index_len = 0;
 	zval *zv;
@@ -655,7 +655,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 	zend_ulong num;
 	zval *val;
 	int (*element_dump_func)(zval *zv, zend_string *key, zend_ulong num);
-	zend_bool is_ref = 0;
+	bool is_ref = 0;
 
 	phpdbg_try_access {
 		is_ref = Z_ISREF_P(zv) && GC_REFCOUNT(Z_COUNTED_P(zv)) > 1;
@@ -731,7 +731,7 @@ head_done:
 	} phpdbg_end_try_access();
 }
 
-PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
+PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
 	zend_op *cur;
 	uint32_t op_num, i;

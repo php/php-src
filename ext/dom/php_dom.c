@@ -1125,7 +1125,7 @@ void php_dom_create_iterator(zval *return_value, int ce_type) /* {{{ */
 /* }}} */
 
 /* {{{ php_dom_create_object */
-PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
+PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
 {
 	zend_class_entry *ce;
 	dom_object *intern;
@@ -1301,10 +1301,10 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 /* }}} */
 /* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 
-static inline zend_bool is_empty_node(xmlNodePtr nodep)
+static inline bool is_empty_node(xmlNodePtr nodep)
 {
 	xmlChar	*strContent = xmlNodeGetContent(nodep);
-	zend_bool ret = strContent == NULL || *strContent == '\0';
+	bool ret = strContent == NULL || *strContent == '\0';
 	xmlFree(strContent);
 	return ret;
 }
