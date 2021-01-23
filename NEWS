@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 
 - MySQLi:
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
+  . Fixed bug #80330 (Replace language in APIs and source code/docs).
+    (Darek Ślusarczyk)
 
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)

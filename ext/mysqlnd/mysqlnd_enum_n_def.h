@@ -681,7 +681,8 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_HOSTS		8	/* Flush host cache */
 #define MYSQLND_REFRESH_STATUS		16	/* Flush status variables */
 #define MYSQLND_REFRESH_THREADS		32	/* Flush thread cache */
-#define MYSQLND_REFRESH_SLAVE		64	/* Reset master info and restart slave */
+#define MYSQLND_REFRESH_REPLICA		64	/* Reset master info and restart replica */
+#define MYSQLND_REFRESH_SLAVE		MYSQLND_REFRESH_REPLICA	/* temporarily for backward compatibility */
 #define MYSQLND_REFRESH_MASTER		128	/* Remove all bin logs in the index */
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
 

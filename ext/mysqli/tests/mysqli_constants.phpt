@@ -93,6 +93,7 @@ mysqli.allow_local_infile=1
         "MYSQLI_REFRESH_HOSTS"				=> true,
         "MYSQLI_REFRESH_STATUS"				=> true,
         "MYSQLI_REFRESH_THREADS"			=> true,
+        "MYSQLI_REFRESH_REPLICA"			=> true,
         "MYSQLI_REFRESH_SLAVE"				=> true,
         "MYSQLI_REFRESH_MASTER"				=> true,
         "MYSQLI_DEBUG_TRACE_ENABLED"		=> true,

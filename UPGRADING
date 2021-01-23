@@ -187,6 +187,12 @@ PHP 8.1 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- MySQLi:
+  . MYSQLI_REFRESH_REPLICA has been added as a replacement for
+    MYSQLI_REFRESH_SLAVE, in line with an upstream change in MySQL. The old
+    constant is still available for backwards-compatibility reasons, but may
+    be deprecated/removed in the future.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
