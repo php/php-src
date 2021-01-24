@@ -426,7 +426,7 @@ class NumberFormatter
      * @tentative-return-type
      * @alias numfmt_format_currency
      */
-    public function formatCurrency(float $amount, string $currency): string|false {}
+    public function formatCurrency(int|float|string $amount, string $currency): string|false {}
 
     /**
      * @param string $currency
