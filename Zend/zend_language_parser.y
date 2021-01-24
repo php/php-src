@@ -1424,6 +1424,10 @@ array_pair:
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $3, $1); }
 	|	'&' variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
+	|	':' T_VARIABLE
+			{ zend_ast *var_name = $2; $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create(ZEND_AST_VAR, var_name), var_name); }
+	|	':' '&' T_VARIABLE
+			{ zend_ast *var_name = $3; $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, zend_ast_create(ZEND_AST_VAR, var_name), var_name); }
 	|	T_ELLIPSIS expr
 			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 	|	array_pair_key_prefix T_LIST '(' array_pair_list ')'
