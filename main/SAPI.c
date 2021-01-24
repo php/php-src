@@ -868,7 +868,7 @@ SAPI_API int sapi_send_headers(void)
 	if (sapi_module.send_headers) {
 		retval = sapi_module.send_headers(&SG(sapi_headers));
 	} else {
-		retval = SAPI_HEADER_DO_SEND;
+		retval = SAPI_HEADER_SEND_FAILED;
 	}
 
 	switch (retval) {
