@@ -705,7 +705,7 @@ static int php_snmp_parse_oid(
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
 		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
-			convert_to_string_ex(tmp_oid);
+			convert_to_string(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
 				if (type_str) {
@@ -720,7 +720,7 @@ static int php_snmp_parse_oid(
 						idx_type++;
 					}
 					if (idx_type < type_ht->nNumUsed) {
-						convert_to_string_ex(tmp_type);
+						convert_to_string(tmp_type);
 						if (Z_STRLEN_P(tmp_type) != 1) {
 							zend_value_error("Type must be a single character");
 							efree(objid_query->vars);
@@ -747,7 +747,7 @@ static int php_snmp_parse_oid(
 						idx_value++;
 					}
 					if (idx_value < value_ht->nNumUsed) {
-						convert_to_string_ex(tmp_value);
+						convert_to_string(tmp_value);
 						objid_query->vars[objid_query->count].value = Z_STRVAL_P(tmp_value);
 						idx_value++;
 					} else {
@@ -1101,7 +1101,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
 	char *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
-	zend_bool use_orignames = 0, suffix_keys = 0;
+	bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
@@ -1324,7 +1324,7 @@ PHP_FUNCTION(snmp_get_quick_print)
 /* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	zend_bool a1;
+	bool a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
 		RETURN_THROWS();
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 /* {{{ Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	zend_bool a1;
+	bool a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
 		RETURN_THROWS();
