@@ -155,6 +155,10 @@ PHP 8.1 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
+    RFC: https://wiki.php.net/rfc/is_list
+
 ========================================
 7. New Classes and Interfaces
 ========================================
