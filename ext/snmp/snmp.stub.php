@@ -104,3 +104,7 @@ class SNMP
     /** @return string */
     public function getError() {}
 }
+
+class SNMPException extends RuntimeException
+{
+}
