@@ -52,8 +52,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_string_output_format, 0
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_snmp_set_string_output_format
-
 #define arginfo_snmp2_get arginfo_snmpget
 
 #define arginfo_snmp2_getnext arginfo_snmpget
