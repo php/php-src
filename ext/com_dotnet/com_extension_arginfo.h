@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: da1da8fcfe8a04d08d354ad2cc5a3658d16c3076 */
+ * Stub hash: 6b162963bcceb90144fdd3165137fb567f916812 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -224,5 +224,10 @@ static const zend_function_entry class_dotnet_methods[] = {
 #if HAVE_MSCOREE_H
 	ZEND_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
 #endif
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_com_exception_methods[] = {
 	ZEND_FE_END
 };
