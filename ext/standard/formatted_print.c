@@ -919,3 +919,26 @@ PHP_FUNCTION(vfprintf)
 	zend_string_efree(result);
 }
 /* }}} */
+
+/* {{{ Output a string followed by a unix newline */
+PHP_FUNCTION(println)
+{
+	char* input = NULL;
+	size_t input_len = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(input, input_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (input_len > 0) {
+		size_t rlen = PHPWRITE(input, input_len);
+		if (UNEXPECTED(rlen != input_len)) {
+			RETURN_LONG(rlen);
+		}
+		rlen += PHPWRITE("\n", 1);
+		RETURN_LONG(rlen);
+	}
+	RETURN_LONG(PHPWRITE("\n", 1));
+}
+/* }}} */

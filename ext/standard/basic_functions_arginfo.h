@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97edf8c87780c892984099e52ad1c6c745b919f8 */
+ * Stub hash: 0909e41211d2c51032e107c7829979dff46a6944 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1489,6 +1489,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_vfprintf, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_println, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_STRING, 0, "\'\'")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "-1")
@@ -2621,6 +2625,7 @@ ZEND_FUNCTION(vprintf);
 ZEND_FUNCTION(vsprintf);
 ZEND_FUNCTION(fprintf);
 ZEND_FUNCTION(vfprintf);
+ZEND_FUNCTION(println);
 ZEND_FUNCTION(fsockopen);
 ZEND_FUNCTION(pfsockopen);
 ZEND_FUNCTION(http_build_query);
@@ -3261,6 +3266,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(vsprintf, arginfo_vsprintf)
 	ZEND_FE(fprintf, arginfo_fprintf)
 	ZEND_FE(vfprintf, arginfo_vfprintf)
+	ZEND_FE(println, arginfo_println)
 	ZEND_FE(fsockopen, arginfo_fsockopen)
 	ZEND_FE(pfsockopen, arginfo_pfsockopen)
 	ZEND_FE(http_build_query, arginfo_http_build_query)

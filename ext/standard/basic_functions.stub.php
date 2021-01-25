@@ -966,6 +966,7 @@ function fprintf($stream, string $format, mixed ...$values): int {}
 /** @param resource $stream */
 function vfprintf($stream, string $format, array $values): int {}
 
+function println(string $data = ''): int {}
 /* fsock.c */
 
 /**
