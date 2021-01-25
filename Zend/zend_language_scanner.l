@@ -307,20 +307,25 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	}
 }
 
-ZEND_API zend_result zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref)
+ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident)
 {
-	char *ident = (char *) SCNG(yy_start) + ident_ref.offset;
-	size_t length = ident_ref.len;
-	if (length == sizeof("<?=")-1 && memcmp(ident, "<?=", sizeof("<?=")-1) == 0) {
+	unsigned char *end = ident;
+	while ((*end >= 'a' && *end <= 'z') || (*end >= 'A' && *end <= 'Z') || *end == '_') {
+		end++;
+	}
+
+	size_t length = end - ident;
+	if (length == 0) {
+		ZEND_ASSERT(ident[0] == '<' && ident[1] == '?' && ident[2] == '=');
 		zend_throw_exception(zend_ce_parse_error, "Cannot use \"<?=\" as an identifier", 0);
 		return FAILURE;
 	}
 
 	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, ident, length, SCNG(on_event_context));
+		SCNG(on_event)(ON_FEEDBACK, T_STRING, 0, (char *) ident, length, SCNG(on_event_context));
 	}
 
-	ZVAL_STRINGL(zv, ident, length);
+	ZVAL_STRINGL(zv, (char *) ident, length);
 	return SUCCESS;
 }
 
@@ -3096,8 +3101,7 @@ emit_token:
 
 emit_token_with_ident:
 	if (PARSER_MODE()) {
-		elem->ident.offset = SCNG(yy_text) - SCNG(yy_start);
-		elem->ident.len = SCNG(yy_leng);
+		elem->ident = SCNG(yy_text);
 	}
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
