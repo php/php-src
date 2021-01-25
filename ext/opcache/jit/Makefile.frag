@@ -16,3 +16,6 @@ $(builddir)/jit/zend_jit.lo: \
 	$(srcdir)/jit/zend_jit_trace.c \
 	$(srcdir)/jit/zend_elf.c
 
+# For non-GNU make, jit/zend_jit.lo and ./jit/zend_jit.lo are considered distinct targets.
+# Use this workaround to allow building from inside ext/opcache.
+jit/zend_jit.lo: $(builddir)/jit/zend_jit.lo
