@@ -4967,15 +4967,26 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 
 		if (CG(context).brk_cont_array[cur].is_switch) {
 			if (depth == 1) {
-				zend_error(E_WARNING,
-					"\"continue\" targeting switch is equivalent to \"break\". " \
-					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
-					depth + 1);
+				if (CG(context).brk_cont_array[cur].parent == -1) {
+					zend_error(E_WARNING,
+						"\"continue\" targeting switch is equivalent to \"break\"");
+				} else {
+					zend_error(E_WARNING,
+						"\"continue\" targeting switch is equivalent to \"break\". " \
+						"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
+						depth + 1);
+				}
 			} else {
-				zend_error(E_WARNING,
-					"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\". " \
-					"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
-					depth, depth, depth + 1);
+				if (CG(context).brk_cont_array[cur].parent == -1) {
+					zend_error(E_WARNING,
+						"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\"",
+						depth, depth);
+				} else {
+					zend_error(E_WARNING,
+						"\"continue " ZEND_LONG_FMT "\" targeting switch is equivalent to \"break " ZEND_LONG_FMT "\". " \
+						"Did you mean to use \"continue " ZEND_LONG_FMT "\"?",
+						depth, depth, depth + 1);
+				}
 			}
 		}
 	}
