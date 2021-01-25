@@ -13,14 +13,14 @@
    | Authors: Go Kudo <zeriyoshi@gmail.com>                               |
    +----------------------------------------------------------------------+
 */
-#ifndef _RNG_OSRNG_H
-#define _RNG_OSRNG_H
+#ifndef _RNG_OS_H
+#define _RNG_OS_H
 
 #include "php.h"
 #include "php_rng.h"
 
-extern PHPAPI zend_class_entry *rng_ce_RNG_OSRNG;
+extern PHPAPI zend_class_entry *rng_ce_RNG_OS;
 
-PHP_MINIT_FUNCTION(rng_osrng);
+PHP_MINIT_FUNCTION(rng_os);
 
 #endif

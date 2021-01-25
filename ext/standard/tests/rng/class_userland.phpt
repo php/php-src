@@ -19,16 +19,18 @@ class FixedNumberGenerator implements \RNG\RNGInterface
 }
 
 $rng = new FixedNumberGenerator();
-$array = range(1, 100);
+$array = \range(1, 100);
 
-$rng->next() . PHP_EOL;
-$rng->next64() . PHP_EOL;
-array_rand($array, 1, $rng);
-array_rand($array, 2, $rng);
-shuffle($array, $rng);
-str_shuffle('foobar', $rng);
-rng_rand($rng, 1, 1000) . PHP_EOL;
-rng_bytes($rng, 100) . PHP_EOL;
+\rng_next($rng);
+if (PHP_INT_SIZE >= 8) {
+    \rng_next64($rng);
+}
+\array_rand($array, 1, $rng);
+\array_rand($array, 2, $rng);
+\shuffle($array, $rng);
+\str_shuffle('foobar', $rng);
+\rng_int($rng, 1, 1000);
+\rng_bytes($rng, 100);
 
 class XorShift128PlusEx extends \RNG\XorShift128Plus
 {
@@ -47,8 +49,8 @@ $origin = new \RNG\XorShift128Plus(12345);
 $extend = new XorShift128PlusEx(12345);
 
 for ($i = 0; $i < 100000; $i++) {
-    $origin_next = $origin->next();
-    $extend_next = $extend->next();
+    $origin_next = \rng_next($origin, false);
+    $extend_next = \rng_next($extend, false);
 
     if (($origin_next + 1) !== $extend_next) {
         die("NG, userland extended class is broken.");

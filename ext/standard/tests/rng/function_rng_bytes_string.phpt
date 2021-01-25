@@ -14,6 +14,11 @@ class StringGenerator implements \RNG\RNGInterface
         return $this->$method();
     }
 
+    public function next64(): int
+    {
+        return $this->next();
+    }
+
     private function gen0(): int
     {
         $t = ord('l');
@@ -47,17 +52,17 @@ class StringGenerator implements \RNG\RNGInterface
     }
 }
 
-$result = rng_bytes(new StringGenerator(), 12);
+$result = \rng_bytes(new StringGenerator(), 12);
 if ($result !== 'Hello world.') {
     die("NG, rng_bytes() invalid result: ${result}");
 }
 
-$result = rng_bytes(new StringGenerator(), 4);
+$result = \rng_bytes(new StringGenerator(), 4);
 if ($result !== 'Hell') {
     die("NG, rng_bytes() invalid result: ${result}");
 }
 
-$result = rng_bytes(new StringGenerator(), 2);
+$result = \rng_bytes(new StringGenerator(), 2);
 if ($result !== 'He') {
     die("NG, rng_bytes() invalid result: ${result}");
 }

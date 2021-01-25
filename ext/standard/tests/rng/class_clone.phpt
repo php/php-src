@@ -4,13 +4,13 @@ Test class: clone RNG classes.
 <?php
 
 foreach (include(__DIR__ . DIRECTORY_SEPARATOR . '_clonable_rng_classes.inc') as $class => $is_seed) {
-    $rng1 = $is_seed ? new $class(random_int(PHP_INT_MIN, PHP_INT_MAX)) : new $class();
-    $rng1->next();
+    $rng1 = $is_seed ? new $class(\random_int(PHP_INT_MIN, PHP_INT_MAX)) : new $class();
+    \rng_next($rng1);
 
     $rng2 = clone $rng1;
 
-    $rng1_value = $rng1->next();
-    $rng2_value = $rng2->next();
+    $rng1_value = \rng_next($rng1);
+    $rng2_value = \rng_next($rng2);
 
     if ($rng1_value !== $rng2_value) {
         die("NG, state is not cloned. RNG class: ${class} RNG1 value: ${rng1_value} RNG2 value: ${rng2_value}");

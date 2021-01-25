@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 23c263defa042155631bec5fcb5282e4cd1e88a7 */
+ * Stub hash: f84bdc5decf171d559698bc9b40b0582ea57b084 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -186,7 +186,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_range, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_MASK(0, step, MAY_BE_LONG|MAY_BE_DOUBLE, "1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_shuffle arginfo_natsort
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shuffle, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, RNG\\RNGInterface, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_pop, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
@@ -316,6 +319,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_array_rand, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num, IS_LONG, 0, "1")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, RNG\\RNGInterface, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_array_sum, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
@@ -1066,7 +1070,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_str_rot13 arginfo_base64_encode
 
-#define arginfo_str_shuffle arginfo_base64_encode
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_shuffle, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, RNG\\RNGInterface, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_str_word_count, 0, 1, MAY_BE_ARRAY|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -1837,6 +1844,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_int, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rng_bytes, 0, 2, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, rng, RNG\\RNGInterface, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rng_int, 0, 3, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, rng, RNG\\RNGInterface, 0)
+	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rng_next, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, rng, RNG\\RNGInterface, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unsigned, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
+
+#define arginfo_rng_next64 arginfo_rng_next
 
 #define arginfo_soundex arginfo_base64_encode
 
@@ -2730,6 +2755,10 @@ ZEND_FUNCTION(mt_rand);
 ZEND_FUNCTION(mt_getrandmax);
 ZEND_FUNCTION(random_bytes);
 ZEND_FUNCTION(random_int);
+ZEND_FUNCTION(rng_bytes);
+ZEND_FUNCTION(rng_int);
+ZEND_FUNCTION(rng_next);
+ZEND_FUNCTION(rng_next64);
 ZEND_FUNCTION(soundex);
 ZEND_FUNCTION(stream_select);
 ZEND_FUNCTION(stream_context_create);
@@ -3372,6 +3401,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(getrandmax, mt_getrandmax, arginfo_getrandmax)
 	ZEND_FE(random_bytes, arginfo_random_bytes)
 	ZEND_FE(random_int, arginfo_random_int)
+	ZEND_FE(rng_bytes, arginfo_rng_bytes)
+	ZEND_FE(rng_int, arginfo_rng_int)
+	ZEND_FE(rng_next, arginfo_rng_next)
+	ZEND_FE(rng_next64, arginfo_rng_next64)
 	ZEND_FE(soundex, arginfo_soundex)
 	ZEND_FE(stream_select, arginfo_stream_select)
 	ZEND_FE(stream_context_create, arginfo_stream_context_create)

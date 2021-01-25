@@ -20,12 +20,12 @@
 
 #include "zend_exceptions.h"
 
-#include "rng_osrng.h"
-#include "rng_osrng_arginfo.h"
+#include "rng_os.h"
+#include "rng_os_arginfo.h"
 
-PHPAPI zend_class_entry *rng_ce_RNG_OSRNG;
+PHPAPI zend_class_entry *rng_ce_RNG_OS;
 
-static zend_object_handlers OSRNG_handlers;
+static zend_object_handlers OS_handlers;
 
 static uint32_t next(php_rng *rng)
 {
@@ -46,7 +46,7 @@ static zend_object *rng_object_new(zend_class_entry *ce)
 	php_rng *rng = php_rng_initialize(next, next64);
 	zend_object_std_init(&rng->std, ce);
 	object_properties_init(&rng->std, ce);
-	rng->std.handlers = &OSRNG_handlers;
+	rng->std.handlers = &OS_handlers;
 	
 	return &rng->std;
 }
@@ -57,7 +57,7 @@ static void free_object_storage(zend_object *object)
 	zend_object_std_dtor(&rng->std);
 }
 
-PHP_METHOD(RNG_OSRNG, next)
+PHP_METHOD(RNG_OS, next)
 {	
 	php_rng *rng = Z_RNG_P(ZEND_THIS);
 
@@ -66,31 +66,26 @@ PHP_METHOD(RNG_OSRNG, next)
 	RETURN_LONG((zend_long) rng->next(rng));
 }
 
-PHP_METHOD(RNG_OSRNG, next64)
+PHP_METHOD(RNG_OS, next64)
 {
 	php_rng *rng = Z_RNG_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-#if UINT32_MAX >= ZEND_ULONG_MAX
-	zend_value_error("Method doesn't supported 32bit integer range.");
-	RETURN_THROWS();
-#endif
-
 	RETURN_LONG((zend_long) rng->next64(rng));
 }
 
-PHP_MINIT_FUNCTION(rng_osrng)
+PHP_MINIT_FUNCTION(rng_os)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, RNG_NAMESPACE "OSRNG", class_RNG_OSRNG_methods);
-	rng_ce_RNG_OSRNG = zend_register_internal_class(&ce);
-	zend_class_implements(rng_ce_RNG_OSRNG, 1, rng_ce_RNG_RNG64Interface);
-	rng_ce_RNG_OSRNG->create_object = rng_object_new;
-	memcpy(&OSRNG_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	OSRNG_handlers.offset = XtOffsetOf(php_rng, std);
-	OSRNG_handlers.free_obj = free_object_storage;
+	INIT_CLASS_ENTRY(ce, RNG_NAMESPACE "OS", class_RNG_OS_methods);
+	rng_ce_RNG_OS = zend_register_internal_class(&ce);
+	zend_class_implements(rng_ce_RNG_OS, 1, rng_ce_RNG_RNGInterface);
+	rng_ce_RNG_OS->create_object = rng_object_new;
+	memcpy(&OS_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	OS_handlers.offset = XtOffsetOf(php_rng, std);
+	OS_handlers.free_obj = free_object_storage;
 
 	return SUCCESS;
 }

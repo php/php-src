@@ -1205,9 +1205,14 @@ function random_int(int $min, int $max): int {}
 
 /* rng.c */
 
-function rng_rand(RNG\RNGInterface $rng, int $min = UNKNOWN, int $max = UNKNOWN): int {}
-
 function rng_bytes(RNG\RNGInterface $rng, int $length): string {}
+
+function rng_int(RNG\RNGInterface $rng, int $min, int $max): int {}
+
+function rng_next(RNG\RNGInterface $rng, bool $unsigned = true): int {}
+
+/** @throws ValueError */
+function rng_next64(RNG\RNGInterface $rng, bool $unsigned = true): int {}
 
 /* soundex.c */
 

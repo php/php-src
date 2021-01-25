@@ -429,7 +429,7 @@ fi
 dnl
 dnl rng
 dnl
-PHP_ADD_SOURCES(PHP_EXT_DIR(standard), rng_xorshift128plus.c rng_mt19937.c rng_osrng.c)
+PHP_ADD_SOURCES(PHP_EXT_DIR(standard), rng_xorshift128plus.c rng_mt19937.c rng_os.c)
 
 dnl
 dnl Setup extension sources

@@ -180,11 +180,6 @@ PHP_METHOD(RNG_MT19937, next64)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-#if UINT32_MAX >= ZEND_ULONG_MAX
-	zend_value_error("Method doesn't supported 32bit integer range.");
-	RETURN_THROWS();
-#endif
-
 	uint64_t result = rng->next(rng);
 	result = (result << 32) | rng->next(rng);
 	
@@ -261,7 +256,7 @@ PHP_MINIT_FUNCTION(rng_mt19937)
 
 	INIT_CLASS_ENTRY(ce, RNG_NAMESPACE "MT19937", class_RNG_MT19937_methods);
 	rng_ce_RNG_MT19937 = zend_register_internal_class(&ce);
-	zend_class_implements(rng_ce_RNG_MT19937, 1, rng_ce_RNG_RNG64Interface);
+	zend_class_implements(rng_ce_RNG_MT19937, 1, rng_ce_RNG_RNGInterface);
 	rng_ce_RNG_MT19937->create_object = rng_object_new;
 	memcpy(&MT19937_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	MT19937_handlers.offset = XtOffsetOf(php_rng, std);

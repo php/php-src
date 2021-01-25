@@ -20,7 +20,6 @@
 #include "php.h"
 
 extern PHPAPI zend_class_entry *rng_ce_RNG_RNGInterface;
-extern PHPAPI zend_class_entry *rng_ce_RNG_RNG64Interface;
 
 typedef struct _php_rng php_rng;
 typedef struct _php_rng {

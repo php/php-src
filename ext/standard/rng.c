@@ -20,14 +20,12 @@
 #include "php_rng.h"
 
 #include "rng_rnginterface_arginfo.h"
-#include "rng_rng64interface_arginfo.h"
 
 #include "rng_xorshift128plus.h"
 #include "rng_mt19937.h"
-#include "rng_osrng.h"
+#include "rng_os.h"
 
 PHPAPI zend_class_entry *rng_ce_RNG_RNGInterface;
-PHPAPI zend_class_entry *rng_ce_RNG_RNG64Interface;
 
 PHPAPI php_rng* php_rng_initialize(uint32_t (*next)(php_rng*), uint64_t (*next64)(php_rng*))
 {
@@ -191,33 +189,6 @@ PHPAPI zend_long php_rng_range(zval *obj, zend_long min, zend_long max)
 	return (zend_long) (rng_rand_range32(obj, umax) + min);
 }
 
-PHP_FUNCTION(rng_rand)
-{
-	zval *zrng;
-	zend_long min, max;
-
-	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_OBJECT_OF_CLASS(zrng, rng_ce_RNG_RNGInterface)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(min)
-		Z_PARAM_LONG(max)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZEND_NUM_ARGS() == 1) {
-		uint32_t result;
-
-		php_rng_next(&result, zrng);
-		RETURN_LONG((zend_long) (result >> 1));
-	}
-
-	if (UNEXPECTED(max < min)) {
-		zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
-		RETURN_THROWS();
-	}
-
-	RETURN_LONG(php_rng_range(zrng, min, max));
-}
-
 PHP_FUNCTION(rng_bytes)
 {
 	zval *zrng;
@@ -254,20 +225,82 @@ PHP_FUNCTION(rng_bytes)
 	}
 }
 
+PHP_FUNCTION(rng_int)
+{
+	zval *zrng;
+	zend_long min, max;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_OBJECT_OF_CLASS(zrng, rng_ce_RNG_RNGInterface)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (min > max) {
+		zend_argument_value_error(1, "must be less than or equal to argument #2 ($max)");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(php_rng_range(zrng, min, max));
+}
+
+PHP_FUNCTION(rng_next)
+{
+	zval *zrng;
+	uint32_t retval;
+	bool is_unsigned = 1;
+	
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(zrng, rng_ce_RNG_RNGInterface)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(is_unsigned)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_rng_next(&retval, zrng);
+
+	if (is_unsigned) {
+		retval = retval >> 1;
+	}
+
+	RETURN_LONG((zend_long) retval);
+}
+
+PHP_FUNCTION(rng_next64)
+{
+	zval *zrng;
+	uint64_t retval;
+	bool is_unsigned = 1;
+	
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(zrng, rng_ce_RNG_RNGInterface)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(is_unsigned)
+	ZEND_PARSE_PARAMETERS_END();
+
+#if UINT32_MAX >= ZEND_ULONG_MAX
+	zend_value_error("Functions doesn't support 32 bit environment.");
+	RETURN_THROWS();
+#endif
+
+	php_rng_next64(&retval, zrng);
+
+	if (is_unsigned) {
+		retval = retval >> 1;
+	}
+
+	RETURN_LONG((zend_long) retval);
+}
+
 PHP_MINIT_FUNCTION(rng)
 {
-	zend_class_entry ce_rng, ce_rng64;
+	zend_class_entry ce_rng;
 
 	INIT_CLASS_ENTRY(ce_rng, RNG_NAMESPACE "RNGInterface", class_RNG_RNGInterface_methods);
 	rng_ce_RNG_RNGInterface = zend_register_internal_interface(&ce_rng);
 
-	INIT_CLASS_ENTRY(ce_rng64, RNG_NAMESPACE "RNG64Interface", class_RNG_RNG64Interface_methods);
-	rng_ce_RNG_RNG64Interface = zend_register_internal_interface(&ce_rng64);
-	zend_class_implements(rng_ce_RNG_RNG64Interface, 1, rng_ce_RNG_RNGInterface);
-
 	PHP_MINIT(rng_xorshift128plus)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(rng_mt19937)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(rng_osrng)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(rng_os)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
