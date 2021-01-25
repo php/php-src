@@ -2652,7 +2652,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "illegal stub for phar \"%s\"", phar->fname);
+				spprintf(error, 0, "illegal stub for phar \"%s\" (__HALT_COMPILER(); is missing)", phar->fname);
 			}
 			if (free_user_stub) {
 				zend_string_free(suser_stub);
