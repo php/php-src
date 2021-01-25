@@ -2963,14 +2963,23 @@ static bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
 }
 /* }}} */
 
+static bool list_is_keyed(zend_ast_list *list)
+{
+	for (uint32_t i = 0; i < list->children; i++) {
+		if (list->child[i]) {
+			return list->child[i]->child[1] != NULL;
+		}
+	}
+	return false;
+}
+
 static void zend_compile_list_assign(
 		znode *result, zend_ast *ast, znode *expr_node, zend_ast_attr array_style) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	bool has_elems = 0;
-	bool is_keyed =
-		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL;
+	bool is_keyed = list_is_keyed(list);
 
 	if (list->children && expr_node->op_type == IS_CONST && Z_TYPE(expr_node->u.constant) == IS_STRING) {
 		zval_make_interned_string(&expr_node->u.constant);
