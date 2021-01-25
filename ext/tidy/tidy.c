@@ -103,14 +103,6 @@
 #define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
 #define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 #define ADD_PROPERTY_STRING(_table, _key, _string) \
 	{ \
 		zval tmp; \
@@ -1118,14 +1110,14 @@ PHP_FUNCTION(tidy_clean_repair)
 /* {{{ Repair a string using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_string)
 {
-	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
+	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
 /* {{{ Repair a file using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_file)
 {
-	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
+	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
