@@ -418,6 +418,7 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_variance_obligations) = NULL;
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
+	CG(current_linking_class) = NULL;
 }
 /* }}} */
 
