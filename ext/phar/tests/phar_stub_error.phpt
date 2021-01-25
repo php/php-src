@@ -47,7 +47,7 @@ __HALT_COMPILER();
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
-Exception: illegal stub for phar "%sphar_stub_error.phar.php"
+Exception: illegal stub for phar "%sphar_stub_error.phar.php" (__HALT_COMPILER(); is missing)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
