@@ -13,7 +13,7 @@ function dgettext(string $domain, string $message): string {}
 
 function dcgettext(string $domain, string $message, int $category): string {}
 
-function bindtextdomain(string $domain, string $directory): string|false {}
+function bindtextdomain(string $domain, ?string $directory): string|false {}
 
 #ifdef HAVE_NGETTEXT
 function ngettext(string $singular, string $plural, int $count): string {}
@@ -28,5 +28,5 @@ function dcngettext(string $domain, string $singular, string $plural, int $count
 #endif
 
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
-function bind_textdomain_codeset(string $domain, string $codeset): string|false {}
+function bind_textdomain_codeset(string $domain, ?string $codeset): string|false {}
 #endif

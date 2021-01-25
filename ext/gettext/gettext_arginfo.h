@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d0fe93cb15576756edc5aad71deadae67046690 */
+ * Stub hash: 3fbd90b87dfcbc5a1a0a2aea8d0cc45516e221ce */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_textdomain, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 1)
@@ -24,7 +24,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bindtextdomain, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_NGETTEXT)
@@ -57,7 +57,7 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_BIND_TEXTDOMAIN_CODESET)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bind_textdomain_codeset, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, codeset, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, codeset, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 #endif
 
