@@ -157,7 +157,7 @@ zend_class_entry *register_class__ZendTestInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__ZendTestInterface, zend_class_entry *class_entry_stdClass)
+zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__ZendTestInterface)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -166,7 +166,11 @@ zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__Z
 	zend_class_implements(class_entry, 1, class_entry__ZendTestInterface);
 	zend_register_class_alias("_ZendTestClassAlias", class_entry);
 
-	zend_declare_property_null(class_entry, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+	zval property__StaticProp_default_value;
+	ZVAL_NULL(&property__StaticProp_default_value);
+	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, 1);
+	zend_declare_property_ex(class_entry, property__StaticProp_name, &property__StaticProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
+	zend_string_release(property__StaticProp_name);
 
 	zval property_staticIntProp_default_value;
 	ZVAL_LONG(&property_staticIntProp_default_value, 123);
@@ -180,10 +184,11 @@ zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__Z
 	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_intProp_name);
 
+	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass"), 1);
 	zval property_classProp_default_value;
 	ZVAL_NULL(&property_classProp_default_value);
 	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
-	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CE(class_entry_stdClass, 1, 0));
+	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 1, 0));
 	zend_string_release(property_classProp_name);
 
 	return class_entry;
@@ -207,7 +212,11 @@ zend_class_entry *register_class__ZendTestTrait()
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_TRAIT;
 
-	zend_declare_property_null(class_entry, "testProp", sizeof("testProp") - 1, ZEND_ACC_PUBLIC);
+	zval property_testProp_default_value;
+	ZVAL_NULL(&property_testProp_default_value);
+	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
+	zend_declare_property_ex(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_testProp_name);
 
 	return class_entry;
 }

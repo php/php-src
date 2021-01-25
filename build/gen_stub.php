@@ -300,7 +300,7 @@ class Type {
         return null;
     }
 
-    public function toArginfoType(): ?ArginfoType {
+    public function toArginfoType(): ArginfoType {
         $classTypes = [];
         $builtinTypes = [];
         foreach ($this->types as $type) {
@@ -465,12 +465,12 @@ class ArgInfo {
 }
 
 class PropertyName {
-    /** @var string */
+    /** @var Name */
     public $class;
     /** @var string */
     public $property;
 
-    public function __construct(string $class, string $property)
+    public function __construct(Name $class, string $property)
     {
         $this->class = $class;
         $this->property = $property;
@@ -478,7 +478,7 @@ class PropertyName {
 
     public function __toString()
     {
-        return $this->class . "::$" . $this->property;
+        return $this->class->toString() . "::$" . $this->property;
     }
 }
 
@@ -864,32 +864,6 @@ class FuncInfo {
 
         return $flags;
     }
-}
-
-class PropertyInfo
-{
-    /** @var PropertyName */
-    public $name;
-    /** @var int */
-    public $flags;
-    /** @var bool */
-    public $isKnownName;
-    /** @var bool */
-    public $isDeprecated;
-    /** @var Type|null */
-    public $type;
-    /** @var Expr|null */
-    public $defaultValue;
-
-    public function __construct(PropertyName $name, int $flags, bool $isKnownName, bool $isDeprecated, ?Type $type, ?Expr $defaultValue)
-    {
-        $this->name = $name;
-        $this->flags = $flags;
-        $this->isKnownName = $isKnownName;
-        $this->isDeprecated = $isDeprecated;
-        $this->type = $type;
-        $this->defaultValue = $defaultValue;
-    }
 
     /**
      * @param FuncInfo[] $funcMap
@@ -999,6 +973,42 @@ class PropertyInfo
         return $methodSynopsis;
     }
 
+    private function appendMethodSynopsisTypeToElement(DOMDocument $doc, DOMElement $elementToAppend, Type $type) {
+        if (count($type->types) > 1) {
+            $typeElement = $doc->createElement('type');
+            $typeElement->setAttribute("class", "union");
+
+            foreach ($type->types as $type) {
+                $unionTypeElement = $doc->createElement('type', $type->name);
+                $typeElement->appendChild($unionTypeElement);
+            }
+        } else {
+            $typeElement = $doc->createElement('type', $type->types[0]->name);
+        }
+
+        $elementToAppend->appendChild($typeElement);
+    }
+}
+
+class PropertyInfo
+{
+    /** @var PropertyName */
+    public $name;
+    /** @var int */
+    public $flags;
+    /** @var Type|null */
+    public $type;
+    /** @var Expr|null */
+    public $defaultValue;
+
+    public function __construct(PropertyName $name, int $flags, ?Type $type, ?Expr $defaultValue)
+    {
+        $this->name = $name;
+        $this->flags = $flags;
+        $this->type = $type;
+        $this->defaultValue = $defaultValue;
+    }
+
     public function discardInfoForOldPhpVersions(): void {
         $this->type = null;
     }
@@ -1032,68 +1042,37 @@ class PropertyInfo
             return "";
         }
 
+        $typeCode = "";
         if ($this->type) {
             $arginfoType = $this->type->toArginfoType();
             if ($arginfoType->hasClassType()) {
                 $simpleType = $this->type->tryToSimpleType();
+
+                $className = $arginfoType->classTypes[0]->name;
+                $code .= "	zend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\"), 1);\n";
                 if ($simpleType) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CE(class_entry_" . str_replace("\\", "_", $arginfoType->classTypes[0]->name) . ", " .  ((int) $this->type->isNullable()) . ", 0)";
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, " .  ((int) $this->type->isNullable()) . ", 0)";
+                } elseif (count($arginfoType->classTypes) === 1) {
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
                 } else {
                     throw new Exception("Property $this->name has an unsupported union type");
                 }
             } else {
                 $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
             }
-
-            $code .= $this->initializeValue($defaultValueType, $defaultValue);
-
-            if ($this->isKnownName) {
-                $nameCode = "ZSTR_KNOWN(ZEND_STR_" . strtoupper($propertyName) . ")";
-            } else {
-                $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
-                $nameCode = "property_{$propertyName}_name";
-            }
-
-            $code .= "\tzend_declare_typed_property(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL, $typeCode);\n";
-            if (!$this->isKnownName) {
-                $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
-            }
-        } else {
-            if ($this->isKnownName) {
-                Throw new Exception("Non-typed property $this->name cannot be annotated as @known");
-            }
-
-            switch ($defaultValueType) {
-                case "undefined": // intentional fallthrough
-                case "NULL":
-                    $code .= "\tzend_declare_property_null(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                case "boolean":
-                    $code .= "\tzend_declare_property_bool(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . ((int) $defaultValue) . ", " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                case "integer":
-                    $code .= "\tzend_declare_property_long(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $defaultValue . ", " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                case "double":
-                    $code .= "\tzend_declare_property_double(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, " . $defaultValue . ", " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                case "string":
-                    $code .= "\tzend_declare_property_string(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, \"" . $defaultValue . "\", " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                case "array":
-                    $code .= $this->initializeValue($defaultValueType, $defaultValue);
-                    $code .= "\tzend_declare_property_ex(class_entry, \"$propertyName\", sizeof(\"$propertyName\") - 1, property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ");\n";
-                    break;
-
-                default:
-                    throw new Exception("Property $this->name has an invalid default value");
-            }
         }
+
+        $code .= $this->initializeValue($defaultValueType, $defaultValue, $this->type !== null);
+
+        $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
+        $nameCode = "property_{$propertyName}_name";
+
+        if ($this->type !== null) {
+            $code .= "\tzend_declare_typed_property(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL, $typeCode);\n";
+        } else {
+            $code .= "\tzend_declare_property_ex(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL);\n";
+        }
+        $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
 
         return $code;
     }
@@ -1101,7 +1080,7 @@ class PropertyInfo
     /**
      * @param mixed $value
      */
-    private function initializeValue(string $type, $value): string
+    private function initializeValue(string $type, $value, bool $isTyped): string
     {
         $name = $this->name->property;
         $zvalName = "property_{$name}_default_value";
@@ -1110,7 +1089,11 @@ class PropertyInfo
 
         switch ($type) {
             case "undefined":
-                $code .= "\tZVAL_UNDEF(&$zvalName);\n";
+                if ($isTyped) {
+                    $code .= "\tZVAL_UNDEF(&$zvalName);\n";
+                } else {
+                    $code .= "\tZVAL_NULL(&$zvalName);\n";
+                }
                 break;
 
             case "NULL":
@@ -1165,27 +1148,7 @@ class PropertyInfo
             $flags .= "|ZEND_ACC_STATIC";
         }
 
-        if ($this->isDeprecated) {
-            $flags .= "|ZEND_ACC_DEPRECATED";
-        }
-
         return $flags;
-    }
-
-    private function appendMethodSynopsisTypeToElement(DOMDocument $doc, DOMElement $elementToAppend, Type $type) {
-        if (count($type->types) > 1) {
-            $typeElement = $doc->createElement('type');
-            $typeElement->setAttribute("class", "union");
-
-            foreach ($type->types as $type) {
-                $unionTypeElement = $doc->createElement('type', $type->name);
-                $typeElement->appendChild($unionTypeElement);
-            }
-        } else {
-            $typeElement = $doc->createElement('type', $type->types[0]->name);
-        }
-
-        $elementToAppend->appendChild($typeElement);
     }
 }
 
@@ -1250,18 +1213,6 @@ class ClassInfo {
         foreach ($this->implements as $implements) {
             $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->parts);
         }
-        foreach ($this->propertyInfos as $property) {
-            $type = $property->type;
-            if ($type === null) {
-                continue;
-            }
-
-            $arginfoType = $type->toArginfoType();
-            if (count($arginfoType->classTypes) == 1) {
-                $params[] = "zend_class_entry *class_entry_" . str_replace("\\", "_", $arginfoType->classTypes[0]->name);
-            }
-        }
-        $params = array_unique($params);
 
         $escapedName = implode("_", $this->name->parts);
 
@@ -1270,8 +1221,8 @@ class ClassInfo {
         $code .= "{\n";
         $code .= "\tzend_class_entry ce, *class_entry;\n\n";
         if (count($this->name->parts) > 1) {
-            $className = array_pop($this->name->parts);
-            $namespace = $this->name->toCodeString();
+            $className = $this->name->getLast();
+            $namespace = $this->name->slice(0, -1);
 
             $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
         } else {
@@ -1279,7 +1230,7 @@ class ClassInfo {
         }
 
         if ($this->type === "class" || $this->type === "trait") {
-            $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]) : "NULL") . ");\n";
+            $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
         } else {
             $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
         }
@@ -1354,8 +1305,6 @@ class FileInfo {
     public $generateLegacyArginfo = false;
     /** @var bool */
     public $generateClassEntries = false;
-    /** @var bool */
-    public $generateLegacyClassEntries = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -1593,18 +1542,12 @@ function parseProperty(
     ?Node $type,
     ?DocComment $comment
 ): PropertyInfo {
-    $isDeprecated = false;
-    $isKnownName = false;
     $docType = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
         foreach ($tags as $tag) {
-            if ($tag->name === 'deprecated') {
-                $isDeprecated = true;
-            } else if ($tag->name === 'known') {
-                $isKnownName = true;
-            } else if ($tag->name === 'var') {
+            if ($tag->name === 'var') {
                 $docType = true;
             }
         }
@@ -1627,10 +1570,8 @@ function parseProperty(
     }
 
     return new PropertyInfo(
-        new PropertyName($class->__toString(), $property->name->__toString()),
+        new PropertyName($class, $property->name->__toString()),
         $flags,
-        $isKnownName,
-        $isDeprecated,
         $propertyType,
         $property->default
     );

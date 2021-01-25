@@ -35,9 +35,7 @@ class Exception implements Throwable
     protected $file = null;
     /** @var int|null */
     protected $line = null;
-    /** @known */
     private array $trace = [];
-    /** @known */
     private ?Throwable $previous = null;
 
     final private function __clone(): void {}
@@ -94,9 +92,7 @@ class Error implements Throwable
     protected $file = null;
     /** @var int|null */
     protected $line = null;
-    /** @known */
     private array $trace = [];
-    /** @known */
     private ?Throwable $previous = null;
 
     /** @implementation-alias Exception::__clone */

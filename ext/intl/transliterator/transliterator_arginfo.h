@@ -58,7 +58,11 @@ zend_class_entry *register_class_Transliterator()
 	INIT_CLASS_ENTRY(ce, "Transliterator", class_Transliterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
-	zend_declare_property_null(class_entry, "id", sizeof("id") - 1, ZEND_ACC_PUBLIC);
+	zval property_id_default_value;
+	ZVAL_NULL(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_declare_property_ex(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_id_name);
 
 	return class_entry;
 }

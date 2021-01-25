@@ -48,11 +48,23 @@ zend_class_entry *register_class_CURLFile()
 	INIT_CLASS_ENTRY(ce, "CURLFile", class_CURLFile_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
-	zend_declare_property_string(class_entry, "name", sizeof("name") - 1, "", ZEND_ACC_PUBLIC);
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
 
-	zend_declare_property_string(class_entry, "mime", sizeof("mime") - 1, "", ZEND_ACC_PUBLIC);
+	zval property_mime_default_value;
+	ZVAL_EMPTY_STRING(&property_mime_default_value);
+	zend_string *property_mime_name = zend_string_init("mime", sizeof("mime") - 1, 1);
+	zend_declare_property_ex(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_mime_name);
 
-	zend_declare_property_string(class_entry, "postname", sizeof("postname") - 1, "", ZEND_ACC_PUBLIC);
+	zval property_postname_default_value;
+	ZVAL_EMPTY_STRING(&property_postname_default_value);
+	zend_string *property_postname_name = zend_string_init("postname", sizeof("postname") - 1, 1);
+	zend_declare_property_ex(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_postname_name);
 
 	return class_entry;
 }

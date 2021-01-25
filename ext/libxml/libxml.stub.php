@@ -8,14 +8,10 @@
 class LibXMLError
 {
     public int $level;
-    /** @known */
     public int $code;
     public int $column;
-    /** @known */
     public string $message;
-    /** @known */
     public string $file;
-    /** @known */
     public int $line;
 }
 

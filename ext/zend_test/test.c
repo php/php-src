@@ -349,7 +349,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_interface = register_class__ZendTestInterface();
 	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
 
-	zend_test_class = register_class__ZendTestClass(zend_test_interface, zend_standard_class_def);
+	zend_test_class = register_class__ZendTestClass(zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 

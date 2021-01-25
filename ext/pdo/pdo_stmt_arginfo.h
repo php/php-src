@@ -143,7 +143,11 @@ zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_Iter
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
-	zend_declare_property_null(class_entry, "queryString", sizeof("queryString") - 1, ZEND_ACC_PUBLIC);
+	zval property_queryString_default_value;
+	ZVAL_NULL(&property_queryString_default_value);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_declare_property_ex(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_queryString_name);
 
 	return class_entry;
 }
