@@ -421,7 +421,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 			zend_string_addref(object_str);
 		}
 
-		zend_hash_add(debug_info, string_key, &value);
+		zend_hash_update(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_string_release_ex(object_str, 0);

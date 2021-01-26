@@ -17,16 +17,12 @@ print_r($d);
 --EXPECTF--
 DOMDocument Object
 (
-    [dynamicProperty] => stdClass Object
-        (
-        )
+    [nodeValue] => 
+    [prefix] => 
+    [textContent] => 
+    foobar
 
-    [doctype] => 
-    [implementation] => (object value omitted)
-    [documentElement] => (object value omitted)
-    [actualEncoding] => 
     [encoding] => 
-    [xmlEncoding] => 
     [standalone] => 1
     [xmlStandalone] => 1
     [version] => 1.0
@@ -40,11 +36,19 @@ DOMDocument Object
     [preserveWhiteSpace] => 1
     [recover] => 
     [substituteEntities] => 
+    [dynamicProperty] => stdClass Object
+        (
+        )
+
+    [doctype] => 
+    [implementation] => (object value omitted)
+    [documentElement] => (object value omitted)
+    [actualEncoding] => 
+    [xmlEncoding] => 
     [firstElementChild] => (object value omitted)
     [lastElementChild] => (object value omitted)
     [childElementCount] => 1
     [nodeName] => #document
-    [nodeValue] => 
     [nodeType] => 9
     [parentNode] => 
     [childNodes] => (object value omitted)
@@ -55,10 +59,6 @@ DOMDocument Object
     [attributes] => 
     [ownerDocument] => 
     [namespaceURI] => 
-    [prefix] => 
     [localName] => 
     [baseURI] => %s
-    [textContent] => 
-    foobar
-
 )

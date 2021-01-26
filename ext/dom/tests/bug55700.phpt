@@ -33,8 +33,8 @@ bool(false)
 bool(true)
 1
 object(DOMXPath)#4 (2) {
-  ["document"]=>
-  string(22) "(object value omitted)"
   ["registerNodeNamespaces"]=>
   bool(true)
+  ["document"]=>
+  string(22) "(object value omitted)"
 }
