@@ -220,7 +220,11 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 		first_observed_frame = NULL;
 		current_observed_frame = NULL;
 	} else {
-		current_observed_frame = execute_data->prev_execute_data;
+		zend_execute_data *ex = execute_data->prev_execute_data;
+		while (ex && !ex->func) {
+			ex = ex->prev_execute_data;
+		}
+		current_observed_frame = ex;
 	}
 }
 
@@ -228,7 +232,7 @@ ZEND_API void zend_observer_fcall_end_all(void)
 {
 	zend_execute_data *ex = current_observed_frame;
 	while (ex != NULL) {
-		if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+		if (ex->func && ex->func->type != ZEND_INTERNAL_FUNCTION) {
 			zend_observer_fcall_end(ex, NULL);
 		}
 		ex = ex->prev_execute_data;
