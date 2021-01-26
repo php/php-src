@@ -2300,9 +2300,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		return ce;
 	}
 
-	check_property_type_resolution(ce);
-	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
-	 || !(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 		return ce;
 	}
 

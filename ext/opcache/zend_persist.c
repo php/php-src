@@ -313,6 +313,9 @@ static void zend_persist_type(zend_type *type, bool use_arena) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			zend_accel_store_interned_string(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
+			// TODO: we may use single map_ptr slot for each class name ???
+			single_type->type_mask |= _ZEND_TYPE_CACHE_BIT;
+			single_type->ce_cache__ptr = (uint32_t)(uintptr_t)zend_map_ptr_new();
 		}
 	} ZEND_TYPE_FOREACH_END();
 }
@@ -808,10 +811,9 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			return new_ce;
 		}
 		if (!ZCG(current_persistent_script)->corrupted
-		// TODO: get rid of CONSTANTS_UPDATED and PROPERTY_TYPES_RESOLVED limitations ???
+		// TODO: get rid of CONSTANTS_UPDATED limitation ???
 		 && (!(ce->ce_flags & ZEND_ACC_LINKED)
-		  || ((ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
-		   && (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)))) {
+		  || (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 			ZCG(is_immutable_class) = 1;
 			ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;

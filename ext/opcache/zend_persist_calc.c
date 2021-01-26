@@ -369,26 +369,6 @@ static void zend_persist_class_constant_calc(zval *zv)
 	}
 }
 
-void check_property_type_resolution(zend_class_entry *ce) {
-	zend_property_info *prop;
-	if (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED) {
-		/* Preloading might have computed this already. */
-		return;
-	}
-
-	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			zend_type *single_type;
-			ZEND_TYPE_FOREACH(prop->type, single_type) {
-				if (ZEND_TYPE_HAS_NAME(*single_type)) {
-					return;
-				}
-			} ZEND_TYPE_FOREACH_END();
-		} ZEND_HASH_FOREACH_END();
-	}
-	ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
-}
-
 void zend_persist_class_entry_calc(zend_class_entry *ce)
 {
 	Bucket *p;
@@ -400,14 +380,11 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		}
 		zend_shared_alloc_register_xlat_entry(ce, ce);
 
-		check_property_type_resolution(ce);
-
 		ZCG(is_immutable_class) =
 			!ZCG(current_persistent_script)->corrupted &&
-			// TODO: get rid of CONSTANTS_UPDATED and PROPERTY_TYPES_RESOLVED limitations ???
+			// TODO: get rid of CONSTANTS_UPDATED limitation ???
 			(!(ce->ce_flags & ZEND_ACC_LINKED) ||
-				((ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) &&
-				(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)));
+			 (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED));
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));
 
