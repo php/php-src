@@ -11,6 +11,12 @@ $fragment = new DOMDocumentFragment();
 $fragment->__construct();
 var_dump($fragment);
 ?>
---EXPECTF--
-object(DOMDocumentFragment)#%d (%d) {
+--EXPECT--
+object(DOMDocumentFragment)#1 (3) {
+  ["nodeValue"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["textContent"]=>
+  string(0) ""
 }

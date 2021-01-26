@@ -31,6 +31,14 @@ foreach ($dataNodes AS $node) {
 --EXPECTF--
 int(3)
 object(DOMText)#%d (21) {
+  ["nodeValue"]=>
+  string(3) "
+  "
+  ["prefix"]=>
+  string(0) ""
+  ["textContent"]=>
+  string(3) "
+  "
   ["wholeText"]=>
   string(3) "
   "
@@ -45,9 +53,6 @@ object(DOMText)#%d (21) {
   NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["nodeValue"]=>
-  string(3) "
-  "
   ["nodeType"]=>
   int(3)
   ["parentNode"]=>
@@ -68,21 +73,30 @@ object(DOMText)#%d (21) {
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
   NULL
-  ["prefix"]=>
-  string(0) ""
   ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["textContent"]=>
-  string(3) "
-  "
 }
 object(DOMElement)#%d (23) {
-  ["tagName"]=>
-  string(5) "form1"
+  ["nodeValue"]=>
+  string(39) "
+    Value A
+    Value B
+    Value C
+  "
+  ["prefix"]=>
+  string(0) ""
+  ["textContent"]=>
+  string(39) "
+    Value A
+    Value B
+    Value C
+  "
   ["schemaTypeInfo"]=>
   NULL
+  ["tagName"]=>
+  string(5) "form1"
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
@@ -95,12 +109,6 @@ object(DOMElement)#%d (23) {
   NULL
   ["nodeName"]=>
   string(5) "form1"
-  ["nodeValue"]=>
-  string(39) "
-    Value A
-    Value B
-    Value C
-  "
   ["nodeType"]=>
   int(1)
   ["parentNode"]=>
@@ -121,20 +129,20 @@ object(DOMElement)#%d (23) {
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
   NULL
-  ["prefix"]=>
-  string(0) ""
   ["localName"]=>
   string(5) "form1"
   ["baseURI"]=>
   NULL
-  ["textContent"]=>
-  string(39) "
-    Value A
-    Value B
-    Value C
-  "
 }
 object(DOMText)#%d (21) {
+  ["nodeValue"]=>
+  string(1) "
+"
+  ["prefix"]=>
+  string(0) ""
+  ["textContent"]=>
+  string(1) "
+"
   ["wholeText"]=>
   string(1) "
 "
@@ -149,9 +157,6 @@ object(DOMText)#%d (21) {
   NULL
   ["nodeName"]=>
   string(5) "#text"
-  ["nodeValue"]=>
-  string(1) "
-"
   ["nodeType"]=>
   int(3)
   ["parentNode"]=>
@@ -172,13 +177,8 @@ object(DOMText)#%d (21) {
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
   NULL
-  ["prefix"]=>
-  string(0) ""
   ["localName"]=>
   NULL
   ["baseURI"]=>
   NULL
-  ["textContent"]=>
-  string(1) "
-"
 }

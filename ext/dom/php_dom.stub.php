@@ -4,6 +4,17 @@
 
 class DOMDocumentType extends DOMNode
 {
+    public string $name;
+
+    public DOMNamedNodeMap $entities;
+
+    public DOMNamedNodeMap $notations;
+
+    public string $publicId;
+
+    public string $systemId;
+
+    public ?string $internalSubset;
 }
 
 class DOMCdataSection extends DOMText
@@ -41,6 +52,41 @@ interface DOMChildNode
 
 class DOMNode
 {
+    public string $nodeName;
+
+    /** @var string|null */
+    public $nodeValue;
+
+    public int $nodeType;
+
+    public ?DOMNode $parentNode;
+
+    public DOMNodeList $childNodes;
+
+    public ?DOMNode $firstChild;
+
+    public ?DOMNode $lastChild;
+
+    public ?DOMNode $previousSibling;
+
+    public ?DOMNode $nextSibling;
+
+    public ?DOMNamedNodeMap $attributes;
+
+    public ?DOMDocument $ownerDocument;
+
+    public ?string $namespaceURI;
+
+    /** @var string */
+    public $prefix = "";
+
+    public ?string $localName;
+
+    public ?string $baseURI;
+
+    /** @var string */
+    public $textContent = "";
+
     /** @return DOMNode|false */
     public function appendChild(DOMNode $node) {}
 
@@ -95,6 +141,21 @@ class DOMNode
 
 class DOMNameSpaceNode
 {
+    public string $nodeName;
+
+    public ?string $nodeValue;
+
+    public int $nodeType;
+
+    public string $prefix;
+
+    public ?string $localName;
+
+    public ?string $namespaceURI;
+
+    public ?DOMDocument $ownerDocument;
+
+    public ?DOMNode $parentNode;
 }
 
 class DOMImplementation
@@ -114,6 +175,12 @@ class DOMImplementation
 
 class DOMDocumentFragment extends DOMNode implements DOMParentNode
 {
+    public ?DOMElement $firstElementChild;
+
+    public ?DOMElement $lastElementChild;
+
+    public int $childElementCount;
+
     public function __construct() {}
 
     /** @return bool */
@@ -128,6 +195,8 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
 
 class DOMNodeList implements IteratorAggregate, Countable
 {
+    public int $length;
+
     /** @return int|false */
     public function count() {}
 
@@ -139,6 +208,14 @@ class DOMNodeList implements IteratorAggregate, Countable
 
 class DOMCharacterData extends DOMNode implements DOMChildNode
 {
+    public string $data;
+
+    public int $length;
+
+    public ?DOMElement $previousElementSibling;
+
+    public ?DOMElement $nextElementSibling;
+
     /** @return bool */
     public function appendData(string $data) {}
 
@@ -168,6 +245,16 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
 
 class DOMAttr extends DOMNode
 {
+    public string $name;
+
+    public bool $specified = true;
+
+    public string $value;
+
+    public ?DOMElement $ownerElement;
+
+    public mixed $schemaTypeInfo = null;
+
     public function __construct(string $name, string $value = "") {}
 
     /** @return bool */
@@ -176,6 +263,20 @@ class DOMAttr extends DOMNode
 
 class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 {
+    public string $tagName;
+
+    public mixed $schemaTypeInfo = null;
+
+    public ?DOMElement $firstElementChild;
+
+    public ?DOMElement $lastElementChild;
+
+    public int $childElementCount;
+
+    public ?DOMElement $previousElementSibling;
+
+    public ?DOMElement $nextElementSibling;
+
     public function __construct(string $qualifiedName, ?string $value = null, string $namespace = "") {}
 
     /** @return string */
@@ -252,6 +353,65 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
 class DOMDocument extends DOMNode implements DOMParentNode
 {
+    public ?DOMDocumentType $doctype;
+
+    public DOMImplementation $implementation;
+
+    public ?DOMElement $documentElement;
+
+    /** @deprecated */
+    public ?string $actualEncoding;
+
+    /** @var string|null */
+    public $encoding;
+
+    public ?string $xmlEncoding;
+
+    /** @var bool */
+    public $standalone = false;
+
+    /** @var bool */
+    public $xmlStandalone = false;
+
+    /** @var string|null */
+    public $version;
+
+    /** @var string|null */
+    public $xmlVersion;
+
+    /** @var bool */
+    public $strictErrorChecking = false;
+
+    /** @var string|null */
+    public $documentURI;
+
+    /** @deprecated */
+    public mixed $config = null;
+
+    /** @var bool */
+    public $formatOutput = false;
+
+    /** @var bool */
+    public $validateOnParse = false;
+
+    /** @var bool */
+    public $resolveExternals = false;
+
+    /** @var bool */
+    public $preserveWhiteSpace = false;
+
+    /** @var bool */
+    public $recover = false;
+
+    /** @var bool */
+    public $substituteEntities = false;
+
+    public ?DOMElement $firstElementChild;
+
+    public ?DOMElement $lastElementChild;
+
+    public int $childElementCount;
+
     public function __construct(string $version = "1.0", string $encoding = "") {}
 
     /** @return DOMAttr|false */
@@ -366,6 +526,8 @@ final class DOMException extends Exception
 
 class DOMText extends DOMCharacterData
 {
+    public string $wholeText;
+
     public function __construct(string $data = "") {}
 
     /** @return bool */
@@ -383,6 +545,8 @@ class DOMText extends DOMCharacterData
 
 class DOMNamedNodeMap implements IteratorAggregate, Countable
 {
+    public int $length;
+
     /** @return DOMNode|null */
     public function getNamedItem(string $qualifiedName) {}
 
@@ -400,6 +564,17 @@ class DOMNamedNodeMap implements IteratorAggregate, Countable
 
 class DOMEntity extends DOMNode
 {
+    public ?string $publicId;
+
+    public ?string $systemId;
+
+    public ?string $notationName;
+
+    public mixed $actualEncoding = null;
+
+    public mixed $encoding = null;
+
+    public mixed $version = null;
 }
 
 class DOMEntityReference extends DOMNode
@@ -409,16 +584,29 @@ class DOMEntityReference extends DOMNode
 
 class DOMNotation extends DOMNode
 {
+    public string $publicId;
+
+    public string $systemId;
 }
 
 class DOMProcessingInstruction extends DOMNode
 {
+    public string $target;
+
+    /** @var string */
+    public $data = "";
+
     public function __construct(string $name, string $value = "") {}
 }
 
 #ifdef LIBXML_XPATH_ENABLED
 class DOMXPath
 {
+    public DOMDocument $document;
+
+    /** @var bool */
+    public $registerNodeNamespaces = false;
+
     public function __construct(DOMDocument $document, bool $registerNodeNS = true) {}
 
     /** @return mixed */
