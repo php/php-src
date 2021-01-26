@@ -1405,7 +1405,7 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 }
 
-int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
+ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	zend_class_entry *ce;
 	zend_string *key;

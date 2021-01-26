@@ -1433,6 +1433,14 @@ PHP_SUBST(install_targets)
 PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
+PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
+    zend_call_graph.h \
+    zend_cfg.h \
+    zend_dump.h \
+    zend_func_info.h \
+    zend_inference.h \
+    zend_optimizer.h \
+    zend_ssa.h])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
@@ -1465,12 +1473,33 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c, \
-	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    zend_observer.c zend_system_id.c \
+	Optimizer/zend_optimizer.c \
+	Optimizer/pass1.c \
+	Optimizer/pass3.c \
+	Optimizer/optimize_func_calls.c \
+	Optimizer/block_pass.c \
+	Optimizer/optimize_temp_vars_5.c \
+	Optimizer/nop_removal.c \
+	Optimizer/compact_literals.c \
+	Optimizer/zend_cfg.c \
+	Optimizer/zend_dfg.c \
+	Optimizer/dfa_pass.c \
+	Optimizer/zend_ssa.c \
+	Optimizer/zend_inference.c \
+	Optimizer/zend_func_info.c \
+	Optimizer/zend_call_graph.c \
+	Optimizer/sccp.c \
+	Optimizer/scdf.c \
+	Optimizer/dce.c \
+	Optimizer/escape_analysis.c \
+	Optimizer/compact_vars.c \
+	Optimizer/zend_dump.c \
+    , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend)
+PHP_ADD_BUILD_DIR(Zend Zend/Optimizer)
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)

@@ -19,7 +19,6 @@
 
 #include "php.h"
 #include "zend_type_info.h"
-#include "ZendAccelerator.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_inference.h"

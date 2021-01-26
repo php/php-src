@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ZendAccelerator.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_ssa.h"
