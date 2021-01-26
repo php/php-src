@@ -4187,7 +4187,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
 		} else if (OP1_TYPE == IS_VAR) {
 			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
-				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				retval_ref = retval_ptr = Z_INDIRECT_P(retval_ptr);
 			}
 			ZVAL_DEREF(retval_ptr);
 		} else if (OP1_TYPE == IS_CV) {
