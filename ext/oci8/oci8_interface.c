@@ -528,7 +528,7 @@ PHP_FUNCTION(oci_lob_write)
 	php_oci_descriptor *descriptor;
 	size_t data_len;
 	zend_long write_len;
-	zend_bool write_len_is_null = 1;
+	bool write_len_is_null = 1;
 	ub4 bytes_written;
 	char *data;
 
@@ -628,7 +628,7 @@ PHP_FUNCTION(oci_lob_erase)
 	php_oci_descriptor *descriptor;
 	ub4 bytes_erased;
 	zend_long offset, length;
-	zend_bool offset_is_null = 1, length_is_null = 1;
+	bool offset_is_null = 1, length_is_null = 1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &offset, &offset_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -697,7 +697,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
-	zend_bool flag;
+	bool flag;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &z_descriptor, oci_lob_class_entry_ptr, &flag) == FAILURE) {
 		RETURN_THROWS();
@@ -747,7 +747,7 @@ PHP_FUNCTION(oci_lob_copy)
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest, *z_descriptor_from;
 	php_oci_descriptor *descriptor_dest, *descriptor_from;
 	zend_long length;
-	zend_bool length_is_null = 1;
+	bool length_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|l!", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -824,7 +824,7 @@ PHP_FUNCTION(oci_lob_export)
 	char *buffer;
 	size_t filename_len;
 	zend_long start, length, block_length;
-	zend_bool start_is_null = 1, length_is_null = 1;
+	bool start_is_null = 1, length_is_null = 1;
 	php_stream *stream;
 	ub4 lob_length;
 

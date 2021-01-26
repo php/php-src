@@ -71,7 +71,7 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
  * Returns pointer the actual hash entry on success
  * key needs to be already allocated as it is not copied
  */
-zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, const char *key, uint32_t key_length, zend_bool indirect, void *data)
+zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, const char *key, uint32_t key_length, bool indirect, void *data)
 {
 	zend_ulong hash_value;
 	zend_ulong index;

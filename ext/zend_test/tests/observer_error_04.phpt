@@ -1,7 +1,7 @@
 --TEST--
 Observer: fatal errors caught with zend_try will not fire end handlers prematurely
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 <?php if (!extension_loaded('soap')) die('skip: soap extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
@@ -30,8 +30,8 @@ try {
 echo 'Done.' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_error_%d.php' -->
-<file '%s/observer_error_%d.php'>
+<!-- init '%s%eobserver_error_%d.php' -->
+<file '%s%eobserver_error_%d.php'>
   <!-- init main() -->
   <main>
     <!-- init foo() -->
@@ -43,4 +43,4 @@ echo 'Done.' . PHP_EOL;
 SOAP-ERROR: Parsing WSDL: Couldn't load from 'foo' : failed to load external entity "foo"
 
 Done.
-</file '%s/observer_error_%d.php'>
+</file '%s%eobserver_error_%d.php'>

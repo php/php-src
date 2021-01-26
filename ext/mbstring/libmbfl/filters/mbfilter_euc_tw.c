@@ -60,7 +60,7 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	"EUC-TW",
 	mbfl_encoding_euc_tw_aliases,
 	mblen_table_euctw,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_euctw_wchar,
 	&vtbl_wchar_euctw
 };

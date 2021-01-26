@@ -29,8 +29,8 @@ int make_http_soap_request(zval        *this_ptr,
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers);
 int basic_authentication(zval* this_ptr, smart_str* soap_headers);
 void http_context_headers(php_stream_context* context,
-                          zend_bool has_authorization,
-                          zend_bool has_proxy_authorization,
-                          zend_bool has_cookies,
+                          bool has_authorization,
+                          bool has_proxy_authorization,
+                          bool has_cookies,
                           smart_str* soap_headers);
 #endif

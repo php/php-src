@@ -79,7 +79,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_stor
 	}
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown)
+ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_store *objects, bool fast_shutdown)
 {
 	zend_object **obj_ptr, **end, *obj;
 

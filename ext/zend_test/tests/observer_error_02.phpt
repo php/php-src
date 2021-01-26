@@ -1,7 +1,7 @@
 --TEST--
 Observer: End handlers fire after a userland fatal error
 --SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -18,11 +18,11 @@ foo();
 echo 'You should not see this.';
 ?>
 --EXPECTF--
-<!-- init '%s/observer_error_%d.php' -->
-<file '%s/observer_error_%d.php'>
+<!-- init '%s%eobserver_error_%d.php' -->
+<file '%s%eobserver_error_%d.php'>
   <!-- init foo() -->
   <foo>
 
 Fatal error: Foo error in %s on line %d
   </foo:NULL>
-</file '%s/observer_error_%d.php'>
+</file '%s%eobserver_error_%d.php'>

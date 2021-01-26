@@ -182,7 +182,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	int previndex=0;
 	HashTable *nodeht;
 	zval *entry;
-	zend_bool do_curobj_undef = 1;
+	bool do_curobj_undef = 1;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 

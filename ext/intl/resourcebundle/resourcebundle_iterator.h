@@ -22,7 +22,7 @@
 typedef struct {
 	zend_object_iterator  intern;
 	ResourceBundle_object *subject;
-	zend_bool             is_table;
+	bool             is_table;
 	zend_long             length;
 	zval                  current;
 	char                  *currentkey;

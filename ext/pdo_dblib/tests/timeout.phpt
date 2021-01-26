@@ -12,12 +12,6 @@ require __DIR__ . '/config.inc';
 
 $sql = 'WAITFOR DELAY \'00:00:02\'';
 
-// querying without a timeout will succeed
-$stmt = $db->prepare($sql);
-if ($stmt->execute()) {
-    echo "OK\n";
-}
-
 // regular timeout attribute, set after instance created, will affect query timeout, causing this query to fail
 $db = new PDO($dsn, $user, $pass);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -72,7 +66,6 @@ if (!$stmt->execute()) {
 
 ?>
 --EXPECT--
-OK
 OK
 OK
 OK

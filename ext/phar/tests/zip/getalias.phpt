@@ -4,6 +4,7 @@ Phar: getAlias() with an existing phar.zip
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 

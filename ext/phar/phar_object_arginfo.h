@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e06a2ea3d97778e61aca0f91fda7b72c29ef171d */
+ * Stub hash: 96900fb403c625ad76b86bac37aed65722472f84 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -139,7 +139,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, stub)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_startBuffering arginfo_class_Phar___destruct
@@ -254,9 +254,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_getPath arginfo_class_Phar___destruct
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData_getMetadata, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, unserialize_options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
+#define arginfo_class_PharData_getMetadata arginfo_class_Phar_getMetadata
 
 #define arginfo_class_PharData_getModified arginfo_class_Phar___destruct
 
@@ -292,10 +290,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_setSignatureAlgorithm arginfo_class_Phar_setSignatureAlgorithm
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData_setStub, 0, 0, 1)
-	ZEND_ARG_INFO(0, newstub)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxlen, IS_LONG, 0, "-1")
-ZEND_END_ARG_INFO()
+#define arginfo_class_PharData_setStub arginfo_class_Phar_setStub
 
 #define arginfo_class_PharData_startBuffering arginfo_class_Phar___destruct
 

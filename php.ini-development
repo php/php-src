@@ -932,6 +932,7 @@ default_socket_timeout = 60
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
 ;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
+;extension=oci8_19  ; Use with Oracle Database 19 Instant Client
 ;extension=odbc
 ;extension=openssl
 ;extension=pdo_firebird

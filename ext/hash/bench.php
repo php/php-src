@@ -11,15 +11,15 @@ foreach (hash_algos() as $algo) {
 
 for ($j = 0; $j < 10; $j++) {
     foreach (hash_algos() as $algo) {
-        $start = microtime(true);
+        $start = hrtime(true);
         for ($i = 0; $i < 1000; $i++) {
             hash($algo, $data);
         }
-        $time[$algo] += microtime(true)-$start;
+        $time[$algo] += hrtime(true)-$start;
     }
 }
 
 asort($time, SORT_NUMERIC);
 foreach ($time as $a => $t) {
-    printf("%-12s %02.6f\n", $a, $t);
+    printf("%-12s %02.6f\n", $a, $t/1000000000);
 }

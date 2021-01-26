@@ -63,7 +63,7 @@ typedef struct _zend_heredoc_label {
 	char *label;
 	int length;
 	int indentation;
-	zend_bool indentation_uses_spaces;
+	bool indentation_uses_spaces;
 } zend_heredoc_label;
 
 /* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
@@ -75,10 +75,10 @@ typedef struct _zend_nest_location {
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
-ZEND_API void zend_prepare_string_for_scanning(zval *str, const char *filename);
+ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename);
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding);
 ZEND_API zend_result zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
-ZEND_API zend_result zend_lex_tstring(zval *zv, zend_lexer_ident_ref ident_ref);
+ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident);
 
 END_EXTERN_C()
 

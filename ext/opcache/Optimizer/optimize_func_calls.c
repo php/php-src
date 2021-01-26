@@ -39,8 +39,8 @@
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
-	zend_bool      is_prototype;
-	zend_bool      try_inline;
+	bool      is_prototype;
+	bool      try_inline;
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 

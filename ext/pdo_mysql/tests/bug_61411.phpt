@@ -30,6 +30,7 @@ if (!$attr) {
 }
 $attr[PDO::ATTR_PERSISTENT] = true;
 $attr[PDO::ATTR_EMULATE_PREPARES] = false;
+$attr[PDO::ATTR_STRINGIFY_FETCHES] = true;
 putenv('PDOTEST_ATTR='.serialize($attr));
 
 $db = MySQLPDOTest::factory();
@@ -46,8 +47,8 @@ print "done!";
 --EXPECT--
 array(2) {
   [1]=>
-  int(1)
+  string(1) "1"
   [0]=>
-  int(1)
+  string(1) "1"
 }
 done!

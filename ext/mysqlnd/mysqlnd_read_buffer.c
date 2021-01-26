@@ -22,7 +22,7 @@
 
 
 /* {{{ mysqlnd_read_buffer_is_empty */
-static zend_bool
+static bool
 mysqlnd_read_buffer_is_empty(const MYSQLND_READ_BUFFER * const buffer)
 {
 	return buffer->len? FALSE:TRUE;

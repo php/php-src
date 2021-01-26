@@ -1271,7 +1271,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	zend_bool recursive = 0;
+	bool recursive = 0;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
@@ -1543,7 +1543,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	xmlDocPtr docp;
 	xmlNodeSetPtr nodeset = NULL;
 	dom_object *intern;
-	zend_bool exclusive=0, with_comments=0;
+	bool exclusive=0, with_comments=0;
 	xmlChar **inclusive_ns_prefixes = NULL;
 	char *file = NULL;
 	int ret = -1;

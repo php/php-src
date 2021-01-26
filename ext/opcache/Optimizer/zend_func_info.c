@@ -462,12 +462,12 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_get_charset", 					MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("mysqli_fetch_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mysqli_fetch_assoc",					MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-	F1("mysqli_fetch_all",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
+	F1("mysqli_fetch_all",						MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mysqli_fetch_object",					MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("mysqli_affected_rows",					MAY_BE_LONG | MAY_BE_STRING),
-	F1("mysqli_character_set_name",				MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_character_set_name",				MAY_BE_STRING),
 	F0("mysqli_debug",							MAY_BE_TRUE),
-	F1("mysqli_error",							MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_error",							MAY_BE_STRING),
 	F1("mysqli_reap_async_query",				MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_OBJECT),
 	F1("mysqli_stmt_get_result",				MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("mysqli_get_warnings",					MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -490,13 +490,13 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_stmt_affected_rows",				MAY_BE_LONG | MAY_BE_STRING),
 	F1("mysqli_stmt_insert_id",					MAY_BE_LONG | MAY_BE_STRING),
 	F1("mysqli_stmt_num_rows",					MAY_BE_LONG | MAY_BE_STRING),
-	F1("mysqli_sqlstate",						MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_sqlstate",						MAY_BE_STRING),
 	F0("mysqli_ssl_set",						MAY_BE_TRUE),
 	F1("mysqli_stat",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("mysqli_stmt_error",						MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_stmt_error",						MAY_BE_STRING),
 	F1("mysqli_stmt_init",						MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("mysqli_stmt_result_metadata",			MAY_BE_FALSE | MAY_BE_OBJECT),
-	F1("mysqli_stmt_sqlstate",					MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_stmt_sqlstate",					MAY_BE_STRING),
 	F1("mysqli_store_result",					MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("mysqli_use_result",						MAY_BE_FALSE | MAY_BE_OBJECT),
 
@@ -504,7 +504,6 @@ static const func_info_t func_infos[] = {
 	F1("curl_init",                             MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("curl_copy_handle",                      MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("curl_version",                          MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F1("curl_getinfo",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("curl_error",                            MAY_BE_STRING),
 	F1("curl_strerror",                         MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_multi_strerror",                   MAY_BE_NULL | MAY_BE_STRING),
@@ -776,7 +775,7 @@ static const func_info_t func_infos[] = {
 #endif
 
 	/* ext/fileinfo */
-	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("finfo_file",							MAY_BE_FALSE | MAY_BE_STRING),
 	F1("finfo_buffer",							MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mime_content_type",						MAY_BE_FALSE | MAY_BE_STRING),
@@ -862,7 +861,7 @@ static uint32_t get_internal_func_info(
 
 uint32_t zend_get_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa,
-		zend_class_entry **ce, zend_bool *ce_is_instanceof)
+		zend_class_entry **ce, bool *ce_is_instanceof)
 {
 	uint32_t ret = 0;
 	const zend_function *callee_func = call_info->callee_func;

@@ -108,7 +108,7 @@ PS_OPEN_FUNC(user)
 
 PS_CLOSE_FUNC(user)
 {
-	zend_bool bailout = 0;
+	bool bailout = 0;
 	STDVARS;
 
 	if (!PS(mod_user_implemented)) {

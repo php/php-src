@@ -4467,9 +4467,6 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 		return 0.0;
 	}
 
-	/* skip leading zero */
-	s++;
-
 	while ((c = *s++)) {
 		if (c < '0' || c > '7') {
 			/* break and return the current value if the number is not well-formed

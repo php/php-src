@@ -253,11 +253,8 @@ static void php_xml_free_wrapper(void *ptr)
 
 PHP_MINIT_FUNCTION(xml)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
-	xml_parser_ce = zend_register_internal_class(&ce);
+	xml_parser_ce = register_class_XMLParser();
 	xml_parser_ce->create_object = xml_parser_create_object;
-	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	xml_parser_ce->serialize = zend_class_serialize_deny;
 	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 
@@ -437,7 +434,7 @@ static void xml_set_handler(zval *handler, zval *data)
 
 	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
 	if (Z_TYPE_P(data) != IS_ARRAY && Z_TYPE_P(data) != IS_OBJECT) {
-		convert_to_string_ex(data);
+		convert_to_string(data);
 		if (Z_STRLEN_P(data) == 0) {
 			ZVAL_UNDEF(handler);
 			return;
@@ -1249,7 +1246,7 @@ PHP_FUNCTION(xml_parse)
 	char *data;
 	size_t data_len;
 	int ret;
-	zend_bool isFinal = 0;
+	bool isFinal = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &pind, xml_parser_ce, &data, &data_len, &isFinal) == FAILURE) {
 		RETURN_THROWS();

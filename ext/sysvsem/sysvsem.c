@@ -188,7 +188,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666;
-	zend_bool auto_release = 1;
+	bool auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
@@ -298,7 +298,7 @@ PHP_FUNCTION(sem_get)
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	zval *arg_id;
-	zend_bool nowait = 0;
+	bool nowait = 0;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 

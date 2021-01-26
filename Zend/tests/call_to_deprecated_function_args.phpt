@@ -2,7 +2,7 @@
 Check that arguments are freed when calling a deprecated function
 --SKIPIF--
 <?php
-if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
+if (!extension_loaded('zend_test')) die('skip zend_test extension not loaded');
 --FILE--
 <?php
 

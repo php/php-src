@@ -279,7 +279,7 @@ PHP_FUNCTION(com_get_active_object)
 	char *module_name;
 	size_t module_name_len;
 	zend_long code_page;
-	zend_bool code_page_is_null = 1;
+	bool code_page_is_null = 1;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -751,7 +751,7 @@ PHP_FUNCTION(com_print_typeinfo)
 	char *ifacename = NULL;
 	char *typelibname = NULL;
 	size_t ifacelen;
-	zend_bool wantsink = 0;
+	bool wantsink = 0;
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
 
@@ -814,7 +814,7 @@ PHP_FUNCTION(com_load_typelib)
 	char *name;
 	size_t namelen;
 	ITypeLib *pTL = NULL;
-	zend_bool cs = TRUE;
+	bool cs = TRUE;
 	int codepage = COMG(code_page);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &namelen, &cs)) {

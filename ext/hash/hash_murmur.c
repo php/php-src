@@ -36,9 +36,20 @@ const php_hash_ops php_hash_murmur3a_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx)
+PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args)
 {
-	ctx->h = 0;
+	if (args) {
+		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		/* This might be a bit too restrictive, but thinking that a seed might be set
+			once and for all, it should be done a clean way. */
+		if (seed && IS_LONG == Z_TYPE_P(seed)) {
+			ctx->h = (uint32_t)Z_LVAL_P(seed);
+		} else {
+			ctx->h = 0;
+		}
+	} else {
+		ctx->h = 0;
+	}
 	ctx->carry = 0;
 	ctx->len = 0;
 }
@@ -82,9 +93,24 @@ const php_hash_ops php_hash_murmur3c_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx)
+PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args)
 {
-	memset(&ctx->h, 0, sizeof ctx->h);
+	if (args) {
+		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		/* This might be a bit too restrictive, but thinking that a seed might be set
+			once and for all, it should be done a clean way. */
+		if (seed && IS_LONG == Z_TYPE_P(seed)) {
+			uint32_t _seed = (uint32_t)Z_LVAL_P(seed);
+			ctx->h[0] = _seed;
+			ctx->h[1] = _seed;
+			ctx->h[2] = _seed;
+			ctx->h[3] = _seed;
+		} else {
+			memset(&ctx->h, 0, sizeof ctx->h);
+		}
+	} else {
+		memset(&ctx->h, 0, sizeof ctx->h);
+	}
 	memset(&ctx->carry, 0, sizeof ctx->carry);
 	ctx->len = 0;
 }
@@ -95,7 +121,7 @@ PHP_HASH_API void PHP_MURMUR3CUpdate(PHP_MURMUR3C_CTX *ctx, const unsigned char 
 	PMurHash128x86_Process(ctx->h, ctx->carry, in, len);
 }
 
-PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[4], PHP_MURMUR3C_CTX *ctx)
+PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[16], PHP_MURMUR3C_CTX *ctx)
 {
 	uint32_t h[4] = {0, 0, 0, 0};
 	PMurHash128x86_Result(ctx->h, ctx->carry, ctx->len, h);
@@ -141,9 +167,22 @@ const php_hash_ops php_hash_murmur3f_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx)
+PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args)
 {
-	memset(&ctx->h, 0, sizeof ctx->h);
+	if (args) {
+		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		/* This might be a bit too restrictive, but thinking that a seed might be set
+			once and for all, it should be done a clean way. */
+		if (seed && IS_LONG == Z_TYPE_P(seed)) {
+			uint64_t _seed = (uint64_t)Z_LVAL_P(seed);
+			ctx->h[0] = _seed;
+			ctx->h[1] = _seed;
+		} else {
+			memset(&ctx->h, 0, sizeof ctx->h);
+		}
+	} else {
+		memset(&ctx->h, 0, sizeof ctx->h);
+	}
 	memset(&ctx->carry, 0, sizeof ctx->carry);
 	ctx->len = 0;
 }
@@ -154,7 +193,7 @@ PHP_HASH_API void PHP_MURMUR3FUpdate(PHP_MURMUR3F_CTX *ctx, const unsigned char 
 	PMurHash128x64_Process(ctx->h, ctx->carry, in, len);
 }
 
-PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[4], PHP_MURMUR3F_CTX *ctx)
+PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[16], PHP_MURMUR3F_CTX *ctx)
 {
 	uint64_t h[2] = {0, 0};
 	PMurHash128x64_Result(ctx->h, ctx->carry, ctx->len, h);

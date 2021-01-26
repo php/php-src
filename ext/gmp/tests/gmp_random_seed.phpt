@@ -108,7 +108,7 @@ var_dump(gmp_strval(gmp_random_range(-10000, 0)));
 // standard non conversion error
 try {
     var_dump(gmp_random_seed('not a number'));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

@@ -93,7 +93,7 @@ typedef struct _spl_recursive_it_object {
 	RecursiveIteratorMode    mode;
 	int                      flags;
 	int                      max_depth;
-	zend_bool                in_iteration;
+	bool                in_iteration;
 	zend_function            *beginIteration;
 	zend_function            *endIteration;
 	zend_function            *callHasChildren;
@@ -685,7 +685,7 @@ PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 	zend_long level;
-	zend_bool level_is_null = 1;
+	bool level_is_null = 1;
 	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &level, &level_is_null) == FAILURE) {
@@ -3135,7 +3135,7 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser)
 PHP_FUNCTION(iterator_to_array)
 {
 	zval  *obj;
-	zend_bool use_keys = 1;
+	bool use_keys = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, zend_ce_traversable, &use_keys) == FAILURE) {
 		RETURN_THROWS();

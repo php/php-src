@@ -81,19 +81,19 @@ struct _zend_compiler_globals {
 
 	/* Refer to zend_yytnamerr() in zend_language_parser.y for meaning of values */
 	zend_uchar parse_error;
-	zend_bool in_compilation;
-	zend_bool short_tags;
+	bool in_compilation;
+	bool short_tags;
 
-	zend_bool unclean_shutdown;
+	bool unclean_shutdown;
 
-	zend_bool ini_parser_unbuffered_errors;
+	bool ini_parser_unbuffered_errors;
 
 	zend_llist open_files;
 
 	struct _zend_ini_parser_param *ini_parser_param;
 
-	zend_bool skip_shebang;
-	zend_bool increment_lineno;
+	bool skip_shebang;
+	bool increment_lineno;
 
 	zend_string *doc_comment;
 	uint32_t extra_fn_flags;
@@ -109,9 +109,9 @@ struct _zend_compiler_globals {
 
 	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
-	zend_bool multibyte;
-	zend_bool detect_unicode;
-	zend_bool encoding_declared;
+	bool multibyte;
+	bool detect_unicode;
+	bool encoding_declared;
 
 	zend_ast *ast;
 	zend_arena *ast_arena;
@@ -176,13 +176,13 @@ struct _zend_executor_globals {
 	uint32_t persistent_classes_count;
 
 	HashTable *in_autoload;
-	zend_bool full_tables_cleanup;
+	bool full_tables_cleanup;
 
 	/* for extended information support */
-	zend_bool no_extensions;
+	bool no_extensions;
 
-	zend_bool vm_interrupt;
-	zend_bool timed_out;
+	bool vm_interrupt;
+	bool timed_out;
 	zend_long hard_timeout;
 
 #ifdef ZEND_WIN32
@@ -218,7 +218,7 @@ struct _zend_executor_globals {
 
 	struct _zend_module_entry *current_module;
 
-	zend_bool active;
+	bool active;
 	zend_uchar flags;
 
 	zend_long assertions;
@@ -238,7 +238,7 @@ struct _zend_executor_globals {
 
 	HashTable weakrefs;
 
-	zend_bool exception_ignore_args;
+	bool exception_ignore_args;
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
@@ -291,9 +291,9 @@ struct _zend_php_scanner_globals {
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
 	zend_stack nest_location_stack; /* for syntax error reporting */
-	zend_bool heredoc_scan_ahead;
+	bool heredoc_scan_ahead;
 	int heredoc_indentation;
-	zend_bool heredoc_indentation_uses_spaces;
+	bool heredoc_indentation_uses_spaces;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;

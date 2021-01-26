@@ -39,7 +39,7 @@ typedef _Bool       my_bool;
 #define PDO_DBG_INF_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
 #define PDO_DBG_ERR_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 #define PDO_DBG_ENTER(func_name) \
-	zend_bool dbg_skip_trace = TRUE; \
+	bool dbg_skip_trace = TRUE; \
 	((void) dbg_skip_trace); \
 	if (PDO_MYSQL_G(dbg)) \
 		dbg_skip_trace = !PDO_MYSQL_G(dbg)->m->func_enter(PDO_MYSQL_G(dbg), __LINE__, __FILE__, func_name, strlen(func_name));
@@ -104,6 +104,7 @@ typedef struct {
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
+	unsigned local_infile:1;
 #ifndef PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
@@ -119,12 +120,6 @@ typedef struct {
 	pdo_mysql_db_handle 	*H;
 	MYSQL_RES				*result;
 	const MYSQL_FIELD		*fields;
-	MYSQL_ROW				current_data;
-#ifdef PDO_USE_MYSQLND
-	const size_t			*current_lengths;
-#else
-	unsigned long			*current_lengths;
-#endif
 	pdo_mysql_error_info 	einfo;
 #ifdef PDO_USE_MYSQLND
 	MYSQLND_STMT 			*stmt;
@@ -136,12 +131,18 @@ typedef struct {
 #ifndef PDO_USE_MYSQLND
 	my_bool					*in_null;
 	zend_ulong			*in_length;
-#endif
 	PDO_MYSQL_PARAM_BIND	*bound_result;
 	my_bool					*out_null;
 	zend_ulong				*out_length;
-	unsigned int			params_given;
+	MYSQL_ROW				current_data;
+	unsigned long			*current_lengths;
+#else
+	zval					*current_row;
+#endif
 	unsigned				max_length:1;
+	/* Whether all result sets have been fully consumed.
+	 * If this flag is not set, they need to be consumed during destruction. */
+	unsigned				done:1;
 } pdo_mysql_stmt;
 
 extern const pdo_driver_t pdo_mysql_driver;

@@ -26,7 +26,7 @@
 #define MYSQL_RES				MYSQLND_RES
 #define MYSQL_ROW				MYSQLND_ROW_C
 #define MYSQL					MYSQLND
-#define my_bool					zend_bool
+#define my_bool					bool
 #define my_ulonglong			uint64_t
 
 #define MYSQL_VERSION_ID		MYSQLND_VERSION_ID
@@ -80,7 +80,7 @@
 #define mysql_stmt_param_count(s)		mysqlnd_stmt_param_count((s))
 #define mysql_stmt_num_rows(s)			mysqlnd_stmt_num_rows((s))
 #define mysql_stmt_insert_id(s)			mysqlnd_stmt_insert_id((s))
-#define mysql_stmt_close(s)				mysqlnd_stmt_close((s))
+#define mysql_stmt_close(s)				mysqlnd_stmt_close((s), 0)
 #define mysql_stmt_bind_param(s,b)		mysqlnd_stmt_bind_param((s), (b))
 #define mysql_stmt_bind_result(s,b)		mysqlnd_stmt_bind_result((s), (b))
 #define mysql_stmt_errno(s)				mysqlnd_stmt_errno((s))
@@ -125,6 +125,7 @@
 #define REFRESH_STATUS		MYSQLND_REFRESH_STATUS
 #define REFRESH_THREADS		MYSQLND_REFRESH_THREADS
 #define REFRESH_SLAVE		MYSQLND_REFRESH_SLAVE
+#define REFRESH_REPLICA		MYSQLND_REFRESH_REPLICA
 #define REFRESH_MASTER		MYSQLND_REFRESH_MASTER
 #define REFRESH_BACKUP_LOG	MYSQLND_REFRESH_BACKUP_LOG
 

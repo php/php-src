@@ -58,7 +58,7 @@ struct _sdl {
 	HashTable *groups;           /* array of sdlTypesPtr */
 	char      *target_ns;
 	char      *source;
-	zend_bool  is_persistent;
+	bool  is_persistent;
 };
 
 typedef struct sdlCtx {

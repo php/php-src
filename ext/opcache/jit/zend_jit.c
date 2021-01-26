@@ -124,14 +124,14 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
 
-static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
+static bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
 	}
 	return a == b;
 }
 
-static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
+static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
 	int next_use;
 
@@ -165,7 +165,7 @@ static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_
 	return 0;
 }
 
-static zend_bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
+static bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
 {
 	if (ival->flags & ZREG_LAST_USE) {
 		const zend_life_range *range = &ival->range;
@@ -178,7 +178,7 @@ static zend_bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int u
 	return 0;
 }
 
-static zend_bool zend_is_commutative(zend_uchar opcode)
+static bool zend_is_commutative(zend_uchar opcode)
 {
 	return
 		opcode == ZEND_ADD ||
@@ -188,7 +188,7 @@ static zend_bool zend_is_commutative(zend_uchar opcode)
 		opcode == ZEND_BW_XOR;
 }
 
-static zend_bool zend_long_is_power_of_two(zend_long x)
+static bool zend_long_is_power_of_two(zend_long x)
 {
 	return (x > 0) && !(x & (x - 1));
 }
@@ -1044,7 +1044,7 @@ static int zend_jit_compute_block_order(zend_ssa *ssa, int *block_order)
 	return end - block_order;
 }
 
-static zend_bool zend_jit_in_loop(zend_ssa *ssa, int header, zend_basic_block *b)
+static bool zend_jit_in_loop(zend_ssa *ssa, int header, zend_basic_block *b)
 {
 	while (b->loop_header >= 0) {
 		if (b->loop_header == header) {
@@ -1435,7 +1435,7 @@ static uint32_t zend_interval_end(zend_lifetime_interval *ival)
 	return range->end;
 }
 
-static zend_bool zend_interval_covers(zend_lifetime_interval *ival, uint32_t position)
+static bool zend_interval_covers(zend_lifetime_interval *ival, uint32_t position)
 {
 	zend_life_range *range = &ival->range;
 
@@ -1997,7 +1997,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 					    ((intervals[i]->flags & ZREG_LOAD) ||
 					     ((intervals[i]->flags & ZREG_STORE) && ssa->vars[i].definition >= 0)) &&
 					    ssa->vars[i].use_chain < 0) {
-					    zend_bool may_remove = 1;
+					    bool may_remove = 1;
 						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
 
 						while (phi) {
@@ -2020,7 +2020,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 					    (intervals[i]->flags & ZREG_STORE) &&
 					    (ssa->vars[i].use_chain < 0 ||
 					     zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
-						zend_bool may_remove = 1;
+						bool may_remove = 1;
 						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
 
 						while (phi) {
@@ -2070,14 +2070,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	int call_level = 0;
 	void *checkpoint = NULL;
 	zend_lifetime_interval **ra = NULL;
-	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
-	zend_bool recv_emitted = 0;   /* emitted at least one RECV opcode */
+	bool is_terminated = 1; /* previous basic block is terminated by jump */
+	bool recv_emitted = 0;   /* emitted at least one RECV opcode */
 	zend_uchar smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
-	zend_bool ce_is_instanceof;
+	bool ce_is_instanceof;
 
 	if (JIT_G(bisect_limit)) {
 		jit_bisect_pos++;
@@ -2842,7 +2842,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
-								NULL)) {
+								NULL, 0)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2871,7 +2871,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								RES_REG_ADDR(),
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
-								NULL)) {
+								NULL, 0)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2932,7 +2932,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						} else {
 							int j;
-							zend_bool left_frame = 0;
+							bool left_frame = 0;
 
 							if (!zend_jit_return(&dasm_state, opline, op_array,
 									op1_info, OP1_REG_ADDR())) {
@@ -3263,7 +3263,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_FETCH_CONSTANT:
-						if (!zend_jit_fetch_constant(&dasm_state, opline)) {
+						if (!zend_jit_fetch_constant(&dasm_state, opline, op_array, ssa, ssa_op)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3629,7 +3629,7 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 	/* JIT-ed code is going to be called by VM */
 }
 
-void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
+void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
 	zend_op *opline;
 	zend_function *func;
 	zend_op_array *op_array;
@@ -3962,15 +3962,24 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE) != 0) {
+		int opts = PROT_READ | PROT_WRITE;
+#ifdef ZTS
+		/* Another thread may be executing JITed code. */
+		opts |= PROT_EXEC;
+#endif
+		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
 #elif _WIN32
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		DWORD old;
-
-		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_READWRITE, &old)) {
+		DWORD old, new;
+#ifdef ZTS
+		new = PAGE_EXECUTE_READWRITE;
+#else
+		new = PAGE_READWRITE;
+#endif
+		if (!VirtualProtect(dasm_buf, dasm_size, new, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
 			fprintf(stderr, "VirtualProtect() failed [%u] %s\n", err, msg);
@@ -4129,7 +4138,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 	}
 
 failure:
-	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\" or 4-digit number");
+	zend_error(E_WARNING, "Invalid \"opcache.jit\" setting. Should be \"disable\", \"on\", \"off\", \"tracing\", \"function\" or 4-digit number");
 	JIT_G(enabled) = 0;
 	JIT_G(on) = 0;
 	return FAILURE;
@@ -4200,7 +4209,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	return SUCCESS;
 }
 
-ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, zend_bool reattached)
+ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 {
 	int ret;
 

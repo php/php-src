@@ -21,7 +21,8 @@ unset( $finfo );
 ?>
 --EXPECTF--
 *** Testing finfo_close() : basic functionality ***
-resource(%d) of type (file_info)
+object(finfo)#%d (0) {
+}
 bool(true)
 object(finfo)#%d (%d) {
 }

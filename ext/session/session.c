@@ -359,7 +359,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 /* }}} */
 
 
-static zend_long php_session_gc(zend_bool immediate) /* {{{ */
+static zend_long php_session_gc(bool immediate) /* {{{ */
 {
 	int nrand;
 	zend_long num = -1;
@@ -605,9 +605,9 @@ static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 	SESSION_CHECK_OUTPUT_STATE;
 
 	if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
-		PS(use_trans_sid) = (zend_bool) 1;
+		PS(use_trans_sid) = (bool) 1;
 	} else {
-		PS(use_trans_sid) = (zend_bool) atoi(ZSTR_VAL(new_value));
+		PS(use_trans_sid) = (bool) atoi(ZSTR_VAL(new_value));
 	}
 
 	return SUCCESS;
@@ -1428,7 +1428,7 @@ PHPAPI int php_session_reset_id(void) /* {{{ */
 {
 	int module_number = PS(module_number);
 	zval *sid, *data, *ppid;
-	zend_bool apply_trans_sid;
+	bool apply_trans_sid;
 
 	if (!PS(id)) {
 		php_error_docref(NULL, E_WARNING, "Cannot set session ID - session ID is not initialized");
@@ -1674,8 +1674,8 @@ PHP_FUNCTION(session_set_cookie_params)
 	HashTable *options_ht;
 	zend_long lifetime_long;
 	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	zend_bool secure = 0, secure_null = 1;
-	zend_bool httponly = 0, httponly_null = 1;
+	bool secure = 0, secure_null = 1;
+	bool httponly = 0, httponly_null = 1;
 	zend_string *ini_name;
 	int result;
 	int found = 0;
@@ -1961,7 +1961,7 @@ PHP_FUNCTION(session_set_save_handler)
 		zval *obj = NULL;
 		zend_string *func_name;
 		zend_function *current_mptr;
-		zend_bool register_shutdown = 1;
+		bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
 			RETURN_THROWS();
@@ -2184,7 +2184,7 @@ PHP_FUNCTION(session_id)
 /* {{{ Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	zend_bool del_ses = 0;
+	bool del_ses = 0;
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
@@ -2378,7 +2378,7 @@ PHP_FUNCTION(session_cache_limiter)
 PHP_FUNCTION(session_cache_expire)
 {
 	zend_long expires;
-	zend_bool expires_is_null = 1;
+	bool expires_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &expires, &expires_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -2686,7 +2686,7 @@ PHP_FUNCTION(session_register_shutdown)
    * Module Setup and Destruction *
    ******************************** */
 
-static int php_rinit_session(zend_bool auto_start) /* {{{ */
+static int php_rinit_session(bool auto_start) /* {{{ */
 {
 	php_rinit_session_globals();
 
@@ -2903,7 +2903,7 @@ static const zend_module_dep session_deps[] = { /* {{{ */
    * Upload hook handling *
    ************************ */
 
-static zend_bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_progress *progress) /* {{{ */
+static bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_progress *progress) /* {{{ */
 {
 	zval *ppid;
 
@@ -2938,7 +2938,7 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 	early_find_sid_in(&progress->sid, TRACK_VARS_GET, progress);
 } /* }}} */
 
-static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress) /* {{{ */
+static bool php_check_cancel_upload(php_session_rfc1867_progress *progress) /* {{{ */
 {
 	zval *progress_ary, *cancel_upload;
 

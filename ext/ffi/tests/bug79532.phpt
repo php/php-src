@@ -3,7 +3,7 @@ Bug #79532 (sizeof off_t can be wrong)
 --SKIPIF--
 <?php
 if (!extension_loaded('ffi')) die('skip ffi extension not available');
-if (!extension_loaded('zend-test')) die('skip zend-test extension not available');
+if (!extension_loaded('zend_test')) die('skip zend_test extension not available');
 ?>
 --FILE--
 <?php

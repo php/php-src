@@ -99,9 +99,9 @@ function gzread($stream, int $length): string|false {}
 
 /**
  * @param resource $stream
- * @implementation-alias fgets
+ * @alias fgets
  */
-function gzgets($stream, int $length = 1024): string|false {}
+function gzgets($stream, ?int $length = null): string|false {}
 
 function deflate_init(int $encoding, array $options = []): DeflateContext|false {}
 

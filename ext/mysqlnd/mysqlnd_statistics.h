@@ -108,8 +108,8 @@
 
 
 
-PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent);
-PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent);
+PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const bool persistent);
+PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent);
 
 PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
 

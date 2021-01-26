@@ -159,7 +159,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	int        cur_uniq_ns;
 	int        soap_version;
 	sdlPtr     sdl;
-	zend_bool  use_soap_error_handler;
+	bool  use_soap_error_handler;
 	char*      error_code;
 	zval       error_object;
 	char       cache;

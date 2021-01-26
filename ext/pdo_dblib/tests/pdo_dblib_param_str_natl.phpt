@@ -23,5 +23,5 @@ Key: Name: [6] :value
 paramno=-1
 name=[6] ":value"
 is_param=1
-param_type=1073741826
+param_type=1073741827
 NULL

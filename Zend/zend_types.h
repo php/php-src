@@ -150,7 +150,7 @@ typedef struct {
 /* Type mask excluding the flags above. */
 #define _ZEND_TYPE_MAY_BE_MASK ((1u << 20) - 1)
 /* Must have same value as MAY_BE_NULL */
-#define _ZEND_TYPE_NULLABLE_BIT 0x2
+#define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
@@ -1130,7 +1130,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #endif
 
 #if ZEND_RC_DEBUG
-extern ZEND_API zend_bool zend_rc_debug;
+extern ZEND_API bool zend_rc_debug;
 # define ZEND_RC_MOD_CHECK(p) do { \
 		if (zend_rc_debug && zval_gc_type((p)->u.type_info) != IS_OBJECT) { \
 			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
@@ -1346,27 +1346,22 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	} while (0)
 
 #define SEPARATE_ARRAY(zv) do {							\
-		zval *_zv = (zv);								\
-		zend_array *_arr = Z_ARR_P(_zv);				\
+		zval *__zv = (zv);								\
+		zend_array *_arr = Z_ARR_P(__zv);				\
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
-			if (Z_REFCOUNTED_P(_zv)) {					\
+			if (Z_REFCOUNTED_P(__zv)) {					\
 				GC_DELREF(_arr);						\
 			}											\
-			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
-		zval *__zv = (zv);								\
-		if (Z_TYPE_P(__zv) == IS_ARRAY) {				\
-			SEPARATE_ARRAY(__zv);                       \
+			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
 		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
+		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
@@ -1384,13 +1379,8 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 				break;									\
 			}											\
 		}												\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
-	} while (0)
-
-#define SEPARATE_ARG_IF_REF(varptr) do { 				\
-		ZVAL_DEREF(varptr);								\
-		if (Z_REFCOUNTED_P(varptr)) { 					\
-			Z_ADDREF_P(varptr); 						\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
 		}												\
 	} while (0)
 

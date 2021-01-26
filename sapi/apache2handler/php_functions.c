@@ -253,7 +253,7 @@ PHP_FUNCTION(apache_setenv)
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	zend_bool walk_to_top = 0;
+	bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
 
@@ -287,7 +287,7 @@ PHP_FUNCTION(apache_getenv)
 	php_struct *ctx;
 	char *variable;
 	size_t variable_len;
-	zend_bool walk_to_top = 0;
+	bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;

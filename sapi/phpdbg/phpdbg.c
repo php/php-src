@@ -74,9 +74,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("phpdbg.eol", "2", PHP_INI_ALL, OnUpdateEol, eol, zend_phpdbg_globals, phpdbg_globals)
 PHP_INI_END()
 
-static zend_bool phpdbg_booted = 0;
-static zend_bool phpdbg_fully_started = 0;
-zend_bool use_mm_wrappers = 1;
+static bool phpdbg_booted = 0;
+static bool phpdbg_fully_started = 0;
+bool use_mm_wrappers = 1;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -312,7 +312,7 @@ PHP_FUNCTION(phpdbg_exec)
 
 	{
 		zend_stat_t sb;
-		zend_bool result = 1;
+		bool result = 1;
 
 		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -476,7 +476,7 @@ PHP_FUNCTION(phpdbg_start_oplog)
 	PHPDBG_G(oplog_cur)->next = NULL;
 }
 
-static zend_always_inline zend_bool phpdbg_is_ignored_opcode(zend_uchar opcode) {
+static zend_always_inline bool phpdbg_is_ignored_opcode(zend_uchar opcode) {
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
 	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
@@ -487,7 +487,7 @@ static zend_always_inline zend_bool phpdbg_is_ignored_opcode(zend_uchar opcode) 
 	;
 }
 
-static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *insert_ht, zend_bool by_opcode) {
+static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *insert_ht, bool by_opcode) {
 	/* ignore RECV_* opcodes */
 	zend_op *cur = op_array->opcodes + op_array->num_args + !!(op_array->fn_flags & ZEND_ACC_VARIADIC);
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -538,8 +538,8 @@ PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
 	zval *option_buffer;
-	zend_bool by_function = 0;
-	zend_bool by_opcode = 0;
+	bool by_function = 0;
+	bool by_opcode = 0;
 	HashTable *insert_ht;
 
 	zend_function *func;
@@ -639,8 +639,8 @@ PHP_FUNCTION(phpdbg_end_oplog)
 
 	HashTable *options = NULL;
 	zval *option_buffer;
-	zend_bool by_function = 0;
-	zend_bool by_opcode = 0;
+	bool by_function = 0;
+	bool by_opcode = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
 		RETURN_THROWS();
@@ -1056,7 +1056,7 @@ const char phpdbg_ini_hardcoded[] =
 "error_log=\n"
 "output_buffering=off\n\0";
 
-static void phpdbg_welcome(zend_bool cleaning) /* {{{ */
+static void phpdbg_welcome(bool cleaning) /* {{{ */
 {
 	/* print blurb */
 	if (!cleaning) {
@@ -1300,21 +1300,21 @@ int main(int argc, char **argv) /* {{{ */
 	int   ini_entries_len;
 	char **zend_extensions = NULL;
 	zend_ulong zend_extensions_len = 0L;
-	zend_bool ini_ignore;
+	bool ini_ignore;
 	char *ini_override;
 	char *exec = NULL;
 	char *first_command = NULL;
 	char *init_file;
 	size_t init_file_len;
-	zend_bool init_file_default;
+	bool init_file_default;
 	char *oplog_file;
 	size_t oplog_file_len;
 	uint64_t flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
-	volatile zend_bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
-	zend_bool remote = 0;
+	volatile bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
+	bool remote = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;
 	char *address;
@@ -1323,12 +1323,12 @@ int main(int argc, char **argv) /* {{{ */
 	int socket = -1;
 	FILE* stream = NULL;
 	char *print_opline_func;
-	zend_bool ext_stmt = 0;
-	zend_bool is_exit;
+	bool ext_stmt = 0;
+	bool is_exit;
 	int exit_status;
 	char *read_from_stdin = NULL;
 	zend_string *backup_phpdbg_compile = NULL;
-	zend_bool show_help = 0, show_version = 0;
+	bool show_help = 0, show_version = 0;
 	void* (*_malloc)(size_t);
 	void (*_free)(void*);
 	void* (*_realloc)(void*, size_t);

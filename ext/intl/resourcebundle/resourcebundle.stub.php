@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 class ResourceBundle implements IteratorAggregate, Countable
 {

@@ -50,16 +50,16 @@ PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle,
 		size_t needle_len, const char *str, size_t str_len);
-PHPAPI zend_string *php_trim(zend_string *zend_string_r, const char *what, size_t what_len, int mode);
+PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode);
 PHPAPI zend_string *php_strip_tags(zend_string *zend_string_r, const char *allow, size_t allow_len);
-PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_r, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
+PHPAPI zend_string *php_strip_tags_ex(zend_string *zend_string_r, const char *allow, size_t allow_len, bool allow_tag_spaces);
 PHPAPI void php_implode(const zend_string *delim, HashTable *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 

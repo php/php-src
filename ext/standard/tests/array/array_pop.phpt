@@ -3,8 +3,6 @@ Test array_pop() function
 --FILE--
 <?php
 
-array_pop($GLOBALS);
-
 $empty_array = array();
 $number = 5;
 $str = "abc";

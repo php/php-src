@@ -158,7 +158,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 	zend_register_constant(&c);
 }
 
-ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zend_bool bval, int flags, int module_number)
+ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number)
 {
 	zend_constant c;
 
@@ -482,7 +482,7 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	zend_string *lowercase_name = NULL;
 	zend_string *name;
 	zend_result ret = SUCCESS;
-	zend_bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
+	bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);

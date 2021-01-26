@@ -8,7 +8,7 @@ class IntlCalendar
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
-     * @return IntlCalendar|IntlGregorianCalendar|null
+     * @return IntlCalendar|null
      * @alias intlcal_create_instance
      */
     public static function createInstance($timezone = null, ?string $locale = null) {}

@@ -23,11 +23,11 @@ object(PDORow)#%d (2) {
   ["queryString"]=>
   string(25) "select 1 as queryStringxx"
   ["queryStringxx"]=>
-  string(1) "1"
+  int(1)
 }
 string(25) "select 1 as queryStringxx"
 NULL
-string(1) "1"
+int(1)
 ---
 NULL
 NULL

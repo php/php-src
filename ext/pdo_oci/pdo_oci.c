@@ -87,7 +87,9 @@ PHP_MINIT_FUNCTION(pdo_oci)
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_MODULE", (zend_long)PDO_OCI_ATTR_MODULE);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CALL_TIMEOUT", (zend_long)PDO_OCI_ATTR_CALL_TIMEOUT);
 
-	php_pdo_register_driver(&pdo_oci_driver);
+	if (FAILURE == php_pdo_register_driver(&pdo_oci_driver)) {
+		return FAILURE;
+	}
 
 	// Defer OCI init to PHP_RINIT_FUNCTION because with php-fpm,
 	// NLS_LANG is not yet available here.

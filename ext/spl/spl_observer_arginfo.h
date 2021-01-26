@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aaefa4d4ac3b795212191d9fe06982d29948f552 */
+ * Stub hash: fdcb6eb431f6accdb8e44ecc735ae563a5651edf */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObserver_update, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)

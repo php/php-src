@@ -208,7 +208,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 PHP_METHOD(DOMXPath, __construct)
 {
 	zval *doc;
-	zend_bool register_node_ns = 1;
+	bool register_node_ns = 1;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 	dom_xpath_object *intern;
@@ -335,7 +335,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	char *expr;
 	xmlDoc *docp = NULL;
 	xmlNsPtr *ns = NULL;
-	zend_bool register_node_ns;
+	bool register_node_ns;
 
 	id = ZEND_THIS;
 	intern = Z_XPATHOBJ_P(id);

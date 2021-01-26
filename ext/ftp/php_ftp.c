@@ -82,6 +82,11 @@ static zend_object* ftp_object_create(zend_class_entry* ce) {
 	return zobj;
 }
 
+static zend_function *ftp_object_get_constructor(zend_object *zobj) {
+	zend_throw_error(NULL, "Cannot directly construct FTPConnection, use ftp_connect() or ftp_ssl_connect() instead");
+	return NULL;
+}
+
 static void ftp_object_destroy(zend_object *zobj) {
 	php_ftp_object *obj = ftp_object_from_zend_object(zobj);
 
@@ -114,6 +119,7 @@ PHP_MINIT_FUNCTION(ftp)
 
 	memcpy(&ftp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ftp_object_handlers.offset = XtOffsetOf(php_ftp_object, std);
+	ftp_object_handlers.get_constructor = ftp_object_get_constructor;
 	ftp_object_handlers.dtor_obj = ftp_object_destroy;
 	ftp_object_handlers.clone_obj = NULL;
 
@@ -489,7 +495,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
-	zend_bool	recursive = 0;
+	bool	recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &z_ftp, php_ftp_ce, &dir, &dir_len, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -656,7 +662,7 @@ PHP_FUNCTION(ftp_pasv)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	zend_bool	pasv;
+	bool	pasv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &z_ftp, php_ftp_ce, &pasv) == FAILURE) {
 		RETURN_THROWS();

@@ -2036,7 +2036,7 @@ typedef struct {
 	char *valid_end;   /* exclusive */
 } exif_offset_info;
 
-static zend_always_inline zend_bool ptr_offset_overflows(char *ptr, size_t offset) {
+static zend_always_inline bool ptr_offset_overflows(char *ptr, size_t offset) {
 	return UINTPTR_MAX - (uintptr_t) ptr < offset;
 }
 
@@ -2072,7 +2072,7 @@ static inline char *exif_offset_info_try_get(
 	return start;
 }
 
-static inline zend_bool exif_offset_info_contains(
+static inline bool exif_offset_info_contains(
 		const exif_offset_info *info, char *start, size_t length) {
 	char *end;
 	if (ptr_offset_overflows(start, length)) {
@@ -4478,7 +4478,7 @@ static bool exif_read_from_file(image_info_type *ImageInfo, char *FileName, int 
 PHP_FUNCTION(exif_read_data)
 {
 	zend_string *z_sections_needed = NULL;
-	zend_bool sub_arrays = 0, read_thumbnail = 0, read_all = 0;
+	bool sub_arrays = 0, read_thumbnail = 0, read_all = 0;
 	zval *stream;
 	bool ret;
 	int i, sections_needed = 0;
@@ -4489,7 +4489,7 @@ PHP_FUNCTION(exif_read_data)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(z_sections_needed, 1, 0)
+		Z_PARAM_STR_OR_NULL(z_sections_needed)
 		Z_PARAM_BOOL(sub_arrays)
 		Z_PARAM_BOOL(read_thumbnail)
 	ZEND_PARSE_PARAMETERS_END();

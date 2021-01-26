@@ -137,7 +137,7 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 
 /* {{{ mysqlnd_handle_local_infile */
 enum_func_status
-mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning)
+mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, bool * is_warning)
 {
 	zend_uchar			*buf = NULL;
 	zend_uchar			empty_packet[MYSQLND_HEADER_SIZE];
@@ -153,7 +153,6 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
 	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
-		php_error_docref(NULL, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
 						"LOAD DATA LOCAL INFILE is forbidden, check mysqli.allow_local_infile");
 		/* write empty packet to server */

@@ -56,8 +56,6 @@ require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP PROCEDURE IF EXISTS p');
 ?>
---XFAIL--
-Works with mysqlnd. It is not supported by libmysql. For libmysql is good enough to see no crash.
 --EXPECT--
 Emulated...
 array(1) {

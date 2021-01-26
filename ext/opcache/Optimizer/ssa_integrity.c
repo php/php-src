@@ -22,7 +22,7 @@
 /* The ssa_verify_integrity() function ensures that that certain invariants of the SSA form and
  * CFG are upheld and prints messages to stderr if this is not the case. */
 
-static inline zend_bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
+static inline bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
 	int use;
 	FOREACH_USE(&ssa->vars[var], use) {
 		if (use == check) {
@@ -32,7 +32,7 @@ static inline zend_bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
 	return 0;
 }
 
-static inline zend_bool is_in_phi_use_chain(zend_ssa *ssa, int var, zend_ssa_phi *check) {
+static inline bool is_in_phi_use_chain(zend_ssa *ssa, int var, zend_ssa_phi *check) {
 	zend_ssa_phi *phi;
 	FOREACH_PHI_USE(&ssa->vars[var], phi) {
 		if (phi == check) {
@@ -42,21 +42,21 @@ static inline zend_bool is_in_phi_use_chain(zend_ssa *ssa, int var, zend_ssa_phi
 	return 0;
 }
 
-static inline zend_bool is_used_by_op(zend_ssa *ssa, int op, int check) {
+static inline bool is_used_by_op(zend_ssa *ssa, int op, int check) {
 	zend_ssa_op *ssa_op = &ssa->ops[op];
 	return (ssa_op->op1_use == check)
 		|| (ssa_op->op2_use == check)
 		|| (ssa_op->result_use == check);
 }
 
-static inline zend_bool is_defined_by_op(zend_ssa *ssa, int op, int check) {
+static inline bool is_defined_by_op(zend_ssa *ssa, int op, int check) {
 	zend_ssa_op *ssa_op = &ssa->ops[op];
 	return (ssa_op->op1_def == check)
 		|| (ssa_op->op2_def == check)
 		|| (ssa_op->result_def == check);
 }
 
-static inline zend_bool is_in_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi, int check) {
+static inline bool is_in_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi, int check) {
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
 		if (source == check) {
@@ -66,7 +66,7 @@ static inline zend_bool is_in_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi, int 
 	return 0;
 }
 
-static inline zend_bool is_in_predecessors(zend_cfg *cfg, zend_basic_block *block, int check) {
+static inline bool is_in_predecessors(zend_cfg *cfg, zend_basic_block *block, int check) {
 	int i, *predecessors = &cfg->predecessors[block->predecessor_offset];
 	for (i = 0; i < block->predecessors_count; i++) {
 		if (predecessors[i] == check) {
@@ -76,7 +76,7 @@ static inline zend_bool is_in_predecessors(zend_cfg *cfg, zend_basic_block *bloc
 	return 0;
 }
 
-static inline zend_bool is_in_successors(zend_basic_block *block, int check) {
+static inline bool is_in_successors(zend_basic_block *block, int check) {
 	int s;
 	for (s = 0; s < block->successors_count; s++) {
 		if (block->successors[s] == check) {
@@ -86,7 +86,7 @@ static inline zend_bool is_in_successors(zend_basic_block *block, int check) {
 	return 0;
 }
 
-static inline zend_bool is_var_type(zend_uchar type) {
+static inline bool is_var_type(zend_uchar type) {
 	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 

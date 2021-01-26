@@ -203,37 +203,38 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 
 PHP_FUNCTION(version_compare)
 {
-	char *v1, *v2, *op = NULL;
-	size_t v1_len, v2_len, op_len = 0;
+	char *v1, *v2;
+	zend_string *op = NULL;
+	size_t v1_len, v2_len;
 	int compare;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(v1, v1_len)
 		Z_PARAM_STRING(v2, v2_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(op, op_len)
+		Z_PARAM_STR_OR_NULL(op)
 	ZEND_PARSE_PARAMETERS_END();
 
 	compare = php_version_compare(v1, v2);
 	if (!op) {
 		RETURN_LONG(compare);
 	}
-	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
+	if (zend_string_equals_literal(op, "<") || zend_string_equals_literal(op, "lt")) {
 		RETURN_BOOL(compare == -1);
 	}
-	if (!strncmp(op, "<=", op_len) || !strncmp(op, "le", op_len)) {
+	if (zend_string_equals_literal(op, "<=") || zend_string_equals_literal(op, "le")) {
 		RETURN_BOOL(compare != 1);
 	}
-	if (!strncmp(op, ">", op_len) || !strncmp(op, "gt", op_len)) {
+	if (zend_string_equals_literal(op, ">") || zend_string_equals_literal(op, "gt")) {
 		RETURN_BOOL(compare == 1);
 	}
-	if (!strncmp(op, ">=", op_len) || !strncmp(op, "ge", op_len)) {
+	if (zend_string_equals_literal(op, ">=") || zend_string_equals_literal(op, "ge")) {
 		RETURN_BOOL(compare != -1);
 	}
-	if (!strncmp(op, "==", op_len) || !strncmp(op, "=", op_len) || !strncmp(op, "eq", op_len)) {
+	if (zend_string_equals_literal(op, "==") || zend_string_equals_literal(op, "=") || zend_string_equals_literal(op, "eq")) {
 		RETURN_BOOL(compare == 0);
 	}
-	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
+	if (zend_string_equals_literal(op, "!=") || zend_string_equals_literal(op, "<>") || zend_string_equals_literal(op, "ne")) {
 		RETURN_BOOL(compare != 0);
 	}
 

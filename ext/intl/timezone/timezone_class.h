@@ -39,7 +39,7 @@ typedef struct {
 	const TimeZone	*utimezone;
 
 	//whether to delete the timezone on object free
-	zend_bool		should_delete;
+	bool		should_delete;
 
 	zend_object		zo;
 } TimeZone_object;

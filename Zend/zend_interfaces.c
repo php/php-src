@@ -436,7 +436,7 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 typedef struct {
 	zend_object std;
 	zend_object_iterator *iter;
-	zend_bool rewind_called;
+	bool rewind_called;
 } zend_internal_iterator;
 
 static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {

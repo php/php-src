@@ -127,7 +127,7 @@ const phpdbg_command_t phpdbg_watch_commands[] = {
 #define HT_WATCH_HT(watch) HT_PTR_HT((watch)->addr.ptr)
 
 /* ### PRINTING POINTER DIFFERENCES ### */
-zend_bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) {
+bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) {
 	switch (type) {
 		case WATCH_ON_BUCKET:
 			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* key/val comparison */) != 0) {
@@ -498,7 +498,7 @@ phpdbg_watch_element *phpdbg_add_ht_watch_element(zval *zv, phpdbg_watch_element
 	return phpdbg_add_watch_element(&watch, element);
 }
 
-zend_bool phpdbg_is_recursively_watched(void *ptr, phpdbg_watch_element *element) {
+bool phpdbg_is_recursively_watched(void *ptr, phpdbg_watch_element *element) {
 	phpdbg_watch_element *next = element;
 	do {
 		element = next;
@@ -663,7 +663,7 @@ void phpdbg_queue_element_for_recreation(phpdbg_watch_element *element) {
 	}
 }
 
-zend_bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *element) {
+bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *element) {
 	zval *zv;
 	HashTable *ht = HT_FROM_ZVP(parent);
 
@@ -1262,7 +1262,7 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key
 	return ret;
 }
 
-PHPDBG_API int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, size_t i, phpdbg_watch_parse_struct *info, zend_bool silent) {
+PHPDBG_API int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, size_t i, phpdbg_watch_parse_struct *info, bool silent) {
 	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_watchpoint_parse_wrapper, NULL, 0, info);
 }
 

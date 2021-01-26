@@ -520,7 +520,7 @@ static char *create_win_command_from_args(HashTable *args)
 {
 	smart_string str = {0};
 	zval *arg_zv;
-	zend_bool is_prog_name = 1;
+	bool is_prog_name = 1;
 	int elem_num = 0;
 
 	ZEND_HASH_FOREACH_VAL(args, arg_zv) {

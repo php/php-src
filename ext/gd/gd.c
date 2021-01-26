@@ -848,7 +848,7 @@ PHP_FUNCTION(imageistruecolor)
 PHP_FUNCTION(imagetruecolortopalette)
 {
 	zval *IM;
-	zend_bool dither;
+	bool dither;
 	zend_long ncolors;
 	gdImagePtr im;
 
@@ -1001,7 +1001,7 @@ PHP_FUNCTION(imagefilledarc)
 PHP_FUNCTION(imagealphablending)
 {
 	zval *IM;
-	zend_bool blend;
+	bool blend;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &IM, gd_image_ce, &blend) == FAILURE) {
@@ -1020,7 +1020,7 @@ PHP_FUNCTION(imagealphablending)
 PHP_FUNCTION(imagesavealpha)
 {
 	zval *IM;
-	zend_bool save;
+	bool save;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &IM, gd_image_ce, &save) == FAILURE) {
@@ -1188,7 +1188,7 @@ PHP_FUNCTION(imagecopyresampled)
 PHP_FUNCTION(imagegrabwindow)
 {
 	HWND window;
-	zend_bool client_area = 0;
+	bool client_area = 0;
 	RECT rc = {0};
 	int Width, Height;
 	HDC		hdc;
@@ -1317,7 +1317,7 @@ PHP_FUNCTION(imagerotate)
 	gdImagePtr im_dst, im_src;
 	double degrees;
 	zend_long color;
-	zend_bool ignoretransparent = 0;
+	bool ignoretransparent = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl|b", &SIM, gd_image_ce,  &degrees, &color, &ignoretransparent) == FAILURE) {
 		RETURN_THROWS();
@@ -1919,7 +1919,7 @@ PHP_FUNCTION(imagexbm)
 	char *file = NULL;
 	size_t file_len = 0;
 	zend_long foreground_color;
-	zend_bool foreground_color_is_null = 1;
+	bool foreground_color_is_null = 1;
 	gdImagePtr im;
 	int i;
 	gdIOCtx *ctx = NULL;
@@ -2057,7 +2057,7 @@ PHP_FUNCTION(imagegd2)
 PHP_FUNCTION(imagebmp)
 {
 	zval *imgind;
-	zend_bool compressed = 1;
+	bool compressed = 1;
 	gdImagePtr im;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
@@ -2607,7 +2607,7 @@ PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
 	zend_long COL = 0;
-	zend_bool COL_IS_NULL = 1;
+	bool COL_IS_NULL = 1;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &IM, gd_image_ce, &COL, &COL_IS_NULL) == FAILURE) {
@@ -2628,8 +2628,8 @@ PHP_FUNCTION(imagecolortransparent)
 PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
-	zend_bool INT = 0;
-	zend_bool INT_IS_NULL = 1;
+	bool INT = 0;
+	bool INT_IS_NULL = 1;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b!", &IM, gd_image_ce, &INT, &INT_IS_NULL) == FAILURE) {
@@ -2655,7 +2655,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 {
 	zval *IM, *POINTS;
 	zend_long NPOINTS, COL;
-	zend_bool COL_IS_NULL = 1;
+	bool COL_IS_NULL = 1;
 	zval *var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
@@ -3390,7 +3390,7 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	zval *IM;
 	gdImagePtr im;
 	zend_long tmp, blocksize;
-	zend_bool mode = 0;
+	bool mode = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oll|b", &IM, gd_image_ce, &tmp, &blocksize, &mode) == FAILURE) {
 		RETURN_THROWS();
@@ -3568,7 +3568,7 @@ PHP_FUNCTION(imageflip)
 PHP_FUNCTION(imageantialias)
 {
 	zval *IM;
-	zend_bool alias;
+	bool alias;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &IM, gd_image_ce, &alias) == FAILURE) {
@@ -4019,7 +4019,7 @@ PHP_FUNCTION(imageresolution)
 	zval *IM;
 	gdImagePtr im;
 	zend_long res_x, res_y;
-	zend_bool res_x_is_null = 1, res_y_is_null = 1;
+	bool res_x_is_null = 1, res_y_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!l!", &IM, gd_image_ce, &res_x, &res_x_is_null, &res_y, &res_y_is_null) == FAILURE)  {
 		RETURN_THROWS();

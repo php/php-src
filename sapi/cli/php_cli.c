@@ -532,7 +532,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(zend_bool no_close) /* {{{ */
+static void cli_register_file_handles(bool no_close) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -645,12 +645,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #else
 					"NTS "
 #endif
-#ifdef COMPILER
-					COMPILER
+#ifdef PHP_BUILD_COMPILER
+					PHP_BUILD_COMPILER
 					" "
 #endif
-#ifdef ARCHITECTURE
-					ARCHITECTURE
+#ifdef PHP_BUILD_ARCH
+					PHP_BUILD_ARCH
 					" "
 #endif
 #if ZEND_DEBUG
@@ -898,6 +898,7 @@ do_repeat:
 			php_optind++;
 		}
 		if (script_file) {
+			virtual_cwd_activate();
 			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
 				goto err;
 			} else {

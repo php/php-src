@@ -308,7 +308,7 @@ static unsigned int php_sapi_filter_init(void)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, zend_bool copy) /* {{{ */
+static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, bool copy) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -433,7 +433,7 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, zend_bool copy) /* {{{ */
+static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, bool copy) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
@@ -602,7 +602,7 @@ static void php_filter_call(
 /* }}} */
 
 static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op_long,
-	zval *return_value, zend_bool add_empty
+	zval *return_value, bool add_empty
 ) /* {{{ */ {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
@@ -737,7 +737,7 @@ PHP_FUNCTION(filter_input_array)
 {
 	zend_long    fetch_from;
 	zval   *array_input = NULL;
-	zend_bool add_empty = 1;
+	bool add_empty = 1;
 	HashTable *op_ht = NULL;
 	zend_long op_long = FILTER_DEFAULT;
 
@@ -787,7 +787,7 @@ PHP_FUNCTION(filter_input_array)
 PHP_FUNCTION(filter_var_array)
 {
 	zval *array_input = NULL;
-	zend_bool add_empty = 1;
+	bool add_empty = 1;
 	HashTable *op_ht = NULL;
 	zend_long op_long = FILTER_DEFAULT;
 

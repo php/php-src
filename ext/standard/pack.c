@@ -84,7 +84,7 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 	size_t i;
 	char *v;
 
-	convert_to_long_ex(val);
+	convert_to_long(val);
 	v = (char *) &Z_LVAL_P(val);
 
 	for (i = 0; i < size; i++) {

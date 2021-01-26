@@ -117,7 +117,7 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 
 /* bcrypt implementation */
 
-static zend_bool php_password_bcrypt_valid(const zend_string *hash) {
+static bool php_password_bcrypt_valid(const zend_string *hash) {
 	const char *h = ZSTR_VAL(hash);
 	return (ZSTR_LEN(hash) == 60) &&
 		(h[0] == '$') && (h[1] == '2') && (h[2] == 'y');
@@ -137,7 +137,7 @@ static int php_password_bcrypt_get_info(zval *return_value, const zend_string *h
 	return SUCCESS;
 }
 
-static zend_bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
+static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
 	zval *znew_cost;
 	zend_long old_cost = PHP_PASSWORD_BCRYPT_COST;
 	zend_long new_cost = PHP_PASSWORD_BCRYPT_COST;
@@ -155,7 +155,7 @@ static zend_bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_
 	return old_cost != new_cost;
 }
 
-static zend_bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
+static bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
 	size_t i;
 	int status = 0;
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
@@ -276,7 +276,7 @@ static int php_password_argon2_get_info(zval *return_value, const zend_string *h
 	return SUCCESS;
 }
 
-static zend_bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
+static bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
 	zend_long v = 0;
 	zend_long new_memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, memory_cost = 0;
 	zend_long new_time_cost = PHP_PASSWORD_ARGON2_TIME_COST, time_cost = 0;
@@ -384,7 +384,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 
 /* argon2i specific methods */
 
-static zend_bool php_password_argon2i_verify(const zend_string *password, const zend_string *hash) {
+static bool php_password_argon2i_verify(const zend_string *password, const zend_string *hash) {
 	return ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), Argon2_i);
 }
 
@@ -403,7 +403,7 @@ const php_password_algo php_password_algo_argon2i = {
 
 /* argon2id specific methods */
 
-static zend_bool php_password_argon2id_verify(const zend_string *password, const zend_string *hash) {
+static bool php_password_argon2id_verify(const zend_string *password, const zend_string *hash) {
 	return ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), Argon2_id);
 }
 
@@ -487,7 +487,7 @@ const php_password_algo* php_password_algo_find(const zend_string *ident) {
 	return Z_PTR_P(tmp);
 }
 
-static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str, zend_long arg_long, zend_bool arg_is_null) {
+static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str, zend_long arg_long, bool arg_is_null) {
 	if (arg_is_null) {
 		return php_password_algo_default();
 	}
@@ -601,7 +601,7 @@ PHP_FUNCTION(password_needs_rehash)
 	zend_string *hash;
 	zend_string *new_algo_str;
 	zend_long new_algo_long;
-	zend_bool new_algo_is_null;
+	bool new_algo_is_null;
 	zend_array *options = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -649,7 +649,7 @@ PHP_FUNCTION(password_hash)
 	zend_string *password, *digest = NULL;
 	zend_string *algo_str;
 	zend_long algo_long;
-	zend_bool algo_is_null;
+	bool algo_is_null;
 	const php_password_algo *algo;
 	zend_array *options = NULL;
 

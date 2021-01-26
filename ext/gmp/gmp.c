@@ -72,7 +72,7 @@ PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 
 typedef struct _gmp_temp {
 	mpz_t num;
-	zend_bool is_used;
+	bool is_used;
 } gmp_temp_t;
 
 #define GMP_ROUND_ZERO      0
@@ -174,7 +174,7 @@ if (IS_GMP(zval)) {                                               \
 	gmp_create(return_value, &gmpnumber)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
+static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
 
 /*
@@ -429,9 +429,14 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 	zval result;
 
 	gmp_cmp(&result, op1, op2);
-	if (Z_TYPE(result) == IS_FALSE) {
+
+	/* An error/exception occurs if one of the operands is not a numeric string
+	 * or an object which is different from GMP */
+	if (EG(exception)) {
 		return 1;
 	}
+	/* result can only be a zend_long if gmp_cmp hasn't thrown an Error */
+	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
 	return Z_LVAL(result);
 }
 /* }}} */
@@ -585,7 +590,7 @@ ZEND_MODULE_INFO_D(gmp)
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
+static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos)
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_LONG:
@@ -593,12 +598,15 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 		return SUCCESS;
 	case IS_STRING: {
 		char *numstr = Z_STRVAL_P(val);
-		zend_bool skip_lead = 0;
+		bool skip_lead = 0;
 		int ret;
 
-		if (Z_STRLEN_P(val) > 2 && numstr[0] == '0') {
+		if (Z_STRLEN_P(val) >= 2 && numstr[0] == '0') {
 			if ((base == 0 || base == 16) && (numstr[1] == 'x' || numstr[1] == 'X')) {
 				base = 16;
+				skip_lead = 1;
+			} else if ((base == 0 || base == 8) && (numstr[1] == 'o' || numstr[1] == 'O')) {
+				base = 8;
 				skip_lead = 1;
 			} else if ((base == 0 || base == 2) && (numstr[1] == 'b' || numstr[1] == 'B')) {
 				base = 2;
@@ -614,7 +622,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t a
 					"Cannot convert variable to GMP, it is not an integer string");
 				return FAILURE;
 			}
-			zend_argument_type_error(arg_pos, "is not an integer string");
+			zend_argument_value_error(arg_pos, "is not an integer string");
 			return FAILURE;
 		}
 
@@ -669,7 +677,7 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
 {
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
-	zend_bool use_si = 0;
+	bool use_si = 0;
 	zend_long res;
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
@@ -1619,7 +1627,7 @@ ZEND_FUNCTION(gmp_kronecker)
 	zval *a_arg, *b_arg;
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
-	zend_bool use_a_si = 0, use_b_si = 0;
+	bool use_a_si = 0, use_b_si = 0;
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
@@ -1856,7 +1864,7 @@ ZEND_FUNCTION(gmp_setbit)
 {
 	zval *a_arg;
 	zend_long index;
-	zend_bool set = 1;
+	bool set = 1;
 	mpz_ptr gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {

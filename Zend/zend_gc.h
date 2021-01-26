@@ -35,12 +35,12 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
 
 /* enable/disable automatic start of GC collection */
-ZEND_API zend_bool gc_enable(zend_bool enable);
-ZEND_API zend_bool gc_enabled(void);
+ZEND_API bool gc_enable(bool enable);
+ZEND_API bool gc_enabled(void);
 
 /* enable/disable possible root additions */
-ZEND_API zend_bool gc_protect(zend_bool protect);
-ZEND_API zend_bool gc_protected(void);
+ZEND_API bool gc_protect(bool protect);
+ZEND_API bool gc_protected(void);
 
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
@@ -54,8 +54,6 @@ void gc_reset(void);
 #ifdef ZTS
 size_t zend_gc_globals_size(void);
 #endif
-
-END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
@@ -121,5 +119,7 @@ static zend_always_inline void zend_get_gc_buffer_use(
 	*table = gc_buffer->start;
 	*n = gc_buffer->cur - gc_buffer->start;
 }
+
+END_EXTERN_C()
 
 #endif /* ZEND_GC_H */

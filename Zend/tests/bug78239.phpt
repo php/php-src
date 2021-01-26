@@ -1,7 +1,7 @@
 --TEST--
 Bug #78239: Deprecation notice during string conversion converted to exception hangs
 --SKIPIF--
-<?php if (!extension_loaded("zend-test")) die("skip requires zend-test extension"); ?>
+<?php if (!extension_loaded("zend_test")) die("skip requires zend_test extension"); ?>
 --FILE--
 <?php
 function handleError($level, $message, $file = '', $line = 0, $context = [])

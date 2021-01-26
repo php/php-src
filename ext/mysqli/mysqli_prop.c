@@ -72,7 +72,7 @@ if (!obj->ptr) { \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
-static int __func(mysqli_object *obj, zval *retval, zend_bool quiet) \
+static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
@@ -90,7 +90,7 @@ static int __func(mysqli_object *obj, zval *retval, zend_bool quiet) \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_STRING(__func, __int_func, __get_type)\
-static int __func(mysqli_object *obj, zval *retval, zend_bool quiet)\
+static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
@@ -108,7 +108,7 @@ static int __func(mysqli_object *obj, zval *retval, zend_bool quiet)\
 }
 
 /* {{{ property link_client_version_read */
-static int link_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 
@@ -117,7 +117,7 @@ static int link_client_version_read(mysqli_object *obj, zval *retval, zend_bool 
 /* }}} */
 
 /* {{{ property link_client_info_read */
-static int link_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 	ZVAL_STRING(retval, MYSQL_SERVER_VERSION);
@@ -127,7 +127,7 @@ static int link_client_info_read(mysqli_object *obj, zval *retval, zend_bool qui
 /* }}} */
 
 /* {{{ property link_connect_errno_read */
-static int link_connect_errno_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_connect_errno_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, (zend_long)MyG(error_no));
 
@@ -136,7 +136,7 @@ static int link_connect_errno_read(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property link_connect_error_read */
-static int link_connect_error_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_connect_error_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (MyG(error_msg)) {
 		ZVAL_STRING(retval, MyG(error_msg));
@@ -149,7 +149,7 @@ static int link_connect_error_read(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property link_affected_rows_read */
-static int link_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
@@ -182,7 +182,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property link_error_list_read */
-static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_MYSQL *mysql;
 
@@ -243,7 +243,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 /* result properties */
 
 /* {{{ property result_type_read */
-static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int result_type_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQL_RES *p;
 
@@ -261,7 +261,7 @@ static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 /* }}} */
 
 /* {{{ property result_lengths_read */
-static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int result_lengths_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQL_RES *p;
 #ifdef MYSQLI_USE_MYSQLND
@@ -297,7 +297,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_R
 /* statement properties */
 
 /* {{{ property stmt_id_read */
-static int stmt_id_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT *p;
 
@@ -316,7 +316,7 @@ static int stmt_id_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 /* }}} */
 
 /* {{{ property stmt_affected_rows_read */
-static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT *p;
 	my_ulonglong rc;
@@ -347,7 +347,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property stmt_error_list_read */
-static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT * stmt;
 

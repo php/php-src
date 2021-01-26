@@ -50,7 +50,7 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	UBreakIterator* grapheme_iterator;
 	intl_error g_error;
 	zend_long error_level;
-	zend_bool use_exceptions;
+	bool use_exceptions;
 ZEND_END_MODULE_GLOBALS(intl)
 
 #if defined(ZTS) && defined(COMPILE_DL_INTL)

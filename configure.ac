@@ -222,12 +222,6 @@ case $host_alias in
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
     ;;
-  *darwin*)
-    if test -n "$GCC"; then
-      AX_CHECK_COMPILE_FLAG([-no-cpp-precomp],
-                            [CPPFLAGS="$CPPFLAGS -no-cpp-precomp"])
-    fi
-    ;;
   *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV"
     ;;
@@ -1289,10 +1283,10 @@ if test -n "${PHP_BUILD_PROVIDER}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
 fi
 if test -n "${PHP_BUILD_COMPILER}"; then
-  AC_DEFINE_UNQUOTED(COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
+  AC_DEFINE_UNQUOTED(PHP_BUILD_COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
 fi
 if test -n "${PHP_BUILD_ARCH}"; then
-  AC_DEFINE_UNQUOTED(ARCHITECTURE,"$PHP_BUILD_ARCH",[build architecture])
+  AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
 
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)

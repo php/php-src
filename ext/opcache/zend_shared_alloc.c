@@ -375,7 +375,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 	return ZEND_ALIGNED_SIZE(size);
 }
 
-static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, zend_bool arena, zend_bool get_xlat, zend_bool set_xlat, zend_bool free_source)
+static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, bool arena, bool get_xlat, bool set_xlat, bool free_source)
 {
 	void *old_p, *retval;
 	zend_ulong key;

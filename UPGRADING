@@ -19,16 +19,123 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Access to the $GLOBALS array is now subject to a number of restrictions.
+    Read and write access to individual array elements like $GLOBALS['var']
+    continues to work as-is. Read-only access to the entire $GLOBALS array also
+    continues to be supported. However, write access to the entire $GLOBALS
+    array is no longer supported. For example, array_pop($GLOBALS) will result
+    in an error.
+    RFC: https://wiki.php.net/rfc/restrict_globals_usage
+
+- Fileinfo:
+  . The fileinfo functions now accept and return, respectively, finfo objects
+    instead of resources.
+
+- IMAP:
+  . The IMAP functions now accept and return, respectively, IMAPConnection objects
+    instead of resources.
+
+- MySQLi:
+  . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
+    zero for max_length. You can compute this information by iterating over the
+    result set and taking the maximum length. This is what PHP was doing
+    internally previously.
+  . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
+  . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
+
+- MySQLnd:
+  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
+    should not result in user-visible behavior changes.
+
+- PDO:
+  . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
+    "0" or "1". Previously booleans were not stringified.
+  . Calling bindColumn() with PDO::PARAM_LOB (and assuming stringification is
+    not enabled) will now consistently bind a stream result, as documented.
+    Previously the result would be either a stream or a string depending on the
+    used database driver and the time the binding is performed.
+
+- PDO MySQL:
+  . Integers and floats in result sets will now be returned using native PHP
+    types instead of strings when using emulated prepared statements. This
+    matches the behavior of native prepared statements. You can restore the
+    previous behavior by enabling the PDO::ATTR_STRINGIFY_FETCHES option.
+
+- PDO SQLite:
+  . Integers and floats in results sets will now be returned using native PHP
+    types. You can restore the previous behavior by enabling the
+    PDO::ATTR_STRINGFIY_FETCHES option.
+
+- Standard:
+  . version_compare() no longer accepts undocumented operator abbreviations.
+  . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),
+    html_entitity_decode() and get_html_translation_table() now use
+    ENT_QUOTES | ENT_SUBSTITUTE rather than ENT_COMPAT by default. This means
+    that ' is escaped to &#039; while previously it was left alone.
+    Additionally, malformed UTF-8 will be replaced by a Unicode substitution
+    character, instead of resulting in an empty string.
+
 ========================================
 2. New Features
 ========================================
 
+- Core:
+  . It is now possible to specify octal integer by using the explicit "0o"/"0O"
+    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer literals
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
+
+- Curl:
+  . Added CURLOPT_DOH_URL option.
+
 - hash:
-  . Added MurmurHash3 with streaming support. The following variants are implemented
+  . The following functions have changed signatures:
+
+    - function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
+    - function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
+    - function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
+
+    The additional `$options` argument can be used to pass algorithm specific data.
+
+  . Added MurmurHash3 with streaming support. The following variants are implemented:
 
     - murmur3a, 32-bit hash
     - murmur3c, 128-bit hash for x86
     - murmur3f, 128-bit hash for x64
+
+    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
+
+    ```php
+    $h = hash("murmur3f", $data, options: ["seed" => 42]);
+    echo $h, "\n";
+    ```
+
+    A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
+
+  . Added xxHash. The implementation brings in the following arguments
+
+    - xxh32, 32-bit hash
+    - xxh64, 64-bit hash
+    - xxh3, 64-bit hash
+    - xxh128, 128-bit hash
+
+    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
+
+    ```php
+    $h = hash("xxh3", $data, options: ["seed" => 42]);
+    echo $h, "\n";
+    ```
+
+- PDO SQLite:
+  . SQLite's "file:" DSN syntax is now supported, which allows specifying
+    additional flags. This feature is not available if open_basedir is set.
+    Example:
+
+        new PDO('sqlite:file:path/to/sqlite.db?mode=ro')
+
+- Posix:
+  . Added POSIX_RLIMIT_KQUEUES and POSIX_RLIMIT_NPTS. These rlimits are only
+    available on FreeBSD.
 
 ========================================
 3. Changes in SAPI modules
@@ -42,9 +149,22 @@ PHP 8.1 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Filter:
+  . The FILTER_FLAG_ALLOW_OCTAL flag of the FILTER_VALIDATE_INT filter now accept
+    octal string with the leading octal prefix ("0o"/"0O")
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
+
+- GMP:
+  . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
+    RFC: https://wiki.php.net/rfc/explicit_octal_notation
+
 ========================================
 6. New Functions
 ========================================
+
+- Core:
+  . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
+    RFC: https://wiki.php.net/rfc/is_list
 
 ========================================
 7. New Classes and Interfaces
@@ -58,6 +178,10 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- MySQLi:
+  . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
+    available when linking against libmysqlclient.
+
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
 
@@ -69,6 +193,12 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- MySQLi:
+  . MYSQLI_REFRESH_REPLICA has been added as a replacement for
+    MYSQLI_REFRESH_SLAVE, in line with an upstream change in MySQL. The old
+    constant is still available for backwards-compatibility reasons, but may
+    be deprecated/removed in the future.
 
 ========================================
 11. Changes to INI File Handling

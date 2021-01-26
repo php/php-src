@@ -100,7 +100,7 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API int php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth);
 
-static inline int php_json_decode(zval *return_value, const char *str, int str_len, zend_bool assoc, zend_long depth)
+static inline int php_json_decode(zval *return_value, const char *str, int str_len, bool assoc, zend_long depth)
 {
 	return php_json_decode_ex(return_value, str, str_len, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0, depth);
 }

@@ -259,7 +259,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, lo
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];
 	const char *original_path = path;
-	zend_bool pending = 0;
+	bool pending = 0;
 	zend_string *path_str;
 
 	HashTable *broken, *file_breaks = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
@@ -1019,7 +1019,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcod
 	return zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], zend_hash_func(opname, strlen(opname)));
 } /* }}} */
 
-static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_execute_data *execute_data) /* {{{ */
+static inline bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_execute_data *execute_data) /* {{{ */
 {
 	zend_function *function = execute_data->func;
 
@@ -1269,7 +1269,7 @@ PHPDBG_API void phpdbg_clear_breakpoints(void) /* {{{ */
 	PHPDBG_G(bp_count) = 0;
 } /* }}} */
 
-PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t *brake, zend_bool output) /* {{{ */
+PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t *brake, bool output) /* {{{ */
 {
 	brake->hits++;
 

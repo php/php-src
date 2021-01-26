@@ -207,7 +207,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 struct phpdbg_init_state {
 	int line;
-	zend_bool in_code;
+	bool in_code;
 	char *code;
 	size_t code_len;
 	const char *init_file;
@@ -309,7 +309,7 @@ void phpdbg_string_init(char *buffer) {
 	}
 }
 
-void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init) /* {{{ */
+void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init) /* {{{ */
 {
 	zend_stat_t sb;
 
@@ -340,7 +340,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 	}
 } /* }}} */
 
-void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /* {{{ */
+void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{ */
 {
 	if (init_file) {
 		phpdbg_try_file_init(init_file, init_file_len, 1);
@@ -382,7 +382,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 }
 /* }}} */
 
-void phpdbg_clean(zend_bool full, zend_bool resubmit) /* {{{ */
+void phpdbg_clean(bool full, bool resubmit) /* {{{ */
 {
 	/* this is implicitly required */
 	if (PHPDBG_G(ops)) {
@@ -751,7 +751,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 {
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		zend_execute_data *ex = EG(current_execute_data);
-		zend_bool restore = 1;
+		bool restore = 1;
 
 		if (PHPDBG_G(in_execution)) {
 			if (phpdbg_ask_user_permission("Do you really want to restart execution?") == SUCCESS) {
@@ -946,7 +946,7 @@ int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keyl
 
 PHPDBG_COMMAND(ev) /* {{{ */
 {
-	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING) == PHPDBG_IS_STEPPING);
+	bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING) == PHPDBG_IS_STEPPING);
 	zval retval;
 
 	zend_execute_data *original_execute_data = EG(current_execute_data);
@@ -1546,7 +1546,7 @@ PHPDBG_COMMAND(watch) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
+int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 {
 	int ret = SUCCESS;
 	phpdbg_param_t stack;
@@ -1679,7 +1679,7 @@ static inline void list_code() {
 
 void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 {
-	zend_bool original_in_execution = PHPDBG_G(in_execution);
+	bool original_in_execution = PHPDBG_G(in_execution);
 
 	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) && !(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
 		zend_bailout();

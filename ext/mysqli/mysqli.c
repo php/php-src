@@ -70,7 +70,7 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 
-typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, zend_bool quiet);
+typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
 typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
@@ -277,7 +277,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static int mysqli_read_na(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (!quiet) {
 		zend_throw_error(NULL, "Cannot read property");
@@ -656,7 +656,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_CS | CONST_PERSISTENT);
 #endif
 #if MYSQL_VERSION_ID < 80000 || MYSQL_VERSION_ID >= 100000 || defined(MYSQLI_USE_MYSQLND)
@@ -805,6 +805,8 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_HOSTS",      REFRESH_HOSTS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_STATUS",     REFRESH_STATUS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_THREADS",    REFRESH_THREADS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_REPLICA",    REFRESH_SLAVE, CONST_CS | CONST_PERSISTENT);
+	/* temporarily for backward compatibility */
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_SLAVE",      REFRESH_SLAVE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_MASTER",     REFRESH_MASTER, CONST_CS | CONST_PERSISTENT);
 #ifdef REFRESH_BACKUP_LOG
@@ -1130,7 +1132,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 		}
 	}
 #else
-	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQLI);
+	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
 #endif
 }
 /* }}} */

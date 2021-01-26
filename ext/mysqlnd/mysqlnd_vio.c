@@ -115,7 +115,7 @@ MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_u
 
 /* {{{ mysqlnd_vio::open_pipe */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
@@ -150,7 +150,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 
 /* {{{ mysqlnd_vio::open_tcp_or_unix */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
@@ -298,7 +298,7 @@ MYSQLND_METHOD(mysqlnd_vio, get_open_stream)(MYSQLND_VIO * const vio, const MYSQ
 
 /* {{{ mysqlnd_vio::connect */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 									 MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status ret = FAIL;
@@ -339,7 +339,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			break;
 		case MYSQLND_OPT_SSL_KEY:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_key) {
 					mnd_pefree(net->data->options.ssl_key, pers);
 				}
@@ -348,7 +348,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CERT:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_cert) {
 					mnd_pefree(net->data->options.ssl_cert, pers);
 				}
@@ -357,7 +357,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CA:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_ca) {
 					mnd_pefree(net->data->options.ssl_ca, pers);
 				}
@@ -366,7 +366,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CAPATH:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_capath) {
 					mnd_pefree(net->data->options.ssl_capath, pers);
 				}
@@ -375,7 +375,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CIPHER:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_cipher) {
 					mnd_pefree(net->data->options.ssl_cipher, pers);
 				}
@@ -384,7 +384,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_PASSPHRASE:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_passphrase) {
 					mnd_pefree(net->data->options.ssl_passphrase, pers);
 				}
@@ -492,7 +492,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 #ifdef MYSQLND_SSL_SUPPORTED
 	php_stream_context * context = php_stream_context_alloc();
 	php_stream * net_stream = net->data->m.get_stream(net);
-	zend_bool any_flag = FALSE;
+	bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_vio::enable_ssl");
 
@@ -543,7 +543,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	}
 	{
 		zval verify_peer_zval;
-		zend_bool verify;
+		bool verify;
 
 		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DEFAULT) {
 			net->data->options.ssl_verify_peer = any_flag? MYSQLND_SSL_PEER_DEFAULT_ACTION:MYSQLND_SSL_PEER_DONT_VERIFY;
@@ -610,7 +610,7 @@ MYSQLND_METHOD(mysqlnd_vio, disable_ssl)(MYSQLND_VIO * const vio)
 static void
 MYSQLND_METHOD(mysqlnd_vio, free_contents)(MYSQLND_VIO * net)
 {
-	zend_bool pers = net->persistent;
+	bool pers = net->persistent;
 	DBG_ENTER("mysqlnd_vio::free_contents");
 
 	if (net->data->options.ssl_key) {
@@ -646,7 +646,7 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 	php_stream * net_stream;
 	DBG_ENTER("mysqlnd_vio::close_stream");
 	if (net && (net_stream = net->data->m.get_stream(net))) {
-		zend_bool pers = net->persistent;
+		bool pers = net->persistent;
 		DBG_INF_FMT("Freeing stream. abstract=%p", net_stream->abstract);
 		/* We removed the resource from the stream, so pass FREE_RSRC_DTOR now to force
 		 * destruction to occur during shutdown, because it won't happen through the resource. */
@@ -728,7 +728,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * ne
 
 
 /* {{{ mysqlnd_vio::has_valid_stream */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
 {
 	DBG_ENTER("mysqlnd_vio::has_valid_stream");
@@ -770,7 +770,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_vio_init */
 PHPAPI MYSQLND_VIO *
-mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_vio_init(bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_VIO * vio;

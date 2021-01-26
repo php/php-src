@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 759463b1adece643974a9c51455789aef11ba935 */
+ * Stub hash: 950679cde15789a9060d4798dc35dc5a590fd8b2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -107,6 +107,11 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
+static const zend_function_entry class__ZendTestInterface_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
@@ -115,8 +120,18 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 };
 
 
+static const zend_function_entry class__ZendTestChildClass_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class__ZendTestTrait_methods[] = {
 	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestAttribute_methods[] = {
 	ZEND_FE_END
 };
 
@@ -131,3 +146,109 @@ static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_Foo, method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class__ZendTestInterface()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestInterface", class__ZendTestInterface_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__ZendTestInterface)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestClass", class__ZendTestClass_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry__ZendTestInterface);
+	zend_register_class_alias("_ZendTestClassAlias", class_entry);
+
+	zval property__StaticProp_default_value;
+	ZVAL_NULL(&property__StaticProp_default_value);
+	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, 1);
+	zend_declare_property_ex(class_entry, property__StaticProp_name, &property__StaticProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
+	zend_string_release(property__StaticProp_name);
+
+	zval property_staticIntProp_default_value;
+	ZVAL_LONG(&property_staticIntProp_default_value, 123);
+	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_staticIntProp_name);
+
+	zval property_intProp_default_value;
+	ZVAL_LONG(&property_intProp_default_value, 123);
+	zend_string *property_intProp_name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_intProp_name);
+
+	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass")-1, 1);
+	zval property_classProp_default_value;
+	ZVAL_NULL(&property_classProp_default_value);
+	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 1, 0));
+	zend_string_release(property_classProp_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *class_entry__ZendTestClass)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestChildClass", class__ZendTestChildClass_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry__ZendTestClass);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class__ZendTestTrait()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTrait", class__ZendTestTrait_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+
+	zval property_testProp_default_value;
+	ZVAL_NULL(&property_testProp_default_value);
+	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
+	zend_declare_property_ex(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_testProp_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ZendTestAttribute()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestAttribute", class_ZendTestAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ZendTestNS_Foo()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "Foo", class_ZendTestNS_Foo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ZendTestNS2_Foo()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS2", "Foo", class_ZendTestNS2_Foo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+

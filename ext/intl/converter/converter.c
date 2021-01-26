@@ -134,7 +134,7 @@ PHP_METHOD(UConverter, fromUCallback) {
 /* }}} */
 
 /* {{{ php_converter_check_limits */
-static inline zend_bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
+static inline bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
 	if (available < needed) {
 		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR, "Buffer overrun " ZEND_LONG_FMT " bytes needed, " ZEND_LONG_FMT " available", needed, available);
 		return 0;
@@ -333,8 +333,8 @@ static void php_converter_from_u_callback(const void *context,
 /* }}} */
 
 /* {{{ php_converter_set_callbacks */
-static inline zend_bool php_converter_set_callbacks(php_converter_object *objval, UConverter *cnv) {
-	zend_bool ret = 1;
+static inline bool php_converter_set_callbacks(php_converter_object *objval, UConverter *cnv) {
+	bool ret = 1;
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (objval->obj.ce == php_converter_ce) {
@@ -363,7 +363,7 @@ static inline zend_bool php_converter_set_callbacks(php_converter_object *objval
 /* }}} */
 
 /* {{{ php_converter_set_encoding */
-static zend_bool php_converter_set_encoding(php_converter_object *objval,
+static bool php_converter_set_encoding(php_converter_object *objval,
                                             UConverter **pcnv,
                                             const char *enc, size_t enc_len
                                            ) {
@@ -705,7 +705,7 @@ PHP_METHOD(UConverter, convert) {
 	char *str;
 	size_t str_len;
 	zend_string *ret;
-	zend_bool reverse = 0;
+	bool reverse = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {

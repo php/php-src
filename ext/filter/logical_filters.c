@@ -233,10 +233,20 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		p++; len--;
 		if (allow_hex && (*p == 'x' || *p == 'X')) {
 			p++; len--;
+			if (len == 0) {
+				RETURN_VALIDATION_FAILED
+			}
 			if (php_filter_parse_hex(p, len, &ctx_value) < 0) {
 				error = 1;
 			}
 		} else if (allow_octal) {
+			/* Support explicit octal prefix notation */
+			if (*p == 'o' || *p == 'O') {
+				p++; len--;
+				if (len == 0) {
+					RETURN_VALIDATION_FAILED
+				}
+			}
 			if (php_filter_parse_octal(p, len, &ctx_value) < 0) {
 				error = 1;
 			}

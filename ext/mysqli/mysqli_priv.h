@@ -127,8 +127,8 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
 	php_mysqli_report_error(mysql_stmt_sqlstate(stmt), mysql_stmt_errno(stmt), mysql_stmt_error(stmt)); \
 }
 
-void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, bool in_ctor);
 
-void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method);
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method);
 
 #endif /* MYSQLI_PRIV_H */

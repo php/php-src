@@ -35,7 +35,7 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
+ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
 
@@ -69,7 +69,7 @@ ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, 
 ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite);
 ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
 ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
-ZEND_API int  zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
+ZEND_API int  zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, bool ordered);
 ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, bucket_compare_func_t compar, int flag);
 
 ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);

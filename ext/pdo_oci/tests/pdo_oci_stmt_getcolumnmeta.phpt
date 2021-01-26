@@ -51,8 +51,15 @@ SQL
     }
 
     // invalid offset
-    $tmp = @$stmt->getColumnMeta(-1);
-    printf(" 1.3 Expecting false got %s\n", var_export($tmp, true));
+    echo " 1.3 ";
+    try {
+        $tmp = $stmt->getColumnMeta(-1);
+    } catch (ValueError $e) {
+        if (false !== $tmp) {
+            printf("[1.3] Expecting false got %s\n", var_export($tmp, true));
+        }
+        echo $e->getMessage(), "\n";
+    }
 
     // PDOStatement::getColumnMeta(): Argument #1 must be of type int, array given in
     echo " 1.4 ";
@@ -311,7 +318,7 @@ Preparations before the test
 Test 1. calling function with invalid parameters
  1.1 Expecting false got false
  1.2 PDOStatement::getColumnMeta() expects exactly 1 argument, 0 given
- 1.3 Expecting false got false
+ 1.3 PDOStatement::getColumnMeta(): Argument #1 ($column) must be greater than or equal to 0
  1.4 PDOStatement::getColumnMeta(): Argument #1 ($column) must be of type int, array given
  1.5 PDOStatement::getColumnMeta() expects exactly 1 argument, 2 given
  1.6 Expecting false because of invalid offset got false

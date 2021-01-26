@@ -252,7 +252,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 {
 	xmlTextWriterPtr ptr;
 	int retval;
-	zend_bool indent;
+	bool indent;
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &self, xmlwriter_class_entry_ce, &indent) == FAILURE) {
@@ -814,7 +814,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	char *name;
 	size_t name_len;
 	int retval;
-	zend_bool isparm;
+	bool isparm;
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osb", &self, xmlwriter_class_entry_ce, &name, &name_len, &isparm) == FAILURE) {
@@ -851,7 +851,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	int retval;
 	/* Optional parameters */
 	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
-	zend_bool pe = 0;
+	bool pe = 0;
 	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self;
 
@@ -985,7 +985,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) {
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr buffer;
-	zend_bool empty = 1;
+	bool empty = 1;
 	int output_bytes;
 	zval *self;
 

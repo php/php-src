@@ -474,7 +474,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 PHP_FUNCTION(jdtojewish)
 {
 	zend_long julday, fl = 0;
-	zend_bool heb   = 0;
+	bool heb   = 0;
 	int year, month, day;
 	char *dayp, *yearp;
 

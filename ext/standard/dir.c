@@ -408,7 +408,7 @@ PHP_FUNCTION(glob)
 	glob_t globbuf;
 	size_t n;
 	int ret;
-	zend_bool basedir_limit = 0;
+	bool basedir_limit = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(pattern, pattern_len)

@@ -80,7 +80,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	size_t		bundlename_len = 0;
 	const char *locale;
 	size_t		locale_len = 0;
-	zend_bool	fallback = 1;
+	bool	fallback = 1;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
@@ -167,12 +167,13 @@ static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
-    zend_bool    is_numeric = 0;
+    bool    is_numeric = 0;
 	char         *pbuf;
 	ResourceBundle_object *rb;
 
-	intl_error_reset( NULL );
 	rb = php_intl_resourcebundle_fetch_object(object);
+	intl_error_reset(NULL);
+	intl_error_reset(INTL_DATA_ERROR_P(rb));
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
 		is_numeric = 1;
@@ -231,7 +232,7 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 /* {{{ Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
 {
-	zend_bool   fallback = 1;
+	bool   fallback = 1;
 	zval *		offset;
 	zval *      object;
 
@@ -365,14 +366,9 @@ PHP_METHOD(ResourceBundle, getIterator) {
  */
 void resourcebundle_register_class( void )
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY( ce, "ResourceBundle", class_ResourceBundle_methods );
-
-	ce.create_object = ResourceBundle_object_create;
-	ce.get_iterator = resourcebundle_get_iterator;
-
-	ResourceBundle_ce_ptr = zend_register_internal_class( &ce );
+	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
+	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;
+	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
@@ -380,7 +376,5 @@ void resourcebundle_register_class( void )
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
-
-	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_aggregate, zend_ce_countable);
 }
 /* }}} */

@@ -35,11 +35,6 @@ require_once('skipifconnectfailure.inc');
                         $charsetInfo->charset,
                         $charsetInfo->number, $field->charsetnr);
                 }
-                if ($field->length != $charsetInfo->max_length) {
-                    printf("[005] Expecting length %d got %d\n",
-                        $charsetInfo->max_length,
-                        $field->max_length);
-                }
                 break;
         }
     }
@@ -76,7 +71,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>
@@ -104,7 +99,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(%d)
   ["charsetnr"]=>

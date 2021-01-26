@@ -42,7 +42,7 @@ static int le_bucket;
 PHP_METHOD(php_user_filter, filter)
 {
 	zval *in, *out, *consumed;
-	zend_bool closing;
+	bool closing;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrzb", &in, &out, &consumed, &closing) == FAILURE) {
 		RETURN_THROWS();
 	}

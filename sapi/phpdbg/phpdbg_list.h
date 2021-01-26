@@ -42,9 +42,6 @@ void phpdbg_list_update(void);
 typedef struct {
 	char *buf;
 	size_t len;
-#if HAVE_MMAP
-	void *map;
-#endif
 	zend_op_array op_array;
 	uint32_t lines;
 	uint32_t line[1];

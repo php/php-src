@@ -45,12 +45,12 @@ mysqlnd_run_authentication(
 			const unsigned int charset_no,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
 			const zend_ulong mysql_flags,
-			const zend_bool silent,
-			const zend_bool is_change_user
+			const bool silent,
+			const bool is_change_user
 			)
 {
 	enum_func_status ret = FAIL;
-	zend_bool first_call = TRUE;
+	bool first_call = TRUE;
 
 	char * switch_to_auth_protocol = NULL;
 	size_t switch_to_auth_protocol_len = 0;
@@ -81,8 +81,10 @@ mysqlnd_run_authentication(
 				mnd_pefree(requested_protocol, FALSE);
 				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
 			} else {
-				php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
+				char * msg;
+				mnd_sprintf(&msg, 0, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+				mnd_sprintf_free(msg);
 				goto end;
 			}
 		}
@@ -103,10 +105,6 @@ mysqlnd_run_authentication(
 			}
 			conn->authentication_plugin_data.l = plugin_data_len;
 			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
-			if (!conn->authentication_plugin_data.s) {
-				SET_OOM_ERROR(conn->error_info);
-				goto end;
-			}
 			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
 
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
@@ -244,7 +242,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const MYSQLND_SESSION_OPTIONS * const session_options,
 							  const zend_ulong mysql_flags,
 							  const unsigned int server_charset_no,
-							  const zend_bool use_full_blown_auth_packet,
+							  const bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
 							  struct st_mysqlnd_authentication_plugin * auth_plugin,
 							  const zend_uchar * const orig_auth_plugin_data,
@@ -373,8 +371,8 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const size_t passwd_len,
 								const char * const db,
 								const size_t db_len,
-								const zend_bool silent,
-								const zend_bool use_full_blown_auth_packet,
+								const bool silent,
+								const bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
 								struct st_mysqlnd_authentication_plugin * auth_plugin,
 								const zend_uchar * const orig_auth_plugin_data,
@@ -1274,8 +1272,12 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 		case 2:
 			// The server tried to send a key, which we didn't expect
 			// fall-through
-		default:
-			php_error_docref(NULL, E_WARNING, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
+		default: {
+			char * msg;
+			mnd_sprintf(&msg, 0, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
+			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+			mnd_sprintf_free(msg);
+		}
 	}
 
 	DBG_RETURN(PASS);

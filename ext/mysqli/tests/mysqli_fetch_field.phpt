@@ -35,10 +35,6 @@ require_once('skipifconnectfailure.inc');
         printf("[004] Expecting charset %s/%d got %d\n",
             $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
     }
-    if ($tmp->length != $charsetInfo->max_length) {
-        printf("[005] Expecting length %d got %d\n",
-            $charsetInfo->max_length, $tmp->max_length);
-    }
     if ($tmp->db != $db) {
         printf("011] Expecting database '%s' got '%s'\n",
             $db, $tmp->db);
@@ -97,7 +93,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>
@@ -159,7 +155,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>

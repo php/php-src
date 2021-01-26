@@ -310,7 +310,7 @@ string(198) "&sbquo;&dagger;&trade;&Yuml;&euro;&sbquo;&dagger;&bdquo;&euro;&perm
 string(42) "&lt;html&gt; This is a test! &lt;/html&gt;"
 
 *** Testing htmlentites() on a quote ***
-string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
+string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"

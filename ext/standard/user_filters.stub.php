@@ -4,6 +4,11 @@
 
 class php_user_filter
 {
+    /** @var string */
+    public $filtername = "";
+    /** @var string */
+    public $params = "";
+
     /**
      * @param resource $in
      * @param resource $out

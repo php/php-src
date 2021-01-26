@@ -185,7 +185,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 /* If a live range starts in a reachable block and ends in an unreachable block, we should
  * not eliminate the latter. While it cannot be reached, the FREE opcode of the loop var
  * is necessary for the correctness of temporary compaction. */
-static zend_bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx) {
+static bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx) {
 	uint32_t i;
 	const zend_op_array *op_array = scdf->op_array;
 	const zend_cfg *cfg = &scdf->ssa->cfg;

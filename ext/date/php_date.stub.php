@@ -57,7 +57,7 @@ function date_sub(DateTime $object, DateInterval $interval): DateTime {}
 
 function date_timezone_get(DateTimeInterface $object): DateTimeZone|false {}
 
-function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone): DateTime {}
+function date_timezone_set(DateTime $object, DateTimeZone $timezone): DateTime {}
 
 function date_offset_get(DateTimeInterface $object): int {}
 
@@ -105,12 +105,12 @@ function date_default_timezone_get(): string {}
 function date_sunrise(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
-    float $utcOffset = 0): string|int|float|false {}
+    ?float $utcOffset = null): string|int|float|false {}
 
 function date_sunset(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
-    float $utcOffset = 0): string|int|float|false {}
+    ?float $utcOffset = null): string|int|float|false {}
 
 function date_sun_info(int $timestamp, float $latitude, float $longitude): array {}
 
@@ -125,7 +125,7 @@ interface DateTimeInterface
     /** @return DateTimeZone|false */
     public function getTimezone();
 
-    /** @return int|false */
+    /** @return int */
     public function getOffset();
 
     /** @return int|false */
@@ -202,7 +202,7 @@ class DateTime implements DateTimeInterface
     public function setTimezone(DateTimeZone $timezone) {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_offset_get
      */
     public function getOffset() {}
@@ -238,7 +238,7 @@ class DateTime implements DateTimeInterface
     public function getTimestamp() {}
 
     /**
-     * @return DateInterval|false
+     * @return DateInterval
      * @alias date_diff
      */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
@@ -251,7 +251,7 @@ class DateTimeImmutable implements DateTimeInterface
     /** @return void */
     public function __wakeup() {}
 
-    /** @return DateTimeZone */
+    /** @return DateTimeImmutable */
     public static function __set_state(array $array) {}
 
     /**
@@ -279,7 +279,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getTimezone() {}
 
     /**
-     * @return int|false
+     * @return int
      * @alias date_offset_get
      */
     public function getOffset() {}
@@ -291,7 +291,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function getTimestamp() {}
 
     /**
-     * @return DateInterval|false
+     * @return DateInterval
      * @alias date_diff
      */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false) {}
@@ -361,7 +361,7 @@ class DateTimeZone
     public static function listAbbreviations() {}
 
     /**
-     * @return array|false
+     * @return array
      * @alias timezone_identifiers_list
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null) {}

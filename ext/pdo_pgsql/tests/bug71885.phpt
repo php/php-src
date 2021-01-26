@@ -37,10 +37,10 @@ foreach ([false, true] as $emulate) {
 string(3) "ERR"
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 ==OK==

@@ -1138,7 +1138,7 @@ static void clear_last_error() {
 static void report_zend_debug_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	if (PG(report_zend_debug)) {
-		zend_bool trigger_break;
+		bool trigger_break;
 
 		switch (type) {
 			case E_ERROR:
@@ -1162,7 +1162,7 @@ static void report_zend_debug_error_notify_cb(int type, const char *error_filena
  extended error handling function */
 static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
 {
-	zend_bool display;
+	bool display;
 	int type = orig_type & E_ALL;
 
 	/* check for repeated errors to be ignored */
@@ -1727,7 +1727,7 @@ int php_request_startup(void)
 /* {{{ php_request_shutdown */
 void php_request_shutdown(void *dummy)
 {
-	zend_bool report_memleaks;
+	bool report_memleaks;
 
 	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
 
@@ -1757,7 +1757,7 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
+		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
 
 		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
 			(size_t)PG(memory_limit) < zend_memory_usage(1)

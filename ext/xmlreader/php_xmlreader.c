@@ -964,7 +964,7 @@ PHP_METHOD(XMLReader, setParserProperty)
 	zval *id;
 	zend_long property;
 	int retval = -1;
-	zend_bool value;
+	bool value;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &property, &value) == FAILURE) {

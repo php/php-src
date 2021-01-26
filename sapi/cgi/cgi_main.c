@@ -162,15 +162,15 @@ static const opt_struct OPTIONS[] = {
 typedef struct _php_cgi_globals_struct {
 	HashTable user_config_cache;
 	char *redirect_status_env;
-	zend_bool rfc2616_headers;
-	zend_bool nph;
-	zend_bool check_shebang_line;
-	zend_bool fix_pathinfo;
-	zend_bool force_redirect;
-	zend_bool discard_path;
-	zend_bool fcgi_logging;
+	bool rfc2616_headers;
+	bool nph;
+	bool check_shebang_line;
+	bool fix_pathinfo;
+	bool force_redirect;
+	bool discard_path;
+	bool fcgi_logging;
 #ifdef PHP_WIN32
-	zend_bool impersonate;
+	bool impersonate;
 #endif
 } php_cgi_globals_struct;
 
@@ -368,7 +368,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 {
 	sapi_header_struct *h;
 	zend_llist_position pos;
-	zend_bool ignore_status = 0;
+	bool ignore_status = 0;
 	int response_status = SG(sapi_headers).http_response_code;
 
 	if (SG(request_info).no_headers == 1) {
@@ -378,7 +378,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 	if (CGIG(nph) || SG(sapi_headers).http_response_code != 200)
 	{
 		int len;
-		zend_bool has_status = 0;
+		bool has_status = 0;
 		char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {

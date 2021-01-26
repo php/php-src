@@ -60,7 +60,7 @@ const mbfl_encoding mbfl_encoding_sjis_open = {
 	"Shift_JIS",
 	mbfl_encoding_sjis_open_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_open_wchar,
 	&vtbl_wchar_sjis_open
 };

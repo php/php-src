@@ -59,7 +59,7 @@ PHP_FUNCTION( numfmt_format )
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
-			convert_to_long_ex(number);
+			convert_to_long(number);
 			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
@@ -91,7 +91,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		case FORMAT_TYPE_DOUBLE:
-			convert_to_double_ex(number);
+			convert_to_double(number);
 			formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));

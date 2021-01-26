@@ -785,7 +785,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 {
 	zend_string *format;
 	zend_long    ts;
-	zend_bool    ts_is_null = 1;
+	bool    ts_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
@@ -941,7 +941,7 @@ PHP_FUNCTION(idate)
 {
 	zend_string *format;
 	zend_long    ts;
-	zend_bool    ts_is_null = 1;
+	bool    ts_is_null = 1;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1012,7 +1012,7 @@ PHP_FUNCTION(strtotime)
 	int parse_error, epoch_does_not_fit_in_zend_long;
 	timelib_error_container *error;
 	zend_long preset_ts, ts;
-	zend_bool preset_ts_is_null = 1;
+	bool preset_ts_is_null = 1;
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(strtotime)
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	zend_long hou, min, sec, mon, day, yea;
-	zend_bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
+	bool min_is_null = 1, sec_is_null = 1, mon_is_null = 1, day_is_null = 1, yea_is_null = 1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
@@ -1179,7 +1179,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	zend_string         *format;
 	zend_long            timestamp;
-	zend_bool            timestamp_is_null = 1;
+	bool            timestamp_is_null = 1;
 	struct tm            ta;
 	int                  max_reallocs = 5;
 	size_t               buf_len = 256, real_len;
@@ -1300,8 +1300,8 @@ PHP_FUNCTION(time)
 PHP_FUNCTION(localtime)
 {
 	zend_long timestamp;
-	zend_bool timestamp_is_null = 1;
-	zend_bool associative = 0;
+	bool timestamp_is_null = 1;
+	bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
@@ -1353,7 +1353,7 @@ PHP_FUNCTION(localtime)
 PHP_FUNCTION(getdate)
 {
 	zend_long timestamp;
-	zend_bool timestamp_is_null = 1;
+	bool timestamp_is_null = 1;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
@@ -3350,7 +3350,7 @@ PHP_FUNCTION(date_diff)
 	zval         *object1, *object2;
 	php_date_obj *dateobj1, *dateobj2;
 	php_interval_obj *interval;
-	zend_bool      absolute = 0;
+	bool      absolute = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_THROWS();
@@ -4462,7 +4462,7 @@ PHP_FUNCTION(date_default_timezone_get)
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
 {
 	double latitude, longitude, zenith, gmt_offset, altitude;
-	zend_bool latitude_is_null = 1, longitude_is_null = 1, zenith_is_null = 1, gmt_offset_is_null = 1;
+	bool latitude_is_null = 1, longitude_is_null = 1, zenith_is_null = 1, gmt_offset_is_null = 1;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
 	zend_long time, retformat = SUNFUNCS_RET_STRING;

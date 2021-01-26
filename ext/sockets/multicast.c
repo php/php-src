@@ -159,7 +159,7 @@ mcast_req_fun: ;
 			php_sockaddr_storage	group = {0};
 			socklen_t				glen;
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
@@ -195,7 +195,7 @@ mcast_req_fun: ;
 			socklen_t				glen,
 									slen;
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
@@ -272,12 +272,12 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IP_MULTICAST_LOOP:
-		convert_to_boolean_ex(arg4);
+		convert_to_boolean(arg4);
 		ipv4_mcast_ttl_lback = (unsigned char) (Z_TYPE_P(arg4) == IS_TRUE);
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
-		convert_to_long_ex(arg4);
+		convert_to_long(arg4);
 		if (Z_LVAL_P(arg4) < 0L || Z_LVAL_P(arg4) > 255L) {
 			zend_argument_value_error(4, "must be between 0 and 255");
 			return FAILURE;
@@ -337,11 +337,11 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IPV6_MULTICAST_LOOP:
-		convert_to_boolean_ex(arg4);
+		convert_to_boolean(arg4);
 		ov = (int) Z_TYPE_P(arg4) == IS_TRUE;
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
-		convert_to_long_ex(arg4);
+		convert_to_long(arg4);
 		if (Z_LVAL_P(arg4) < -1L || Z_LVAL_P(arg4) > 255L) {
 			zend_argument_value_error(4, "must be between -1 and 255");
 			return FAILURE;

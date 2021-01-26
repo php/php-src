@@ -777,7 +777,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	zend_bool	escape_overflow = FALSE;
+	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_quotes");
 
@@ -831,7 +831,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	zend_bool	escape_overflow = FALSE;
+	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_slashes");
 	DBG_INF_FMT("charset=%s", cset->name);

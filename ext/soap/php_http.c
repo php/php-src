@@ -88,9 +88,9 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 
 /* Additional HTTP headers */
 void http_context_headers(php_stream_context* context,
-                          zend_bool has_authorization,
-                          zend_bool has_proxy_authorization,
-                          zend_bool has_cookies,
+                          bool has_authorization,
+                          bool has_proxy_authorization,
+                          bool has_cookies,
                           smart_str* soap_headers)
 {
 	zval *tmp;
@@ -359,11 +359,11 @@ int make_http_soap_request(zval        *this_ptr,
 	zend_long redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
-	zend_bool old_allow_url_fopen;
+	bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
-	zend_bool has_authorization = 0;
-	zend_bool has_proxy_authorization = 0;
-	zend_bool has_cookies = 0;
+	bool has_authorization = 0;
+	bool has_proxy_authorization = 0;
+	bool has_cookies = 0;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;

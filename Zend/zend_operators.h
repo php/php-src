@@ -54,7 +54,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
+ZEND_API bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
 
 ZEND_API zend_result ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2);
@@ -63,10 +63,10 @@ ZEND_API zend_result ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1
 ZEND_API zend_result ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API zend_bool ZEND_FASTCALL zend_class_implements_interface(const zend_class_entry *class_ce, const zend_class_entry *interface_ce);
-ZEND_API zend_bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *instance_ce, const zend_class_entry *ce);
+ZEND_API bool ZEND_FASTCALL zend_class_implements_interface(const zend_class_entry *class_ce, const zend_class_entry *interface_ce);
+ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *instance_ce, const zend_class_entry *ce);
 
-static zend_always_inline zend_bool instanceof_function(
+static zend_always_inline bool instanceof_function(
 		const zend_class_entry *instance_ce, const zend_class_entry *ce) {
 	return instance_ce == ce || instanceof_function_slow(instance_ce, ce);
 }
@@ -262,7 +262,6 @@ ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op);
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_double(zval *op);
-ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base);
 ZEND_API void ZEND_FASTCALL convert_to_null(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
@@ -322,8 +321,8 @@ static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_st
 
 /* Like convert_to_string(), but returns whether the conversion succeeded and does not modify the
  * zval in-place if it fails. */
-ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op);
-static zend_always_inline zend_bool try_convert_to_string(zval *op) {
+ZEND_API bool ZEND_FASTCALL _try_convert_to_string(zval *op);
+static zend_always_inline bool try_convert_to_string(zval *op) {
 	if (Z_TYPE_P(op) == IS_STRING) {
 		return 1;
 	}
@@ -406,10 +405,10 @@ again:
 
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2);
 
-ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
-ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive);
+ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, bool case_insensitive);
 ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
@@ -442,66 +441,14 @@ ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
 ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
-ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-
-#define convert_to_ex_master(pzv, lower_type, upper_type)	\
-	if (Z_TYPE_P(pzv)!=upper_type) {					\
-		convert_to_##lower_type(pzv);						\
-	}
-
-#define convert_to_explicit_type(pzv, type)		\
-	do {										\
-		switch (type) {							\
-			case IS_NULL:						\
-				convert_to_null(pzv);			\
-				break;							\
-			case IS_LONG:						\
-				convert_to_long(pzv);			\
-				break;							\
-			case IS_DOUBLE:						\
-				convert_to_double(pzv);			\
-				break;							\
-			case _IS_BOOL:						\
-				convert_to_boolean(pzv);		\
-				break;							\
-			case IS_ARRAY:						\
-				convert_to_array(pzv);			\
-				break;							\
-			case IS_OBJECT:						\
-				convert_to_object(pzv);			\
-				break;							\
-			case IS_STRING:						\
-				convert_to_string(pzv);			\
-				break;							\
-			default:							\
-				assert(0);						\
-				break;							\
-		}										\
-	} while (0);
-
-#define convert_to_explicit_type_ex(pzv, str_type)	\
-	if (Z_TYPE_P(pzv) != str_type) {				\
-		convert_to_explicit_type(pzv, str_type);	\
-	}
-
-#define convert_to_boolean_ex(pzv)	do { \
-		if (Z_TYPE_INFO_P(pzv) > IS_TRUE) { \
-			convert_to_boolean(pzv); \
-		} else if (Z_TYPE_INFO_P(pzv) < IS_FALSE) { \
-			ZVAL_FALSE(pzv); \
-		} \
-	} while (0)
-#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, IS_LONG)
-#define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, IS_DOUBLE)
-#define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, IS_STRING)
-#define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, IS_ARRAY)
-#define convert_to_object_ex(pzv)	convert_to_ex_master(pzv, object, IS_OBJECT)
-#define convert_to_null_ex(pzv)		convert_to_ex_master(pzv, null, IS_NULL)
-
-#define convert_scalar_to_number_ex(pzv)							\
-	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
-		convert_scalar_to_number(pzv);					\
-	}
+#define convert_to_null_ex(zv) convert_to_null(zv)
+#define convert_to_boolean_ex(zv) convert_to_boolean(zv)
+#define convert_to_long_ex(zv) convert_to_long(zv)
+#define convert_to_double_ex(zv) convert_to_double(zv)
+#define convert_to_string_ex(zv) convert_to_string(zv)
+#define convert_to_array_ex(zv) convert_to_array(zv)
+#define convert_to_object_ex(zv) convert_to_object(zv)
+#define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
 #if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
 /* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
@@ -896,7 +843,7 @@ static zend_always_inline bool fast_equal_check_string(zval *op1, zval *op2)
 	return zend_compare(op1, op2) == 0;
 }
 
-static zend_always_inline zend_bool fast_is_identical_function(zval *op1, zval *op2)
+static zend_always_inline bool fast_is_identical_function(zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;
@@ -906,7 +853,7 @@ static zend_always_inline zend_bool fast_is_identical_function(zval *op1, zval *
 	return zend_is_identical(op1, op2);
 }
 
-static zend_always_inline zend_bool fast_is_not_identical_function(zval *op1, zval *op2)
+static zend_always_inline bool fast_is_not_identical_function(zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 1;

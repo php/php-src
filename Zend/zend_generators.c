@@ -115,7 +115,7 @@ static void zend_generator_cleanup_unfinished_execution(
 }
 /* }}} */
 
-ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution) /* {{{ */
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -614,9 +614,6 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 
 			p = &ht->arData[pos];
 			value = &p->val;
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
-			}
 			pos++;
 		} while (Z_ISUNDEF_P(value));
 
@@ -1115,17 +1112,11 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 void zend_register_generator_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
-	zend_ce_generator = zend_register_internal_class(&ce);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_ce_generator = register_class_Generator(zend_ce_iterator);
 	zend_ce_generator->create_object = zend_generator_create;
 	zend_ce_generator->serialize = zend_class_serialize_deny;
 	zend_ce_generator->unserialize = zend_class_unserialize_deny;
-
 	/* get_iterator has to be assigned *after* implementing the interface */
-	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1135,7 +1126,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.clone_obj = NULL;
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
-	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
-	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	zend_ce_ClosedGeneratorException = register_class_ClosedGeneratorException(zend_ce_exception);
 }
 /* }}} */

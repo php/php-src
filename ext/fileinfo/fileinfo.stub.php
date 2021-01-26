@@ -28,30 +28,21 @@ class finfo
     public function set_flags(int $flags) {}
 }
 
-/** @return resource|false */
-function finfo_open(int $flags = FILEINFO_NONE, string $magic_database = "") {}
+function finfo_open(int $flags = FILEINFO_NONE, string $magic_database = ""): finfo|false {}
+
+function finfo_close(finfo $finfo): bool {}
+
+function finfo_set_flags(finfo $finfo, int $flags): bool {}
 
 /**
- * @param resource $finfo
- */
-function finfo_close($finfo): bool {}
-
-/**
- * @param resource $finfo
- */
-function finfo_set_flags($finfo, int $flags): bool {}
-
-/**
- * @param resource $finfo
  * @param resource|null $context
  */
-function finfo_file($finfo, string $filename, int $flags = FILEINFO_NONE, $context = null): string|false {}
+function finfo_file(finfo $finfo, string $filename, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
 /**
- * @param resource $finfo
  * @param resource|null $context
  */
-function finfo_buffer($finfo, string $string, int $flags = FILEINFO_NONE, $context = null): string|false {}
+function finfo_buffer(finfo $finfo, string $string, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource|string $filename

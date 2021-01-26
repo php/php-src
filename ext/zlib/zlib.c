@@ -788,7 +788,7 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
-static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
+static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {

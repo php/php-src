@@ -89,7 +89,7 @@ PHP_FUNCTION(stream_socket_client)
 	zend_string *host;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout;
-	zend_bool timeout_is_null = 1;
+	bool timeout_is_null = 1;
 	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
@@ -244,7 +244,7 @@ PHP_FUNCTION(stream_socket_server)
 PHP_FUNCTION(stream_socket_accept)
 {
 	double timeout;
-	zend_bool timeout_is_null = 1;
+	bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
 	php_timeout_ull conv;
@@ -305,7 +305,7 @@ PHP_FUNCTION(stream_socket_get_name)
 {
 	php_stream *stream;
 	zval *zstream;
-	zend_bool want_peer;
+	bool want_peer;
 	zend_string *name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -419,7 +419,7 @@ PHP_FUNCTION(stream_get_contents)
 	php_stream *stream;
 	zval *zsrc;
 	zend_long maxlen, desiredpos = -1L;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	zend_string *contents;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -476,7 +476,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	php_stream *src, *dest;
 	zval *zsrc, *zdest;
 	zend_long maxlen, pos = 0;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	size_t len;
 	int ret;
 
@@ -748,7 +748,7 @@ PHP_FUNCTION(stream_select)
 	php_socket_t max_fd = 0;
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
-	zend_bool secnull;
+	bool secnull;
 	int set_count, max_set_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
@@ -1313,7 +1313,7 @@ PHP_FUNCTION(stream_get_line)
 PHP_FUNCTION(stream_set_blocking)
 {
 	zval *zstream;
-	zend_bool block;
+	bool block;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -1478,7 +1478,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	zend_long cryptokind = 0;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
-	zend_bool enable, cryptokindnull = 1;
+	bool enable, cryptokindnull = 1;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -1641,7 +1641,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 {
 	zval *zsrc;
 	php_stream *stream;
-	zend_bool enable, enable_is_null = 1;
+	bool enable, enable_is_null = 1;
 	zend_long fileno;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)

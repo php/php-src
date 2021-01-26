@@ -105,7 +105,7 @@ object(stdClass)#2 (1) {
       ["sprogress"]=>
       string(3) "100"
       ["bhidden"]=>
-      bool(false)
+      string(1) "0"
       ["sdatetime"]=>
       string(19) "2017.10.16 08:36:45"
     }

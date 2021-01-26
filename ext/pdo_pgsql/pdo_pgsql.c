@@ -65,8 +65,7 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
-	php_pdo_register_driver(&pdo_pgsql_driver);
-	return SUCCESS;
+	return php_pdo_register_driver(&pdo_pgsql_driver);
 }
 /* }}} */
 

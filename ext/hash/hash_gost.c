@@ -235,15 +235,15 @@ static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char inpu
 	Gost(context, data);
 }
 
-PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context)
+PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->tables = &tables_test;
 }
 
-PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context)
+PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
-	PHP_GOSTInit(context);
+	PHP_GOSTInit(context, NULL);
 	context->tables = &tables_crypto;
 }
 

@@ -209,7 +209,7 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 /* }}} */
 
 
-static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
+static zend_always_inline bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
 {
 	child_class = child_class->parent;
 	while (child_class) {
@@ -443,7 +443,7 @@ found:
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic) /* {{{ */
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic) /* {{{ */
 {
 	zend_property_info *property_info;
 	const char *class_name = NULL;
@@ -691,7 +691,7 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline zend_bool property_uses_strict_types() {
+static zend_always_inline bool property_uses_strict_types() {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
 		&& execute_data->func
@@ -1440,7 +1440,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 	return zend_std_get_static_property_with_info(ce, property_name, type, &prop_info);
 }
 
-ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
+ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
 {
 	zend_throw_error(NULL, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 	return 0;
@@ -1746,7 +1746,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce = obj->ce;

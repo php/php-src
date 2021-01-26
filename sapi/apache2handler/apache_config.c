@@ -119,7 +119,7 @@ static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const ch
 	return NULL;
 }
 
-static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
+static bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
 {
 	php_dir_entry *new_per_dir_entry = Z_PTR_P(zv);
 	php_dir_entry *orig_per_dir_entry;

@@ -60,7 +60,7 @@ typedef struct {
 	unsigned reorder_dtor_effects : 1;
 } context;
 
-static inline zend_bool is_bad_mod(const zend_ssa *ssa, int use, int def) {
+static inline bool is_bad_mod(const zend_ssa *ssa, int use, int def) {
 	if (def < 0) {
 		/* This modification is not tracked by SSA, assume the worst */
 		return 1;
@@ -72,16 +72,17 @@ static inline zend_bool is_bad_mod(const zend_ssa *ssa, int use, int def) {
 	return 0;
 }
 
-static inline zend_bool may_have_side_effects(
+static inline bool may_have_side_effects(
 		zend_op_array *op_array, zend_ssa *ssa,
 		const zend_op *opline, const zend_ssa_op *ssa_op,
-		zend_bool reorder_dtor_effects) {
+		bool reorder_dtor_effects) {
 	switch (opline->opcode) {
 		case ZEND_NOP:
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_QM_ASSIGN:
 		case ZEND_FREE:
+		case ZEND_FE_FREE:
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
 		case ZEND_ADD:
@@ -246,6 +247,11 @@ static inline zend_bool may_have_side_effects(
 			return 0;
 		case ZEND_CHECK_VAR:
 			return (OP1_INFO() & MAY_BE_UNDEF) != 0;
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+			/* Model as not having side-effects -- let the side-effect be introduced by
+			 * FE_FETCH if the array is not known to be non-empty. */
+			return (OP1_INFO() & MAY_BE_ANY) != MAY_BE_ARRAY;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
@@ -304,7 +310,7 @@ static zend_always_inline void add_phi_sources_to_worklists(context *ctx, zend_s
 	} FOREACH_PHI_SOURCE_END();
 }
 
-static inline zend_bool is_var_dead(context *ctx, int var_num) {
+static inline bool is_var_dead(context *ctx, int var_num) {
 	zend_ssa_var *var = &ctx->ssa->vars[var_num];
 	if (var->definition_phi) {
 		return zend_bitset_in(ctx->phi_dead, var_num);
@@ -319,7 +325,7 @@ static inline zend_bool is_var_dead(context *ctx, int var_num) {
 }
 
 // Sometimes we can mark the var as EXT_UNUSED
-static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_op *opline) {
+static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_op *opline) {
 	if (use_chain >= 0) {
 		return 0;
 	}
@@ -373,8 +379,23 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 	return 0;
 }
 
+static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+	switch (opline->opcode) {
+		case ZEND_FREE:
+			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
+			if (!(ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+				return 0;
+			}
+			/* break missing intentionally */
+		case ZEND_FE_FREE:
+			return !is_var_dead(ctx, ssa_op->op1_use);
+		default:
+			return 0;
+	}
+}
+
 /* Returns whether the instruction has been DCEd */
-static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
 	int free_var = -1;
 	zend_uchar free_var_type;
@@ -384,9 +405,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 
 	/* We mark FREEs as dead, but they're only really dead if the destroyed var is dead */
-	if (opline->opcode == ZEND_FREE
-			&& (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
-			&& !is_var_dead(ctx, ssa_op->op1_use)) {
+	if (is_free_of_live_var(ctx, opline, ssa_op)) {
 		return 0;
 	}
 
@@ -464,7 +483,7 @@ static void try_remove_trivial_phi(context *ctx, zend_ssa_phi *phi) {
 	}
 }
 
-static inline zend_bool may_break_varargs(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op) {
+static inline bool may_break_varargs(const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op) {
 	if (ssa_op->op1_def >= 0
 			&& ssa->vars[ssa_op->op1_def].var < op_array->num_args) {
 		return 1;
@@ -480,13 +499,13 @@ static inline zend_bool may_break_varargs(const zend_op_array *op_array, const z
 	return 0;
 }
 
-int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
+int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
 	int removed_ops = 0;
 
 	/* DCE of CV operations that changes arguments may affect vararg functions. */
-	zend_bool has_varargs = (ssa->cfg.flags & ZEND_FUNC_VARARG) != 0;
+	bool has_varargs = (ssa->cfg.flags & ZEND_FUNC_VARARG) != 0;
 
 	context ctx;
 	ctx.ssa = ssa;

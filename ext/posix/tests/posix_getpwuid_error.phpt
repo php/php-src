@@ -2,7 +2,8 @@
 Test posix_getpwuid() function : error conditions
 --SKIPIF--
 <?php
-    if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
+if(!extension_loaded("posix")) dir("skip - POSIX extension not loaded");
+if (getenv('SKIP_ASAN')) die('skip LSan crashes when firebird is loaded');
 ?>
 --FILE--
 <?php

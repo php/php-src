@@ -58,7 +58,7 @@ typedef struct _zend_file_handle {
 	zend_stream_type  type;
 	/* free_filename is used by wincache */
 	/* TODO: Clean up filename vs opened_path mess */
-	zend_bool         free_filename;
+	bool         free_filename;
 	char              *buf;
 	size_t            len;
 } zend_file_handle;

@@ -94,11 +94,11 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	zend_string *contents;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
 	zend_long maxlen;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -234,7 +234,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	int size = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 
@@ -334,7 +334,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 

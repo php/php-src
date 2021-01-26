@@ -95,8 +95,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
 	enum mbfl_no_language language;
-	zend_bool encoding_translation;
-	zend_bool strict_detection;
+	bool encoding_translation;
+	bool strict_detection;
 	size_t illegalchars;
 	mbfl_buffer_converter *outconv;
     void *http_output_conv_mimetypes;
@@ -107,9 +107,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_string *last_used_encoding_name;
 	const mbfl_encoding *last_used_encoding;
 	/* Whether an explicit internal_encoding / http_output / http_input encoding was set. */
-	zend_bool internal_encoding_set;
-	zend_bool http_output_set;
-	zend_bool http_input_set;
+	bool internal_encoding_set;
+	bool http_output_set;
+	bool http_input_set;
 #ifdef HAVE_MBREGEX
     zend_long regex_retry_limit;
 #endif

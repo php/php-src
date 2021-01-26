@@ -185,7 +185,7 @@ static size_t strnlen(const char *s, size_t maxlen) {
 /*
  * Do format conversion placing the output in buffer
  */
-static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
+static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
 	size_t s_len;

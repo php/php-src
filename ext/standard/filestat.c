@@ -594,7 +594,7 @@ PHP_FUNCTION(touch)
 	char *filename;
 	size_t filename_len;
 	zend_long filetime = 0, fileatime = 0;
-	zend_bool filetime_is_null = 1, fileatime_is_null = 1;
+	bool filetime_is_null = 1, fileatime_is_null = 1;
 	int ret;
 	FILE *file;
 	struct utimbuf newtimebuf;
@@ -674,7 +674,7 @@ PHP_FUNCTION(touch)
 #endif
 
 /* {{{ php_clear_stat_cache() */
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
+PHPAPI void php_clear_stat_cache(bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
@@ -700,7 +700,7 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
 /* {{{ Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	zend_bool  clear_realpath_cache = 0;
+	bool  clear_realpath_cache = 0;
 	char      *filename             = NULL;
 	size_t     filename_len         = 0;
 
