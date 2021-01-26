@@ -810,14 +810,6 @@ int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t a
 }
 /* }}} */
 
-static zend_bool is_ascii(const unsigned char *str, uint32_t len)
-{
-	while (--len) {
-		if (*str++ >= 0x80) return 0;
-	}
-	return 1;
-}
-
 struct _phar_zip_pass {
 	php_stream *filefp;
 	php_stream *centralfp;
@@ -887,13 +879,11 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	memcpy(central.datestamp, local.datestamp, sizeof(local.datestamp));
 	PHAR_SET_16(central.filename_len, entry->filename_len + (entry->is_dir ? 1 : 0));
 	PHAR_SET_16(local.filename_len, entry->filename_len + (entry->is_dir ? 1 : 0));
-	if (!is_ascii(entry->filename, entry->filename_len)) {
-		 // set language encoding flag
-		general_purpose_flags = PHAR_GET_16(central.flags);
-		PHAR_SET_16(central.flags, general_purpose_flags | (1 << 11));
-		general_purpose_flags = PHAR_GET_16(local.flags);
-		PHAR_SET_16(local.flags, general_purpose_flags | (1 << 11));
-	}
+	// set language encoding flag (all filenames have to be UTF-8 anyway)
+	general_purpose_flags = PHAR_GET_16(central.flags);
+	PHAR_SET_16(central.flags, general_purpose_flags | (1 << 11));
+	general_purpose_flags = PHAR_GET_16(local.flags);
+	PHAR_SET_16(local.flags, general_purpose_flags | (1 << 11));
 	PHAR_SET_32(central.offset, php_stream_tell(p->filefp));
 
 	/* do extra field for perms later */
