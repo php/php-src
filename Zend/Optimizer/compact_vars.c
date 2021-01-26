@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ZendAccelerator.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_bitset.h"
 

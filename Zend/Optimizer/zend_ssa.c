@@ -768,7 +768,7 @@ add_op1_def:
 }
 /* }}} */
 
-int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
+ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var) /* {{{ */
 {
 	return _zend_ssa_rename_op(op_array, opline, k, build_flags, ssa_vars_count, ssa_ops, var);
 }
@@ -891,7 +891,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 }
 /* }}} */
 
-int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
+ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -1042,7 +1042,7 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 }
 /* }}} */
 
-int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars;
 	int i;

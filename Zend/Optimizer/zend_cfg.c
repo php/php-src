@@ -269,7 +269,7 @@ static void initialize_block(zend_basic_block *block) {
 		block_map[i]++; \
 	} while (0)
 
-int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
+ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -599,7 +599,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 }
 /* }}} */
 
-int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
+ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 {
 	int j, s, edges;
 	zend_basic_block *b;
@@ -682,7 +682,7 @@ static void compute_postnum_recursive(
 
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
-int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
@@ -795,7 +795,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 	*b = tmp;
 }
 
-int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	int i, j, k, n;
 	int time;

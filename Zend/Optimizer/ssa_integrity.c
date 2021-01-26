@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ZendAccelerator.h"
 #include "Optimizer/zend_optimizer_internal.h"
 
 /* The ssa_verify_integrity() function ensures that that certain invariants of the SSA form and

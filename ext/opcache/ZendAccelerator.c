@@ -2957,9 +2957,6 @@ static zend_result accel_post_startup(void)
 		}
 	}
 
-	/* Initialize zend_func_info_rid */
-	zend_optimizer_startup();
-
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
@@ -3119,8 +3116,6 @@ file_cache_fallback:
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
 
-	zend_optimizer_startup();
-
 	if (!file_cache_only && ZCG(accel_directives).interned_strings_buffer) {
 		accel_use_shm_interned_strings();
 	}
@@ -3143,8 +3138,6 @@ void accel_shutdown(void)
 #ifdef HAVE_JIT
 	zend_jit_shutdown();
 #endif
-
-	zend_optimizer_shutdown();
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 

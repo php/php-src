@@ -54,9 +54,9 @@ typedef struct _zend_call_info zend_call_info;
 
 BEGIN_EXTERN_C()
 
-extern int zend_func_info_rid;
+extern ZEND_API int zend_func_info_rid;
 
-uint32_t zend_get_func_info(
+ZEND_API uint32_t zend_get_func_info(
 	const zend_call_info *call_info, const zend_ssa *ssa,
 	zend_class_entry **ce, bool *ce_is_instanceof);
 

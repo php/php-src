@@ -250,14 +250,14 @@ static zend_always_inline bool zend_sub_will_overflow(zend_long a, zend_long b) 
 
 BEGIN_EXTERN_C()
 
-int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
-int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
-int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
+ZEND_API int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 
-uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
+ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 
 int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
-int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
+ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
 void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow);
 int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
@@ -265,27 +265,23 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
-uint32_t zend_fetch_arg_info_type(
+ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
-void zend_init_func_return_info(const zend_op_array   *op_array,
-                                const zend_script     *script,
-                                zend_ssa_var_info     *ret);
+ZEND_API void zend_init_func_return_info(
+	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret);
 void zend_func_return_info(const zend_op_array   *op_array,
                            const zend_script     *script,
                            int                    recursive,
                            int                    widening,
                            zend_ssa_var_info     *ret);
 
-int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
-int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
+ZEND_API int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
 
-int zend_update_type_info(const zend_op_array *op_array,
-                          zend_ssa            *ssa,
-                          const zend_script   *script,
-                          zend_op             *opline,
-                          zend_ssa_op         *ssa_op,
-                          const zend_op      **ssa_opcodes,
-                          zend_long            optimization_level);
+ZEND_API int zend_update_type_info(
+	const zend_op_array *op_array, zend_ssa *ssa, const zend_script *script,
+	zend_op *opline, zend_ssa_op *ssa_op, const zend_op **ssa_opcodes,
+	zend_long optimization_level);
 
 END_EXTERN_C()
 

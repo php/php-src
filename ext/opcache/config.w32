@@ -38,8 +38,6 @@ if (PHP_OPCACHE != "no") {
 		}
 	}
 
-	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c", "opcache", "ext\\opcache\\Optimizer");
-
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
 }

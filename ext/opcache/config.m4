@@ -312,27 +312,6 @@ int main() {
 	shared_alloc_shm.c \
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
-	Optimizer/zend_optimizer.c \
-	Optimizer/pass1.c \
-	Optimizer/pass3.c \
-	Optimizer/optimize_func_calls.c \
-	Optimizer/block_pass.c \
-	Optimizer/optimize_temp_vars_5.c \
-	Optimizer/nop_removal.c \
-	Optimizer/compact_literals.c \
-	Optimizer/zend_cfg.c \
-	Optimizer/zend_dfg.c \
-	Optimizer/dfa_pass.c \
-	Optimizer/zend_ssa.c \
-	Optimizer/zend_inference.c \
-	Optimizer/zend_func_info.c \
-	Optimizer/zend_call_graph.c \
-	Optimizer/sccp.c \
-	Optimizer/scdf.c \
-	Optimizer/dce.c \
-	Optimizer/escape_analysis.c \
-	Optimizer/compact_vars.c \
-	Optimizer/zend_dump.c \
 	$ZEND_JIT_SRC,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 

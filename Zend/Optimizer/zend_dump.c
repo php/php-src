@@ -133,7 +133,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	}
 }
 
-void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
+ZEND_API void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
@@ -332,7 +332,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
+ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);
@@ -405,7 +405,7 @@ static void zend_dump_range_constraint(const zend_op_array *op_array, const zend
 	}
 }
 
-void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op)
+ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op)
 {
 	const char *name = zend_get_opcode_name(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
@@ -881,7 +881,7 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 	}
 }
 
-void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data)
+ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data)
 {
 	int i;
 	const zend_cfg *cfg = NULL;

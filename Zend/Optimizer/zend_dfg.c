@@ -242,7 +242,7 @@ add_op1_def:
 }
 /* }}} */
 
-void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
 	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
 }

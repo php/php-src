@@ -89,8 +89,10 @@ typedef struct _zend_script {
 	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
-int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
+BEGIN_EXTERN_C()
+ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
 int zend_optimizer_startup(void);
 int zend_optimizer_shutdown(void);
+END_EXTERN_C()
 
 #endif

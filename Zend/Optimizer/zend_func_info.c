@@ -837,7 +837,7 @@ static const func_info_t func_infos[] = {
 };
 
 static HashTable func_info;
-int zend_func_info_rid = -1;
+ZEND_API int zend_func_info_rid = -1;
 
 static uint32_t get_internal_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa, zend_string *lcname) {
@@ -859,7 +859,7 @@ static uint32_t get_internal_func_info(
 	}
 }
 
-uint32_t zend_get_func_info(
+ZEND_API uint32_t zend_get_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa,
 		zend_class_entry **ce, bool *ce_is_instanceof)
 {
