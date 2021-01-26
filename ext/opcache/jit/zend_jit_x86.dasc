@@ -11413,6 +11413,14 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	if (ZEND_OBSERVER_ENABLED) {
+		if (Z_MODE(op1_addr) == IS_REG) {
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			if (!zend_jit_spill_store(Dst, op1_addr, dst, op1_info, 1)) {
+				return 0;
+			}
+			op1_addr = dst;
+		}
 		|	LOAD_ZVAL_ADDR FCARG2a, op1_addr
 		|	mov FCARG1a, FP
 		|	SET_EX_OPLINE opline, r0
