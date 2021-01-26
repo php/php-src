@@ -1,9 +1,15 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 class PDOStatement implements IteratorAggregate
 {
+    /** @var string|null */
+    public $queryString;
+
     /** @return bool */
     public function bindColumn(string|int $column, mixed &$var, int $type = 0, int $maxLength = 0, mixed $driverOptions = null) {}
 

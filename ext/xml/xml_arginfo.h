@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d42215062c41775bae538cd310bc60e63fa06a8e */
+ * Stub hash: fffff15f512d0c99f201d1dd2257fb7bc91cebe2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -137,3 +137,15 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_XMLParser_methods[] = {
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_XMLParser()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+

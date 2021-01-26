@@ -2499,16 +2499,11 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 
 void pdo_stmt_init(void)
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
-	pdo_dbstmt_ce = zend_register_internal_class(&ce);
+	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
 	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
 	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
-	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_aggregate);
-	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
@@ -2520,9 +2515,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.compare = dbstmt_compare;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
-	pdo_row_ce = zend_register_internal_class(&ce);
-	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
+	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
 	pdo_row_ce->serialize = zend_class_serialize_deny;
 	pdo_row_ce->unserialize = zend_class_unserialize_deny;

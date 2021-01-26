@@ -251,37 +251,9 @@ PHP_METHOD(PhpToken, __toString)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(tokenizer)
 {
-	zend_class_entry ce;
-	zend_string *name;
-	zval default_val;
-	ZVAL_UNDEF(&default_val);
-
 	tokenizer_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 	tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-
-	INIT_CLASS_ENTRY(ce, "PhpToken", class_PhpToken_methods);
-	php_token_ce = zend_register_internal_class(&ce);
-	zend_class_implements(php_token_ce, 1, zend_ce_stringable);
-
-	name = zend_string_init("id", sizeof("id") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(name);
-
-	name = zend_string_init("text", sizeof("text") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(name);
-
-	name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(name);
-
-	name = zend_string_init("pos", sizeof("pos") - 1, 1);
-	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(name);
+	php_token_ce = register_class_PhpToken(zend_ce_stringable);
 
 	return SUCCESS;
 }

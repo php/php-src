@@ -356,6 +356,8 @@ class DOMDocument implements DOMParentNode
 
 final class DOMException extends Exception
 {
+    /** @var int */
+    public $code = 0;
 }
 
 class DOMText

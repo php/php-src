@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ba5e5a57404b44d2be662e9a6b5abb1a44ccfb22 */
+ * Stub hash: 474a5f2d63f94aaf68c92839bb343d74179111a7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -50,3 +50,15 @@ static const zend_function_entry class_ResourceBundle_methods[] = {
 	ZEND_ME(ResourceBundle, getIterator, arginfo_class_ResourceBundle_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ResourceBundle", class_ResourceBundle_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+
+	return class_entry;
+}
+

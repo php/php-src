@@ -66,6 +66,9 @@ function zip_entry_compressionmethod($zip_entry): string|false {}
 
 class ZipArchive
 {
+    /** @var string|null */
+    public $name;
+
     /** @return bool|int */
     public function open(string $filename, int $flags = 0) {}
 

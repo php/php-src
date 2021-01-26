@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 function xml_parser_create(?string $encoding = null): XMLParser {}
 
@@ -63,6 +66,7 @@ function xml_parser_set_option(XMLParser $parser, int $option, $value): bool {}
 
 function xml_parser_get_option(XMLParser $parser, int $option): string|int {}
 
+/** @strict-properties */
 final class XMLParser
 {
 }

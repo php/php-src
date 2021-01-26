@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d890849a08b43cb35e2cd8468aeaabfc0a7f218 */
+ * Stub hash: 17cecd2e7b3f80314e18bbd44e51b54c9ed061a7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -134,3 +134,32 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 static const zend_function_entry class_PDORow_methods[] = {
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
+
+	zval property_queryString_default_value;
+	ZVAL_NULL(&property_queryString_default_value);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_declare_property_ex(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_queryString_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_PDORow()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+

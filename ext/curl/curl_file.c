@@ -122,12 +122,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 
 void curlfile_register_class(void)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY( ce, "CURLFile", class_CURLFile_methods );
-	curl_CURLFile_class = zend_register_internal_class(&ce);
+	curl_CURLFile_class = register_class_CURLFile();
 	curl_CURLFile_class->serialize = zend_class_serialize_deny;
 	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;
-	zend_declare_property_string(curl_CURLFile_class, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(curl_CURLFile_class, "mime", sizeof("mime")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(curl_CURLFile_class, "postname", sizeof("postname")-1, "", ZEND_ACC_PUBLIC);
 }

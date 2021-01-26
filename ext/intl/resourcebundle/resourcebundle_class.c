@@ -366,14 +366,9 @@ PHP_METHOD(ResourceBundle, getIterator) {
  */
 void resourcebundle_register_class( void )
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY( ce, "ResourceBundle", class_ResourceBundle_methods );
-
-	ce.create_object = ResourceBundle_object_create;
-	ce.get_iterator = resourcebundle_get_iterator;
-
-	ResourceBundle_ce_ptr = zend_register_internal_class( &ce );
+	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
+	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;
+	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
@@ -381,7 +376,5 @@ void resourcebundle_register_class( void )
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
-
-	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_aggregate, zend_ce_countable);
 }
 /* }}} */

@@ -1,10 +1,26 @@
 <?php
 
-/** @generate-function-entries static */
+/**
+ * @generate-function-entries static
+ * @generate-class-entries
+ */
 
 namespace {
 
-class _ZendTestClass {
+interface _ZendTestInterface
+{
+}
+
+/** @alias _ZendTestClassAlias */
+class _ZendTestClass implements _ZendTestInterface {
+    /** @var mixed */
+    public static $_StaticProp;
+    public static int $staticIntProp = 123;
+
+    public int $intProp = 123;
+    public ?stdClass $classProp = null;
+    //public stdClass|Iterator|null $classUnionProp = null;
+
     public static function is_object(): int {}
 
     /** @deprecated */
@@ -13,8 +29,19 @@ class _ZendTestClass {
     public function returnsStatic(): static {}
 }
 
+class _ZendTestChildClass extends _ZendTestClass
+{
+}
+
 trait _ZendTestTrait {
+    /** @var mixed */
+    public $testProp;
+
     public function testMethod(): bool {}
+}
+
+final class ZendTestAttribute {
+
 }
 
 function zend_test_array_return(): array {}

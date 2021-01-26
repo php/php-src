@@ -303,7 +303,7 @@ PHP_MINIT_FUNCTION(pdo)
 	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
-	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
+	INIT_CLASS_ENTRY(ce, "PDOException", class_PDOException_methods);
 
 	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException);
 

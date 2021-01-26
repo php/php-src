@@ -253,11 +253,8 @@ static void php_xml_free_wrapper(void *ptr)
 
 PHP_MINIT_FUNCTION(xml)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "XMLParser", class_XMLParser_methods);
-	xml_parser_ce = zend_register_internal_class(&ce);
+	xml_parser_ce = register_class_XMLParser();
 	xml_parser_ce->create_object = xml_parser_create_object;
-	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	xml_parser_ce->serialize = zend_class_serialize_deny;
 	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 

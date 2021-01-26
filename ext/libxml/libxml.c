@@ -738,8 +738,6 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
 
 static PHP_MINIT_FUNCTION(libxml)
 {
-	zend_class_entry ce;
-
 	php_libxml_initialize();
 
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
@@ -787,35 +785,7 @@ static PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_ERROR",		XML_ERR_ERROR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL",		XML_ERR_FATAL,		CONST_CS | CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
-	libxmlerror_class_entry = zend_register_internal_class(&ce);
-
-	zval default_val;
-	zend_string *name;
-	ZVAL_UNDEF(&default_val);
-
-	name = zend_string_init("level", sizeof("level")-1, 1);
-	zend_declare_typed_property(
-		libxmlerror_class_entry, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(name);
-	zend_declare_typed_property(
-		libxmlerror_class_entry, ZSTR_KNOWN(ZEND_STR_CODE), &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	name = zend_string_init("column", sizeof("column")-1, 1);
-	zend_declare_typed_property(
-		libxmlerror_class_entry, name, &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(name);
-	zend_declare_typed_property(
-		libxmlerror_class_entry, ZSTR_KNOWN(ZEND_STR_MESSAGE), &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
-		libxmlerror_class_entry, ZSTR_KNOWN(ZEND_STR_FILE), &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_declare_typed_property(
-		libxmlerror_class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &default_val, ZEND_ACC_PUBLIC, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	libxmlerror_class_entry = register_class_LibXMLError();
 
 	if (sapi_module.name) {
 		static const char * const supported_sapis[] = {

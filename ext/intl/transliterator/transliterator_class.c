@@ -258,31 +258,16 @@ static zval *Transliterator_write_property( zend_object *object, zend_string *na
  */
 void transliterator_register_Transliterator_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Transliterator' class. */
-	INIT_CLASS_ENTRY( ce, "Transliterator", class_Transliterator_methods );
-	ce.create_object = Transliterator_object_create;
-	Transliterator_ce_ptr = zend_register_internal_class( &ce );
-	memcpy( &Transliterator_handlers, &std_object_handlers,
-		sizeof Transliterator_handlers );
+	Transliterator_ce_ptr = register_class_Transliterator();
+	Transliterator_ce_ptr->create_object = Transliterator_object_create;
+	memcpy( &Transliterator_handlers, &std_object_handlers, sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 	Transliterator_handlers.get_property_ptr_ptr = Transliterator_get_property_ptr_ptr;
 	Transliterator_handlers.read_property = Transliterator_read_property;
 	Transliterator_handlers.write_property = Transliterator_write_property;
-
-	/* Declare 'Transliterator' class properties */
-	if( !Transliterator_ce_ptr )
-	{
-		zend_error( E_ERROR,
-			"Transliterator: attempt to create properties "
-			"on a non-registered class." );
-		return;
-	}
-	zend_declare_property_null( Transliterator_ce_ptr,
-		"id", sizeof( "id" ) - 1, ZEND_ACC_PUBLIC );
 
 	/* constants are declared in transliterator_register_constants, called from MINIT */
 

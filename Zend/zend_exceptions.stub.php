@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 interface Throwable extends Stringable
 {
@@ -22,6 +25,19 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
+    /** @var string */
+    protected $message = "";
+    /** @var string */
+    private $string = "";
+    /** @var int */
+    protected $code = 0;
+    /** @var string|null */
+    protected $file = null;
+    /** @var int|null */
+    protected $line = null;
+    private array $trace = [];
+    private ?Throwable $previous = null;
+
     final private function __clone(): void {}
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
@@ -49,13 +65,36 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = null, ?int $line = null, ?Throwable $previous = null) {}
+    /** @var int */
+    protected $severity = E_ERROR;
+
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        int $severity = E_ERROR,
+        ?string $filename = null,
+        ?int $line = null,
+        ?Throwable $previous = null
+    ) {}
 
     final public function getSeverity(): int {}
 }
 
 class Error implements Throwable
 {
+    /** @var string */
+    protected $message = "";
+    /** @var string */
+    private $string = "";
+    /** @var int */
+    protected $code = 0;
+    /** @var string|null */
+    protected $file = null;
+    /** @var int|null */
+    protected $line = null;
+    private array $trace = [];
+    private ?Throwable $previous = null;
+
     /** @implementation-alias Exception::__clone */
     final private function __clone(): void {}
 
@@ -121,5 +160,9 @@ class ArithmeticError extends Error
 }
 
 class DivisionByZeroError extends ArithmeticError
+{
+}
+
+class UnhandledMatchError extends Error
 {
 }

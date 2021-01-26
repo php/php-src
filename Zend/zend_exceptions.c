@@ -53,14 +53,21 @@ static zend_object_handlers default_exception_handlers;
 /* {{{ zend_implement_throwable */
 static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	if (instanceof_function(class_type, zend_ce_exception) || instanceof_function(class_type, zend_ce_error)) {
+	/* zend_ce_exception and zend_ce_error may not be initialized yet when this is caleld (e.g when
+	 * implementing Throwable for Exception itself). Perform a manual inheritance check. */
+	zend_class_entry *root = class_type;
+	while (root->parent) {
+		root = root->parent;
+	}
+	if (zend_string_equals_literal(root->name, "Exception")
+			|| zend_string_equals_literal(root->name, "Error")) {
 		return SUCCESS;
 	}
-	zend_error_noreturn(E_ERROR, "Class %s cannot implement interface %s, extend %s or %s instead",
+
+	zend_error_noreturn(E_ERROR,
+		"Class %s cannot implement interface %s, extend Exception or Error instead",
 		ZSTR_VAL(class_type->name),
-		ZSTR_VAL(interface->name),
-		ZSTR_VAL(zend_ce_exception->name),
-		ZSTR_VAL(zend_ce_error->name));
+		ZSTR_VAL(interface->name));
 	return FAILURE;
 }
 /* }}} */
@@ -740,87 +747,50 @@ ZEND_METHOD(Exception, __toString)
 }
 /* }}} */
 
-static void declare_exception_properties(zend_class_entry *ce)
-{
-	zval val;
-
-	zend_declare_property_string(ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
-	zend_declare_property_string(ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
-	zend_declare_property_long(ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(ce, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
-	zend_declare_property_null(ce, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
-
-	ZVAL_EMPTY_ARRAY(&val);
-	zend_declare_typed_property(
-		ce, ZSTR_KNOWN(ZEND_STR_TRACE), &val, ZEND_ACC_PRIVATE, NULL,
-		(zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-
-	ZVAL_NULL(&val);
-	zend_declare_typed_property(
-		ce, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &val, ZEND_ACC_PRIVATE, NULL,
-		(zend_type) ZEND_TYPE_INIT_CE(zend_ce_throwable, /* allow_null */ 1, 0));
-}
-
 void zend_register_default_exception(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
-	zend_class_implements(zend_ce_throwable, 1, zend_ce_stringable);
+	zend_ce_throwable = register_class_Throwable(zend_ce_stringable);
+	zend_ce_throwable->interface_gets_implemented = zend_implement_throwable;
 
 	memcpy(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "Exception", class_Exception_methods);
-	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
+	zend_ce_exception = register_class_Exception(zend_ce_throwable);
 	zend_ce_exception->create_object = zend_default_exception_new;
-	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
-	declare_exception_properties(zend_ce_exception);
 
-	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
-	zend_ce_error_exception = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	zend_ce_error_exception = register_class_ErrorException(zend_ce_exception);
 	zend_ce_error_exception->create_object = zend_error_exception_new;
+	/* Declared manually because it uses constant E_ERROR. */
 	zend_declare_property_long(zend_ce_error_exception, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED);
 
-	INIT_CLASS_ENTRY(ce, "Error", class_Error_methods);
-	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
+	zend_ce_error = register_class_Error(zend_ce_throwable);
 	zend_ce_error->create_object = zend_default_exception_new;
-	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
-	declare_exception_properties(zend_ce_error);
 
-	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
-	zend_ce_compile_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_compile_error = register_class_CompileError(zend_ce_error);
 	zend_ce_compile_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ParseError", class_ParseError_methods);
-	zend_ce_parse_error = zend_register_internal_class_ex(&ce, zend_ce_compile_error);
+	zend_ce_parse_error = register_class_ParseError(zend_ce_compile_error);
 	zend_ce_parse_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "TypeError", class_TypeError_methods);
-	zend_ce_type_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_type_error = register_class_TypeError(zend_ce_error);
 	zend_ce_type_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ArgumentCountError", class_ArgumentCountError_methods);
-	zend_ce_argument_count_error = zend_register_internal_class_ex(&ce, zend_ce_type_error);
+	zend_ce_argument_count_error = register_class_ArgumentCountError(zend_ce_type_error);
 	zend_ce_argument_count_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ValueError", class_ValueError_methods);
-	zend_ce_value_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_value_error = register_class_ValueError(zend_ce_error);
 	zend_ce_value_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ArithmeticError", class_ArithmeticError_methods);
-	zend_ce_arithmetic_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_arithmetic_error = register_class_ArithmeticError(zend_ce_error);
 	zend_ce_arithmetic_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
-	zend_ce_division_by_zero_error = zend_register_internal_class_ex(&ce, zend_ce_arithmetic_error);
+	zend_ce_division_by_zero_error = register_class_DivisionByZeroError(zend_ce_arithmetic_error);
 	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
-
-	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", NULL);
-	zend_ce_unhandled_match_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_unhandled_match_error = register_class_UnhandledMatchError(zend_ce_error);
 	zend_ce_unhandled_match_error->create_object = zend_default_exception_new;
+
+	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 }
 /* }}} */
 
