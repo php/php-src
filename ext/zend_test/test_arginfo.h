@@ -184,7 +184,7 @@ zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__Z
 	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_intProp_name);
 
-	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass"), 1);
+	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass")-1, 1);
 	zval property_classProp_default_value;
 	ZVAL_NULL(&property_classProp_default_value);
 	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);

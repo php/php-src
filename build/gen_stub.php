@@ -1049,7 +1049,7 @@ class PropertyInfo
                 $simpleType = $this->type->tryToSimpleType();
 
                 $className = $arginfoType->classTypes[0]->name;
-                $code .= "	zend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\"), 1);\n";
+                $code .= "	zend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
                 if ($simpleType) {
                     $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, " .  ((int) $this->type->isNullable()) . ", 0)";
                 } elseif (count($arginfoType->classTypes) === 1) {
