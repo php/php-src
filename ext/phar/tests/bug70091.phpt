@@ -40,7 +40,7 @@ array(2) {
   ["sig"]=>
   string(8) "504b0304"
   ["flags"]=>
-  int(0)
+  int(8)
 }
 array(2) {
   ["sig"]=>
@@ -52,7 +52,7 @@ array(2) {
   ["sig"]=>
   string(8) "504b0102"
   ["flags"]=>
-  int(0)
+  int(8)
 }
 --CLEAN--
 <?php
