@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #75850 (Unclear error message wrt. __halt_compiler() w/o
     semicolon) (cmb)
+  . Fixed bug #70091 (Phar does not mark UTF-8 filenames in ZIP archives). (cmb)
 
 - Zip:
   . Fixed bug #80648 (Fix for bug 79296 should be based on runtime version).
