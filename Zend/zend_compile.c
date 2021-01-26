@@ -1196,13 +1196,23 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			if (ZEND_TYPE_HAS_CE(*list_type)) {
 				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name);
 			} else {
-				zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
-				str = add_type_string(str, resolved);
-				zend_string_release(resolved);
+				if (ZEND_TYPE_HAS_CE_CACHE(*list_type)
+				 && ZEND_TYPE_CE_CACHE(*list_type)) {
+					str = add_type_string(str, ZEND_TYPE_CE_CACHE(*list_type)->name);
+				} else {
+					zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
+					str = add_type_string(str, resolved);
+					zend_string_release(resolved);
+				}
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		if (ZEND_TYPE_HAS_CE_CACHE(type)
+		 && ZEND_TYPE_CE_CACHE(type)) {
+			str = zend_string_copy(ZEND_TYPE_CE_CACHE(type)->name);
+		} else {
+			str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		}
 	} else if (ZEND_TYPE_HAS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
 	}
