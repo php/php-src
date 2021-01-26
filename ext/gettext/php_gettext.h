@@ -47,6 +47,17 @@ PHP_NAMED_FUNCTION(zif_dcngettext);
 PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset);
 #endif
 
+ZEND_BEGIN_MODULE_GLOBALS(php_gettext)
+	HashTable *dirs;
+ZEND_END_MODULE_GLOBALS(php_gettext)
+
+#if defined(ZTS) && defined(COMPILE_DL_GETTEXT)
+ZEND_TSRMLS_CACHE_EXTERN()
+#endif
+
+ZEND_EXTERN_MODULE_GLOBALS(php_gettext)
+#define PHPGETTEXTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(php_gettext, v)
+
 #else
 #define gettext_module_ptr NULL
 #endif /* HAVE_LIBINTL */

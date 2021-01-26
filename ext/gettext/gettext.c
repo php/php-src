@@ -28,6 +28,11 @@
 #include "ext/standard/info.h"
 #include "php_gettext.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(php_gettext)
+static PHP_GINIT_FUNCTION(php_gettext);
+static PHP_MINIT_FUNCTION(php_gettext);
+static PHP_RINIT_FUNCTION(php_gettext);
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_textdomain, 0)
 	ZEND_ARG_INFO(0, domain)
@@ -114,24 +119,64 @@ static const zend_function_entry php_gettext_functions[] = {
 };
 /* }}} */
 
-#include <libintl.h>
-
 zend_module_entry php_gettext_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"gettext",
 	php_gettext_functions,
+	PHP_MINIT(php_gettext),
 	NULL,
-	NULL,
-	NULL,
+	PHP_RINIT(php_gettext),
 	NULL,
 	PHP_MINFO(php_gettext),
 	PHP_GETTEXT_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(php_gettext),
+	PHP_GINIT(php_gettext),
+    NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_GETTEXT
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(php_gettext)
 #endif
+
+static PHP_GINIT_FUNCTION(php_gettext)
+{
+#if defined(COMPILE_DL_GETTEXT) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	php_gettext_globals->dirs = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(php_gettext_globals->dirs, 0, NULL, NULL, 1);
+}
+
+static char *php_textdomain;
+
+#include <libintl.h>
+
+PHP_MINIT_FUNCTION(php_gettext)
+{
+	php_textdomain = textdomain(NULL);
+
+	return SUCCESS;
+}
+
+PHP_RINIT_FUNCTION(php_gettext)
+{
+	zend_string *domain;
+	zval *dir;
+
+	textdomain(php_textdomain);
+
+	ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(PHPGETTEXTG(dirs), domain, dir) {
+		ZEND_ASSERT(Z_TYPE_P(dir) == IS_STRING);
+		bindtextdomain(ZSTR_VAL(domain), Z_STRVAL_P(dir));
+	} ZEND_HASH_FOREACH_END_DEL();
+
+	return SUCCESS;
+}
 
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
@@ -255,11 +300,11 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
    Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
 PHP_NAMED_FUNCTION(zif_bindtextdomain)
 {
-	char *domain, *dir;
+	char *domain, *dir = NULL;
 	size_t domain_len, dir_len;
 	char *retval, dir_name[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss!", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -270,12 +315,24 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 		RETURN_FALSE;
 	}
 
+       if (dir == NULL) {
+               RETURN_STRING(bindtextdomain(domain, NULL));
+       }
+
 	if (dir[0] != '\0' && strcmp(dir, "0")) {
 		if (!VCWD_REALPATH(dir, dir_name)) {
 			RETURN_FALSE;
 		}
 	} else if (!VCWD_GETCWD(dir_name, MAXPATHLEN)) {
 		RETURN_FALSE;
+	}
+
+	if (!zend_hash_str_exists(PHPGETTEXTG(dirs), domain, strlen(domain))) {
+		zval zorig;
+		char *orig = bindtextdomain(domain, NULL);
+		ZEND_ASSERT(orig != NULL);
+		ZVAL_PSTRING(&zorig, orig);
+		zend_hash_str_add(PHPGETTEXTG(dirs), domain, strlen(domain), &zorig);
 	}
 
 	retval = bindtextdomain(domain, dir_name);
