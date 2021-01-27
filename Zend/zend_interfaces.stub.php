@@ -52,7 +52,7 @@ interface Serializable
     public function serialize();
 
     /** @return void */
-    public function unserialize(?string $data);
+    public function unserialize(string $data);
 }
 
 interface Countable
