@@ -506,13 +506,15 @@ echo "Done";
   string(16) "some_page_ref123"
 }
 
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(6) {
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
-  string(26) "secret@hideout@www.php.net"
+  string(11) "www.php.net"
   ["port"]=>
   int(80)
+  ["user"]=>
+  string(14) "secret@hideout"
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
