@@ -149,10 +149,10 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	MYSQLND_INFILE		infile;
 	MYSQLND_PFC			* net = conn->protocol_frame_codec;
 	MYSQLND_VIO			* vio = conn->vio;
-	int					is_local_infile_enabled = (conn->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES;
+	bool				is_local_infile_enabled = (conn->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES;
 	const char*			local_infile_directory = conn->options->local_infile_directory;
-	int					is_local_infile_dir_set = local_infile_directory && local_infile_directory[0];
-	int					prerequisities_ok = TRUE;
+	bool				is_local_infile_dir_set = local_infile_directory != NULL;
+	bool				prerequisities_ok = TRUE;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
@@ -160,12 +160,24 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 		if local_infile is disabled, and local_infile_dir is not set, then operation is forbidden
 	*/
 	if (!is_local_infile_enabled && !is_local_infile_dir_set) {
-		php_error_docref(NULL, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
 						"LOAD DATA LOCAL INFILE is forbidden, check related settings like "
-						"mysqli.allow_local_infile|local_infile_directory or "
-						"PDO::MYSQL_ATTR_LOCAL_INFILE|MYSQL_ATTR_LOCAL_INFILE_DIRECTORY");
+						"mysqli.allow_local_infile|mysqli.local_infile_directory or "
+						"PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY");
 		prerequisities_ok = FALSE;
+	}
+
+	/*
+		if local_infile_dir is set, then check whether it actually exists, and is accessible
+	*/
+	if (is_local_infile_dir_set) {
+		php_stream *stream = php_stream_opendir(local_infile_directory, REPORT_ERRORS, NULL);
+		if (stream) {
+			php_stream_closedir(stream);
+		} else {
+			SET_CLIENT_ERROR(conn->error_info, CR_CANT_OPEN_DIR, UNKNOWN_SQLSTATE, "cannot open local_infile_directory");
+			prerequisities_ok = FALSE;
+		}
 	}
 
 	/*
@@ -173,9 +185,8 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 		filename is located inside its subtree
 		but only in such a case, because when local_infile is enabled, then local_infile_dir is ignored
 	*/
-	if (!is_local_infile_enabled && is_local_infile_dir_set) {
+	if (prerequisities_ok && !is_local_infile_enabled && is_local_infile_dir_set) {
 		if (php_check_specific_open_basedir(local_infile_directory, filename) == -1) {
-			php_error_docref(NULL, E_WARNING, "LOAD DATA LOCAL INFILE DIRECTORY restriction in effect");
 			SET_CLIENT_ERROR(conn->error_info, CR_CANT_OPEN_DIR, UNKNOWN_SQLSTATE,
 							"LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file");
 			prerequisities_ok = FALSE;

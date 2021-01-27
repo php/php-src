@@ -61,6 +61,5 @@ if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
 $link->close();
 ?>
 --EXPECTF--
-Warning: mysqli::query(): LOAD DATA LOCAL INFILE DIRECTORY restriction in effect in %s on line %d
 [004] [2036] LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file
 done

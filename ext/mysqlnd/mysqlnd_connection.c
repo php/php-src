@@ -1654,22 +1654,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
 		{
+			if (conn->options->local_infile_directory) {
+				mnd_pefree(conn->options->local_infile_directory, conn->persistent);
+			}
+
 			if (!value || (*value == '\0')) {
 				conn->options->local_infile_directory = NULL;
-				break;
-			}
-
-			php_stream *stream = php_stream_opendir(value, REPORT_ERRORS, NULL);
-			if (!stream) {
-				SET_CLIENT_ERROR(conn->error_info, CR_CANT_OPEN_DIR, UNKNOWN_SQLSTATE, "Cannot open directory");
-				ret = FAIL;
-				break;
-			}
-			php_stream_closedir(stream);
-
-			conn->options->local_infile_directory = mnd_pestrdup(value, conn->persistent);
-			if (!conn->options->local_infile_directory) {
-				ret = FAIL;
+			} else {
+				conn->options->local_infile_directory = mnd_pestrdup(value, conn->persistent);
 			}
 			break;
 		}

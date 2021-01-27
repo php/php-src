@@ -27,6 +27,21 @@ mysqli.local_infile_directory={PWD}/../
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 
+	if (!$link->query("DROP TABLE IF EXISTS test")) {
+		printf("[002] [%d] %s\n", $link->errno, $link->error);
+	}
+
+	if (!$link->query("CREATE TABLE test (id INT UNSIGNED NOT NULL PRIMARY KEY) ENGINE=" . $engine)) {
+		printf("[003] [%d] %s\n", $link->errno, $link->error);
+	}
+
+	$filepath = str_replace('\\', '/', __DIR__.'/foo/foo.data');
+	if (!$link->query("LOAD DATA LOCAL INFILE '".$filepath."' INTO TABLE test")) {
+		printf("[004] [%d] %s\n", $link->errno, $link->error);
+	} else {
+		printf("[005] bug! should not happen - operation not permitted expected\n");
+	}
+
 	echo "done";
 ?>
 --CLEAN--
@@ -45,7 +60,8 @@ if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
 $link->close();
 ?>
 --EXPECTF--
-Warning: mysqli_connect(): open_basedir restriction in effect. File(%s) in %s
+Warning: mysqli::query(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s) in %s
 
-Warning: mysqli_connect(%s): Failed to open directory: Operation not permitted in %s
+Warning: mysqli::query(%s): Failed to open directory: Operation not permitted in %s
+[004] [2036] cannot open local_infile_directory
 done
