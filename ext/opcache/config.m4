@@ -315,7 +315,6 @@ int main() {
 	$ZEND_JIT_SRC,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
-  PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
   if test "$have_shm_ipc" != "yes" && test "$have_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
