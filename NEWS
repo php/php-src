@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     semicolon) (cmb)
   . Fixed bug #70091 (Phar does not mark UTF-8 filenames in ZIP archives). (cmb)
 
+- Standard:
+  . Fixed bug #80654 (file_get_contents() maxlen fails above (2**31)-1 bytes).
+    (cmb)
+
 - Zip:
   . Fixed bug #80648 (Fix for bug 79296 should be based on runtime version).
     (cmb, Remi)
