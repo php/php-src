@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 60259c3fefaf8ba8ac22bf80147c3525387ec763 */
+ * Stub hash: b34401e98646f1e85a8dd292477cac68c6e4ac97 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -659,5 +659,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sodium_base642bin, arginfo_sodium_base642bin)
 #endif
 	ZEND_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_scalarmult_base)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SodiumException_methods[] = {
 	ZEND_FE_END
 };
