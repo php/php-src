@@ -186,3 +186,5 @@ function sodium_base642bin(string $string, int $id, string $ignore  = ""): strin
 
 /** @alias sodium_crypto_box_publickey_from_secretkey */
 function sodium_crypto_scalarmult_base(string $secret_key): string {}
+
+class SodiumException extends Exception {}
