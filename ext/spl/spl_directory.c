@@ -458,8 +458,6 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 
 	ce = ce ? ce : source->info_class;
 
-	zend_update_class_constants(ce);
-
 	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 	RETVAL_OBJ(&intern->std);
 
@@ -497,10 +495,6 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		case SPL_FS_INFO:
 			ce = ce ? ce : source->info_class;
 
-			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-				return NULL;
-			}
-
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 			RETVAL_OBJ(&intern->std);
 
@@ -522,10 +516,6 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		case SPL_FS_FILE:
 		{
 			ce = ce ? ce : source->file_class;
-
-			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-				return NULL;
-			}
 
 			char *open_mode = "r";
 			size_t open_mode_len = 1;
