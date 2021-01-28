@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #80634 (write_property handler of internal classes is skipped on
     preloaded JITted code). (Dmitry)
+  . Fixed bug #80682 (opcache doesn't honour pcre.jit option). (Remi)
+
 
 - Phar:
   . Fixed bug #75850 (Unclear error message wrt. __halt_compiler() w/o
