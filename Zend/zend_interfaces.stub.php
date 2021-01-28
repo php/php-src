@@ -48,7 +48,7 @@ interface ArrayAccess
 
 interface Serializable
 {
-    /** @return string */
+    /** @return string|null */
     public function serialize();
 
     /** @return void */
