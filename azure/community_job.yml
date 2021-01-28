@@ -50,7 +50,7 @@ jobs:
     - script: |
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
         cd framework
-        php7.3 /usr/bin/composer install --no-progress
+        php7.4 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         # Avoid test using exit(), which thus leaks.
@@ -61,8 +61,8 @@ jobs:
     - script: |
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
-        php7.3 /usr/bin/composer install --no-progress
-        php7.3 ./phpunit install
+        php7.4 /usr/bin/composer install --no-progress
+        php7.4 ./phpunit install
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
@@ -82,7 +82,7 @@ jobs:
       displayName: 'Test Amphp'
       condition: or(succeeded(), failed())
     - script: |
-        php7.3 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
+        php7.4 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
