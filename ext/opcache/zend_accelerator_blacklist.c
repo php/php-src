@@ -185,10 +185,12 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 				return;
 			}
 #ifdef HAVE_PCRE_JIT_SUPPORT
-			if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
-				/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
-				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
-				zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+			if (PCRE_G(jit)) {
+				if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
+					/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
+					pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
+					zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+				}
 			}
 #endif
 			/* prepare for the next iteration */
