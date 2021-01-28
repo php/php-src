@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 7.4.16
 
+- OPcache:
+  . Fixed bug #80682 (opcache doesn't honour pcre.jit option). (Remi)
+
 - Phar:
   . Fixed bug #75850 (Unclear error message wrt. __halt_compiler() w/o
     semicolon) (cmb)
