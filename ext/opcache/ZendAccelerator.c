@@ -3667,11 +3667,6 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 			*name = ZSTR_VAL(ce->parent_name);
 			return;
 		}
-		if (!(p->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			*kind = "Parent with unresolved property types ";
-			*name = ZSTR_VAL(ce->parent_name);
-			return;
-		}
 	}
 
 	if (ce->num_interfaces) {
@@ -3770,9 +3765,6 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class
 		return ce;
 	}
 	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		return NULL;
-	}
-	if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
 		return NULL;
 	}
 	return ce;
@@ -3928,9 +3920,6 @@ static void preload_link(void)
 					if (!(parent->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 						continue;
 					}
-					if (!(parent->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-						continue;
-					}
 				}
 
 				if (ce->num_interfaces) {
@@ -4050,11 +4039,6 @@ static void preload_link(void)
 				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
 				"Can't preload class %s with unresolved initializer for %s%s",
 				ZSTR_VAL(ce->name), kind, name);
-		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			zend_error_at(
-				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
-				"Can't preload class %s with unresolved property types",
-				ZSTR_VAL(ce->name));
 		} else {
 			continue;
 		}
