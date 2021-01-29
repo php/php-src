@@ -117,6 +117,7 @@ typedef struct _php_stream_ops  {
 	ssize_t (*read)(php_stream *stream, char *buf, size_t count);
 	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
+	int    (*sync)(php_stream *stream);
 
 	const char *label; /* label for this ops structure */
 
@@ -335,6 +336,9 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c);
 
 PHPAPI int _php_stream_flush(php_stream *stream, int closing);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0)
+
+PHPAPI int _php_stream_sync(php_stream *stream);
+#define php_stream_sync(stream)	        _php_stream_sync((stream))
 
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL)

@@ -1170,6 +1170,26 @@ PHPAPI PHP_FUNCTION(fwrite)
 }
 /* }}} */
 
+PHPAPI PHP_FUNCTION(fsync)
+{
+	zval *res;
+	int ret;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	ret = php_stream_sync(stream);
+	if (ret) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+
+}
+
 /* {{{ Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {

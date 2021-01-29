@@ -1224,6 +1224,15 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 	return consumed;
 }
 
+PHPAPI int _php_stream_sync(php_stream *stream)
+{
+	int ret = 0;
+	if (stream->ops->sync) {
+		ret = stream->ops->sync(stream);
+	}
+	return ret;
+}
+
 PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 {
 	int ret = 0;
