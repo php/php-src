@@ -117,7 +117,6 @@ typedef struct _php_stream_ops  {
 	ssize_t (*read)(php_stream *stream, char *buf, size_t count);
 	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
-	int    (*sync)(php_stream *stream);
 
 	const char *label; /* label for this ops structure */
 
@@ -126,6 +125,7 @@ typedef struct _php_stream_ops  {
 	int (*cast)(php_stream *stream, int castas, void **ret);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam);
+        int (*sync)(php_stream *stream);
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {
