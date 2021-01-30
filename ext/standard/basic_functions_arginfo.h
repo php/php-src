@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7540039937587f05584660bc1a1a8a80aa5ccbd1 */
+ * Stub hash: 10b34c3c2fc59b9b7d635c69604b4c3d5fd7b19b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1268,6 +1268,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftell, 0, 1, MAY_BE_LONG|MAY_BE_
 ZEND_END_ARG_INFO()
 
 #define arginfo_fflush arginfo_rewind
+
+#define arginfo_fsync arginfo_rewind
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fwrite, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream)
@@ -2560,6 +2562,7 @@ ZEND_FUNCTION(fstat);
 ZEND_FUNCTION(fseek);
 ZEND_FUNCTION(ftell);
 ZEND_FUNCTION(fflush);
+ZEND_FUNCTION(fsync);
 ZEND_FUNCTION(fwrite);
 ZEND_FUNCTION(mkdir);
 ZEND_FUNCTION(rename);
@@ -3197,6 +3200,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fseek, arginfo_fseek)
 	ZEND_FE(ftell, arginfo_ftell)
 	ZEND_FE(fflush, arginfo_fflush)
+	ZEND_FE(fsync, arginfo_fsync)
 	ZEND_FE(fwrite, arginfo_fwrite)
 	ZEND_FALIAS(fputs, fwrite, arginfo_fputs)
 	ZEND_FE(mkdir, arginfo_mkdir)
