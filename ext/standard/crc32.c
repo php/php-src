@@ -43,6 +43,7 @@ static inline int has_crc32_insn() {
 	size_t reslen = sizeof(res);
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
+	return res;
 # else
 	res = 0;
 	return res;
