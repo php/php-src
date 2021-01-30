@@ -46,7 +46,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fsync_basic.tmp";
 unlink($filename);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fsync(): writing to a file and reading the contents ***
 int(63)
 bool(true)
@@ -58,7 +58,7 @@ third line of stringint(63)
 bool(true)
 
 *** Testing fsync(): for non-file stream ***
-Warning: fsync(): Can't fsync this stream!
+Warning: fsync(): Can't fsync this stream! in %s on line %d
 bool(false)
 
 *** Done ***
