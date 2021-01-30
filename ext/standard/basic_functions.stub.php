@@ -824,6 +824,9 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
+function fsync($stream): bool {}
+
+/** @param resource $stream */
 function fwrite($stream, string $data, ?int $length = null): int|false {}
 
 /**

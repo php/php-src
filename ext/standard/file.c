@@ -1170,26 +1170,6 @@ PHPAPI PHP_FUNCTION(fwrite)
 }
 /* }}} */
 
-PHPAPI PHP_FUNCTION(fsync)
-{
-	zval *res;
-	int ret;
-	php_stream *stream;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END();
-
-	PHP_STREAM_TO_ZVAL(stream, res);
-
-	ret = php_stream_sync(stream);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-
-}
-
 /* {{{ Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
@@ -1486,6 +1466,34 @@ PHP_FUNCTION(unlink)
 	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
 }
 /* }}} */
+
+/* {{{ Sync file to storage. Similar to fflush() but blocks until OS buffers have flushed. */
+PHP_FUNCTION(fsync)
+{
+	zval *res;
+	int ret;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	ret = php_stream_sync(stream);
+	if (ret) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+
+}
+/* }}} */
+
 
 /* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)

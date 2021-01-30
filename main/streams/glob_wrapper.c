@@ -190,8 +190,7 @@ const php_stream_ops  php_glob_stream_ops = {
 	php_glob_stream_rewind,
 	NULL, /* cast */
 	NULL, /* stat */
-	NULL,  /* set_option */
-	NULL
+	NULL  /* set_option */
 };
 
  /* {{{ php_glob_stream_opener */

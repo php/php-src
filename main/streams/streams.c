@@ -1224,15 +1224,6 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 	return consumed;
 }
 
-PHPAPI int _php_stream_sync(php_stream *stream)
-{
-	int ret = 0;
-	if (stream->ops->sync) {
-		ret = stream->ops->sync(stream);
-	}
-	return ret;
-}
-
 PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 {
 	int ret = 0;
@@ -1413,6 +1404,11 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	}
 
 	return ret;
+}
+
+PHPAPI int _php_stream_sync(php_stream *stream)
+{
+	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_FSYNC, NULL);
 }
 
 PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)

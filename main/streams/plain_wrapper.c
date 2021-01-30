@@ -520,7 +520,6 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 	return ret;
 }
 
-//dwg
 static int php_stdiop_sync(php_stream *stream)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
@@ -534,7 +533,7 @@ static int php_stdiop_sync(php_stream *stream)
 		    return fsync(fileno(data->file));
 		}
 	}
-	return ret;	
+	return ret;
 }
 
 static int php_stdiop_flush(php_stream *stream)
@@ -902,6 +901,14 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
+		case PHP_STREAM_OPTION_SYNC_API:
+			switch (value) {
+				case PHP_STREAM_SYNC_SUPPORTED:
+					return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
+				case PHP_STREAM_SYNC_FSYNC:
+				    return php_stdiop_sync(stream) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+			}
+
 		case PHP_STREAM_OPTION_TRUNCATE_API:
 			switch (value) {
 				case PHP_STREAM_TRUNCATE_SUPPORTED:
@@ -979,8 +986,7 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_seek,
 	php_stdiop_cast,
 	php_stdiop_stat,
-	php_stdiop_set_option,
-	php_stdiop_sync,
+	php_stdiop_set_option
 };
 /* }}} */
 
