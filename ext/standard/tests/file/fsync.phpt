@@ -58,6 +58,7 @@ third line of stringint(63)
 bool(true)
 
 *** Testing fsync(): for non-file stream ***
+
 Warning: fsync(): Can't fsync this stream! in %s on line %d
 bool(false)
 
