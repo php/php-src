@@ -2053,6 +2053,72 @@ skip_frame:
 }
 /* }}} */
 
+static zend_long zend_compute_debug_backtrace_depth(zend_long limit) /* {{{ */
+{
+	/** Based on zend_fetch_debug_backtrace() - the goal is to return the same value as count(debug_backtrace()) */
+	zend_execute_data *ptr, *skip, *call = NULL;
+	int frameno = 0;
+
+	if (!(ptr = EG(current_execute_data))) {
+		return 0;
+	}
+
+	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
+		call = ptr;
+		ptr = ptr->prev_execute_data;
+	}
+
+	if (ptr) {
+		/* skip debug_backtrace_depth() */
+		call = ptr;
+		ptr = ptr->prev_execute_data;
+	}
+
+	while (ptr && (limit == 0 || frameno < limit)) {
+		ptr = zend_generator_check_placeholder_frame(ptr);
+
+		skip = ptr;
+		/* skip internal handler */
+		if (skip_internal_handler(skip)) {
+			skip = skip->prev_execute_data;
+		}
+
+		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
+			goto next_frame;
+		}
+
+		if (call && call->func) {
+			/* next frame */
+		} else {
+			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
+			uint32_t include_kind = 0;
+			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = ptr->opline->extended_value;
+			}
+
+			switch (include_kind) {
+				case ZEND_EVAL:
+				case ZEND_INCLUDE:
+				case ZEND_REQUIRE:
+				case ZEND_INCLUDE_ONCE:
+				case ZEND_REQUIRE_ONCE:
+					break;
+				default:
+					/* Skip dummy frame unless it is needed to preserve filename/lineno info. */
+					goto skip_frame;
+					break;
+			}
+		}
+next_frame:
+		frameno++;
+skip_frame:
+		call = skip;
+		ptr = skip->prev_execute_data;
+	}
+	return frameno;
+}
+/* }}} */
+
 /* {{{ Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
@@ -2064,6 +2130,19 @@ ZEND_FUNCTION(debug_backtrace)
 	}
 
 	zend_fetch_debug_backtrace(return_value, 1, options, limit);
+}
+/* }}} */
+
+/* {{{ Return depth of backtrace as an integer. Stops counting if the optional limit is reached. */
+ZEND_FUNCTION(debug_backtrace_depth)
+{
+	zend_long limit = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &limit) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_LONG(zend_compute_debug_backtrace_depth(limit > 0 ? limit : ZEND_LONG_MAX));
 }
 /* }}} */
 

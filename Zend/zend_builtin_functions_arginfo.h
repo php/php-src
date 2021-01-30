@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 429fc9b22054348101d0b9d6746494e52dc04edf */
+ * Stub hash: b11c04588aee5fc1d64cc34750987ce987befe98 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -185,6 +185,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_debug_print_backtrace, 0, 0, IS_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_debug_backtrace_depth, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, limit, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_extension_loaded, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, extension, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -258,6 +262,7 @@ ZEND_FUNCTION(get_loaded_extensions);
 ZEND_FUNCTION(get_defined_constants);
 ZEND_FUNCTION(debug_backtrace);
 ZEND_FUNCTION(debug_print_backtrace);
+ZEND_FUNCTION(debug_backtrace_depth);
 ZEND_FUNCTION(extension_loaded);
 ZEND_FUNCTION(get_extension_funcs);
 #if ZEND_DEBUG && defined(ZTS)
@@ -320,6 +325,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_defined_constants, arginfo_get_defined_constants)
 	ZEND_FE(debug_backtrace, arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, arginfo_debug_print_backtrace)
+	ZEND_FE(debug_backtrace_depth, arginfo_debug_backtrace_depth)
 	ZEND_FE(extension_loaded, arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs, arginfo_get_extension_funcs)
 #if ZEND_DEBUG && defined(ZTS)
