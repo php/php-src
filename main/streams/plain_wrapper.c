@@ -529,7 +529,7 @@ static int php_stdiop_sync(php_stream *stream)
 
 	if (data->file) {
 		ret = fflush(data->file);
-		if (ret != 0) {
+		if (ret == 0) {
 		    return fsync(fileno(data->file));
 		}
 	}
