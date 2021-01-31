@@ -20,6 +20,7 @@
 #include "php.h"
 #include "php_spl.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/json/php_json.h"
 
 extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
 extern PHPAPI zend_class_entry *spl_ce_CachingIterator;
