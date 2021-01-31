@@ -31,6 +31,15 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
+#ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
+# define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
+#endif
+
+struct {
+	zend_optimizer_pass_t pass[ZEND_OPTIMIZER_MAX_REGISTERED_PASSES];
+	int last;
+} zend_optimizer_registered_passes = {{NULL}, 0};
+
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
 	zval_ptr_dtor_nogc(zvalue);
@@ -1402,6 +1411,16 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 }
 
+static void zend_optimizer_call_registered_passes(zend_script *script, void *ctx) {
+	for (int i = 0; i < zend_optimizer_registered_passes.last; i++) {
+		if (!zend_optimizer_registered_passes.pass[i]) {
+			continue;
+		}
+
+		zend_optimizer_registered_passes.pass[i](script, ctx);
+	}
+}
+
 ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	zend_class_entry *ce;
@@ -1541,6 +1560,8 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
+	zend_optimizer_call_registered_passes(script, &ctx);
+
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 			(ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_foreach_op_array(script, step_dump_after_optimizer, NULL);
@@ -1552,6 +1573,27 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	zend_arena_destroy(ctx.arena);
 
 	return 1;
+}
+
+ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass)
+{
+	if (!pass) {
+		return -1;
+	}
+
+	if (zend_optimizer_registered_passes.last == ZEND_OPTIMIZER_MAX_REGISTERED_PASSES) {
+		return -1;	
+	}
+
+	zend_optimizer_registered_passes.pass[
+		zend_optimizer_registered_passes.last++] = pass;
+
+	return zend_optimizer_registered_passes.last;
+}
+
+ZEND_API void zend_optimizer_unregister_pass(int idx)
+{
+	zend_optimizer_registered_passes.pass[idx-1] = NULL;
 }
 
 int zend_optimizer_startup(void)

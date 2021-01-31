@@ -28,6 +28,7 @@
 #include "zend_observer.h"
 #include "zend_smart_str.h"
 #include "zend_fibers.h"
+#include "Zend/Optimizer/zend_optimizer.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
@@ -43,6 +44,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_nesting_depth;
 	int observer_fiber_switch;
 	int replace_zend_execute_ex;
+	int register_passes;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -84,6 +86,16 @@ static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static void pass1(zend_script *script, void *context)
+{
+	php_printf("pass1\n");
+}
+
+static void pass2(zend_script *script, void *context)
+{
+	php_printf("pass2\n");
 }
 
 static ZEND_FUNCTION(zend_test_deprecated)
@@ -365,6 +377,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("zend_test.observer.show_opcode_in_user_handler", "", PHP_INI_SYSTEM, OnUpdateString, observer_show_opcode_in_user_handler, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_switch", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_switch, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
@@ -501,6 +514,11 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_observer_fiber_switch_register(fiber_address_observer);
 		zend_observer_fiber_switch_register(fiber_enter_observer);
 		zend_observer_fiber_switch_register(fiber_suspend_observer);
+	}
+
+	if (ZT_G(register_passes)) {
+		zend_optimizer_register_pass(pass1);
+		zend_optimizer_register_pass(pass2);
 	}
 
 	return SUCCESS;
