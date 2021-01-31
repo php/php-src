@@ -523,17 +523,20 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 static int php_stdiop_sync(php_stream *stream)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
-	int ret = 0;
+	FILE *fp;
 
-	assert(data != NULL);
-
-	if (data->file) {
-		ret = fflush(data->file);
-		if (ret == 0) {
-		    return fsync(fileno(data->file));
-		}
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS) == FAILURE) {
+		return 1;
 	}
-	return ret;
+
+	if (php_stdiop_flush(stream) == 0) {
+		#ifdef PHP_WIN32
+		return _commit(fileno(fp));
+		#else
+		return fsync(fileno(fp));
+		#endif
+	}
+	return 1;
 }
 
 static int php_stdiop_flush(php_stream *stream)
