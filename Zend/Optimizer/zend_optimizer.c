@@ -32,7 +32,7 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
-static zend_custom_pass custom_pass = {};
+static zend_custom_pass custom_pass;
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
