@@ -27,6 +27,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_smart_str.h"
+#include "Zend/Optimizer/zend_optimizer.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
@@ -40,6 +41,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_opcode;
 	int observer_nesting_depth;
 	int replace_zend_execute_ex;
+	int open_custom_pass;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -78,6 +80,16 @@ static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static void pass1(zend_op_array *op_array, void *context)
+{
+	php_printf("pass1\n");
+}
+
+static void pass2(zend_op_array *op_array, void *context)
+{
+	php_printf("pass2\n");
 }
 
 static ZEND_FUNCTION(zend_test_deprecated)
@@ -334,6 +346,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.open_custom_pass", "0", PHP_INI_SYSTEM, OnUpdateBool, open_custom_pass, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execute_data);
@@ -396,6 +409,11 @@ PHP_MINIT_FUNCTION(zend_test)
 	if (ZT_G(replace_zend_execute_ex)) {
 		old_zend_execute_ex = zend_execute_ex;
 		zend_execute_ex = custom_zend_execute_ex;
+	}
+
+	if (ZT_G(open_custom_pass)) {
+		zend_optimize_register_pass(pass1);
+		zend_optimize_register_pass(pass2);
 	}
 
 	return SUCCESS;

@@ -32,6 +32,8 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
+static zend_custom_pass custom_pass = {};
+
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
 	zval_ptr_dtor_nogc(zvalue);
@@ -1405,6 +1407,12 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 }
 
+static void call_custom_pass(zend_script *script, void *ctx) {
+	for (int i = 0; i < custom_pass.last_pass; i++) {
+		zend_foreach_op_array(script, custom_pass.pass[i], ctx);
+	}
+}
+
 ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	zend_class_entry *ce;
@@ -1549,12 +1557,19 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		zend_foreach_op_array(script, step_dump_after_optimizer, NULL);
 	}
 
+	call_custom_pass(script, &ctx);
+
 	if (ctx.constants) {
 		zend_hash_destroy(ctx.constants);
 	}
 	zend_arena_destroy(ctx.arena);
 
 	return 1;
+}
+
+ZEND_API void zend_optimize_register_pass(zend_op_array_func_t pass)
+{
+	custom_pass.pass[custom_pass.last_pass++] = pass;
 }
 
 int zend_optimizer_startup(void)
