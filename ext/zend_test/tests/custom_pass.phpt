@@ -1,5 +1,7 @@
 --TEST--
 Test custom pass
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
