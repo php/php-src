@@ -524,19 +524,21 @@ static int php_stdiop_sync(php_stream *stream)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 	FILE *fp;
+	int fd;
 
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS) == FAILURE) {
-		return 1;
+		return -1;
 	}
 
 	if (php_stdiop_flush(stream) == 0) {
+		PHP_STDIOP_GET_FD(fd, data);
 		#ifdef PHP_WIN32
-		return _commit(fileno(fp));
+		return _commit(fd);
 		#else
-		return fsync(fileno(fp));
+		return fsync(fd);
 		#endif
 	}
-	return 1;
+	return -1;
 }
 
 static int php_stdiop_flush(php_stream *stream)
