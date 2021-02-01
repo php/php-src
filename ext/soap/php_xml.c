@@ -197,7 +197,7 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 
 int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp((char*)node->name, name) == 0) {
+	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = attr_find_ns(node);
 			if (nsPtr) {
@@ -213,7 +213,7 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 
 int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp((char*)node->name, name) == 0) {
+	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
 			if (nsPtr) {
