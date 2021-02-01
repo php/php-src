@@ -82,12 +82,12 @@ static ZEND_FUNCTION(zend_test_void_return)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static void pass1(zend_script_func_t *script, void *context)
+static void pass1(zend_script *script, void *context)
 {
 	php_printf("pass1\n");
 }
 
-static void pass2(zend_script_func_t *script, void *context)
+static void pass2(zend_script *script, void *context)
 {
 	php_printf("pass2\n");
 }
