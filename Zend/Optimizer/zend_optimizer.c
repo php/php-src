@@ -1409,7 +1409,7 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 
 static void call_custom_pass(zend_script *script, void *ctx) {
 	for (int i = 0; i < custom_pass.last_pass; i++) {
-		zend_foreach_op_array(script, custom_pass.pass[i], ctx);
+		custom_pass.pass[i](script, ctx);
 	}
 }
 
