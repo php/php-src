@@ -1485,7 +1485,7 @@ PHP_FUNCTION(fsync)
 		RETURN_FALSE;
 	}
 
-	ret = php_stream_sync(stream);
+	ret = php_stream_sync(stream, 0);
 	if (ret) {
 		RETURN_FALSE;
 	}
@@ -1493,6 +1493,34 @@ PHP_FUNCTION(fsync)
 
 }
 /* }}} */
+
+/* {{{ Sync file data only to storage. Similar to fsync but does not flush modified metadata. POSIX only, aliased to fsync on Win32. */
+PHP_FUNCTION(fdatasync)
+{
+	zval *res;
+	int ret;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	ret = php_stream_sync(stream, 1);
+	if (ret) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+
+}
+/* }}} */
+
 
 
 /* {{{ Truncate file to 'size' length */

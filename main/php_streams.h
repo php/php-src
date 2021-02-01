@@ -336,8 +336,8 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0)
 
-PHPAPI int _php_stream_sync(php_stream *stream);
-#define php_stream_sync(stream)	    _php_stream_sync((stream))
+PHPAPI int _php_stream_sync(php_stream *stream, int dataonly);
+#define php_stream_sync(stream, d)	    _php_stream_sync((stream), (d))
 
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL)
@@ -451,6 +451,7 @@ END_EXTERN_C()
 #define PHP_STREAM_OPTION_SYNC_API		14
 #define PHP_STREAM_SYNC_SUPPORTED	0
 #define PHP_STREAM_SYNC_FSYNC 1
+#define PHP_STREAM_SYNC_FDSYNC 2
 
 #define php_stream_sync_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 

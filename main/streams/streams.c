@@ -1406,9 +1406,13 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	return ret;
 }
 
-PHPAPI int _php_stream_sync(php_stream *stream)
+PHPAPI int _php_stream_sync(php_stream *stream, int dataonly)
 {
-	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_FSYNC, NULL);
+	int op = PHP_STREAM_SYNC_FSYNC;
+	if (dataonly) {
+		op = PHP_STREAM_SYNC_FDSYNC;
+	}
+	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, op, NULL);
 }
 
 PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)

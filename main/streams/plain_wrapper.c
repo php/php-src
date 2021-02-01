@@ -54,6 +54,8 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 
 #if defined(PHP_WIN32)
 # define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+#define fsync _commit
+#define fdatasync fsync
 #else
 # define PLAIN_WRAP_BUF_SIZE(st) (st)
 #endif
@@ -538,7 +540,7 @@ static int php_stdiop_flush(php_stream *stream)
 }
 
 
-static int php_stdiop_sync(php_stream *stream)
+static int php_stdiop_sync(php_stream *stream, int dataonly)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 	FILE *fp;
@@ -550,11 +552,11 @@ static int php_stdiop_sync(php_stream *stream)
 
 	if (php_stdiop_flush(stream) == 0) {
 		PHP_STDIOP_GET_FD(fd, data);
-		#ifdef PHP_WIN32
-		return _commit(fd);
-		#else
-		return fsync(fd);
-		#endif
+		if (dataonly) {
+			return fdatasync(fd);
+		} else {
+			return fsync(fd);
+		}
 	}
 	return -1;
 }
@@ -912,7 +914,9 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				case PHP_STREAM_SYNC_SUPPORTED:
 					return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 				case PHP_STREAM_SYNC_FSYNC:
-				    return php_stdiop_sync(stream) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+				    return php_stdiop_sync(stream, 0) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+				case PHP_STREAM_SYNC_FDSYNC:
+				    return php_stdiop_sync(stream, 1) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 			}
 
 		case PHP_STREAM_OPTION_TRUNCATE_API:

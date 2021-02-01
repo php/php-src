@@ -827,6 +827,9 @@ function fflush($stream): bool {}
 function fsync($stream): bool {}
 
 /** @param resource $stream */
+function fdatasync($stream): bool {}
+
+/** @param resource $stream */
 function fwrite($stream, string $data, ?int $length = null): int|false {}
 
 /**
