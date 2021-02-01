@@ -727,8 +727,10 @@ TSRM_API void *tsrm_get_ls_cache(void)
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
 #if defined(__APPLE__) && defined(__x86_64__)
-    // TODO: Implement support for fast JIT ZTS code ???
-	return 0;
+	size_t ret;
+	asm ("movq __tsrm_ls_cache(%%rip),%0"
+          : "=r" (ret));
+	return ret;
 #elif defined(__x86_64__) && defined(__GNUC__)
 	size_t ret;
 
