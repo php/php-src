@@ -313,6 +313,8 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 	ctx->context = NULL;
 }
 
+#define SAFE_STR(a) ((a)?a:"")
+
 static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 {
 	sdlPtr tmpsdl = ctx->sdl;
@@ -374,7 +376,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				if (node_is_equal_ex(trav2, "schema", XSD_NAMESPACE)) {
 					load_schema(ctx, trav2);
 				} else if (is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", SAFE_STR(trav2->name));
 				}
 				trav2 = trav2->next;
 			}
@@ -435,7 +437,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				soap_error0(E_ERROR, "Parsing WSDL: <service> has no name attribute");
 			}
 		} else if (!node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -545,7 +547,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				}
 				smart_str_free(&key);
 			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 			}
 			trav = trav->next;
 		}
@@ -647,7 +649,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			}
 			smart_str_free(&key);
 		} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -679,14 +681,14 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 		sdlParamPtr param;
 
 		if (trav->ns != NULL && strcmp((char*)trav->ns->href, WSDL_NAMESPACE) != 0) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>",  SAFE_STR(trav->name));
 		}
 		if (node_is_equal(trav,"documentation")) {
 			trav = trav->next;
 			continue;
 		}
 		if (!node_is_equal(trav,"part")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		part = trav;
 		param = emalloc(sizeof(sdlParam));
@@ -695,7 +697,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 
 		name = get_attribute(part->properties, "name");
 		if (name == NULL) {
-			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'", message->name);
+			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'",  SAFE_STR(message->name));
 		}
 
 		param->paramName = estrdup((char*)name->children->content);
@@ -764,7 +766,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					continue;
 				}
 				if (!node_is_equal(trav,"port")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 				}
 
 				port = trav;
@@ -803,7 +805,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						}
 					}
 					if (trav2 != address && is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 				  trav2 = trav2->next;
 				}
@@ -905,7 +907,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						continue;
 					}
 					if (!node_is_equal(trav2,"operation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 
 					operation = trav2;
@@ -924,7 +926,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						           !node_is_equal(trav3,"output") &&
 						           !node_is_equal(trav3,"fault") &&
 						           !node_is_equal(trav3,"documentation")) {
-							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav3->name);
+							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav3->name));
 						}
 						trav3 = trav3->next;
 					}
@@ -1102,7 +1104,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 												}
 											}
 										} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 										}
 										trav = trav->next;
 									}
