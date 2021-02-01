@@ -111,7 +111,16 @@ typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_st
 typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
 /* Object maintenance/destruction */
+/* .dtor_obj is called while the executor is active, which means it can call
+ * user code. Use std_object_handlers.dtor_obj for .dtor_obj unless necessary,
+ * as providing something else breaks leak detection.
+ */
 typedef void (*zend_object_dtor_obj_t)(zend_object *object);
+
+/* .free_obj is called while the executor is not active, which means it can not
+ * call user code. In some cases .dtor_obj is called before .free_obj, but it is
+ * not guaranteed, such as hitting a fatal error.
+ */
 typedef void (*zend_object_free_obj_t)(zend_object *object);
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
 
