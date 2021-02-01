@@ -28,7 +28,7 @@
 #include "zend_exceptions.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
-ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
+ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
 
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
@@ -371,15 +371,54 @@ typedef enum {
 	INHERITANCE_SUCCESS = 1,
 } inheritance_status;
 
+
+static void track_class_dependency(zend_class_entry *ce, zend_string *class_name)
+{
+	HashTable *ht;
+
+	if (!CG(current_linking_class) || ce == CG(current_linking_class)) {
+		return;
+	} else if (!class_name) {
+		class_name = ce->name;
+	} else if (zend_string_equals_literal_ci(class_name, "self")
+	        || zend_string_equals_literal_ci(class_name, "parent")) {
+		return;
+	}
+
+	ht = (HashTable*)CG(current_linking_class)->inheritance_cache;
+
+#ifndef ZEND_WIN32
+	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+#else
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+#endif
+		// TODO: dependency on not-immutable class ???
+//		fprintf(stderr, "dep %s - %s/%s %d\n", ZSTR_VAL(CG(current_linking_class)->name), ZSTR_VAL(class_name), ZSTR_VAL(ce->name), (ce->type == ZEND_INTERNAL_CLASS) || (ce->ce_flags & ZEND_ACC_IMMUTABLE) != 0);
+//		ZEND_ASSERT(0);
+		if (ht) {
+			zend_hash_destroy(ht);
+			FREE_HASHTABLE(ht);
+			CG(current_linking_class)->inheritance_cache = NULL;
+		}
+		CG(current_linking_class)->ce_flags &= ~ZEND_ACC_CACHABLE;
+		CG(current_linking_class) = NULL;
+		return;
+	}
+
+	/* Record dependency */
+	if (!ht) {
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, 0, NULL, NULL, 0);
+		CG(current_linking_class)->inheritance_cache = (zend_inheritance_cache_entry*)ht;
+	}
+	zend_hash_add_ptr(ht, class_name, ce);
+}
+
 static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type,
 		bool register_unresolved) {
 	bool have_unresolved = 0;
-
-	if (CG(current_linking_class)) {
-		CG(current_linking_class)->ce_flags |= ZEND_ACC_NEEDS_VARIANCE_CHECKS;
-	}
 
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
@@ -389,6 +428,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else {
+			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	}
@@ -397,6 +437,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else if (unlinked_instanceof(fe_ce, zend_ce_traversable)) {
+			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	}
@@ -404,8 +445,9 @@ static inheritance_status zend_perform_covariant_class_type_check(
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		zend_class_entry *proto_ce;
+		zend_string *proto_class_name = NULL;
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *proto_class_name =
+			proto_class_name =
 				resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
 			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
 				return INHERITANCE_SUCCESS;
@@ -424,6 +466,8 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce || !proto_ce) {
 			have_unresolved = 1;
 		} else if (unlinked_instanceof(fe_ce, proto_ce)) {
+			track_class_dependency(fe_ce, fe_class_name);
+			track_class_dependency(proto_ce, proto_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	} ZEND_TYPE_FOREACH_END();
@@ -476,7 +520,7 @@ static inheritance_status zend_perform_covariant_type_check(
 				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
 			status = zend_perform_covariant_class_type_check(
 				fe_scope, fe_class_name, NULL,
-				proto_scope, proto_type, /* register_unresolved */ 0);
+				proto_scope, proto_type, /* register_unresolved */ 0); // dep 1.
 		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
 			zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
 			status = zend_perform_covariant_class_type_check(
@@ -632,7 +676,7 @@ static inheritance_status zend_do_perform_implementation_check(
 
 		local_status = zend_perform_covariant_type_check(
 			fe_scope, fe->common.arg_info[-1].type,
-			proto_scope, proto->common.arg_info[-1].type);
+			proto_scope, proto->common.arg_info[-1].type); // dep 2.
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
@@ -2275,7 +2319,12 @@ static int check_variance_obligation(zval *zv) {
 	if (obligation->type == OBLIGATION_DEPENDENCY) {
 		zend_class_entry *dependency_ce = obligation->dependency_ce;
 		if (dependency_ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
+			zend_class_entry *orig_linking_class = CG(current_linking_class);
+
+			CG(current_linking_class) =
+				(dependency_ce->ce_flags & ZEND_ACC_CACHABLE) ? dependency_ce : NULL;
 			resolve_delayed_variance_obligations(dependency_ce);
+			CG(current_linking_class) = orig_linking_class;
 		}
 		if (!(dependency_ce->ce_flags & ZEND_ACC_LINKED)) {
 			return ZEND_HASH_APPLY_KEEP;
@@ -2413,6 +2462,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	memcpy(ce, pce, sizeof(zend_class_entry));
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
+	ce->inheritance_cache = NULL;
 
 	/* properties */
 	if (ce->default_properties_table) {
@@ -2629,7 +2679,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		if (is_cachable) {
-			if (zend_inheritance_cache_get) {
+			if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 				zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
 				if (ret) {
 					if (traits_and_interfaces) {
@@ -2641,6 +2691,8 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 					*pce = ret;
 					return ret;
 				}
+			} else {
+				is_cachable = 0;
 			}
 			proto = ce;
 		}
@@ -2653,7 +2705,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 	}
 
 	orig_linking_class = CG(current_linking_class);
-	CG(current_linking_class) = ce;
+	CG(current_linking_class) = is_cachable ? ce : NULL;
 
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -2681,25 +2733,37 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 		ce->ce_flags |= ZEND_ACC_LINKED;
 	} else {
 		ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
+		if (CG(current_linking_class)) {
+			ce->ce_flags |= ZEND_ACC_CACHABLE;
+		}
 		load_delayed_classes();
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				CG(current_linking_class) = orig_linking_class;
 				report_variance_errors(ce);
 			}
 		}
+		if (ce->ce_flags & ZEND_ACC_CACHABLE) {
+			ce->ce_flags &= ~ZEND_ACC_CACHABLE;
+		} else {
+			CG(current_linking_class) = NULL;
+		}
 	}
 
-	CG(current_linking_class) = orig_linking_class;
-
-	if (ce->ce_flags & ZEND_ACC_NEEDS_VARIANCE_CHECKS) {
-		// TODO: Don't give up. Track and then re-play variance dependency checks ???
+	if (!CG(current_linking_class)) {
 		is_cachable = 0;
 	}
+	CG(current_linking_class) = orig_linking_class;
 
 	if (is_cachable) {
-		if (zend_inheritance_cache_add) {
-			*pce = ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces);
+		HashTable *ht = (HashTable*)ce->inheritance_cache;
+
+		ce->inheritance_cache = NULL;
+		*pce = ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces, ht);
+		if (ht) {
+			zend_hash_destroy(ht);
+			FREE_HASHTABLE(ht);
 		}
 	}
 
@@ -2765,7 +2829,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 
 	UPDATE_IS_CACHABLE(parent_ce);
 	if (is_cachable) {
-		if (zend_inheritance_cache_get) {
+		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
 			if (ret) {
 				if (delayed_early_binding) {
@@ -2780,11 +2844,16 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 				}
 				return ret;
 			}
+		} else {
+			is_cachable = 0;
 		}
 		proto = ce;
 	}
 
+	orig_linking_class = CG(current_linking_class);
+	CG(current_linking_class) = NULL;
 	status = zend_can_early_bind(ce, parent_ce);
+	CG(current_linking_class) = orig_linking_class;
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
@@ -2803,7 +2872,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		}
 
 		orig_linking_class = CG(current_linking_class);
-		CG(current_linking_class) = ce;
+		CG(current_linking_class) = is_cachable ? ce : NULL;
 
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 		if (parent_ce && parent_ce->num_interfaces) {
@@ -2819,8 +2888,13 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		CG(current_linking_class) = orig_linking_class;
 
 		if (is_cachable) {
-			if (zend_inheritance_cache_add) {
-				ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL);
+			HashTable *ht = (HashTable*)ce->inheritance_cache;
+
+			ce->inheritance_cache = NULL;
+			ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
+			if (ht) {
+				zend_hash_destroy(ht);
+				FREE_HASHTABLE(ht);
 			}
 		}
 
