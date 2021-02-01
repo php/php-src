@@ -412,8 +412,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	if (ZT_G(open_custom_pass)) {
-		zend_optimize_register_pass(pass1);
-		zend_optimize_register_pass(pass2);
+		zend_optimize_register_custom_pass(pass1);
+		zend_optimize_register_custom_pass(pass2);
 	}
 
 	return SUCCESS;
