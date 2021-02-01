@@ -69,6 +69,9 @@ PHP                                                                        NEWS
   . Reverted fix for bug #76813 (Access violation near NULL on source operand).
     (cmb)
 
+- SOAP:
+  . Fixed bug #80672 (Null Dereference in SoapClient). (CVE-2021-21702) (cmb, Stas)
+
 07 Jan 2021, PHP 8.0.1
 
 - Core:
@@ -543,4 +546,3 @@ PHP                                                                        NEWS
   . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
   . Fixed bug #78792 (zlib.output_compression disabled by Content-Type: image/).
     (cmb)
-
