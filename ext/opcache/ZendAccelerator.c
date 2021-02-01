@@ -119,7 +119,7 @@ bool fallback_process = 0; /* process uses file cache fallback */
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
-static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
+static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -2251,7 +2251,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	return zend_accel_load_script(persistent_script, from_shared_memory);
 }
 
-static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+static zend_inheritance_cache_entry* _zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
 	uint32_t i;
 	zend_inheritance_cache_entry *entry;
@@ -2275,7 +2275,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 		}
 		if (found) {
 			zend_map_ptr_extend(ZCSG(map_ptr_last));
-			return entry->ce;
+			return entry;
 		} else {
 			entry = entry->next;
 		}
@@ -2284,7 +2284,36 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 	return NULL;
 }
 
-static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+static bool zend_accel_check_dependencies(zend_class_dependency *dependencies, uint32_t dependencies_count)
+{
+	uint32_t i;
+
+	for (i = 0; i < dependencies_count; i++) {
+		zend_class_entry *ce = zend_lookup_class(dependencies[i].name);
+
+		if (!ce || ce != dependencies[i].ce) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+{
+	zend_inheritance_cache_entry *entry = _zend_accel_inheritance_cache_get(ce, parent, traits_and_interfaces);
+
+	if (entry) {
+		if (entry->dependencies) {
+			if (!zend_accel_check_dependencies(entry->dependencies, entry->dependencies_count)) {
+				return NULL;
+			}
+		}
+		return entry->ce;
+	}
+	return NULL;
+}
+
+static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies)
 {
 	zend_persistent_script dummy;
 	size_t size;
@@ -2304,14 +2333,27 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		return ce;
 	}
 
+	if (traits_and_interfaces && dependencies) {
+		for (i = 0; i < proto->num_traits + proto->num_interfaces; i++) {
+			if (traits_and_interfaces[i]) {
+				zend_hash_del(dependencies, traits_and_interfaces[i]->name);
+			}
+		}
+	}
+
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	new_ce = zend_accel_inheritance_cache_get(proto, parent, traits_and_interfaces);
-	if (new_ce) {
+	entry = _zend_accel_inheritance_cache_get(proto, parent, traits_and_interfaces);
+	if (entry) {
 		zend_shared_alloc_unlock();
 		SHM_PROTECT();
-		return new_ce;
+		if (!entry->dependencies
+		 || zend_accel_check_dependencies(entry->dependencies, entry->dependencies_count)) {
+			return entry->ce;
+		}
+		SHM_UNPROTECT();
+		zend_shared_alloc_lock();
 	}
 
 	zend_shared_alloc_init_xlat_table();
@@ -2321,6 +2363,9 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		sizeof(zend_inheritance_cache_entry) -
 		sizeof(void*) +
 		(sizeof(void*) * (proto->num_traits + proto->num_interfaces)));
+	if (dependencies) {
+		dummy.size += ZEND_ALIGNED_SIZE(zend_hash_num_elements(dependencies) * sizeof(zend_class_dependency));
+	}
 	ZCG(current_persistent_script) = &dummy;
 	zend_persist_class_entry_calc(ce);
 	size = dummy.size;
@@ -2352,12 +2397,26 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 			(sizeof(zend_inheritance_cache_entry) -
 			 sizeof(void*) +
 			 (sizeof(void*) * (proto->num_traits + proto->num_interfaces))));
-	entry->ce = new_ce = zend_persist_class_entry(ce);
-	zend_update_parent_ce(new_ce);
 	entry->parent = parent;
 	for (i = 0; i < proto->num_traits + proto->num_interfaces; i++) {
 		entry->traits_and_interfaces[i] = traits_and_interfaces[i];
 	}
+	if (dependencies && zend_hash_num_elements(dependencies)) {
+		zend_string *dep_name;
+		zend_class_entry *dep_ce;
+
+		i = 0;
+		entry->dependencies_count = zend_hash_num_elements(dependencies);
+		entry->dependencies = (zend_class_dependency*)ZCG(mem);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(dependencies, dep_name, dep_ce) {
+			entry->dependencies[i].name = dep_name;
+			entry->dependencies[i].ce = dep_ce;
+			i++;
+		} ZEND_HASH_FOREACH_END();
+		ZCG(mem) = (char*)ZCG(mem) + zend_hash_num_elements(dependencies) * sizeof(zend_class_dependency);
+	}
+	entry->ce = new_ce = zend_persist_class_entry(ce);
+	zend_update_parent_ce(new_ce);
 	entry->next = proto->inheritance_cache;
 	proto->inheritance_cache = entry;
 
