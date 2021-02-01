@@ -110,9 +110,29 @@ typedef zend_array *(*zend_object_get_properties_for_t)(zend_object *object, zen
 typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
 typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
-/* Object maintenance/destruction */
-typedef void (*zend_object_dtor_obj_t)(zend_object *object);
+/* free_obj should release any resources the object holds, without freeing the
+ * object structure itself. The object does not need to be in a valid state after
+ * free_obj finishes running.
+ *
+ * free_obj will always be invoked, even if the object leaks or a fatal error
+ * occurs. However, during shutdown it may be called once the executor is no
+ * longer active, in which case execution of user code may be skipped.
+ */
 typedef void (*zend_object_free_obj_t)(zend_object *object);
+
+/* dtor_obj is called before free_obj. The object must remain in a valid state
+ * after dtor_obj finishes running. Unlike free_obj, it is run prior to
+ * deactivation of the executor during shutdown, which allows user code to run.
+ *
+ * This handler is not guaranteed to be called (e.g. on fatal error), and as
+ * such should not be used to release resources or deallocate memory. Furthermore,
+ * releasing resources in this handler can break detection of memory leaks, as
+ * cycles may be broken early.
+ *
+ * dtor_obj should be used *only* to call user destruction hooks, such as __destruct.
+ */
+typedef void (*zend_object_dtor_obj_t)(zend_object *object);
+
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
 
 /* Get class name for display in var_dump and other debugging functions.
