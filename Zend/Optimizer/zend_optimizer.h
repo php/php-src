@@ -99,6 +99,7 @@ typedef struct _zend_custom_pass {
 BEGIN_EXTERN_C()
 ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
 ZEND_API int zend_optimize_register_custom_pass(zend_op_array_func_t pass);
+ZEND_API void zend_optimize_clean_custom_pass();
 int zend_optimizer_startup(void);
 int zend_optimizer_shutdown(void);
 END_EXTERN_C()
