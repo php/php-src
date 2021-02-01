@@ -1,9 +1,9 @@
 --TEST--
-Test fsync() function: basic functionality
+Test fdatasync() function: basic functionality
 --FILE--
 <?php
 
-echo "*** Testing fsync(): writing to a file and reading the contents ***\n";
+echo "*** Testing fdatasync(): writing to a file and reading the contents ***\n";
 $data = <<<EOD
 first line of string
 second line of string
@@ -11,7 +11,7 @@ third line of string
 EOD;
 
 $file_path = __DIR__;
-$filename = "$file_path/fsync_basic.tmp";
+$filename = "$file_path/fdatasync_basic.tmp";
 
 // opening a file
 $file_handle = fopen($filename, "w");
@@ -24,22 +24,22 @@ if(substr(PHP_OS, 0, 3) == "WIN")  {
 
 // writing data to the file
 var_dump( fwrite($file_handle, $data) );
-var_dump( fsync($file_handle) );
+var_dump( fdatasync($file_handle) );
 var_dump( readfile($filename) );
 
-echo "\n*** Testing fsync(): for return type ***\n";
-$return_value = fsync($file_handle);
+echo "\n*** Testing fdatasync(): for return type ***\n";
+$return_value = fdatasync($file_handle);
 var_dump( is_bool($return_value) );
 fclose($file_handle);
 
-echo "\n*** Testing fsync(): attempting to sync read-only file ***\n";
+echo "\n*** Testing fdatasync(): attempting to sync read-only file ***\n";
 $file_handle = fopen($filename, "r");
-var_dump(fsync($file_handle));
+var_dump(fdatasync($file_handle));
 fclose($file_handle);
 
-echo "\n*** Testing fsync(): for non-file stream ***\n";
+echo "\n*** Testing fdatasync(): for non-file stream ***\n";
 $file_handle = fopen("php://memory", "w");
-$return_value = fsync($file_handle);
+$return_value = fdatasync($file_handle);
 var_dump( ($return_value) );
 fclose($file_handle);
 
@@ -48,26 +48,26 @@ echo "\n*** Done ***";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-$filename = "$file_path/fsync_basic.tmp";
+$filename = "$file_path/fdatasync_basic.tmp";
 unlink($filename);
 ?>
 --EXPECTF--
-*** Testing fsync(): writing to a file and reading the contents ***
+*** Testing fdatasync(): writing to a file and reading the contents ***
 int(63)
 bool(true)
 first line of string
 second line of string
 third line of stringint(63)
 
-*** Testing fsync(): for return type ***
+*** Testing fdatasync(): for return type ***
 bool(true)
 
-*** Testing fsync(): attempting to sync read-only file ***
+*** Testing fdatasync(): attempting to sync read-only file ***
 bool(false)
 
-*** Testing fsync(): for non-file stream ***
+*** Testing fdatasync(): for non-file stream ***
 
-Warning: fsync(): Can't fsync this stream! in %s on line %d
+Warning: fdatasync(): Can't fsync this stream! in %s on line %d
 bool(false)
 
 *** Done ***
