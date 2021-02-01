@@ -7516,7 +7516,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 			if (UNEXPECTED(!zv)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 			} else {
-				ce = zend_do_link_class(&Z_CE_P(zv), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+				ce = zend_do_link_class(ce, Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(lcname));
 				if (!ce) {
 					/* Reload bucket pointer, the hash table may have been reallocated */
 					zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
@@ -7558,7 +7558,7 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 		ce = Z_CE_P(zv);
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
-			ce = zend_do_link_class(&Z_CE_P(zv), (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
+			ce = zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
 			if (!ce) {
 				HANDLE_EXCEPTION();
 			}
