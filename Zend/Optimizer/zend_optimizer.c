@@ -1567,7 +1567,7 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	return 1;
 }
 
-ZEND_API int zend_optimize_register_custom_pass(zend_op_array_func_t pass)
+ZEND_API int zend_optimize_register_custom_pass(zend_script_func_t pass)
 {
 	if (custom_pass.last_pass < 256 && pass) {
 		custom_pass.pass[custom_pass.last_pass++] = pass;
