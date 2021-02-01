@@ -1552,12 +1552,12 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
+	call_custom_pass(script, &ctx);
+
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 			(ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_foreach_op_array(script, step_dump_after_optimizer, NULL);
 	}
-
-	call_custom_pass(script, &ctx);
 
 	if (ctx.constants) {
 		zend_hash_destroy(ctx.constants);
