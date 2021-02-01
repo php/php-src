@@ -564,10 +564,6 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	if (maxlen > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "maxlen truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
-		maxlen = INT_MAX;
-	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
 		RETVAL_STR(contents);
 	} else {
