@@ -2503,6 +2503,7 @@ TEST $file
         $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
+    $orig_cmd = $cmd;
     if ($valgrind) {
         $env['USE_ZEND_ALLOC'] = '0';
         $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
@@ -2705,7 +2706,7 @@ COMMAND $cmd
 
         if (preg_match("/^$wanted_re\$/s", $output)) {
             $passed = true;
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
@@ -2810,32 +2811,6 @@ COMMAND $cmd
             error("Cannot create test diff - $diff_filename");
         }
 
-        // write .sh
-        if (strpos($log_format, 'S') !== false) {
-            $sh_script = <<<SH
-#!/bin/sh
-
-case "$1" in
-"gdb")
-    gdb --args {$cmd}
-    ;;
-"valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 ${cmd}
-    ;;
-"rr")
-    rr record $2 ${cmd}
-    ;;
-*)
-    {$cmd}
-    ;;
-esac
-SH;
-            if (file_put_contents($sh_filename, $sh_script) === false) {
-                error("Cannot create test shell script - $sh_filename");
-            }
-            chmod($sh_filename, 0755);
-        }
-
         // write .log
         if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
@@ -2846,6 +2821,34 @@ $output
 ") === false) {
             error("Cannot create test log - $log_filename");
             error_report($file, $log_filename, $tested);
+        }
+    }
+
+    if (!$passed || $leaked) {
+        // write .sh
+        if (strpos($log_format, 'S') !== false) {
+            $sh_script = <<<SH
+#!/bin/sh
+
+case "$1" in
+"gdb")
+    gdb --args {$orig_cmd}
+    ;;
+"valgrind")
+    USE_ZEND_ALLOC=0 valgrind $2 ${orig_cmd}
+    ;;
+"rr")
+    rr record $2 ${orig_cmd}
+    ;;
+*)
+    {$orig_cmd}
+    ;;
+esac
+SH;
+            if (file_put_contents($sh_filename, $sh_script) === false) {
+                error("Cannot create test shell script - $sh_filename");
+            }
+            chmod($sh_filename, 0755);
         }
     }
 
