@@ -51,10 +51,7 @@ jobs:
     - script: |
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
         cd framework
-        #php7.3 /usr/bin/composer require "doctrine/dbal:^3.0" --no-interaction
-        php7.3 /usr/bin/composer install --no-progress
-        # Hack to disable a test that hangs on azure
-        sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
+        php7.4 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
         export ASAN_OPTIONS=exitcode=139
         php vendor/bin/phpunit
@@ -65,8 +62,8 @@ jobs:
     - script: |
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
-        php7.3 /usr/bin/composer install --no-progress
-        php7.3 ./phpunit install
+        php7.4 /usr/bin/composer install --no-progress
+        php7.4 ./phpunit install
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
@@ -96,14 +93,14 @@ jobs:
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
-        php7.3 /usr/bin/composer install --no-progress
+        php7.4 /usr/bin/composer install --no-progress
         php ./phpunit
         if [ $? -gt 128 ]; then
           exit 1
         fi
       displayName: 'Test PHPUnit'
     - script: |
-        php7.3 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
+        php7.4 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
