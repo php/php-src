@@ -2326,11 +2326,11 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 
 	if (!ZCG(accelerator_enabled) ||
         (ZCSG(restart_in_progress) && accel_restart_is_active())) {
-		return ce;
+		return NULL;
 	}
 
 	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		return ce;
+		return NULL;
 	}
 
 	if (traits_and_interfaces && dependencies) {
@@ -2382,7 +2382,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	if (!ZCG(mem)) {
 		zend_shared_alloc_unlock();
 		SHM_PROTECT();
-		return ce;
+		return NULL;
 	}
 
 #if ZEND_MM_ALIGNMENT < 8
@@ -4017,11 +4017,8 @@ static void preload_link(void)
 					continue;
 				}
 
-				{
-					zend_string *key = zend_string_tolower(ce->name);
-					zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
-					zend_string_release(key);
-				}
+				key = zend_string_tolower(ce->name);
+				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
 
 				if (EXPECTED(zv)) {
 					/* Set filename & lineno information for inheritance errors */
@@ -4037,7 +4034,7 @@ static void preload_link(void)
 					} else {
 						CG(zend_lineno) = ce->info.user.line_start;
 					}
-					ce = zend_do_link_class(&ce, NULL);
+					ce = zend_do_link_class(ce, NULL, key);
 					if (!ce) {
 						ZEND_ASSERT(0 && "Class linking failed?");
 					}
@@ -4046,6 +4043,8 @@ static void preload_link(void)
 
 					changed = 1;
 				}
+
+				zend_string_release(key);
 			}
 			if (ce->ce_flags & ZEND_ACC_LINKED) {
 				if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {

@@ -2594,12 +2594,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		} while (0)
 #endif
 
-ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_string *lc_parent_name) /* {{{ */
+ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name, zend_string *key) /* {{{ */
 {
 	/* Load parent/interface dependencies first, so we can still gracefully abort linking
 	 * with an exception and remove the class from the class table. This is only possible
 	 * if no variance obligations on the current class have been added during autoloading. */
-	zend_class_entry *ce = *pce;
 	zend_class_entry *parent = NULL;
 	zend_class_entry **interfaces = NULL;
 	zend_class_entry **traits_and_interfaces = NULL;
@@ -2607,6 +2606,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 	zend_class_entry *orig_linking_class;
 	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
+	zval *zv;
 
 	if (ce->parent_name) {
 		parent = zend_fetch_class_by_name(
@@ -2688,7 +2688,8 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 					if (traits_and_interfaces) {
 						efree(interfaces);
 					}
-					*pce = ret;
+					zv = zend_hash_find_ex(CG(class_table), key, 1);
+					Z_CE_P(zv) = ret;
 					return ret;
 				}
 			} else {
@@ -2697,7 +2698,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 			proto = ce;
 		}
 		/* Lazy class loading */
-		*pce = ce = zend_lazy_class_load(ce);
+		ce = zend_lazy_class_load(ce);
+		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		Z_CE_P(zv) = ce;
 		if (CG(unlinked_uses)
 		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
 			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
@@ -2758,9 +2761,15 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry **pce, zend_strin
 
 	if (is_cachable) {
 		HashTable *ht = (HashTable*)ce->inheritance_cache;
+		zend_class_entry *new_ce;
 
 		ce->inheritance_cache = NULL;
-		*pce = ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces, ht);
+		new_ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces, ht);
+		if (new_ce) {
+			zv = zend_hash_find_ex(CG(class_table), key, 1);
+			ce = new_ce;
+			Z_CE_P(zv) = ce;
+		}
 		if (ht) {
 			zend_hash_destroy(ht);
 			FREE_HASHTABLE(ht);
@@ -2837,6 +2846,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 						return NULL;
 					}
+					Z_CE_P(delayed_early_binding) = ret;
 				} else {
 					if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ret) == NULL)) {
 						return NULL;
@@ -2855,20 +2865,21 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 	status = zend_can_early_bind(ce, parent_ce);
 	CG(current_linking_class) = orig_linking_class;
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+		}
+
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 				return NULL;
 			}
+			Z_CE_P(delayed_early_binding) = ce;
 		} else {
 			if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) == NULL)) {
 				return NULL;
 			}
-		}
-
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-			/* Lazy class loading */
-			ce = zend_lazy_class_load(ce);
 		}
 
 		orig_linking_class = CG(current_linking_class);
@@ -2889,9 +2900,15 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 
 		if (is_cachable) {
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
+			zend_class_entry *new_ce;
 
 			ce->inheritance_cache = NULL;
-			ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
+			new_ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
+			if (new_ce) {
+				zval *zv = zend_hash_find_ex(CG(class_table), lcname, 1);
+				ce = new_ce;
+				Z_CE_P(zv) = ce;
+			}
 			if (ht) {
 				zend_hash_destroy(ht);
 				FREE_HASHTABLE(ht);
