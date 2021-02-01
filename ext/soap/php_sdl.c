@@ -313,7 +313,7 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 	ctx->context = NULL;
 }
 
-#define SAFE_STR(a) ((a)?a:"")
+#define SAFE_STR(a) ((a)?((const char *)a):"")
 
 static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 {
