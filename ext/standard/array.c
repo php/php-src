@@ -6052,7 +6052,8 @@ PHP_FUNCTION(array_key_exists)
 			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
 			break;
 		case IS_DOUBLE:
-			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval(Z_DVAL_P(key))));
+			/* TODO Should this warn or not? */
+			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
 			break;
 		case IS_FALSE:
 			RETVAL_BOOL(zend_hash_index_exists(ht, 0));

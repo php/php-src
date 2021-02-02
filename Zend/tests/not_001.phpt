@@ -16,7 +16,8 @@ var_dump(bin2hex($s1));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
 int(-24)
 string(8) "8c90929a"
 Done

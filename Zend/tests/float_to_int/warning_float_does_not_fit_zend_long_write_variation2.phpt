@@ -1,0 +1,28 @@
+--TEST--
+Implicit float to int conversions when float too large should warn, array variant
+--FILE--
+<?php
+
+$float = 10e120;
+$string_float = (string) $float;
+
+$string = 'Here is some text for good measure';
+
+try {
+    echo 'Float string variable', \PHP_EOL;
+    $string[$string_float] = 'E';
+    var_dump($string);
+} catch (\TypeError) {
+    echo 'TypeError', \PHP_EOL;
+}
+
+?>
+--EXPECTF--
+Float string variable
+
+Warning: Uncaught TypeError: Cannot access offset of type string on string in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
+
+Fatal error: Allowed memory size of %d bytes exhausted at %s:141 (tried to allocate %d bytes) in %s on line %d

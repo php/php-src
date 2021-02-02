@@ -38,6 +38,8 @@ try {
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
 bool(true)
 bool(false)
 bool(false)

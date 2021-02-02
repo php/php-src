@@ -426,6 +426,9 @@ static inline int fetch_array_elem(zval **result, zval *op1, zval *op2) {
 			*result = zend_hash_index_find(Z_ARR_P(op1), Z_LVAL_P(op2));
 			return SUCCESS;
 		case IS_DOUBLE:
+			if (!is_long_compatible(Z_DVAL_P(op2))) {
+				return FAILURE;
+			}
 			*result = zend_hash_index_find(Z_ARR_P(op1), zend_dval_to_lval(Z_DVAL_P(op2)));
 			return SUCCESS;
 		case IS_STRING:
@@ -509,6 +512,9 @@ static inline int ct_eval_del_array_elem(zval *result, zval *key) {
 			zend_hash_index_del(Z_ARR_P(result), Z_LVAL_P(key));
 			break;
 		case IS_DOUBLE:
+			if (!is_long_compatible(Z_DVAL_P(key))) {
+				return FAILURE;
+			}
 			zend_hash_index_del(Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)));
 			break;
 		case IS_STRING:
@@ -550,6 +556,9 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 			break;
 		case IS_DOUBLE:
 			SEPARATE_ARRAY(result);
+			if (!is_long_compatible(Z_DVAL_P(key))) {
+				return FAILURE;
+			}
 			value = zend_hash_index_update(
 				Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)), value);
 			break;

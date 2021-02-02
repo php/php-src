@@ -30,5 +30,7 @@ sscanf 32-bit unsign int '4294967295'           (2^32)-1 = 4294967295
 sscanf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
 sscanf 64-bit unsign int '18446744073709551615' (2^64)-1 = 18446744073709551615
 printf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
+
+Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
 printf 64-bit signed int '18446744073709551615' (2^64)-1 = 0
 Done

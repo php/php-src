@@ -122,6 +122,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 }
 #endif
 
+/* Used to convert a string float to integer during an (int) cast */
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
@@ -132,6 +133,18 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 	return (zend_long)d;
 }
 /* }}} */
+
+static zend_always_inline bool is_long_compatible(double d) {
+	return ((double)(zend_long) d == d);
+}
+
+static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
+{
+	if (!is_long_compatible(d)) {
+		zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float");
+	}
+	return zend_dval_to_lval(d);
+}
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
@@ -267,13 +280,16 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
-ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op, bool is_lax);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
 static zend_always_inline zend_long zval_get_long(zval *op) {
-	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, 0);
+}
+static zend_always_inline zend_long zval_get_long_ex(zval *op, bool is_lax) {
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, is_lax);
 }
 static zend_always_inline double zval_get_double(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);

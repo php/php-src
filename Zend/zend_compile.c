@@ -8197,12 +8197,12 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op
 		return 1;
 	}
 
-	if ((opcode == ZEND_MOD && zval_get_long(op2) == 0)
+	if ((opcode == ZEND_MOD && zval_get_long_func(op2, /* lax */ true) == 0)
 			|| (opcode == ZEND_DIV && zval_get_double(op2) == 0.0)) {
 		/* Division by zero throws an error. */
 		return 1;
 	}
-	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
+	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long_func(op2, /* lax */ true) < 0) {
 		/* Shift by negative number throws an error. */
 		return 1;
 	}
@@ -8355,7 +8355,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					break;
 				case IS_DOUBLE:
 					zend_hash_index_update(Z_ARRVAL_P(result),
-						zend_dval_to_lval(Z_DVAL_P(key)), value);
+						zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 					break;
 				case IS_FALSE:
 					zend_hash_index_update(Z_ARRVAL_P(result), 0, value);

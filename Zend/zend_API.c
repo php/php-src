@@ -503,7 +503,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			return 0;
 		} else {
-			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
+			*dest = zend_dval_to_lval_safe(Z_DVAL_P(arg));
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
@@ -516,9 +516,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 				}
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
 					return 0;
-				} else {
-					*dest = zend_dval_to_lval(d);
 				}
+
+				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError
+				 * Manually check to get correct warning text mentioning string origin */
+				if (!is_long_compatible(d)) {
+					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string");
+				}
+				*dest = zend_dval_to_lval(d);
 			} else {
 				return 0;
 			}
@@ -1971,7 +1976,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), value);
+			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 			break;
 		default:
 			zend_type_error("Illegal offset type");

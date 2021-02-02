@@ -1470,7 +1470,7 @@ try_again:
 				break;
 		}
 
-		offset = zval_get_long_func(dim);
+		offset = zval_get_long_func(dim, /* lax */ true);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -2133,7 +2133,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
-			value->lval = zend_dval_to_lval(Z_DVAL_P(dim));
+			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			return IS_LONG;
 		case IS_RESOURCE:
 			zend_use_resource_as_offset(dim);
@@ -2452,7 +2452,7 @@ try_string_offset:
 					break;
 			}
 
-			offset = zval_get_long_func(dim);
+			offset = zval_get_long_func(dim, /* is_lax */ true);
 		} else {
 			offset = Z_LVAL_P(dim);
 		}
@@ -2543,7 +2543,7 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 	zend_ulong hval;
 
 	if (Z_TYPE_P(offset) == IS_DOUBLE) {
-		hval = zend_dval_to_lval(Z_DVAL_P(offset));
+		hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
@@ -2667,7 +2667,7 @@ num_key:
 		key = Z_REFVAL_P(key);
 		goto try_again;
 	} else if (Z_TYPE_P(key) == IS_DOUBLE) {
-		hval = zend_dval_to_lval(Z_DVAL_P(key));
+		hval = zend_dval_to_lval_safe(Z_DVAL_P(key));
 		goto num_key;
 	} else if (Z_TYPE_P(key) == IS_FALSE) {
 		hval = 0;

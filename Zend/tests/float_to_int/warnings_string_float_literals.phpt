@@ -1,0 +1,102 @@
+--TEST--
+Implicit string float to int conversions should warn for literals
+--XFAIL--
+Double warning for internal calls
+--FILE--
+<?php
+
+echo 'Bitwise ops:' . \PHP_EOL;
+// 7 Warnings generated in total
+$var = '1.5'|3;
+var_dump($var);
+$var = '1.5'&3;
+var_dump($var);
+$var = '1.5'^3;
+var_dump($var);
+$var = '1.5' << 3;
+var_dump($var);
+$var = '1.5' >> 3;
+var_dump($var);
+$var = 3 << '1.5';
+var_dump($var);
+$var = 3 >> '1.5';
+var_dump($var);
+
+echo 'Modulo:' . \PHP_EOL;
+// 2 warnings in total
+$var = '6.5' % 2;
+var_dump($var);
+$var = 9 % '2.5';
+var_dump($var);
+
+echo 'Function calls:' . \PHP_EOL;
+function foo(int $a) {
+    return $a;
+}
+var_dump(foo('1.5'));
+
+// TODO: Why are two warnings generated here?
+var_dump(chr('60.5'));
+
+echo 'Function returns:' . \PHP_EOL;
+function bar(): int {
+    return '3.5';
+}
+var_dump(bar());
+
+echo 'Typed property assignment:' . \PHP_EOL;
+class Test {
+    public int $a;
+}
+
+$instance = new Test();
+$instance->a = '1.5';
+var_dump($instance->a);
+
+?>
+--EXPECTF--
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Bitwise ops:
+int(3)
+int(1)
+int(2)
+int(8)
+int(0)
+int(6)
+int(1)
+Modulo:
+int(0)
+int(1)
+Function calls:
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+int(1)
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+string(1) "<"
+Function returns:
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+int(3)
+Typed property assignment:
+
+Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+int(1)
