@@ -982,6 +982,16 @@ PHP_ARG_ENABLE([memory-sanitizer],,
     [Enable memory sanitizer (clang only)])],
   [no],
   [no])
+PHP_ARG_ENABLE([address-sanitizer],,
+  [AS_HELP_STRING([--enable-address-sanitizer],
+    [Enable address sanitizer])],
+  [no],
+  [no])
+PHP_ARG_ENABLE([undefined-sanitizer],,
+  [AS_HELP_STRING([--enable-undefined-sanitizer],
+    [Enable undefined sanitizer])],
+  [no],
+  [no])
 
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
@@ -1372,10 +1382,38 @@ if test "$PHP_WERROR" = "yes"; then
   CXXFLAGS="$CXXFLAGS -Werror"
 fi
 
+if test "$PHP_MEMORY_SANITIZER" = "yes" &&
+   test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+   AC_MSG_ERROR([MemorySanitizer and AddressSanitizer are mutually exclusive])
+fi
+
 dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
 if test "$PHP_MEMORY_SANITIZER" = "yes"; then
-  CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
-  CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  AX_CHECK_COMPILE_FLAG([-fsanitize=memory -fsanitize-memory-track-origins], [
+    CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+    CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  ], [AC_MSG_ERROR([MemorySanitizer is not available])])
+fi
+
+if test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+  AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
+    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+  ], [AC_MSG_ERROR([AddressSanitizer is not available])])
+fi
+
+if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
+  AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
+    CFLAGS="$CFLAGS -fsanitize=undefined"
+    CXXFLAGS="$CXXFLAGS -fsanitize=undefined"
+  ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
+fi
+
+if test "$PHP_MEMORY_SANITIZER" = "yes" ||
+   test "$PHP_ADDRESS_SANITIZER" = "yes" ||
+   test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
+    CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+    CXXFLAGS="$CXXFLAGS -fno-omit-frame-pointer"
 fi
 
 dnl
