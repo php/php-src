@@ -349,9 +349,8 @@ PHP_METHOD(DOMCharacterData, replaceData)
 PHP_METHOD(DOMCharacterData, remove)
 {
 	zval *id = ZEND_THIS;
-	xmlNodePtr children, child;
+	xmlNodePtr child;
 	dom_object *intern;
-	int stricterror;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -359,38 +358,7 @@ PHP_METHOD(DOMCharacterData, remove)
 
 	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
 
-	if (dom_node_children_valid(child) == FAILURE) {
-		RETURN_NULL();
-	}
-
-	stricterror = dom_get_strict_error(intern->document);
-
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	while (children) {
-		if (children == child) {
-			xmlUnlinkNode(child);
-			RETURN_NULL();
-		}
-		children = children->next;
-	}
-
-	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	dom_child_node_remove(intern);
 	RETURN_NULL();
 }
 
