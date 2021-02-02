@@ -2018,6 +2018,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 #endif
 
 			prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "name", sizeof("name")-1, 0, &rv);
+			ZVAL_DEREF(prop);
 			if (Z_TYPE_P(prop) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", ZSTR_VAL(string_key));
 			} else {
@@ -2028,10 +2029,12 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				}
 
 				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
+				ZVAL_DEREF(prop);
 				if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 					type = Z_STRVAL_P(prop);
 				}
 				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "postname", sizeof("postname")-1, 0, &rv);
+				ZVAL_DEREF(prop);
 				if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 					filename = Z_STRVAL_P(prop);
 				}
