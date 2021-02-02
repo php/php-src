@@ -739,9 +739,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	zend_try {
-
+	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
