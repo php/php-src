@@ -32,8 +32,8 @@ $return_value = fsync($file_handle);
 var_dump( is_bool($return_value) );
 fclose($file_handle);
 
-echo "\n*** Testing fsync(): attempting to sync read-only file ***\n";
-$file_handle = fopen($filename, "r");
+echo "\n*** Testing fsync(): attempting to sync stdin ***\n";
+$file_handle = fopen("php://stdin", "w");
 var_dump(fsync($file_handle));
 fclose($file_handle);
 
@@ -62,7 +62,7 @@ third line of stringint(63)
 *** Testing fsync(): for return type ***
 bool(true)
 
-*** Testing fsync(): attempting to sync read-only file ***
+*** Testing fsync(): attempting to sync stdin ***
 bool(false)
 
 *** Testing fsync(): for non-file stream ***
