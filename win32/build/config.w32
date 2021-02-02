@@ -130,11 +130,6 @@ ADD_FLAG("ARFLAGS", '/nologo /libpath:"' + php_usual_lib_suspects + '" ');
 probe_basic_headers();
 add_extra_dirs();
 
-// Allow compatible IL versions, do not require an exact match.
-// Prevents build failures where different libs were built with different (but compatible) IL versions.
-// See fatal error C1047.
-ADD_FLAG("LDFLAGS", "/d2:-AllowCompatibleILVersions ");
-
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, clang for clang, cppcheck for Cppcheck, pvs for PVS-Studio", "no");
