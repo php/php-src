@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 

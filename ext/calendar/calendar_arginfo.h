@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ced2659f54bb25693831315625fe90b33e2f7cbe */
+ * Stub hash: 4953fb1f36502b399061f5e0ca2f700d09761be3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)
@@ -116,3 +116,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(unixtojd, arginfo_unixtojd)
 	ZEND_FE_END
 };
+

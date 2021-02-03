@@ -1,17 +1,20 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
-class DOMDocumentType
+class DOMDocumentType extends DOMNode
 {
 }
 
-class DOMCdataSection
+class DOMCdataSection extends DOMText
 {
     public function __construct(string $data) {}
 }
 
-class DOMComment
+class DOMComment extends DOMCharacterData
 {
     public function __construct(string $data = "") {}
 }
@@ -93,6 +96,10 @@ class DOMNode
     public function replaceChild(DOMNode $node, DOMNode $child) {}
 }
 
+class DOMNameSpaceNode
+{
+}
+
 class DOMImplementation
 {
     /** @return void */
@@ -108,7 +115,7 @@ class DOMImplementation
     public function createDocument(string $namespace = "", string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
 }
 
-class DOMDocumentFragment implements DOMParentNode
+class DOMDocumentFragment extends DOMNode implements DOMParentNode
 {
     public function __construct() {}
 
@@ -133,7 +140,7 @@ class DOMNodeList implements IteratorAggregate, Countable
     public function item(int $index) {}
 }
 
-class DOMCharacterData implements DOMChildNode
+class DOMCharacterData extends DOMNode implements DOMChildNode
 {
     /** @return bool */
     public function appendData(string $data) {}
@@ -162,7 +169,7 @@ class DOMCharacterData implements DOMChildNode
     public function after(...$nodes): void {}
 }
 
-class DOMAttr
+class DOMAttr extends DOMNode
 {
     public function __construct(string $name, string $value = "") {}
 
@@ -170,7 +177,7 @@ class DOMAttr
     public function isId() {}
 }
 
-class DOMElement implements DOMParentNode, DOMChildNode
+class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 {
     public function __construct(string $qualifiedName, ?string $value = null, string $namespace = "") {}
 
@@ -246,7 +253,7 @@ class DOMElement implements DOMParentNode, DOMChildNode
     public function prepend(...$nodes): void {}
 }
 
-class DOMDocument implements DOMParentNode
+class DOMDocument extends DOMNode implements DOMParentNode
 {
     public function __construct(string $version = "1.0", string $encoding = "") {}
 
@@ -360,7 +367,7 @@ final class DOMException extends Exception
     public $code = 0;
 }
 
-class DOMText
+class DOMText extends DOMCharacterData
 {
     public function __construct(string $data = "") {}
 
@@ -398,7 +405,7 @@ class DOMEntity extends DOMNode
 {
 }
 
-class DOMEntityReference
+class DOMEntityReference extends DOMNode
 {
     public function __construct(string $name) {}
 }
@@ -407,7 +414,7 @@ class DOMNotation extends DOMNode
 {
 }
 
-class DOMProcessingInstruction
+class DOMProcessingInstruction extends DOMNode
 {
     public function __construct(string $name, string $value = "") {}
 }

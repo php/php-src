@@ -1177,10 +1177,7 @@ PHP_MINIT_FUNCTION(curl)
 		return FAILURE;
 	}
 
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "CurlHandle", class_CurlHandle_methods);
-	curl_ce = zend_register_internal_class(&ce);
-	curl_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;
 	curl_ce->serialize = zend_class_serialize_deny;
 	curl_ce->unserialize = zend_class_unserialize_deny;
@@ -1193,8 +1190,11 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.clone_obj = curl_clone_obj;
 	curl_object_handlers.cast_object = curl_cast_object;
 
-	curl_multi_register_class(class_CurlMultiHandle_methods);
-	curl_share_register_class(class_CurlShareHandle_methods);
+	curl_multi_ce = register_class_CurlMultiHandle();
+	curl_multi_register_handlers();
+
+	curl_share_ce = register_class_CurlShareHandle();
+	curl_share_register_handlers();
 	curlfile_register_class();
 
 	return SUCCESS;

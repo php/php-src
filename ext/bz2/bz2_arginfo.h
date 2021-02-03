@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5436fd5a4b0fbfd3b3b3f1caa6a0cf8326c9c5f7 */
+ * Stub hash: 10682cdfc126686cab8497868287459dc574b93d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, file)
@@ -72,3 +72,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bzdecompress, arginfo_bzdecompress)
 	ZEND_FE_END
 };
+

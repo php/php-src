@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aa287af25fe33a05d15d85b92b0edcfae00284a2 */
+ * Stub hash: bdf377cc2819bdc625cd2ee1afed2f3e7990eef8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ctype_alnum, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_MIXED, 0)
@@ -53,3 +53,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ctype_xdigit, arginfo_ctype_xdigit)
 	ZEND_FE_END
 };
+

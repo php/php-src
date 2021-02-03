@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0c1e2a6163a5fc0f42bf79bbc530af7c5fd77074 */
+ * Stub hash: 2232d60eb40f382b141ec28fe9542bd88e784333 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -69,3 +69,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcscale, arginfo_bcscale)
 	ZEND_FE_END
 };
+
