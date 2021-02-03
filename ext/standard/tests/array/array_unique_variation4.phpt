@@ -35,13 +35,9 @@ $inputs = array (
 /*1*/  array('0' => 0, '1' => 0),
        array("one" => 1, 'two' => 2, "three" => 1, 4 => 1),
 
-       // arrays with float values
-/*3*/  array("float1" => 2.3333, "float2" => 2.3333),
-       array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2),
-
        // arrays with string values
-/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'),
+/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'),
        array(1 => "hello", "heredoc" => $heredoc, $heredoc),
 
        // array with object, unset variable and resource variable
@@ -75,20 +71,6 @@ array(2) {
   int(2)
 }
 -- Iteration 3 --
-array(1) {
-  ["float1"]=>
-  float(2.3333)
-}
--- Iteration 4 --
-array(3) {
-  ["f1"]=>
-  float(1.2)
-  ["f2"]=>
-  float(3.33)
-  [3]=>
-  float(4.89999922839999)
-}
--- Iteration 5 --
 array(3) {
   [111]=>
   string(6) "	Hello"
@@ -97,7 +79,7 @@ array(3) {
   [2]=>
   string(7) "world"
 }
--- Iteration 6 --
+-- Iteration 4 --
 array(3) {
   [111]=>
   string(7) "\tHello"
@@ -106,14 +88,14 @@ array(3) {
   [2]=>
   string(9) "\v\fworld"
 }
--- Iteration 7 --
+-- Iteration 5 --
 array(2) {
   [1]=>
   string(5) "hello"
   ["heredoc"]=>
   string(11) "Hello world"
 }
--- Iteration 8 --
+-- Iteration 6 --
 array(3) {
   [11]=>
   object(classA)#%d (0) {
