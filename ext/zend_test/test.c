@@ -236,6 +236,12 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);
@@ -320,6 +326,10 @@ static ZEND_METHOD(ZendTestNS_Foo, method) {
 }
 
 static ZEND_METHOD(ZendTestNS2_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method) {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 

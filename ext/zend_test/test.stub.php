@@ -90,3 +90,13 @@ class Foo {
 }
 
 }
+
+namespace ZendTestNS2\ZendSubNS {
+
+class Foo {
+    public function method(): void {}
+}
+
+function namespaced_func(): bool {}
+
+}
