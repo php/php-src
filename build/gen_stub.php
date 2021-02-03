@@ -818,9 +818,10 @@ class FuncInfo {
             }
 
             if ($namespace) {
+                // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    $namespace, $declarationName, $this->getArgInfoName());
+                    addslashes($namespace), $declarationName, $this->getArgInfoName());
             } else {
                 return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
@@ -1222,7 +1223,7 @@ class ClassInfo {
         $code .= "\tzend_class_entry ce, *class_entry;\n\n";
         if (count($this->name->parts) > 1) {
             $className = $this->name->getLast();
-            $namespace = $this->name->slice(0, -1);
+            $namespace = addslashes((string) $this->name->slice(0, -1));
 
             $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
         } else {
