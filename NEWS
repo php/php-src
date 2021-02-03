@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #75850 (Unclear error message wrt. __halt_compiler() w/o
     semicolon) (cmb)
   . Fixed bug #70091 (Phar does not mark UTF-8 filenames in ZIP archives). (cmb)
+  . Fixed bug #53467 (Phar cannot compress large archives). (cmb, lserni)
 
 - Standard:
   . Fixed bug #80654 (file_get_contents() maxlen fails above (2**31)-1 bytes).
