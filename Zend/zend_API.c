@@ -1213,39 +1213,97 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 }
 /* }}} */
 
+ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type) /* {{{ */
+{
+	HashTable *constants_table;
+	zend_string *key;
+	zend_class_constant *new_c, *c;
+
+	constants_table = zend_arena_alloc(&CG(arena), sizeof(HashTable));
+	zend_hash_init(constants_table, zend_hash_num_elements(class_type->constants_table), NULL, NULL, 0);
+	zend_hash_extend(constants_table, zend_hash_num_elements(class_type->constants_table), 0);
+	ZEND_MAP_PTR_SET(class_type->constants_table_ptr, constants_table);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(class_type->constants_table, key, c) {
+		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+			new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+			memcpy(new_c, c, sizeof(zend_class_constant));
+			c = new_c;
+		}
+		_zend_hash_append_ptr(constants_table, key, c);
+	} ZEND_HASH_FOREACH_END();
+
+	return constants_table;
+}
+
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
-	if (!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		zend_class_constant *c;
-		zval *val;
-		zend_property_info *prop_info;
+	zval *default_properties_table = NULL;
+	zval *static_members_table = NULL;
+	zend_class_constant *c;
+	zval *val;
+	zend_property_info *prop_info;
 
-		if (class_type->parent) {
-			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
-				return FAILURE;
-			}
+	if (class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) {
+		return SUCCESS;
+	}
+
+	if (class_type->parent) {
+		if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
+			return FAILURE;
 		}
+	}
 
-		ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
-			val = &c->value;
-			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+	if (class_type->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) {
+		HashTable *constants_table = ZEND_MAP_PTR_GET(class_type->constants_table_ptr);
+
+		if (!constants_table) {
+			constants_table = zend_separate_class_constants_table(class_type);
+		}
+		ZEND_HASH_FOREACH_PTR(constants_table, c) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+				val = &c->value;
 				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
+	}
 
-		if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
+	if (class_type->default_static_members_count) {
+		static_members_table = CE_STATIC_MEMBERS(class_type);
+		if (!static_members_table) {
 			if (class_type->type == ZEND_INTERNAL_CLASS || (class_type->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED))) {
 				zend_class_init_statics(class_type);
+				static_members_table = CE_STATIC_MEMBERS(class_type);
 			}
 		}
+	}
 
+	default_properties_table = ZEND_MAP_PTR_GET(class_type->default_properties_table_ptr);
+	if (class_type->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES) {
+		if (!default_properties_table) {
+			zval *src, *dst, *end;
+
+			default_properties_table = zend_arena_alloc(&CG(arena), sizeof(zval) * class_type->default_properties_count);
+			ZEND_MAP_PTR_SET(class_type->default_properties_table_ptr, default_properties_table);
+			src = class_type->default_properties_table;
+			dst = default_properties_table;
+			end = dst + class_type->default_properties_count;
+			do {
+				ZVAL_COPY_VALUE_PROP(dst, src);
+				src++;
+				dst++;
+			} while (dst != end);
+		}
+	}
+
+	if (class_type->ce_flags & (ZEND_ACC_HAS_AST_PROPERTIES|ZEND_ACC_HAS_AST_STATICS)) {
 		ZEND_HASH_FOREACH_PTR(&class_type->properties_info, prop_info) {
 			if (prop_info->flags & ZEND_ACC_STATIC) {
-				val = CE_STATIC_MEMBERS(class_type) + prop_info->offset;
+				val = static_members_table + prop_info->offset;
 			} else {
-				val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
+				val = (zval*)((char*)default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 			}
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 				if (ZEND_TYPE_IS_SET(prop_info->type)) {
@@ -1268,8 +1326,15 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
+	}
 
+	if (!(class_type->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
+		class_type->ce_flags &= ~ZEND_ACC_HAS_AST_CONSTANTS;
+		class_type->ce_flags &= ~ZEND_ACC_HAS_AST_PROPERTIES;
+		if (!(class_type->ce_flags & ZEND_ACC_PRELOADED)) {
+			class_type->ce_flags &= ~ZEND_ACC_HAS_AST_STATICS;
+		}
 	}
 
 	return SUCCESS;
@@ -1279,7 +1344,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 static zend_always_inline void _object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
 {
 	if (class_type->default_properties_count) {
-		zval *src = class_type->default_properties_table;
+		zval *src = ZEND_MAP_PTR_GET(class_type->default_properties_table_ptr);
 		zval *dst = object->properties_table;
 		zval *end = src + class_type->default_properties_count;
 
@@ -3809,6 +3874,11 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 		if (Z_TYPE_P(property) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+			if (access_type & ZEND_ACC_STATIC) {
+				ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
+			} else {
+				ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
+			}
 		}
 	}
 
@@ -4113,8 +4183,16 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	}
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (!ce->constants_table) {
+			ce->constants_table = pemalloc(sizeof(HashTable), 1);
+			zend_hash_init(ce->constants_table, 8, NULL, NULL, 1);
+		}
 		c = pemalloc(sizeof(zend_class_constant), 1);
 	} else {
+		if (!ce->constants_table) {
+			ce->constants_table = zend_arena_alloc(&CG(arena), sizeof(HashTable));
+			zend_hash_init(ce->constants_table, 8, NULL, NULL, 0);
+		}
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
 	ZVAL_COPY_VALUE(&c->value, value);
@@ -4124,9 +4202,10 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	c->ce = ce;
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
 	}
 
-	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
+	if (!zend_hash_add_ptr(ce->constants_table, name, c)) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 			"Cannot redefine class constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}

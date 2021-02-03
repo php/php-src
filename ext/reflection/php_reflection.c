@@ -380,13 +380,18 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 
 	/* Constants */
 	smart_str_append_printf(str, "\n");
-	count = zend_hash_num_elements(&ce->constants_table);
+	count = ce->constants_table ? zend_hash_num_elements(ce->constants_table) : 0;
 	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, count);
 	if (count > 0) {
+		HashTable *constants_table;
 		zend_string *key;
 		zend_class_constant *c;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+		constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+		if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+			constants_table = zend_separate_class_constants_table(ce);
+		}
+		ZEND_HASH_FOREACH_STR_KEY_PTR(constants_table, key, c) {
 			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
@@ -3535,6 +3540,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	zend_string *constname;
 	reflection_object *intern;
 	zend_class_entry *ce;
+	HashTable *constants_table;
 	zend_class_constant *constant = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -3554,7 +3560,12 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
-	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
+	constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+	if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+		constants_table = zend_separate_class_constants_table(ce);
+	}
+	if (!constants_table
+	 || (constant = zend_hash_find_ptr(constants_table, constname)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
 		RETURN_THROWS();
 	}
@@ -4420,7 +4431,8 @@ ZEND_METHOD(ReflectionClass, hasConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_exists(&ce->constants_table, name)) {
+	if (ce->constants_table
+	 && zend_hash_exists(ce->constants_table, name)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -4433,6 +4445,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	HashTable *constants_table;
 	zend_string *key;
 	zend_class_constant *constant;
 	zval val;
@@ -4450,7 +4463,14 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, constant) {
+	constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+	if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+		constants_table = zend_separate_class_constants_table(ce);
+	}
+	if (!constants_table) {
+		return;
+	}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(constants_table, key, constant) {
 		if (UNEXPECTED(zval_update_constant_ex(&constant->value, ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
@@ -4468,6 +4488,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	HashTable *constants_table;
 	zend_string *name;
 	zend_class_constant *constant;
 	zend_long filter;
@@ -4484,7 +4505,14 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
+	constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+	if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+		constants_table = zend_separate_class_constants_table(ce);
+	}
+	if (!constants_table) {
+		return;
+	}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(constants_table, name, constant) {
 		if (Z_ACCESS_FLAGS(constant->value) & filter) {
 			zval class_const;
 			reflection_class_constant_factory(name, constant, &class_const);
@@ -4499,6 +4527,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	HashTable *constants_table;
 	zend_class_constant *c;
 	zend_string *name;
 
@@ -4507,12 +4536,19 @@ ZEND_METHOD(ReflectionClass, getConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+	constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+	if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+		constants_table = zend_separate_class_constants_table(ce);
+	}
+	if (!constants_table) {
+		RETURN_FALSE;
+	}
+	ZEND_HASH_FOREACH_PTR(constants_table, c) {
 		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
-	if ((c = zend_hash_find_ptr(&ce->constants_table, name)) == NULL) {
+	if ((c = zend_hash_find_ptr(constants_table, name)) == NULL) {
 		RETURN_FALSE;
 	}
 	ZVAL_COPY_OR_DUP(return_value, &c->value);
@@ -4524,6 +4560,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstant)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	HashTable *constants_table;
 	zend_class_constant *constant;
 	zend_string *name;
 
@@ -4532,7 +4569,12 @@ ZEND_METHOD(ReflectionClass, getReflectionConstant)
 		RETURN_THROWS();
 	}
 
-	if ((constant = zend_hash_find_ptr(&ce->constants_table, name)) == NULL) {
+	constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+	if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+		constants_table = zend_separate_class_constants_table(ce);
+	}
+	if (!constants_table
+	 || (constant = zend_hash_find_ptr(constants_table, name)) == NULL) {
 		RETURN_FALSE;
 	}
 	reflection_class_constant_factory(name, constant, return_value);

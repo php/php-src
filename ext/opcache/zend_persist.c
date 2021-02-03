@@ -236,7 +236,7 @@ static void zend_persist_zval(zval *z)
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = 0;
-			} else {
+			} else if (!zend_accel_in_shm(Z_AST_P(z))) {
 				zend_ast_ref *old_ref = Z_AST_P(z);
 				Z_AST_P(z) = zend_shared_memdup_put(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
@@ -810,10 +810,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		if (new_ce) {
 			return new_ce;
 		}
-		if (!ZCG(current_persistent_script)->corrupted
-		// TODO: get rid of CONSTANTS_UPDATED limitation ???
-		 && (!(ce->ce_flags & ZEND_ACC_LINKED)
-		  || (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (!ZCG(current_persistent_script)->corrupted) {
 			ZCG(is_immutable_class) = 1;
 			ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
@@ -838,6 +835,13 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 				zend_persist_zval(&ce->default_properties_table[i]);
 			}
 		}
+		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+		 && (ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)
+		 && (ce->ce_flags & ZEND_ACC_LINKED)) {
+			ZEND_MAP_PTR_NEW(ce->default_properties_table_ptr);
+		} else {
+			ZEND_MAP_PTR_INIT(ce->default_properties_table_ptr, &ce->default_properties_table);
+		}
 		if (ce->default_static_members_table) {
 			int i;
 			ce->default_static_members_table = zend_shared_memdup_free(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
@@ -861,13 +865,27 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		}
 
-		zend_hash_persist(&ce->constants_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
-			ZEND_ASSERT(p->key != NULL);
-			zend_accel_store_interned_string(p->key);
-			zend_persist_class_constant(&p->val);
-		} ZEND_HASH_FOREACH_END();
-		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
+		if (ce->constants_table) {
+			if (ZCG(is_immutable_class)) {
+				ce->constants_table = zend_shared_memdup(ce->constants_table, sizeof(HashTable));
+			} else {
+				ce->constants_table = zend_shared_memdup_arena(ce->constants_table, sizeof(HashTable));
+			}
+			zend_hash_persist(ce->constants_table);
+			ZEND_HASH_FOREACH_BUCKET(ce->constants_table, p) {
+				ZEND_ASSERT(p->key != NULL);
+				zend_accel_store_interned_string(p->key);
+				zend_persist_class_constant(&p->val);
+			} ZEND_HASH_FOREACH_END();
+			HT_FLAGS(ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
+		}
+		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+		 && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)
+		 && (ce->ce_flags & ZEND_ACC_LINKED)) {
+			ZEND_MAP_PTR_NEW(ce->constants_table_ptr);
+		} else {
+			ZEND_MAP_PTR_INIT(ce->constants_table_ptr, &ce->constants_table);
+		}
 
 		zend_hash_persist(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
