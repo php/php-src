@@ -439,6 +439,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #endif
 			return;
 		} else if (op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+			HashTable *static_variables = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+			if (static_variables) {
+				zend_array_release(static_variables);
+			}
 			return;
 		}
 	} else {
