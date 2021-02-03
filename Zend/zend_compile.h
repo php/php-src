@@ -233,7 +233,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 24...)                            |     |     |     */
+/* Class Flags (unused: 27...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -287,6 +287,10 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* temporary flag used during delayed variance checks     |     |     |     */
 #define ZEND_ACC_CACHABLE                (1 << 23) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_HAS_AST_CONSTANTS       (1 << 24) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_AST_PROPERTIES      (1 << 25) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_AST_STATICS         (1 << 26) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */

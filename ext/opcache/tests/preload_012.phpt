@@ -11,5 +11,16 @@ require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 ?>
 --FILE--
---EXPECTF--
-Warning: Can't preload class Test with unresolved initializer for constant C in %s on line %d
+<?php
+class Foo {
+}
+var_dump(class_exists('Test'));
+try {
+    new Test();
+} catch (Throwable $ex) {
+    echo $ex->getMessage() . "\n";
+}
+?>
+--EXPECT--
+bool(true)
+Undefined constant Foo::BAR

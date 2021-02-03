@@ -5787,6 +5787,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 	zend_class_entry *ce, *scope;
 	zend_class_constant *c;
 	zval *value, *zv;
+	HashTable *constants_table;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -5821,7 +5822,14 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 		}
 
-		zv = zend_hash_find_ex(&ce->constants_table, Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1);
+		constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
+		if (!constants_table && (ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)) {
+			constants_table = zend_separate_class_constants_table(ce);
+		}
+
+		zv = constants_table ?
+			zend_hash_find_ex(constants_table, Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1) :
+			NULL;
 		if (EXPECTED(zv != NULL)) {
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;

@@ -129,10 +129,12 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			break;
 		case IS_CONSTANT_AST:
-			size = zend_shared_memdup_size(Z_AST_P(z), sizeof(zend_ast_ref));
-			if (size) {
-				ADD_SIZE(size);
-				zend_persist_ast_calc(Z_ASTVAL_P(z));
+			if (!zend_accel_in_shm(Z_AST_P(z))) {
+				size = zend_shared_memdup_size(Z_AST_P(z), sizeof(zend_ast_ref));
+				if (size) {
+					ADD_SIZE(size);
+					zend_persist_ast_calc(Z_ASTVAL_P(z));
+				}
 			}
 			break;
 		default:
@@ -381,10 +383,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		zend_shared_alloc_register_xlat_entry(ce, ce);
 
 		ZCG(is_immutable_class) =
-			!ZCG(current_persistent_script)->corrupted &&
-			// TODO: get rid of CONSTANTS_UPDATED limitation ???
-			(!(ce->ce_flags & ZEND_ACC_LINKED) ||
-			 (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED));
+			!ZCG(current_persistent_script)->corrupted;
 
 		ADD_SIZE_EX(sizeof(zend_class_entry));
 
@@ -412,12 +411,15 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				}
 			}
 		}
-		zend_hash_persist_calc(&ce->constants_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
-			ZEND_ASSERT(p->key != NULL);
-			ADD_INTERNED_STRING(p->key);
-			zend_persist_class_constant_calc(&p->val);
-		} ZEND_HASH_FOREACH_END();
+		if (ce->constants_table) {
+			ADD_SIZE_EX(sizeof(HashTable));
+			zend_hash_persist_calc(ce->constants_table);
+			ZEND_HASH_FOREACH_BUCKET(ce->constants_table, p) {
+				ZEND_ASSERT(p->key != NULL);
+				ADD_INTERNED_STRING(p->key);
+				zend_persist_class_constant_calc(&p->val);
+			} ZEND_HASH_FOREACH_END();
+		}
 
 		zend_hash_persist_calc(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {

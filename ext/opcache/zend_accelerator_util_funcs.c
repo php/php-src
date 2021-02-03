@@ -320,7 +320,9 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_hash_clone_prop_info(&ce->properties_info);
 
 	/* constants table */
-	zend_hash_clone_constants(&ce->constants_table);
+	if (ce->constants_table) {
+		zend_hash_clone_constants(ce->constants_table);
+	}
 
 	if (ce->properties_info_table) {
 		int i;

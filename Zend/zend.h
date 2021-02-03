@@ -138,10 +138,12 @@ struct _zend_class_entry {
 	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
+	ZEND_MAP_PTR_DEF(zval *, default_properties_table_ptr);
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);
 	HashTable function_table;
 	HashTable properties_info;
-	HashTable constants_table;
+	HashTable *constants_table;
+	ZEND_MAP_PTR_DEF(HashTable *, constants_table_ptr);
 
 	struct _zend_property_info **properties_info_table;
 
