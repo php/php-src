@@ -1,7 +1,5 @@
 --TEST--
 Function snmp_set_string_output_format
---CREDITS--
-Larry Adams
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
