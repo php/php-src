@@ -51,8 +51,8 @@ $arrays = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333333),
 
        // arrays with string values
-/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'),
+/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'),
        array(1 => "hello", "heredoc" => $heredoc),
 
        // array with object, unset variable and resource variable
@@ -323,7 +323,7 @@ array(4) {
   ["unset"]=>
   NULL
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(5) of type (stream)
 }
 int(6)
 array(6) {
@@ -339,7 +339,7 @@ array(6) {
   ["unset"]=>
   NULL
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(5) of type (stream)
 }
 -- Iteration 11 --
 int(9)
@@ -354,7 +354,7 @@ array(9) {
   [3]=>
   string(5) "fruit"
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(5) of type (stream)
   ["int"]=>
   int(133)
   ["float"]=>
@@ -380,7 +380,7 @@ array(11) {
   [5]=>
   string(5) "fruit"
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(5) of type (stream)
   ["int"]=>
   int(133)
   ["float"]=>
