@@ -780,10 +780,7 @@ function main(): void
 }
 
 if (!function_exists("hrtime")) {
-    /**
-     * @return array|float|int
-     */
-    function hrtime(bool $as_num = false)
+    function hrtime(bool $as_num = false): array|float|int
     {
         $t = microtime(true);
 
@@ -1070,10 +1067,7 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
     closedir($o);
 }
 
-/**
- * @param array|string $name
- */
-function test_name($name): string
+function test_name(array|string $name): string
 {
     if (is_array($name)) {
         return $name[0] . ':' . $name[1];
@@ -1081,11 +1075,8 @@ function test_name($name): string
         return $name;
     }
 }
-/**
- * @param array|string $a
- * @param array|string $b
- */
-function test_sort($a, $b): int
+
+function test_sort(array|string $a, array|string $b): int
 {
     $a = test_name($a);
     $b = test_name($b);
@@ -1196,9 +1187,6 @@ function error_report(string $testname, string $logname, string $tested): void
     }
 }
 
-/**
- * @return false|string
- */
 function system_with_timeout(
     string $commandline,
     ?array $env = null,
@@ -1206,7 +1194,7 @@ function system_with_timeout(
     bool $captureStdIn = true,
     bool $captureStdOut = true,
     bool $captureStdErr = true
-) {
+): string|false {
     global $valgrind;
 
     $data = '';
@@ -1286,10 +1274,7 @@ function system_with_timeout(
     return $data;
 }
 
-/**
- * @param string|array|null $redir_tested
- */
-function run_all_tests(array $test_files, array $env, $redir_tested = null): void
+function run_all_tests(array $test_files, array $env, array|string|null $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
     // Parallel testing
@@ -1357,10 +1342,8 @@ function run_all_tests(array $test_files, array $env, $redir_tested = null): voi
     }
 }
 
-/** The heart of parallel testing.
- * @param string|array|null $redir_tested
- */
-function run_all_tests_parallel(array $test_files, array $env, $redir_tested): void
+/** The heart of parallel testing. */
+function run_all_tests_parallel(array $test_files, array $env, array|string|null $redir_tested): void
 {
     global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
@@ -1798,10 +1781,7 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 //
 //  Run an individual test case.
 //
-/**
- * @param string|array $file
- */
-function run_test(string $php, $file, array $env): string
+function run_test(string $php, array|string $file, array $env): string
 {
     global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
     global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
@@ -2875,10 +2855,7 @@ SH;
     return $restype[0] . 'ED';
 }
 
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
+function comp_line(string $l1, string $l2, bool $is_reg): bool
 {
     if ($is_reg) {
         return preg_match('/^' . $l1 . '$/s', $l2);
@@ -3499,11 +3476,8 @@ function junit_enabled(): bool
     return !empty($JUNIT);
 }
 
-/**
- * @param array|string $type
- */
 function junit_mark_test_as(
-    $type,
+    array|string $type,
     string $file_name,
     string $test_name,
     ?int $time = null,
@@ -3561,7 +3535,7 @@ function junit_mark_test_as(
     $JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
 }
 
-function junit_suite_record(string $suite, string $param, int $value = 1): void
+function junit_suite_record(string $suite, string $param, int|float $value = 1): void
 {
     global $JUNIT;
 
@@ -3569,7 +3543,7 @@ function junit_suite_record(string $suite, string $param, int $value = 1): void
     $JUNIT['suites'][$suite][$param] += $value;
 }
 
-function junit_get_timer(string $file_name): int
+function junit_get_timer(string $file_name): float
 {
     global $JUNIT;
     if (!junit_enabled()) {
