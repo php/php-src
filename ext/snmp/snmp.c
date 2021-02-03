@@ -1358,7 +1358,7 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 		RETURN_THROWS();
 	}
 
-	switch((int) a1) {
+	switch(a1) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
@@ -1383,7 +1383,7 @@ PHP_FUNCTION(snmp_set_string_output_format)
 		RETURN_THROWS();
 	}
 
-	switch((int) a1) {
+	switch(a1) {
 		case NETSNMP_STRING_OUTPUT_GUESS:
 		case NETSNMP_STRING_OUTPUT_ASCII:
 		case NETSNMP_STRING_OUTPUT_HEX:
