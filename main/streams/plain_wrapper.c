@@ -914,9 +914,9 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				case PHP_STREAM_SYNC_SUPPORTED:
 					return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 				case PHP_STREAM_SYNC_FSYNC:
-				    return php_stdiop_sync(stream, 0) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+					return php_stdiop_sync(stream, 0) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 				case PHP_STREAM_SYNC_FDSYNC:
-				    return php_stdiop_sync(stream, 1) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+					return php_stdiop_sync(stream, 1) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 			}
 
 		case PHP_STREAM_OPTION_TRUNCATE_API:
