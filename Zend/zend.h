@@ -149,7 +149,7 @@ struct _zend_class_entry {
 	HashTable properties_info;
 	HashTable constants_table;
 
-	ZEND_MAP_PTR_DEF(zend_class_muttable_data, muttable_data);
+	ZEND_MAP_PTR_DEF(zend_class_muttable_data*, muttable_data);
 	zend_inheritance_cache_entry *inheritance_cache;
 
 	struct _zend_property_info **properties_info_table;

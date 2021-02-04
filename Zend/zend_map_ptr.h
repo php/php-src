@@ -42,7 +42,7 @@
 # define ZEND_MAP_PTR_SET(ptr, val) do { \
 		(*(ZEND_MAP_PTR(ptr))) = (val); \
 	} while (0)
-# define ZEND_MAP_PTR_SET_IMM(ptr, val)
+# define ZEND_MAP_PTR_SET_IMM(ptr, val) \
 	ZEND_MAP_PTR_SET(ptr, val)
 # define ZEND_MAP_PTR_INIT(ptr, val) do { \
 		ZEND_MAP_PTR(ptr) = (val); \
@@ -55,6 +55,8 @@
 # define ZEND_MAP_PTR_SET_REAL_BASE(base, ptr) do { \
 		base = (ptr); \
 	} while (0)
+# define ZEND_MAP_PTR_OFFSET2PTR(ptr) \
+	((void**)((char*)CG(map_ptr_base) + (uintptr_t)ZEND_MAP_PTR(ptr)))
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 # define ZEND_MAP_PTR(ptr) \
 	ptr ## __ptr
