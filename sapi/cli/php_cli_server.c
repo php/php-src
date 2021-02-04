@@ -498,58 +498,7 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
-	char *workers;
-
-	if (php_module_startup(sapi_module, &cli_server_module_entry, 1) == FAILURE) {
-		return FAILURE;
-	}
-
-	if ((workers = getenv("PHP_CLI_SERVER_WORKERS"))) {
-#ifndef SO_REUSEPORT
-		fprintf(stderr, "platform does not support SO_REUSEPORT, cannot create workers\n");
-#elif HAVE_FORK
-		ZEND_ATOL(php_cli_server_workers_max, workers);
-
-		if (php_cli_server_workers_max > 1) {
-			zend_long php_cli_server_worker;
-
-			php_cli_server_workers = calloc(
-				php_cli_server_workers_max, sizeof(pid_t));
-			if (!php_cli_server_workers) {
-				php_cli_server_workers_max = 1;
-
-				return SUCCESS;
-			}
-
-			php_cli_server_master = getpid();
-
-			for (php_cli_server_worker = 0;
-				 php_cli_server_worker < php_cli_server_workers_max;
-				 php_cli_server_worker++) {
-				pid_t pid = fork();
-
-				if (pid == FAILURE) {
-					/* no more forks allowed, work with what we have ... */
-					php_cli_server_workers_max =
-						php_cli_server_worker + 1;
-					return SUCCESS;
-				} else if (pid == SUCCESS) {
-					return SUCCESS;
-				} else {
-					php_cli_server_workers[
-						php_cli_server_worker
-					] = pid;
-				}
-			}
-		} else {
-			fprintf(stderr, "number of workers must be larger than 1\n");
-		}
-#else
-		fprintf(stderr, "forking is not supported on this platform\n");
-#endif
-	}
-
-	return SUCCESS;
+	return php_module_startup(sapi_module, &cli_server_module_entry, 1);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -1314,13 +1263,6 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 		{
 			int val = 1;
 			setsockopt(retval, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
-		}
-#endif
-
-#if defined(HAVE_FORK) && defined(SO_REUSEPORT)
-		if (php_cli_server_workers_max > 1) {
-			int val = 1;
-			setsockopt(retval, SOL_SOCKET, SO_REUSEPORT, (char*)&val, sizeof(val));
 		}
 #endif
 
@@ -2408,6 +2350,50 @@ static char *php_cli_server_parse_addr(const char *addr, int *pport) {
 	return pestrndup(addr, end - addr, 1);
 }
 
+static void php_cli_server_startup_workers() {
+	char *workers = getenv("PHP_CLI_SERVER_WORKERS");
+	if (!workers) {
+		return;
+	}
+
+#if HAVE_FORK
+	ZEND_ATOL(php_cli_server_workers_max, workers);
+	if (php_cli_server_workers_max > 1) {
+		zend_long php_cli_server_worker;
+
+		php_cli_server_workers = calloc(
+			php_cli_server_workers_max, sizeof(pid_t));
+		if (!php_cli_server_workers) {
+			php_cli_server_workers_max = 1;
+			return;
+		}
+
+		php_cli_server_master = getpid();
+
+		for (php_cli_server_worker = 0;
+			 php_cli_server_worker < php_cli_server_workers_max;
+			 php_cli_server_worker++) {
+			pid_t pid = fork();
+
+			if (pid == FAILURE) {
+				/* no more forks allowed, work with what we have ... */
+				php_cli_server_workers_max =
+					php_cli_server_worker + 1;
+				return;
+			} else if (pid == SUCCESS) {
+				return;
+			} else {
+				php_cli_server_workers[php_cli_server_worker] = pid;
+			}
+		}
+	} else {
+		fprintf(stderr, "number of workers must be larger than 1\n");
+	}
+#else
+	fprintf(stderr, "forking is not supported on this platform\n");
+#endif
+}
+
 static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
 {
 	int retval = SUCCESS;
@@ -2436,6 +2422,8 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		goto out;
 	}
 	server->server_sock = server_sock;
+
+	php_cli_server_startup_workers();
 
 	err = php_cli_server_poller_ctor(&server->poller);
 	if (SUCCESS != err) {
