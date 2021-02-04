@@ -2339,6 +2339,40 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		}
 	}
 
+	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+		zend_op_array *op_array;
+		zval *zv;
+
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+			if (op_array->type == ZEND_USER_FUNCTION
+			 && op_array->static_variables
+			 && !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+				if (UNEXPECTED(GC_REFCOUNT(op_array->static_variables) > 1)) {
+					GC_DELREF(op_array->static_variables);
+					op_array->static_variables = zend_array_dup(op_array->static_variables);
+				}
+				ZEND_HASH_FOREACH_VAL(op_array->static_variables, zv) {
+					if (Z_ISREF_P(zv)) {
+						zend_reference *ref = Z_REF_P(zv);
+
+						ZVAL_COPY_VALUE(zv, &ref->val);
+						if (GC_DELREF(ref) == 0) {
+							efree_size(ref, sizeof(zend_reference));
+						}
+					}
+					if (Z_REFCOUNTED_P(zv)) {
+						if (Z_TYPE_P(zv) == IS_ARRAY) {
+							SEPARATE_ARRAY(zv);
+						} else if (Z_TYPE_P(zv) == IS_OBJECT || Z_TYPE_P(zv) == IS_RESOURCE) {
+							/* Can't cache */
+							return NULL;
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
