@@ -438,19 +438,13 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			}
 #endif
 			return;
-		} else if (op_array->scope->ce_flags & ZEND_ACC_CACHED) {
-			HashTable *static_variables = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-			if (static_variables) {
-				zend_array_release(static_variables);
-			}
-			return;
 		}
 	} else {
 		/* "prototype" may be undefined if "scope" isn't set */
 		op_array->prototype = NULL;
 	}
 
-	if (op_array->static_variables) {
+	if (op_array->static_variables && !zend_accel_in_shm(op_array->static_variables)) {
 		Bucket *p;
 
 		zend_hash_persist(op_array->static_variables);
@@ -465,6 +459,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
 	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+
+	if (op_array->scope && op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+		return;
+	}
 
 	if (op_array->literals) {
 		zval *p, *end;

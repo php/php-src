@@ -206,12 +206,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			/* already stored */
 			ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 			return;
-		} else if (op_array->scope->ce_flags & ZEND_ACC_CACHED) {
-			return;
 		}
 	}
 
-	if (op_array->static_variables) {
+	if (op_array->static_variables && !zend_accel_in_shm(op_array->static_variables)) {
 		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
 			Bucket *p;
 
@@ -224,6 +222,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				zend_persist_zval_calc(&p->val);
 			} ZEND_HASH_FOREACH_END();
 		}
+	}
+
+	if (op_array->scope && op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+		return;
 	}
 
 	if (op_array->literals) {
