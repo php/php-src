@@ -413,15 +413,12 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				}
 			}
 		}
-		if (ce->constants_table) {
-			ADD_SIZE_EX(sizeof(HashTable));
-			zend_hash_persist_calc(ce->constants_table);
-			ZEND_HASH_FOREACH_BUCKET(ce->constants_table, p) {
-				ZEND_ASSERT(p->key != NULL);
-				ADD_INTERNED_STRING(p->key);
-				zend_persist_class_constant_calc(&p->val);
-			} ZEND_HASH_FOREACH_END();
-		}
+		zend_hash_persist_calc(&ce->constants_table);
+		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
+			ZEND_ASSERT(p->key != NULL);
+			ADD_INTERNED_STRING(p->key);
+			zend_persist_class_constant_calc(&p->val);
+		} ZEND_HASH_FOREACH_END();
 
 		zend_hash_persist_calc(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {

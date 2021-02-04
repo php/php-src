@@ -267,8 +267,7 @@ constant_binary_op:
 					zend_class_constant *cc;
 					zval *c, t;
 
-					if (ce->constants_table &&
-					    (cc = zend_hash_find_ptr(ce->constants_table,
+					if ((cc = zend_hash_find_ptr(&ce->constants_table,
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
 						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;

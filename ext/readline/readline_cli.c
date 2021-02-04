@@ -553,7 +553,7 @@ TODO:
 				}
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? (ce->constants_table ? ce->constants_table : (HashTable*)&zend_empty_array): EG(zend_constants));
+				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}

@@ -107,12 +107,18 @@ typedef struct _zend_trait_alias {
 	uint32_t modifiers;
 } zend_trait_alias;
 
-typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
+typedef struct _zend_class_muttable_data {
+	zval      *default_properties_table;
+	HashTable *constants_table;
+	uint32_t   ce_flags;
+} zend_class_muttable_data;
 
 typedef struct _zend_class_dependency {
 	zend_string      *name;
 	zend_class_entry *ce;
 } zend_class_dependency;
+
+typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
 
 struct _zend_inheritance_cache_entry {
 	zend_inheritance_cache_entry *next;
@@ -138,12 +144,13 @@ struct _zend_class_entry {
 	int default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
-	ZEND_MAP_PTR_DEF(zval *, default_properties_table_ptr);
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);
 	HashTable function_table;
 	HashTable properties_info;
-	HashTable *constants_table;
-	ZEND_MAP_PTR_DEF(HashTable *, constants_table_ptr);
+	HashTable constants_table;
+
+	ZEND_MAP_PTR_DEF(zend_class_muttable_data, muttable_data);
+	zend_inheritance_cache_entry *inheritance_cache;
 
 	struct _zend_property_info **properties_info_table;
 
@@ -189,7 +196,6 @@ struct _zend_class_entry {
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
-	zend_inheritance_cache_entry *inheritance_cache;
 
 	union {
 		struct {

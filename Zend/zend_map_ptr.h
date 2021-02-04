@@ -37,9 +37,13 @@
 	type * ZEND_MAP_PTR(name)
 # define ZEND_MAP_PTR_GET(ptr) \
 	(*(ZEND_MAP_PTR(ptr)))
+# define ZEND_MAP_PTR_GET_IMM(ptr) \
+	ZEND_MAP_PTR_GET(ptr)
 # define ZEND_MAP_PTR_SET(ptr, val) do { \
 		(*(ZEND_MAP_PTR(ptr))) = (val); \
 	} while (0)
+# define ZEND_MAP_PTR_SET_IMM(ptr, val)
+	ZEND_MAP_PTR_SET(ptr, val)
 # define ZEND_MAP_PTR_INIT(ptr, val) do { \
 		ZEND_MAP_PTR(ptr) = (val); \
 	} while (0)
@@ -66,11 +70,17 @@
 	(*(ZEND_MAP_PTR_IS_OFFSET(ptr) ? \
 		ZEND_MAP_PTR_OFFSET2PTR(ptr) : \
 		((void**)(ZEND_MAP_PTR(ptr)))))
+# define ZEND_MAP_PTR_GET_IMM(ptr) \
+	(*ZEND_MAP_PTR_OFFSET2PTR(ptr))
 # define ZEND_MAP_PTR_SET(ptr, val) do { \
 		void **__p = (void**)(ZEND_MAP_PTR(ptr)); \
 		if (ZEND_MAP_PTR_IS_OFFSET(ptr)) { \
 			__p = ZEND_MAP_PTR_OFFSET2PTR(ptr); \
 		} \
+		*__p = (val); \
+	} while (0)
+# define ZEND_MAP_PTR_SET_IMM(ptr, val) do { \
+		void **__p = ZEND_MAP_PTR_OFFSET2PTR(ptr); \
 		*__p = (val); \
 	} while (0)
 # define ZEND_MAP_PTR_INIT(ptr, val) do { \
