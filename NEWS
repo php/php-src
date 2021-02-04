@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 7.4.16
 
+- Core:
+  . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
+
 - MySQLi:
   . Fixed bug #74779 (x() and y() truncating floats to integers). (cmb)
 
