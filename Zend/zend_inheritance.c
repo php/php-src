@@ -393,8 +393,6 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 #endif
 		// TODO: dependency on not-immutable class ???
-//		fprintf(stderr, "dep %s - %s/%s %d\n", ZSTR_VAL(CG(current_linking_class)->name), ZSTR_VAL(class_name), ZSTR_VAL(ce->name), (ce->type == ZEND_INTERNAL_CLASS) || (ce->ce_flags & ZEND_ACC_IMMUTABLE) != 0);
-//		ZEND_ASSERT(0);
 		if (ht) {
 			zend_hash_destroy(ht);
 			FREE_HASHTABLE(ht);
@@ -419,7 +417,6 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *proto_scope, zend_type proto_type,
 		bool register_unresolved) {
 	bool have_unresolved = 0;
-
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
 		 * for forward-compatibility reasons, as we may have named types in the future that
@@ -520,7 +517,7 @@ static inheritance_status zend_perform_covariant_type_check(
 				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
 			status = zend_perform_covariant_class_type_check(
 				fe_scope, fe_class_name, NULL,
-				proto_scope, proto_type, /* register_unresolved */ 0); // dep 1.
+				proto_scope, proto_type, /* register_unresolved */ 0);
 		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
 			zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
 			status = zend_perform_covariant_class_type_check(
@@ -676,7 +673,7 @@ static inheritance_status zend_do_perform_implementation_check(
 
 		local_status = zend_perform_covariant_type_check(
 			fe_scope, fe->common.arg_info[-1].type,
-			proto_scope, proto->common.arg_info[-1].type); // dep 2.
+			proto_scope, proto->common.arg_info[-1].type);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
@@ -1179,7 +1176,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
-	zval *zv = zend_hash_find_ex(ce->constants_table, name, 1);
+	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
 	zend_class_constant *c;
 
 	if (zv != NULL) {
@@ -1203,7 +1200,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 			memcpy(c, parent_const, sizeof(zend_class_constant));
 			parent_const = c;
 		}
-		_zend_hash_append_ptr(ce->constants_table, name, parent_const);
+		_zend_hash_append_ptr(&ce->constants_table, name, parent_const);
 	}
 }
 /* }}} */
@@ -1430,23 +1427,14 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (parent_ce->constants_table) {
+	if (zend_hash_num_elements(&parent_ce->constants_table)) {
 		zend_class_constant *c;
 
-		if (!ce->constants_table) {
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->constants_table = pemalloc(sizeof(HashTable), 1);
-				zend_hash_init(ce->constants_table, 8, NULL, NULL, 1);
-			} else {
-				ce->constants_table = zend_arena_alloc(&CG(arena), sizeof(HashTable));
-				zend_hash_init(ce->constants_table, 8, NULL, NULL, 0);
-			}
-		}
-		zend_hash_extend(ce->constants_table,
-			zend_hash_num_elements(ce->constants_table) +
-			zend_hash_num_elements(parent_ce->constants_table), 0);
+		zend_hash_extend(&ce->constants_table,
+			zend_hash_num_elements(&ce->constants_table) +
+			zend_hash_num_elements(&parent_ce->constants_table), 0);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(parent_ce->constants_table, key, c) {
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, c) {
 			do_inherit_class_constant(key, c, ce);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1500,7 +1488,7 @@ static bool do_inherit_constant_check(HashTable *child_constants_table, zend_cla
 
 static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	if (do_inherit_constant_check(ce->constants_table, c, name, iface)) {
+	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
 		zend_class_constant *ct;
 		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1516,7 +1504,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 			memcpy(ct, c, sizeof(zend_class_constant));
 			c = ct;
 		}
-		zend_hash_update_ptr(ce->constants_table, name, c);
+		zend_hash_update_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */
@@ -1527,20 +1515,9 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	zend_string *key;
 	zend_class_constant *c;
 
-	if (iface->constants_table) {
-		if (!ce->constants_table) {
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->constants_table = pemalloc(sizeof(HashTable), 1);
-				zend_hash_init(ce->constants_table, 8, NULL, NULL, 1);
-			} else {
-				ce->constants_table = zend_arena_alloc(&CG(arena), sizeof(HashTable));
-				zend_hash_init(ce->constants_table, 8, NULL, NULL, 0);
-			}
-		}
-		ZEND_HASH_FOREACH_STR_KEY_PTR(iface->constants_table, key, c) {
-			do_inherit_iface_constant(key, c, ce, iface);
-		} ZEND_HASH_FOREACH_END();
-	}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+		do_inherit_iface_constant(key, c, ce, iface);
+	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
 		do_inherit_method(key, func, ce, 1, 0);
@@ -1576,12 +1553,10 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 	}
 	if (ignore) {
-		if (iface->constants_table && ce->constants_table) {
-			/* Check for attempt to redeclare interface constants */
-			ZEND_HASH_FOREACH_STR_KEY_PTR(ce->constants_table, key, c) {
-				do_inherit_constant_check(iface->constants_table, c, key, iface);
-			} ZEND_HASH_FOREACH_END();
-		}
+		/* Check for attempt to redeclare interface constants */
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+			do_inherit_constant_check(&iface->constants_table, c, key, iface);
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -1624,11 +1599,9 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 					return;
 				}
 				/* skip duplications */
-				if (iface->constants_table && ce->constants_table) {
-					ZEND_HASH_FOREACH_STR_KEY_PTR(ce->constants_table, key, c) {
-						do_inherit_constant_check(iface->constants_table, c, key, iface);
-					} ZEND_HASH_FOREACH_END();
-				}
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+					do_inherit_constant_check(&iface->constants_table, c, key, iface);
+				} ZEND_HASH_FOREACH_END();
 
 				iface = NULL;
 				break;
@@ -2502,6 +2475,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
 	ce->inheritance_cache = NULL;
+	ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
 
 	/* properties */
 	if (ce->default_properties_table) {
@@ -2514,7 +2488,6 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZVAL_COPY_VALUE_PROP(dst, src);
 		}
 	}
-	ZEND_MAP_PTR_INIT(ce->default_properties_table_ptr, &ce->default_properties_table);
 
 	/* methods */
 	ce->function_table.pDestructor = ZEND_FUNCTION_DTOR;
@@ -2600,15 +2573,12 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	}
 
 	/* constants table */
-	if (ce->constants_table) {
-		HashTable *ht = zend_arena_alloc(&CG(arena), sizeof(HashTable));
-		memcpy(ht, ce->constants_table, sizeof(HashTable));
-		ce->constants_table = ht;
-		p = emalloc(HT_SIZE(ht));
-		memcpy(p, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
-		HT_SET_DATA_ADDR(ht, p);
-		p = ht->arData;
-		end = p + ht->nNumUsed;
+	if (!(HT_FLAGS(&ce->constants_table) & HASH_FLAG_UNINITIALIZED)) {
+		p = emalloc(HT_SIZE(&ce->constants_table));
+		memcpy(p, HT_GET_DATA_ADDR(&ce->constants_table), HT_USED_SIZE(&ce->constants_table));
+		HT_SET_DATA_ADDR(&ce->constants_table, p);
+		p = ce->constants_table.arData;
+		end = p + ce->constants_table.nNumUsed;
 		for (; p != end; p++) {
 			zend_class_constant *c, *new_c;
 
@@ -2620,7 +2590,6 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			new_c->ce = ce;
 		}
 	}
-	ZEND_MAP_PTR_INIT(ce->constants_table_ptr, &ce->constants_table);
 
 	return ce;
 }

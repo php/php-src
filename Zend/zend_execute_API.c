@@ -295,34 +295,15 @@ void shutdown_executor(void) /* {{{ */
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
 			zend_class_entry *ce = Z_PTR_P(zv);
+
 			if (ce->default_static_members_count) {
 				zend_cleanup_internal_class_data(ce);
 			}
-			if (ZEND_MAP_PTR_GET(ce->constants_table_ptr)) {
-				HashTable *constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
-				zend_class_constant *c;
 
-				if (constants_table != ce->constants_table) {
-					ZEND_HASH_FOREACH_PTR(constants_table, c) {
-						zval_ptr_dtor_nogc(&c->value);
-					} ZEND_HASH_FOREACH_END();
-					zend_hash_destroy(constants_table);
-					ZEND_MAP_PTR_SET(ce->constants_table_ptr, NULL);
-				}
+			if (ZEND_MAP_PTR(ce->muttable_data) && ZEND_MAP_PTR_GET_IMM(ce->muttable_data)) {
+				zend_cleanup_muttable_class_data(ce);
 			}
-			if (ZEND_MAP_PTR_GET(ce->default_properties_table_ptr)) {
-				zval *p = ZEND_MAP_PTR_GET(ce->default_properties_table_ptr);
-				zval *end;
 
-				if (p != ce->default_properties_table) {
-					end = p + ce->default_properties_count;
-					while (p < end) {
-						zval_ptr_dtor_nogc(p);
-						p++;
-					}
-					ZEND_MAP_PTR_SET(ce->default_properties_table_ptr, NULL);
-				}
-			}
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 				zend_op_array *op_array;
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {

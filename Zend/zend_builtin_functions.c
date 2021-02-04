@@ -703,7 +703,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
-	zval *default_properties_table = ZEND_MAP_PTR_GET(ce->default_properties_table_ptr);
+	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&

@@ -650,13 +650,11 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		if (ce->constants_table) {
-			ZEND_HASH_FOREACH_BUCKET(ce->constants_table, q) {
-				if (q->key) {
-					q->key = new_interned_string(q->key);
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, q) {
+			if (q->key) {
+				q->key = new_interned_string(q->key);
+			}
+		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
 	/* constant hash keys */
@@ -3767,18 +3765,16 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	do {
 		ok = 1;
 		changed = 0;
-		if (ce->constants_table) {
-			ZEND_HASH_FOREACH_PTR(ce->constants_table, c) {
-				val = &c->value;
-				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-					if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
-						was_changed = changed = 1;
-					} else {
-						ok = 0;
-					}
+		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+			val = &c->value;
+			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+					was_changed = changed = 1;
+				} else {
+					ok = 0;
 				}
-			} ZEND_HASH_FOREACH_END();
-		}
+			}
+		} ZEND_HASH_FOREACH_END();
 		if (ok) {
 			ce->ce_flags &= ~ZEND_ACC_HAS_AST_CONSTANTS;
 		}

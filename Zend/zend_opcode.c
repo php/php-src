@@ -255,6 +255,38 @@ static void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
+ZEND_API void zend_cleanup_muttable_class_data(zend_class_entry *ce)
+{
+	zend_class_muttable_data *muttable_data = ZEND_MAP_PTR_GET_IMM(ce->muttable_data);
+
+	if (muttable_data) {
+		HashTable *constants_table;
+		zval *p;
+
+		constants_table = muttable_data->constants_table;
+		if (constants_table && constants_table != &ce->constants_table) {
+			zend_class_constant *c;
+
+			ZEND_HASH_FOREACH_PTR(constants_table, c) {
+				zval_ptr_dtor_nogc(&c->value);
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(constants_table);
+			muttable_data->constants_table = NULL;
+		}
+
+		p = muttable_data->default_properties_table;
+		if (p && p != ce->default_properties_table) {
+			zval *end = p + ce->default_properties_count;
+
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
+			muttable_data->default_properties_table = NULL;
+		}
+	}
+}
+
 ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
@@ -267,31 +299,11 @@ ZEND_API void destroy_zend_class(zval *zv)
 		if (ce->default_static_members_count) {
 			zend_cleanup_internal_class_data(ce);
 		}
-		if (ZEND_MAP_PTR_GET(ce->constants_table_ptr)) {
-			HashTable *constants_table = ZEND_MAP_PTR_GET(ce->constants_table_ptr);
-			zend_class_constant *c;
 
-			if (constants_table != ce->constants_table) {
-				ZEND_HASH_FOREACH_PTR(constants_table, c) {
-					zval_ptr_dtor_nogc(&c->value);
-				} ZEND_HASH_FOREACH_END();
-				zend_hash_destroy(constants_table);
-				ZEND_MAP_PTR_SET(ce->constants_table_ptr, NULL);
-			}
+		if (ZEND_MAP_PTR(ce->muttable_data) && ZEND_MAP_PTR_GET_IMM(ce->muttable_data)) {
+			zend_cleanup_muttable_class_data(ce);
 		}
-		if (ZEND_MAP_PTR_GET(ce->default_properties_table_ptr)) {
-			zval *p = ZEND_MAP_PTR_GET(ce->default_properties_table_ptr);
-			zval *end;
 
-			if (p != ce->default_properties_table) {
-				end = p + ce->default_properties_count;
-				while (p < end) {
-					zval_ptr_dtor_nogc(p);
-					p++;
-				}
-				ZEND_MAP_PTR_SET(ce->default_properties_table_ptr, NULL);
-			}
-		}
 		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 				if (op_array->type == ZEND_USER_FUNCTION) {
@@ -379,10 +391,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->function_table);
-			if (ce->constants_table) {
+			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(ce->constants_table, c) {
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
@@ -393,8 +405,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
-				zend_hash_destroy(ce->constants_table);
 			}
+			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
 			}
@@ -435,10 +447,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			} ZEND_HASH_FOREACH_END();
 
 			zend_hash_destroy(&ce->function_table);
-			if (ce->constants_table) {
+			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(ce->constants_table, c) {
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
 						zval_internal_ptr_dtor(&c->value);
 						if (c->doc_comment) {
@@ -450,8 +462,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					}
 					free(c);
 				} ZEND_HASH_FOREACH_END();
-				zend_hash_destroy(ce->constants_table);
-				free(ce->constants_table);
+				zend_hash_destroy(&ce->constants_table);
 			}
 			if (ce->iterator_funcs_ptr) {
 				free(ce->iterator_funcs_ptr);

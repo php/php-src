@@ -1659,13 +1659,11 @@ static bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend
 	zval *c;
 
 	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
-		cc = CG(active_class_entry)->constants_table ?
-			zend_hash_find_ptr(CG(active_class_entry)->constants_table, name) : NULL;
+		cc = zend_hash_find_ptr(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
 		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name);
 		if (ce) {
-			cc = ce->constants_table ?
-				zend_hash_find_ptr(ce->constants_table, name) : NULL;
+			cc = zend_hash_find_ptr(&ce->constants_table, name);
 		} else {
 			return 0;
 		}
@@ -1843,8 +1841,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	ce->constants_table = NULL;
 	zend_hash_init(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes);
+	zend_hash_init(&ce->constants_table, 8, NULL, NULL, persistent_hashes);
 	zend_hash_init(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -1853,8 +1851,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
 	}
-	ZEND_MAP_PTR_INIT(ce->default_properties_table_ptr, &ce->default_properties_table);
-	ZEND_MAP_PTR_INIT(ce->constants_table_ptr, &ce->constants_table);
+	ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
