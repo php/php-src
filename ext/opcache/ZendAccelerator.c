@@ -2251,10 +2251,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	return zend_accel_load_script(persistent_script, from_shared_memory);
 }
 
-static zend_inheritance_cache_entry* _zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+static zend_inheritance_cache_entry* zend_accel_inheritance_cache_find(zend_inheritance_cache_entry *entry, zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, bool *needs_autoload_ptr)
 {
 	uint32_t i;
-	zend_inheritance_cache_entry *entry;
 
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
@@ -2262,6 +2261,7 @@ static zend_inheritance_cache_entry* _zend_accel_inheritance_cache_get(zend_clas
 	entry = ce->inheritance_cache;
 	while (entry) {
 		bool found = 1;
+		bool needs_autoload = 0;
 
 		if (entry->parent != parent) {
 			found = 0;
@@ -2272,44 +2272,55 @@ static zend_inheritance_cache_entry* _zend_accel_inheritance_cache_get(zend_clas
 					break;
 				}
 			}
+			if (entry->dependencies) {
+				for (i = 0; i < entry->dependencies_count; i++) {
+					zend_class_entry *ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+
+					if (ce != entry->dependencies[i].ce) {
+						if (!ce) {
+							needs_autoload = 1;
+						} else {
+							found = 0;
+							break;
+						}
+					}
+				}
+			}
 		}
 		if (found) {
-			zend_map_ptr_extend(ZCSG(map_ptr_last));
+			*needs_autoload_ptr = needs_autoload;
 			return entry;
-		} else {
-			entry = entry->next;
 		}
+		entry = entry->next;
 	}
 
 	return NULL;
 }
 
-static bool zend_accel_check_dependencies(zend_class_dependency *dependencies, uint32_t dependencies_count)
-{
-	uint32_t i;
-
-	for (i = 0; i < dependencies_count; i++) {
-		zend_class_entry *ce = zend_lookup_class(dependencies[i].name);
-
-		if (!ce || ce != dependencies[i].ce) {
-			return 0;
-		}
-	}
-	return 1;
-}
-
 static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
-	zend_inheritance_cache_entry *entry = _zend_accel_inheritance_cache_get(ce, parent, traits_and_interfaces);
+	uint32_t i;
+	bool needs_autoload;
+	zend_inheritance_cache_entry *entry = ce->inheritance_cache;
 
-	if (entry) {
-		if (entry->dependencies) {
-			if (!zend_accel_check_dependencies(entry->dependencies, entry->dependencies_count)) {
-				return NULL;
+	while (entry) {
+		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
+		if (entry) {
+			if (!needs_autoload) {
+				zend_map_ptr_extend(ZCSG(map_ptr_last));
+				return entry->ce;
+			}
+
+			for (i = 0; i < entry->dependencies_count; i++) {
+				zend_class_entry *ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, 0);
+
+				if (ce == NULL) {
+					return NULL;
+				}
 			}
 		}
-		return entry->ce;
 	}
+
 	return NULL;
 }
 
@@ -2318,6 +2329,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	zend_persistent_script dummy;
 	size_t size;
 	uint32_t i;
+	bool needs_autoload;
 	zend_class_entry *new_ce;
 	zend_inheritance_cache_entry *entry;
 
@@ -2374,16 +2386,19 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	entry = _zend_accel_inheritance_cache_get(proto, parent, traits_and_interfaces);
-	if (entry) {
-		zend_shared_alloc_unlock();
-		SHM_PROTECT();
-		if (!entry->dependencies
-		 || zend_accel_check_dependencies(entry->dependencies, entry->dependencies_count)) {
-			return entry->ce;
+	entry = ce->inheritance_cache;
+	while (entry) {
+		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
+		if (entry) {
+			if (!needs_autoload) {
+				zend_shared_alloc_unlock();
+				SHM_PROTECT();
+
+				zend_map_ptr_extend(ZCSG(map_ptr_last));
+				return entry->ce;
+			}
+			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be posible ???
 		}
-		SHM_UNPROTECT();
-		zend_shared_alloc_lock();
 	}
 
 	zend_shared_alloc_init_xlat_table();
