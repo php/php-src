@@ -217,10 +217,7 @@ void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 
 static void php_gd_object_minit_helper()
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "GdImage", class_GdImage_methods);
-	gd_image_ce = zend_register_internal_class(&ce);
-	gd_image_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
 	gd_image_ce->serialize = zend_class_serialize_deny;
 	gd_image_ce->unserialize = zend_class_unserialize_deny;
@@ -287,10 +284,7 @@ static zend_function *php_gd_font_object_get_constructor(zend_object *object)
 
 static void php_gd_font_minit_helper()
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
-	gd_font_ce = zend_register_internal_class(&ce);
-	gd_font_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	gd_font_ce = register_class_GdFont();
 	gd_font_ce->create_object = php_gd_font_object_create;
 	gd_font_ce->serialize = zend_class_serialize_deny;
 	gd_font_ce->unserialize = zend_class_unserialize_deny;

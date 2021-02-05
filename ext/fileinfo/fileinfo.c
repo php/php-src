@@ -107,9 +107,7 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(finfo)
 {
-	zend_class_entry _finfo_class_entry;
-	INIT_CLASS_ENTRY(_finfo_class_entry, "finfo", class_finfo_methods);
-	finfo_class_entry = zend_register_internal_class(&_finfo_class_entry);
+	finfo_class_entry = register_class_finfo();
 	finfo_class_entry->create_object = finfo_objects_new;
 	finfo_class_entry->serialize = zend_class_serialize_deny;
 	finfo_class_entry->unserialize = zend_class_unserialize_deny;

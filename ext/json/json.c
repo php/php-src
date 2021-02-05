@@ -44,13 +44,9 @@ PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
-	zend_class_entry ce;
+	php_json_serializable_ce = register_class_JsonSerializable();
 
-	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
-	php_json_serializable_ce = zend_register_internal_interface(&ce);
-
-	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
-	php_json_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	php_json_exception_ce = register_class_JsonException(zend_ce_exception);
 
 	/* options for json_encode */
 	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG);
