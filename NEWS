@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
 
+- MySQLnd:
+  . Fixed bug #78680 (mysqlnd's mysql_clear_password does not transmit
+    null-terminated password). (Daniel Black)
+
 - MySQLi:
   . Fixed bug #74779 (x() and y() truncating floats to integers). (cmb)
 
