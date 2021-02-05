@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 namespace {
 
@@ -68,8 +71,17 @@ final class FFI
 
 namespace FFI {
 
+final class CData {
+}
+
 final class CType {
     public function getName() : string {}
+}
+
+class Exception extends \Error {
+}
+
+final class ParserException extends Exception {
 }
 
 }

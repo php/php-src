@@ -1557,8 +1557,6 @@ PHP_METHOD(HashContext, __unserialize)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(hash)
 {
-	zend_class_entry ce;
-
 	zend_hash_init(&php_hash_hashtable, 35, NULL, NULL, 1);
 
 	php_hash_register_algo("md2",			&php_hash_md2_ops);
@@ -1627,9 +1625,7 @@ PHP_MINIT_FUNCTION(hash)
 
 	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "HashContext", class_HashContext_methods);
-	php_hashcontext_ce = zend_register_internal_class(&ce);
-	php_hashcontext_ce->ce_flags |= ZEND_ACC_FINAL;
+	php_hashcontext_ce = register_class_HashContext();
 	php_hashcontext_ce->create_object = php_hashcontext_create;
 
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,

@@ -97,8 +97,6 @@ static void ftp_object_destroy(zend_object *zobj) {
 
 PHP_MINIT_FUNCTION(ftp)
 {
-	zend_class_entry ce;
-
 #ifdef HAVE_FTP_SSL
 #if OPENSSL_VERSION_NUMBER < 0x10101000 && !defined(LIBRESSL_VERSION_NUMBER)
 	SSL_library_init();
@@ -110,9 +108,7 @@ PHP_MINIT_FUNCTION(ftp)
 #endif
 #endif
 
-	INIT_CLASS_ENTRY(ce, "FTPConnection", NULL);
-	php_ftp_ce = zend_register_internal_class(&ce);
-	php_ftp_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_ftp_ce = register_class_FTPConnection();
 	php_ftp_ce->create_object = ftp_object_create;
 	php_ftp_ce->serialize = zend_class_serialize_deny;
 	php_ftp_ce->unserialize = zend_class_unserialize_deny;

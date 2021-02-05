@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5d05deb60466c6e1ee73b44ad0b09a032bc8410e */
+ * Stub hash: c301856deffe269e4bbf1554d9eba4d5cbbb20e8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iconv_strlen, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -85,3 +85,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iconv_get_encoding, arginfo_iconv_get_encoding)
 	ZEND_FE_END
 };
+

@@ -527,9 +527,7 @@ static ZEND_GINIT_FUNCTION(gmp)
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(gmp)
 {
-	zend_class_entry tmp_ce;
-	INIT_CLASS_ENTRY(tmp_ce, "GMP", class_GMP_methods);
-	gmp_ce = zend_register_internal_class(&tmp_ce);
+	gmp_ce = register_class_GMP();
 	gmp_ce->create_object = gmp_create_object;
 	gmp_ce->serialize = gmp_serialize;
 	gmp_ce->unserialize = gmp_unserialize;

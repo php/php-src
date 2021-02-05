@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 31f7c4cd39e58d6474b90acd65f4b7bda7a6ddf3 */
+ * Stub hash: ec1ad38320dfec1e567b0f0062dbc032c425945c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -157,3 +157,26 @@ static const zend_function_entry class_EnchantBroker_methods[] = {
 static const zend_function_entry class_EnchantDictionary_methods[] = {
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_EnchantBroker()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "EnchantBroker", class_EnchantBroker_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_EnchantDictionary()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "EnchantDictionary", class_EnchantDictionary_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+

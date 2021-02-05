@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef23ff502ea9658af29e50d57366c281f7a7eb6c */
+ * Stub hash: 3dde1567a65ab31bd5722ea6d568050420f89439 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exif_tagname, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -37,3 +37,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(exif_imagetype, arginfo_exif_imagetype)
 	ZEND_FE_END
 };
+

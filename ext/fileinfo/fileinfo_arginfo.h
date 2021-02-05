@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1282a20b1d007bbcc9c0d4efe400db43a5450307 */
+ * Stub hash: ae5759febdd7ad434c8bf2e23e9da334ff9054dd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_finfo_open, 0, 0, finfo, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FILEINFO_NONE")
@@ -81,3 +81,14 @@ static const zend_function_entry class_finfo_methods[] = {
 	ZEND_ME_MAPPING(set_flags, finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_finfo()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "finfo", class_finfo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+

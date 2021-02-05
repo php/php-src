@@ -1,8 +1,13 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
+/** @strict-properties */
 final class GdImage {}
+/** @strict-properties */
 final class GdFont {}
 
 function gd_info(): array {}

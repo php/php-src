@@ -444,7 +444,6 @@ static PHP_GINIT_FUNCTION(imap)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(imap)
 {
-	zend_class_entry ce;
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
 
 	REGISTER_INI_ENTRIES();
@@ -478,10 +477,7 @@ PHP_MINIT_FUNCTION(imap)
 	ssl_onceonlyinit ();
 #endif
 
-
-	INIT_CLASS_ENTRY(ce, "IMAPConnection", class_IMAPConnection_methods);
-	php_imap_ce = zend_register_internal_class(&ce);
-	php_imap_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_imap_ce = register_class_IMAPConnection();
 	php_imap_ce->create_object = imap_object_create;
 	php_imap_ce->serialize = zend_class_serialize_deny;
 	php_imap_ce->unserialize = zend_class_unserialize_deny;

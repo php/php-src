@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b5f2e4a79eb6f30fe143b3086845435d0a0a6ef0 */
+ * Stub hash: dc73178b6c82437ae4eec49984613563018d3bde */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input_type, IS_LONG, 0)
@@ -58,3 +58,4 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(filter_id, arginfo_filter_id)
 	ZEND_FE_END
 };
+
