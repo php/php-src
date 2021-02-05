@@ -30,20 +30,8 @@ zend_class_entry *Normalizer_ce_ptr = NULL;
  */
 void normalizer_register_Normalizer_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Normalizer' class. */
-	INIT_CLASS_ENTRY( ce, "Normalizer", class_Normalizer_methods );
-	ce.create_object = NULL;
-	Normalizer_ce_ptr = zend_register_internal_class( &ce );
-
-	/* Declare 'Normalizer' class properties. */
-	if( !Normalizer_ce_ptr )
-	{
-		zend_error( E_ERROR,
-			"Normalizer: attempt to create properties "
-			"on a non-registered class." );
-		return;
-	}
+	Normalizer_ce_ptr = register_class_Normalizer();
+	Normalizer_ce_ptr->create_object = NULL;
 }
 /* }}} */

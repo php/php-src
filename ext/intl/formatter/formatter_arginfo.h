@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f285bbaa6f4f37060eb8325956f41bd86e9dea3 */
+ * Stub hash: 2a232c97981e23bec14f03e564a7ec3d7fedc31e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -111,3 +111,14 @@ static const zend_function_entry class_NumberFormatter_methods[] = {
 	ZEND_ME_MAPPING(getErrorMessage, numfmt_get_error_message, arginfo_class_NumberFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_NumberFormatter()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NumberFormatter", class_NumberFormatter_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+

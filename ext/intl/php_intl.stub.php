@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class IntlException extends Exception
+{
+}
 
 /* calendar */
 

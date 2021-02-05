@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c890e3cde79ffeade4623001cc369aa734812959 */
+ * Stub hash: 9ddf3e4e42735c34a8b53a1856d6dc93346afc6f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -1165,3 +1165,19 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_IntlException_methods[] = {
+	ZEND_FE_END
+};
+
+zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlException", class_IntlException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}
+

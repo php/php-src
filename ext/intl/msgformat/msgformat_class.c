@@ -93,12 +93,9 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
  */
 void msgformat_register_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'MessageFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "MessageFormatter", class_MessageFormatter_methods );
-	ce.create_object = MessageFormatter_object_create;
-	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
+	MessageFormatter_ce_ptr = register_class_MessageFormatter();
+	MessageFormatter_ce_ptr->create_object = MessageFormatter_object_create;
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);
