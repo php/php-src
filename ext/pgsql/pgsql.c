@@ -1424,9 +1424,10 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			pgsql = (PGconn *) le->ptr;
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
-			if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 7.2) {
+			/* consider to use php_version_compare() here */
+			if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 7.2) {
 #else
-			if (atof(PG_VERSION) >= 7.2) {
+			if (zend_strtod(PG_VERSION, NULL) >= 7.2) {
 #endif
 				pg_result = PQexec(pgsql, "RESET ALL;");
 				PQclear(pg_result);
@@ -5326,9 +5327,10 @@ PHP_FUNCTION(pg_get_notify)
 		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
-		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+		/* consider to use php_version_compare() here */
+		if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
 #else
-		if (atof(PG_VERSION) >= 9.0) {
+		if (zend_strtod(PG_VERSION) >= 9.0, NULL) {
 #endif
 #if HAVE_PQPARAMETERSTATUS
 			add_index_string(return_value, 2, pgsql_notify->extra);
@@ -5339,9 +5341,10 @@ PHP_FUNCTION(pg_get_notify)
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
-		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
+		/* consider to use php_version_compare() here */
+		if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
 #else
-		if (atof(PG_VERSION) >= 9.0) {
+		if (zend_strtod(PG_VERSION, NULL) >= 9.0) {
 #endif
 #if HAVE_PQPARAMETERSTATUS
 			add_assoc_string(return_value, "payload", pgsql_notify->extra);
