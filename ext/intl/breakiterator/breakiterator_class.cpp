@@ -220,13 +220,11 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
  */
 U_CFUNC void breakiterator_register_BreakIterator_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
-	ce.create_object = BreakIterator_object_create;
-	ce.get_iterator = _breakiterator_get_iterator;
-	BreakIterator_ce_ptr = zend_register_internal_class(&ce);
+
+	BreakIterator_ce_ptr = register_class_IntlBreakIterator(zend_ce_aggregate);
+	BreakIterator_ce_ptr->create_object = BreakIterator_object_create;
+	BreakIterator_ce_ptr->get_iterator = _breakiterator_get_iterator;
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
@@ -235,8 +233,6 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
-
-	zend_class_implements(BreakIterator_ce_ptr, 1, zend_ce_aggregate);
 
 	zend_declare_class_constant_long(BreakIterator_ce_ptr,
 		"DONE", sizeof("DONE") - 1, BreakIterator::DONE );
@@ -271,15 +267,9 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 
 	/* Create and register 'RuleBasedBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
-			class_IntlRuleBasedBreakIterator_methods);
-	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	RuleBasedBreakIterator_ce_ptr = register_class_IntlRuleBasedBreakIterator(BreakIterator_ce_ptr);
 
 	/* Create and register 'CodePointBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator",
-			class_IntlCodePointBreakIterator_methods);
-	CodePointBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	CodePointBreakIterator_ce_ptr = register_class_IntlCodePointBreakIterator(BreakIterator_ce_ptr);
 }
 /* }}} */

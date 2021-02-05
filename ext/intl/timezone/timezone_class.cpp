@@ -396,18 +396,9 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
  */
 U_CFUNC void timezone_register_IntlTimeZone_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlTimeZone' class. */
-	INIT_CLASS_ENTRY(ce, "IntlTimeZone", class_IntlTimeZone_methods);
-	ce.create_object = TimeZone_object_create;
-	TimeZone_ce_ptr = zend_register_internal_class(&ce);
-	if (!TimeZone_ce_ptr) {
-		//can't happen now without bigger problems before
-		php_error_docref(NULL, E_ERROR,
-			"IntlTimeZone: class registration has failed.");
-		return;
-	}
+	TimeZone_ce_ptr = register_class_IntlTimeZone();
+	TimeZone_ce_ptr->create_object = TimeZone_object_create;
 
 	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);

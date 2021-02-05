@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * @generate-function-entries
+ * @generate-class-entries
+ */
 
 class IntlBreakIterator implements IteratorAggregate
 {
@@ -84,12 +87,6 @@ class IntlRuleBasedBreakIterator extends IntlBreakIterator
 
     /** @return array|false */
     public function getRuleStatusVec() {}
-}
-
-class IntlPartsIterator extends IntlIterator
-{
-    /** @return IntlBreakIterator */
-    public function getBreakIterator() {}
 }
 
 class IntlCodePointBreakIterator extends IntlBreakIterator

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 10c330c8e06dbe21833f9c556b005fde2ea0ab42 */
+ * Stub hash: fa0a42cf3c54d9ccb45771e9fd7f05c1ed3bbcb3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -51,3 +51,14 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 #endif
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_Spoofchecker()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+

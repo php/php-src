@@ -107,12 +107,9 @@ zend_object *IntlDateFormatter_object_clone(zend_object *object)
  */
 void dateformat_register_IntlDateFormatter_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlDateFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "IntlDateFormatter", class_IntlDateFormatter_methods );
-	ce.create_object = IntlDateFormatter_object_create;
-	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce );
+	IntlDateFormatter_ce_ptr = register_class_IntlDateFormatter();
+	IntlDateFormatter_ce_ptr->create_object = IntlDateFormatter_object_create;
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);

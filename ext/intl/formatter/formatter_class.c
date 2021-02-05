@@ -94,12 +94,9 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
  */
 void formatter_register_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'NumberFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "NumberFormatter", class_NumberFormatter_methods );
-	ce.create_object = NumberFormatter_object_create;
-	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
+	NumberFormatter_ce_ptr = register_class_NumberFormatter();
+	NumberFormatter_ce_ptr->create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr->serialize = zend_class_serialize_deny;
 	NumberFormatter_ce_ptr->unserialize = zend_class_unserialize_deny;
 

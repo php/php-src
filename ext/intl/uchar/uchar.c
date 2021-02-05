@@ -612,10 +612,9 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 /* }}} */
 
 int php_uchar_minit(INIT_FUNC_ARGS) {
-	zend_class_entry tmp, *ce;
+	zend_class_entry *ce;
 
-	INIT_CLASS_ENTRY(tmp, "IntlChar", class_IntlChar_methods);
-	ce = zend_register_internal_class(&tmp);
+	ce = register_class_IntlChar();
 
 #define IC_CONSTL(name, val) \
 	zend_declare_class_constant_long(ce, name, strlen(name), val);
