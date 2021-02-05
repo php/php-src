@@ -23,7 +23,7 @@ if (!$link->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true)) {
     printf("[003] [%d] %s\n", $link->errno, $link->error);
 }
 
-if (!$result = $link->query("SELECT Y(Point(56.7, 53.34))")) {
+if (!$result = $link->query("SELECT ST_Y(Point(56.7, 53.34))")) {
     printf("[004] [%d] %s\n", $link->errno, $link->error);
 }
 
@@ -37,6 +37,6 @@ mysqli_close($link);
 ?>
 --EXPECT--
 array(1) {
-  ["Y(Point(56.7, 53.34))"]=>
+  ["ST_Y(Point(56.7, 53.34))"]=>
   float(53,34)
 }
