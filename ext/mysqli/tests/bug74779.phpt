@@ -38,5 +38,5 @@ mysqli_close($link);
 --EXPECT--
 array(1) {
   ["ST_Y(Point(56.7, 53.34))"]=>
-  float(53,34)
+  float(53.34)
 }
