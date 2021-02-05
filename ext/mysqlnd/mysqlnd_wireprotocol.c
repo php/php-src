@@ -1653,7 +1653,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				ZVAL_DOUBLE(current_field, atof((char *) p));
+				ZVAL_DOUBLE(current_field, zend_strtod((char *) p, NULL));
 				*(p + len) = save;
 			} else {
 				ZVAL_STRINGL_FAST(current_field, (char *)p, len);
