@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #53251 (bindtextdomain with null dir doesn't return old value).
     (cmb)
 
+- MySQLi:
+  . Fixed bug #74779 (x() and y() truncating floats to integers). (cmb)
+
 - Opcache:
   . Fixed bug #80634 (write_property handler of internal classes is skipped on
     preloaded JITted code). (Dmitry)
