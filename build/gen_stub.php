@@ -793,9 +793,10 @@ class FuncInfo {
             }
 
             if ($namespace) {
+                // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    $namespace, $declarationName, $this->getArgInfoName());
+                    addslashes($namespace), $declarationName, $this->getArgInfoName());
             } else {
                 return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
