@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 088e107c889f44d0a9762c47fce668f4d82f28ba */
+ * Stub hash: 1bbe2028d78f83db95e129acff83e14f57456f3e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2218,12 +2218,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_PHP_iterable_any, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_any, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_PHP_iterable_all arginfo_PHP_iterable_any
+#define arginfo_iterable_all arginfo_iterable_any
 
 
 ZEND_FUNCTION(set_time_limit);
@@ -3501,8 +3501,8 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
-	ZEND_NS_FE("PHP\\iterable", any, arginfo_PHP_iterable_any)
-	ZEND_NS_FE("PHP\\iterable", all, arginfo_PHP_iterable_all)
+	ZEND_NS_FE("iterable", any, arginfo_iterable_any)
+	ZEND_NS_FE("iterable", all, arginfo_iterable_all)
 	ZEND_FE_END
 };
 

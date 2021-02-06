@@ -2,6 +2,8 @@
 
 /** @generate-class-entries */
 
+namespace {
+
 final class __PHP_Incomplete_Class
 {
 }
@@ -9,8 +11,6 @@ final class __PHP_Incomplete_Class
 class AssertionError extends Error
 {
 }
-
-namespace {
 
 /* main/main.c */
 
@@ -1514,7 +1514,7 @@ function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif
 } // end global namespace
 
-namespace PHP\iterable {
+namespace iterable {
 
 function any(iterable $iterable, ?callable $callback = null): bool {}
 

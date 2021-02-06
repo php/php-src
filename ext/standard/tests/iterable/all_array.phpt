@@ -3,7 +3,7 @@ Test all() function
 --FILE--
 <?php
 
-use function PHP\iterable\all;
+use function iterable\all;
 
 /*
     Prototype: bool all(array $array, mixed $callback);
@@ -50,11 +50,11 @@ echo "\nDone";
 ?>
 --EXPECT--
 *** Testing not enough or wrong arguments ***
-Caught ArgumentCountError: PHP\iterable\all() expects at least 1 argument, 0 given
-Caught TypeError: PHP\iterable\all(): Argument #1 ($iterable) must be of type iterable, bool given
+Caught ArgumentCountError: iterable\all() expects at least 1 argument, 0 given
+Caught TypeError: iterable\all(): Argument #1 ($iterable) must be of type iterable, bool given
 bool(true)
-Caught TypeError: PHP\iterable\all(): Argument #1 ($iterable) must be of type iterable, bool given
-Caught TypeError: PHP\iterable\all(): Argument #2 ($callback) must be a valid callback, no array or string given
+Caught TypeError: iterable\all(): Argument #1 ($iterable) must be of type iterable, bool given
+Caught TypeError: iterable\all(): Argument #2 ($callback) must be a valid callback or null, no array or string given
 
 *** Testing basic functionality ***
 bool(true)

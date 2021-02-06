@@ -3,7 +3,7 @@ Test any() function
 --FILE--
 <?php
 
-use function PHP\iterable\any;
+use function iterable\any;
 
 /*
     Prototype: bool any(array $array, ?callable $callback = null, int $use_type = 0);
@@ -73,7 +73,7 @@ echo "\nDone";
 --EXPECT--
 *** Testing not enough or wrong arguments ***
 bool(false)
-Caught TypeError: PHP\iterable\any(): Argument #2 ($callback) must be a valid callback, no array or string given
+Caught TypeError: iterable\any(): Argument #2 ($callback) must be a valid callback or null, no array or string given
 
 *** Testing basic functionality ***
 bool(true)

@@ -6296,7 +6296,7 @@ static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_val
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(input)
+		Z_PARAM_ITERABLE(input)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
@@ -6305,28 +6305,24 @@ static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_val
 		case IS_ARRAY:
 			php_array_until(return_value, Z_ARRVAL_P(input), fci, fci_cache, stop_value);
 			return;
-		case IS_OBJECT:
-			if (instanceof_function(Z_OBJCE_P(input), zend_ce_traversable)) {
-				php_iterator_until_info until_info;
+		case IS_OBJECT: {
+			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(input), zend_ce_traversable));
+			php_iterator_until_info until_info;
 
-				until_info.obj = input;
-				until_info.fci = fci;
-				until_info.fcc = fci_cache;
+			until_info.obj = input;
+			until_info.fci = fci;
+			until_info.fcc = fci_cache;
 
-				until_info.stop_value = stop_value;
-				until_info.result = SUCCESS;
-				until_info.found = 0;
+			until_info.stop_value = stop_value;
+			until_info.result = SUCCESS;
+			until_info.found = 0;
 
-				if (spl_iterator_apply(until_info.obj, php_traversable_func_until, (void*)&until_info) == SUCCESS && until_info.result == SUCCESS) {
-					RETURN_BOOL(!(until_info.found ^ stop_value));
-				}
-				return;
+			if (spl_iterator_apply(until_info.obj, php_traversable_func_until, (void*)&until_info) == SUCCESS && until_info.result == SUCCESS) {
+				RETURN_BOOL(!(until_info.found ^ stop_value));
 			}
-			/* fallthrough */
-		default:
-			zend_argument_type_error(1, "must be of type iterable, %s given", zend_zval_type_name(input));
-			RETURN_THROWS();
-			break;
+			return;
+		}
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 
