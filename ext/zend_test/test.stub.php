@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries static
- * @generate-class-entries
- */
+/** @generate-class-entries static */
 
 namespace {
 
