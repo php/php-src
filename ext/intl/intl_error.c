@@ -203,11 +203,6 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 }
 /* }}} */
 
-void intl_register_IntlException_handlers(void)
-{
-	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
-}
-
 smart_str intl_parse_error_to_string( UParseError* pe )
 {
 	smart_str    ret = {0};

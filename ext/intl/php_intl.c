@@ -216,7 +216,7 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'IntlException' PHP class */
 	IntlException_ce_ptr = register_class_IntlException(zend_ce_exception);
-	intl_register_IntlException_handlers();
+	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
 
 	/* Register 'IntlIterator' PHP class */
 	intl_register_IntlIterator_class(  );
