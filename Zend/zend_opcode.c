@@ -284,6 +284,8 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			}
 			mutable_data->default_properties_table = NULL;
 		}
+
+		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
 	}
 }
 
