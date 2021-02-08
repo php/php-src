@@ -2271,7 +2271,7 @@ static zend_inheritance_cache_entry* zend_accel_inheritance_cache_find(zend_inhe
 					break;
 				}
 			}
-			if (entry->dependencies) {
+			if (found && entry->dependencies) {
 				for (i = 0; i < entry->dependencies_count; i++) {
 					zend_class_entry *ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
