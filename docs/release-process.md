@@ -8,9 +8,11 @@
  2. Package two days before a release. So if the release is to be on Thursday,
     package on Tuesday. Think about timezones as well.
 
- 3. Ensure that the tests on Travis CI are green.
+ 3. Ensure that the tests on CIs are okay. See:
 
-    See: https://travis-ci.org/php/php-src/builds
+    * https://travis-ci.com/github/php/php-src
+    * https://ci.appveyor.com/project/php/php-src
+    * https://dev.azure.com/phpazuredevops/PHP/_build
 
     It is recommended to do so a couple of days before the packaging day, to
     have enough time to investigate failures, communicate with the authors and
