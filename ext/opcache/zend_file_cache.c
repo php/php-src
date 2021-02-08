@@ -1205,7 +1205,7 @@ static void zend_file_cache_unserialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
-		if (!(script->corrupted)) {		
+		if (!(script->corrupted)) {
 			// TODO: we may use single map_ptr slot for each class name ???
 			type->type_mask |= _ZEND_TYPE_CACHE_BIT;
 			type->ce_cache__ptr = (uint32_t)(uintptr_t)zend_map_ptr_new();

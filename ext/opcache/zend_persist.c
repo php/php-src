@@ -790,7 +790,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
-		}				
+		}
 		ce->inheritance_cache = NULL;
 
 		zend_hash_persist(&ce->function_table);
