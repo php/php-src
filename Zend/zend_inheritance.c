@@ -2718,6 +2718,16 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
 			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
 		}
+	} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+		/* Lazy class loading */
+		ce = zend_lazy_class_load(ce);
+		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
+		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		Z_CE_P(zv) = ce;
+		if (CG(unlinked_uses)
+		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
+			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+		}
 	}
 
 	orig_linking_class = CG(current_linking_class);
@@ -2881,6 +2891,10 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 			/* Lazy class loading */
 			ce = zend_lazy_class_load(ce);
+		} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+			ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
 		}
 
 		if (delayed_early_binding) {

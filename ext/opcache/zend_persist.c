@@ -373,7 +373,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				op_array->static_variables = zend_shared_alloc_get_xlat_entry(op_array->static_variables);
 				ZEND_ASSERT(op_array->static_variables != NULL);
 			}
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 			if (op_array->literals) {
 				op_array->literals = zend_shared_alloc_get_xlat_entry(op_array->literals);
 				ZEND_ASSERT(op_array->literals != NULL);
@@ -455,7 +454,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		GC_SET_REFCOUNT(op_array->static_variables, 2);
 		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 
 	if (op_array->scope && op_array->scope->ce_flags & ZEND_ACC_CACHED) {
 		return;
@@ -561,7 +559,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	if (op_array->filename) {
@@ -646,7 +643,7 @@ static void zend_persist_op_array(zval *zv)
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		}
 	} else {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 	}
 }
 
@@ -706,8 +703,10 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		}
 	} else {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		}
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 	}
 }
 
@@ -811,8 +810,10 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
 		 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			ZEND_MAP_PTR_NEW(ce->mutable_data);
-		} else {
+		} else if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 			ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+		} else {
+			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		if (ce->default_static_members_table) {
 			int i;
@@ -1217,6 +1218,11 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		zend_persist_op_array(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	if (!script->corrupted) {
+		ZEND_MAP_PTR_INIT(script->script.main_op_array.run_time_cache, NULL);
+	}
+	ZEND_MAP_PTR_INIT(script->script.main_op_array.static_variables_ptr,
+		&script->script.main_op_array.static_variables);
 	zend_persist_warnings(script);
 
 	if (for_shm) {

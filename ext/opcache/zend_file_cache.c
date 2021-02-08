@@ -450,6 +450,9 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
                                                zend_file_cache_metainfo *info,
                                                void                     *buf)
 {
+	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+
 	/* Check whether this op_array has already been serialized. */
 	if (IS_SERIALIZED(op_array->opcodes)) {
 		ZEND_ASSERT(op_array->scope && "Only method op_arrays should be shared");
@@ -464,9 +467,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(ht);
 		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 	}
-
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
-	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 
 	if (op_array->scope) {
 		if (UNEXPECTED(zend_shared_alloc_get_xlat_entry(op_array->opcodes))) {
@@ -1223,6 +1223,26 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
 {
+	if (!(script->corrupted)
+	 && op_array != &script->script.main_op_array) {
+		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+		if (op_array->static_variables) {
+			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+		} else {
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		}
+		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+	} else {
+		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		if (op_array != &script->script.main_op_array) {
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+		} else {
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		}
+	}
+
 	/* Check whether this op_array has already been unserialized. */
 	if (IS_UNSERIALIZED(op_array->opcodes)) {
 		ZEND_ASSERT(op_array->scope && "Only method op_arrays should be shared");
@@ -1236,21 +1256,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		ht = op_array->static_variables;
 		zend_file_cache_unserialize_hash(ht,
 				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
-	}
-
-	if (!(script->corrupted)
-	 && op_array != &script->script.main_op_array) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-		}
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-	} else {
-		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	if (op_array->refcount) {
@@ -1613,6 +1618,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ZEND_MAP_PTR_NEW(ce->mutable_data);
 	} else {
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
+		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 	}
