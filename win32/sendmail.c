@@ -526,7 +526,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 				   header we know it was the last thing. */
 				pos2 = pos1;
 			} else {
-				char *pos3 = pos2;
+				const char *pos3 = pos2;
 				while (pos2[2] == ' ' || pos2[2] == '\t') {
 					pos3 = strstr(pos2 + 2, "\r\n");
 					if (pos3 != NULL) {
