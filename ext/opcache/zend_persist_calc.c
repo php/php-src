@@ -211,7 +211,9 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
-	if (op_array->scope && op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+	if (op_array->scope
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
 		return;
 	}
 

@@ -455,7 +455,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
 
-	if (op_array->scope && op_array->scope->ce_flags & ZEND_ACC_CACHED) {
+	if (op_array->scope
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
 		return;
 	}
 
