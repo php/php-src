@@ -2424,6 +2424,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 #endif
 
 	if (!ZCG(mem)) {
+		zend_shared_alloc_destroy_xlat_table();
 		zend_shared_alloc_unlock();
 		SHM_PROTECT();
 		return NULL;

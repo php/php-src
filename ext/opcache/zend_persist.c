@@ -679,6 +679,14 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 		return;
 	}
 
+	if ((op_array->fn_flags & ZEND_ACC_IMMUTABLE)
+	 && !op_array->static_variables
+	 && !ZCG(current_persistent_script)->corrupted
+	 && zend_accel_in_shm(op_array)) {
+		zend_shared_alloc_register_xlat_entry(op_array, op_array);
+		return;
+	}
+
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (old_op_array) {
 		Z_PTR_P(zv) = old_op_array;
