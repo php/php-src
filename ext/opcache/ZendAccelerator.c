@@ -2453,6 +2453,9 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		entry->dependencies_count = zend_hash_num_elements(dependencies);
 		entry->dependencies = (zend_class_dependency*)ZCG(mem);
 		ZEND_HASH_FOREACH_STR_KEY_PTR(dependencies, dep_name, dep_ce) {
+#if ZEND_DEBUG
+			ZEND_ASSERT(zend_accel_in_shm(dep_name));
+#endif
 			entry->dependencies[i].name = dep_name;
 			entry->dependencies[i].ce = dep_ce;
 			i++;
