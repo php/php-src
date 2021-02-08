@@ -2258,7 +2258,6 @@ static zend_inheritance_cache_entry* zend_accel_inheritance_cache_find(zend_inhe
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
-	entry = ce->inheritance_cache;
 	while (entry) {
 		bool found = 1;
 		bool needs_autoload = 0;
