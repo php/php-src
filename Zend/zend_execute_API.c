@@ -300,8 +300,8 @@ void shutdown_executor(void) /* {{{ */
 				zend_cleanup_internal_class_data(ce);
 			}
 
-			if (ZEND_MAP_PTR(ce->muttable_data) && ZEND_MAP_PTR_GET_IMM(ce->muttable_data)) {
-				zend_cleanup_muttable_class_data(ce);
+			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
+				zend_cleanup_mutable_class_data(ce);
 			}
 
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {

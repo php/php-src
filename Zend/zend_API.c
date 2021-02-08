@@ -1213,26 +1213,26 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 }
 /* }}} */
 
-static zend_class_muttable_data *zend_allocate_muttable_data(zend_class_entry *class_type) /* {{{ */
+static zend_class_mutable_data *zend_allocate_mutable_data(zend_class_entry *class_type) /* {{{ */
 {
-	zend_class_muttable_data *muttable_data;
+	zend_class_mutable_data *mutable_data;
 
 	ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_IMMUTABLE);
-	ZEND_ASSERT(ZEND_MAP_PTR(class_type->muttable_data) != NULL);
-	ZEND_ASSERT(ZEND_MAP_PTR_GET_IMM(class_type->muttable_data) == NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR_GET_IMM(class_type->mutable_data) == NULL);
 
-	muttable_data = zend_arena_alloc(&CG(arena), sizeof(zend_class_muttable_data));
-	memset(muttable_data, 0, sizeof(zend_class_muttable_data));
-	muttable_data->ce_flags = class_type->ce_flags;
-	ZEND_MAP_PTR_SET_IMM(class_type->muttable_data, muttable_data);
+	mutable_data = zend_arena_alloc(&CG(arena), sizeof(zend_class_mutable_data));
+	memset(mutable_data, 0, sizeof(zend_class_mutable_data));
+	mutable_data->ce_flags = class_type->ce_flags;
+	ZEND_MAP_PTR_SET_IMM(class_type->mutable_data, mutable_data);
 
-	return muttable_data;
+	return mutable_data;
 }
 /* }}} */
 
 ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type) /* {{{ */
 {
-	zend_class_muttable_data *muttable_data;
+	zend_class_mutable_data *mutable_data;
 	HashTable *constants_table;
 	zend_string *key;
 	zend_class_constant *new_c, *c;
@@ -1251,21 +1251,21 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_IMMUTABLE);
-	ZEND_ASSERT(ZEND_MAP_PTR(class_type->muttable_data) != NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
 
-	muttable_data = ZEND_MAP_PTR_GET_IMM(class_type->muttable_data);
-	if (!muttable_data) {
-		muttable_data = zend_allocate_muttable_data(class_type);
+	mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
+	if (!mutable_data) {
+		mutable_data = zend_allocate_mutable_data(class_type);
 	}
 
-	muttable_data->constants_table = constants_table;
+	mutable_data->constants_table = constants_table;
 
 	return constants_table;
 }
 
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
-	zend_class_muttable_data *muttable_data = NULL;
+	zend_class_mutable_data *mutable_data = NULL;
 	zval *default_properties_table = NULL;
 	zval *static_members_table = NULL;
 	zend_class_constant *c;
@@ -1280,14 +1280,14 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	}
 
 	if (ce_flags & ZEND_ACC_IMMUTABLE) {
-		muttable_data = ZEND_MAP_PTR_GET_IMM(class_type->muttable_data);
-		if (muttable_data) {
-			ce_flags = muttable_data->ce_flags;
+		mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
+		if (mutable_data) {
+			ce_flags = mutable_data->ce_flags;
 			if (ce_flags & ZEND_ACC_CONSTANTS_UPDATED) {
 				return SUCCESS;
 			}
 		} else {
-			muttable_data = zend_allocate_muttable_data(class_type);
+			mutable_data = zend_allocate_mutable_data(class_type);
 		}
 	}
 
@@ -1301,7 +1301,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		HashTable *constants_table;
 
 		if (ce_flags & ZEND_ACC_IMMUTABLE) {
-			constants_table = muttable_data->constants_table;
+			constants_table = mutable_data->constants_table;
 			if (!constants_table) {
 				constants_table = zend_separate_class_constants_table(class_type);
 			}
@@ -1333,7 +1333,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	 && (ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)) {
 		zval *src, *dst, *end;
 
-		default_properties_table = muttable_data->default_properties_table;
+		default_properties_table = mutable_data->default_properties_table;
 		if (!default_properties_table) {
 			default_properties_table = zend_arena_alloc(&CG(arena), sizeof(zval) * class_type->default_properties_count);
 			src = class_type->default_properties_table;
@@ -1344,7 +1344,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				src++;
 				dst++;
 			} while (dst != end);
-			muttable_data->default_properties_table = default_properties_table;
+			mutable_data->default_properties_table = default_properties_table;
 		}
 	}
 
@@ -1383,8 +1383,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	ce_flags &= ~ZEND_ACC_HAS_AST_PROPERTIES;
 	if (class_type->ce_flags & ZEND_ACC_IMMUTABLE) {
 		ce_flags &= ~ZEND_ACC_HAS_AST_STATICS;
-		if (muttable_data) {
-			muttable_data->ce_flags = ce_flags;
+		if (mutable_data) {
+			mutable_data->ce_flags = ce_flags;
 		}
 	} else {
 		if (!(ce_flags & ZEND_ACC_PRELOADED)) {

@@ -286,7 +286,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* temporary flag used during delayed variance checks     |     |     |     */
-#define ZEND_ACC_CACHABLE                (1 << 23) /*  X  |     |     |     */
+#define ZEND_ACC_CACHEABLE               (1 << 23) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 #define ZEND_ACC_HAS_AST_CONSTANTS       (1 << 24) /*  X  |     |     |     */
 #define ZEND_ACC_HAS_AST_PROPERTIES      (1 << 25) /*  X  |     |     |     */
@@ -809,7 +809,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
-ZEND_API void zend_cleanup_muttable_class_data(zend_class_entry *ce);
+ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_type_release(zend_type type, bool persistent);

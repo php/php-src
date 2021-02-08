@@ -852,7 +852,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	}
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
-	ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
+	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 }
 
 static void zend_file_cache_serialize_warnings(
@@ -1610,11 +1610,11 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		} else {
 			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		}
-		ZEND_MAP_PTR_NEW(ce->muttable_data);
+		ZEND_MAP_PTR_NEW(ce->mutable_data);
 	} else {
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-		ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
+		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 	}
 }
 

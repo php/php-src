@@ -398,7 +398,7 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 			FREE_HASHTABLE(ht);
 			CG(current_linking_class)->inheritance_cache = NULL;
 		}
-		CG(current_linking_class)->ce_flags &= ~ZEND_ACC_CACHABLE;
+		CG(current_linking_class)->ce_flags &= ~ZEND_ACC_CACHEABLE;
 		CG(current_linking_class) = NULL;
 		return;
 	}
@@ -2334,7 +2334,7 @@ static int check_variance_obligation(zval *zv) {
 			zend_class_entry *orig_linking_class = CG(current_linking_class);
 
 			CG(current_linking_class) =
-				(dependency_ce->ce_flags & ZEND_ACC_CACHABLE) ? dependency_ce : NULL;
+				(dependency_ce->ce_flags & ZEND_ACC_CACHEABLE) ? dependency_ce : NULL;
 			resolve_delayed_variance_obligations(dependency_ce);
 			CG(current_linking_class) = orig_linking_class;
 		}
@@ -2475,7 +2475,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
 	ce->inheritance_cache = NULL;
-	ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
+	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
 	/* properties */
 	if (ce->default_properties_table) {
@@ -2595,15 +2595,15 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 }
 
 #ifndef ZEND_WIN32
-# define UPDATE_IS_CACHABLE(ce) do { \
+# define UPDATE_IS_CACHEABLE(ce) do { \
 			if ((ce)->type == ZEND_USER_CLASS) { \
-				is_cachable &= (ce)->ce_flags; \
+				is_cacheable &= (ce)->ce_flags; \
 			} \
 		} while (0)
 #else
 // TODO: ASLR may cause different addresses in different workers ???
-# define UPDATE_IS_CACHABLE(ce) do { \
-			is_cachable &= (ce)->ce_flags; \
+# define UPDATE_IS_CACHEABLE(ce) do { \
+			is_cacheable &= (ce)->ce_flags; \
 		} while (0)
 #endif
 
@@ -2617,7 +2617,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	zend_class_entry **traits_and_interfaces = NULL;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
-	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
 	zval *zv;
 
@@ -2629,7 +2629,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			check_unrecoverable_load_failure(ce);
 			return NULL;
 		}
-		UPDATE_IS_CACHABLE(parent);
+		UPDATE_IS_CACHEABLE(parent);
 	}
 
 	if (ce->num_traits || ce->num_interfaces) {
@@ -2656,7 +2656,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			}
 			traits_and_interfaces[i] = trait;
 			if (trait) {
-				UPDATE_IS_CACHABLE(trait);
+				UPDATE_IS_CACHEABLE(trait);
 			}
 		}
 	}
@@ -2684,14 +2684,14 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			interfaces[num_parent_interfaces + i] = iface;
 			traits_and_interfaces[ce->num_traits + i] = iface;
 			if (iface) {
-				UPDATE_IS_CACHABLE(iface);
+				UPDATE_IS_CACHEABLE(iface);
 			}
 		}
 	}
 
 
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-		if (is_cachable) {
+		if (is_cacheable) {
 			if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 				zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
 				if (ret) {
@@ -2706,7 +2706,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					return ret;
 				}
 			} else {
-				is_cachable = 0;
+				is_cacheable = 0;
 			}
 			proto = ce;
 		}
@@ -2721,7 +2721,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	orig_linking_class = CG(current_linking_class);
-	CG(current_linking_class) = is_cachable ? ce : NULL;
+	CG(current_linking_class) = is_cacheable ? ce : NULL;
 
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -2750,7 +2750,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	} else {
 		ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
 		if (CG(current_linking_class)) {
-			ce->ce_flags |= ZEND_ACC_CACHABLE;
+			ce->ce_flags |= ZEND_ACC_CACHEABLE;
 		}
 		load_delayed_classes();
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
@@ -2760,19 +2760,19 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				report_variance_errors(ce);
 			}
 		}
-		if (ce->ce_flags & ZEND_ACC_CACHABLE) {
-			ce->ce_flags &= ~ZEND_ACC_CACHABLE;
+		if (ce->ce_flags & ZEND_ACC_CACHEABLE) {
+			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
 		} else {
 			CG(current_linking_class) = NULL;
 		}
 	}
 
 	if (!CG(current_linking_class)) {
-		is_cachable = 0;
+		is_cacheable = 0;
 	}
 	CG(current_linking_class) = orig_linking_class;
 
-	if (is_cachable) {
+	if (is_cacheable) {
 		HashTable *ht = (HashTable*)ce->inheritance_cache;
 		zend_class_entry *new_ce;
 
@@ -2847,10 +2847,10 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 	inheritance_status status;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
-	uint32_t is_cachable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
-	UPDATE_IS_CACHABLE(parent_ce);
-	if (is_cachable) {
+	UPDATE_IS_CACHEABLE(parent_ce);
+	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
 			if (ret) {
@@ -2868,7 +2868,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 				return ret;
 			}
 		} else {
-			is_cachable = 0;
+			is_cacheable = 0;
 		}
 		proto = ce;
 	}
@@ -2896,7 +2896,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		}
 
 		orig_linking_class = CG(current_linking_class);
-		CG(current_linking_class) = is_cachable ? ce : NULL;
+		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 		if (parent_ce && parent_ce->num_interfaces) {
@@ -2911,7 +2911,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 
 		CG(current_linking_class) = orig_linking_class;
 
-		if (is_cachable) {
+		if (is_cacheable) {
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
 			zend_class_entry *new_ce;
 

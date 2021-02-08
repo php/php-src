@@ -107,11 +107,11 @@ typedef struct _zend_trait_alias {
 	uint32_t modifiers;
 } zend_trait_alias;
 
-typedef struct _zend_class_muttable_data {
+typedef struct _zend_class_mutable_data {
 	zval      *default_properties_table;
 	HashTable *constants_table;
 	uint32_t   ce_flags;
-} zend_class_muttable_data;
+} zend_class_mutable_data;
 
 typedef struct _zend_class_dependency {
 	zend_string      *name;
@@ -149,7 +149,7 @@ struct _zend_class_entry {
 	HashTable properties_info;
 	HashTable constants_table;
 
-	ZEND_MAP_PTR_DEF(zend_class_muttable_data*, muttable_data);
+	ZEND_MAP_PTR_DEF(zend_class_mutable_data*, mutable_data);
 	zend_inheritance_cache_entry *inheritance_cache;
 
 	struct _zend_property_info **properties_info_table;

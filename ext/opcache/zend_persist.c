@@ -810,9 +810,9 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
 		 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-			ZEND_MAP_PTR_NEW(ce->muttable_data);
+			ZEND_MAP_PTR_NEW(ce->mutable_data);
 		} else {
-			ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
+			ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 		}
 		if (ce->default_static_members_table) {
 			int i;
