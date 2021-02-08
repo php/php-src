@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries
- * @generate-class-entries
- */
-
+/** @generate-class-entries */
 class LibXMLError
 {
     public int $level;

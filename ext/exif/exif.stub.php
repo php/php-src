@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries
- * @generate-class-entries
- */
+/** @generate-class-entries */
 
 function exif_tagname(int $index): string|false {}
 

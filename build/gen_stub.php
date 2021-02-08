@@ -1782,12 +1782,14 @@ function parseStubFile(string $code): FileInfo {
                 $fileInfo->generateLegacyArginfo = true;
             } else if ($tag->name === 'generate-class-entries') {
                 $fileInfo->generateClassEntries = true;
+                $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
             }
         }
     }
 
+    // Generating class entries require generating function/method entries
     if ($fileInfo->generateClassEntries && !$fileInfo->generateFunctionEntries) {
-        throw new Exception("Function entry generation must be enabled when generating class entries");
+        $fileInfo->generateFunctionEntries = true;
     }
 
     handleStatements($fileInfo, $stmts, $prettyPrinter);
