@@ -29,15 +29,6 @@
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
-#define ADD_ARENA_SIZE(m)  ZCG(current_persistent_script)->arena_size += ZEND_ALIGNED_SIZE(m)
-
-#define ADD_SIZE_EX(m) do { \
-		if (ZCG(is_immutable_class)) { \
-			ADD_SIZE(m); \
-		} else { \
-			ADD_ARENA_SIZE(m); \
-		} \
-	} while (0)
 
 # define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
 
@@ -169,14 +160,10 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 	}
 }
 
-static void zend_persist_type_calc(zend_type *type, bool use_arena)
+static void zend_persist_type_calc(zend_type *type)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
-		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class) && use_arena) {
-			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
-		} else {
-			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
-		}
+		ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 	}
 
 	zend_type *single_type;
@@ -263,7 +250,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name);
 			}
-			zend_persist_type_calc(&arg_info[i].type, 0);
+			zend_persist_type_calc(&arg_info[i].type);
 		}
 	}
 
@@ -302,9 +289,6 @@ static void zend_persist_op_array_calc(zval *zv)
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 	ADD_SIZE(sizeof(zend_op_array));
 	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
-	if (ZCG(current_persistent_script)->corrupted) {
-		ADD_ARENA_SIZE(sizeof(void*));
-	}
 }
 
 static void zend_persist_class_method_calc(zval *zv)
@@ -317,7 +301,7 @@ static void zend_persist_class_method_calc(zval *zv)
 		if (op_array->fn_flags & ZEND_ACC_ARENA_ALLOCATED) {
 			old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 			if (!old_op_array) {
-				ADD_SIZE_EX(sizeof(zend_internal_function));
+				ADD_SIZE(sizeof(zend_internal_function));
 				zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
 			}
 		}
@@ -326,12 +310,9 @@ static void zend_persist_class_method_calc(zval *zv)
 
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (!old_op_array) {
-		ADD_SIZE_EX(sizeof(zend_op_array));
+		ADD_SIZE(sizeof(zend_op_array));
 		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
 		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
-		if (!ZCG(is_immutable_class)) {
-			ADD_ARENA_SIZE(sizeof(void*));
-		}
 	} else {
 		/* If op_array is shared, the function name refcount is still incremented for each use,
 		 * so we need to release it here. We remembered the original function name in xlat. */
@@ -345,9 +326,9 @@ static void zend_persist_class_method_calc(zval *zv)
 
 static void zend_persist_property_info_calc(zend_property_info *prop)
 {
-	ADD_SIZE_EX(sizeof(zend_property_info));
+	ADD_SIZE(sizeof(zend_property_info));
 	ADD_INTERNED_STRING(prop->name);
-	zend_persist_type_calc(&prop->type, 1);
+	zend_persist_type_calc(&prop->type);
 	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 		ADD_STRING(prop->doc_comment);
 	}
@@ -362,7 +343,7 @@ static void zend_persist_class_constant_calc(zval *zv)
 
 	if (!zend_shared_alloc_get_xlat_entry(c)) {
 		zend_shared_alloc_register_xlat_entry(c, c);
-		ADD_SIZE_EX(sizeof(zend_class_constant));
+		ADD_SIZE(sizeof(zend_class_constant));
 		zend_persist_zval_calc(&c->value);
 		if (ZCG(accel_directives).save_comments && c->doc_comment) {
 			ADD_STRING(c->doc_comment);
@@ -384,10 +365,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		}
 		zend_shared_alloc_register_xlat_entry(ce, ce);
 
-		ZCG(is_immutable_class) =
-			!ZCG(current_persistent_script)->corrupted;
-
-		ADD_SIZE_EX(sizeof(zend_class_entry));
+		ADD_SIZE(sizeof(zend_class_entry));
 
 		zend_hash_persist_calc(&ce->function_table);
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
@@ -431,7 +409,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		} ZEND_HASH_FOREACH_END();
 
 		if (ce->properties_info_table) {
-			ADD_SIZE_EX(sizeof(zend_property_info *) * ce->default_properties_count);
+			ADD_SIZE(sizeof(zend_property_info *) * ce->default_properties_count);
 		}
 
 		if (ce->num_interfaces && (ce->ce_flags & ZEND_ACC_LINKED)) {
@@ -550,8 +528,6 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
-	new_persistent_script->arena_mem = NULL;
-	new_persistent_script->arena_size = 0;
 	new_persistent_script->corrupted = 0;
 	ZCG(current_persistent_script) = new_persistent_script;
 
@@ -588,12 +564,6 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 	zend_persist_warnings_calc(new_persistent_script);
 
-#if defined(__AVX__) || defined(__SSE2__)
-	/* Align size to 64-byte boundary */
-	new_persistent_script->arena_size = (new_persistent_script->arena_size + 63) & ~63;
-#endif
-
-	new_persistent_script->size += new_persistent_script->arena_size;
 	new_persistent_script->corrupted = 0;
 
 	ZCG(current_persistent_script) = NULL;

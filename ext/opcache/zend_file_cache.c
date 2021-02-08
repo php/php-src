@@ -465,12 +465,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 	}
 
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-	if (op_array->fn_flags & ZEND_ACC_IMMUTABLE) {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
-	} else {
-		SERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
-	}
+	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 
 	if (op_array->scope) {
 		if (UNEXPECTED(zend_shared_alloc_get_xlat_entry(op_array->opcodes))) {
@@ -855,7 +851,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		SERIALIZE_PTR(ce->iterator_funcs_ptr);
 	}
 
-	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
+	ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
 }
 
 static void zend_file_cache_serialize_warnings(
@@ -901,7 +898,6 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
 	zend_file_cache_serialize_warnings(new_script, info, buf);
 
-	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
 }
 
@@ -1209,6 +1205,13 @@ static void zend_file_cache_unserialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
+		if (!(script->corrupted)) {		
+			// TODO: we may use single map_ptr slot for each class name ???
+			type->type_mask |= _ZEND_TYPE_CACHE_BIT;
+			type->ce_cache__ptr = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		} else {
+			type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
+		}
 	} else if (ZEND_TYPE_HAS_CE(*type)) {
 		zend_class_entry *ce = ZEND_TYPE_CE(*type);
 		UNSERIALIZE_PTR(ce);
@@ -1235,7 +1238,9 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
-	if (op_array->fn_flags & ZEND_ACC_IMMUTABLE) {
+	if (!(script->corrupted)
+	 && op_array != &script->script.main_op_array) {
+		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		} else {
@@ -1243,16 +1248,9 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		}
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 	} else {
+		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-		if (ZEND_MAP_PTR(op_array->run_time_cache)) {
-			if (script->corrupted) {
-				/* Not in SHM: Use serialized arena pointer. */
-				UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
-			} else {
-				/* In SHM: Allocate new pointer. */
-				ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-			}
-		}
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	if (op_array->refcount) {
@@ -1605,10 +1603,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
 	}
 
-	if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
-		ZEND_MAP_PTR_NEW(ce->static_members_table);
+	if (!(script->corrupted)) {
+		ce->ce_flags |= ZEND_ACC_IMMUTABLE;
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
+			ZEND_MAP_PTR_NEW(ce->static_members_table);
+		} else {
+			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+		}
+		ZEND_MAP_PTR_NEW(ce->muttable_data);
 	} else {
+		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+		ZEND_MAP_PTR_INIT(ce->muttable_data, NULL);
 	}
 }
 
@@ -1637,8 +1643,6 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 	zend_file_cache_unserialize_warnings(script, buf);
-
-	UNSERIALIZE_PTR(script->arena_mem);
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)

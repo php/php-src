@@ -4897,8 +4897,6 @@ static int accel_preload(const char *config, bool in_child)
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
-		ZEND_ASSERT(ZCSG(preload_script)->arena_size == 0);
-
 		preload_load();
 
 		/* Store individual scripts with unlinked classes */
