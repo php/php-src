@@ -112,7 +112,7 @@ class DOMImplementation
     public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
     /** @return DOMDocument|false */
-    public function createDocument(string $namespace = "", string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
+    public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
 }
 
 class DOMDocumentFragment extends DOMNode implements DOMParentNode
