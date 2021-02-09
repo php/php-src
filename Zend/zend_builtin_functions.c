@@ -859,24 +859,6 @@ ZEND_FUNCTION(get_mangled_object_vars)
 }
 /* }}} */
 
-static bool same_name(zend_string *key, zend_string *name) /* {{{ */
-{
-	zend_string *lcname;
-	bool ret;
-
-	if (key == name) {
-		return 1;
-	}
-	if (ZSTR_LEN(key) != ZSTR_LEN(name)) {
-		return 0;
-	}
-	lcname = zend_string_tolower(name);
-	ret = memcmp(ZSTR_VAL(lcname), ZSTR_VAL(key), ZSTR_LEN(key)) == 0;
-	zend_string_release_ex(lcname, 0);
-	return ret;
-}
-/* }}} */
-
 /* {{{ Returns an array of method names for class or class instance. */
 ZEND_FUNCTION(get_class_methods)
 {
@@ -1271,30 +1253,28 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
-static void copy_class_or_interface_name(zval *array, zend_string *key, zend_class_entry *ce) /* {{{ */
-{
-	if ((ce->refcount == 1 && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) ||
-		same_name(key, ce->name)) {
-		key = ce->name;
-	}
-	add_next_index_str(array, zend_string_copy(key));
-}
-/* }}} */
-
 static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags) /* {{{ */
 {
 	zend_string *key;
+	zval *zv, tmp;
 	zend_class_entry *ce;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+		ce = Z_PTR_P(zv);
 		if (key
 		 && ZSTR_VAL(key)[0] != 0
 		 && (ce->ce_flags & flags)
 		 && !(ce->ce_flags & skip_flags)) {
-			copy_class_or_interface_name(return_value, key, ce);
+			if (EXPECTED(Z_TYPE_P(zv) == IS_PTR)) {
+				ZVAL_STR_COPY(&tmp, ce->name);
+			} else {
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_ALIAS_PTR);
+				ZVAL_STR_COPY(&tmp, key);
+			}
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
