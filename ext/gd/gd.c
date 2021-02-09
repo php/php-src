@@ -1785,8 +1785,18 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
-		RETURN_THROWS();
+	switch (image_type) {
+		case PHP_GDIMG_TYPE_GD:
+			if (zend_parse_parameters(argc, "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		case PHP_GDIMG_TYPE_GD2:
+			if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
