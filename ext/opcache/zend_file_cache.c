@@ -1610,6 +1610,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 
 	if (!(script->corrupted)) {
 		ce->ce_flags |= ZEND_ACC_IMMUTABLE;
+		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
 		if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
 			ZEND_MAP_PTR_NEW(ce->static_members_table);
 		} else {

@@ -302,8 +302,27 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_cleanup_internal_class_data(ce);
 		}
 
-		if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
-			zend_cleanup_mutable_class_data(ce);
+		if (!(ce->ce_flags & ZEND_ACC_FILE_CACHED)) {
+			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
+				zend_cleanup_mutable_class_data(ce);
+			}
+		} else {
+			zend_class_constant *c;
+			zval *p, *end;
+
+			ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				if (c->ce == ce) {
+					zval_ptr_dtor_nogc(&c->value);
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
+
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
 		}
 
 		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
