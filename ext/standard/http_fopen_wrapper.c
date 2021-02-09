@@ -69,7 +69,7 @@
 
 #include "php_fopen_wrappers.h"
 
-#define HTTP_HEADER_BLOCK_SIZE		1024
+#define HTTP_HEADER_BLOCK_SIZE		2024
 #define PHP_URL_REDIRECT_MAX		20
 #define HTTP_HEADER_USER_AGENT		1
 #define HTTP_HEADER_HOST			2
@@ -741,7 +741,15 @@ finish:
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;
 			if (*e != '\n') {
-				do { /* partial header */
+				/* fail on overlong Location header */
+				if (!strncasecmp(http_header_line, "Location:", sizeof("Location:")-1)) {
+					php_stream_close(stream);
+					stream = NULL;
+					php_stream_wrapper_log_error(wrapper, options, "Location header too long");
+					goto out;
+				}
+				/* silently discard other overlong headers */
+				do {
 					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
 						php_stream_wrapper_log_error(wrapper, options, "Failed to read HTTP headers");
 						goto out;
