@@ -34,7 +34,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s!",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		return FAILURE;

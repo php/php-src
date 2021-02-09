@@ -4,13 +4,13 @@
 
 class NumberFormatter
 {
-    public function __construct(string $locale, int $style, string $pattern = "") {}
+    public function __construct(string $locale, int $style, ?string $pattern = null) {}
 
     /**
      * @return NumberFormatter|null
      * @alias numfmt_create
      */
-    public static function create(string $locale, int $style, string $pattern = "") {}
+    public static function create(string $locale, int $style, ?string $pattern = null) {}
 
     /**
      * @return string|false
