@@ -430,7 +430,6 @@ void shutdown_compiler(void) /* {{{ */
 	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_stack_destroy(&CG(short_circuiting_opnums));
-	zend_arena_destroy(CG(arena));
 
 	if (CG(delayed_variance_obligations)) {
 		zend_hash_destroy(CG(delayed_variance_obligations));
