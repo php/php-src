@@ -197,7 +197,7 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     public function getElementsByTagName(string $qualifiedName) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagNameNS(string $namespace, string $localName) {}
+    public function getElementsByTagNameNS(?string $namespace, string $localName) {}
 
     /** @return bool */
     public function hasAttribute(string $qualifiedName) {}
@@ -294,7 +294,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function getElementsByTagName(string $qualifiedName) {}
 
     /** @return DOMNodeList */
-    public function getElementsByTagNameNS(string $namespace, string $localName) {}
+    public function getElementsByTagNameNS(?string $namespace, string $localName) {}
 
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
