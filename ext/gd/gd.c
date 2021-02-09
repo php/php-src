@@ -1778,7 +1778,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	char *file = NULL;
 	zend_long quality = 0, type = 0;
 	gdImagePtr im;
-	char *fn = NULL;
 	FILE *fp;
 	size_t file_len = 0;
 	int argc = ZEND_NUM_ARGS();
@@ -1786,28 +1785,25 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc, "O|pll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+	if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1) {
-		fn = file;
-		if (argc >= 3) {
-			q = quality;
-			if (argc == 4) {
-				t = type;
-			}
+	if (argc >= 3) {
+		q = quality;
+		if (argc == 4) {
+			t = type;
 		}
 	}
 
-	if (argc >= 2 && file_len) {
-		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
+	if (file_len) {
+		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
 
-		fp = VCWD_FOPEN(fn, "wb");
+		fp = VCWD_FOPEN(file, "wb");
 		if (!fp) {
-			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", fn);
+			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", file);
 			RETURN_FALSE;
 		}
 
