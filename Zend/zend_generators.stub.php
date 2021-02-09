@@ -20,3 +20,7 @@ final class Generator implements Iterator
 
     public function getReturn(): mixed {}
 }
+
+class ClosedGeneratorException extends Exception
+{
+}

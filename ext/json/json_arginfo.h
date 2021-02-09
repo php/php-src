@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2d1e6c422221ec7efbbd540ee777a5ce2c639943 */
+ * Stub hash: 200044f4196cd8efd1ec9a2e93d4bbb63618b3c9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_json_encode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -41,5 +41,10 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_JsonSerializable_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_JsonException_methods[] = {
 	ZEND_FE_END
 };

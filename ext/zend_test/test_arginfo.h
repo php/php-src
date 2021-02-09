@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d98281072c6eeb5631dbf3ba975807f49a553b3e */
+ * Stub hash: 3240b7fa3461b40a211371250c4975802f44185b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -111,6 +111,11 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
+static const zend_function_entry class__ZendTestInterface_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
@@ -119,8 +124,18 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 };
 
 
+static const zend_function_entry class__ZendTestChildClass_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class__ZendTestTrait_methods[] = {
 	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestAttribute_methods[] = {
 	ZEND_FE_END
 };
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5aeec68fea7a94cd643464acfb10bf4cfcc863da */
+ * Stub hash: b01d17eaac68e56d3f2c2c2bc86d44bcc8ea7c26 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -125,7 +125,22 @@ static const zend_function_entry class_FFI_methods[] = {
 };
 
 
+static const zend_function_entry class_FFI_CData_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_ME(FFI_CType, getName, arginfo_class_FFI_CType_getName, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_FFI_Exception_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_FFI_ParserException_methods[] = {
 	ZEND_FE_END
 };

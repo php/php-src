@@ -15,3 +15,7 @@ interface JsonSerializable
     /** @return mixed */
     public function jsonSerialize();
 }
+
+class JsonException extends Exception
+{
+}

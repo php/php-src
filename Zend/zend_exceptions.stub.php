@@ -123,3 +123,7 @@ class ArithmeticError extends Error
 class DivisionByZeroError extends ArithmeticError
 {
 }
+
+class UnhandledMatchError extends Error
+{
+}

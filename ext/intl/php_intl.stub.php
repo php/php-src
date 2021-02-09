@@ -2,6 +2,10 @@
 
 /** @generate-function-entries */
 
+class IntlException extends Exception
+{
+}
+
 /* calendar */
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
