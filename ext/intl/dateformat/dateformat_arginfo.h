@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 62742b5f463272f43970e98900a89d513c4fb839 */
+ * Stub hash: faeef90c9c1324c6a25f0df36c7239ddc2b43ee4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -7,7 +7,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, timeType, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, calendar, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_create, 0, 0, 3)
@@ -16,7 +16,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_create, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, timeType, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
 	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_getDateType, 0, 0, 0)
