@@ -2323,6 +2323,27 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 	return NULL;
 }
 
+static bool is_array_cacheable(zval *zv)
+{
+	zval *p;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARR_P(zv), p) {
+		if (Z_REFCOUNTED_P(p)) {
+			if (Z_TYPE_P(p) == IS_ARRAY) {
+				if (!is_array_cacheable(p)) {
+					/* Can't cache */
+					return 0;
+				}
+			} else if (Z_TYPE_P(p) == IS_OBJECT || Z_TYPE_P(p) == IS_RESOURCE || Z_TYPE_P(p) == IS_REFERENCE) {
+				/* Can't cache */
+				return 0;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return 1;
+}
+
 static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies)
 {
 	zend_persistent_script dummy;
@@ -2371,6 +2392,10 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 					}
 					if (Z_REFCOUNTED_P(zv)) {
 						if (Z_TYPE_P(zv) == IS_ARRAY) {
+							if (!is_array_cacheable(zv)) {
+								/* Can't cache */
+								return NULL;
+							}
 							SEPARATE_ARRAY(zv);
 						} else if (Z_TYPE_P(zv) == IS_OBJECT || Z_TYPE_P(zv) == IS_RESOURCE) {
 							/* Can't cache */
