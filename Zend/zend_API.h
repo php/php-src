@@ -278,6 +278,12 @@ typedef struct _zend_fcall_info_cache {
 #define CE_STATIC_MEMBERS(ce) \
 	((zval*)ZEND_MAP_PTR_GET((ce)->static_members_table))
 
+#define CE_CONSTANTS_TABLE(ce) \
+	zend_class_constants_table(ce)
+
+#define CE_DEFAULT_PROPERTIES_TABLE(ce) \
+	zend_class_default_properties_table(ce)
+
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
 
 ZEND_API int zend_next_free_module(void);
@@ -382,6 +388,33 @@ ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const ch
 ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value);
 
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
+ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type);
+
+static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry *ce) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)
+	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		zend_class_mutable_data *mutable_data =
+			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		if (mutable_data && mutable_data->constants_table) {
+			return mutable_data->constants_table;
+		} else {
+			return zend_separate_class_constants_table(ce);
+		}
+	} else {
+		return &ce->constants_table;
+	}
+}
+
+static zend_always_inline zval *zend_class_default_properties_table(zend_class_entry *ce) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)
+	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		zend_class_mutable_data *mutable_data =
+			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		return mutable_data->default_properties_table;
+	} else {
+		return ce->default_properties_table;
+	}
+}
 
 ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zval *value);
 ZEND_API void zend_update_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zval *value);

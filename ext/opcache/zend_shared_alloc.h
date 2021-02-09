@@ -139,8 +139,6 @@ void *zend_shared_memdup_free(void *source, size_t size);
 void *zend_shared_memdup_get_put(void *source, size_t size);
 void *zend_shared_memdup_put(void *source, size_t size);
 void *zend_shared_memdup(void *source, size_t size);
-void *zend_shared_memdup_arena_put(void *source, size_t size);
-void *zend_shared_memdup_arena(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 

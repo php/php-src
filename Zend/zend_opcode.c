@@ -163,7 +163,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
-	if (CE_STATIC_MEMBERS(ce)) {
+	if (ZEND_MAP_PTR(ce->static_members_table) && CE_STATIC_MEMBERS(ce)) {
 		zval *static_members = CE_STATIC_MEMBERS(ce);
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
@@ -255,18 +255,76 @@ static void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
+ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
+{
+	zend_class_mutable_data *mutable_data = ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+
+	if (mutable_data) {
+		HashTable *constants_table;
+		zval *p;
+
+		constants_table = mutable_data->constants_table;
+		if (constants_table && constants_table != &ce->constants_table) {
+			zend_class_constant *c;
+
+			ZEND_HASH_FOREACH_PTR(constants_table, c) {
+				zval_ptr_dtor_nogc(&c->value);
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(constants_table);
+			mutable_data->constants_table = NULL;
+		}
+
+		p = mutable_data->default_properties_table;
+		if (p && p != ce->default_properties_table) {
+			zval *end = p + ce->default_properties_count;
+
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
+			mutable_data->default_properties_table = NULL;
+		}
+
+		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
+	}
+}
+
 ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
-	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED)) {
+	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED|ZEND_ACC_FILE_CACHED)) {
 		zend_op_array *op_array;
 
 		if (ce->default_static_members_count) {
 			zend_cleanup_internal_class_data(ce);
 		}
+
+		if (!(ce->ce_flags & ZEND_ACC_FILE_CACHED)) {
+			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
+				zend_cleanup_mutable_class_data(ce);
+			}
+		} else {
+			zend_class_constant *c;
+			zval *p, *end;
+
+			ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				if (c->ce == ce) {
+					zval_ptr_dtor_nogc(&c->value);
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
+
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
+		}
+
 		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 				if (op_array->type == ZEND_USER_FUNCTION) {

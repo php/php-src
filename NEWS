@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #80330 (Replace language in APIs and source code/docs).
     (Darek Ślusarczyk)
 
+- Opcache:
+  . Added inheritance cache. (Dmitry)
+
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
 

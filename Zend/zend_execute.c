@@ -857,7 +857,17 @@ static bool zend_check_and_resolve_property_class_type(
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
-			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+			if (ZEND_TYPE_HAS_CE_CACHE(*list_type)) {
+				ce = ZEND_TYPE_CE_CACHE(*list_type);
+				if (!ce) {
+					zend_string *name = ZEND_TYPE_NAME(*list_type);
+					ce = resolve_single_class_type(name, info->ce);
+					if (UNEXPECTED(!ce)) {
+						continue;
+					}
+					ZEND_TYPE_SET_CE_CACHE(*list_type, ce);
+				}
+			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
 				zend_string *name = ZEND_TYPE_NAME(*list_type);
 				ce = resolve_single_class_type(name, info->ce);
 				if (!ce) {
@@ -874,7 +884,17 @@ static bool zend_check_and_resolve_property_class_type(
 		} ZEND_TYPE_LIST_FOREACH_END();
 		return 0;
 	} else {
-		if (UNEXPECTED(ZEND_TYPE_HAS_NAME(info->type))) {
+		if (ZEND_TYPE_HAS_CE_CACHE(info->type)) {
+			ce = ZEND_TYPE_CE_CACHE(info->type);
+			if (!ce) {
+				zend_string *name = ZEND_TYPE_NAME(info->type);
+				ce = resolve_single_class_type(name, info->ce);
+				if (UNEXPECTED(!ce)) {
+					return 0;
+				}
+				ZEND_TYPE_SET_CE_CACHE(info->type, ce);
+			}
+		} else if (UNEXPECTED(ZEND_TYPE_HAS_NAME(info->type))) {
 			zend_string *name = ZEND_TYPE_NAME(info->type);
 			ce = resolve_single_class_type(name, info->ce);
 			if (UNEXPECTED(!ce)) {

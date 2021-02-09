@@ -27,6 +27,9 @@
 #include "zend_operators.h"
 #include "zend_exceptions.h"
 
+ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
+ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
+
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
 		zend_class_entry *ce, const zend_function *child_fn, zend_class_entry *child_scope,
@@ -368,6 +371,47 @@ typedef enum {
 	INHERITANCE_SUCCESS = 1,
 } inheritance_status;
 
+
+static void track_class_dependency(zend_class_entry *ce, zend_string *class_name)
+{
+	HashTable *ht;
+
+	if (!CG(current_linking_class) || ce == CG(current_linking_class)) {
+		return;
+	} else if (!class_name) {
+		class_name = ce->name;
+	} else if (zend_string_equals_literal_ci(class_name, "self")
+	        || zend_string_equals_literal_ci(class_name, "parent")) {
+		return;
+	}
+
+	ht = (HashTable*)CG(current_linking_class)->inheritance_cache;
+
+#ifndef ZEND_WIN32
+	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+#else
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+#endif
+		// TODO: dependency on not-immutable class ???
+		if (ht) {
+			zend_hash_destroy(ht);
+			FREE_HASHTABLE(ht);
+			CG(current_linking_class)->inheritance_cache = NULL;
+		}
+		CG(current_linking_class)->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		CG(current_linking_class) = NULL;
+		return;
+	}
+
+	/* Record dependency */
+	if (!ht) {
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, 0, NULL, NULL, 0);
+		CG(current_linking_class)->inheritance_cache = (zend_inheritance_cache_entry*)ht;
+	}
+	zend_hash_add_ptr(ht, class_name, ce);
+}
+
 static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type,
@@ -381,6 +425,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else {
+			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	}
@@ -389,6 +434,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce) {
 			have_unresolved = 1;
 		} else if (unlinked_instanceof(fe_ce, zend_ce_traversable)) {
+			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	}
@@ -396,8 +442,9 @@ static inheritance_status zend_perform_covariant_class_type_check(
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		zend_class_entry *proto_ce;
+		zend_string *proto_class_name = NULL;
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *proto_class_name =
+			proto_class_name =
 				resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
 			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
 				return INHERITANCE_SUCCESS;
@@ -416,6 +463,8 @@ static inheritance_status zend_perform_covariant_class_type_check(
 		if (!fe_ce || !proto_ce) {
 			have_unresolved = 1;
 		} else if (unlinked_instanceof(fe_ce, proto_ce)) {
+			track_class_dependency(fe_ce, fe_class_name);
+			track_class_dependency(proto_ce, proto_class_name);
 			return INHERITANCE_SUCCESS;
 		}
 	} ZEND_TYPE_FOREACH_END();
@@ -1139,6 +1188,12 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+			ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+			if (ce->parent->ce_flags & ZEND_ACC_IMMUTABLE) {
+				c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+				memcpy(c, parent_const, sizeof(zend_class_constant));
+				parent_const = c;
+			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
 			c = pemalloc(sizeof(zend_class_constant), 1);
@@ -1251,6 +1306,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 				ZVAL_COPY_OR_DUP_PROP(dst, src);
 				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+					ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
 				}
 				continue;
 			} while (dst != end);
@@ -1261,6 +1317,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 				ZVAL_COPY_PROP(dst, src);
 				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+					ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
 				}
 				continue;
 			} while (dst != end);
@@ -1323,6 +1380,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 				}
 				if (Z_TYPE_P(Z_INDIRECT_P(dst)) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+					ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
 				}
 			} while (dst != end);
 		} else {
@@ -1434,6 +1492,12 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 		zend_class_constant *ct;
 		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+			ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+			if (iface->ce_flags & ZEND_ACC_IMMUTABLE) {
+				ct = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+				memcpy(ct, c, sizeof(zend_class_constant));
+				c = ct;
+			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
 			ct = pemalloc(sizeof(zend_class_constant), 1);
@@ -2073,36 +2137,12 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 }
 /* }}} */
 
-static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
+static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
 {
 	HashTable **exclude_tables;
 	zend_class_entry **aliases;
-	zend_class_entry **traits, *trait;
-	uint32_t i, j;
 
 	ZEND_ASSERT(ce->num_traits > 0);
-
-	traits = emalloc(sizeof(zend_class_entry*) * ce->num_traits);
-
-	for (i = 0; i < ce->num_traits; i++) {
-		trait = zend_fetch_class_by_name(ce->trait_names[i].name,
-			ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
-		if (UNEXPECTED(trait == NULL)) {
-			return;
-		}
-		if (UNEXPECTED(!(trait->ce_flags & ZEND_ACC_TRAIT))) {
-			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
-			return;
-		}
-		for (j = 0; j < i; j++) {
-			if (traits[j] == trait) {
-				/* skip duplications */
-				trait = NULL;
-				break;
-			}
-		}
-		traits[i] = trait;
-	}
 
 	/* complete initialization of trait strutures in ce */
 	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
@@ -2120,8 +2160,6 @@ static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 
 	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
 	zend_do_traits_property_binding(ce, traits);
-
-	efree(traits);
 }
 /* }}} */
 
@@ -2293,7 +2331,12 @@ static int check_variance_obligation(zval *zv) {
 	if (obligation->type == OBLIGATION_DEPENDENCY) {
 		zend_class_entry *dependency_ce = obligation->dependency_ce;
 		if (dependency_ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
+			zend_class_entry *orig_linking_class = CG(current_linking_class);
+
+			CG(current_linking_class) =
+				(dependency_ce->ce_flags & ZEND_ACC_CACHEABLE) ? dependency_ce : NULL;
 			resolve_delayed_variance_obligations(dependency_ce);
+			CG(current_linking_class) = orig_linking_class;
 		}
 		if (!(dependency_ce->ce_flags & ZEND_ACC_LINKED)) {
 			return ZEND_HASH_APPLY_KEEP;
@@ -2401,7 +2444,10 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	 * to remove the class from the class table and throw an exception, because there is already
 	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
 	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
-	if (ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES)
+	 || ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+	  && CG(unlinked_uses)
+	  && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce) == SUCCESS)) {
 		zend_string *exception_str;
 		zval exception_zv;
 		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
@@ -2413,13 +2459,167 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	}
 }
 
-ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
+#define zend_update_inherited_handler(handler) do { \
+		if (ce->handler == (zend_function*)op_array) { \
+			ce->handler = (zend_function*)new_op_array; \
+		} \
+	} while (0)
+
+static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
+{
+	zend_class_entry *ce;
+	Bucket *p, *end;
+
+	ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
+	memcpy(ce, pce, sizeof(zend_class_entry));
+	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
+	ce->refcount = 1;
+	ce->inheritance_cache = NULL;
+	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+
+	/* properties */
+	if (ce->default_properties_table) {
+		zval *dst = emalloc(sizeof(zval) * ce->default_properties_count);
+		zval *src = ce->default_properties_table;
+		zval *end = src + ce->default_properties_count;
+
+		ce->default_properties_table = dst;
+		for (; src != end; src++, dst++) {
+			ZVAL_COPY_VALUE_PROP(dst, src);
+		}
+	}
+
+	/* methods */
+	ce->function_table.pDestructor = ZEND_FUNCTION_DTOR;
+	if (!(HT_FLAGS(&ce->function_table) & HASH_FLAG_UNINITIALIZED)) {
+		p = emalloc(HT_SIZE(&ce->function_table));
+		memcpy(p, HT_GET_DATA_ADDR(&ce->function_table), HT_USED_SIZE(&ce->function_table));
+		HT_SET_DATA_ADDR(&ce->function_table, p);
+		p = ce->function_table.arData;
+		end = p + ce->function_table.nNumUsed;
+		for (; p != end; p++) {
+			zend_op_array *op_array, *new_op_array;
+			void ***run_time_cache_ptr;
+
+			op_array = Z_PTR(p->val);
+			ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+			ZEND_ASSERT(op_array->scope == pce);
+			ZEND_ASSERT(op_array->prototype == NULL);
+			new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + sizeof(void*));
+			Z_PTR(p->val) = new_op_array;
+			memcpy(new_op_array, op_array, sizeof(zend_op_array));
+			run_time_cache_ptr = (void***)(new_op_array + 1);
+			*run_time_cache_ptr = NULL;
+			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
+			new_op_array->scope = ce;
+			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, run_time_cache_ptr);
+			ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, &new_op_array->static_variables);
+
+			zend_update_inherited_handler(constructor);
+			zend_update_inherited_handler(destructor);
+			zend_update_inherited_handler(clone);
+			zend_update_inherited_handler(__get);
+			zend_update_inherited_handler(__set);
+			zend_update_inherited_handler(__call);
+			zend_update_inherited_handler(__isset);
+			zend_update_inherited_handler(__unset);
+			zend_update_inherited_handler(__tostring);
+			zend_update_inherited_handler(__callstatic);
+			zend_update_inherited_handler(__debugInfo);
+			zend_update_inherited_handler(__serialize);
+			zend_update_inherited_handler(__unserialize);
+		}
+	}
+
+	/* static members */
+	if (ce->default_static_members_table) {
+		zval *dst = emalloc(sizeof(zval) * ce->default_static_members_count);
+		zval *src = ce->default_static_members_table;
+		zval *end = src + ce->default_static_members_count;
+
+		ce->default_static_members_table = dst;
+		for (; src != end; src++, dst++) {
+			ZVAL_COPY_VALUE(dst, src);
+		}
+	}
+	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+
+	/* properties_info */
+	if (!(HT_FLAGS(&ce->properties_info) & HASH_FLAG_UNINITIALIZED)) {
+		p = emalloc(HT_SIZE(&ce->properties_info));
+		memcpy(p, HT_GET_DATA_ADDR(&ce->properties_info), HT_USED_SIZE(&ce->properties_info));
+		HT_SET_DATA_ADDR(&ce->properties_info, p);
+		p = ce->properties_info.arData;
+		end = p + ce->properties_info.nNumUsed;
+		for (; p != end; p++) {
+			zend_property_info *prop_info, *new_prop_info;
+
+			prop_info = Z_PTR(p->val);
+			ZEND_ASSERT(prop_info->ce == pce);
+			new_prop_info= zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
+			Z_PTR(p->val) = new_prop_info;
+			memcpy(new_prop_info, prop_info, sizeof(zend_property_info));
+			new_prop_info->ce = ce;
+			if (ZEND_TYPE_HAS_LIST(new_prop_info->type)) {
+				zend_type_list *new_list;
+				zend_type_list *list = ZEND_TYPE_LIST(new_prop_info->type);
+
+				new_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->num_types));
+				memcpy(new_list, list, ZEND_TYPE_LIST_SIZE(list->num_types));
+				ZEND_TYPE_SET_PTR(new_prop_info->type, list);
+				ZEND_TYPE_FULL_MASK(new_prop_info->type) |= _ZEND_TYPE_ARENA_BIT;
+			}
+		}
+	}
+
+	/* constants table */
+	if (!(HT_FLAGS(&ce->constants_table) & HASH_FLAG_UNINITIALIZED)) {
+		p = emalloc(HT_SIZE(&ce->constants_table));
+		memcpy(p, HT_GET_DATA_ADDR(&ce->constants_table), HT_USED_SIZE(&ce->constants_table));
+		HT_SET_DATA_ADDR(&ce->constants_table, p);
+		p = ce->constants_table.arData;
+		end = p + ce->constants_table.nNumUsed;
+		for (; p != end; p++) {
+			zend_class_constant *c, *new_c;
+
+			c = Z_PTR(p->val);
+			ZEND_ASSERT(c->ce == pce);
+			new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+			Z_PTR(p->val) = new_c;
+			memcpy(new_c, c, sizeof(zend_class_constant));
+			new_c->ce = ce;
+		}
+	}
+
+	return ce;
+}
+
+#ifndef ZEND_WIN32
+# define UPDATE_IS_CACHEABLE(ce) do { \
+			if ((ce)->type == ZEND_USER_CLASS) { \
+				is_cacheable &= (ce)->ce_flags; \
+			} \
+		} while (0)
+#else
+// TODO: ASLR may cause different addresses in different workers ???
+# define UPDATE_IS_CACHEABLE(ce) do { \
+			is_cacheable &= (ce)->ce_flags; \
+		} while (0)
+#endif
+
+ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name, zend_string *key) /* {{{ */
 {
 	/* Load parent/interface dependencies first, so we can still gracefully abort linking
 	 * with an exception and remove the class from the class table. This is only possible
 	 * if no variance obligations on the current class have been added during autoloading. */
 	zend_class_entry *parent = NULL;
 	zend_class_entry **interfaces = NULL;
+	zend_class_entry **traits_and_interfaces = NULL;
+	zend_class_entry *proto = NULL;
+	zend_class_entry *orig_linking_class;
+	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	uint32_t i, j;
+	zval *zv;
 
 	if (ce->parent_name) {
 		parent = zend_fetch_class_by_name(
@@ -2427,13 +2627,43 @@ ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_pa
 			ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
 		if (!parent) {
 			check_unrecoverable_load_failure(ce);
-			return FAILURE;
+			return NULL;
+		}
+		UPDATE_IS_CACHEABLE(parent);
+	}
+
+	if (ce->num_traits || ce->num_interfaces) {
+		traits_and_interfaces = emalloc(sizeof(zend_class_entry*) * (ce->num_traits + ce->num_interfaces));
+
+		for (i = 0; i < ce->num_traits; i++) {
+			zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
+				ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
+			if (UNEXPECTED(trait == NULL)) {
+				efree(traits_and_interfaces);
+				return NULL;
+			}
+			if (UNEXPECTED(!(trait->ce_flags & ZEND_ACC_TRAIT))) {
+				zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
+				efree(traits_and_interfaces);
+				return NULL;
+			}
+			for (j = 0; j < i; j++) {
+				if (traits_and_interfaces[j] == trait) {
+					/* skip duplications */
+					trait = NULL;
+					break;
+				}
+			}
+			traits_and_interfaces[i] = trait;
+			if (trait) {
+				UPDATE_IS_CACHEABLE(trait);
+			}
 		}
 	}
 
 	if (ce->num_interfaces) {
 		/* Also copy the parent interfaces here, so we don't need to reallocate later. */
-		uint32_t i, num_parent_interfaces = parent ? parent->num_interfaces : 0;
+		uint32_t num_parent_interfaces = parent ? parent->num_interfaces : 0;
 		interfaces = emalloc(
 			sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
 		if (num_parent_interfaces) {
@@ -2448,11 +2678,60 @@ ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_pa
 			if (!iface) {
 				check_unrecoverable_load_failure(ce);
 				efree(interfaces);
-				return FAILURE;
+				efree(traits_and_interfaces);
+				return NULL;
 			}
 			interfaces[num_parent_interfaces + i] = iface;
+			traits_and_interfaces[ce->num_traits + i] = iface;
+			if (iface) {
+				UPDATE_IS_CACHEABLE(iface);
+			}
 		}
 	}
+
+
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+		if (is_cacheable) {
+			if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
+				zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
+				if (ret) {
+					if (traits_and_interfaces) {
+						efree(traits_and_interfaces);
+					}
+					if (traits_and_interfaces) {
+						efree(interfaces);
+					}
+					zv = zend_hash_find_ex(CG(class_table), key, 1);
+					Z_CE_P(zv) = ret;
+					return ret;
+				}
+			} else {
+				is_cacheable = 0;
+			}
+			proto = ce;
+		}
+		/* Lazy class loading */
+		ce = zend_lazy_class_load(ce);
+		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		Z_CE_P(zv) = ce;
+		if (CG(unlinked_uses)
+		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
+			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+		}
+	} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+		/* Lazy class loading */
+		ce = zend_lazy_class_load(ce);
+		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
+		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		Z_CE_P(zv) = ce;
+		if (CG(unlinked_uses)
+		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
+			ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+		}
+	}
+
+	orig_linking_class = CG(current_linking_class);
+	CG(current_linking_class) = is_cacheable ? ce : NULL;
 
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
@@ -2461,7 +2740,7 @@ ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_pa
 		zend_do_inheritance(ce, parent);
 	}
 	if (ce->num_traits) {
-		zend_do_bind_traits(ce);
+		zend_do_bind_traits(ce, traits_and_interfaces);
 	}
 	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
@@ -2478,19 +2757,53 @@ ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_pa
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
-		return SUCCESS;
-	}
-
-	ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
-	load_delayed_classes();
-	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
-		resolve_delayed_variance_obligations(ce);
-		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-			report_variance_errors(ce);
+	} else {
+		ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
+		if (CG(current_linking_class)) {
+			ce->ce_flags |= ZEND_ACC_CACHEABLE;
+		}
+		load_delayed_classes();
+		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
+			resolve_delayed_variance_obligations(ce);
+			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				CG(current_linking_class) = orig_linking_class;
+				report_variance_errors(ce);
+			}
+		}
+		if (ce->ce_flags & ZEND_ACC_CACHEABLE) {
+			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		} else {
+			CG(current_linking_class) = NULL;
 		}
 	}
 
-	return SUCCESS;
+	if (!CG(current_linking_class)) {
+		is_cacheable = 0;
+	}
+	CG(current_linking_class) = orig_linking_class;
+
+	if (is_cacheable) {
+		HashTable *ht = (HashTable*)ce->inheritance_cache;
+		zend_class_entry *new_ce;
+
+		ce->inheritance_cache = NULL;
+		new_ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces, ht);
+		if (new_ce) {
+			zv = zend_hash_find_ex(CG(class_table), key, 1);
+			ce = new_ce;
+			Z_CE_P(zv) = ce;
+		}
+		if (ht) {
+			zend_hash_destroy(ht);
+			FREE_HASHTABLE(ht);
+		}
+	}
+
+	if (traits_and_interfaces) {
+		efree(traits_and_interfaces);
+	}
+
+	return ce;
 }
 /* }}} */
 
@@ -2539,21 +2852,66 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 }
 /* }}} */
 
-bool zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
+zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
-	inheritance_status status = zend_can_early_bind(ce, parent_ce);
+	inheritance_status status;
+	zend_class_entry *proto = NULL;
+	zend_class_entry *orig_linking_class;
+	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
+	UPDATE_IS_CACHEABLE(parent_ce);
+	if (is_cacheable) {
+		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
+			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
+			if (ret) {
+				if (delayed_early_binding) {
+					if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+						return NULL;
+					}
+					Z_CE_P(delayed_early_binding) = ret;
+				} else {
+					if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ret) == NULL)) {
+						return NULL;
+					}
+				}
+				return ret;
+			}
+		} else {
+			is_cacheable = 0;
+		}
+		proto = ce;
+	}
+
+	orig_linking_class = CG(current_linking_class);
+	CG(current_linking_class) = NULL;
+	status = zend_can_early_bind(ce, parent_ce);
+	CG(current_linking_class) = orig_linking_class;
 	if (EXPECTED(status != INHERITANCE_UNRESOLVED)) {
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+		} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+			ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
+		}
+
 		if (delayed_early_binding) {
 			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-				return 0;
+				return NULL;
 			}
+			Z_CE_P(delayed_early_binding) = ce;
 		} else {
 			if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) == NULL)) {
-				return 0;
+				return NULL;
 			}
 		}
+
+		orig_linking_class = CG(current_linking_class);
+		CG(current_linking_class) = is_cacheable ? ce : NULL;
+
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 		if (parent_ce && parent_ce->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent_ce);
@@ -2564,8 +2922,28 @@ bool zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend
 		}
 		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
 		ce->ce_flags |= ZEND_ACC_LINKED;
-		return 1;
+
+		CG(current_linking_class) = orig_linking_class;
+
+		if (is_cacheable) {
+			HashTable *ht = (HashTable*)ce->inheritance_cache;
+			zend_class_entry *new_ce;
+
+			ce->inheritance_cache = NULL;
+			new_ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
+			if (new_ce) {
+				zval *zv = zend_hash_find_ex(CG(class_table), lcname, 1);
+				ce = new_ce;
+				Z_CE_P(zv) = ce;
+			}
+			if (ht) {
+				zend_hash_destroy(ht);
+				FREE_HASHTABLE(ht);
+			}
+		}
+
+		return ce;
 	}
-	return 0;
+	return NULL;
 }
 /* }}} */

@@ -9878,7 +9878,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				if (func && !(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 					if (ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
-					} else if (!zend_accel_in_shm(func->op_array.opcodes)) {
+					} else if ((func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+					        && (!func->op_array.scope || (func->op_array.scope->ce_flags & ZEND_ACC_LINKED))) {
+						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
+					} else {
 						/* the called op_array may be not persisted yet */
 						|	test r2, 1
 						|	jz >1
@@ -12611,11 +12614,12 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	return 1;
 }
 
-static zend_property_info* zend_get_known_property_info(zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
+static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
 
-	if (!ce ||
+	if ((on_this && (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) ||
+	    !ce ||
 	    !(ce->ce_flags & ZEND_ACC_LINKED) ||
 	    (ce->ce_flags & ZEND_ACC_TRAIT) ||
 	    ce->create_object) {
@@ -12745,7 +12749,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	prop_info = zend_get_known_property_info(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -12784,7 +12788,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13140,7 +13144,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13188,7 +13192,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13514,7 +13518,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13571,7 +13575,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13847,7 +13851,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13903,7 +13907,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;

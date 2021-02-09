@@ -703,6 +703,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
+	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -716,7 +717,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 			prop = &ce->default_static_members_table[prop_info->offset];
 			ZVAL_DEINDIRECT(prop);
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
-			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+			prop = &default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
 		if (!prop) {
 			continue;
@@ -734,7 +735,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
 		if (Z_OPT_TYPE_P(prop) == IS_CONSTANT_AST) {
-			if (UNEXPECTED(zval_update_constant_ex(prop, NULL) != SUCCESS)) {
+			if (UNEXPECTED(zval_update_constant_ex(prop, ce) != SUCCESS)) {
 				return;
 			}
 		}

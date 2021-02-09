@@ -417,6 +417,8 @@ void init_compiler(void) /* {{{ */
 
 	CG(delayed_variance_obligations) = NULL;
 	CG(delayed_autoloads) = NULL;
+	CG(unlinked_uses) = NULL;
+	CG(current_linking_class) = NULL;
 }
 /* }}} */
 
@@ -428,7 +430,6 @@ void shutdown_compiler(void) /* {{{ */
 	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_stack_destroy(&CG(short_circuiting_opnums));
-	zend_arena_destroy(CG(arena));
 
 	if (CG(delayed_variance_obligations)) {
 		zend_hash_destroy(CG(delayed_variance_obligations));
@@ -440,6 +441,12 @@ void shutdown_compiler(void) /* {{{ */
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
 	}
+	if (CG(unlinked_uses)) {
+		zend_hash_destroy(CG(unlinked_uses));
+		FREE_HASHTABLE(CG(unlinked_uses));
+		CG(unlinked_uses) = NULL;
+	}
+	CG(current_linking_class) = NULL;
 }
 /* }}} */
 
@@ -1136,7 +1143,8 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 		return FAILURE;
 	}
 
-	if (zend_do_link_class(ce, lc_parent_name) == FAILURE) {
+	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
+	if (!ce) {
 		/* Reload bucket pointer, the hash table may have been reallocated */
 		zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
 		zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(rtd_key));
@@ -1187,13 +1195,23 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			if (ZEND_TYPE_HAS_CE(*list_type)) {
 				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name);
 			} else {
-				zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
-				str = add_type_string(str, resolved);
-				zend_string_release(resolved);
+				if (ZEND_TYPE_HAS_CE_CACHE(*list_type)
+				 && ZEND_TYPE_CE_CACHE(*list_type)) {
+					str = add_type_string(str, ZEND_TYPE_CE_CACHE(*list_type)->name);
+				} else {
+					zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
+					str = add_type_string(str, resolved);
+					zend_string_release(resolved);
+				}
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		if (ZEND_TYPE_HAS_CE_CACHE(type)
+		 && ZEND_TYPE_CE_CACHE(type)) {
+			str = zend_string_copy(ZEND_TYPE_CE_CACHE(type)->name);
+		} else {
+			str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		}
 	} else if (ZEND_TYPE_HAS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
 	}
@@ -1354,7 +1372,8 @@ ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t fi
 				zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), lc_parent_name, 1);
 
 				if (parent_ce) {
-					if (zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv)) {
+					ce = zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv);
+					if (ce) {
 						/* Store in run-time cache */
 						((void**)((char*)run_time_cache + opline->extended_value))[0] = ce;
 					}
@@ -1831,6 +1850,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ce->info.user.doc_comment = NULL;
 	}
+	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;

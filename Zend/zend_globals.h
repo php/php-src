@@ -126,6 +126,8 @@ struct _zend_compiler_globals {
 
 	HashTable *delayed_variance_obligations;
 	HashTable *delayed_autoloads;
+	HashTable *unlinked_uses;
+	zend_class_entry *current_linking_class;
 
 	uint32_t rtd_key_counter;
 

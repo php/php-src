@@ -374,7 +374,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ce = zend_fetch_class(class_name, flags);
 		}
 		if (ce) {
-			c = zend_hash_find_ptr(&ce->constants_table, constant_name);
+			c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constant_name);
 			if (c == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
