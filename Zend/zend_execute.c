@@ -1144,7 +1144,7 @@ static zend_always_inline zend_bool zend_internal_call_should_throw(zend_functio
 
 static ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 {
-	zend_error(E_CORE_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
+	zend_error(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 		fbc->common.scope ? "::" : "",
 		ZSTR_VAL(fbc->common.function_name));
