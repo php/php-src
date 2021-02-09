@@ -77,9 +77,9 @@ string(2) "01"
 string(2) "00"
 -- Iteration 12 --
 
-Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+Deprecated: Passing null to parameter of type int is deprecated in %s on line %d
 string(2) "00"
 -- Iteration 13 --
 
-Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+Deprecated: Passing null to parameter of type int is deprecated in %s on line %d
 string(2) "00"

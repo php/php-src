@@ -428,7 +428,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *type) {
 	zend_string *func_name = get_active_function_or_method_name();
-	zend_error(E_DEPRECATED, "%s(): Passing null to argument of type %s is deprecated",
+	zend_error(E_DEPRECATED, "%s(): Passing null to parameter of type %s is deprecated",
 		ZSTR_VAL(func_name), type);
 	zend_string_release(func_name);
 	return !EG(exception);
