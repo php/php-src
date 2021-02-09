@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function mb_language(?string $language = null): string|bool {}
 

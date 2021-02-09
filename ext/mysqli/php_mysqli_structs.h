@@ -186,13 +186,6 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	mysql->multi_query = 1; \
 }
 
-#define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
-	zend_class_entry ce; \
-	INIT_CLASS_ENTRY(ce, name,class_functions); \
-	ce.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&ce); \
-} \
-
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
 	(Z_MYSQLI_P(__zval))->ptr = __ptr;
 

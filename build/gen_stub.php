@@ -1114,10 +1114,11 @@ class PropertyInfo
                 break;
 
             case "string":
-                if (empty($value)) {
+                if ($value === "") {
                     $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
                 } else {
-                    $code .= "\tZVAL_STRING(&$zvalName, \"$value\");\n";
+                    $code .= "\tzend_string *{$zvalName}_str = zend_string_init(\"$value\", sizeof(\"$value\") - 1, 1);\n";
+                    $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
                 }
                 break;
 
