@@ -34,10 +34,6 @@ $inputs =  array (
           false,
           TRUE,
           FALSE,
-
-          // null values
-/*15*/	  NULL,
-          null,
 );
 
 // loop through with each element of the $inputs array to test chr() function
@@ -51,7 +47,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"
@@ -74,12 +70,4 @@ string(2) "00"
 -- Iteration 10 --
 string(2) "01"
 -- Iteration 11 --
-string(2) "00"
--- Iteration 12 --
-
-Deprecated: Passing null to parameter of type int is deprecated in %s on line %d
-string(2) "00"
--- Iteration 13 --
-
-Deprecated: Passing null to parameter of type int is deprecated in %s on line %d
 string(2) "00"

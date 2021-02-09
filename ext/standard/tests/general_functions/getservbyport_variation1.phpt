@@ -15,15 +15,12 @@ Simone Gentili (sensorario@gmail.com)
 ?>
 --FILE--
 <?php
-    var_dump(getservbyport( -1, "tcp" ));
-    var_dump(getservbyport( 80, "ppp" ));
-    var_dump(getservbyport( null, null));
-    var_dump(getservbyport( 2, 2));
-    var_dump(getservbyport( "80", "tcp"));
-
+var_dump(getservbyport( -1, "tcp" ));
+var_dump(getservbyport( 80, "ppp" ));
+var_dump(getservbyport( 2, 2));
+var_dump(getservbyport( "80", "tcp"));
 ?>
 --EXPECTF--
-bool(false)
 bool(false)
 bool(false)
 bool(false)

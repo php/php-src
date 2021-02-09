@@ -21,7 +21,6 @@ $values = array(23,
         "23.45",
         "2.345e1",
         "1000",
-        null,
         true,
         false);
 
@@ -42,6 +41,5 @@ float(NAN)
 float(NAN)
 float(NAN)
 float(NAN)
-float(0)
 float(1.5707963267948966)
 float(0)
