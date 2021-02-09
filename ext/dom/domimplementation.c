@@ -127,7 +127,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssO!", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!sO!", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 
