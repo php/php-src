@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7cba1a7a34cc4789871faf44fc4794a48db26e61 */
+ * Stub hash: 72c2add8db9af8f90e84997a2a5ca6743268fae8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -184,10 +184,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMElement_getElementsByTagName arginfo_class_DOMElement_getAttribute
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_getElementsByTagNameNS, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DOMElement_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
 
 #define arginfo_class_DOMElement_hasAttribute arginfo_class_DOMElement_getAttribute
 
@@ -292,7 +289,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocument_getElementsByTagName arginfo_class_DOMElement_getAttribute
 
-#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getElementsByTagNameNS
+#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_importNode, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
