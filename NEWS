@@ -22,7 +22,7 @@ PHP                                                                        NEWS
     (Darek Ślusarczyk)
 
 - Opcache:
-  . Added inheritanch cache. (Dmitry)
+  . Added inheritance cache. (Dmitry)
 
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
