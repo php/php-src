@@ -22,7 +22,7 @@ foreach ($tests as $idx => $test) {
 
 // no IV
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-    NULL, $test['tag'], $test['aad']));
+    '', $test['tag'], $test['aad']));
 // failed because no AAD
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
     $test['iv'], $test['tag']));
