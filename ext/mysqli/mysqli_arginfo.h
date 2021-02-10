@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a41875cecd71e72e1c1d3fc9c4d1442a65cd2d15 */
+ * Stub hash: cd44441ccae3d04e4691e0b1b040cafd8db8b521 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -382,11 +382,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ca_path, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cipher_algos, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, ca_path, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, cipher_algos, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_stat, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -545,11 +545,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 0, 5)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, ca_path, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cipher_algos, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, ca_path, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, cipher_algos, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stat arginfo_class_mysqli_character_set_name

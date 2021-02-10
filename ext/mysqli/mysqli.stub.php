@@ -256,11 +256,11 @@ class mysqli
      * @alias mysqli_ssl_set
      */
     public function ssl_set(
-        string $key,
-        string $certificate,
-        string $ca_certificate,
-        string $ca_path,
-        string $cipher_algos
+        ?string $key,
+        ?string $certificate,
+        ?string $ca_certificate,
+        ?string $ca_path,
+        ?string $cipher_algos
     ) {}
 
     /**
@@ -746,11 +746,11 @@ function mysqli_sqlstate(mysqli $mysql): string {}
 
 function mysqli_ssl_set(
     mysqli $mysql,
-    string $key,
-    string $certificate,
-    string $ca_certificate,
-    string $ca_path,
-    string $cipher_algos
+    ?string $key,
+    ?string $certificate,
+    ?string $ca_certificate,
+    ?string $ca_path,
+    ?string $cipher_algos
 ): bool {}
 
 function mysqli_stat(mysqli $mysql): string|false {}
