@@ -581,6 +581,36 @@ static zend_result pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 }
 /* }}} */
 
+/* {{{ proto string PDO::mysqlGetWarningCount()
+   Returns the number of SQL warnings during the execution of the last statement */
+static PHP_METHOD(PDO, mysqlGetWarningCount)
+{
+	pdo_dbh_t *dbh;
+	pdo_mysql_db_handle *H;
+
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_mysql_db_handle *)dbh->driver_data;
+	RETURN_LONG(mysql_warning_count(H->server));
+}
+/* }}} */
+
+static const zend_function_entry dbh_methods[] = {
+	PHP_ME(PDO, mysqlGetWarningCount, NULL, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+
+static const zend_function_entry *pdo_mysql_get_driver_methods(pdo_dbh_t *dbh, int kind)
+{
+	switch (kind) {
+		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
+			return dbh_methods;
+		default:
+			return NULL;
+	}
+}
+
 /* {{{ pdo_mysql_request_shutdown */
 static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 {
@@ -625,7 +655,7 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
 	pdo_mysql_check_liveness,
-	NULL,
+	pdo_mysql_get_driver_methods,
 	pdo_mysql_request_shutdown,
 	pdo_mysql_in_transaction,
 	NULL /* get_gc */
