@@ -2217,7 +2217,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		ZVAL_STRINGL(&params[0], buf, buf_size);
 		ZVAL_STRING(&params[1], location);
 		if (action == NULL) {
-			ZVAL_NULL(&params[2]);
+			ZVAL_EMPTY_STRING(&params[2]);
 		} else {
 			ZVAL_STRING(&params[2], action);
 		}
