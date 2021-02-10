@@ -712,8 +712,12 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 	}
 
 	if (fptr->common.scope) {
-		/* cut off on NULL byte ... class@anonymous */
-		smart_str_appendl(&str, ZSTR_VAL(fptr->common.scope->name), strlen(ZSTR_VAL(fptr->common.scope->name)));
+		if (fptr->common.scope->ce_flags & ZEND_ACC_ANON_CLASS) {
+			/* cut off on NULL byte ... class@anonymous */
+			smart_str_appends(&str, ZSTR_VAL(fptr->common.scope->name));
+		} else {
+			smart_str_appendl(&str, ZSTR_VAL(fptr->common.scope->name), ZSTR_LEN(fptr->common.scope->name));
+		}
 		smart_str_appends(&str, "::");
 	}
 
