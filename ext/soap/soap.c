@@ -2215,11 +2215,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 		ZVAL_STRINGL(&func,"__doRequest",sizeof("__doRequest")-1);
 		ZVAL_STRINGL(&params[0], buf, buf_size);
-		if (location == NULL) {
-			ZVAL_NULL(&params[1]);
-		} else {
-			ZVAL_STRING(&params[1], location);
-		}
+		ZVAL_STRING(&params[1], location);
 		if (action == NULL) {
 			ZVAL_NULL(&params[2]);
 		} else {
@@ -2371,6 +2367,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 				if (location == NULL) {
 					location = binding->location;
+					ZEND_ASSERT(location);
 				}
 				if (binding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
