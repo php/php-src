@@ -2157,7 +2157,7 @@ PHP_FUNCTION(mysqli_ssl_set)
 	char		*ssl_parm[5];
 	size_t			ssl_parm_len[5], i;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osssss", &mysql_link, mysqli_link_class_entry, &ssl_parm[0], &ssl_parm_len[0], &ssl_parm[1], &ssl_parm_len[1], &ssl_parm[2], &ssl_parm_len[2], &ssl_parm[3], &ssl_parm_len[3], &ssl_parm[4], &ssl_parm_len[4])   == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!s!s!s!s!", &mysql_link, mysqli_link_class_entry, &ssl_parm[0], &ssl_parm_len[0], &ssl_parm[1], &ssl_parm_len[1], &ssl_parm[2], &ssl_parm_len[2], &ssl_parm[3], &ssl_parm_len[3], &ssl_parm[4], &ssl_parm_len[4])   == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
