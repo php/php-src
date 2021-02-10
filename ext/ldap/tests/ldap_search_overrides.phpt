@@ -20,7 +20,7 @@ ldap_set_option($link, LDAP_OPT_NETWORK_TIMEOUT, 44);
 
 insert_dummy_data($link, $base);
 var_dump(
-    $result = ldap_search($link, "$base", "(objectClass=person)", array(), null, 111, 22, LDAP_DEREF_NEVER),
+    $result = ldap_search($link, "$base", "(objectClass=person)", array(), 0, 111, 22, LDAP_DEREF_NEVER),
     ldap_get_entries($link, $result)
 );
 var_dump(

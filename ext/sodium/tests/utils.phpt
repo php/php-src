@@ -7,7 +7,7 @@ Check for libsodium utils
 $a = 'test';
 sodium_memzero($a);
 if ($a !== 'test') {
-  echo strlen($a);
+  var_dump($a);
 } else {
   echo $a;
 }
@@ -107,7 +107,8 @@ try {
 
 ?>
 --EXPECT--
-0
+NULL
+
 bool(true)
 bool(false)
 string(22) "0000810102030405060708"
