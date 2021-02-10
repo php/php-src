@@ -1143,6 +1143,10 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 		return FAILURE;
 	}
 
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		return SUCCESS;
+	}
+
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (!ce) {
 		/* Reload bucket pointer, the hash table may have been reallocated */
@@ -7517,31 +7521,36 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	if (toplevel
-		/* We currently don't early-bind classes that implement interfaces or use traits */
-	 && !ce->num_interfaces && !ce->num_traits
+	/* We currently don't early-bind classes that implement interfaces or use traits */
+	if (!ce->num_interfaces && !ce->num_traits
 	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
-		if (extends_ast) {
-			zend_class_entry *parent_ce = zend_lookup_class_ex(
-				ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		if (toplevel) {
+			if (extends_ast) {
+				zend_class_entry *parent_ce = zend_lookup_class_ex(
+					ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
-			if (parent_ce
-			 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
-			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))) {
+				if (parent_ce
+				 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
+				 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))) {
 
-				CG(zend_lineno) = decl->end_lineno;
-				if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
+					CG(zend_lineno) = decl->end_lineno;
+					if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
+						CG(zend_lineno) = ast->lineno;
+						zend_string_release(lcname);
+						return;
+					}
 					CG(zend_lineno) = ast->lineno;
-					zend_string_release(lcname);
-					return;
 				}
-				CG(zend_lineno) = ast->lineno;
+			} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
+				zend_string_release(lcname);
+				zend_build_properties_info_table(ce);
+				ce->ce_flags |= ZEND_ACC_LINKED;
+				return;
 			}
-		} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
-			zend_string_release(lcname);
+		} else if (!extends_ast) {
+			/* Link unbound simple class */
 			zend_build_properties_info_table(ce);
 			ce->ce_flags |= ZEND_ACC_LINKED;
-			return;
 		}
 	}
 
