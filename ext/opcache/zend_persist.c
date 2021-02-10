@@ -296,7 +296,7 @@ uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *s
 	uint32_t ret;
 
 	if (zend_string_equals_literal_ci(type_name, "self")) {
-		if (!scope) {
+		if (!scope || (scope->ce_flags & ZEND_ACC_TRAIT)) {
 			return 0;
 		}
 		type_name = scope->name;
