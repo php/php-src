@@ -8,5 +8,5 @@ var_dump(strlen($null));
 
 ?>
 --EXPECTF--
-Deprecated: strlen(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: strlen(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 int(0)

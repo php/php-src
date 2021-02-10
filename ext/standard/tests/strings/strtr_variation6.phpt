@@ -104,11 +104,11 @@ string(6) "0a2atm"
 string(6) "012atm"
 -- Iteration 14 --
 
-Deprecated: strtr(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 string(6) "012atm"
 -- Iteration 15 --
 
-Deprecated: strtr(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"

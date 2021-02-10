@@ -41,5 +41,5 @@ $reader->close();
 unlink(__DIR__.'/015-move-errors.xml');
 ?>
 --EXPECTF--
-Deprecated: XMLReader::moveToAttributeNs(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: XMLReader::moveToAttributeNs(): Passing null to parameter #2 ($namespace) of type string is deprecated in %s on line %d
 XMLReader::moveToAttributeNs(): Argument #2 ($namespace) cannot be empty

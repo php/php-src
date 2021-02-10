@@ -118,12 +118,12 @@ strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 14 --
 
-Deprecated: strtr(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 15 --
 
-Deprecated: strtr(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 16 --

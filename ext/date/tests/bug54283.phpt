@@ -11,5 +11,5 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: DatePeriod::__construct(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: DatePeriod::__construct(): Passing null to parameter #1 ($start) of type string is deprecated in %s on line %d
 string(51) "DatePeriod::__construct(): Unknown or bad format ()"

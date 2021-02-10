@@ -88,7 +88,7 @@ bool(false)
 
 -- NULL as filename --
 
-Deprecated: sha1_file(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: sha1_file(): Passing null to parameter #1 ($filename) of type string is deprecated in %s on line %d
 Path cannot be empty
 
 -- Hexadecimal Output for Empty file as Argument --

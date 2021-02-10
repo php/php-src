@@ -95,10 +95,10 @@ NULL
 ===3===
 NULL
 
-Deprecated: CachingIterator::offsetExists(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: CachingIterator::offsetExists(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 bool(false)
 
-Deprecated: CachingIterator::offsetGet(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: CachingIterator::offsetGet(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 
 Warning: Undefined array key "" in %s on line %d
 NULL
@@ -138,10 +138,10 @@ int(1)
 ===3===
 NULL
 
-Deprecated: CachingIterator::offsetExists(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: CachingIterator::offsetExists(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 bool(false)
 
-Deprecated: CachingIterator::offsetGet(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: CachingIterator::offsetGet(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 
 Warning: Undefined array key "" in %s on line %d
 NULL

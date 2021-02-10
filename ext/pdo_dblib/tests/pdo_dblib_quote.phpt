@@ -34,7 +34,7 @@ string(3) "'1'"
 string(2) "''"
 string(4) "'42'"
 
-Deprecated: PDO::quote(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: PDO::quote(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 string(2) "''"
 string(4) "''''"
 string(5) "'foo'"

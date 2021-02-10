@@ -147,7 +147,7 @@ Test bad arguments:
 ReflectionClass::implementsInterface() expects exactly 1 argument, 0 given
 ReflectionClass::implementsInterface() expects exactly 1 argument, 2 given
 
-Deprecated: ReflectionClass::implementsInterface(): Passing null to parameter of type string is deprecated in %s on line %d
+Deprecated: ReflectionClass::implementsInterface(): Passing null to parameter #1 ($interface) of type ReflectionClass|string is deprecated in %s on line %d
 Interface "" does not exist
 Interface "ThisClassDoesNotExist" does not exist
 Interface "2" does not exist
