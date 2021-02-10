@@ -108,5 +108,5 @@ class SoapClient
     public function __setSoapHeaders($headers = null) {}
 
     /** @return string|null */
-    public function __setLocation(string $location = "") {}
+    public function __setLocation(?string $location = null) {}
 }
