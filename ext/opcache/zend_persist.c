@@ -36,6 +36,7 @@
 #endif
 
 #define zend_set_str_gc_flags(str) do { \
+	GC_SET_REFCOUNT(str, 2); \
 	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
@@ -290,7 +291,40 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-static void zend_persist_type(zend_type *type) {
+uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *scope)
+{
+	uint32_t ret;
+
+	if (zend_string_equals_literal_ci(type_name, "self")) {
+		if (!scope) {
+			return 0;
+		}
+		type_name = scope->name;
+	} else if (zend_string_equals_literal_ci(type_name, "parent")) {
+		if (!scope || !scope->parent) {
+			return 0;
+		}
+		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
+			type_name = scope->parent->name;
+		} else {
+			type_name = scope->parent_name;
+		}
+	}
+
+	ZEND_ASSERT(GC_FLAGS(type_name) & GC_IMMUTABLE);
+	ZEND_ASSERT(GC_FLAGS(type_name) & IS_STR_PERMANENT);
+	ret = GC_REFCOUNT(type_name);
+
+	/* We use type.name.gc.refcount to keep map_ptr of corresponding type */
+	if (ret <= 2) {
+		ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		ZEND_ASSERT(ret > 2);
+		GC_SET_REFCOUNT(type_name, ret);
+	}
+	return ret;
+}
+
+static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {
@@ -309,9 +343,12 @@ static void zend_persist_type(zend_type *type) {
 			zend_accel_store_interned_string(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 			if (!ZCG(current_persistent_script)->corrupted) {
-				// TODO: we may use single map_ptr slot for each class name ???
-				single_type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-				single_type->ce_cache__ptr = (uint32_t)(uintptr_t)zend_map_ptr_new();
+				uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
+
+				if (ptr) {
+					single_type->type_mask |= _ZEND_TYPE_CACHE_BIT;
+					single_type->ce_cache__ptr = ptr;
+				}
 			}
 		}
 	} ZEND_TYPE_FOREACH_END();
@@ -584,7 +621,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (arg_info[i].name) {
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
-			zend_persist_type(&arg_info[i].type);
+			zend_persist_type(&arg_info[i].type, op_array->scope);
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
@@ -743,7 +780,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	if (prop->attributes) {
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
-	zend_persist_type(&prop->type);
+	zend_persist_type(&prop->type, ce);
 	return prop;
 }
 

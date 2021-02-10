@@ -1190,7 +1190,7 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 }
 
 static void zend_file_cache_unserialize_type(
-		zend_type *type, zend_persistent_script *script, void *buf)
+		zend_type *type, zend_class_entry *scope, zend_persistent_script *script, void *buf)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
@@ -1199,16 +1199,21 @@ static void zend_file_cache_unserialize_type(
 
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(list, list_type) {
-			zend_file_cache_unserialize_type(list_type, script, buf);
+			zend_file_cache_unserialize_type(list_type, scope, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
 		if (!(script->corrupted)) {
-			// TODO: we may use single map_ptr slot for each class name ???
-			type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-			type->ce_cache__ptr = (uint32_t)(uintptr_t)zend_map_ptr_new();
+			uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
+
+			if (ptr) {
+				type->type_mask |= _ZEND_TYPE_CACHE_BIT;
+				type->ce_cache__ptr = ptr;
+			} else {
+				type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
+			}
 		} else {
 			type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
 		}
@@ -1362,7 +1367,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				zend_file_cache_unserialize_type(&p->type, script, buf);
+				zend_file_cache_unserialize_type(&p->type, op_array->scope, script, buf);
 				p++;
 			}
 		}
@@ -1421,7 +1426,7 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 				UNSERIALIZE_STR(prop->doc_comment);
 			}
 			UNSERIALIZE_ATTRIBUTES(prop->attributes);
-			zend_file_cache_unserialize_type(&prop->type, script, buf);
+			zend_file_cache_unserialize_type(&prop->type, prop->ce, script, buf);
 		}
 	}
 }
