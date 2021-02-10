@@ -693,7 +693,7 @@ PHP_METHOD(SoapVar, __construct)
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
 	size_t stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!l!|ssss", &data, &type, &type_is_null, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!l!|s!s!s!s!", &data, &type, &type_is_null, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
