@@ -1352,6 +1352,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			opline++;
 		}
 
+		UNSERIALIZE_PTR(op_array->scope);
+
 		if (op_array->arg_info) {
 			zend_arg_info *p, *end;
 			UNSERIALIZE_PTR(op_array->arg_info);
@@ -1367,7 +1369,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				zend_file_cache_unserialize_type(&p->type, op_array->scope, script, buf);
+				zend_file_cache_unserialize_type(&p->type, (op_array->fn_flags & ZEND_ACC_CLOSURE) ? NULL : op_array->scope, script, buf);
 				p++;
 			}
 		}
@@ -1389,7 +1391,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_STR(op_array->function_name);
 		UNSERIALIZE_STR(op_array->filename);
 		UNSERIALIZE_PTR(op_array->live_range);
-		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_ATTRIBUTES(op_array->attributes);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
