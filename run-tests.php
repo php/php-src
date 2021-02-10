@@ -1764,7 +1764,7 @@ function run_worker(): void
                     "type" => "tests_finished",
                     "junit" => $junit->isEnabled() ? $junit : null,
                 ]);
-                //junit_init(); TODO is this needed?
+                $junit->clear();
                 break;
             default:
                 send_message($workerSock, [
@@ -3466,6 +3466,12 @@ class JUnit
     public function isEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    public function clear(): void
+    {
+        $this->rootSuite = self::EMPTY_SUITE + ['name' => 'php'];
+        $this->suites = [];
     }
 
     public function saveXML(): void
