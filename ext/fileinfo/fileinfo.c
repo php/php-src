@@ -187,7 +187,7 @@ PHP_FUNCTION(finfo_open)
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp!", &options, &file, &file_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
