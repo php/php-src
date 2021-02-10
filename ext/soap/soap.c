@@ -2886,7 +2886,7 @@ PHP_METHOD(SoapClient, __setLocation)
 	zval *tmp;
 	zval *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &location, &location_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &location, &location_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
