@@ -56,13 +56,11 @@ $file_path_variations = array (
   /* paths with shortcut home dir char, with suffix variation */
   array("C:\\temp\\bar"),
   array("C:\\temp\\bar", ""),
-  array("C:\\temp\\bar", NULL),
   array("C:\\temp\\bar", ' '),
   array("C:\\temp\\bar.tar", ".tar"),
   array("C:\\temp\\bar.tar", "~"),
   array("C:\\temp\\bar.tar\\", "~"),
   array("C:\\temp\\bar.tar\\", ""),
-  array("C:\\temp\\bar.tar", NULL),
   array("C:\\temp\\bar.tar", ''),
   array("C:\\temp\\bar.tar", " "),
 
@@ -84,7 +82,6 @@ $file_path_variations = array (
   array("\\bar.zip\\", "\\bar.zip\\"),
   array(" ", " "),
   array(' ', ' '),
-  array(NULL, NULL),
 
   /* path with spaces */
   array(" "),
@@ -93,7 +90,6 @@ $file_path_variations = array (
   /* empty paths */
   array(""),
   array(''),
-  array(NULL)
 );
 
 function check_basename( $path_arrays ) {
@@ -287,8 +283,5 @@ string(1) " "
 string(0) ""
 
 --Iteration 31--
-string(0) ""
-
---Iteration 32--
 string(0) ""
 Done

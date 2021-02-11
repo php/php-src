@@ -28,7 +28,6 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 echo "\n*** testing file info ***";
-stat_fn(NULL);
 stat_fn(false);
 stat_fn('');
 stat_fn(' ');
@@ -49,11 +48,6 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing file info ***
--- File '' --
--- File access time is => 
--- File modification time is => 
--- inode change time is => 
-
 -- File '' --
 -- File access time is => 
 -- File modification time is => 
