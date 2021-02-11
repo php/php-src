@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #70091 (Phar does not mark UTF-8 filenames in ZIP archives). (cmb)
   . Fixed bug #53467 (Phar cannot compress large archives). (cmb, lserni)
 
+- SPL:
+  . Fixed bug#80719 (Iterating after failed ArrayObject::setIteratorClass()
+    causes Segmentation fault). (Nikita)
+
 - Standard:
   . Fixed bug #80654 (file_get_contents() maxlen fails above (2**31)-1 bytes).
     (cmb)
