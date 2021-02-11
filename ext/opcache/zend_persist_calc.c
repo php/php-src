@@ -105,6 +105,10 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			break;
 		case IS_ARRAY:
+			if (!ZCG(current_persistent_script)->corrupted
+			 && zend_accel_in_shm(Z_ARR_P(z))) {
+				return;
+			}
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
 				Bucket *p;
@@ -120,7 +124,8 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			break;
 		case IS_CONSTANT_AST:
-			if (!zend_accel_in_shm(Z_AST_P(z))) {
+			if (ZCG(current_persistent_script)->corrupted
+			 || !zend_accel_in_shm(Z_AST_P(z))) {
 				size = zend_shared_memdup_size(Z_AST_P(z), sizeof(zend_ast_ref));
 				if (size) {
 					ADD_SIZE(size);
@@ -137,7 +142,8 @@ static void zend_persist_zval_calc(zval *z)
 static void zend_persist_attributes_calc(HashTable *attributes)
 {
 	if (!zend_shared_alloc_get_xlat_entry(attributes)
-	 && !zend_accel_in_shm(attributes)) {
+	 && (ZCG(current_persistent_script)->corrupted
+	  || !zend_accel_in_shm(attributes))) {
 		zend_attribute *attr;
 		uint32_t i;
 
@@ -352,6 +358,10 @@ static void zend_persist_class_constant_calc(zval *zv)
 	zend_class_constant *c = Z_PTR_P(zv);
 
 	if (!zend_shared_alloc_get_xlat_entry(c)) {
+		if (!ZCG(current_persistent_script)->corrupted
+		 && zend_accel_in_shm(Z_PTR_P(zv))) {
+			return;
+		}
 		zend_shared_alloc_register_xlat_entry(c, c);
 		ADD_SIZE(sizeof(zend_class_constant));
 		zend_persist_zval_calc(&c->value);

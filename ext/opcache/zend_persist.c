@@ -210,6 +210,9 @@ static void zend_persist_zval(zval *z)
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = 0;
+			} else if (!ZCG(current_persistent_script)->corrupted
+			 && zend_accel_in_shm(Z_ARR_P(z))) {
+				/* pass */
 			} else {
 				Bucket *p;
 
@@ -237,7 +240,8 @@ static void zend_persist_zval(zval *z)
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = 0;
-			} else if (!zend_accel_in_shm(Z_AST_P(z))) {
+			} else if (ZCG(current_persistent_script)->corrupted
+			 || !zend_accel_in_shm(Z_AST_P(z))) {
 				zend_ast_ref *old_ref = Z_AST_P(z);
 				Z_AST_P(z) = zend_shared_memdup_put(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
@@ -260,7 +264,8 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 		uint32_t i;
 		zval *v;
 
-		if (zend_accel_in_shm(attributes)) {
+		if (!ZCG(current_persistent_script)->corrupted
+		 && zend_accel_in_shm(attributes)) {
 			return attributes;
 		}
 
@@ -791,6 +796,9 @@ static void zend_persist_class_constant(zval *zv)
 
 	if (c) {
 		Z_PTR_P(zv) = c;
+		return;
+	} else if (!ZCG(current_persistent_script)->corrupted
+	 && zend_accel_in_shm(Z_PTR_P(zv))) {
 		return;
 	}
 	c = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_class_constant));
