@@ -584,11 +584,8 @@ PHP_FUNCTION(password_get_info)
 	zend_string_release(ident);
 
 	add_assoc_string(return_value, "algoName", algo->name);
-	if (algo->get_info &&
-		(FAILURE == algo->get_info(&options, hash))) {
-		zval_ptr_dtor_nogc(&options);
-		zval_ptr_dtor_nogc(return_value);
-		RETURN_NULL();
+	if (algo->get_info) {
+		algo->get_info(&options, hash);
 	}
 	add_assoc_zval(return_value, "options", &options);
 }
