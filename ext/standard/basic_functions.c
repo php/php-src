@@ -2086,13 +2086,18 @@ static int php_ini_check_path(char *option_name, size_t option_len, char *new_op
 PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
-	zend_string *new_value;
+	zval *new_value;
 	zend_string *val;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(varname)
-		Z_PARAM_STR(new_value)
+		Z_PARAM_ZVAL(new_value)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(new_value) > IS_STRING) {
+		zend_argument_type_error(2, "must be of type string|int|float|bool|null");
+		RETURN_THROWS();
+	}
 
 	val = zend_ini_get_value(varname);
 
@@ -2101,6 +2106,9 @@ PHP_FUNCTION(ini_set)
 	} else {
 		RETVAL_FALSE;
 	}
+
+	zend_string *new_value_tmp_str;
+	zend_string *new_value_str = zval_get_tmp_string(new_value, &new_value_tmp_str);
 
 #define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
 	/* open basedir check */
@@ -2111,18 +2119,20 @@ PHP_FUNCTION(ini_set)
 			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "mail.log") ||
 			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.library.path") ||
 			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "vpopmail.directory")) {
-			if (php_check_open_basedir(ZSTR_VAL(new_value))) {
+			if (php_check_open_basedir(ZSTR_VAL(new_value_str))) {
 				zval_ptr_dtor_str(return_value);
+				zend_tmp_string_release(new_value_tmp_str);
 				RETURN_FALSE;
 			}
 		}
 	}
 #undef _CHECK_PATH
 
-	if (zend_alter_ini_entry_ex(varname, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
+	if (zend_alter_ini_entry_ex(varname, new_value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zval_ptr_dtor_str(return_value);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	zend_tmp_string_release(new_value_tmp_str);
 }
 /* }}} */
 
