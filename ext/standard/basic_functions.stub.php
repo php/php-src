@@ -1138,7 +1138,7 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /* password.c */
 
-function password_get_info(string $hash): ?array {}
+function password_get_info(string $hash): array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
