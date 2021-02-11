@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #80654 (file_get_contents() maxlen fails above (2**31)-1 bytes).
     (cmb)
+  . Fixed bug #80718 (ext/standard/dl.c fallback code path with syntax error).
+    (Nikita)
 
 21 Jan 2021, PHP 8.0.2
 
