@@ -1832,6 +1832,11 @@ function run_test(string $php, $file, array $env): string
     /** @var JUnit */
     global $junit;
 
+    static $skipCache;
+    if (!$skipCache) {
+        $skipCache = new SkipCache($cfg['keep']['skip']);
+    }
+
     $temp_filenames = null;
     $org_file = $file;
 
@@ -2155,9 +2160,8 @@ TEST $file
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        $ext_dir = `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo ini_get('extension_dir');"`;
         $extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-        $loaded = explode(",", `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         foreach ($extensions as $req_ext) {
             if (!in_array($req_ext, $loaded)) {
@@ -2217,7 +2221,6 @@ TEST $file
     if (array_key_exists('SKIPIF', $section_text)) {
         if (trim($section_text['SKIPIF'])) {
             show_file_block('skip', $section_text['SKIPIF']);
-            save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
@@ -2229,8 +2232,9 @@ TEST $file
             $junit->startTimer($shortname);
 
             $startTime = microtime(true);
-            $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0 \"$test_skipif\"", $env);
-            $output = trim($output);
+            $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
+            $output = $skipCache->checkSkip($commandLine, $section_text['SKIPIF'], $test_skipif, $temp_skipif, $env);
+
             $time = microtime(true) - $startTime;
 
             $junit->stopTimer($shortname);
@@ -2245,19 +2249,11 @@ TEST $file
                 ];
             }
 
-            if (!$cfg['keep']['skip']) {
-                @unlink($test_skipif);
-            }
-
             if (!strncasecmp('skip', $output, 4)) {
                 if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
                     show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
                 } else {
                     show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
-                }
-
-                if (!$cfg['keep']['skip']) {
-                    @unlink($test_skipif);
                 }
 
                 $message = !empty($m[1]) ? $m[1] : '';
@@ -3714,6 +3710,79 @@ class JUnit
         $dest['execution_time'] += $source['execution_time'];
         $dest['files'] += $source['files'];
     }
+}
+
+class SkipCache
+{
+    private bool $keepFile;
+
+    private array $skips = [];
+    private array $extensions = [];
+
+    private int $hits = 0;
+    private int $misses = 0;
+    private int $extHits = 0;
+    private int $extMisses = 0;
+
+    public function __construct(bool $keepFile)
+    {
+        $this->keepFile = $keepFile;
+    }
+
+    public function checkSkip(string $php, string $code, string $checkFile, string $tempFile, array $env): string
+    {
+        // Extension tests frequently use something like <?php require 'skipif.inc';
+        // for skip checks. This forces us to cache per directory to avoid pollution.
+        $dir = dirname($checkFile);
+        $key = "$php => $dir";
+
+        if (isset($this->skips[$key][$code])) {
+            $this->hits++;
+            if ($this->keepFile) {
+                save_text($checkFile, $code, $tempFile);
+            }
+            return $this->skips[$key][$code];
+        }
+
+        save_text($checkFile, $code, $tempFile);
+        $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
+        $this->skips[$key][$code] = $result;
+        $this->misses++;
+
+        if (!$this->keepFile) {
+            @unlink($checkFile);
+        }
+
+        return $result;
+    }
+
+    public function getExtensions(string $php): array
+    {
+        if (isset($this->extensions[$php])) {
+            $this->extHits++;
+            return $this->extensions[$php];
+        }
+
+        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+
+        $result = [$extDir, $extensions];
+        $this->extensions[$php] = $result;
+        $this->extMisses++;
+
+        return $result;
+    }
+
+//    public function __destruct()
+//    {
+//        echo "Skips: {$this->hits} hits, {$this->misses} misses.\n";
+//        echo "Extensions: {$this->extHits} hits, {$this->extMisses} misses.\n";
+//        echo "Cache distribution:\n";
+//
+//        foreach ($this->skips as $php => $cache) {
+//            echo "$php: " . count($cache) . "\n";
+//        }
+//    }
 }
 
 class RuntestsValgrind
