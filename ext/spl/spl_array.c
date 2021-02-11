@@ -11,6 +11,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
+   | Authors: Levi Morrison <levim@php.net>                               |
    +----------------------------------------------------------------------+
  */
 
@@ -40,6 +41,12 @@ PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
+
+zend_object_handlers spl_handler_ForwardArrayIterator;
+PHPAPI zend_class_entry  *spl_ce_ForwardArrayIterator;
+
+zend_object_handlers spl_handler_ReverseArrayIterator;
+PHPAPI zend_class_entry  *spl_ce_ReverseArrayIterator;
 
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
@@ -1839,9 +1846,551 @@ PHP_METHOD(ArrayObject, __debugInfo)
 	RETURN_ARR(spl_array_get_debug_info(Z_OBJ_P(ZEND_THIS)));
 } /* }}} */
 
+
+/* Used by:
+ *   1. Spl\ForwardArrayIterator
+ *   2. Spl\ReverseArrayIterator
+ */
+typedef struct {
+	HashPosition current;
+	HashTable *ht;
+	zend_object std;
+} ArrayIterator;
+
+static zend_always_inline ArrayIterator *ArrayIterator_from_obj(zend_object *obj)
+{
+	return (ArrayIterator *) ((char*)(obj) - XtOffsetOf(ArrayIterator, std));
+}
+
+
+static void ArrayIterator_dtor_obj(zend_object *object)
+{
+	ArrayIterator *iterator = ArrayIterator_from_obj(object);
+		zend_hash_release(iterator->ht);
+		iterator->current = 0;
+		iterator->ht = (HashTable *)&zend_empty_array;
+}
+
+static void ArrayIterator_free_obj(zend_object *object)
+{
+	ArrayIterator_dtor_obj(object);
+	zend_object_std_dtor(object);
+}
+
+static int ArrayIterator_count_elements(zend_object *obj, zend_long *count)
+{
+	ArrayIterator *iterator = ArrayIterator_from_obj(obj);
+	*count = zend_hash_num_elements(iterator->ht);
+	return SUCCESS;
+}
+
+static HashTable *ArrayIterator_get_properties_for(zend_object *object, zend_prop_purpose purpose)
+{
+	// todo: determine if it is worthwhile to implement any other purposes
+	if (purpose != ZEND_PROP_PURPOSE_DEBUG) {
+		return NULL;
+	}
+
+	ArrayIterator *iterator = ArrayIterator_from_obj(object);
+	HashTable *properties = zend_new_array(2);
+	zval inner, offset;
+
+	/* At the time of this writing, there isn't a macro that sets the
+	 * correct type info on the zval if the array is immutable, so do it
+	 * manually, as returning `zend_empty_array` (either from our own
+	 * .create_obj handler or from an array literal in a script) will
+	 * cause a sigsegv if the flags are not set correctly.
+	 */
+	HashTable *ht = iterator->ht;
+	{
+		Z_ARR(inner) = ht;
+		if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+			GC_ADDREF(ht);
+			Z_TYPE_INFO(inner) = IS_ARRAY_EX;
+		} else {
+			Z_TYPE_INFO(inner) = IS_ARRAY;
+		}
+	}
+	zend_hash_str_add(properties, ZEND_STRL("inner"), &inner);
+
+	// For the offset property we ignore holes, which are hidden from PHP.
+	HashPosition pos = 0, target = iterator->current;
+	zend_long current = 0;
+	for (
+		zend_hash_internal_pointer_reset_ex(ht, &pos);
+		pos != target && zend_hash_get_current_key_type_ex(ht, &pos) != HASH_KEY_NON_EXISTENT;
+		zend_hash_move_forward_ex(ht, &pos)
+	) {
+		++current;
+	}
+	ZVAL_LONG(&offset, current);
+	zend_hash_str_add(properties, ZEND_STRL("offset"), &offset);
+
+	return properties;
+}
+
+/* Spl\ForwardArrayIterator {{{ */
+typedef ArrayIterator ForwardArrayIterator;
+
+static void ForwardArrayIterator_it_dtor(zend_object_iterator *iterator)
+{
+	zval_ptr_dtor(&iterator->data);
+}
+
+static void ForwardArrayIterator_rewind(ForwardArrayIterator *iterator)
+{
+	iterator->current = 0;
+}
+
+static void ForwardArrayIterator_it_rewind(zend_object_iterator *zoi)
+{
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ForwardArrayIterator_rewind(iterator);
+}
+
+static bool ForwardArrayIterator_valid(ForwardArrayIterator *iterator)
+{
+	HashTable *ht = iterator->ht;
+	return zend_hash_get_current_key_type_ex(ht, &iterator->current) != HASH_KEY_NON_EXISTENT;
+}
+
+static int ForwardArrayIterator_it_valid(zend_object_iterator *zoi)
+{
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	return ForwardArrayIterator_valid(iterator) ? SUCCESS : FAILURE;
+}
+
+static zval *ForwardArrayIterator_current(ForwardArrayIterator *iterator)
+{
+	if (UNEXPECTED(!ForwardArrayIterator_valid(iterator))) {
+		zend_throw_error(NULL, "Spl\\ForwardArrayIterator::current() must not be called on an invalid iterator");
+		return NULL;
+	}
+
+	return zend_hash_get_current_data_ex(iterator->ht, &iterator->current);
+}
+
+static zval *ForwardArrayIterator_it_get_current_data(zend_object_iterator *zoi)
+{
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	return ForwardArrayIterator_current(iterator);
+}
+
+static void ForwardArrayIterator_key(ForwardArrayIterator *iterator, zval *key)
+{
+	if (UNEXPECTED(!ForwardArrayIterator_valid(iterator))) {
+		zend_throw_error(NULL, "Spl\\ForwardArrayIterator::key() must not be called on an invalid iterator");
+		return;
+	}
+
+	zend_hash_get_current_key_zval_ex(iterator->ht, key, &iterator->current);
+}
+
+static void ForwardArrayIterator_it_get_current_key(zend_object_iterator *zoi, zval *key)
+{
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ForwardArrayIterator_key(iterator, key);
+}
+
+static void ForwardArrayIterator_next(ForwardArrayIterator *iterator)
+{
+	// Why is `next` being called on an invalid iterator? Fix your code!
+	if (!ForwardArrayIterator_valid(iterator)) {
+		zend_throw_error(NULL, "Spl\\ForwardArrayIterator::next() must not be called on an invalid iterator");
+		return;
+	}
+
+	zend_hash_move_forward_ex(iterator->ht, &iterator->current);
+}
+
+static void ForwardArrayIterator_it_move_forward(zend_object_iterator *zoi)
+{
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ForwardArrayIterator_next(iterator);
+}
+
+
+static const zend_object_iterator_funcs spl_ForwardArrayIterator_it_funcs = {
+	ForwardArrayIterator_it_dtor,
+	ForwardArrayIterator_it_valid,
+	ForwardArrayIterator_it_get_current_data,
+	ForwardArrayIterator_it_get_current_key,
+	ForwardArrayIterator_it_move_forward,
+	ForwardArrayIterator_it_rewind,
+	NULL,
+	NULL,
+};
+
+static zend_object_iterator *ForwardArrayIterator_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
+{
+	if (UNEXPECTED(by_ref)) {
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
+	}
+
+	if (UNEXPECTED(ce != spl_ce_ForwardArrayIterator || Z_OBJCE_P(object) != spl_ce_ForwardArrayIterator)) {
+		zend_throw_error(NULL, "Spl\\ForwardArrayIterator is final");
+		return NULL;
+	}
+
+	zend_object_iterator *zoi = emalloc(sizeof(zend_object_iterator));
+	zend_iterator_init(zoi);
+
+	ZVAL_OBJ_COPY(&zoi->data, Z_OBJ_P(object));
+	zoi->funcs = &spl_ForwardArrayIterator_it_funcs;
+	return zoi;
+}
+
+static zend_object *spl_ForwardArrayIterator_new(zend_class_entry *class_type)
+{
+	zend_class_entry *ce = spl_ce_ForwardArrayIterator;
+	ZEND_ASSERT(class_type == ce);
+
+	ForwardArrayIterator *iterator =
+		zend_object_alloc(sizeof(ForwardArrayIterator), ce);
+
+	zend_object_std_init(&iterator->std, ce);
+
+	iterator->std.handlers = &spl_handler_ForwardArrayIterator;
+
+	/* Initialize the inner array to the empty array, then call rewind.
+	 * This ensures a consistent object.
+	 */
+	iterator->ht = (HashTable *)&zend_empty_array;
+
+	ForwardArrayIterator_rewind(iterator);
+
+	return &iterator->std;
+
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, __construct)
+{
+	zval *array;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+
+	iterator->ht = Z_ARR_P(array);
+	GC_TRY_ADDREF(iterator->ht);
+
+	ForwardArrayIterator_rewind(iterator);
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, count)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Z_TYPE_INFO_P(return_value) = IS_LONG;
+	ArrayIterator_count_elements(Z_OBJ_P(ZEND_THIS), &Z_LVAL_P(return_value));
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, rewind)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ForwardArrayIterator_rewind(iterator);
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, valid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	RETURN_BOOL(ForwardArrayIterator_valid(iterator));
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, key)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ForwardArrayIterator_key(iterator, return_value);
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, current)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	zval *current = ForwardArrayIterator_current(iterator);
+	if (EXPECTED(current)) {
+		ZVAL_COPY(return_value, current);
+	}
+}
+
+ZEND_METHOD(Spl_ForwardArrayIterator, next)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ForwardArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ForwardArrayIterator_next(iterator);
+}
+
+static void register_ForwardArrayIterator(void)
+{
+	zend_class_entry tmp;
+	INIT_NS_CLASS_ENTRY(tmp, "Spl", "ForwardArrayIterator", class_Spl_ForwardArrayIterator_methods)
+
+	zend_class_entry *ce = spl_ce_ForwardArrayIterator = zend_register_internal_class(&tmp);
+	zend_class_implements(ce, 2, zend_ce_countable, zend_ce_iterator);
+
+	ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	/* Spl\ForwardArrayIterator object handlers */
+	zend_object_handlers *obj_handlers = &spl_handler_ForwardArrayIterator;
+	memcpy(obj_handlers, &std_object_handlers, sizeof std_object_handlers);
+	obj_handlers->free_obj = ArrayIterator_free_obj;
+	obj_handlers->offset = XtOffsetOf(ArrayIterator, std);
+	obj_handlers->count_elements = ArrayIterator_count_elements;
+	obj_handlers->get_properties_for = ArrayIterator_get_properties_for;
+
+	/* Spl\ForwardArrayIterator class handlers */
+	ce->create_object = spl_ForwardArrayIterator_new;
+	ce->get_iterator = ForwardArrayIterator_get_iterator;
+	ce->serialize = zend_class_serialize_deny;
+	ce->unserialize = zend_class_unserialize_deny;
+}
+/* }}} */
+
+/* Spl\ReverseArrayIterator {{{ */
+typedef ArrayIterator ReverseArrayIterator;
+
+static void ReverseArrayIterator_it_dtor(zend_object_iterator *iterator)
+{
+	zval_ptr_dtor(&iterator->data);
+}
+
+static void ReverseArrayIterator_rewind(ReverseArrayIterator *iterator)
+{
+	zend_hash_internal_pointer_end_ex(iterator->ht, &iterator->current);
+}
+
+static void ReverseArrayIterator_it_rewind(zend_object_iterator *zoi)
+{
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ReverseArrayIterator_rewind(iterator);
+}
+
+static bool ReverseArrayIterator_valid(ReverseArrayIterator *iterator)
+{
+	HashTable *ht = iterator->ht;
+	return zend_hash_get_current_key_type_ex(ht, &iterator->current) != HASH_KEY_NON_EXISTENT;
+}
+
+static int ReverseArrayIterator_it_valid(zend_object_iterator *zoi)
+{
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	return ReverseArrayIterator_valid(iterator) ? SUCCESS : FAILURE;
+}
+
+static zval *ReverseArrayIterator_current(ReverseArrayIterator *iterator)
+{
+	if (UNEXPECTED(!ReverseArrayIterator_valid(iterator))) {
+		zend_throw_error(NULL, "Spl\\ReverseArrayIterator::current() must not be called on an invalid iterator");
+		return NULL;
+	}
+
+	return zend_hash_get_current_data_ex(iterator->ht, &iterator->current);
+}
+
+static zval *ReverseArrayIterator_it_get_current_data(zend_object_iterator *zoi)
+{
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	return ReverseArrayIterator_current(iterator);
+}
+
+static void ReverseArrayIterator_key(ReverseArrayIterator *iterator, zval *key)
+{
+	if (UNEXPECTED(!ReverseArrayIterator_valid(iterator))) {
+		zend_throw_error(NULL, "Spl\\ReverseArrayIterator::key() must not be called on an invalid iterator");
+		return;
+	}
+
+	HashTable *ht = iterator->ht;
+	zend_hash_get_current_key_zval_ex(ht, key, &iterator->current);
+}
+
+static void ReverseArrayIterator_it_get_current_key(zend_object_iterator *zoi, zval *key)
+{
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ReverseArrayIterator_key(iterator, key);
+}
+
+static void ReverseArrayIterator_next(ReverseArrayIterator *iterator)
+{
+	// Why is `next` being called on an invalid iterator? Fix your code!
+	if (!ReverseArrayIterator_valid(iterator)) {
+		zend_throw_error(NULL, "Spl\\ReverseArrayIterator::next() must not be called on an invalid iterator");
+		return;
+	}
+
+	zend_hash_move_backwards_ex(iterator->ht, &iterator->current);
+}
+
+static void ReverseArrayIterator_it_move_forward(zend_object_iterator *zoi)
+{
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ(zoi->data));
+	ReverseArrayIterator_next(iterator);
+}
+
+
+static const zend_object_iterator_funcs spl_ReverseArrayIterator_it_funcs = {
+	ReverseArrayIterator_it_dtor,
+	ReverseArrayIterator_it_valid,
+	ReverseArrayIterator_it_get_current_data,
+	ReverseArrayIterator_it_get_current_key,
+	ReverseArrayIterator_it_move_forward,
+	ReverseArrayIterator_it_rewind,
+	NULL,
+	NULL,
+};
+
+static zend_object_iterator *ReverseArrayIterator_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
+{
+	if (UNEXPECTED(by_ref)) {
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
+	}
+
+	if (UNEXPECTED(ce != spl_ce_ReverseArrayIterator || Z_OBJCE_P(object) != spl_ce_ReverseArrayIterator)) {
+		zend_throw_error(NULL, "Spl\\ReverseArrayIterator is final");
+		return NULL;
+	}
+
+	zend_object_iterator *zoi = emalloc(sizeof(zend_object_iterator));
+	zend_iterator_init(zoi);
+
+	ZVAL_OBJ_COPY(&zoi->data, Z_OBJ_P(object));
+	zoi->funcs = &spl_ReverseArrayIterator_it_funcs;
+	return zoi;
+}
+
+static zend_object *spl_ReverseArrayIterator_new(zend_class_entry *class_type)
+{
+	zend_class_entry *ce = spl_ce_ReverseArrayIterator;
+	ZEND_ASSERT(class_type == ce);
+
+	ReverseArrayIterator *iterator =
+		zend_object_alloc(sizeof(ReverseArrayIterator), ce);
+
+	zend_object_std_init(&iterator->std, ce);
+
+	iterator->std.handlers = &spl_handler_ReverseArrayIterator;
+
+	/* Initialize the inner array to the empty array, then call rewind.
+	 * This ensures a consistent object.
+	 */
+	iterator->ht = (HashTable *)&zend_empty_array;
+
+	ReverseArrayIterator_rewind(iterator);
+
+	return &iterator->std;
+
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, __construct)
+{
+	zval *array;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+
+	iterator->ht = Z_ARR_P(array);
+	GC_TRY_ADDREF(iterator->ht);
+
+	ReverseArrayIterator_rewind(iterator);
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, count)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Z_TYPE_INFO_P(return_value) = IS_LONG;
+	ArrayIterator_count_elements(Z_OBJ_P(ZEND_THIS), &Z_LVAL_P(return_value));
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, rewind)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ReverseArrayIterator_rewind(iterator);
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, valid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	RETURN_BOOL(ReverseArrayIterator_valid(iterator));
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, key)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ReverseArrayIterator_key(iterator, return_value);
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, current)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	zval *current = ReverseArrayIterator_current(iterator);
+	if (EXPECTED(current)) {
+		ZVAL_COPY(return_value, current);
+	}
+}
+
+ZEND_METHOD(Spl_ReverseArrayIterator, next)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ReverseArrayIterator *iterator = ArrayIterator_from_obj(Z_OBJ_P(ZEND_THIS));
+	ReverseArrayIterator_next(iterator);
+}
+
+static void register_ReverseArrayIterator(void)
+{
+	zend_class_entry tmp;
+	INIT_NS_CLASS_ENTRY(tmp, "Spl", "ReverseArrayIterator", class_Spl_ReverseArrayIterator_methods)
+
+	spl_ce_ReverseArrayIterator = zend_register_internal_class(&tmp);
+	zend_class_entry *ce = spl_ce_ReverseArrayIterator;
+	zend_class_implements(ce, 2, zend_ce_countable, zend_ce_iterator);
+
+	ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	/* Spl\ReverseArrayIterator object handlers */
+	zend_object_handlers *obj_handlers = &spl_handler_ReverseArrayIterator;
+	memcpy(obj_handlers, &std_object_handlers, sizeof std_object_handlers);
+	obj_handlers->free_obj = ArrayIterator_free_obj;
+	obj_handlers->offset = XtOffsetOf(ArrayIterator, std);
+	obj_handlers->count_elements = ArrayIterator_count_elements;
+	obj_handlers->get_properties_for = ArrayIterator_get_properties_for;
+
+	/* Spl\ReverseArrayIterator class handlers */
+	ce->create_object = spl_ReverseArrayIterator_new;
+	ce->get_iterator = ReverseArrayIterator_get_iterator;
+	ce->serialize = zend_class_serialize_deny;
+	ce->unserialize = zend_class_unserialize_deny;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
+	register_ForwardArrayIterator();
+	register_ReverseArrayIterator();
+
 	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, class_ArrayObject_methods);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
