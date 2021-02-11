@@ -207,7 +207,7 @@ struct _zend_executor_globals {
 	/* timeout support */
 	zend_long timeout_seconds;
 
-	int lambda_count;
+	int capture_warnings_during_sccp;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;

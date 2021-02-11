@@ -714,7 +714,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
-	executor_globals->lambda_count = 0;
+	executor_globals->warnings_during_sccp = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	executor_globals->in_autoload = NULL;
@@ -1298,6 +1298,14 @@ static ZEND_COLD void zend_error_impl(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
+
+	/* If we're executing a function during SCCP, count any warnings that may be emitted,
+	 * but don't perform any other error handling. */
+	if (EG(capture_warnings_during_sccp)) {
+		ZEND_ASSERT(!(type & E_FATAL_ERRORS) && "Fatal error during SCCP");
+		EG(capture_warnings_during_sccp)++;
+		return;
+	}
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
