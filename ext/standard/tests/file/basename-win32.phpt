@@ -205,7 +205,7 @@ string(3) "bar"
 string(3) "bar"
 
 --Iteration 5--
-string(3) "bar"
+string(7) "bar.tar"
 
 --Iteration 6--
 string(7) "bar.tar"
@@ -220,10 +220,10 @@ string(7) "bar.tar"
 string(7) "bar.tar"
 
 --Iteration 10--
-string(7) "bar.tar"
+string(4) "10.5"
 
 --Iteration 11--
-string(7) "bar.tar"
+string(2) "10"
 
 --Iteration 12--
 string(4) "10.5"
@@ -232,37 +232,37 @@ string(4) "10.5"
 string(2) "10"
 
 --Iteration 14--
-string(4) "10.5"
+string(2) "10"
 
 --Iteration 15--
-string(2) "10"
+string(4) "10.5"
 
 --Iteration 16--
-string(2) "10"
+string(4) "10.5"
 
 --Iteration 17--
-string(4) "10.5"
-
---Iteration 18--
-string(4) "10.5"
-
---Iteration 19--
 string(6) "10.zip"
 
---Iteration 20--
+--Iteration 18--
 string(1) "0"
 
---Iteration 21--
+--Iteration 19--
 string(1) "0"
+
+--Iteration 20--
+string(7) "bar.zip"
+
+--Iteration 21--
+string(7) "bar.zip"
 
 --Iteration 22--
 string(7) "bar.zip"
 
 --Iteration 23--
-string(7) "bar.zip"
+string(1) " "
 
 --Iteration 24--
-string(7) "bar.zip"
+string(1) " "
 
 --Iteration 25--
 string(1) " "
@@ -274,14 +274,5 @@ string(1) " "
 string(0) ""
 
 --Iteration 28--
-string(1) " "
-
---Iteration 29--
-string(1) " "
-
---Iteration 30--
-string(0) ""
-
---Iteration 31--
 string(0) ""
 Done

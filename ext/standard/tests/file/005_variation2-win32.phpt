@@ -32,8 +32,7 @@ stat_fn(false);
 stat_fn('');
 stat_fn(' ');
 stat_fn('|');
-echo "\n*** testing touch ***";
-var_dump(touch(NULL));
+echo "\n*** testing touch ***\n";
 var_dump(touch(false));
 var_dump(touch(''));
 
@@ -80,7 +79,7 @@ Warning: filemtime(): stat failed for | in %s on line %d
 Warning: filectime(): stat failed for | in %s on line %d
 
 
-*** testing touch ***bool(false)
+*** testing touch ***
 bool(false)
 bool(false)
 
