@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
 
+- DOM:
+  . Fixed bug #80600 (DOMChildNode::remove() doesn't work on CharacterData
+    nodes). (beberlei)
+
 - Gettext:
   . Fixed bug #53251 (bindtextdomain with null dir doesn't return old value).
     (cmb)
@@ -186,7 +190,7 @@ PHP                                                                        NEWS
   . Fixed #62004 (SplFileObject: fgets after seek returns wrong line). (cmb)
 
 - Standard:
-  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo). 
+  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo).
     (CVE-2020-7071) (cmb)
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
 
