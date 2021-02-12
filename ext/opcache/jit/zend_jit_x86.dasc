@@ -2923,20 +2923,12 @@ static int zend_jit_setup(void)
 # elif defined(__APPLE__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model)
-		size_t ret;
-
-		asm ("movq __tsrm_ls_cache(%%rip),%0"
-			: "=r" (ret));
-		tsrm_ls_cache_tcb_offset = ret;
-#else
 		size_t *ti;
 		__asm__(
 			"leaq __tsrm_ls_cache(%%rip),%0"
 			: "=r" (ti));
 		tsrm_tls_offset = ti[2];
 		tsrm_tls_index = ti[1] * 8;
-#endif
 	}
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
