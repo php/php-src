@@ -35,6 +35,7 @@ if (PHP_OS_FAMILY === 'Windows') {
         'C:/a./b./file12.txt' => 'a_/b_/file12.txt',
         'a/b:/c/file13.txt' => 'c/file13.txt',
         'a/b/c/file14.' => 'a/b/c/file14_',
+        'C:a./b./file15.txt' => 'a_/b_/file15.txt',
     ];
 } else {
     $paths = [
@@ -52,6 +53,7 @@ if (PHP_OS_FAMILY === 'Windows') {
         'C:/a./b./file12.txt' => 'a./b./file12.txt',
         'a/b:/c/file13.txt' => 'c/file13.txt',
         'a/b/c/file14.' => 'a/b/c/file14.',
+        'C:a./b./file15.txt' => 'a./b./file15.txt',
     ];
 }
 

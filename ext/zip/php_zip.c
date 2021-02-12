@@ -102,23 +102,28 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return NULL;
 	}
 
-	if (path_len == 1 && (path[0] == '.' || IS_SLASH(path[0]))) {
+	if (path_len == 1 && (path[0] == '.' || IS_SLASH(path[0]) || path[0] == ':')) {
 		return NULL;
 	}
 
 	i = path_len;
 
 	while (1) {
-		while (i > 0 && !IS_SLASH(path[i])) {
+		while (i > 0 && !(IS_SLASH(path[i]) || path[i] == ':')) {
 			i--;
 		}
 
 		if (!i) {
-			if (IS_SLASH(path[0])) {
+			if (IS_SLASH(path[0]) || path[0] == ':') {
 				path_begin = path + 1;
 			} else {
 				path_begin = path;
 			}
+			break;
+		}
+
+		if (i == 1 && path[i] == ':') {
+			path_begin = path + i + 1;
 			break;
 		}
 
