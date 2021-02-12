@@ -629,11 +629,7 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 
 void zend_register_closure_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
-	zend_ce_closure = zend_register_internal_class(&ce);
-	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_closure = register_class_Closure();
 	zend_ce_closure->create_object = zend_closure_new;
 	zend_ce_closure->serialize = zend_class_serialize_deny;
 	zend_ce_closure->unserialize = zend_class_unserialize_deny;
