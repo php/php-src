@@ -124,10 +124,11 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 	setproctitle("%s", title);
 #else
 #ifdef __linux__
-	if (fpm_env_argv != NULL && fpm_env_argv_len > strlen(SETPROCTITLE_PREFIX) + 3) {
+	size_t prefixlen = strlen(SETPROCTITLE_PREFIX);
+	if (fpm_env_argv != NULL && fpm_env_argv_len > prefixlen + 3) {
 		memset(fpm_env_argv[0], 0, fpm_env_argv_len);
 		strncpy(fpm_env_argv[0], SETPROCTITLE_PREFIX, fpm_env_argv_len - 2);
-		strncpy(fpm_env_argv[0] + strlen(SETPROCTITLE_PREFIX), title, fpm_env_argv_len - strlen(SETPROCTITLE_PREFIX) - 2);
+		strncpy(fpm_env_argv[0] + prefixlen, title, fpm_env_argv_len - prefixlen - 2);
 		fpm_env_argv[1] = NULL;
 	}
 #endif
