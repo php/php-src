@@ -114,10 +114,11 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #ifndef __APPLE__
 # define ZEND_MM_FD -1
 #else
+# include <mach/vm_statistics.h>
 /* Mac allows to track anonymous page via vmmap per TAG id.
  * user land applications are allowed to take from 240 to 255.
  */
-# define ZEND_MM_FD (250u << 24u)
+# define ZEND_MM_FD VM_MAKE_TAG(250U)
 #endif
 
 #ifndef ZEND_MM_STAT
