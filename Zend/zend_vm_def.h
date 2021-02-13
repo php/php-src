@@ -5092,26 +5092,27 @@ ZEND_VM_C_LABEL(send_again):
 				HANDLE_EXCEPTION();
 			}
 
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
+			const zend_object_iterator_funcs *funcs = iter->funcs;
+			if (funcs->rewind) {
+				funcs->rewind(iter);
 			}
 
-			for (; iter->funcs->valid(iter) == SUCCESS; ++arg_num) {
+			for (; funcs->valid(iter) == SUCCESS; ++arg_num) {
 				zval *arg, *top;
 
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					break;
 				}
 
-				arg = iter->funcs->get_current_data(iter);
+				arg = funcs->get_current_data(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					break;
 				}
 
 				zend_string *name = NULL;
-				if (iter->funcs->get_current_key) {
+				if (funcs->get_current_key) {
 					zval key;
-					iter->funcs->get_current_key(iter, &key);
+					funcs->get_current_key(iter, &key);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						break;
 					}
@@ -5173,7 +5174,7 @@ ZEND_VM_C_LABEL(send_again):
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 				}
 
-				iter->funcs->move_forward(iter);
+				funcs->move_forward(iter);
 			}
 
 			zend_iterator_dtor(iter);
@@ -5997,25 +5998,26 @@ ZEND_VM_C_LABEL(add_unpack_again):
 				HANDLE_EXCEPTION();
 			}
 
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
+			const zend_object_iterator_funcs *funcs = iter->funcs;
+			if (funcs->rewind) {
+				funcs->rewind(iter);
 			}
 
-			for (; iter->funcs->valid(iter) == SUCCESS; ) {
+			for (; funcs->valid(iter) == SUCCESS; ) {
 				zval *val;
 
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					break;
 				}
 
-				val = iter->funcs->get_current_data(iter);
+				val = funcs->get_current_data(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					break;
 				}
 
 				zval key;
-				if (iter->funcs->get_current_key) {
-					iter->funcs->get_current_key(iter, &key);
+				if (funcs->get_current_key) {
+					funcs->get_current_key(iter, &key);
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						break;
 					}
@@ -6045,7 +6047,7 @@ ZEND_VM_C_LABEL(add_unpack_again):
 					}
 				}
 
-				iter->funcs->move_forward(iter);
+				funcs->move_forward(iter);
 				if (UNEXPECTED(EG(exception))) {
 					break;
 				}
@@ -6748,15 +6750,16 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 				}
 			}
 		} else {
+			const zend_object_iterator_funcs *funcs = iter->funcs;
 			if (EXPECTED(++iter->index > 0)) {
 				/* This could cause an endless loop if index becomes zero again.
 				 * In case that ever happens we need an additional flag. */
-				iter->funcs->move_forward(iter);
+				funcs->move_forward(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					UNDEF_RESULT();
 					HANDLE_EXCEPTION();
 				}
-				if (UNEXPECTED(iter->funcs->valid(iter) == FAILURE)) {
+				if (UNEXPECTED(funcs->valid(iter) == FAILURE)) {
 					/* reached end of iteration */
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						UNDEF_RESULT();
@@ -6765,7 +6768,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 					ZEND_VM_C_GOTO(fe_fetch_r_exit);
 				}
 			}
-			value = iter->funcs->get_current_data(iter);
+			value = funcs->get_current_data(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -6775,8 +6778,8 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 				ZEND_VM_C_GOTO(fe_fetch_r_exit);
 			}
 			if (RETURN_VALUE_USED(opline)) {
-				if (iter->funcs->get_current_key) {
-					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
+				if (funcs->get_current_key) {
+					funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						UNDEF_RESULT();
 						HANDLE_EXCEPTION();
@@ -6901,15 +6904,16 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				}
 			}
 		} else {
+			const zend_object_iterator_funcs *funcs = iter->funcs;
 			if (++iter->index > 0) {
 				/* This could cause an endless loop if index becomes zero again.
 				 * In case that ever happens we need an additional flag. */
-				iter->funcs->move_forward(iter);
+				funcs->move_forward(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					UNDEF_RESULT();
 					HANDLE_EXCEPTION();
 				}
-				if (UNEXPECTED(iter->funcs->valid(iter) == FAILURE)) {
+				if (UNEXPECTED(funcs->valid(iter) == FAILURE)) {
 					/* reached end of iteration */
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						UNDEF_RESULT();
@@ -6918,7 +6922,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 					ZEND_VM_C_GOTO(fe_fetch_w_exit);
 				}
 			}
-			value = iter->funcs->get_current_data(iter);
+			value = funcs->get_current_data(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -6928,8 +6932,8 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 				ZEND_VM_C_GOTO(fe_fetch_w_exit);
 			}
 			if (RETURN_VALUE_USED(opline)) {
-				if (iter->funcs->get_current_key) {
-					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
+				if (funcs->get_current_key) {
+					funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
 						UNDEF_RESULT();
 						HANDLE_EXCEPTION();
