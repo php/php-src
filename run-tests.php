@@ -871,7 +871,6 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
         'xdebug' => ['xdebug.mode=off'],
-        'mbstring' => ['mbstring.func_overload=0'],
     ];
 
     foreach ($info_params_ex as $ext => $ini_overwrites_ex) {
