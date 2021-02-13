@@ -6,6 +6,10 @@ opcache.enable_cli=1
 opcache.revalidate_path=1
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+die("skip Currently hangs and needs to be investigates");
+?>
 --CONFLICTS--
 server
 --FILE--
