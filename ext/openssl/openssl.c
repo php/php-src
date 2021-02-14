@@ -1101,10 +1101,7 @@ PHP_MINIT_FUNCTION(openssl)
 {
 	char * config_filename;
 
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "OpenSSLCertificate", class_OpenSSLCertificate_methods);
-	php_openssl_certificate_ce = zend_register_internal_class(&ce);
-	php_openssl_certificate_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
 	php_openssl_certificate_ce->serialize = zend_class_serialize_deny;
 	php_openssl_certificate_ce->unserialize = zend_class_unserialize_deny;
@@ -1115,10 +1112,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_certificate_object_handlers.get_constructor = php_openssl_certificate_get_constructor;
 	php_openssl_certificate_object_handlers.clone_obj = NULL;
 
-	zend_class_entry csr_ce;
-	INIT_CLASS_ENTRY(csr_ce, "OpenSSLCertificateSigningRequest", class_OpenSSLCertificateSigningRequest_methods);
-	php_openssl_request_ce = zend_register_internal_class(&csr_ce);
-	php_openssl_request_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_openssl_request_ce = register_class_OpenSSLCertificateSigningRequest();
 	php_openssl_request_ce->create_object = php_openssl_request_create_object;
 	php_openssl_request_ce->serialize = zend_class_serialize_deny;
 	php_openssl_request_ce->unserialize = zend_class_unserialize_deny;
@@ -1129,10 +1123,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_request_object_handlers.get_constructor = php_openssl_request_get_constructor;
 	php_openssl_request_object_handlers.clone_obj = NULL;
 
-	zend_class_entry key_ce;
-	INIT_CLASS_ENTRY(key_ce, "OpenSSLAsymmetricKey", class_OpenSSLAsymmetricKey_methods);
-	php_openssl_pkey_ce = zend_register_internal_class(&key_ce);
-	php_openssl_pkey_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_openssl_pkey_ce = register_class_OpenSSLAsymmetricKey();
 	php_openssl_pkey_ce->create_object = php_openssl_pkey_create_object;
 	php_openssl_pkey_ce->serialize = zend_class_serialize_deny;
 	php_openssl_pkey_ce->unserialize = zend_class_unserialize_deny;

@@ -1289,10 +1289,7 @@ static void pdo_dbh_free_storage(zend_object *std);
 
 void pdo_dbh_init(void)
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "PDO", class_PDO_methods);
-	pdo_dbh_ce = zend_register_internal_class(&ce);
+	pdo_dbh_ce = register_class_PDO();
 	pdo_dbh_ce->create_object = pdo_dbh_new;
 	pdo_dbh_ce->serialize = zend_class_serialize_deny;
 	pdo_dbh_ce->unserialize = zend_class_unserialize_deny;
