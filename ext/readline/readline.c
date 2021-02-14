@@ -24,6 +24,9 @@
 #include "php_readline.h"
 #include "readline_cli.h"
 #include "readline_arginfo.h"
+#include "main/php_output.h"
+#include <ext/standard/php_var.h>
+#include "zend_smart_str.h"
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
@@ -44,7 +47,9 @@ static zval _prepped_callback;
 
 #endif
 
+
 static zval _readline_completion;
+static zval _readline_interactive_shell_result_function;
 static zval _readline_array;
 
 PHP_MINIT_FUNCTION(readline);
@@ -79,6 +84,7 @@ PHP_MINIT_FUNCTION(readline)
 	using_history();
 #endif
 	ZVAL_UNDEF(&_readline_completion);
+	ZVAL_NULL(&_readline_interactive_shell_result_function);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
@@ -94,6 +100,8 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 {
 	zval_ptr_dtor(&_readline_completion);
 	ZVAL_UNDEF(&_readline_completion);
+	zval_ptr_dtor(&_readline_interactive_shell_result_function);
+	ZVAL_UNDEF(&_readline_interactive_shell_result_function);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
@@ -485,6 +493,62 @@ PHP_FUNCTION(readline_completion_function)
 	if (rl_attempted_completion_function == NULL) {
 		RETURN_FALSE;
 	}
+	RETURN_TRUE;
+}
+
+bool php_readline_should_dump_interactive_result()
+{
+	return Z_TYPE(_readline_interactive_shell_result_function) != IS_UNDEF;
+}
+
+void php_readline_dump_interactive_result(const char* code, const size_t codelen, zval *returned_zv)
+{
+	if (Z_TYPE(_readline_interactive_shell_result_function) == IS_NULL) {
+		ZVAL_DEREF(returned_zv);
+		if (Z_TYPE_P(returned_zv) > IS_NULL) {
+			if (Z_TYPE_P(returned_zv) >= IS_ARRAY) {
+				/* Use var_dump to dump arrays, objects, and resources.
+				 * var_dump's representation distinguishes between ints/floats and can show recursive data structures. */
+				PHPWRITE("=> ", sizeof("=> ") - 1);
+				php_var_dump(returned_zv, 1);
+			} else {
+				/* Use var_export to dump scalars */
+				smart_str buf = {0};
+				php_var_export_ex(returned_zv, 1, &buf);
+				PHPWRITE("=> ", sizeof("=> ") - 1);
+				PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+				smart_str_free(&buf);
+			}
+		}
+	} else if (Z_TYPE(_readline_interactive_shell_result_function) != IS_UNDEF) {
+		zval dump_result;
+		zval args[2];
+		ZVAL_STRINGL(&args[0], code, codelen);
+		ZVAL_COPY_VALUE(&args[1], returned_zv);
+		call_user_function(NULL, NULL, &_readline_interactive_shell_result_function, &dump_result, 2, args);
+		zval_ptr_dtor(&dump_result);
+		zval_ptr_dtor(&args[0]);
+	}
+	zval_ptr_dtor(returned_zv);
+	ZVAL_UNDEF(returned_zv);
+}
+
+PHP_FUNCTION(readline_interactive_shell_result_function)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "f!", &fci, &fcc)) {
+		RETURN_THROWS();
+	}
+
+	zval_ptr_dtor(&_readline_interactive_shell_result_function);
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		ZVAL_COPY(&_readline_interactive_shell_result_function, &fci.function_name);
+	} else {
+		ZVAL_UNDEF(&_readline_interactive_shell_result_function);
+	}
+
 	RETURN_TRUE;
 }
 

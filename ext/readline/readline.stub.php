@@ -24,6 +24,7 @@ function readline_write_history(?string $filename = null): bool {}
 
 function readline_completion_function(callable $callback): bool {}
 
+function readline_interactive_shell_result_function(?callable $callback): bool {}
 
 #if HAVE_RL_CALLBACK_READ_CHAR
 function readline_callback_handler_install(string $prompt, callable $callback): bool {}

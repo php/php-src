@@ -27,6 +27,7 @@ Interactive shell
 
 bar
 xx
+=> 1
 xxx
 
 Warning: Uncaught Error: Undefined constant "FOO" in php shell code:1
