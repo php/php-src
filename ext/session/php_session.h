@@ -305,16 +305,12 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 
-#define PS_CLASS_NAME "SessionHandler"
 extern PHPAPI zend_class_entry *php_session_class_entry;
 
-#define PS_IFACE_NAME "SessionHandlerInterface"
 extern PHPAPI zend_class_entry *php_session_iface_entry;
 
-#define PS_SID_IFACE_NAME "SessionIdInterface"
 extern PHPAPI zend_class_entry *php_session_id_iface_entry;
 
-#define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
 extern PHPAPI zend_class_entry *php_session_update_timestamp_iface_entry;
 
 extern PHP_METHOD(SessionHandler, open);

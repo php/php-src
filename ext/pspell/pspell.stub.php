@@ -1,8 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class PSpell {}
+/** @strict-properties */
 final class PSpellConfig {}
 
 function pspell_new(string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): PSpell|false {}

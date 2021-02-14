@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6849bff1f2b343df4bd7e6da9c8adc555731e2d3 */
+ * Stub hash: 5c4f082e36118b7a955cc1d6b1fda385dd7c0bc0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -994,3 +994,268 @@ static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_ME(ReflectionAttribute, __construct, arginfo_class_ReflectionAttribute___construct, ZEND_ACC_PRIVATE)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_ReflectionException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionException", class_ReflectionException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_Reflection()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Reflection", class_Reflection_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_Reflector(zend_class_entry *class_entry_Stringable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Reflector", class_Reflector_methods);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 1, class_entry_Stringable);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionFunctionAbstract", class_ReflectionFunctionAbstract_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionFunction(zend_class_entry *class_entry_ReflectionFunctionAbstract)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionFunction", class_ReflectionFunction_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionFunctionAbstract);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionGenerator()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionGenerator", class_ReflectionGenerator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class_entry_ReflectionFunctionAbstract)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionMethod", class_ReflectionMethod_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionFunctionAbstract);
+
+	zval property_class_default_value;
+	ZVAL_EMPTY_STRING(&property_class_default_value);
+	zend_string *property_class_name = zend_string_init("class", sizeof("class") - 1, 1);
+	zend_declare_property_ex(class_entry, property_class_name, &property_class_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_class_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionClass", class_ReflectionClass_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionObject(zend_class_entry *class_entry_ReflectionClass)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionObject", class_ReflectionObject_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionClass);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionProperty(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionProperty", class_ReflectionProperty_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	zval property_class_default_value;
+	ZVAL_EMPTY_STRING(&property_class_default_value);
+	zend_string *property_class_name = zend_string_init("class", sizeof("class") - 1, 1);
+	zend_declare_property_ex(class_entry, property_class_name, &property_class_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_class_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionClassConstant", class_ReflectionClassConstant_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	zval property_class_default_value;
+	ZVAL_EMPTY_STRING(&property_class_default_value);
+	zend_string *property_class_name = zend_string_init("class", sizeof("class") - 1, 1);
+	zend_declare_property_ex(class_entry, property_class_name, &property_class_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_class_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionParameter(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionParameter", class_ReflectionParameter_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionType(zend_class_entry *class_entry_Stringable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionType", class_ReflectionType_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	zend_class_implements(class_entry, 1, class_entry_Stringable);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *class_entry_ReflectionType)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionNamedType", class_ReflectionNamedType_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionType);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionUnionType(zend_class_entry *class_entry_ReflectionType)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionUnionType", class_ReflectionUnionType_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionType);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionExtension(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionExtension", class_ReflectionExtension_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionZendExtension", class_ReflectionZendExtension_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_EMPTY_STRING(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_name_name);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionReference()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionReference", class_ReflectionReference_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_ReflectionAttribute()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionAttribute", class_ReflectionAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
