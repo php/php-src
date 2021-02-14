@@ -3774,22 +3774,28 @@ zend_result zend_compile_func_strlen(znode *result, zend_ast_list *args) /* {{{ 
 }
 /* }}} */
 
-zend_result zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
+static void zend_compile_func_typecheck_impl(znode *result, zend_ast *arg, uint32_t type) /* {{{ */
 {
 	znode arg_node;
 	zend_op *opline;
 
-	if (args->children != 1) {
-		return FAILURE;
-	}
-
-	zend_compile_expr(&arg_node, args->child[0]);
+	zend_compile_expr(&arg_node, arg);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
 	if (type != _IS_BOOL) {
 		opline->extended_value = (1 << type);
 	} else {
 		opline->extended_value = (1 << IS_FALSE) | (1 << IS_TRUE);
 	}
+}
+
+zend_result zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
+{
+	if (args->children != 1) {
+		return FAILURE;
+	}
+
+	zend_compile_func_typecheck_impl(result, args->child[0], type);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -8794,6 +8800,15 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_class_ref(&class_node, class_ast,
 		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION);
+
+	if (class_node.op_type == IS_CONST) {
+		zend_uchar t = zend_lookup_builtin_type_by_name(Z_STR(class_node.u.constant));
+
+		if (t == IS_NULL || t == _IS_BOOL || t == IS_LONG || t == IS_STRING || t == IS_DOUBLE || t == IS_OBJECT) {
+			zend_compile_func_typecheck_impl(result, obj_ast, t);
+			return;
+		}
+	}
 
 	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL);
 
