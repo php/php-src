@@ -111,7 +111,7 @@ test: all
 
 clean:
 	find . -name \*.gcno -o -name \*.gcda | xargs rm -f
-	find . -name \*.lo -o -name \*.o | xargs rm -f
+	find . -name \*.lo -o -name \*.o -o -name \*.dep | xargs rm -f
 	find . -name \*.la -o -name \*.a | xargs rm -f
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
@@ -155,10 +155,6 @@ prof-use:
 			fi; \
 		fi; \
 	fi;
-
-# As we don't track includes, this is just a heuristic
-%.c: %_arginfo.h
-	@touch $@
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:
