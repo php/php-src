@@ -1,15 +1,18 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class OpenSSLCertificate
 {
 }
 
+/** @strict-properties */
 final class OpenSSLCertificateSigningRequest
 {
 }
 
+/** @strict-properties */
 final class OpenSSLAsymmetricKey
 {
 }
