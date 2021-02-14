@@ -572,7 +572,6 @@ class ReflectionParameter implements Reflector
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
-/** @explicit-abstract */
 abstract class ReflectionType implements Stringable
 {
     /** @implementation-alias ReflectionClass::__clone */

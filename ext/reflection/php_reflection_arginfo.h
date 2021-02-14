@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eb380ca51654694ed286df7d58c2f38067a28ab7 */
+ * Stub hash: 5c4f082e36118b7a955cc1d6b1fda385dd7c0bc0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1177,7 +1177,7 @@ zend_class_entry *register_class_ReflectionType(zend_class_entry *class_entry_St
 
 	INIT_CLASS_ENTRY(ce, "ReflectionType", class_ReflectionType_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;

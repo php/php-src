@@ -1166,8 +1166,6 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
-    /** @var bool */
-    public $isExplicitAbstract;
     /** @var Name[] */
     public $extends;
     /** @var Name[] */
@@ -1190,7 +1188,6 @@ class ClassInfo {
         ?string $alias,
         bool $isDeprecated,
         bool $isStrictProperties,
-        bool $isExplicitAbstract,
         array $extends,
         array $implements,
         array $propertyInfos,
@@ -1202,7 +1199,6 @@ class ClassInfo {
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
-        $this->isExplicitAbstract = $isExplicitAbstract;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->propertyInfos = $propertyInfos;
@@ -1281,9 +1277,7 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_FINAL";
         }
 
-        if ($this->isExplicitAbstract) {
-            $flags[] = "ZEND_ACC_EXPLICIT_ABSTRACT_CLASS";
-        } elseif ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
             $flags[] = "ZEND_ACC_ABSTRACT";
         }
 
@@ -1594,7 +1588,6 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
     $alias = null;
     $isDeprecated = false;
     $isStrictProperties = false;
-    $isExplicitAbstract = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -1605,8 +1598,6 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
                 $isDeprecated = true;
             } else if ($tag->name === 'strict-properties') {
                 $isStrictProperties = true;
-            } else if ($tag->name === 'explicit-abstract') {
-                $isExplicitAbstract = true;
             }
         }
     }
@@ -1630,7 +1621,6 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
         $alias,
         $isDeprecated,
         $isStrictProperties,
-        $isExplicitAbstract,
         $extends,
         $implements,
         $properties,
