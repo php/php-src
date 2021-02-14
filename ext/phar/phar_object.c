@@ -5074,23 +5074,13 @@ PHP_METHOD(PharFileInfo, decompress)
 
 void phar_object_init(void) /* {{{ */
 {
-	zend_class_entry ce;
+	phar_ce_PharException = register_class_PharException(zend_ce_exception);
 
-	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
-	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	phar_ce_archive = register_class_Phar(spl_ce_RecursiveDirectoryIterator, zend_ce_countable, zend_ce_arrayaccess);
 
-	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
-	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
+	phar_ce_data = register_class_PharData(spl_ce_RecursiveDirectoryIterator, zend_ce_countable, zend_ce_arrayaccess);
 
-	zend_class_implements(phar_ce_archive, 2, zend_ce_countable, zend_ce_arrayaccess);
-
-	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
-	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
-
-	zend_class_implements(phar_ce_data, 2, zend_ce_countable, zend_ce_arrayaccess);
-
-	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
-	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo);
+	phar_ce_entry = register_class_PharFileInfo(spl_ce_SplFileInfo);
 
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)

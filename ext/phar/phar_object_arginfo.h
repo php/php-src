@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bad833e724b1ebface8e8331310ecf7c32a52898 */
+ * Stub hash: 8f6974078c7b16fd452a34a9e1b5c509699a2037 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -581,3 +581,46 @@ static const zend_function_entry class_PharFileInfo_methods[] = {
 	ZEND_ME(PharFileInfo, setMetadata, arginfo_class_PharFileInfo_setMetadata, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_PharException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_Phar(zend_class_entry *class_entry_RecursiveDirectoryIterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_PharData(zend_class_entry *class_entry_RecursiveDirectoryIterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_PharFileInfo(zend_class_entry *class_entry_SplFileInfo)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+
+	return class_entry;
+}
+

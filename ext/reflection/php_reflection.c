@@ -6511,8 +6511,6 @@ static void reflection_init_class_handlers(zend_class_entry *ce) {
 
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
-	zend_class_entry _reflection_entry;
-
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
@@ -6520,59 +6518,37 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.write_property = _reflection_write_property;
 	reflection_object_handlers.get_gc = reflection_get_gc;
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", class_ReflectionException_methods);
-	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_ce_exception);
+	reflection_exception_ptr = register_class_ReflectionException(zend_ce_exception);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "Reflection", class_Reflection_methods);
-	reflection_ptr = zend_register_internal_class(&_reflection_entry);
+	reflection_ptr = register_class_Reflection();
 
-	INIT_CLASS_ENTRY(_reflection_entry, "Reflector", class_Reflector_methods);
-	reflector_ptr = zend_register_internal_interface(&_reflection_entry);
-	zend_class_implements(reflector_ptr, 1, zend_ce_stringable);
+	reflector_ptr = register_class_Reflector(zend_ce_stringable);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunctionAbstract", class_ReflectionFunctionAbstract_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_function_abstract_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_function_abstract_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_function_abstract_ptr, "name", sizeof("name")-1, "", ZEND_ACC_ABSTRACT);
+	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr);
+	reflection_init_class_handlers(reflection_function_abstract_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunction", class_ReflectionFunction_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_function_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr);
-	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	reflection_function_ptr = register_class_ReflectionFunction(reflection_function_abstract_ptr);
+	reflection_init_class_handlers(reflection_function_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionGenerator", class_ReflectionGenerator_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_generator_ptr = zend_register_internal_class(&_reflection_entry);
-	reflection_generator_ptr->ce_flags |= ZEND_ACC_FINAL;
+	reflection_generator_ptr = register_class_ReflectionGenerator();
+	reflection_init_class_handlers(reflection_generator_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", class_ReflectionParameter_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_parameter_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_parameter_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr);
+	reflection_init_class_handlers(reflection_parameter_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", class_ReflectionType_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
-	reflection_type_ptr->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	zend_class_implements(reflection_type_ptr, 1, zend_ce_stringable);
+	reflection_type_ptr = register_class_ReflectionType(zend_ce_stringable);
+	reflection_init_class_handlers(reflection_type_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", class_ReflectionNamedType_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_named_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
+	reflection_named_type_ptr = register_class_ReflectionNamedType(reflection_type_ptr);
+	reflection_init_class_handlers(reflection_named_type_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionUnionType", class_ReflectionUnionType_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_union_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
+	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
+	reflection_init_class_handlers(reflection_union_type_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", class_ReflectionMethod_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_method_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr);
-	zend_declare_property_string(reflection_method_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(reflection_method_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
+	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
+	reflection_init_class_handlers(reflection_method_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PUBLIC", ZEND_ACC_PUBLIC);
@@ -6581,65 +6557,43 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_ABSTRACT", ZEND_ACC_ABSTRACT);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_FINAL", ZEND_ACC_FINAL);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", class_ReflectionClass_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_class_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_class_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr);
+	reflection_init_class_handlers(reflection_class_ptr);
 
 	/* IS_IMPLICIT_ABSTRACT is not longer used */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", class_ReflectionObject_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr);
+	reflection_object_ptr = register_class_ReflectionObject(reflection_class_ptr);
+	reflection_init_class_handlers(reflection_object_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionProperty", class_ReflectionProperty_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_property_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_property_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
+	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr);
+	reflection_init_class_handlers(reflection_property_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClassConstant", class_ReflectionClassConstant_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_class_constant_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_class_constant_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_class_constant_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(reflection_class_constant_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
+	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr);
+	reflection_init_class_handlers(reflection_class_constant_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", class_ReflectionExtension_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_extension_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	reflection_extension_ptr = register_class_ReflectionExtension(reflector_ptr);
+	reflection_init_class_handlers(reflection_extension_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionZendExtension", class_ReflectionZendExtension_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry);
-	zend_class_implements(reflection_zend_extension_ptr, 1, reflector_ptr);
-	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	reflection_zend_extension_ptr = register_class_ReflectionZendExtension(reflector_ptr);
+	reflection_init_class_handlers(reflection_zend_extension_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionReference", class_ReflectionReference_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	_reflection_entry.ce_flags |= ZEND_ACC_FINAL;
-	reflection_reference_ptr = zend_register_internal_class(&_reflection_entry);
+	reflection_reference_ptr = register_class_ReflectionReference();
+	reflection_init_class_handlers(reflection_reference_ptr);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionAttribute", class_ReflectionAttribute_methods);
-	reflection_init_class_handlers(&_reflection_entry);
-	_reflection_entry.ce_flags |= ZEND_ACC_FINAL;
-	reflection_attribute_ptr = zend_register_internal_class(&_reflection_entry);
+	reflection_attribute_ptr = register_class_ReflectionAttribute();
+	reflection_init_class_handlers(reflection_attribute_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(attribute, "IS_INSTANCEOF", REFLECTION_ATTRIBUTE_IS_INSTANCEOF);
 
