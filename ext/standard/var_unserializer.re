@@ -605,52 +605,60 @@ static zend_always_inline int process_nested_object_data(UNSERIALIZE_PARAMETER, 
 
 		if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-			while (1) {
-				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-						/* This is a property with a declaration */
-						old_data = Z_INDIRECT_P(old_data);
-						info = zend_get_typed_property_info_for_slot(obj, old_data);
-						if (info) {
-							if (Z_ISREF_P(old_data)) {
-								/* If the value is overwritten, remove old type source from ref. */
-								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
-							}
-
-							if ((*var_hash)->ref_props) {
-								/* Remove old entry from ref_props table, if it exists. */
-								zend_hash_index_del(
-									(*var_hash)->ref_props, (zend_uintptr_t) old_data);
-							}
+			if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+declared_property:
+					/* This is a property with a declaration */
+					old_data = Z_INDIRECT_P(old_data);
+					info = zend_get_typed_property_info_for_slot(obj, old_data);
+					if (info) {
+						if (Z_ISREF_P(old_data)) {
+							/* If the value is overwritten, remove old type source from ref. */
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
 						}
-						var_push_dtor(var_hash, old_data);
-						Z_TRY_DELREF_P(old_data);
-						ZVAL_NULL(old_data);
-						data = old_data;
-					} else {
-						int ret = is_property_visibility_changed(obj->ce, &key);
 
-						if (EXPECTED(!ret)) {
-							var_push_dtor(var_hash, old_data);
-							data = zend_hash_update_ind(ht, Z_STR(key), &d);
-						} else if (ret < 0) {
-							goto failure;
-						} else {
-							continue;
+						if ((*var_hash)->ref_props) {
+							/* Remove old entry from ref_props table, if it exists. */
+							zend_hash_index_del(
+								(*var_hash)->ref_props, (zend_uintptr_t) old_data);
 						}
 					}
+					var_push_dtor(var_hash, old_data);
+					Z_TRY_DELREF_P(old_data);
+					ZVAL_NULL(old_data);
+					data = old_data;
 				} else {
 					int ret = is_property_visibility_changed(obj->ce, &key);
 
 					if (EXPECTED(!ret)) {
-						data = zend_hash_add_new(ht, Z_STR(key), &d);
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 					} else if (ret < 0) {
 						goto failure;
 					} else {
-						continue;
+						goto second_try;
 					}
 				}
-				break;
+			} else {
+				int ret = is_property_visibility_changed(obj->ce, &key);
+
+				if (EXPECTED(!ret)) {
+					data = zend_hash_add_new(ht, Z_STR(key), &d);
+				} else if (ret < 0) {
+					goto failure;
+				} else {
+second_try:
+					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+						if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+							goto declared_property;
+						} else {
+							var_push_dtor(var_hash, old_data);
+							data = zend_hash_update_ind(ht, Z_STR(key), &d);
+						}
+					} else {
+						data = zend_hash_add_new(ht, Z_STR(key), &d);
+					}
+				}
 			}
 			zval_ptr_dtor_str(&key);
 		} else if (Z_TYPE(key) == IS_LONG) {
