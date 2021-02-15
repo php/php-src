@@ -1169,7 +1169,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* read in the oids */
 	str = php_openssl_conf_get_string(req->req_config, NULL, "oid_file");
-	if (str && !php_openssl_open_base_dir_chk(str)) {
+	if (str != NULL && !php_openssl_open_base_dir_chk(str)) {
 		BIO *oid_bio = BIO_new_file(str, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
@@ -1250,7 +1250,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* set the string mask */
 	str = php_openssl_conf_get_string(req->req_config, req->section_name, "string_mask");
-	if (str && !ASN1_STRING_set_default_mask_asc(str)) {
+	if (str != NULL && !ASN1_STRING_set_default_mask_asc(str)) {
 		php_error_docref(NULL, E_WARNING, "Invalid global string mask setting %s", str);
 		return FAILURE;
 	}
