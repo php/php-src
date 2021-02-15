@@ -819,7 +819,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #ifdef PHP_WIN32
 	if (vars[2].optval && !strcmp(".", vars[2].optval)) {
 #else
-	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
+	if (strlen(vars[2].optval) == 0 || (vars[2].optval && !strcmp("localhost", vars[2].optval))) {
 #endif
 		unix_socket = vars[4].optval;
 	}
