@@ -1123,7 +1123,7 @@ class PropertyInfo
                 break;
 
             case "array":
-                if (empty($value)) {
+                if ($value === "") {
                     $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
                 } else {
                     throw new Exception("Unimplemented property default value");
