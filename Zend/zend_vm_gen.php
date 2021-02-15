@@ -2552,10 +2552,11 @@ function gen_vm($def, $skel) {
             }
 
             // Store parameters
-            if (ZEND_VM_KIND == ZEND_VM_KIND_GOTO
+            if ((ZEND_VM_KIND == ZEND_VM_KIND_GOTO
              || ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
-             || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && $hot)) {
-                foreach (explode(",", $param) as $p) {
+             || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && $hot))
+             && $param) {
+                foreach (explode(",", $param ) as $p) {
                     $p = trim($p);
                     if ($p !== "") {
                         $params[$p] = 1;
