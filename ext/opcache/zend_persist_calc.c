@@ -387,6 +387,13 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 
 		ADD_SIZE(sizeof(zend_class_entry));
 
+		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+			ADD_INTERNED_STRING(ce->name);
+			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+				ADD_INTERNED_STRING(ce->parent_name);
+			}
+		}
+
 		zend_hash_persist_calc(&ce->function_table);
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
@@ -442,11 +449,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 
 		if (ce->ce_flags & ZEND_ACC_CACHED) {
 			return;
-		}
-
-		ADD_INTERNED_STRING(ce->name);
-		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			ADD_INTERNED_STRING(ce->parent_name);
 		}
 
 		if (ce->info.user.filename) {

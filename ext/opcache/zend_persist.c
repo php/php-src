@@ -846,6 +846,13 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 		ce->inheritance_cache = NULL;
 
+		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+			zend_accel_store_interned_string(ce->name);
+			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+				zend_accel_store_interned_string(ce->parent_name);
+			}
+		}
+
 		zend_hash_persist(&ce->function_table);
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
@@ -949,11 +956,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 
 		ce->ce_flags |= ZEND_ACC_CACHED;
-
-		zend_accel_store_interned_string(ce->name);
-		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			zend_accel_store_interned_string(ce->parent_name);
-		}
 
 		if (ce->info.user.filename) {
 			zend_accel_store_string(ce->info.user.filename);
