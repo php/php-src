@@ -3412,12 +3412,13 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{ */
 {
+	/* Clean before putting into the cache, since clean could call dtors,
+	 * which could use the cached hash. Also do this before the check for
+	 * available cache slots, as those may be used by a dtor as well. */
+	zend_symtable_clean(symbol_table);
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
 		zend_array_destroy(symbol_table);
 	} else {
-		/* clean before putting into the cache, since clean
-		   could call dtors, which could use cached hash */
-		zend_symtable_clean(symbol_table);
 		*(EG(symtable_cache_ptr)++) = symbol_table;
 	}
 }
