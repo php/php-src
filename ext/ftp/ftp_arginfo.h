@@ -280,7 +280,7 @@ static const zend_function_entry class_FTPConnection_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_FTPConnection()
+static zend_class_entry *register_class_FTPConnection(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -290,4 +290,3 @@ zend_class_entry *register_class_FTPConnection()
 
 	return class_entry;
 }
-

@@ -86,7 +86,7 @@ static const zend_function_entry class_Collator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Collator()
+static zend_class_entry *register_class_Collator(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -95,4 +95,3 @@ zend_class_entry *register_class_Collator()
 
 	return class_entry;
 }
-

@@ -51,6 +51,9 @@ static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
+static zend_class_entry *zend_test_ns_foo_class;
+static zend_class_entry *zend_test_ns2_foo_class;
+static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_object_handlers zend_test_class_handlers;
 
 static ZEND_FUNCTION(zend_test_func)
@@ -392,6 +395,10 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_internal_attribute *attr = zend_internal_attribute_register(zend_test_attribute, ZEND_ATTRIBUTE_TARGET_ALL);
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
+
+	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
+	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
+	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

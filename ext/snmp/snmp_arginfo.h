@@ -242,7 +242,7 @@ static const zend_function_entry class_SNMPException_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_SNMP()
+static zend_class_entry *register_class_SNMP(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -252,7 +252,7 @@ zend_class_entry *register_class_SNMP()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SNMPException(zend_class_entry *class_entry_RuntimeException)
+static zend_class_entry *register_class_SNMPException(zend_class_entry *class_entry_RuntimeException)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -261,4 +261,3 @@ zend_class_entry *register_class_SNMPException(zend_class_entry *class_entry_Run
 
 	return class_entry;
 }
-

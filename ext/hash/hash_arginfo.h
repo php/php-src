@@ -205,7 +205,7 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_HashContext()
+static zend_class_entry *register_class_HashContext(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -215,4 +215,3 @@ zend_class_entry *register_class_HashContext()
 
 	return class_entry;
 }
-

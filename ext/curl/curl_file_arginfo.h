@@ -54,7 +54,7 @@ static const zend_function_entry class_CURLStringFile_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_CURLFile()
+static zend_class_entry *register_class_CURLFile(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -82,7 +82,7 @@ zend_class_entry *register_class_CURLFile()
 	return class_entry;
 }
 
-zend_class_entry *register_class_CURLStringFile()
+static zend_class_entry *register_class_CURLStringFile(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -109,4 +109,3 @@ zend_class_entry *register_class_CURLStringFile()
 
 	return class_entry;
 }
-

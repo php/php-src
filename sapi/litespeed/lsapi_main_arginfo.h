@@ -35,4 +35,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(litespeed_finish_request, arginfo_litespeed_finish_request)
 	ZEND_FE_END
 };
-

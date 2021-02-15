@@ -186,7 +186,7 @@ static const zend_function_entry class_UnhandledMatchError_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Throwable(zend_class_entry *class_entry_Stringable)
+static zend_class_entry *register_class_Throwable(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -197,7 +197,7 @@ zend_class_entry *register_class_Throwable(zend_class_entry *class_entry_Stringa
 	return class_entry;
 }
 
-zend_class_entry *register_class_Exception(zend_class_entry *class_entry_Throwable)
+static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_Throwable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -251,7 +251,7 @@ zend_class_entry *register_class_Exception(zend_class_entry *class_entry_Throwab
 	return class_entry;
 }
 
-zend_class_entry *register_class_ErrorException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_ErrorException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -261,7 +261,7 @@ zend_class_entry *register_class_ErrorException(zend_class_entry *class_entry_Ex
 	return class_entry;
 }
 
-zend_class_entry *register_class_Error(zend_class_entry *class_entry_Throwable)
+static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Throwable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -315,7 +315,7 @@ zend_class_entry *register_class_Error(zend_class_entry *class_entry_Throwable)
 	return class_entry;
 }
 
-zend_class_entry *register_class_CompileError(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_CompileError(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -325,7 +325,7 @@ zend_class_entry *register_class_CompileError(zend_class_entry *class_entry_Erro
 	return class_entry;
 }
 
-zend_class_entry *register_class_ParseError(zend_class_entry *class_entry_CompileError)
+static zend_class_entry *register_class_ParseError(zend_class_entry *class_entry_CompileError)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -335,7 +335,7 @@ zend_class_entry *register_class_ParseError(zend_class_entry *class_entry_Compil
 	return class_entry;
 }
 
-zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -345,7 +345,7 @@ zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_Error)
 	return class_entry;
 }
 
-zend_class_entry *register_class_ArgumentCountError(zend_class_entry *class_entry_TypeError)
+static zend_class_entry *register_class_ArgumentCountError(zend_class_entry *class_entry_TypeError)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -355,7 +355,7 @@ zend_class_entry *register_class_ArgumentCountError(zend_class_entry *class_entr
 	return class_entry;
 }
 
-zend_class_entry *register_class_ValueError(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_ValueError(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -365,7 +365,7 @@ zend_class_entry *register_class_ValueError(zend_class_entry *class_entry_Error)
 	return class_entry;
 }
 
-zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -375,7 +375,7 @@ zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_entry_E
 	return class_entry;
 }
 
-zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *class_entry_ArithmeticError)
+static zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *class_entry_ArithmeticError)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -385,7 +385,7 @@ zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -394,4 +394,3 @@ zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *class_ent
 
 	return class_entry;
 }
-

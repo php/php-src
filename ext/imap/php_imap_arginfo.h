@@ -518,7 +518,7 @@ static const zend_function_entry class_IMAPConnection_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IMAPConnection()
+static zend_class_entry *register_class_IMAPConnection(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -528,4 +528,3 @@ zend_class_entry *register_class_IMAPConnection()
 
 	return class_entry;
 }
-

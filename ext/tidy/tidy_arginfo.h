@@ -282,7 +282,7 @@ static const zend_function_entry class_tidyNode_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_tidy()
+static zend_class_entry *register_class_tidy(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -292,7 +292,7 @@ zend_class_entry *register_class_tidy()
 	return class_entry;
 }
 
-zend_class_entry *register_class_tidyNode()
+static zend_class_entry *register_class_tidyNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -302,4 +302,3 @@ zend_class_entry *register_class_tidyNode()
 
 	return class_entry;
 }
-

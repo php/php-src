@@ -333,4 +333,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_status, arginfo_gc_status)
 	ZEND_FE_END
 };
-

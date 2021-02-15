@@ -790,7 +790,7 @@ static const zend_function_entry class_OCICollection_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_OCILob()
+static zend_class_entry *register_class_OCILob(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -800,7 +800,7 @@ zend_class_entry *register_class_OCILob()
 	return class_entry;
 }
 
-zend_class_entry *register_class_OCICollection()
+static zend_class_entry *register_class_OCICollection(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -809,4 +809,3 @@ zend_class_entry *register_class_OCICollection()
 
 	return class_entry;
 }
-

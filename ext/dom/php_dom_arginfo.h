@@ -848,7 +848,7 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -858,7 +858,7 @@ zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_D
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMCdataSection(zend_class_entry *class_entry_DOMText)
+static zend_class_entry *register_class_DOMCdataSection(zend_class_entry *class_entry_DOMText)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -868,7 +868,7 @@ zend_class_entry *register_class_DOMCdataSection(zend_class_entry *class_entry_D
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMComment(zend_class_entry *class_entry_DOMCharacterData)
+static zend_class_entry *register_class_DOMComment(zend_class_entry *class_entry_DOMCharacterData)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -878,7 +878,7 @@ zend_class_entry *register_class_DOMComment(zend_class_entry *class_entry_DOMCha
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMParentNode()
+static zend_class_entry *register_class_DOMParentNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -888,7 +888,7 @@ zend_class_entry *register_class_DOMParentNode()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMChildNode()
+static zend_class_entry *register_class_DOMChildNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -898,7 +898,7 @@ zend_class_entry *register_class_DOMChildNode()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMNode()
+static zend_class_entry *register_class_DOMNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -908,7 +908,7 @@ zend_class_entry *register_class_DOMNode()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMNameSpaceNode()
+static zend_class_entry *register_class_DOMNameSpaceNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -918,7 +918,7 @@ zend_class_entry *register_class_DOMNameSpaceNode()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMImplementation()
+static zend_class_entry *register_class_DOMImplementation(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -928,7 +928,7 @@ zend_class_entry *register_class_DOMImplementation()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
+static zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -939,7 +939,7 @@ zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -950,7 +950,7 @@ zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_Itera
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMCharacterData(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMChildNode)
+static zend_class_entry *register_class_DOMCharacterData(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMChildNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -961,7 +961,7 @@ zend_class_entry *register_class_DOMCharacterData(zend_class_entry *class_entry_
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -971,7 +971,7 @@ zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DOMNode)
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode, zend_class_entry *class_entry_DOMChildNode)
+static zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode, zend_class_entry *class_entry_DOMChildNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -982,7 +982,7 @@ zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry_DOMNod
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMDocument(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
+static zend_class_entry *register_class_DOMDocument(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -993,7 +993,7 @@ zend_class_entry *register_class_DOMDocument(zend_class_entry *class_entry_DOMNo
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_DOMException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1010,7 +1010,7 @@ zend_class_entry *register_class_DOMException(zend_class_entry *class_entry_Exce
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DOMCharacterData)
+static zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DOMCharacterData)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1020,7 +1020,7 @@ zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DOMCharac
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1031,7 +1031,7 @@ zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_I
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1041,7 +1041,7 @@ zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_DOMNode
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMEntityReference(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMEntityReference(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1051,7 +1051,7 @@ zend_class_entry *register_class_DOMEntityReference(zend_class_entry *class_entr
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1061,7 +1061,7 @@ zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entry_DOMNo
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entry *class_entry_DOMNode)
+static zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1071,7 +1071,7 @@ zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entry *clas
 	return class_entry;
 }
 
-zend_class_entry *register_class_DOMXPath()
+static zend_class_entry *register_class_DOMXPath(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1080,4 +1080,3 @@ zend_class_entry *register_class_DOMXPath()
 
 	return class_entry;
 }
-

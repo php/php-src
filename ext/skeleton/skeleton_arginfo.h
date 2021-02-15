@@ -18,4 +18,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(test2, arginfo_test2)
 	ZEND_FE_END
 };
-

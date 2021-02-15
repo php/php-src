@@ -14,7 +14,7 @@ static const zend_function_entry class_Attribute_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Attribute()
+static zend_class_entry *register_class_Attribute(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -30,4 +30,3 @@ zend_class_entry *register_class_Attribute()
 
 	return class_entry;
 }
-

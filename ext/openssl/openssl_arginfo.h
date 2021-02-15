@@ -531,7 +531,7 @@ static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_OpenSSLCertificate()
+static zend_class_entry *register_class_OpenSSLCertificate(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -542,7 +542,7 @@ zend_class_entry *register_class_OpenSSLCertificate()
 	return class_entry;
 }
 
-zend_class_entry *register_class_OpenSSLCertificateSigningRequest()
+static zend_class_entry *register_class_OpenSSLCertificateSigningRequest(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -553,7 +553,7 @@ zend_class_entry *register_class_OpenSSLCertificateSigningRequest()
 	return class_entry;
 }
 
-zend_class_entry *register_class_OpenSSLAsymmetricKey()
+static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -563,4 +563,3 @@ zend_class_entry *register_class_OpenSSLAsymmetricKey()
 
 	return class_entry;
 }
-

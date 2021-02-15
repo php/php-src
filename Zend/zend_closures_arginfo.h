@@ -41,7 +41,7 @@ static const zend_function_entry class_Closure_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Closure()
+static zend_class_entry *register_class_Closure(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -51,4 +51,3 @@ zend_class_entry *register_class_Closure()
 
 	return class_entry;
 }
-

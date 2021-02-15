@@ -658,7 +658,7 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_DateTimeInterface()
+static zend_class_entry *register_class_DateTimeInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -668,7 +668,7 @@ zend_class_entry *register_class_DateTimeInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_DateTimeInterface)
+static zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_DateTimeInterface)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -679,7 +679,7 @@ zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_DateTime
 	return class_entry;
 }
 
-zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *class_entry_DateTimeInterface)
+static zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *class_entry_DateTimeInterface)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -690,7 +690,7 @@ zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *class_entry
 	return class_entry;
 }
 
-zend_class_entry *register_class_DateTimeZone()
+static zend_class_entry *register_class_DateTimeZone(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -700,7 +700,7 @@ zend_class_entry *register_class_DateTimeZone()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DateInterval()
+static zend_class_entry *register_class_DateInterval(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -710,7 +710,7 @@ zend_class_entry *register_class_DateInterval()
 	return class_entry;
 }
 
-zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -720,4 +720,3 @@ zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry_Iterat
 
 	return class_entry;
 }
-

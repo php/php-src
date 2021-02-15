@@ -160,7 +160,7 @@ static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class__ZendTestInterface()
+static zend_class_entry *register_class__ZendTestInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -170,7 +170,7 @@ zend_class_entry *register_class__ZendTestInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__ZendTestInterface)
+static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__ZendTestInterface)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -207,7 +207,7 @@ zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_entry__Z
 	return class_entry;
 }
 
-zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *class_entry__ZendTestClass)
+static zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *class_entry__ZendTestClass)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -217,7 +217,7 @@ zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class__ZendTestTrait()
+static zend_class_entry *register_class__ZendTestTrait(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -234,7 +234,7 @@ zend_class_entry *register_class__ZendTestTrait()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ZendTestAttribute()
+static zend_class_entry *register_class_ZendTestAttribute(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -245,7 +245,7 @@ zend_class_entry *register_class_ZendTestAttribute()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ZendTestNS_Foo()
+static zend_class_entry *register_class_ZendTestNS_Foo(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -255,7 +255,7 @@ zend_class_entry *register_class_ZendTestNS_Foo()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ZendTestNS2_Foo()
+static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -265,7 +265,7 @@ zend_class_entry *register_class_ZendTestNS2_Foo()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo()
+static zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -274,4 +274,3 @@ zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo()
 
 	return class_entry;
 }
-

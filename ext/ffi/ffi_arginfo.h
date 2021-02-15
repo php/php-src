@@ -145,7 +145,7 @@ static const zend_function_entry class_FFI_ParserException_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_FFI()
+static zend_class_entry *register_class_FFI(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -156,7 +156,7 @@ zend_class_entry *register_class_FFI()
 	return class_entry;
 }
 
-zend_class_entry *register_class_FFI_CData()
+static zend_class_entry *register_class_FFI_CData(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -167,7 +167,7 @@ zend_class_entry *register_class_FFI_CData()
 	return class_entry;
 }
 
-zend_class_entry *register_class_FFI_CType()
+static zend_class_entry *register_class_FFI_CType(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -178,7 +178,7 @@ zend_class_entry *register_class_FFI_CType()
 	return class_entry;
 }
 
-zend_class_entry *register_class_FFI_Exception(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_FFI_Exception(zend_class_entry *class_entry_Error)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -188,7 +188,7 @@ zend_class_entry *register_class_FFI_Exception(zend_class_entry *class_entry_Err
 	return class_entry;
 }
 
-zend_class_entry *register_class_FFI_ParserException(zend_class_entry *class_entry_FFI_Exception)
+static zend_class_entry *register_class_FFI_ParserException(zend_class_entry *class_entry_FFI_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -198,4 +198,3 @@ zend_class_entry *register_class_FFI_ParserException(zend_class_entry *class_ent
 
 	return class_entry;
 }
-

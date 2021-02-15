@@ -51,7 +51,7 @@ static const zend_function_entry class_Transliterator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Transliterator()
+static zend_class_entry *register_class_Transliterator(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -66,4 +66,3 @@ zend_class_entry *register_class_Transliterator()
 
 	return class_entry;
 }
-

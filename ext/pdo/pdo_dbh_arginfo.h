@@ -93,7 +93,7 @@ static const zend_function_entry class_PDO_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PDO()
+static zend_class_entry *register_class_PDO(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -102,4 +102,3 @@ zend_class_entry *register_class_PDO()
 
 	return class_entry;
 }
-

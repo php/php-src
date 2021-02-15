@@ -85,4 +85,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iconv_get_encoding, arginfo_iconv_get_encoding)
 	ZEND_FE_END
 };
-

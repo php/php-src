@@ -242,7 +242,7 @@ static const zend_function_entry class_CurlShareHandle_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_CurlHandle()
+static zend_class_entry *register_class_CurlHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -253,7 +253,7 @@ zend_class_entry *register_class_CurlHandle()
 	return class_entry;
 }
 
-zend_class_entry *register_class_CurlMultiHandle()
+static zend_class_entry *register_class_CurlMultiHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -264,7 +264,7 @@ zend_class_entry *register_class_CurlMultiHandle()
 	return class_entry;
 }
 
-zend_class_entry *register_class_CurlShareHandle()
+static zend_class_entry *register_class_CurlShareHandle(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -274,4 +274,3 @@ zend_class_entry *register_class_CurlShareHandle()
 
 	return class_entry;
 }
-

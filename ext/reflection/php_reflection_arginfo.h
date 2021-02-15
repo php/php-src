@@ -995,7 +995,7 @@ static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_ReflectionException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_ReflectionException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1005,7 +1005,7 @@ zend_class_entry *register_class_ReflectionException(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_Reflection()
+static zend_class_entry *register_class_Reflection(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1015,7 +1015,7 @@ zend_class_entry *register_class_Reflection()
 	return class_entry;
 }
 
-zend_class_entry *register_class_Reflector(zend_class_entry *class_entry_Stringable)
+static zend_class_entry *register_class_Reflector(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1026,7 +1026,7 @@ zend_class_entry *register_class_Reflector(zend_class_entry *class_entry_Stringa
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1044,7 +1044,7 @@ zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_entry *cl
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionFunction(zend_class_entry *class_entry_ReflectionFunctionAbstract)
+static zend_class_entry *register_class_ReflectionFunction(zend_class_entry *class_entry_ReflectionFunctionAbstract)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1054,7 +1054,7 @@ zend_class_entry *register_class_ReflectionFunction(zend_class_entry *class_entr
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionGenerator()
+static zend_class_entry *register_class_ReflectionGenerator(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1065,7 +1065,7 @@ zend_class_entry *register_class_ReflectionGenerator()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class_entry_ReflectionFunctionAbstract)
+static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class_entry_ReflectionFunctionAbstract)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1081,7 +1081,7 @@ zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class_entry_
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1098,7 +1098,7 @@ zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_entry_R
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionObject(zend_class_entry *class_entry_ReflectionClass)
+static zend_class_entry *register_class_ReflectionObject(zend_class_entry *class_entry_ReflectionClass)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1108,7 +1108,7 @@ zend_class_entry *register_class_ReflectionObject(zend_class_entry *class_entry_
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionProperty(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1131,7 +1131,7 @@ zend_class_entry *register_class_ReflectionProperty(zend_class_entry *class_entr
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1154,7 +1154,7 @@ zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry *class
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionParameter(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionParameter(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1171,7 +1171,7 @@ zend_class_entry *register_class_ReflectionParameter(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionType(zend_class_entry *class_entry_Stringable)
+static zend_class_entry *register_class_ReflectionType(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1183,7 +1183,7 @@ zend_class_entry *register_class_ReflectionType(zend_class_entry *class_entry_St
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *class_entry_ReflectionType)
+static zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *class_entry_ReflectionType)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1193,7 +1193,7 @@ zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionUnionType(zend_class_entry *class_entry_ReflectionType)
+static zend_class_entry *register_class_ReflectionUnionType(zend_class_entry *class_entry_ReflectionType)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1203,7 +1203,7 @@ zend_class_entry *register_class_ReflectionUnionType(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionExtension(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionExtension(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1220,7 +1220,7 @@ zend_class_entry *register_class_ReflectionExtension(zend_class_entry *class_ent
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry *class_entry_Reflector)
+static zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1237,7 +1237,7 @@ zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry *class
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionReference()
+static zend_class_entry *register_class_ReflectionReference(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1248,7 +1248,7 @@ zend_class_entry *register_class_ReflectionReference()
 	return class_entry;
 }
 
-zend_class_entry *register_class_ReflectionAttribute()
+static zend_class_entry *register_class_ReflectionAttribute(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1258,4 +1258,3 @@ zend_class_entry *register_class_ReflectionAttribute()
 
 	return class_entry;
 }
-

@@ -52,7 +52,7 @@ static const zend_function_entry class_LibXMLError_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_LibXMLError()
+static zend_class_entry *register_class_LibXMLError(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -97,4 +97,3 @@ zend_class_entry *register_class_LibXMLError()
 
 	return class_entry;
 }
-

@@ -227,7 +227,7 @@ static const zend_function_entry class_SessionHandler_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_SessionHandlerInterface()
+static zend_class_entry *register_class_SessionHandlerInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -237,7 +237,7 @@ zend_class_entry *register_class_SessionHandlerInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SessionIdInterface()
+static zend_class_entry *register_class_SessionIdInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -247,7 +247,7 @@ zend_class_entry *register_class_SessionIdInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SessionUpdateTimestampHandlerInterface()
+static zend_class_entry *register_class_SessionUpdateTimestampHandlerInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -257,7 +257,7 @@ zend_class_entry *register_class_SessionUpdateTimestampHandlerInterface()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SessionHandler(zend_class_entry *class_entry_SessionHandlerInterface, zend_class_entry *class_entry_SessionIdInterface)
+static zend_class_entry *register_class_SessionHandler(zend_class_entry *class_entry_SessionHandlerInterface, zend_class_entry *class_entry_SessionIdInterface)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -267,4 +267,3 @@ zend_class_entry *register_class_SessionHandler(zend_class_entry *class_entry_Se
 
 	return class_entry;
 }
-

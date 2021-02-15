@@ -71,4 +71,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
 	ZEND_FE_END
 };
-

@@ -112,7 +112,7 @@ static const zend_function_entry class_NumberFormatter_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_NumberFormatter()
+static zend_class_entry *register_class_NumberFormatter(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -121,4 +121,3 @@ zend_class_entry *register_class_NumberFormatter()
 
 	return class_entry;
 }
-

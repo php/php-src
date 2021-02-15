@@ -25,4 +25,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fpm_get_status, arginfo_fpm_get_status)
 	ZEND_FE_END
 };
-

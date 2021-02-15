@@ -147,7 +147,7 @@ static const zend_function_entry class_IntlCodePointBreakIterator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -158,7 +158,7 @@ zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *class_entry
 	return class_entry;
 }
 
-zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
+static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -168,7 +168,7 @@ zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_entry *cl
 	return class_entry;
 }
 
-zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
+static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -177,4 +177,3 @@ zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_entry *cl
 
 	return class_entry;
 }
-

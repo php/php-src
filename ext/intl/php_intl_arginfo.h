@@ -1171,7 +1171,7 @@ static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -1180,4 +1180,3 @@ zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exc
 
 	return class_entry;
 }
-

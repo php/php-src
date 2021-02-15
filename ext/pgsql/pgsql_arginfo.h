@@ -652,4 +652,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_select, arginfo_pg_select)
 	ZEND_FE_END
 };
-

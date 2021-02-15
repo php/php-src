@@ -57,7 +57,7 @@ static const zend_function_entry class_SysvSharedMemory_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_SysvSharedMemory()
+static zend_class_entry *register_class_SysvSharedMemory(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -67,4 +67,3 @@ zend_class_entry *register_class_SysvSharedMemory()
 
 	return class_entry;
 }
-

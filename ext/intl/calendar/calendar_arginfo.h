@@ -271,7 +271,7 @@ static const zend_function_entry class_IntlGregorianCalendar_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IntlCalendar()
+static zend_class_entry *register_class_IntlCalendar(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -281,7 +281,7 @@ zend_class_entry *register_class_IntlCalendar()
 	return class_entry;
 }
 
-zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *class_entry_IntlCalendar)
+static zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *class_entry_IntlCalendar)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -290,4 +290,3 @@ zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *class_e
 
 	return class_entry;
 }
-

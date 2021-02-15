@@ -24,4 +24,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_response_headers, arginfo_apache_response_headers)
 	ZEND_FE_END
 };
-

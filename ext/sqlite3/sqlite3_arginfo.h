@@ -255,7 +255,7 @@ static const zend_function_entry class_SQLite3Result_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_SQLite3()
+static zend_class_entry *register_class_SQLite3(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -265,7 +265,7 @@ zend_class_entry *register_class_SQLite3()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SQLite3Stmt()
+static zend_class_entry *register_class_SQLite3Stmt(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -275,7 +275,7 @@ zend_class_entry *register_class_SQLite3Stmt()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SQLite3Result()
+static zend_class_entry *register_class_SQLite3Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -284,4 +284,3 @@ zend_class_entry *register_class_SQLite3Result()
 
 	return class_entry;
 }
-

@@ -51,7 +51,7 @@ static const zend_function_entry class_ResourceBundle_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -61,4 +61,3 @@ zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_It
 
 	return class_entry;
 }
-

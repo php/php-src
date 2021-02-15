@@ -144,7 +144,7 @@ static const zend_function_entry class_PSpellConfig_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PSpell()
+static zend_class_entry *register_class_PSpell(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -155,7 +155,7 @@ zend_class_entry *register_class_PSpell()
 	return class_entry;
 }
 
-zend_class_entry *register_class_PSpellConfig()
+static zend_class_entry *register_class_PSpellConfig(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -165,4 +165,3 @@ zend_class_entry *register_class_PSpellConfig()
 
 	return class_entry;
 }
-

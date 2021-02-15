@@ -96,4 +96,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(preg_last_error_msg, arginfo_preg_last_error_msg)
 	ZEND_FE_END
 };
-

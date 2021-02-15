@@ -153,7 +153,7 @@ static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IntlTimeZone()
+static zend_class_entry *register_class_IntlTimeZone(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -162,4 +162,3 @@ zend_class_entry *register_class_IntlTimeZone()
 
 	return class_entry;
 }
-

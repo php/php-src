@@ -62,4 +62,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_get_modules, arginfo_apache_get_modules)
 	ZEND_FE_END
 };
-

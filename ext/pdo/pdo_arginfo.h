@@ -18,7 +18,7 @@ static const zend_function_entry class_PDOException_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PDOException(zend_class_entry *class_entry_RuntimeException)
+static zend_class_entry *register_class_PDOException(zend_class_entry *class_entry_RuntimeException)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -33,4 +33,3 @@ zend_class_entry *register_class_PDOException(zend_class_entry *class_entry_Runt
 
 	return class_entry;
 }
-

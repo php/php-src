@@ -40,4 +40,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(opcache_is_script_cached, arginfo_opcache_is_script_cached)
 	ZEND_FE_END
 };
-

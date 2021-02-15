@@ -29,7 +29,7 @@ static const zend_function_entry class_IntlIterator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_IntlIterator(zend_class_entry *class_entry_Iterator)
+static zend_class_entry *register_class_IntlIterator(zend_class_entry *class_entry_Iterator)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -39,4 +39,3 @@ zend_class_entry *register_class_IntlIterator(zend_class_entry *class_entry_Iter
 
 	return class_entry;
 }
-

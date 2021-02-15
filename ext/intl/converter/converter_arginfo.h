@@ -114,7 +114,7 @@ static const zend_function_entry class_UConverter_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_UConverter()
+static zend_class_entry *register_class_UConverter(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -123,4 +123,3 @@ zend_class_entry *register_class_UConverter()
 
 	return class_entry;
 }
-

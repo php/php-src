@@ -116,4 +116,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(unixtojd, arginfo_unixtojd)
 	ZEND_FE_END
 };
-

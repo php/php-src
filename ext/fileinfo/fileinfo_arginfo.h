@@ -82,7 +82,7 @@ static const zend_function_entry class_finfo_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_finfo()
+static zend_class_entry *register_class_finfo(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -91,4 +91,3 @@ zend_class_entry *register_class_finfo()
 
 	return class_entry;
 }
-

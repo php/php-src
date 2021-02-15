@@ -120,7 +120,7 @@ static const zend_function_entry class_InternalIterator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Traversable()
+static zend_class_entry *register_class_Traversable(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -130,7 +130,7 @@ zend_class_entry *register_class_Traversable()
 	return class_entry;
 }
 
-zend_class_entry *register_class_IteratorAggregate(zend_class_entry *class_entry_Traversable)
+static zend_class_entry *register_class_IteratorAggregate(zend_class_entry *class_entry_Traversable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -141,7 +141,7 @@ zend_class_entry *register_class_IteratorAggregate(zend_class_entry *class_entry
 	return class_entry;
 }
 
-zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_Traversable)
+static zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_Traversable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -152,7 +152,7 @@ zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_Traversa
 	return class_entry;
 }
 
-zend_class_entry *register_class_ArrayAccess()
+static zend_class_entry *register_class_ArrayAccess(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -162,7 +162,7 @@ zend_class_entry *register_class_ArrayAccess()
 	return class_entry;
 }
 
-zend_class_entry *register_class_Serializable()
+static zend_class_entry *register_class_Serializable(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -172,7 +172,7 @@ zend_class_entry *register_class_Serializable()
 	return class_entry;
 }
 
-zend_class_entry *register_class_Countable()
+static zend_class_entry *register_class_Countable(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -182,7 +182,7 @@ zend_class_entry *register_class_Countable()
 	return class_entry;
 }
 
-zend_class_entry *register_class_Stringable()
+static zend_class_entry *register_class_Stringable(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -192,7 +192,7 @@ zend_class_entry *register_class_Stringable()
 	return class_entry;
 }
 
-zend_class_entry *register_class_InternalIterator(zend_class_entry *class_entry_Iterator)
+static zend_class_entry *register_class_InternalIterator(zend_class_entry *class_entry_Iterator)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -203,4 +203,3 @@ zend_class_entry *register_class_InternalIterator(zend_class_entry *class_entry_
 
 	return class_entry;
 }
-

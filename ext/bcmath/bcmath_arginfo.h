@@ -69,4 +69,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcscale, arginfo_bcscale)
 	ZEND_FE_END
 };
-

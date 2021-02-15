@@ -375,4 +375,3 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE_END
 };
-

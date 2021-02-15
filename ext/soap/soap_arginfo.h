@@ -231,7 +231,7 @@ static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_SoapParam()
+static zend_class_entry *register_class_SoapParam(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -241,7 +241,7 @@ zend_class_entry *register_class_SoapParam()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SoapHeader()
+static zend_class_entry *register_class_SoapHeader(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -251,7 +251,7 @@ zend_class_entry *register_class_SoapHeader()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -261,7 +261,7 @@ zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_Excepti
 	return class_entry;
 }
 
-zend_class_entry *register_class_SoapVar()
+static zend_class_entry *register_class_SoapVar(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -271,7 +271,7 @@ zend_class_entry *register_class_SoapVar()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SoapServer()
+static zend_class_entry *register_class_SoapServer(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -281,7 +281,7 @@ zend_class_entry *register_class_SoapServer()
 	return class_entry;
 }
 
-zend_class_entry *register_class_SoapClient()
+static zend_class_entry *register_class_SoapClient(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -290,4 +290,3 @@ zend_class_entry *register_class_SoapClient()
 
 	return class_entry;
 }
-

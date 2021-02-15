@@ -322,7 +322,7 @@ static const zend_function_entry class_AddressInfo_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Socket()
+static zend_class_entry *register_class_Socket(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -333,7 +333,7 @@ zend_class_entry *register_class_Socket()
 	return class_entry;
 }
 
-zend_class_entry *register_class_AddressInfo()
+static zend_class_entry *register_class_AddressInfo(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -343,4 +343,3 @@ zend_class_entry *register_class_AddressInfo()
 
 	return class_entry;
 }
-

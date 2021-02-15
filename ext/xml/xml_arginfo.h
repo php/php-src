@@ -138,7 +138,7 @@ static const zend_function_entry class_XMLParser_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_XMLParser()
+static zend_class_entry *register_class_XMLParser(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -148,4 +148,3 @@ zend_class_entry *register_class_XMLParser()
 
 	return class_entry;
 }
-

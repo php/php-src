@@ -52,7 +52,7 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Spoofchecker()
+static zend_class_entry *register_class_Spoofchecker(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -61,4 +61,3 @@ zend_class_entry *register_class_Spoofchecker()
 
 	return class_entry;
 }
-

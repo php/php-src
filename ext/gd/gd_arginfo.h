@@ -837,7 +837,7 @@ static const zend_function_entry class_GdFont_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_GdImage()
+static zend_class_entry *register_class_GdImage(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -848,7 +848,7 @@ zend_class_entry *register_class_GdImage()
 	return class_entry;
 }
 
-zend_class_entry *register_class_GdFont()
+static zend_class_entry *register_class_GdFont(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -858,4 +858,3 @@ zend_class_entry *register_class_GdFont()
 
 	return class_entry;
 }
-

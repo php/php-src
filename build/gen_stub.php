@@ -1217,7 +1217,7 @@ class ClassInfo {
 
         $escapedName = implode("_", $this->name->parts);
 
-        $code = "zend_class_entry *register_class_$escapedName(" . implode(", ", $params) . ")\n";
+        $code = "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
 
         $code .= "{\n";
         $code .= "\tzend_class_entry ce, *class_entry;\n\n";
@@ -1260,7 +1260,7 @@ class ClassInfo {
 
         $code .= "\n\treturn class_entry;\n";
 
-        $code .= "}\n\n";
+        $code .= "}\n";
 
         return $code;
     }
@@ -1981,10 +1981,10 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
 }
 
 function generateClassEntryCode(FileInfo $fileInfo): string {
-    $code = "\n";
+    $code = "";
 
     foreach ($fileInfo->classInfos as $class) {
-        $code .= $class->getRegistration();
+        $code .= "\n" . $class->getRegistration();
     }
 
     return $code;

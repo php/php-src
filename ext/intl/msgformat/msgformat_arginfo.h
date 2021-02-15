@@ -70,7 +70,7 @@ static const zend_function_entry class_MessageFormatter_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_MessageFormatter()
+static zend_class_entry *register_class_MessageFormatter(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -79,4 +79,3 @@ zend_class_entry *register_class_MessageFormatter()
 
 	return class_entry;
 }
-

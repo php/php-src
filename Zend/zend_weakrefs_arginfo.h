@@ -64,7 +64,7 @@ static const zend_function_entry class_WeakMap_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_WeakReference()
+static zend_class_entry *register_class_WeakReference(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -75,7 +75,7 @@ zend_class_entry *register_class_WeakReference()
 	return class_entry;
 }
 
-zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -86,4 +86,3 @@ zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_ArrayAcce
 
 	return class_entry;
 }
-

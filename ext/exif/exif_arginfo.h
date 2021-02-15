@@ -37,4 +37,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(exif_imagetype, arginfo_exif_imagetype)
 	ZEND_FE_END
 };
-

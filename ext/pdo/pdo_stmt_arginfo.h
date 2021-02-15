@@ -135,7 +135,7 @@ static const zend_function_entry class_PDORow_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -152,7 +152,7 @@ zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_Iter
 	return class_entry;
 }
 
-zend_class_entry *register_class_PDORow()
+static zend_class_entry *register_class_PDORow(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -162,4 +162,3 @@ zend_class_entry *register_class_PDORow()
 
 	return class_entry;
 }
-
