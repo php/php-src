@@ -108,10 +108,7 @@ static void sysvmsg_queue_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvmsg)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", class_SysvMessageQueue_methods);
-	sysvmsg_queue_ce = zend_register_internal_class(&ce);
-	sysvmsg_queue_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvmsg_queue_ce = register_class_SysvMessageQueue();
 	sysvmsg_queue_ce->create_object = sysvmsg_queue_create_object;
 	sysvmsg_queue_ce->serialize = zend_class_serialize_deny;
 	sysvmsg_queue_ce->unserialize = zend_class_unserialize_deny;

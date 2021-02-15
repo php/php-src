@@ -129,14 +129,11 @@ static void sodium_separate_string(zval *zv) {
 
 PHP_MINIT_FUNCTION(sodium)
 {
-	zend_class_entry ce;
-
 	if (sodium_init() < 0) {
 		zend_error(E_ERROR, "sodium_init()");
 	}
 
-	INIT_CLASS_ENTRY(ce, "SodiumException", NULL);
-	sodium_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	sodium_exception_ce = register_class_SodiumException(zend_ce_exception);
 	sodium_exception_ce->create_object = sodium_exception_create_object;
 
 	REGISTER_STRING_CONSTANT("SODIUM_LIBRARY_VERSION",
