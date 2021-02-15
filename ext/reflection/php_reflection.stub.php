@@ -18,8 +18,7 @@ interface Reflector extends Stringable
 
 abstract class ReflectionFunctionAbstract implements Reflector
 {
-    /** @var string */
-    public $name = "";
+    public string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
@@ -150,8 +149,7 @@ final class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
-    /** @var string */
-    public $class = "";
+    public string $class;
 
     public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
@@ -205,8 +203,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
 class ReflectionClass implements Reflector
 {
-    /** @var string */
-    public $name = "";
+    public string $name;
 
     final private function __clone(): void {}
 
@@ -378,11 +375,8 @@ class ReflectionObject extends ReflectionClass
 
 class ReflectionProperty implements Reflector
 {
-    /** @var string */
-    public $name = "";
-
-    /** @var string */
-    public $class = "";
+    public string $name;
+    public string $class;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
@@ -449,11 +443,8 @@ class ReflectionProperty implements Reflector
 
 class ReflectionClassConstant implements Reflector
 {
-    /** @var string */
-    public $name = "";
-
-    /** @var string */
-    public $class = "";
+    public string $name;
+    public string $class;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
@@ -492,8 +483,7 @@ class ReflectionClassConstant implements Reflector
 
 class ReflectionParameter implements Reflector
 {
-    /** @var string */
-    public $name = "";
+    public string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
@@ -599,8 +589,7 @@ class ReflectionUnionType extends ReflectionType
 
 class ReflectionExtension implements Reflector
 {
-    /** @var string */
-    public $name = "";
+    public string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
@@ -645,8 +634,7 @@ class ReflectionExtension implements Reflector
 
 class ReflectionZendExtension implements Reflector
 {
-    /** @var string */
-    public $name = "";
+    public string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
