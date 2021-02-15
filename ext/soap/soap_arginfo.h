@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c0d32b2d8f3c39203b437a01dc79cd4e934dc9f7 */
+ * Stub hash: b4f2354707bc7b992a3574f820edb329b16dd49e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -230,3 +230,64 @@ static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_ME(SoapClient, __setLocation, arginfo_class_SoapClient___setLocation, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+zend_class_entry *register_class_SoapParam()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapParam", class_SoapParam_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SoapHeader()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapHeader", class_SoapHeader_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapFault", class_SoapFault_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SoapVar()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapVar", class_SoapVar_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SoapServer()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapServer", class_SoapServer_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+zend_class_entry *register_class_SoapClient()
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SoapClient", class_SoapClient_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+

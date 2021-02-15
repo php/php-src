@@ -166,13 +166,6 @@ ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, const char *, const uint32_t, zend_string *);
 
-#define PHP_SOAP_SERVER_CLASSNAME "SoapServer"
-#define PHP_SOAP_CLIENT_CLASSNAME "SoapClient"
-#define PHP_SOAP_VAR_CLASSNAME    "SoapVar"
-#define PHP_SOAP_FAULT_CLASSNAME  "SoapFault"
-#define PHP_SOAP_PARAM_CLASSNAME  "SoapParam"
-#define PHP_SOAP_HEADER_CLASSNAME "SoapHeader"
-
 PHP_RINIT_FUNCTION(soap);
 PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
@@ -361,39 +354,27 @@ static void delete_hashtable_res(zend_resource *res)
 
 PHP_MINIT_FUNCTION(soap)
 {
-	zend_class_entry ce;
-
 	/* TODO: add ini entry for always use soap errors */
 	php_soap_prepare_globals();
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	/* Register SoapClient class */
-	/* BIG NOTE : THIS EMITS AN COMPILATION WARNING UNDER ZE2 - handle_function_call deprecated.
-		soap_call_function_handler should be of type zend_function, not (*handle_function_call).
-	*/
-	{
-		INIT_CLASS_ENTRY(ce, PHP_SOAP_CLIENT_CLASSNAME, class_SoapClient_methods);
-		soap_class_entry = zend_register_internal_class(&ce);
-	}
+	soap_class_entry = register_class_SoapClient();
+
 	/* Register SoapVar class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_VAR_CLASSNAME, class_SoapVar_methods);
-	soap_var_class_entry = zend_register_internal_class(&ce);
+	soap_var_class_entry = register_class_SoapVar();
 
 	/* Register SoapServer class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_SERVER_CLASSNAME, class_SoapServer_methods);
-	soap_server_class_entry = zend_register_internal_class(&ce);
+	soap_server_class_entry = register_class_SoapServer();
 
 	/* Register SoapFault class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, class_SoapFault_methods);
-	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	soap_fault_class_entry = register_class_SoapFault(zend_ce_exception);
 
 	/* Register SoapParam class */
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_PARAM_CLASSNAME, class_SoapParam_methods);
-	soap_param_class_entry = zend_register_internal_class(&ce);
+	soap_param_class_entry = register_class_SoapParam();
 
-	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, class_SoapHeader_methods);
-	soap_header_class_entry = zend_register_internal_class(&ce);
+	soap_header_class_entry = register_class_SoapHeader();
 
 	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
 	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);

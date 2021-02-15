@@ -99,10 +99,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
-	sysvshm_ce = zend_register_internal_class(&ce);
-	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
 	sysvshm_ce->serialize = zend_class_serialize_deny;
 	sysvshm_ce->unserialize = zend_class_unserialize_deny;
