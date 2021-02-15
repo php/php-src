@@ -4,8 +4,7 @@
 
 class Transliterator
 {
-    /** @var string|null */
-    public $id;
+    public string $id;
 
     final private function __construct() {}
 
