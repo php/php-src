@@ -13,7 +13,7 @@
 #include "fpm.h"
 
 #ifndef HAVE_SETPROCTITLE
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 static char **fpm_env_argv = NULL;
 static size_t fpm_env_argv_len = 0;
 #endif
@@ -122,8 +122,7 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 	setproctitle_fast("%s", title);
 #elif defined(HAVE_SETPROCTITLE)
 	setproctitle("%s", title);
-#else
-#ifdef __linux__
+#elif defined(__linux__) || defined(__APPLE__)
 	size_t prefixlen = strlen(SETPROCTITLE_PREFIX);
 	if (fpm_env_argv != NULL && fpm_env_argv_len > prefixlen + 3) {
 		memset(fpm_env_argv[0], 0, fpm_env_argv_len);
@@ -131,7 +130,6 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 		strncpy(fpm_env_argv[0] + prefixlen, title, fpm_env_argv_len - prefixlen - 2);
 		fpm_env_argv[1] = NULL;
 	}
-#endif
 #endif
 }
 /* }}} */
@@ -208,7 +206,7 @@ int fpm_env_init_main() /* {{{ */
 		}
 	}
 #ifndef HAVE_SETPROCTITLE
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 	int i;
 	char *first = NULL;
 	char *last = NULL;
