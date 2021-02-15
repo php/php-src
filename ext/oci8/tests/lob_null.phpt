@@ -10,6 +10,8 @@ require(__DIR__.'/skipif.inc');
 
 require __DIR__.'/connect.inc';
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 // Initialization
 
 $s = oci_parse($c, 'drop table lob_null_tab');
