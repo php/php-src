@@ -136,12 +136,12 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 
 #define SPL_FILE_DIR_KEY_AS_PATHNAME       0x00000000 /* make RecursiveDirectoryTree::key() return getPathname() */
 #define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
-#define SPL_FILE_DIR_FOLLOW_SYMLINKS       0x00000200 /* make RecursiveDirectoryTree::hasChildren() follow symlinks */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
 
 #define SPL_FILE_DIR_SKIPDOTS              0x00001000 /* Tells whether it should skip dots or not */
 #define SPL_FILE_DIR_UNIXPATHS             0x00002000 /* Whether to unixify path separators */
-#define SPL_FILE_DIR_OTHERS_MASK           0x00003000 /* mask used for get/setFlags */
+#define SPL_FILE_DIR_FOLLOW_SYMLINKS       0x00004000 /* make RecursiveDirectoryTree::hasChildren() follow symlinks */
+#define SPL_FILE_DIR_OTHERS_MASK           0x00007000 /* mask used for get/setFlags */
 
 #endif /* SPL_DIRECTORY_H */

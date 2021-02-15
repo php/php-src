@@ -44,4 +44,8 @@ PHP                                                                        NEWS
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSpellConfig. (Sara)
 
+- SPL:
+  . Fixed bug #80724 (FilesystemIterator::FOLLOW_SYMLINKS remove KEY_AS_FILE
+    from bitmask). (Cameron Porter)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
