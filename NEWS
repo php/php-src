@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     preloaded JITted code). (Dmitry)
   . Fixed bug #80682 (opcache doesn't honour pcre.jit option). (Remi)
 
+- OpenSSL:
+  . Fixed bug #80747 (Providing RSA key size < 512 generates key that crash
+    PHP). (Nikita)
+
 - Phar:
   . Fixed bug #75850 (Unclear error message wrt. __halt_compiler() w/o
     semicolon) (cmb)

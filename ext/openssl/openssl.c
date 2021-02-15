@@ -3687,6 +3687,8 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 						PHP_OPENSSL_RAND_ADD_TIME();
 						if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
 							php_openssl_store_errors();
+							RSA_free(rsaparam);
+							rsaparam = NULL;
 						}
 						BN_free(bne);
 					}
