@@ -2323,8 +2323,10 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	} else if (Z_REFCOUNT_P(str) > 1) {
-		Z_DELREF_P(str);
+		/* Only release string after allocation succeeded. */
+		zend_string *orig_str = Z_STR_P(str);
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		GC_DELREF(orig_str);
 	} else {
 		zend_string_forget_hash_val(Z_STR_P(str));
 	}
