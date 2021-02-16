@@ -1608,6 +1608,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
+{
+	return ZEND_UNCOMPARABLE;
+}
+
 ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	int result;

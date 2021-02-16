@@ -443,6 +443,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
+	socket_object_handlers.compare = zend_objects_not_comparable;
 
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
