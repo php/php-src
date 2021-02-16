@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed bug #80634 (write_property handler of internal classes is skipped on
     preloaded JITted code). (Dmitry)
   . Fixed bug #80682 (opcache doesn't honour pcre.jit option). (Remi)
+  . Fixed bug #80742 (Opcache JIT makes some boolean logic unexpectedly be
+    true). (Dmitry)
 
 - OpenSSL:
   . Fixed bug #80747 (Providing RSA key size < 512 generates key that crash

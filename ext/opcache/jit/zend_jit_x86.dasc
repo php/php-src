@@ -7138,7 +7138,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					break;
 				case ZEND_IS_NOT_IDENTICAL:
 					if (exit_addr) {
-						|1:
+						| jp >1
 						| je &exit_addr
 						|1:
 					} else {
@@ -7231,10 +7231,10 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_NOT_IDENTICAL:
 					|	jp >1
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 					|	je => target_label
 					|1:
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
