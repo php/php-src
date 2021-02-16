@@ -195,6 +195,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
 	enchant_broker_handlers.free_obj = php_enchant_broker_free;
 	enchant_broker_handlers.clone_obj = NULL;
+	enchant_broker_handlers.compare = zend_objects_not_comparable;
 
 	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
@@ -205,6 +206,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);
 	enchant_dict_handlers.free_obj = php_enchant_dict_free;
 	enchant_dict_handlers.clone_obj = NULL;
+	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL",  PHP_ENCHANT_ISPELL,  CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);

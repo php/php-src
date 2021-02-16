@@ -161,6 +161,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 	sysvsem_object_handlers.free_obj = sysvsem_free_obj;
 	sysvsem_object_handlers.get_constructor = sysvsem_get_constructor;
 	sysvsem_object_handlers.clone_obj = NULL;
+	sysvsem_object_handlers.compare = zend_objects_not_comparable;
 
 	return SUCCESS;
 }

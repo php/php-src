@@ -1113,6 +1113,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_certificate_object_handlers.free_obj = php_openssl_certificate_free_obj;
 	php_openssl_certificate_object_handlers.get_constructor = php_openssl_certificate_get_constructor;
 	php_openssl_certificate_object_handlers.clone_obj = NULL;
+	php_openssl_certificate_object_handlers.compare = zend_objects_not_comparable;
 
 	php_openssl_request_ce = register_class_OpenSSLCertificateSigningRequest();
 	php_openssl_request_ce->create_object = php_openssl_request_create_object;
@@ -1124,6 +1125,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_request_object_handlers.free_obj = php_openssl_request_free_obj;
 	php_openssl_request_object_handlers.get_constructor = php_openssl_request_get_constructor;
 	php_openssl_request_object_handlers.clone_obj = NULL;
+	php_openssl_request_object_handlers.compare = zend_objects_not_comparable;
 
 	php_openssl_pkey_ce = register_class_OpenSSLAsymmetricKey();
 	php_openssl_pkey_ce->create_object = php_openssl_pkey_create_object;
@@ -1135,6 +1137,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_object_handlers.free_obj = php_openssl_pkey_free_obj;
 	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
+	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 	OPENSSL_config(NULL);

@@ -109,6 +109,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
 	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;
+	sysvshm_object_handlers.compare = zend_objects_not_comparable;
 
 	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;

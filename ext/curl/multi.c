@@ -592,4 +592,5 @@ void curl_multi_register_handlers(void) {
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
 	curl_multi_handlers.clone_obj = NULL;
 	curl_multi_handlers.cast_object = curl_cast_object;
+	curl_multi_handlers.compare = zend_objects_not_comparable;
 }

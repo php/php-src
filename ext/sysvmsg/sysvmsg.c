@@ -118,6 +118,7 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	sysvmsg_queue_object_handlers.free_obj = sysvmsg_queue_free_obj;
 	sysvmsg_queue_object_handlers.get_constructor = sysvmsg_queue_get_constructor;
 	sysvmsg_queue_object_handlers.clone_obj = NULL;
+	sysvmsg_queue_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", PHP_MSG_IPC_NOWAIT, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_EAGAIN",	 EAGAIN, 	     CONST_PERSISTENT|CONST_CS);

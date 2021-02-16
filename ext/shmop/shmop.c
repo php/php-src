@@ -118,6 +118,7 @@ PHP_MINIT_FUNCTION(shmop)
 	shmop_object_handlers.free_obj = shmop_free_obj;
 	shmop_object_handlers.get_constructor = shmop_get_constructor;
 	shmop_object_handlers.clone_obj = NULL;
+	shmop_object_handlers.compare = zend_objects_not_comparable;
 
 	return SUCCESS;
 }

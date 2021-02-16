@@ -227,6 +227,7 @@ static void php_gd_object_minit_helper()
 	php_gd_image_object_handlers.clone_obj = NULL;
 	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
 	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
+	php_gd_image_object_handlers.compare = zend_objects_not_comparable;
 	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
 }
 

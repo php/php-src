@@ -455,6 +455,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
+	address_info_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
