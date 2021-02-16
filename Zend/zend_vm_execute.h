@@ -7508,7 +7508,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CON
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
-		zval key_tmp, *val;
+		zval key_tmp;
 
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
@@ -7520,7 +7520,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CON
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 
@@ -19703,7 +19703,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
-		zval key_tmp, *val;
+		zval key_tmp;
 
 		if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
@@ -19715,7 +19715,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -24747,7 +24747,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
-		zval key_tmp, *val;
+		zval key_tmp;
 
 		if ((IS_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
@@ -24759,7 +24759,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -42510,7 +42510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
-		zval key_tmp, *val;
+		zval key_tmp;
 
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
@@ -42522,7 +42522,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 

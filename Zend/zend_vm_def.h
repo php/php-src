@@ -8944,7 +8944,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
-		zval key_tmp, *val;
+		zval key_tmp;
 
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
@@ -8956,7 +8956,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 				FREE_OP1();
