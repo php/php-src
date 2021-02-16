@@ -210,7 +210,7 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	property_classUnionProp_type_list->num_types = 2;
 	property_classUnionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_stdClass, 0, 0);
 	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Iterator, 0, 0);
-	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_PTR(property_classUnionProp_type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
+	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_PTR(property_classUnionProp_type_list, _ZEND_TYPE_LIST_BIT, 0, MAY_BE_NULL);
 	zval property_classUnionProp_default_value;
 	ZVAL_NULL(&property_classUnionProp_default_value);
 	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
