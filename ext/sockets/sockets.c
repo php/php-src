@@ -446,6 +446,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
+	socket_object_handlers.compare = zend_objects_not_comparable;
 
 	zend_class_entry ce_address_info;
 	INIT_CLASS_ENTRY(ce_address_info, "AddressInfo", class_AddressInfo_methods);

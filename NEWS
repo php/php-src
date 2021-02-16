@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #70091 (Phar does not mark UTF-8 filenames in ZIP archives). (cmb)
   . Fixed bug #53467 (Phar cannot compress large archives). (cmb, lserni)
 
+- Socket:
+  . Fixed bug #80723 (Different sockets compare as equal (regression in 8.0)).
+    (Nikita)
+
 - SPL:
   . Fixed bug#80719 (Iterating after failed ArrayObject::setIteratorClass()
     causes Segmentation fault). (Nikita)
