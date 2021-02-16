@@ -16,7 +16,7 @@ class _ZendTestClass implements _ZendTestInterface {
 
     public int $intProp = 123;
     public ?stdClass $classProp = null;
-    //public stdClass|Iterator|null $classUnionProp = null;
+    public stdClass|Iterator|null $classUnionProp = null;
 
     public static function is_object(): int {}
 
