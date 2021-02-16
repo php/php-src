@@ -1067,16 +1067,10 @@ class PropertyInfo
                     $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_PTR(property_{$propertyName}_type_list, _ZEND_TYPE_LIST_BIT, 0, $typeMaskCode);\n";
                     $typeCode = "property_{$propertyName}_type";
                 } else {
-                    $simpleType = $this->type->tryToSimpleType();
-
                     $className = $arginfoType->classTypes[0]->name;
                     $code .= "\tzend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
 
-                    if ($simpleType) {
-                        $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, " . ((int)$this->type->isNullable()) . ", 0)";
-                    } else {
-                        $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
-                    }
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
                 }
             } else {
                 $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
