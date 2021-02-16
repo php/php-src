@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #78680 (mysqlnd's mysql_clear_password does not transmit
     null-terminated password). (Daniel Black)
+  . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
+    MySQL 8.0). (Nikita)
 
 - MySQLi:
   . Fixed bug #74779 (x() and y() truncating floats to integers). (cmb)
