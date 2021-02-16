@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
     (Nikita)
+  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
 
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
