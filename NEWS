@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2021, php 7.4.17
 
 
-25 Feb 2021, php 7.4.16
+04 Mar 2021, php 7.4.16
 
 - Core:
   . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
@@ -40,7 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug #80648 (Fix for bug 79296 should be based on runtime version).
     (cmb, Remi)
 
-21 Jan 2021, PHP 7.4.15
+04 Feb 2021, PHP 7.4.15
 
 - Core:
   . Fixed bug #80523 (bogus parse error on >4GB source code). (Nikita)
