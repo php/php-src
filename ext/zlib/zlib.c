@@ -1350,6 +1350,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
 	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
+	inflate_context_object_handlers.compare = zend_objects_not_comparable;
 
 	zend_class_entry deflate_ce;
 	INIT_CLASS_ENTRY(deflate_ce, "DeflateContext", class_DeflateContext_methods);
@@ -1364,6 +1365,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
 	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;
+	deflate_context_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);

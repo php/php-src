@@ -1200,6 +1200,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.get_constructor = curl_get_constructor;
 	curl_object_handlers.clone_obj = curl_clone_obj;
 	curl_object_handlers.cast_object = curl_cast_object;
+	curl_object_handlers.compare = zend_objects_not_comparable;
 
 	curl_multi_register_class(class_CurlMultiHandle_methods);
 	curl_share_register_class(class_CurlShareHandle_methods);

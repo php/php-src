@@ -176,4 +176,5 @@ void curl_share_register_class(const zend_function_entry *method_entries) {
 	curl_share_handlers.free_obj = curl_share_free_obj;
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
+	curl_share_handlers.compare = zend_objects_not_comparable;
 }
