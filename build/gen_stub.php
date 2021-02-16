@@ -1047,16 +1047,30 @@ class PropertyInfo
         if ($this->type) {
             $arginfoType = $this->type->toArginfoType();
             if ($arginfoType->hasClassType()) {
-                $simpleType = $this->type->tryToSimpleType();
+                if (count($arginfoType->classTypes) >= 2) {
+                    foreach ($arginfoType->classTypes as $classType) {
+                        $className = $classType->name;
+                        $code .= "\tzend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\") - 1, 1);\n";
+                    }
 
-                $className = $arginfoType->classTypes[0]->name;
-                $code .= "	zend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
-                if ($simpleType) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, " .  ((int) $this->type->isNullable()) . ", 0)";
-                } elseif (count($arginfoType->classTypes) === 1) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
+                    $classTypeCount = count($arginfoType->classTypes);
+                    $code .= "\tzend_type_list *property_{$propertyName}_type_list = malloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
+                    $code .= "\tproperty_{$propertyName}_type_list->num_types = $classTypeCount;\n";
+
+                    foreach ($arginfoType->classTypes as $k => $classType) {
+                        $className = $classType->name;
+                        $code .= "\tproperty_{$propertyName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, 0);\n";
+                    }
+
+                    $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
+
+                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_PTR(property_{$propertyName}_type_list, _ZEND_TYPE_LIST_BIT, 0, $typeMaskCode);\n";
+                    $typeCode = "property_{$propertyName}_type";
                 } else {
-                    throw new Exception("Property $this->name has an unsupported union type");
+                    $className = $arginfoType->classTypes[0]->name;
+                    $code .= "\tzend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
+
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
                 }
             } else {
                 $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";

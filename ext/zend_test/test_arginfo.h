@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cfe2668e6d45a45dafb313cc8b053e2c81ef053a */
+ * Stub hash: cf8958513064fb7257203b3304c8dc67c8e008b9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -201,8 +201,21 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zval property_classProp_default_value;
 	ZVAL_NULL(&property_classProp_default_value);
 	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
-	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 1, 0));
+	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 0, MAY_BE_NULL));
 	zend_string_release(property_classProp_name);
+
+	zend_string *property_classUnionProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
+	zend_string *property_classUnionProp_class_Iterator = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
+	zend_type_list *property_classUnionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_classUnionProp_type_list->num_types = 2;
+	property_classUnionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_stdClass, 0, 0);
+	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Iterator, 0, 0);
+	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_PTR(property_classUnionProp_type_list, _ZEND_TYPE_LIST_BIT, 0, MAY_BE_NULL);
+	zval property_classUnionProp_default_value;
+	ZVAL_NULL(&property_classUnionProp_default_value);
+	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
+	zend_string_release(property_classUnionProp_name);
 
 	return class_entry;
 }
