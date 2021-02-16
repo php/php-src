@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 7.4.16
+18 Feb 2021, PHP 7.4.16RC1
 
 - Core:
   . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
