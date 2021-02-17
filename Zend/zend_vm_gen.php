@@ -2338,6 +2338,62 @@ function parse_spec_rules($def, $lineno, $str) {
     return $ret;
 }
 
+function gen_vm_opcodes_header(
+    array $opcodes, int $max_opcode, int $max_opcode_len, array $vm_op_flags
+): string {
+    $str = HEADER_TEXT;
+    $str .= "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n";
+    $str .= "#define ZEND_VM_SPEC\t\t" . ZEND_VM_SPEC . "\n";
+    $str .= "#define ZEND_VM_LINES\t\t" . ZEND_VM_LINES . "\n";
+    $str .= "#define ZEND_VM_KIND_CALL\t" . ZEND_VM_KIND_CALL . "\n";
+    $str .= "#define ZEND_VM_KIND_SWITCH\t" . ZEND_VM_KIND_SWITCH . "\n";
+    $str .= "#define ZEND_VM_KIND_GOTO\t" . ZEND_VM_KIND_GOTO . "\n";
+    $str .= "#define ZEND_VM_KIND_HYBRID\t" . ZEND_VM_KIND_HYBRID . "\n";
+    if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID") {
+        $str .= "/* HYBRID requires support for computed GOTO and global register variables*/\n";
+        $str .= "#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))\n";
+        $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_HYBRID\n";
+        $str .= "#else\n";
+        $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_CALL\n";
+        $str .= "#endif\n";
+    } else {
+        $str .= "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_KIND] . "\n";
+    }
+    $str .= "\n";
+    $str .= "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n";
+    $str .= "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n";
+    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n";
+    $str .= "# endif\n";
+    $str .= "#endif\n";
+    $str .= "\n";
+    foreach ($vm_op_flags as $name => $val) {
+        $str .= sprintf("#define %-24s 0x%08x\n", $name, $val);
+    }
+    $str .= "#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)\n";
+    $str .= "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n";
+    $str .= "\n";
+    $str .= "BEGIN_EXTERN_C()\n\n";
+    $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n";
+    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n";
+    $str .= "END_EXTERN_C()\n\n";
+
+    $code_len = strlen((string) $max_opcode);
+    foreach ($opcodes as $code => $dsc) {
+        $code = str_pad((string)$code, $code_len, " ", STR_PAD_LEFT);
+        $op = str_pad($dsc["op"], $max_opcode_len);
+        if ($code <= $max_opcode) {
+            $str .= "#define $op $code\n";
+        }
+    }
+
+    $code = str_pad((string)$max_opcode, $code_len, " ", STR_PAD_LEFT);
+    $op = str_pad("ZEND_VM_LAST_OPCODE", $max_opcode_len);
+    $str .= "\n#define $op $code\n";
+
+    $str .= "\n#endif\n";
+    return $str;
+}
+
 function gen_vm($def, $skel) {
     global $definition_file, $skeleton_file, $executor_file,
         $op_types, $list, $opcodes, $helpers, $params, $opnames,
@@ -2576,60 +2632,8 @@ function gen_vm($def, $skel) {
     }
 
     // Generate opcode #defines (zend_vm_opcodes.h)
-    $code_len = strlen((string)$max_opcode);
-    $f = fopen(__DIR__ . "/zend_vm_opcodes.h", "w+") or die("ERROR: Cannot create zend_vm_opcodes.h\n");
-
-    // Insert header
-    out($f, HEADER_TEXT);
-    fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
-    fputs($f, "#define ZEND_VM_SPEC\t\t" . ZEND_VM_SPEC . "\n");
-    fputs($f, "#define ZEND_VM_LINES\t\t" . ZEND_VM_LINES . "\n");
-    fputs($f, "#define ZEND_VM_KIND_CALL\t" . ZEND_VM_KIND_CALL . "\n");
-    fputs($f, "#define ZEND_VM_KIND_SWITCH\t" . ZEND_VM_KIND_SWITCH . "\n");
-    fputs($f, "#define ZEND_VM_KIND_GOTO\t" . ZEND_VM_KIND_GOTO . "\n");
-    fputs($f, "#define ZEND_VM_KIND_HYBRID\t" . ZEND_VM_KIND_HYBRID . "\n");
-    if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID") {
-        fputs($f, "/* HYBRID requires support for computed GOTO and global register variables*/\n");
-        fputs($f, "#if (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))\n");
-        fputs($f, "# define ZEND_VM_KIND\t\tZEND_VM_KIND_HYBRID\n");
-        fputs($f, "#else\n");
-        fputs($f, "# define ZEND_VM_KIND\t\tZEND_VM_KIND_CALL\n");
-        fputs($f, "#endif\n");
-    } else {
-        fputs($f, "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_KIND] . "\n");
-    }
-    fputs($f, "\n");
-    fputs($f, "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n");
-    fputs($f, "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n");
-    fputs($f, "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n");
-    fputs($f, "# endif\n");
-    fputs($f, "#endif\n");
-    fputs($f, "\n");
-    foreach ($vm_op_flags as $name => $val) {
-        fprintf($f, "#define %-24s 0x%08x\n", $name, $val);
-    }
-    fputs($f, "#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)\n");
-    fputs($f, "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n");
-    fputs($f, "\n");
-    fputs($f, "BEGIN_EXTERN_C()\n\n");
-    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n");
-    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n");
-    fputs($f, "END_EXTERN_C()\n\n");
-
-    foreach ($opcodes as $code => $dsc) {
-        $code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
-        $op = str_pad($dsc["op"],$max_opcode_len);
-        if ($code <= $max_opcode) {
-            fputs($f,"#define $op $code\n");
-        }
-    }
-
-    $code = str_pad((string)$max_opcode,$code_len," ",STR_PAD_LEFT);
-    $op = str_pad("ZEND_VM_LAST_OPCODE",$max_opcode_len);
-    fputs($f,"\n#define $op $code\n");
-
-    fputs($f, "\n#endif\n");
-    fclose($f);
+    $str = gen_vm_opcodes_header($opcodes, $max_opcode, $max_opcode_len, $vm_op_flags);
+    write_file_if_changed(__DIR__ . "/zend_vm_opcodes.h", $str);
     echo "zend_vm_opcodes.h generated successfully.\n";
 
     // zend_vm_opcodes.c
@@ -2980,6 +2984,18 @@ function gen_vm($def, $skel) {
 
     fclose($f);
     echo "zend_vm_execute.h generated successfully.\n";
+}
+
+function write_file_if_changed(string $filename, string $contents) {
+    if (file_exists($filename)) {
+        $orig_contents = file_get_contents($filename);
+        if ($orig_contents === $contents) {
+            // Unchanged, no need to write.
+            return;
+        }
+    }
+
+    file_put_contents($filename, $contents);
 }
 
 function usage() {
