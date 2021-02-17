@@ -37,6 +37,28 @@ PHP 8.1 UPGRADE NOTES
         //             is deprecated
 
     RFC: https://wiki.php.net/rfc/deprecate_null_to_scalar_internal_arg
+  . When a method using static variables is inherited, the inherited method
+    will now initialize the static variables to their original values, rather
+    than the values at the time of inheritance:
+
+        class A {
+            public function counter() {
+                static $counter = 0;
+                $counter++;
+                return $counter;
+            }
+        }
+
+        var_dump((new A)->counter()); // int(1)
+
+        eval('class B extends A {}'); // eval() to prevent early binding.
+
+        var_dump((new B)->counter()); // int(1), previously int(2)
+        var_dump((new A)->counter()); // int(2)
+        var_dump((new B)->counter()); // int(2), previously int(3)
+
+    Previously the behavior would be different depending on whether A::counter()
+    was called before class B was declared, or after it was declared.
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects

@@ -2323,27 +2323,6 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 	return NULL;
 }
 
-static bool is_array_cacheable(zval *zv)
-{
-	zval *p;
-
-	ZEND_HASH_FOREACH_VAL(Z_ARR_P(zv), p) {
-		if (Z_REFCOUNTED_P(p)) {
-			if (Z_TYPE_P(p) == IS_ARRAY) {
-				if (!is_array_cacheable(p)) {
-					/* Can't cache */
-					return 0;
-				}
-			} else if (Z_TYPE_P(p) == IS_OBJECT || Z_TYPE_P(p) == IS_RESOURCE || Z_TYPE_P(p) == IS_REFERENCE) {
-				/* Can't cache */
-				return 0;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	return 1;
-}
-
 static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies)
 {
 	zend_persistent_script dummy;
@@ -2367,44 +2346,6 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 				zend_hash_del(dependencies, traits_and_interfaces[i]->name);
 			}
 		}
-	}
-
-	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-		zend_op_array *op_array;
-		zval *zv;
-
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-			if (op_array->type == ZEND_USER_FUNCTION
-			 && op_array->static_variables
-			 && !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (UNEXPECTED(GC_REFCOUNT(op_array->static_variables) > 1)) {
-					GC_DELREF(op_array->static_variables);
-					op_array->static_variables = zend_array_dup(op_array->static_variables);
-				}
-				ZEND_HASH_FOREACH_VAL(op_array->static_variables, zv) {
-					if (Z_ISREF_P(zv)) {
-						zend_reference *ref = Z_REF_P(zv);
-
-						ZVAL_COPY_VALUE(zv, &ref->val);
-						if (GC_DELREF(ref) == 0) {
-							efree_size(ref, sizeof(zend_reference));
-						}
-					}
-					if (Z_REFCOUNTED_P(zv)) {
-						if (Z_TYPE_P(zv) == IS_ARRAY) {
-							if (!is_array_cacheable(zv)) {
-								/* Can't cache */
-								return NULL;
-							}
-							SEPARATE_ARRAY(zv);
-						} else if (Z_TYPE_P(zv) == IS_OBJECT || Z_TYPE_P(zv) == IS_RESOURCE) {
-							/* Can't cache */
-							return NULL;
-						}
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-		} ZEND_HASH_FOREACH_END();
 	}
 
 	SHM_UNPROTECT();
@@ -3691,11 +3632,6 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 
 //???		efree(op_array->refcount);
 		op_array->refcount = NULL;
-
-		if (op_array->static_variables &&
-		    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(op_array->static_variables);
-		}
 
 		zend_hash_add_ptr(preload_scripts, script->script.filename, script);
 	}

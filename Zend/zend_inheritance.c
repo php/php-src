@@ -89,28 +89,10 @@ static zend_function *zend_duplicate_internal_function(zend_function *func, zend
 
 static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ */
 {
-	zend_function *new_function;
-
-	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-	memcpy(new_function, func, sizeof(zend_op_array));
-
-	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
-		ZEND_ASSERT(new_function->op_array.fn_flags & ZEND_ACC_PRELOADED);
-		ZEND_MAP_PTR_NEW(new_function->op_array.static_variables_ptr);
-	} else {
-		ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
-	}
-
-	HashTable *static_properties_ptr = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
-	if (static_properties_ptr) {
-		/* See: Zend/tests/method_static_var.phpt */
-		ZEND_MAP_PTR_SET(new_function->op_array.static_variables_ptr, static_properties_ptr);
-		GC_TRY_ADDREF(static_properties_ptr);
-	} else {
-		GC_TRY_ADDREF(new_function->op_array.static_variables);
-	}
-
-	return new_function;
+	zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+	memcpy(new_op_array, func, sizeof(zend_op_array));
+	zend_init_static_variables_map_ptr(new_op_array);
+	return (zend_function *) new_op_array;
 }
 /* }}} */
 
@@ -2504,12 +2486,17 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		for (; p != end; p++) {
 			zend_op_array *op_array, *new_op_array;
 			void ***run_time_cache_ptr;
+			size_t alloc_size;
 
 			op_array = Z_PTR(p->val);
 			ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 			ZEND_ASSERT(op_array->scope == pce);
 			ZEND_ASSERT(op_array->prototype == NULL);
-			new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + sizeof(void*));
+			alloc_size = sizeof(zend_op_array) + sizeof(void *);
+			if (op_array->static_variables) {
+				alloc_size += sizeof(HashTable *);
+			}
+			new_op_array = zend_arena_alloc(&CG(arena), alloc_size);
 			Z_PTR(p->val) = new_op_array;
 			memcpy(new_op_array, op_array, sizeof(zend_op_array));
 			run_time_cache_ptr = (void***)(new_op_array + 1);
@@ -2517,7 +2504,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 			new_op_array->scope = ce;
 			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, run_time_cache_ptr);
-			ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, &new_op_array->static_variables);
+			if (op_array->static_variables) {
+				HashTable **static_variables_ptr = (HashTable **) (run_time_cache_ptr + 1);
+				*static_variables_ptr = NULL;
+				ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, static_variables_ptr);
+			}
 
 			zend_update_inherited_handler(constructor);
 			zend_update_inherited_handler(destructor);

@@ -219,7 +219,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	*op_array = persistent_script->script.main_op_array;
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 
 	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
 		zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);

@@ -1796,7 +1796,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 		array_init(return_value);
 		ht = ZEND_MAP_PTR_GET(fptr->op_array.static_variables_ptr);
 		if (!ht) {
-			ZEND_ASSERT(fptr->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
 			ht = zend_array_dup(fptr->op_array.static_variables);
 			ZEND_MAP_PTR_SET(fptr->op_array.static_variables_ptr, ht);
 		}

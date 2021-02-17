@@ -1234,12 +1234,16 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+		if (op_array->static_variables) {
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
+				zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
+			ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+		}
 		if (op_array != &script->script.main_op_array) {
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
 			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);

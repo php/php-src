@@ -77,7 +77,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->last_live_range = 0;
 
 	op_array->static_variables = NULL;
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
@@ -515,12 +515,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
 	uint32_t i;
 
-	if (op_array->static_variables) {
+	if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 		HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-		if (ht && !(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-			if (GC_DELREF(ht) == 0) {
-				zend_array_destroy(ht);
-			}
+		if (ht) {
+			zend_array_destroy(ht);
 		}
 	}
 
@@ -598,6 +596,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			zend_type_release(arg_info[i].type, /* persistent */ 0);
 		}
 		efree(arg_info);
+	}
+	if (op_array->static_variables) {
+		zend_array_destroy(op_array->static_variables);
 	}
 }
 

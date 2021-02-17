@@ -18,8 +18,8 @@ Bar::test();
 --EXPECT--
 int(1)
 int(2)
+int(1)
 int(2)
-int(3)
 
 int(1)
 int(1)
