@@ -517,11 +517,6 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 
 	zend_create_closure(&result, &closure->func,
 		closure->func.common.scope, closure->called_scope, &closure->this_ptr);
-	if (closure->static_variables) {
-		zend_closure *new_closure = (zend_closure *) Z_OBJ(result);
-		zend_array_destroy(new_closure->static_variables);
-		new_closure->static_variables = zend_array_dup(closure->static_variables);
-	}
 	return Z_OBJ(result);
 }
 /* }}} */
@@ -683,9 +678,12 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
 		if (closure->func.op_array.static_variables) {
+			HashTable *static_variables =
+				ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
 				&closure->static_variables);
-			closure->static_variables = zend_array_dup(closure->func.op_array.static_variables);
+			closure->static_variables = zend_array_dup(
+				static_variables ? static_variables : closure->func.op_array.static_variables);
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
