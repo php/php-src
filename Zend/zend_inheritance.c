@@ -2502,7 +2502,9 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 			new_op_array->scope = ce;
 			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, run_time_cache_ptr);
-			ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, static_variables_ptr);
+			if (new_op_array->static_variables) {
+				ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, static_variables_ptr);
+			}
 
 			zend_update_inherited_handler(constructor);
 			zend_update_inherited_handler(destructor);
