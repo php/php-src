@@ -8662,6 +8662,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 		ht = zend_array_dup(EX(func)->op_array.static_variables);
 		ZEND_MAP_PTR_SET(EX(func)->op_array.static_variables_ptr, ht);
 	}
+	ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)));
 
