@@ -3415,6 +3415,7 @@ function show_result(
                 case 'FAIL':
                 case 'BORK':
                 case 'LEAK':
+                case 'LEAK&FAIL':
                     // Light Red
                     $color = "\e[1;31m{$result}\e[0m"; break;
                 default: // Yellow
