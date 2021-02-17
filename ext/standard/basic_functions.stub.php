@@ -1,6 +1,14 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+final class __PHP_Incomplete_Class
+{
+}
+
+class AssertionError extends Error
+{
+}
 
 /* main/main.c */
 

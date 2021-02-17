@@ -132,11 +132,6 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
 void dom_child_node_remove(dom_object *context);
 
-#define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
-INIT_CLASS_ENTRY(ce, name, funcs); \
-ce.create_object = dom_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
-
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \

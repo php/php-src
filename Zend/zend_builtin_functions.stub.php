@@ -2,6 +2,10 @@
 
 /** @generate-class-entries */
 
+class stdClass
+{
+}
+
 function zend_version(): string {}
 
 function func_num_args(): int {}

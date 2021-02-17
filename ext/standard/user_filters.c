@@ -58,7 +58,7 @@ PHP_METHOD(php_user_filter, onClose)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static zend_class_entry user_filter_class_entry;
+static zend_class_entry *user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
@@ -71,14 +71,8 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 
 PHP_MINIT_FUNCTION(user_filters)
 {
-	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
-	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", class_php_user_filter_methods);
-	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry)) == NULL) {
-		return FAILURE;
-	}
-	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC);
+	user_filter_class_entry = register_class_php_user_filter();
 
 	/* init the filter resource; it has no dtor, as streams will always clean it up
 	 * at the correct time */

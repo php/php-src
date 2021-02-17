@@ -112,10 +112,8 @@ PHP_RINIT_FUNCTION(dir)
 PHP_MINIT_FUNCTION(dir)
 {
 	static char dirsep_str[2], pathsep_str[2];
-	zend_class_entry dir_class_entry;
 
-	INIT_CLASS_ENTRY(dir_class_entry, "Directory", class_Directory_methods);
-	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
+	dir_class_entry_ptr = register_class_Directory();
 
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
