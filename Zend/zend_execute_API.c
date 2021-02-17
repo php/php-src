@@ -285,7 +285,7 @@ void shutdown_executor(void) /* {{{ */
 			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
 				break;
 			}
-			if (op_array->static_variables) {
+			if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 				if (ht) {
 					zend_array_release(ht);
@@ -308,7 +308,7 @@ void shutdown_executor(void) /* {{{ */
 				zend_op_array *op_array;
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
-						if (op_array->static_variables) {
+						if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 							if (ht) {
 								zend_array_release(ht);

@@ -686,8 +686,6 @@ static void zend_persist_op_array(zval *zv)
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		}
-	} else {
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 	}
 }
 
@@ -757,8 +755,8 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 	} else {
 		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 	}
 }
 
@@ -1277,9 +1275,10 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 	if (!script->corrupted) {
 		ZEND_MAP_PTR_INIT(script->script.main_op_array.run_time_cache, NULL);
+		if (script->script.main_op_array.static_variables) {
+			ZEND_MAP_PTR_NEW(script->script.main_op_array.static_variables_ptr);
+		}
 	}
-	ZEND_MAP_PTR_INIT(script->script.main_op_array.static_variables_ptr,
-		&script->script.main_op_array.static_variables);
 	zend_persist_warnings(script);
 
 	if (for_shm) {

@@ -19,11 +19,7 @@ var_dump($d->foo(24));
 var_dump($c->foo());
 ?>
 --EXPECT--
-array(1) {
-  [0]=>
-  object(stdClass)#2 (0) {
-  }
-}
+NULL
 array(1) {
   [0]=>
   int(24)

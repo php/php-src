@@ -1029,28 +1029,32 @@ static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 }
 /* }}} */
 
+void zend_init_static_variables_map_ptr(zend_op_array *op_array)
+{
+	if (op_array->static_variables) {
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
+			zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
+		ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+	}
+}
+
 ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 {
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
-
 		if (op_array->refcount) {
 			(*op_array->refcount)++;
-		}
-		if (op_array->static_variables
-			&& !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(op_array->static_variables);
 		}
 
 		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_PRELOADED);
 			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void *)));
 			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 		}
+
+		zend_init_static_variables_map_ptr(op_array);
 	}
 
 	if (function->common.function_name) {
@@ -7021,9 +7025,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-		ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 	} else {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void *)));
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 	}
 
@@ -7112,6 +7115,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 	zend_do_extended_stmt();
 	zend_emit_final_return(0);
 
+	zend_init_static_variables_map_ptr(op_array);
 	pass_two(CG(active_op_array));
 	zend_oparray_context_end(&orig_oparray_context);
 
