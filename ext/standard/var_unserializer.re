@@ -342,12 +342,9 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 }
 
 static inline int unserialize_allowed_class(
-		zend_string *class_name, php_unserialize_data_t *var_hashx)
+		zend_string *lcname, php_unserialize_data_t *var_hashx)
 {
 	HashTable *classes = (*var_hashx)->allowed_classes;
-	zend_string *lcname;
-	int res;
-	ALLOCA_FLAG(use_heap)
 
 	if(classes == NULL) {
 		return 1;
@@ -356,11 +353,7 @@ static inline int unserialize_allowed_class(
 		return 0;
 	}
 
-	ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(class_name), use_heap);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-	res = zend_hash_exists(classes, lcname);
-	ZSTR_ALLOCA_FREE(lcname, use_heap);
-	return res;
+	return zend_hash_exists(classes, lcname);
 }
 
 #define YYFILL(n) do { } while (0)
@@ -1145,22 +1138,55 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
-	if (!zend_is_valid_class_name(class_name)) {
-		zend_string_release_ex(class_name, 0);
+	if (len == 0) {
+		/* empty class names are not allowed */
 		return 0;
 	}
 
+	if (str[0] == '\000') {
+		/* runtime definition keys are not allowed */
+		return 0;
+	}
+
+	if (str[0] == '\\') {
+		/* class name can't start from namespace separator */
+		return 0;
+	}
+
+	class_name = zend_string_init(str, len, 0);
+
 	do {
-		if(!unserialize_allowed_class(class_name, var_hash)) {
+		zend_string *lc_name = zend_string_tolower(class_name);
+
+		if(!unserialize_allowed_class(lc_name, var_hash)) {
+			zend_string_release_ex(lc_name, 0);
+			if (!zend_is_valid_class_name(class_name)) {
+				zend_string_release_ex(class_name, 0);
+				return 0;
+			}
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
 
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		if (ce
+		 && (ce->ce_flags & ZEND_ACC_LINKED)
+		 && !(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+			zend_string_release_ex(lc_name, 0);
+			break;
+		}
+
+		if (!zend_is_valid_class_name(class_name)) {
+			zend_string_release_ex(lc_name, 0);
+			zend_string_release_ex(class_name, 0);
+			return 0;
+		}
+
 		/* Try to find class directly */
 		BG(serialize_lock)++;
-		ce = zend_lookup_class(class_name);
+		ce = zend_lookup_class_ex(class_name, lc_name, 0);
+		zend_string_release_ex(lc_name, 0);
 		if (ce) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
