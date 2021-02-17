@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed inclusion order for phpize builds on Windows. (cmb)
   . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
+  . Fixed bug #75474 (function scope static variables are not bound to a unique
+    function). (Nikita)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
