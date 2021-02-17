@@ -3878,10 +3878,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
 #else
+							res_use_info = -1;
 							if (opline->result_type == IS_CV) {
-								res_use_info = RES_USE_INFO();
-							} else {
-								res_use_info = MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
 							}
 #endif
 							res_info = RES_INFO();
@@ -3973,10 +3978,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
 #else
+							res_use_info = -1;
 							if (opline->result_type == IS_CV) {
-								res_use_info = RES_USE_INFO();
-							} else {
-								res_use_info = MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
 							}
 #endif
 						}
@@ -4050,10 +4060,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
 #else
+							res_use_info = -1;
 							if (opline->result_type == IS_CV) {
-								res_use_info = RES_USE_INFO();
-							} else {
-								res_use_info = MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
 							}
 #endif
 						}

@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . Fixed bug #80682 (opcache doesn't honour pcre.jit option). (Remi)
   . Fixed bug #80742 (Opcache JIT makes some boolean logic unexpectedly be
     true). (Dmitry)
+  . Fixed bug #80745 (JIT produces Assert failure and UNKNOWN:0 var_dumps in
+    code involving bitshifts). (Dmitry)
 
 - OpenSSL:
   . Fixed bug #80747 (Providing RSA key size < 512 generates key that crash

@@ -2303,7 +2303,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (opline->result_type != IS_UNUSED) {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 							res_info = RES_INFO();
 							res_addr = RES_REG_ADDR();
 						} else {
@@ -2354,7 +2364,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								goto jit_failure;
 							}
 						} else {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 						}
 						if (!zend_jit_long_math(&dasm_state, opline,
 								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
@@ -2398,7 +2418,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								goto jit_failure;
 							}
 						} else {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 						}
 						res_info = RES_INFO();
 						if (opline->opcode == ZEND_ADD &&
