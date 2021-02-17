@@ -58,7 +58,7 @@ PHP_METHOD(php_user_filter, onClose)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static zend_class_entry user_filter_class_entry;
+static zend_class_entry *user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
@@ -72,7 +72,7 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 PHP_MINIT_FUNCTION(user_filters)
 {
 	/* init the filter class ancestor */
-	zend_class_entry *php_user_filter = register_class_php_user_filter();
+	user_filter_class_entry = register_class_php_user_filter();
 
 	/* init the filter resource; it has no dtor, as streams will always clean it up
 	 * at the correct time */

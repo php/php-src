@@ -17,7 +17,6 @@
 /* {{{ includes */
 #include "php.h"
 #include "php_assert.h"
-#include "assert_arginfo.h"
 #include "php_ini.h"
 #include "zend_exceptions.h"
 /* }}} */
@@ -32,8 +31,6 @@ ZEND_BEGIN_MODULE_GLOBALS(assert)
 ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
-
-static zend_class_entry *assertion_error_ce;
 
 #define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
@@ -99,8 +96,6 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
-
-	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	return SUCCESS;
 }

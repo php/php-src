@@ -16,8 +16,6 @@
 
 #include "php.h"
 #include "basic_functions.h"
-#include "basic_functions_arginfo.h"
-#include "incomplete_class_arginfo.h"
 #include "php_incomplete_class.h"
 
 #define INCOMPLETE_CLASS_MSG \
@@ -110,7 +108,7 @@ static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 	return object;
 }
 
-PHPAPI void php_register_incomplete_class(void)
+PHPAPI void php_register_incomplete_class_handlers(void)
 {
 	memcpy(&php_incomplete_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_incomplete_object_handlers.read_property = incomplete_class_get_property;
@@ -120,7 +118,6 @@ PHPAPI void php_register_incomplete_class(void)
 	php_incomplete_object_handlers.get_property_ptr_ptr = incomplete_class_get_property_ptr_ptr;
     php_incomplete_object_handlers.get_method = incomplete_class_get_method;
 
-	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_ce_incomplete_class->create_object = php_create_incomplete_object;
 }
 /* }}} */

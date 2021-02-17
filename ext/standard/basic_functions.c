@@ -16,6 +16,7 @@
  */
 
 #include "php.h"
+#include "php_assert.h"
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
@@ -283,7 +284,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 #endif
 
-	php_register_incomplete_class();
+	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
+	php_register_incomplete_class_handlers();
+
+	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);

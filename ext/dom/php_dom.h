@@ -141,7 +141,7 @@ void dom_child_node_remove(dom_object *context);
 }
 
 #define DOM_NO_ARGS() \
-	if (zend_parse_parameters_none() == failure) { \
+	if (zend_parse_parameters_none() == FAILURE) { \
 		RETURN_THROWS(); \
 	}
 
