@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 /**
  * @return resource|int|false
@@ -64,8 +64,26 @@ function zip_entry_filesize($zip_entry): int|false {}
  */
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
-class ZipArchive
+class ZipArchive implements Countable
 {
+    /** @var int|null */
+    public $lastId;
+
+    /** @var int|null */
+    public $status;
+
+    /** @var int|null */
+    public $statusSys;
+
+    /** @var int|null */
+    public $numFiles;
+
+    /** @var string|null */
+    public $filename;
+
+    /** @var string|null */
+    public $comment;
+
     /** @var string|null */
     public $name;
 

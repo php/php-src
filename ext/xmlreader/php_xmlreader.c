@@ -1147,8 +1147,6 @@ PHP_METHOD(XMLReader, expand)
 PHP_MINIT_FUNCTION(xmlreader)
 {
 
-	zend_class_entry ce;
-
 	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
 	xmlreader_object_handlers.dtor_obj = zend_objects_destroy_object;
@@ -1159,9 +1157,8 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.get_method = xmlreader_get_method;
 	xmlreader_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "XMLReader", class_XMLReader_methods);
-	ce.create_object = xmlreader_objects_new;
-	xmlreader_class_entry = zend_register_internal_class(&ce);
+	xmlreader_class_entry = register_class_XMLReader();
+	xmlreader_class_entry->create_object = xmlreader_objects_new;
 
 	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1), sizeof(zend_internal_function));
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;

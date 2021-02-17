@@ -32,10 +32,7 @@
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
-	zend_class_entry class_entry;
-
-	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
-	zend_standard_class_def = zend_register_internal_class(&class_entry);
+	zend_standard_class_def = register_class_stdClass();
 
 	zend_register_default_classes();
 

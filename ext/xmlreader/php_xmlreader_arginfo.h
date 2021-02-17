@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0188a53f262d3f8e19b5b64d163bdee84f1be6b8 */
+ * Stub hash: 44e03e4884bd11843bae3d286a75ef1e6a677c16 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_close, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -138,3 +138,13 @@ static const zend_function_entry class_XMLReader_methods[] = {
 	ZEND_ME(XMLReader, expand, arginfo_class_XMLReader_expand, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_XMLReader(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "XMLReader", class_XMLReader_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

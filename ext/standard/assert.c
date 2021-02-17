@@ -17,6 +17,7 @@
 /* {{{ includes */
 #include "php.h"
 #include "php_assert.h"
+#include "assert_arginfo.h"
 #include "php_ini.h"
 #include "zend_exceptions.h"
 /* }}} */
@@ -89,8 +90,6 @@ static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{
 
 PHP_MINIT_FUNCTION(assert) /* {{{ */
 {
-	zend_class_entry ce;
-
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
@@ -101,8 +100,7 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
+	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	return SUCCESS;
 }

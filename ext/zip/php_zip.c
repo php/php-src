@@ -831,17 +831,12 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 {
 	zip_prop_handler hnd;
 	zend_string *str;
-	zval tmp;
 
 	hnd.read_const_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.type = rettype;
 	str = zend_string_init_interned(name, strlen(name), 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(zip_prop_handler));
-
-	/* Register for reflection */
-	ZVAL_NULL(&tmp);
-	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release_ex(str, 1);
 }
 /* }}} */
@@ -3026,8 +3021,6 @@ static void php_zip_free_prop_handler(zval *el) /* {{{ */ {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(zip)
 {
-	zend_class_entry ce;
-
 	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
@@ -3039,9 +3032,8 @@ static PHP_MINIT_FUNCTION(zip)
 	zip_object_handlers.read_property	= php_zip_read_property;
 	zip_object_handlers.has_property	= php_zip_has_property;
 
-	INIT_CLASS_ENTRY(ce, "ZipArchive", class_ZipArchive_methods);
-	ce.create_object = php_zip_object_new;
-	zip_class_entry = zend_register_internal_class(&ce);
+	zip_class_entry = register_class_ZipArchive(zend_ce_countable);
+	zip_class_entry->create_object = php_zip_object_new;
 
 	zend_hash_init(&zip_prop_handlers, 0, NULL, php_zip_free_prop_handler, 1);
 	php_zip_register_prop_handler(&zip_prop_handlers, "lastId",    php_zip_last_id, NULL, IS_LONG);
@@ -3050,7 +3042,6 @@ static PHP_MINIT_FUNCTION(zip)
 	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, IS_LONG);
 	php_zip_register_prop_handler(&zip_prop_handlers, "filename",  NULL, php_zipobj_get_filename, IS_STRING);
 	php_zip_register_prop_handler(&zip_prop_handlers, "comment",   NULL, php_zipobj_get_zip_comment, IS_STRING);
-	zend_class_implements(zip_class_entry, 1, zend_ce_countable);
 
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
