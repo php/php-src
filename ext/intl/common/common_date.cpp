@@ -173,6 +173,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		return ZEND_NAN;
 	}
 
+try_again:
 	switch (Z_TYPE_P(z)) {
 	case IS_STRING:
 		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
@@ -225,6 +226,9 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 			efree(message);
 		}
 		break;
+	case IS_REFERENCE:
+		z = Z_REFVAL_P(z);
+		goto try_again;
 	default:
 		spprintf(&message, 0, "%s: invalid PHP type for date", func);
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,

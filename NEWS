@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.3
+?? ??? 2021, PHP 8.0.4
+
+- Intl:
+  . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
+    (cmb)
+
+18 Feb 2021, PHP 8.0.3
 
 - Core:
   . Fixed #80706 (mail(): Headers after Bcc headers may be ignored). (cmb)
