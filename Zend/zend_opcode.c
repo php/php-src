@@ -518,7 +518,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 		HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 		if (ht) {
-			zend_array_release(ht);
+			zend_array_destroy(ht);
 		}
 	}
 
