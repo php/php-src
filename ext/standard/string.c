@@ -2177,7 +2177,7 @@ PHP_FUNCTION(substr)
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
-		if ((size_t)-f > ZSTR_LEN(str)) {
+		if (-(size_t)f > ZSTR_LEN(str)) {
 			f = 0;
 		} else {
 			f = (zend_long)ZSTR_LEN(str) + f;
@@ -2191,7 +2191,7 @@ PHP_FUNCTION(substr)
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
-			if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
+			if (-(size_t)l > ZSTR_LEN(str) - (size_t)f) {
 				l = 0;
 			} else {
 				l = (zend_long)ZSTR_LEN(str) - f + l;
