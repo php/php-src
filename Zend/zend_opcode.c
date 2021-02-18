@@ -598,7 +598,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(arg_info);
 	}
 	if (op_array->static_variables) {
-		zend_array_release(op_array->static_variables);
+		zend_array_destroy(op_array->static_variables);
 	}
 }
 
