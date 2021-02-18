@@ -2,6 +2,8 @@
 
 /** @generate-function-entries */
 
+namespace {
+
 class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
 {
     public function __construct(array|object $array = [], int $flags = 0, string $iteratorClass = ArrayIterator::class) {}
@@ -246,3 +248,41 @@ class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
     /** @return RecursiveArrayIterator|null */
     public function getChildren() {}
 }
+
+} // namespace
+
+namespace Spl {
+
+final class ForwardArrayIterator
+    implements \Countable, \Iterator
+{
+    public function __construct(array $array) {}
+
+    public function count(): int {}
+    public function rewind(): void {}
+    public function valid(): bool {}
+    public function key(): int|string {}
+
+    /** @return mixed */
+    public function current() {}
+
+    public function next(): void {}
+}
+
+final class ReverseArrayIterator
+    implements \Countable, \Iterator
+{
+    public function __construct(array $array) {}
+
+    public function count(): int {}
+    public function rewind(): void {}
+    public function valid(): bool {}
+    public function key(): int|string {}
+
+    /** @return mixed */
+    public function current() {}
+
+    public function next(): void {}
+}
+
+} // namespace Spl

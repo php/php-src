@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: da85db1e5e985ddbefaf38598133e3cba46475f2 */
+ * Stub hash: 6ad79bc9054f23420d8e522eaa58d045e22df920 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -140,6 +140,40 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveArrayIterator_getChildren arginfo_class_ArrayObject_getArrayCopy
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spl_ForwardArrayIterator___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spl_ForwardArrayIterator_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spl_ForwardArrayIterator_rewind, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spl_ForwardArrayIterator_valid, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Spl_ForwardArrayIterator_key, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Spl_ForwardArrayIterator_current arginfo_class_ArrayObject_getArrayCopy
+
+#define arginfo_class_Spl_ForwardArrayIterator_next arginfo_class_Spl_ForwardArrayIterator_rewind
+
+#define arginfo_class_Spl_ReverseArrayIterator___construct arginfo_class_Spl_ForwardArrayIterator___construct
+
+#define arginfo_class_Spl_ReverseArrayIterator_count arginfo_class_Spl_ForwardArrayIterator_count
+
+#define arginfo_class_Spl_ReverseArrayIterator_rewind arginfo_class_Spl_ForwardArrayIterator_rewind
+
+#define arginfo_class_Spl_ReverseArrayIterator_valid arginfo_class_Spl_ForwardArrayIterator_valid
+
+#define arginfo_class_Spl_ReverseArrayIterator_key arginfo_class_Spl_ForwardArrayIterator_key
+
+#define arginfo_class_Spl_ReverseArrayIterator_current arginfo_class_ArrayObject_getArrayCopy
+
+#define arginfo_class_Spl_ReverseArrayIterator_next arginfo_class_Spl_ForwardArrayIterator_rewind
+
 
 ZEND_METHOD(ArrayObject, __construct);
 ZEND_METHOD(ArrayObject, offsetExists);
@@ -175,6 +209,20 @@ ZEND_METHOD(ArrayIterator, valid);
 ZEND_METHOD(ArrayIterator, seek);
 ZEND_METHOD(RecursiveArrayIterator, hasChildren);
 ZEND_METHOD(RecursiveArrayIterator, getChildren);
+ZEND_METHOD(Spl_ForwardArrayIterator, __construct);
+ZEND_METHOD(Spl_ForwardArrayIterator, count);
+ZEND_METHOD(Spl_ForwardArrayIterator, rewind);
+ZEND_METHOD(Spl_ForwardArrayIterator, valid);
+ZEND_METHOD(Spl_ForwardArrayIterator, key);
+ZEND_METHOD(Spl_ForwardArrayIterator, current);
+ZEND_METHOD(Spl_ForwardArrayIterator, next);
+ZEND_METHOD(Spl_ReverseArrayIterator, __construct);
+ZEND_METHOD(Spl_ReverseArrayIterator, count);
+ZEND_METHOD(Spl_ReverseArrayIterator, rewind);
+ZEND_METHOD(Spl_ReverseArrayIterator, valid);
+ZEND_METHOD(Spl_ReverseArrayIterator, key);
+ZEND_METHOD(Spl_ReverseArrayIterator, current);
+ZEND_METHOD(Spl_ReverseArrayIterator, next);
 
 
 static const zend_function_entry class_ArrayObject_methods[] = {
@@ -242,5 +290,29 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 static const zend_function_entry class_RecursiveArrayIterator_methods[] = {
 	ZEND_ME(RecursiveArrayIterator, hasChildren, arginfo_class_RecursiveArrayIterator_hasChildren, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveArrayIterator, getChildren, arginfo_class_RecursiveArrayIterator_getChildren, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Spl_ForwardArrayIterator_methods[] = {
+	ZEND_ME(Spl_ForwardArrayIterator, __construct, arginfo_class_Spl_ForwardArrayIterator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, count, arginfo_class_Spl_ForwardArrayIterator_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, rewind, arginfo_class_Spl_ForwardArrayIterator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, valid, arginfo_class_Spl_ForwardArrayIterator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, key, arginfo_class_Spl_ForwardArrayIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, current, arginfo_class_Spl_ForwardArrayIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ForwardArrayIterator, next, arginfo_class_Spl_ForwardArrayIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Spl_ReverseArrayIterator_methods[] = {
+	ZEND_ME(Spl_ReverseArrayIterator, __construct, arginfo_class_Spl_ReverseArrayIterator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, count, arginfo_class_Spl_ReverseArrayIterator_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, rewind, arginfo_class_Spl_ReverseArrayIterator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, valid, arginfo_class_Spl_ReverseArrayIterator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, key, arginfo_class_Spl_ReverseArrayIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, current, arginfo_class_Spl_ReverseArrayIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spl_ReverseArrayIterator, next, arginfo_class_Spl_ReverseArrayIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
