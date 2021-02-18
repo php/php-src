@@ -2730,7 +2730,9 @@ PHP_METHOD(SplFileObject, seek)
 /* {{{ PHP_MINIT_FUNCTION(spl_directory) */
 PHP_MINIT_FUNCTION(spl_directory)
 {
-	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, class_SplFileInfo_methods);
+	spl_ce_SplFileInfo = register_class_SplFileInfo(zend_ce_stringable);
+	spl_ce_SplFileInfo->create_object = spl_filesystem_object_new;
+
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
@@ -2739,16 +2741,14 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
 	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;
 	spl_ce_SplFileInfo->unserialize = zend_class_unserialize_deny;
-	REGISTER_SPL_IMPLEMENTS(SplFileInfo, Stringable);
 
-
-	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, class_DirectoryIterator_methods);
-	zend_class_implements(spl_ce_DirectoryIterator, 1, zend_ce_iterator);
-	REGISTER_SPL_IMPLEMENTS(DirectoryIterator, SeekableIterator);
-
+	spl_ce_DirectoryIterator = register_class_DirectoryIterator(spl_ce_SplFileInfo, spl_ce_SeekableIterator);
+	spl_ce_DirectoryIterator->create_object = spl_filesystem_object_new;
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(FilesystemIterator, DirectoryIterator, spl_filesystem_object_new, class_FilesystemIterator_methods);
+	spl_ce_FilesystemIterator = register_class_FilesystemIterator(spl_ce_DirectoryIterator);
+	spl_ce_FilesystemIterator->create_object = spl_filesystem_object_new;
+	spl_ce_FilesystemIterator->get_iterator = spl_filesystem_tree_get_iterator;
 
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_MODE_MASK",   SPL_FILE_DIR_CURRENT_MODE_MASK);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_AS_PATHNAME", SPL_FILE_DIR_CURRENT_AS_PATHNAME);
@@ -2763,30 +2763,29 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "SKIP_DOTS",           SPL_FILE_DIR_SKIPDOTS);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "UNIX_PATHS",          SPL_FILE_DIR_UNIXPATHS);
 
-	spl_ce_FilesystemIterator->get_iterator = spl_filesystem_tree_get_iterator;
-
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, FilesystemIterator, spl_filesystem_object_new, class_RecursiveDirectoryIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
+	spl_ce_RecursiveDirectoryIterator = register_class_RecursiveDirectoryIterator(spl_ce_FilesystemIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveDirectoryIterator->create_object = spl_filesystem_object_new;
 
 	memcpy(&spl_filesystem_object_check_handlers, &spl_filesystem_object_handlers, sizeof(zend_object_handlers));
 	spl_filesystem_object_check_handlers.clone_obj = NULL;
 	spl_filesystem_object_check_handlers.get_method = spl_filesystem_object_get_method_check;
 
 #ifdef HAVE_GLOB
-	REGISTER_SPL_SUB_CLASS_EX(GlobIterator, FilesystemIterator, spl_filesystem_object_new_check, class_GlobIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(GlobIterator, Countable);
+	spl_ce_GlobIterator = register_class_GlobIterator(spl_ce_FilesystemIterator, zend_ce_countable);
+	spl_ce_GlobIterator->create_object = spl_filesystem_object_new_check;
 #endif
 
-	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new_check, class_SplFileObject_methods);
-	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);
-	REGISTER_SPL_IMPLEMENTS(SplFileObject, SeekableIterator);
+	spl_ce_SplFileObject = register_class_SplFileObject(spl_ce_SplFileInfo, spl_ce_RecursiveIterator, spl_ce_SeekableIterator);
+	spl_ce_SplFileObject->create_object = spl_filesystem_object_new_check;
 
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "DROP_NEW_LINE", SPL_FILE_OBJECT_DROP_NEW_LINE);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_AHEAD",    SPL_FILE_OBJECT_READ_AHEAD);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "SKIP_EMPTY",    SPL_FILE_OBJECT_SKIP_EMPTY);
 	REGISTER_SPL_CLASS_CONST_LONG(SplFileObject, "READ_CSV",      SPL_FILE_OBJECT_READ_CSV);
 
-	REGISTER_SPL_SUB_CLASS_EX(SplTempFileObject, SplFileObject, spl_filesystem_object_new_check, class_SplTempFileObject_methods);
+	spl_ce_SplTempFileObject = register_class_SplTempFileObject(spl_ce_SplFileObject);
+	spl_ce_SplTempFileObject->create_object = spl_filesystem_object_new_check;
+
 	return SUCCESS;
 }
 /* }}} */

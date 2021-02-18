@@ -3217,11 +3217,13 @@ PHP_FUNCTION(iterator_apply)
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators) */
 PHP_MINIT_FUNCTION(spl_iterators)
 {
-	REGISTER_SPL_INTERFACE(RecursiveIterator);
-	REGISTER_SPL_ITERATOR(RecursiveIterator);
+	spl_ce_RecursiveIterator = register_class_RecursiveIterator(zend_ce_iterator);
 
-	REGISTER_SPL_STD_CLASS_EX(RecursiveIteratorIterator, spl_RecursiveIteratorIterator_new, class_RecursiveIteratorIterator_methods);
-	REGISTER_SPL_ITERATOR(RecursiveIteratorIterator);
+	spl_ce_OuterIterator = register_class_OuterIterator(zend_ce_iterator);
+
+	spl_ce_RecursiveIteratorIterator = register_class_RecursiveIteratorIterator(spl_ce_OuterIterator);
+	spl_ce_RecursiveIteratorIterator->create_object = spl_RecursiveIteratorIterator_new;
+	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 
 	memcpy(&spl_handlers_rec_it_it, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_handlers_rec_it_it.offset = XtOffsetOf(spl_recursive_it_object, std);
@@ -3238,43 +3240,36 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_handlers_dual_it.free_obj = spl_dual_it_free_storage;
 	spl_handlers_dual_it.get_gc = spl_dual_it_get_gc;
 
-	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
-
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "LEAVES_ONLY",     RIT_LEAVES_ONLY);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "SELF_FIRST",      RIT_SELF_FIRST);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "CHILD_FIRST",     RIT_CHILD_FIRST);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveIteratorIterator, "CATCH_GET_CHILD", RIT_CATCH_GET_CHILD);
 
-	REGISTER_SPL_INTERFACE(OuterIterator);
-	REGISTER_SPL_ITERATOR(OuterIterator);
+	spl_ce_IteratorIterator = register_class_IteratorIterator(spl_ce_OuterIterator);
+	spl_ce_IteratorIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_STD_CLASS_EX(IteratorIterator, spl_dual_it_new, class_IteratorIterator_methods);
-	REGISTER_SPL_ITERATOR(IteratorIterator);
-	REGISTER_SPL_IMPLEMENTS(IteratorIterator, OuterIterator);
+	spl_ce_FilterIterator = register_class_FilterIterator(spl_ce_IteratorIterator);
+	spl_ce_FilterIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(FilterIterator, IteratorIterator, spl_dual_it_new, class_FilterIterator_methods);
-	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+	spl_ce_RecursiveFilterIterator = register_class_RecursiveFilterIterator(spl_ce_FilterIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveFilterIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveFilterIterator, FilterIterator, spl_dual_it_new, class_RecursiveFilterIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveFilterIterator, RecursiveIterator);
+	spl_ce_CallbackFilterIterator = register_class_CallbackFilterIterator(spl_ce_FilterIterator);
+	spl_ce_CallbackFilterIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(CallbackFilterIterator, FilterIterator, spl_dual_it_new, class_CallbackFilterIterator_methods);
+	spl_ce_RecursiveCallbackFilterIterator = register_class_RecursiveCallbackFilterIterator(spl_ce_CallbackFilterIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveCallbackFilterIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveCallbackFilterIterator, CallbackFilterIterator, spl_dual_it_new, class_RecursiveCallbackFilterIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveCallbackFilterIterator, RecursiveIterator);
+	spl_ce_ParentIterator = register_class_ParentIterator(spl_ce_RecursiveFilterIterator);
+	spl_ce_ParentIterator->create_object = spl_dual_it_new;
 
+	spl_ce_SeekableIterator = register_class_SeekableIterator(zend_ce_iterator);
 
-	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, class_ParentIterator_methods);
+	spl_ce_LimitIterator = register_class_LimitIterator(spl_ce_IteratorIterator);
+	spl_ce_LimitIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_INTERFACE(SeekableIterator);
-	REGISTER_SPL_ITERATOR(SeekableIterator);
-
-	REGISTER_SPL_SUB_CLASS_EX(LimitIterator, IteratorIterator, spl_dual_it_new, class_LimitIterator_methods);
-
-	REGISTER_SPL_SUB_CLASS_EX(CachingIterator, IteratorIterator, spl_dual_it_new, class_CachingIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(CachingIterator, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(CachingIterator, Countable);
-	REGISTER_SPL_IMPLEMENTS(CachingIterator, Stringable);
+	spl_ce_CachingIterator = register_class_CachingIterator(spl_ce_IteratorIterator, zend_ce_arrayaccess, zend_ce_countable, zend_ce_stringable);
+	spl_ce_CachingIterator->create_object = spl_dual_it_new;
 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CALL_TOSTRING",        CIT_CALL_TOSTRING);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD);
@@ -3283,17 +3278,21 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "TOSTRING_USE_INNER",   CIT_TOSTRING_USE_INNER);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "FULL_CACHE",           CIT_FULL_CACHE);
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveCachingIterator, CachingIterator, spl_dual_it_new, class_RecursiveCachingIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveCachingIterator, RecursiveIterator);
+	spl_ce_RecursiveCachingIterator = register_class_RecursiveCachingIterator(spl_ce_CachingIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveCachingIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(NoRewindIterator, IteratorIterator, spl_dual_it_new, class_NoRewindIterator_methods);
+	spl_ce_NoRewindIterator = register_class_NoRewindIterator(spl_ce_IteratorIterator);
+	spl_ce_NoRewindIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(AppendIterator, IteratorIterator, spl_dual_it_new, class_AppendIterator_methods);
+	spl_ce_AppendIterator = register_class_AppendIterator(spl_ce_IteratorIterator);
+	spl_ce_AppendIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_IMPLEMENTS(RecursiveIteratorIterator, OuterIterator);
+	spl_ce_InfiniteIterator = register_class_InfiniteIterator(spl_ce_IteratorIterator);
+	spl_ce_InfiniteIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, class_InfiniteIterator_methods);
-	REGISTER_SPL_SUB_CLASS_EX(RegexIterator, FilterIterator, spl_dual_it_new, class_RegexIterator_methods);
+	spl_ce_RegexIterator = register_class_RegexIterator(spl_ce_FilterIterator);
+	spl_ce_RegexIterator->create_object = spl_dual_it_new;
+
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "USE_KEY",     REGIT_USE_KEY);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "INVERT_MATCH",REGIT_INVERTED);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "MATCH",       REGIT_MODE_MATCH);
@@ -3301,14 +3300,15 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "ALL_MATCHES", REGIT_MODE_ALL_MATCHES);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "SPLIT",       REGIT_MODE_SPLIT);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "REPLACE",     REGIT_MODE_REPLACE);
-	REGISTER_SPL_PROPERTY(RegexIterator, "replacement", 0);
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveRegexIterator, RegexIterator, spl_dual_it_new, class_RecursiveRegexIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveRegexIterator, RecursiveIterator);
 
-	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, class_EmptyIterator_methods);
-	REGISTER_SPL_ITERATOR(EmptyIterator);
+	spl_ce_RecursiveRegexIterator = register_class_RecursiveRegexIterator(spl_ce_RegexIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveRegexIterator->create_object = spl_dual_it_new;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveTreeIterator, RecursiveIteratorIterator, spl_RecursiveTreeIterator_new, class_RecursiveTreeIterator_methods);
+	spl_ce_EmptyIterator = register_class_EmptyIterator(zend_ce_iterator);
+
+	spl_ce_RecursiveTreeIterator = register_class_RecursiveTreeIterator(spl_ce_RecursiveIteratorIterator);
+	spl_ce_RecursiveTreeIterator->create_object = spl_RecursiveTreeIterator_new;
+
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveTreeIterator, "BYPASS_CURRENT",      RTIT_BYPASS_CURRENT);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveTreeIterator, "BYPASS_KEY",          RTIT_BYPASS_KEY);
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveTreeIterator, "PREFIX_LEFT",         0);

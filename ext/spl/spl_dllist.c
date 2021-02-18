@@ -1332,7 +1332,12 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 {
-	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, class_SplDoublyLinkedList_methods);
+	spl_ce_SplDoublyLinkedList = register_class_SplDoublyLinkedList(
+		zend_ce_iterator, zend_ce_countable, zend_ce_arrayaccess, zend_ce_serializable
+	);
+	spl_ce_SplDoublyLinkedList->create_object = spl_dllist_object_new;
+	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;
+
 	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
@@ -1347,17 +1352,12 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
 	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
 
-	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Iterator);
-	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Countable);
-	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Serializable);
-
-	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;
-
-	REGISTER_SPL_SUB_CLASS_EX(SplQueue,           SplDoublyLinkedList,        spl_dllist_object_new, class_SplQueue_methods);
-	REGISTER_SPL_SUB_CLASS_EX(SplStack,           SplDoublyLinkedList,        spl_dllist_object_new, class_SplStack_methods);
-
+	spl_ce_SplQueue = register_class_SplQueue(spl_ce_SplDoublyLinkedList);
+	spl_ce_SplQueue->create_object = spl_dllist_object_new;
 	spl_ce_SplQueue->get_iterator = spl_dllist_get_iterator;
+
+	spl_ce_SplStack = register_class_SplStack(spl_ce_SplDoublyLinkedList);
+	spl_ce_SplStack->create_object = spl_dllist_object_new;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
 
 	return SUCCESS;

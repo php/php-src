@@ -1190,10 +1190,12 @@ PHP_METHOD(MultipleIterator, key)
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */
 PHP_MINIT_FUNCTION(spl_observer)
 {
-	REGISTER_SPL_INTERFACE(SplObserver);
-	REGISTER_SPL_INTERFACE(SplSubject);
+	spl_ce_SplObserver = register_class_SplObserver();
+	spl_ce_SplSubject = register_class_SplSubject();
 
-	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, class_SplObjectStorage_methods);
+	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_arrayaccess);
+	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
+
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
@@ -1203,13 +1205,8 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_handler_SplObjectStorage.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_SplObjectStorage.free_obj        = spl_SplObjectStorage_free_storage;
 
-	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
-	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
-	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
-	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, ArrayAccess);
-
-	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, class_MultipleIterator_methods);
-	REGISTER_SPL_ITERATOR(MultipleIterator);
+	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
+	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
 
 	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
 	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);

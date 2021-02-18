@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 404df73577d733275e386226e11887b37a500ade */
+ * Stub hash: d0c98e1628895a81ac0b4abe62dede9ed2c7f55e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -144,3 +144,34 @@ static const zend_function_entry class_SplQueue_methods[] = {
 static const zend_function_entry class_SplStack_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SplQueue(zend_class_entry *class_entry_SplDoublyLinkedList)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplQueue", class_SplQueue_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_SplDoublyLinkedList)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplStack", class_SplStack_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+
+	return class_entry;
+}

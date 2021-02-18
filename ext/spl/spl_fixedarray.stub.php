@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
 {
