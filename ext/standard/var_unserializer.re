@@ -612,7 +612,7 @@ declared_property:
 					}
 					var_push_dtor(var_hash, old_data);
 					Z_TRY_DELREF_P(old_data);
-					ZVAL_NULL(old_data);
+					ZVAL_UNDEF(old_data);
 					data = old_data;
 				} else {
 					int ret = is_property_visibility_changed(obj->ce, &key);
