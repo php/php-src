@@ -3633,10 +3633,6 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 //???		efree(op_array->refcount);
 		op_array->refcount = NULL;
 
-		if (op_array->static_variables) {
-			GC_TRY_ADDREF(op_array->static_variables);
-		}
-
 		zend_hash_add_ptr(preload_scripts, script->script.filename, script);
 	}
 
