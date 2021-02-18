@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
   . Fixed bug #75474 (function scope static variables are not bound to a unique
     function). (Nikita)
+  . Fixed bug #53826 (__callStatic fired in base class through a parent call if
+    the method is private). (Nikita)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)

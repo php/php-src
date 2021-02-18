@@ -1263,11 +1263,29 @@ static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_
 }
 /* }}} */
 
+static zend_always_inline zend_function *get_static_method_fallback(
+		zend_class_entry *ce, zend_string *function_name)
+{
+	zend_object *object;
+	if (ce->__call &&
+		(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
+		instanceof_function(object->ce, ce)) {
+		/* Call the top-level defined __call().
+		 * see: tests/classes/__call_004.phpt  */
+
+		ZEND_ASSERT(object->ce->__call);
+		return zend_get_user_call_function(object->ce, function_name);
+	} else if (ce->__callstatic) {
+		return zend_get_user_callstatic_function(ce, function_name);
+	} else {
+		return NULL;
+	}
+}
+
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
 	zend_function *fbc = NULL;
 	zend_string *lc_function_name;
-	zend_object *object;
 	zend_class_entry *scope;
 
 	if (EXPECTED(key != NULL)) {
@@ -1293,19 +1311,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (UNEXPECTED(!key)) {
 				zend_string_release_ex(lc_function_name, 0);
 			}
-			if (ce->__call &&
-				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
-			    instanceof_function(object->ce, ce)) {
-				/* Call the top-level defined __call().
-				 * see: tests/classes/__call_004.phpt  */
-
-				ZEND_ASSERT(object->ce->__call);
-				return zend_get_user_call_function(object->ce, function_name);
-			} else if (ce->__callstatic) {
-				return zend_get_user_callstatic_function(ce, function_name);
-			} else {
-	   			return NULL;
-			}
+			return get_static_method_fallback(ce, function_name);
 		}
 	} while (0);
 
@@ -1321,12 +1327,11 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		if (UNEXPECTED(fbc->common.scope != scope)) {
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-				if (ce->__callstatic) {
-					fbc = zend_get_user_callstatic_function(ce, function_name);
-				} else {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
 					zend_bad_method_call(fbc, function_name, scope);
-					fbc = NULL;
 				}
+				fbc = fallback_fbc;
 			}
 		}
 	}
