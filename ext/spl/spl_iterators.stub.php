@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class EmptyIterator implements Iterator
 {
@@ -198,7 +198,7 @@ class LimitIterator extends IteratorIterator
     public function getPosition() {}
 }
 
-class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
+class CachingIterator extends IteratorIterator implements ArrayAccess, Countable, Stringable
 {
     public function __construct(Iterator $iterator, int $flags = self::CALL_TOSTRING) {}
 

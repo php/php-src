@@ -1113,7 +1113,10 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 
 PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
-	REGISTER_SPL_STD_CLASS_EX(SplHeap, spl_heap_object_new, class_SplHeap_methods);
+	spl_ce_SplHeap = register_class_SplHeap(zend_ce_iterator, zend_ce_countable);
+	spl_ce_SplHeap->create_object = spl_heap_object_new;
+	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
+
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
@@ -1123,18 +1126,18 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplHeap.dtor_obj = zend_objects_destroy_object;
 	spl_handler_SplHeap.free_obj = spl_heap_object_free_storage;
 
-	REGISTER_SPL_IMPLEMENTS(SplHeap, Iterator);
-	REGISTER_SPL_IMPLEMENTS(SplHeap, Countable);
-
-	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
-
-	REGISTER_SPL_SUB_CLASS_EX(SplMinHeap,           SplHeap,        spl_heap_object_new, class_SplMinHeap_methods);
-	REGISTER_SPL_SUB_CLASS_EX(SplMaxHeap,           SplHeap,        spl_heap_object_new, class_SplMaxHeap_methods);
-
-	spl_ce_SplMaxHeap->get_iterator = spl_heap_get_iterator;
+	spl_ce_SplMinHeap = register_class_SplMinHeap(spl_ce_SplHeap);
+	spl_ce_SplMinHeap->create_object = spl_heap_object_new;
 	spl_ce_SplMinHeap->get_iterator = spl_heap_get_iterator;
 
-	REGISTER_SPL_STD_CLASS_EX(SplPriorityQueue, spl_heap_object_new, class_SplPriorityQueue_methods);
+	spl_ce_SplMaxHeap = register_class_SplMaxHeap(spl_ce_SplHeap);
+	spl_ce_SplMaxHeap->create_object = spl_heap_object_new;
+	spl_ce_SplMaxHeap->get_iterator = spl_heap_get_iterator;
+
+	spl_ce_SplPriorityQueue = register_class_SplPriorityQueue(zend_ce_iterator, zend_ce_countable);
+	spl_ce_SplPriorityQueue->create_object = spl_heap_object_new;
+	spl_ce_SplPriorityQueue->get_iterator = spl_pqueue_get_iterator;
+
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);
@@ -1143,11 +1146,6 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.dtor_obj = zend_objects_destroy_object;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
-
-	REGISTER_SPL_IMPLEMENTS(SplPriorityQueue, Iterator);
-	REGISTER_SPL_IMPLEMENTS(SplPriorityQueue, Countable);
-
-	spl_ce_SplPriorityQueue->get_iterator = spl_pqueue_get_iterator;
 
 	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_BOTH",      SPL_PQUEUE_EXTR_BOTH);
 	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_PRIORITY",  SPL_PQUEUE_EXTR_PRIORITY);
