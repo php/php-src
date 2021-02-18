@@ -548,18 +548,12 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 		} else {
 			if (!strcmp(unmangled_class, "*")
 			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
-				zend_string *unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
-
-				existing_propinfo = zend_hash_find_ptr(&ce->properties_info, unmangled);
+				existing_propinfo = zend_hash_str_find_ptr(
+					&ce->properties_info, unmangled_prop, unmangled_prop_len);
 				if (existing_propinfo != NULL) {
-					zend_string_release_ex(unmangled, 0);
 					zval_ptr_dtor_str(key);
 					ZVAL_STR_COPY(key, existing_propinfo->name);
 					return 1;
-				} else {
-					zval_ptr_dtor_str(key);
-					ZVAL_STR(key, unmangled);
-					return 0;
 				}
 			}
 		}
