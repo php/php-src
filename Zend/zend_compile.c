@@ -10073,7 +10073,19 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			resolved_name = zend_resolve_class_name_ast(class_ast);
+			switch (zend_get_class_fetch_type(zend_ast_get_str(class_ast))) {
+				case ZEND_FETCH_CLASS_SELF:
+					if (!zend_is_scope_known()) {
+						return;
+					}
+					resolved_name = zend_string_copy(CG(active_class_entry)->name);
+					break;
+				case ZEND_FETCH_CLASS_DEFAULT:
+					resolved_name = zend_resolve_class_name_ast(class_ast);
+					break;
+				default:
+					return;
+			}
 
 			if (!zend_try_ct_eval_class_const(&result, resolved_name, zend_ast_get_str(name_ast))) {
 				zend_string_release_ex(resolved_name, 0);
