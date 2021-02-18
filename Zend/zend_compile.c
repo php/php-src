@@ -1512,6 +1512,11 @@ static bool zend_try_ct_eval_const(zval *zv, zend_string *name, bool is_fully_qu
 
 static inline bool zend_is_scope_known() /* {{{ */
 {
+	if (!CG(active_op_array)) {
+		/* This can only happen when evaluating a default value string. */
+		return 0;
+	}
+
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
 		/* Closures can be rebound to a different scope */
 		return 0;
