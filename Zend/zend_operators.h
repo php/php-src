@@ -450,16 +450,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 #define convert_to_object_ex(zv) convert_to_object(zv)
 #define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
-#if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
-/* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
-#define ZEND_USE_TOLOWER_L 1
-#endif
-
-#ifdef ZEND_USE_TOLOWER_L
 ZEND_API void zend_update_current_locale(void);
-#else
-#define zend_update_current_locale()
-#endif
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\

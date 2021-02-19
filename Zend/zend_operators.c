@@ -30,12 +30,21 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 
+#include <locale.h>
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
+
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
 
+#if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
+/* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
+#define ZEND_USE_TOLOWER_L 1
+#endif
+
 #ifdef ZEND_USE_TOLOWER_L
-#include <locale.h>
 static _locale_t current_locale = NULL;
 /* this is true global! may lead to strange effects on ZTS, but so may setlocale() */
 #define zend_tolower(c) _tolower_l(c, current_locale)
@@ -2537,13 +2546,85 @@ ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_USE_TOLOWER_L
 ZEND_API void zend_update_current_locale(void) /* {{{ */
 {
+#ifdef ZEND_USE_TOLOWER_L
+# if defined(ZEND_WIN32) && defined(_MSC_VER)
 	current_locale = _get_current_locale();
+# else
+	current_locale = uselocale(0);
+# endif
+#endif
+#if defined(ZEND_WIN32) && defined(_MSC_VER)
+	if (MB_CUR_MAX > 1) {
+		unsigned int cp = ___lc_codepage_func();
+		CG(variable_width_locale) = 1;
+		// TODO: EUC-* are also ASCII compatible ???
+		CG(ascii_compatible_locale) =
+			cp == 65001; /* UTF-8 */
+	} else {
+		CG(variable_width_locale) = 0;
+		CG(ascii_compatible_locale) = 1;
+	}
+#elif defined(MB_CUR_MAX)
+	/* Check if current locale uses variable width encoding */
+	if (MB_CUR_MAX > 1) {
+#if HAVE_NL_LANGINFO
+		const char *charmap = nl_langinfo(CODESET);
+#else
+		char buf[16];
+		const char *charmap = NULL;
+		const char *locale = setlocale(LC_CTYPE, NULL);
+
+		if (locale) {
+			const char *dot = strchr(locale, '.');
+			const char *modifier;
+
+			if (dot) {
+				dot++;
+				modifier = strchr(dot, '@');
+				if (!modifier) {
+					charmap = dot;
+				} else if (modifier - dot < sizeof(buf)) {
+					memcpy(buf, dot, modifier - dot);
+                    buf[modifier - dot] = '\0';
+                    charmap = buf;
+				}
+			}
+		}
+#endif
+		CG(variable_width_locale) = 1;
+		CG(ascii_compatible_locale) = 0;
+
+		if (charmap) {
+			size_t len = strlen(charmap);
+			static const char *ascii_compatible_charmaps[] = {
+				"utf-8",
+				"utf8",
+				// TODO: EUC-* are also ASCII compatible ???
+				NULL
+			};
+			const char **p;
+			/* Check if current locale is ASCII compatible */
+			for (p = ascii_compatible_charmaps; *p; p++) {
+				if (zend_binary_strcasecmp(charmap, len, *p, strlen(*p)) == 0) {
+					CG(ascii_compatible_locale) = 1;
+					break;
+				}
+			}
+		}
+
+	} else {
+		CG(variable_width_locale) = 0;
+		CG(ascii_compatible_locale) = 1;
+	}
+#else
+	/* We can't determine current charset. Assume the worst case */
+	CG(variable_width_locale) = 1;
+	CG(ascii_compatible_locale) = 0;
+#endif
 }
 /* }}} */
-#endif
 
 static zend_always_inline void zend_str_tolower_impl(char *dest, const char *str, size_t length) /* {{{ */ {
 	unsigned char *p = (unsigned char*)str;

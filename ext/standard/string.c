@@ -1465,66 +1465,96 @@ PHP_FUNCTION(strtolower)
 /* {{{ php_basename */
 PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t suffix_len)
 {
-	/* State 0 is directly after a directory separator (or at the start of the string).
-	 * State 1 is everything else. */
-	int state = 0;
-	const char *basename_start = s;
-	const char *basename_end = s;
-	while (len > 0) {
-		int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
+	const char *basename_start;
+	const char *basename_end;
 
-		switch (inc_len) {
-			case 0:
-				goto quit_loop;
-			case 1:
-#if defined(PHP_WIN32)
-				if (*s == '/' || *s == '\\') {
-#else
-				if (*s == '/') {
-#endif
-					if (state == 1) {
-						state = 0;
-						basename_end = s;
-					}
-#if defined(PHP_WIN32)
-				/* Catch relative paths in c:file.txt style. They're not to confuse
-				   with the NTFS streams. This part ensures also, that no drive
-				   letter traversing happens. */
-				} else if ((*s == ':' && (s - basename_start == 1))) {
-					if (state == 0) {
-						basename_start = s;
-						state = 1;
-					} else {
-						basename_end = s;
-						state = 0;
-					}
-#endif
-				} else {
-					if (state == 0) {
-						basename_start = s;
-						state = 1;
-					}
-				}
-				break;
-			default:
-				if (inc_len < 0) {
-					/* If character is invalid, treat it like other non-significant characters. */
-					inc_len = 1;
-					php_mb_reset();
-				}
-				if (state == 0) {
-					basename_start = s;
-					state = 1;
-				}
-				break;
+	if (CG(ascii_compatible_locale)) {
+#ifdef ZEND_WIN32
+		if ((len >= 2) && isalpha((int)((unsigned char *)s)[0]) && (s[1] == ':')) {
+			s += 2;
+			len -= 2;
 		}
-		s += inc_len;
-		len -= inc_len;
-	}
+#endif
+
+		basename_end = s + len - 1;
+
+		/* Strip trailing slashes */
+		while (basename_end >= s && IS_SLASH_P(basename_end)) {
+			basename_end--;
+		}
+		if (basename_end < s) {
+			return ZSTR_EMPTY_ALLOC();
+		}
+
+		/* Extract filename */
+		basename_start = basename_end;
+		basename_end++;
+		while (basename_start > s && !IS_SLASH_P(basename_start - 1)) {
+			basename_start--;
+		}
+	} else {
+		/* State 0 is directly after a directory separator (or at the start of the string).
+		 * State 1 is everything else. */
+		int state = 0;
+
+		basename_start = s;
+		basename_end = s;
+		while (len > 0) {
+			int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
+
+			switch (inc_len) {
+				case 0:
+					goto quit_loop;
+				case 1:
+#if defined(PHP_WIN32)
+					if (*s == '/' || *s == '\\') {
+#else
+					if (*s == '/') {
+#endif
+						if (state == 1) {
+							state = 0;
+							basename_end = s;
+						}
+#if defined(PHP_WIN32)
+					/* Catch relative paths in c:file.txt style. They're not to confuse
+					   with the NTFS streams. This part ensures also, that no drive
+					   letter traversing happens. */
+					} else if ((*s == ':' && (s - basename_start == 1))) {
+						if (state == 0) {
+							basename_start = s;
+							state = 1;
+						} else {
+							basename_end = s;
+							state = 0;
+						}
+#endif
+					} else {
+						if (state == 0) {
+							basename_start = s;
+							state = 1;
+						}
+					}
+					break;
+				default:
+					if (inc_len < 0) {
+						/* If character is invalid, treat it like other non-significant characters. */
+						inc_len = 1;
+						php_mb_reset();
+					}
+					if (state == 0) {
+						basename_start = s;
+						state = 1;
+					}
+					break;
+			}
+			s += inc_len;
+			len -= inc_len;
+		}
 
 quit_loop:
-	if (state == 1) {
-		basename_end = s;
+		if (state == 1) {
+			basename_end = s;
+		}
 	}
 
 	if (suffix != NULL && suffix_len < (size_t)(basename_end - basename_start) &&
@@ -4604,7 +4634,6 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 		retval = setlocale(cat, NULL);
 	}
 # endif
-	zend_update_current_locale();
 	if (!retval) {
 		return NULL;
 	}
@@ -4615,6 +4644,7 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 
 		BG(locale_changed) = 1;
 		if (cat == LC_CTYPE || cat == LC_ALL) {
+			zend_update_current_locale();
 			if (BG(ctype_string)) {
 				zend_string_release_ex(BG(ctype_string), 0);
 			}
