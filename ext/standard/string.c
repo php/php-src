@@ -1462,6 +1462,25 @@ PHP_FUNCTION(strtolower)
 }
 /* }}} */
 
+#if defined(PHP_WIN32)
+static bool _is_basename_start(const char *start, const char *pos)
+{
+	if (pos - start >= 1
+     && *(pos-1) != '/'
+     && *(pos-1) != '\\') {
+		if (pos - start == 1) {
+			return 1;
+		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
+			return 1;
+		} else if (*(pos-2) == ':'
+			&& _is_basename_start(start, pos - 2)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+#endif
+
 /* {{{ php_basename */
 PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t suffix_len)
 {
@@ -1469,17 +1488,18 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 	const char *basename_end;
 
 	if (CG(ascii_compatible_locale)) {
-#ifdef ZEND_WIN32
-		if ((len >= 2) && isalpha((int)((unsigned char *)s)[0]) && (s[1] == ':')) {
-			s += 2;
-			len -= 2;
-		}
-#endif
-
 		basename_end = s + len - 1;
 
 		/* Strip trailing slashes */
-		while (basename_end >= s && IS_SLASH_P(basename_end)) {
+		while (basename_end >= s
+#if defined(PHP_WIN32)
+			&& (*basename_end == '/'
+				|| *basename_end == '\\'
+				|| (*basename_end == ':'
+					&& _is_basename_start(s, basename_end)))) {
+#else
+			&& *basename_end == '/') {
+#endif
 			basename_end--;
 		}
 		if (basename_end < s) {
@@ -1489,7 +1509,18 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 		/* Extract filename */
 		basename_start = basename_end;
 		basename_end++;
-		while (basename_start > s && !IS_SLASH_P(basename_start - 1)) {
+		while (basename_start > s
+#if defined(PHP_WIN32)
+			&& *(basename_start-1) != '/'
+			&& *(basename_start-1) != '\\') {
+
+			if (*(basename_start-1) == ':' &&
+				_is_basename_start(s, basename_start - 1)) {
+				break;
+			}
+#else
+			&& *(basename_start-1) != '/') {
+#endif
 			basename_start--;
 		}
 	} else {
