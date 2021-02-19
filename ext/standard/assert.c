@@ -17,6 +17,7 @@
 /* {{{ includes */
 #include "php.h"
 #include "php_assert.h"
+#include "assert_arginfo.h"
 #include "php_ini.h"
 #include "zend_exceptions.h"
 /* }}} */
@@ -43,6 +44,8 @@ enum {
 	ASSERT_WARNING,
 	ASSERT_EXCEPTION
 };
+
+static zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
 {
@@ -90,6 +93,8 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
+
+	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);

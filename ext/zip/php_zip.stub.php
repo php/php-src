@@ -84,9 +84,6 @@ class ZipArchive implements Countable
     /** @var string|null */
     public $comment;
 
-    /** @var string|null */
-    public $name;
-
     /** @return bool|int */
     public function open(string $filename, int $flags = 0) {}
 

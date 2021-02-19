@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: df2233876db8f522ddf8d66e13764470738229c1 */
+ * Stub hash: a50da348df01027594efd7c8ab7427c05ffea39e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -497,12 +497,6 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *property_comment_name = zend_string_init("comment", sizeof("comment") - 1, 1);
 	zend_declare_property_ex(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_comment_name);
-
-	zval property_name_default_value;
-	ZVAL_NULL(&property_name_default_value);
-	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property_name_name);
 
 	return class_entry;
 }
