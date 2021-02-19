@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
     MySQL 8.0). (Nikita)
 
+- Session:
+  . Fixed bug #80774 (session_name() problem with backslash). (cmb)
+
 04 Mar 2021, php 7.4.16
 
 - Core:
