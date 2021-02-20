@@ -1,5 +1,5 @@
 --TEST--
-Closure::fromCallabl() and GC
+Closure::fromCallable() and GC
 --FILE--
 <?php
 
