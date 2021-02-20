@@ -332,15 +332,14 @@ static int filename_is_in_cache(zend_string *filename)
 
 static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval zfilename;
+	if (ZEND_NUM_ARGS() == 1) {
+		zval *zv = ZEND_CALL_ARG(execute_data , 1);
 
-	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_array_ex(1, &zfilename) == FAILURE ||
-	    Z_TYPE(zfilename) != IS_STRING ||
-	    Z_STRLEN(zfilename) == 0) {
-		return 0;
+		if (Z_TYPE_P(zv) == IS_STRING && Z_STRLEN_P(zv) != 0) {
+			return filename_is_in_cache(Z_STR_P(zv));
+		}
 	}
-	return filename_is_in_cache(Z_STR(zfilename));
+	return 0;
 }
 
 static ZEND_NAMED_FUNCTION(accel_file_exists)
