@@ -9,9 +9,6 @@ printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
                        is_int(LONG_MIN-1),is_int(LONG_MAX+1));
 
 function epsilon_equal($left, $right): bool {
-    if (!is_float($left) && !is_int($left) || !is_float($right) && !is_int($right)) {
-        return false;
-    }
     return abs(($left-$right) / $left) < 1e-12;
 }
 
