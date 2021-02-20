@@ -620,7 +620,8 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
-	return (closure->func.type == ZEND_USER_FUNCTION) ?
+	return (closure->func.type == ZEND_USER_FUNCTION &&
+		closure->func.op_array.static_variables) ?
 		ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr) : NULL;
 }
 /* }}} */
