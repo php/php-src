@@ -1171,12 +1171,6 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
-		if (!zend_is_valid_class_name(class_name)) {
-			zend_string_release_ex(lc_name, 0);
-			zend_string_release_ex(class_name, 0);
-			return 0;
-		}
-
 		/* Try to find class directly */
 		BG(serialize_lock)++;
 		ce = zend_lookup_class_ex(class_name, lc_name, 0);
