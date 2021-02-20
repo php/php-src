@@ -40,18 +40,29 @@ PHP_HASH_API void PHP_XXH64Update(PHP_XXH64_CTX *ctx, const unsigned char *in, s
 PHP_HASH_API void PHP_XXH64Final(unsigned char digest[8], PHP_XXH64_CTX *ctx);
 PHP_HASH_API int PHP_XXH64Copy(const php_hash_ops *ops, PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context);
 
+#define PHP_XXH3_SECRET_SIZE_MIN XXH3_SECRET_SIZE_MIN
+#define PHP_XXH3_SECRET_SIZE_MAX 256
+
 typedef struct {
 	XXH3_state_t s;
-} PHP_XXH3_64_CTX; 
+	/* The value must survive the whole streaming cycle from init to final.
+
+	   A more flexible mechanism would be to carry zend_string* passed through
+	   the options. However, that will require to introduce a destructor
+	   handler for ctx, so then it wolud be automatically called from the
+	   object destructor. Until that is given, the viable way is to use a
+	   plausible max secret length. */
+	const unsigned char secret[PHP_XXH3_SECRET_SIZE_MAX];
+} PHP_XXH3_CTX;
+
+typedef PHP_XXH3_CTX PHP_XXH3_64_CTX;
 
 PHP_HASH_API void PHP_XXH3_64_Init(PHP_XXH3_64_CTX *ctx, HashTable *args);
 PHP_HASH_API void PHP_XXH3_64_Update(PHP_XXH3_64_CTX *ctx, const unsigned char *in, size_t len);
 PHP_HASH_API void PHP_XXH3_64_Final(unsigned char digest[8], PHP_XXH3_64_CTX *ctx);
 PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context);
 
-typedef struct {
-	XXH3_state_t s;
-} PHP_XXH3_128_CTX; 
+typedef PHP_XXH3_CTX PHP_XXH3_128_CTX;
 
 PHP_HASH_API void PHP_XXH3_128_Init(PHP_XXH3_128_CTX *ctx, HashTable *args);
 PHP_HASH_API void PHP_XXH3_128_Update(PHP_XXH3_128_CTX *ctx, const unsigned char *in, size_t len);

@@ -165,21 +165,51 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_XXH3_64_Init(PHP_XXH3_64_CTX *ctx, HashTable *args)
+typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
+typedef XXH_errorcode (*xxh3_reset_with_seed_func_t)(XXH3_state_t*, XXH64_hash_t);
+
+zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
+		xxh3_reset_with_seed_func_t func_init_seed, xxh3_reset_with_secret_func_t func_init_secret, const char* algo_name)
 {
-	/* TODO integrate also XXH3_64bits_reset_withSecret(). */
-	XXH64_hash_t seed = 0;
+	memset(&ctx->s, 0, sizeof ctx->s);
 
 	if (args) {
 		zval *_seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
-		/* This might be a bit too restrictive, but thinking that a seed might be set
-			once and for all, it should be done a clean way. */
+		zval *_secret = zend_hash_str_find_deref(args, "secret", sizeof("secret") - 1);
+
+		if (_seed && _secret) {
+			zend_throw_error(NULL, "%s: Only one of seed or secret is to be passed for initialization", algo_name);
+			return;
+		}
+
 		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
-			seed = (XXH64_hash_t)Z_LVAL_P(_seed);
+			/* This might be a bit too restrictive, but thinking that a seed might be set
+				once and for all, it should be done a clean way. */
+			func_init_seed(&ctx->s, (XXH64_hash_t)Z_LVAL_P(_seed));
+			return;
+		} else if (_secret) {
+			convert_to_string(_secret);
+			size_t len = Z_STRLEN_P(_secret);
+			if (len < PHP_XXH3_SECRET_SIZE_MIN) {
+				zend_throw_error(NULL, "%s: Secret length must be >= %u bytes, %zu bytes passed", algo_name, XXH3_SECRET_SIZE_MIN, len);
+				return;
+			}
+			if (len > sizeof(ctx->secret)) {
+				len = sizeof(ctx->secret);
+				php_error_docref(NULL, E_WARNING, "%s: Secret content exceeding %zu bytes discarded", algo_name, sizeof(ctx->secret));
+			}
+			memcpy((unsigned char *)ctx->secret, Z_STRVAL_P(_secret), len);
+			func_init_secret(&ctx->s, ctx->secret, len);
+			return;
 		}
 	}
 
-	XXH3_64bits_reset_withSeed(&ctx->s, seed);
+	func_init_seed(&ctx->s, 0);
+}
+
+PHP_HASH_API void PHP_XXH3_64_Init(PHP_XXH3_64_CTX *ctx, HashTable *args)
+{
+	_PHP_XXH3_Init(ctx, args, XXH3_64bits_reset_withSeed, XXH3_64bits_reset_withSecret, "xxh3");
 }
 
 PHP_HASH_API void PHP_XXH3_64_Update(PHP_XXH3_64_CTX *ctx, const unsigned char *in, size_t len)
@@ -238,19 +268,7 @@ const php_hash_ops php_hash_xxh3_128_ops = {
 
 PHP_HASH_API void PHP_XXH3_128_Init(PHP_XXH3_128_CTX *ctx, HashTable *args)
 {
-	/* TODO integrate also XXH3_128__64bits_reset_withSecret(). */
-	XXH64_hash_t seed = 0;
-
-	if (args) {
-		zval *_seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
-		/* This might be a bit too restrictive, but thinking that a seed might be set
-			once and for all, it should be done a clean way. */
-		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
-			seed = (XXH64_hash_t)Z_LVAL_P(_seed);
-		}
-	}
-
-	XXH3_128bits_reset_withSeed(&ctx->s, seed);
+	_PHP_XXH3_Init(ctx, args, XXH3_128bits_reset_withSeed, XXH3_128bits_reset_withSecret, "xxh128");
 }
 
 PHP_HASH_API void PHP_XXH3_128_Update(PHP_XXH3_128_CTX *ctx, const unsigned char *in, size_t len)
