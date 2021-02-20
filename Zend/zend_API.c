@@ -503,7 +503,15 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			return 0;
 		} else {
-			*dest = zend_dval_to_lval_safe(Z_DVAL_P(arg));
+			/* Manually check arg_num is not (uint32_t)-1, as otherwise its called by
+			 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+			if (UNEXPECTED(!is_long_compatible(Z_DVAL_P(arg)) && arg_num != (uint32_t)-1)) {
+				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float");
+				if (UNEXPECTED(EG(exception))) {
+					return 0;
+				}
+			}
+			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
@@ -519,9 +527,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 				}
 
 				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError
-				 * Manually check to get correct warning text mentioning string origin */
-				if (!is_long_compatible(d)) {
+				 * Manually check to get correct warning text mentioning string origin
+				 * Check arg_num is not (uint32_t)-1, as otherwise its called by
+				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+				if (UNEXPECTED(!is_long_compatible(d) && arg_num != (uint32_t)-1)) {
 					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string");
+					if (UNEXPECTED(EG(exception))) {
+						return 0;
+					}
 				}
 				*dest = zend_dval_to_lval(d);
 			} else {

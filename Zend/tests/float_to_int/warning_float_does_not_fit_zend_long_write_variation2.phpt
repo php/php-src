@@ -25,4 +25,4 @@ Stack trace:
 #0 {main}
   thrown in %s on line %d
 
-Fatal error: Allowed memory size of %d bytes exhausted at %s:141 (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted %S(tried to allocate %d bytes) in %s on line %d

@@ -1,7 +1,5 @@
 --TEST--
 Implicit string float to int conversions should warn for literals
---XFAIL--
-Double warning for internal calls
 --FILE--
 <?php
 
@@ -35,7 +33,6 @@ function foo(int $a) {
 }
 var_dump(foo('1.5'));
 
-// TODO: Why are two warnings generated here?
 var_dump(chr('60.5'));
 
 echo 'Function returns:' . \PHP_EOL;
@@ -87,8 +84,6 @@ Function calls:
 
 Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
 int(1)
-
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
 
 Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
 string(1) "<"
