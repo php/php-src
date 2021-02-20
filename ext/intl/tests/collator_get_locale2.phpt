@@ -19,7 +19,6 @@ function ut_main()
         -100,
         -9999999999999,
         9999999999999,
-        1.2,
     );
 
     $coll = ut_coll_create( 'en_US' );
@@ -48,4 +47,3 @@ Locale of type 100 is false
 Locale of type -100 is false
 Locale of type -9999999999999 is false
 Locale of type 9999999999999 is false
-Locale of type 1.2 is 'en_US'
