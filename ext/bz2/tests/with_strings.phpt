@@ -5,8 +5,6 @@ BZ2 with strings
 --FILE--
 <?php
 
-error_reporting(E_ALL);
-
 # This FAILS
 $blaat = <<<HEREDOC
 This is some random data
@@ -17,11 +15,8 @@ HEREDOC;
 
 $blaat2 = bzdecompress(bzcompress($blaat));
 
-$tests = <<<TESTS
- \$blaat === \$blaat2
-TESTS;
+var_dump($blaat === $blaat2);
 
-include(__DIR__ . '/../../../tests/quicktester.inc');
 ?>
 --EXPECT--
-OK
+bool(true)
