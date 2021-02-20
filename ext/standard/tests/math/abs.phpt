@@ -8,18 +8,21 @@ define('LONG_MIN', -LONG_MAX - 1);
 printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
                        is_int(LONG_MIN-1),is_int(LONG_MAX+1));
 
-$tests = <<<TESTS
- 1   === abs(-1)
- 1.5 === abs(-1.5)
- 1   === abs("-1")
- 1.5 === abs("-1.5")
--LONG_MIN+1 === abs(LONG_MIN-1)
--LONG_MIN   === abs(LONG_MIN)
--(LONG_MIN+1) === abs(LONG_MIN+1)
-TESTS;
+var_dump(1   === abs(-1));
+var_dump(1.5 === abs(-1.5));
+var_dump(1   === abs("-1"));
+var_dump(1.5 === abs("-1.5"));
+var_dump(-LONG_MIN+1 === abs(LONG_MIN-1));
+var_dump(-LONG_MIN   === abs(LONG_MIN));
+var_dump(-(LONG_MIN+1) === abs(LONG_MIN+1));
 
-include(__DIR__ . '/../../../../tests/quicktester.inc');
 ?>
 --EXPECT--
 1,1,0,0
-OK
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
