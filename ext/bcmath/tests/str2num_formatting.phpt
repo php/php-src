@@ -46,6 +46,12 @@ try {
     echo $e->getMessage() . PHP_EOL;
 }
 
+try {
+    echo bcadd("1.a", "2");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
 echo "\n";
 
 echo bccomp("1", "2"),"\n";
@@ -94,6 +100,7 @@ try {
 2
 2
 
+bcadd(): Argument #1 ($num1) is not well-formed
 bcadd(): Argument #1 ($num1) is not well-formed
 bcadd(): Argument #1 ($num1) is not well-formed
 bcadd(): Argument #1 ($num1) is not well-formed
