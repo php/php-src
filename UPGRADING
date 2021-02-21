@@ -166,6 +166,16 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
+    Secret usage is supported through passing the `secret` key in the `$options` array, too:
+
+    ```php
+    $h = hash("xxh3", $data, options: ["secret" => "at least 136 bytes long secret here"]);
+    echo $h, "\n";
+    ```
+
+    Note, that the quality of the custom secret is crucial for the quality of the resulting hash. It is
+    highly recommended for the secret to use the best possible entropy.
+
 - PDO SQLite:
   . SQLite's "file:" DSN syntax is now supported, which allows specifying
     additional flags. This feature is not available if open_basedir is set.

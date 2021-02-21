@@ -22,9 +22,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   a. ext/hash
     - The init signatures are extended with an additional `HashTable*`
       argument. The passed HT is to contain the algorithm specific
-      configuration. If the an algorithm doesn't make use of any
-      additional configuration, the argument is to be marked with
-      ZEND_ATTRIBUTE_UNUSED.
+      configuration. If an algorithm doesn't make use of any additional
+      configuration, the argument is to be marked with ZEND_ATTRIBUTE_UNUSED.
 
   b. ext/pdo
     - The "preparer" callback now accepts a zend_string* instead of
