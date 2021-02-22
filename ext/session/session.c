@@ -1264,13 +1264,11 @@ static void php_session_remove_cookie(void) {
 	zend_llist_element *next;
 	zend_llist_element *current;
 	char *session_cookie;
-	zend_string *e_session_name;
 	size_t session_cookie_len;
 	size_t len = sizeof("Set-Cookie")-1;
 
-	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
-	spprintf(&session_cookie, 0, "Set-Cookie: %s=", ZSTR_VAL(e_session_name));
-	zend_string_free(e_session_name);
+	ZEND_ASSERT(strpbrk(PS(session_name), "=,; \t\r\n\013\014") == NULL);
+	spprintf(&session_cookie, 0, "Set-Cookie: %s=", PS(session_name));
 
 	session_cookie_len = strlen(session_cookie);
 	current = l->head;
@@ -1302,7 +1300,7 @@ static int php_session_send_cookie(void) /* {{{ */
 {
 	smart_str ncookie = {0};
 	zend_string *date_fmt = NULL;
-	zend_string *e_session_name, *e_id;
+	zend_string *e_id;
 
 	if (SG(headers_sent)) {
 		const char *output_start_filename = php_output_get_start_filename();
@@ -1316,16 +1314,20 @@ static int php_session_send_cookie(void) /* {{{ */
 		return FAILURE;
 	}
 
-	/* URL encode session_name and id because they might be user supplied */
-	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
+	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
+	if (strpbrk(PS(session_name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,; \\t\\r\\n\\013\\014'");
+		return FAILURE;
+	}
+
+	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
 
 	smart_str_appendl(&ncookie, "Set-Cookie: ", sizeof("Set-Cookie: ")-1);
-	smart_str_appendl(&ncookie, ZSTR_VAL(e_session_name), ZSTR_LEN(e_session_name));
+	smart_str_appendl(&ncookie, PS(session_name), strlen(PS(session_name)));
 	smart_str_appendc(&ncookie, '=');
 	smart_str_appendl(&ncookie, ZSTR_VAL(e_id), ZSTR_LEN(e_id));
 
-	zend_string_release_ex(e_session_name, 0);
 	zend_string_release_ex(e_id, 0);
 
 	if (PS(cookie_lifetime) > 0) {
