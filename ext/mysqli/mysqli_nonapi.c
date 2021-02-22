@@ -333,7 +333,9 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
 
 #if MYSQL_VERSION_ID > 80021 || defined(MYSQLI_USE_MYSQLND)
-	mysql_options(mysql->mysql, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, MyG(local_infile_directory));
+	if (MyG(local_infile_directory) && !php_check_open_basedir(MyG(local_infile_directory))) {
+		mysql_options(mysql->mysql, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, MyG(local_infile_directory));
+	}
 #endif
 
 end:

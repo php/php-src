@@ -60,8 +60,6 @@ if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
 $link->close();
 ?>
 --EXPECTF--
-Warning: mysqli::query(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s) in %s
-
-Warning: mysqli::query(%s): Failed to open directory: Operation not permitted in %s
-[004] [2068] cannot open local_infile_directory
+Warning: mysqli_connect(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s) in %s on line %d
+[004] [2068] LOAD DATA LOCAL INFILE %s
 done
