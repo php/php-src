@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.4
 
+- Core:
+  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
+
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
