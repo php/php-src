@@ -995,7 +995,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	}
 
 
-	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {
+	if (flag & PHP_INFO_CREDITS) {
 		php_info_print_hr();
 		php_print_credits(PHP_CREDITS_ALL & ~PHP_CREDITS_FULLPAGE);
 	}

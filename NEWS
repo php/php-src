@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #80774 (session_name() problem with backslash). (cmb)
 
+- Standard:
+  . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
+
 18 Feb 2021, PHP 8.0.3
 
 - Core:
