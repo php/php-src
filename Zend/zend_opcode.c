@@ -514,10 +514,8 @@ void zend_class_add_ref(zval *zv)
 	}
 }
 
-ZEND_API void destroy_op_array(zend_op_array *op_array)
+ZEND_API void zend_destroy_static_vars(zend_op_array *op_array)
 {
-	uint32_t i;
-
 	if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 		HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 		if (ht) {
@@ -525,6 +523,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 		}
 	}
+}
+
+ZEND_API void destroy_op_array(zend_op_array *op_array)
+{
+	uint32_t i;
 
 	if ((op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 	 && ZEND_MAP_PTR(op_array->run_time_cache)) {

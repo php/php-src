@@ -2824,6 +2824,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
+		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 #ifdef ZEND_PREFER_RELOAD
@@ -6231,6 +6232,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL, SPEC(OBSER
 			zend_vm_stack_free_call_frame(call);
 		}
 
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {

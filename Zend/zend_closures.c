@@ -39,6 +39,7 @@ typedef struct _zend_closure {
 	zval              this_ptr;
 	zend_class_entry *called_scope;
 	zif_handler       orig_internal_handler;
+	HashTable        *static_variables;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -486,10 +487,9 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
-		/* We shared static_variables with the original function.
-		 * Unshare now so we don't try to destroy them. */
-		if (closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr, NULL);
+		/* We don't own the static variables of fake closures. */
+		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+			zend_destroy_static_vars(&closure->func.op_array);
 		}
 		destroy_op_array(&closure->func.op_array);
 	}
@@ -689,11 +689,13 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		/* For fake closures, we want to reuse the static variables of the original function. */
 		if (!is_fake) {
 			if (closure->func.op_array.static_variables) {
-				closure->func.op_array.static_variables =
-					zend_array_dup(closure->func.op_array.static_variables);
+				HashTable *static_variables =
+					ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
+				closure->static_variables = zend_array_dup(
+					static_variables ? static_variables : closure->func.op_array.static_variables);
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				&closure->func.op_array.static_variables);
+				&closure->static_variables);
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
