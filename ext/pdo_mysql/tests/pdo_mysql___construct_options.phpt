@@ -48,7 +48,6 @@ MySQLPDOTest::skip();
 
             PDO::MYSQL_ATTR_USE_BUFFERED_QUERY		=> 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY',
             PDO::MYSQL_ATTR_LOCAL_INFILE					=> 'PDO::MYSQL_ATTR_LOCAL_INFILE',
-            PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY			=> 'PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY',
             PDO::MYSQL_ATTR_DIRECT_QUERY					=> 'PDO::MYSQL_ATTR_DIRECT_QUERY',
 
             PDO::MYSQL_ATTR_INIT_COMMAND					=> 'PDO::MYSQL_ATTR_INIT_COMMAND',
@@ -64,7 +63,6 @@ MySQLPDOTest::skip();
             PDO::MYSQL_ATTR_USE_BUFFERED_QUERY		=> 1,
             /* TODO getAttribute() does not handle it */
             PDO::MYSQL_ATTR_LOCAL_INFILE					=> false,
-            PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY			=> null,
             /* TODO getAttribute() does not handle it */
             PDO::MYSQL_ATTR_DIRECT_QUERY					=> 1,
             PDO::MYSQL_ATTR_INIT_COMMAND					=> '',
