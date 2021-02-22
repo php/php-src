@@ -34,6 +34,11 @@
 #define PHP_FTP_FINISHED		1
 #define PHP_FTP_MOREDATA		2
 
+#ifdef PHP_WIN32
+# undef ETIMEDOUT
+# define ETIMEDOUT WSAETIMEDOUT
+#endif
+
 /* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
 
