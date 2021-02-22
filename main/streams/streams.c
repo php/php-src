@@ -443,7 +443,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		(close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0);
 #endif
 
-	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN) {
+	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN || stream->writefilters.head) {
 		/* make sure everything is saved */
 		_php_stream_flush(stream, 1);
 	}
