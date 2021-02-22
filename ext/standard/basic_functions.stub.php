@@ -6,6 +6,10 @@ final class __PHP_Incomplete_Class
 {
 }
 
+class AssertionError extends Error
+{
+}
+
 /* main/main.c */
 
 function set_time_limit(int $seconds): bool {}
