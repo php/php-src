@@ -72,5 +72,5 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2068 LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file in %s on line %d
+Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2068 LOAD DATA LOCAL INFILE %s in %s on line %d
 done!

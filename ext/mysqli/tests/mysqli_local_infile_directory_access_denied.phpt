@@ -60,6 +60,6 @@ if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
 
 $link->close();
 ?>
---EXPECT--
-[004] [2068] LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file
+--EXPECTF--
+[004] [2068] LOAD DATA LOCAL INFILE %s
 done
