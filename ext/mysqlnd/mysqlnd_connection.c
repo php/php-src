@@ -251,6 +251,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->options->connect_attr, pers);
 		conn->options->connect_attr = NULL;
 	}
+	if (conn->options->local_infile_directory) {
+		mnd_pefree(conn->options->local_infile_directory, pers);
+		conn->options->local_infile_directory = NULL;
+	}
 }
 /* }}} */
 
@@ -1648,6 +1652,19 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
 			}
 			break;
+		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
+		{
+			if (conn->options->local_infile_directory) {
+				mnd_pefree(conn->options->local_infile_directory, conn->persistent);
+			}
+
+			if (!value || (*value == '\0')) {
+				conn->options->local_infile_directory = NULL;
+			} else {
+				conn->options->local_infile_directory = mnd_pestrdup(value, conn->persistent);
+			}
+			break;
+		}
 		case MYSQL_INIT_COMMAND:
 		{
 			char ** new_init_commands;

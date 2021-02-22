@@ -46,7 +46,7 @@ require_once('skipifconnectfailure.inc');
     if ($IS_MYSQLND) {
         $expected = array(
             'size',
-            'mysqli.allow_local_infile',
+            'mysqli.allow_local_infile', 'mysqli.local_infile_directory',
             'mysqli.allow_persistent', 'mysqli.max_persistent'
         );
         foreach ($expected as $k => $entry)

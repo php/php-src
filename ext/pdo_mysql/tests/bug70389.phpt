@@ -13,6 +13,7 @@ $flags = [
     PDO::MYSQL_ATTR_FOUND_ROWS	=> true,
     PDO::MYSQL_ATTR_LOCAL_INFILE	=> true,
     PDO::ATTR_PERSISTENT 		=> true,
+    PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY	=> __DIR__,
 ];
 
 $std = new StdClass();
@@ -23,11 +24,13 @@ var_dump($flags);
 
 ?>
 --EXPECTF--
-array(3) {
+array(4) {
   [%d]=>
   bool(true)
-  [1001]=>
+  [%d]=>
   bool(true)
-  [12]=>
+  [%d]=>
   bool(true)
+  [%d]=>
+  string(%d) "%s"
 }
