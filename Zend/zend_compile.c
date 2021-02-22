@@ -941,22 +941,35 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 {
 	char *compound;
 
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
+		if (type == ZEND_NAME_FQ) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"'\\%s' is an invalid class name", ZSTR_VAL(name));
+		}
+		if (type == ZEND_NAME_RELATIVE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"'namespace\\%s' is an invalid class name", ZSTR_VAL(name));
+		}
+		ZEND_ASSERT(type == ZEND_NAME_NOT_FQ);
+		return zend_string_copy(name);
+	}
+
 	if (type == ZEND_NAME_RELATIVE) {
 		return zend_prefix_with_ns(name);
 	}
 
-	if (type == ZEND_NAME_FQ || ZSTR_VAL(name)[0] == '\\') {
-		/* Remove \ prefix (only relevant if this is a string rather than a label) */
+	if (type == ZEND_NAME_FQ) {
 		if (ZSTR_VAL(name)[0] == '\\') {
+			/* Remove \ prefix (only relevant if this is a string rather than a label) */
 			name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
-		} else {
-			zend_string_addref(name);
+			if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"'\\%s' is an invalid class name", ZSTR_VAL(name));
+			}
+			return name;
 		}
-		/* Ensure that \self, \parent and \static are not used */
-		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", ZSTR_VAL(name));
-		}
-		return name;
+
+		return zend_string_copy(name);
 	}
 
 	if (FC(imports)) {
@@ -10078,20 +10091,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			switch (zend_get_class_fetch_type(zend_ast_get_str(class_ast))) {
-				case ZEND_FETCH_CLASS_SELF:
-					if (!zend_is_scope_known()) {
-						return;
-					}
-					resolved_name = zend_string_copy(CG(active_class_entry)->name);
-					break;
-				case ZEND_FETCH_CLASS_DEFAULT:
-					resolved_name = zend_resolve_class_name_ast(class_ast);
-					break;
-				default:
-					return;
-			}
-
+			resolved_name = zend_resolve_class_name_ast(class_ast);
 			if (!zend_try_ct_eval_class_const(&result, resolved_name, zend_ast_get_str(name_ast))) {
 				zend_string_release_ex(resolved_name, 0);
 				return;
