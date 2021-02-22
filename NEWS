@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
   . Fixed bug #80330 (Replace language in APIs and source code/docs).
     (Darek Ślusarczyk)
+  . Fixed bug #80329 (Add option to specify LOAD DATA LOCAL white list folder
+    (including libmysql)). (Darek Ślusarczyk)
 
 - Opcache:
   . Added inheritance cache. (Dmitry)

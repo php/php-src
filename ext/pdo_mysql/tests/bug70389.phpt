@@ -26,8 +26,8 @@ var_dump($flags);
 array(3) {
   [%d]=>
   bool(true)
-  [1001]=>
+  [%d]=>
   bool(true)
-  [12]=>
+  [%d]=>
   bool(true)
 }

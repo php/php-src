@@ -176,6 +176,18 @@ PHP 8.1 UPGRADE NOTES
     Note, that the quality of the custom secret is crucial for the quality of the resulting hash. It is
     highly recommended for the secret to use the best possible entropy.
 
+- MySQLi:
+  . The mysqli.local_infile_directory ini setting has been added, which can be
+    used to specify a directory from which files are allowed to be loaded. It
+    is only meaningful if mysqli.allow_local_infile is not enabled, as all
+    directories are allowed in that case.
+
+- PDO MySQL:
+  . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
+    can be used to specify a directory from which files are allowed to be
+    loaded. It is only meaningful if PDO::MYSQL_ATTR_LOCAL_INFILE is not
+    enabled, as all directories are allowed in that case.
+
 - PDO SQLite:
   . SQLite's "file:" DSN syntax is now supported, which allows specifying
     additional flags. This feature is not available if open_basedir is set.

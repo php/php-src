@@ -231,6 +231,8 @@ typedef struct st_mysqlnd_session_options
 	unsigned int		max_allowed_packet;
 
 	bool	int_and_float_native;
+
+	char		*local_infile_directory;
 } MYSQLND_SESSION_OPTIONS;
 
 

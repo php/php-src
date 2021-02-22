@@ -1210,7 +1210,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 #ifdef MYSQLI_USE_MYSQLND
 	const size_t	*ret;
 #else
-	const zend_ulong *ret;
+	const unsigned long *ret;
 #endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
@@ -1673,6 +1673,9 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_SET_CHARSET_DIR:
 #if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_SERVER_PUBLIC_KEY:
+#endif
+#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
 #endif
 			return IS_STRING;
 

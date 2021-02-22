@@ -149,12 +149,51 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	MYSQLND_INFILE		infile;
 	MYSQLND_PFC			* net = conn->protocol_frame_codec;
 	MYSQLND_VIO			* vio = conn->vio;
+	bool				is_local_infile_enabled = (conn->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES;
+	const char*			local_infile_directory = conn->options->local_infile_directory;
+	bool				is_local_infile_dir_set = local_infile_directory != NULL;
+	bool				prerequisities_ok = TRUE;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
-	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
-		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
-						"LOAD DATA LOCAL INFILE is forbidden, check mysqli.allow_local_infile");
+	/*
+		if local_infile is disabled, and local_infile_dir is not set, then operation is forbidden
+	*/
+	if (!is_local_infile_enabled && !is_local_infile_dir_set) {
+		SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE,
+						"LOAD DATA LOCAL INFILE is forbidden, check related settings like "
+						"mysqli.allow_local_infile|mysqli.local_infile_directory or "
+						"PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY");
+		prerequisities_ok = FALSE;
+	}
+
+	/*
+		if local_infile_dir is set, then check whether it actually exists, and is accessible
+	*/
+	if (is_local_infile_dir_set) {
+		php_stream *stream = php_stream_opendir(local_infile_directory, REPORT_ERRORS, NULL);
+		if (stream) {
+			php_stream_closedir(stream);
+		} else {
+			SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE, "cannot open local_infile_directory");
+			prerequisities_ok = FALSE;
+		}
+	}
+
+	/*
+		if local_infile is disabled and local_infile_dir is set, then we have to check whether
+		filename is located inside its subtree
+		but only in such a case, because when local_infile is enabled, then local_infile_dir is ignored
+	*/
+	if (prerequisities_ok && !is_local_infile_enabled && is_local_infile_dir_set) {
+		if (php_check_specific_open_basedir(local_infile_directory, filename) == -1) {
+			SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE,
+							"LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file");
+			prerequisities_ok = FALSE;
+		}
+	}
+
+	if (!prerequisities_ok) {
 		/* write empty packet to server */
 		ret = net->data->m.send(net, vio, empty_packet, 0, conn->stats, conn->error_info);
 		*is_warning = TRUE;

@@ -46,6 +46,7 @@ typedef _Bool		my_bool;
 #include <errmsg.h>
 #include <mysqld_error.h>
 #include "mysqli_libmysql.h"
+
 #endif /* MYSQLI_USE_MYSQLND */
 
 
@@ -276,6 +277,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char			*default_pw;
 	zend_long			reconnect;
 	zend_long			allow_local_infile;
+	char				*local_infile_directory;
 	zend_long			strict;
 	zend_long			error_no;
 	char			*error_msg;
