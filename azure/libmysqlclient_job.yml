@@ -18,6 +18,8 @@ jobs:
         set -o
         sudo service mysql start
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        # Ensure local_infile tests can run.
+        mysql -uroot -proot -e "SET GLOBAL local_infile = true"
       displayName: 'Setup MySQL server'
     # Does not support caching_sha2_auth :(
     #- template: libmysqlclient_test.yml
