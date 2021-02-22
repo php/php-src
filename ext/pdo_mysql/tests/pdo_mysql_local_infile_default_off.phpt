@@ -5,6 +5,9 @@ ensure default for local infile is off
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
+if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
+    die("skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support");
+}
 ?>
 --FILE--
 <?php
