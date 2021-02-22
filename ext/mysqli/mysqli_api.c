@@ -1674,7 +1674,7 @@ static int mysqli_options_get_option_zval_type(int option)
 #if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_SERVER_PUBLIC_KEY:
 #endif
-#if MYSQL_VERSION_ID > 80021 || defined(MYSQLI_USE_MYSQLND)
+#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
 #endif
 			return IS_STRING;
