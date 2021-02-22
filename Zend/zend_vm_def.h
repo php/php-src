@@ -6937,6 +6937,10 @@ ZEND_VM_C_LABEL(num_index_prop):
 			ZEND_VM_C_GOTO(isset_again);
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				ZEND_VM_C_GOTO(isset_dim_obj_exit);
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {

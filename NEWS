@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, php 7.4.17
 
+- Core:
+  . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
+    (Nikita)
+
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)

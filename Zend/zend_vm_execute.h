@@ -6302,6 +6302,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -8496,6 +8500,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -10949,6 +10957,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -14985,6 +14997,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -16402,6 +16418,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -17689,6 +17709,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -41505,6 +41529,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -44950,6 +44978,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
@@ -50123,6 +50155,10 @@ num_index_prop:
 			goto isset_again;
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				goto isset_dim_obj_exit;
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
