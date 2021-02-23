@@ -1188,7 +1188,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	}
 	if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
 		$data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
-	} else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 30) & 0b11) === 0x3) {
+	} else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
 		// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
 		$data .= "\nTermsig=" . $stat["exitcode"] . "\n";
 	}
