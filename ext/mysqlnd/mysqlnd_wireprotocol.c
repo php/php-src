@@ -1407,7 +1407,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			memcpy(buffer->ptr, buf, *data_size);
 			efree(buf);
 		}
-		p = buffer->ptr + *data_size;
+		p = (zend_uchar *) buffer->ptr + *data_size;
 		*data_size += header.size;
 
 		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
