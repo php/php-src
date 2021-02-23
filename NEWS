@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
+  . Fixed bug #78719 (http wrapper silently ignores long Location headers).
+    (cmb)
 
 04 Mar 2021, php 7.4.16
 
