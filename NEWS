@@ -13,6 +13,9 @@ PHP                                                                        NEWS
     reference). (Dmitry)
   . Fixed bug #80968 (JIT segfault with return from required file). (Dmitry)
 
+- MySQLnd:
+  . Fixed bug #80761 (PDO uses too much memory). (Nikita)
+
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
     (cmb)

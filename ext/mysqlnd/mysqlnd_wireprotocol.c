@@ -1391,47 +1391,39 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	} else {
+		/* If the packet is split in multiple chunks, allocate a temporary buffer that we can
+		 * reallocate, and only afterwards copy it to the pool when we know the final size. */
+		zend_uchar *buf = NULL;
+		while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
+			buf = erealloc(buf, *data_size + header.size);
+			p = buf + *data_size;
+			*data_size += header.size;
+
+			if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
+				DBG_ERR("Empty row packet body");
+				SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
+				set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+				efree(buf);
+				DBG_RETURN(FAIL);
+			}
+			if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
+				efree(buf);
+				DBG_RETURN(FAIL);
+			}
+		}
+
+		buffer->ptr = pool->get_chunk(pool, *data_size + header.size + prealloc_more_bytes);
+		if (buf) {
+			memcpy(buffer->ptr, buf, *data_size);
+			efree(buf);
+		}
+		p = (zend_uchar *) buffer->ptr + *data_size;
 		*data_size += header.size;
-		buffer->ptr = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
-		p = buffer->ptr;
 
 		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
 			DBG_ERR("Empty row packet body");
 			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 			set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-		} else {
-			while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
-				if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
-					ret = FAIL;
-					break;
-				}
-
-				*data_size += header.size;
-
-				/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
-				if (!header.size) {
-					break;
-				}
-
-				/*
-				  We have to realloc the buffer.
-				*/
-				buffer->ptr = pool->resize_chunk(pool, buffer->ptr, *data_size - header.size, *data_size + prealloc_more_bytes);
-				if (!buffer->ptr) {
-					SET_OOM_ERROR(error_info);
-					ret = FAIL;
-					break;
-				}
-				/* The position could have changed, recalculate */
-				p = (zend_uchar *) buffer->ptr + (*data_size - header.size);
-
-				if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
-					DBG_ERR("Empty row packet body");
-					SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
-					set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-					break;
-				}
-			}
 		}
 	}
 	if (ret == FAIL && buffer->ptr) {
