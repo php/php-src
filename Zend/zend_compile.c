@@ -2902,7 +2902,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 		if (nullsafe) {
-			/* We will push to the short_cirtcuiting_opnums stack in zend_delayed_compile_end(). */
+			/* We will push to the short_circuiting_opnums stack in zend_delayed_compile_end(). */
 			opline = zend_delayed_emit_op(NULL, ZEND_JMP_NULL, &obj_node, NULL);
 			if (opline->op1_type == IS_CONST) {
 				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
