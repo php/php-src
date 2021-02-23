@@ -51,11 +51,9 @@ typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 struct st_mysqlnd_memory_pool
 {
 	zend_arena		*arena;
-	void			*last;
 	void            *checkpoint;
 
 	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
-	void	(*free_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr);
 };
 
 

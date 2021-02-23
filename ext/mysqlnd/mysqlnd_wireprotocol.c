@@ -1416,10 +1416,6 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		}
 	}
-	if (ret == FAIL && buffer->ptr) {
-		pool->free_chunk(pool, buffer->ptr);
-		buffer->ptr = NULL;
-	}
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1729,23 +1725,6 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 end:
 	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_rowp_free_mem */
-static void
-php_mysqlnd_rowp_free_mem(void * _packet)
-{
-	MYSQLND_PACKET_ROW *p;
-
-	DBG_ENTER("php_mysqlnd_rowp_free_mem");
-	p = (MYSQLND_PACKET_ROW *) _packet;
-	if (p->row_buffer.ptr) {
-		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer.ptr);
-		p->row_buffer.ptr = NULL;
-	}
-	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -2196,7 +2175,7 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 	{
 		php_mysqlnd_rowp_read, /* read */
 		NULL, /* write */
-		php_mysqlnd_rowp_free_mem,
+		NULL,
 	}, /* PROT_ROW_PACKET */
 	{
 		php_mysqlnd_stats_read, /* read */

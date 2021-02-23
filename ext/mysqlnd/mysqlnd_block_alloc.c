@@ -22,38 +22,12 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_priv.h"
 
-/* {{{ mysqlnd_mempool_free_chunk */
-static void
-mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
-{
-	DBG_ENTER("mysqlnd_mempool_free_chunk");
-	/* Try to back-off and guess if this is the last block allocated */
-#ifndef ZEND_TRACK_ARENA_ALLOC
-	if (ptr == pool->last) {
-		/*
-			This was the last allocation. Lucky us, we can free
-			a bit of memory from the pool. Next time we will return from the same ptr.
-		*/
-		pool->arena->ptr = (char*)ptr;
-		pool->last = NULL;
-	}
-#endif
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_mempool_get_chunk */
 static void *
 mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, size_t size)
 {
-	void *ptr = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");
-
-	ptr = zend_arena_alloc(&pool->arena, size);
-	pool->last = ptr;
-
-	DBG_RETURN(ptr);
+	DBG_RETURN(zend_arena_alloc(&pool->arena, size));
 }
 /* }}} */
 
@@ -69,10 +43,8 @@ mysqlnd_mempool_create(size_t arena_size)
 	arena = zend_arena_create(MAX(arena_size, ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))));
 	ret = zend_arena_alloc(&arena, sizeof(MYSQLND_MEMORY_POOL));
 	ret->arena = arena;
-	ret->last = NULL;
 	ret->checkpoint = NULL;
 	ret->get_chunk = mysqlnd_mempool_get_chunk;
-	ret->free_chunk = mysqlnd_mempool_free_chunk;
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -109,7 +81,6 @@ mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 #endif
 	if (pool->checkpoint) {
 		zend_arena_release(&pool->arena, pool->checkpoint);
-		pool->last = NULL;
 		pool->checkpoint = NULL;
 	}
 	DBG_VOID_RETURN;
