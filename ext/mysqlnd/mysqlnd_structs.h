@@ -55,7 +55,6 @@ struct st_mysqlnd_memory_pool
 	void            *checkpoint;
 
 	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
-	void*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size);
 	void	(*free_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr);
 };
 
