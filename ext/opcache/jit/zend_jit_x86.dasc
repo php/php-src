@@ -4428,7 +4428,14 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
                                      zend_jit_addr   res_addr,
                                      uint32_t        res_use_info)
 {
-	zend_reg result_reg, tmp_reg;
+	zend_reg result_reg, tmp_reg_gp;
+
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+		/* ASSIGN_DIM_OP */
+		tmp_reg_gp = ZREG_R1;
+	} else {
+		tmp_reg_gp = ZREG_R0;
+	}
 
 	if (zend_is_commutative(opcode)
 	 && (Z_MODE(res_addr) != IS_REG || Z_MODE(op1_addr) != IS_REG || Z_REG(res_addr) != Z_REG(op1_addr))) {
@@ -4437,13 +4444,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 		} else {
 			result_reg = ZREG_XMM0;
 		}
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
-			/* ASSIGN_DIM_OP */
-			tmp_reg = ZREG_R1;
-		} else {
-			tmp_reg = ZREG_R0;
-		}
-		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr, tmp_reg
+		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr, tmp_reg_gp
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
 			/* ASSIGN_DIM_OP */
 			if (CAN_USE_AVX()) {
@@ -4485,7 +4486,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, tmp_reg_gp
 				|	AVX_MATH_REG opcode, result_reg, op1_reg, tmp_reg
 			}
 		} else {
@@ -4495,7 +4496,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, tmp_reg_gp
 				|	SSE_MATH_REG opcode, result_reg, tmp_reg
 			}
 		}
