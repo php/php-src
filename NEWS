@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #80786 (PHP crash using JIT). (Nikita)
+  . Fixed bug #80782 (DASM_S_RANGE_VREG on PHP_INT_MIN-1). (Dmitry)
 
 - Session:
   . Fixed bug #80774 (session_name() problem with backslash). (cmb)
