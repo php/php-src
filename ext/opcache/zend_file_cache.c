@@ -113,11 +113,13 @@ static int zend_file_cache_flock(int fd, int type)
 #define IS_SERIALIZED_INTERNED(ptr) \
 	((size_t)(ptr) & Z_UL(1))
 
-/* Allowing == here to account for a potential empty allocation at the end of the memory */
+/* Allowing == on the upper bound accounts for a potential empty allocation at the end of the
+ * memory region. This can also happen for a return-type-only arg_info, where &arg_info[1] is
+ * stored, which may point to the end of the region. */
 #define IS_SERIALIZED(ptr) \
 	((char*)(ptr) <= (char*)script->size)
 #define IS_UNSERIALIZED(ptr) \
-	(((char*)(ptr) >= (char*)script->mem && (char*)(ptr) < (char*)script->mem + script->size) || \
+	(((char*)(ptr) >= (char*)script->mem && (char*)(ptr) <= (char*)script->mem + script->size) || \
 	 IS_ACCEL_INTERNED(ptr))
 #define SERIALIZE_PTR(ptr) do { \
 		if (ptr) { \
