@@ -3736,7 +3736,10 @@ class SkipCache
         $dir = dirname($checkFile);
         $key = "$php => $dir";
 
-        if (isset($this->skips[$key][$code])) {
+        if (isset($this->skips[$key][$code])
+            // FIXME: caching breaks mysqli tests
+            && strpos($checkFile, 'mysqli') === false
+        ) {
             $this->hits++;
             if ($this->keepFile) {
                 save_text($checkFile, $code, $tempFile);
