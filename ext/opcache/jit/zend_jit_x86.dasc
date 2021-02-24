@@ -4329,12 +4329,17 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		}
 
 		do {
-			if ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
-			    (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1)) {
+			if ((sizeof(void*) == 8 || Z_MODE(res_addr) != IS_REG) &&
+			    ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
+			     (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1))) {
 				if (opcode == ZEND_ADD) {
 					|.if X64
 						|	mov64 rax, 0x43e0000000000000
-						|	SET_ZVAL_LVAL res_addr, rax
+						if (Z_MODE(res_addr) == IS_REG) {
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+						} else {
+							|	SET_ZVAL_LVAL res_addr, rax
+						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0
 						|	SET_ZVAL_W2 res_addr, 0x41e00000
@@ -4343,7 +4348,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 				} else if (opcode == ZEND_SUB) {
 					|.if X64
 						|	mov64 rax, 0xc3e0000000000000
-						|	SET_ZVAL_LVAL res_addr, rax
+						if (Z_MODE(res_addr) == IS_REG) {
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+						} else {
+							|	SET_ZVAL_LVAL res_addr, rax
+						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0x00200000
 						|	SET_ZVAL_W2 res_addr, 0xc1e00000
