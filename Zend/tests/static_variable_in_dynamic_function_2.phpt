@@ -1,5 +1,5 @@
 --TEST--
-Static variables in dynamically declared function (first use before dynamic def dtor)
+Static variables in dynamically declared function (first use after dynamic def dtor)
 --FILE--
 <?php
 
@@ -9,10 +9,10 @@ if (1) {
         static $x = 0;
         var_dump(++$x);
     }
-    test();
 }
 CODE;
 eval($code);
+test();
 test();
 
 ?>
