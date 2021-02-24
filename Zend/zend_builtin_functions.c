@@ -1069,23 +1069,25 @@ ZEND_FUNCTION(function_exists)
 ZEND_FUNCTION(class_alias)
 {
 	zend_string *class_name;
-	char *alias_name;
+	zend_string *alias_name;
 	zend_class_entry *ce;
-	size_t alias_name_len;
 	bool autoload = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ss|b", &class_name, &alias_name, &alias_name_len, &autoload) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(class_name)
+		Z_PARAM_STR(alias_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
 		if (ce->type == ZEND_USER_CLASS) {
-			if (zend_register_class_alias_ex(alias_name, alias_name_len, ce, 0) == SUCCESS) {
+			if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, 0) == SUCCESS) {
 				RETURN_TRUE;
 			} else {
-				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), alias_name);
+				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
 				RETURN_FALSE;
 			}
 		} else {
@@ -1152,10 +1154,11 @@ ZEND_FUNCTION(set_error_handler)
 	zend_fcall_info_cache fcc;
 	zend_long error_type = E_ALL;
 
-	/* callable argument corresponds to the error handler */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!|l", &fci, &fcc, &error_type) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(error_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 		ZVAL_COPY(return_value, &EG(user_error_handler));
@@ -1209,10 +1212,9 @@ ZEND_FUNCTION(set_exception_handler)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 
-	/* callable argument corresponds to the exception handler */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!", &fci, &fcc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 		ZVAL_COPY(return_value, &EG(user_exception_handler));
