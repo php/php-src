@@ -39,7 +39,6 @@ typedef struct _zend_closure {
 	zval              this_ptr;
 	zend_class_entry *called_scope;
 	zif_handler       orig_internal_handler;
-	HashTable        *static_variables;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -689,13 +688,11 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		/* For fake closures, we want to reuse the static variables of the original function. */
 		if (!is_fake) {
 			if (closure->func.op_array.static_variables) {
-				HashTable *static_variables =
-					ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
-				closure->static_variables = zend_array_dup(
-					static_variables ? static_variables : closure->func.op_array.static_variables);
+				closure->func.op_array.static_variables =
+					zend_array_dup(closure->func.op_array.static_variables);
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				&closure->static_variables);
+				&closure->func.op_array.static_variables);
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
