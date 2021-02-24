@@ -764,6 +764,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile() == FAILURE) {
 				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
+				EG(exit_status) = FAILURE;
 				goto out;
 			}
 		}
