@@ -759,7 +759,7 @@ array (
   array (
   ),
 )
-string(55) "array (
+string(53) "array (
   0 =>
   array (
   ),
@@ -794,7 +794,7 @@ array (
     1 => 'b',
   ),
 )
-string(107) "array (
+string(105) "array (
   0 =>
   array (
     0 => 1,
@@ -942,7 +942,7 @@ Value::__set_state(array(
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(55) "Value::__set_state(array(
   'vars' =>
   array (
   ),
@@ -982,7 +982,7 @@ myClass::__set_state(array(
   foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(283) "myClass::__set_state(array(
   'foo_object' =>
   foo::__set_state(array(
   )),
@@ -1033,7 +1033,7 @@ myClass::__set_state(array(
   foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(283) "myClass::__set_state(array(
   'foo_object' =>
   foo::__set_state(array(
   )),
@@ -1089,7 +1089,7 @@ Value::__set_state(array(
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(55) "Value::__set_state(array(
   'vars' =>
   array (
   ),
