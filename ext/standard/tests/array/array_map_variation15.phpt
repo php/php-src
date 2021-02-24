@@ -23,5 +23,5 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing array_map() : non existent 'callback' function ***
-array_map(): Argument #1 ($callback) must be a valid callback, function "non_existent" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "non_existent" not found or invalid function name
 Done

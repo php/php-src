@@ -62,6 +62,6 @@ array(6) {
   [5]=>
   int(1000)
 }
-array_filter(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
-array_filter(): Argument #2 ($callback) must be a valid callback, function "exit" not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback or null, function "exit" not found or invalid function name
 Done

@@ -215,6 +215,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_WRONG_CALLBACK:
 			zend_wrong_callback_error(num, name);
 			break;
+		case ZPP_ERROR_WRONG_CALLBACK_OR_NULL:
+			zend_wrong_callback_or_null_error(num, name);
+			break;
 		case ZPP_ERROR_WRONG_CLASS:
 			zend_wrong_parameter_class_error(num, name, arg);
 			break;
@@ -333,6 +336,17 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, ch
 	}
 
 	zend_argument_type_error(num, "must be a valid callback, %s", error);
+	efree(error);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_or_null_error(uint32_t num, char *error) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_argument_type_error(num, "must be a valid callback or null, %s", error);
 	efree(error);
 }
 /* }}} */
