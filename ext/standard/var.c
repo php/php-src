@@ -420,7 +420,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (zend_long) index);
-		smart_str_appendl(buf, " => ", 4);
+		smart_str_appendl(buf, " =>", 3);
 
 	} else { /* string key */
 		zend_string *tmp_str;
@@ -431,7 +431,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, tmp_str);
-		smart_str_appendl(buf, "' => ", 5);
+		smart_str_appendl(buf, "' =>", 4);
 
 		zend_string_free(ckey);
 		zend_string_free(tmp_str);
@@ -445,7 +445,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 
 static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
-	buffer_append_spaces(buf, level + 2);
+	buffer_append_spaces(buf, level + 1);
 	if (key != NULL) {
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
@@ -461,7 +461,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 	} else {
 		smart_str_append_long(buf, (zend_long) index);
 	}
-	smart_str_appendl(buf, " => ", 4);
+	smart_str_appendl(buf, " =>", 3);
 	php_var_export_ex(zv, level + 2, buf);
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
@@ -477,7 +477,21 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 	zend_string *key;
 	zval *val;
 
-again:
+	while (Z_TYPE_P(struc) == IS_REFERENCE) {
+		struc = Z_REFVAL_P(struc);
+	}
+
+	switch (Z_TYPE_P(struc)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+			break;
+		default:
+			if (level > 1) {
+				buffer_append_spaces(buf, 1);
+			}
+			break;
+	}
+
 	switch (Z_TYPE_P(struc)) {
 		case IS_FALSE:
 			smart_str_appendl(buf, "false", 5);
@@ -593,10 +607,6 @@ again:
 				smart_str_appendl(buf, "))", 2);
 			}
 
-			break;
-		case IS_REFERENCE:
-			struc = Z_REFVAL_P(struc);
-			goto again;
 			break;
 		default:
 			smart_str_appendl(buf, "NULL", 4);

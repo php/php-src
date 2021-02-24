@@ -23,53 +23,53 @@ var_export($add_arr);
 ?>
 --EXPECT--
 array (
-  0 => 
+  0 =>
   (object) array(
-     'mailbox' => 'iane',
-     'host' => 'example.ac.uk',
-     'personal' => 'ian eiloart',
+    'mailbox' => 'iane',
+    'host' => 'example.ac.uk',
+    'personal' => 'ian eiloart',
   ),
-  1 => 
+  1 =>
   (object) array(
-     'mailbox' => 'shuf6',
-     'host' => 'example.ac.uk',
+    'mailbox' => 'shuf6',
+    'host' => 'example.ac.uk',
   ),
-  2 => 
+  2 =>
   (object) array(
-     'mailbox' => 'blobby',
-     'host' => 'example.com',
+    'mailbox' => 'blobby',
+    'host' => 'example.com',
   ),
-  3 => 
+  3 =>
   (object) array(
-     'mailbox' => 'ian',
-     'host' => 'example.ac.uk',
-     'personal' => 'ian,eiloart',
+    'mailbox' => 'ian',
+    'host' => 'example.ac.uk',
+    'personal' => 'ian,eiloart',
   ),
-  4 => 
+  4 =>
   (object) array(
-     'mailbox' => 'foo',
-     'host' => 'example.ac.uk',
-     'adl' => '@example.com',
+    'mailbox' => 'foo',
+    'host' => 'example.ac.uk',
+    'adl' => '@example.com',
   ),
-  5 => 
+  5 =>
   (object) array(
-     'mailbox' => 'foo',
-     'host' => '#',
+    'mailbox' => 'foo',
+    'host' => '#',
   ),
-  6 => 
+  6 =>
   (object) array(
-     'mailbox' => 'ian',
-     'host' => '-example.com',
+    'mailbox' => 'ian',
+    'host' => '-example.com',
   ),
-  7 => 
+  7 =>
   (object) array(
-     'mailbox' => 'ian',
-     'host' => 'one',
+    'mailbox' => 'ian',
+    'host' => 'one',
   ),
-  8 => 
+  8 =>
   (object) array(
-     'mailbox' => 'UNEXPECTED_DATA_AFTER_ADDRESS',
-     'host' => '.SYNTAX-ERROR.',
+    'mailbox' => 'UNEXPECTED_DATA_AFTER_ADDRESS',
+    'host' => '.SYNTAX-ERROR.',
   ),
 )
 Notice: Unknown: Unexpected characters at end of address: @two (errflg=3) in Unknown on line 0

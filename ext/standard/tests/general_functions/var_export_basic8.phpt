@@ -25,14 +25,14 @@ var_export($b);
 --EXPECT--
 -- Var export on a simple  object --
 (object) array(
-   'a' => 1,
-   'b' => 
+  'a' => 1,
+  'b' =>
   array (
     'k' => 2,
   ),
-   'x' => 
+  'x' =>
   (object) array(
-     'p' => '22',
+    'p' => '22',
   ),
 )
 
@@ -46,20 +46,20 @@ array (
 
 -- Var export on an nested array --
 array (
-  'foo' => 
+  'foo' =>
   array (
     'one' => 'first',
   ),
-  'bar' => 
+  'bar' =>
   (object) array(
-     'a' => 1,
-     'b' => 
+    'a' => 1,
+    'b' =>
     array (
       'k' => 2,
     ),
-     'x' => 
+    'x' =>
     (object) array(
-       'p' => '22',
+      'p' => '22',
     ),
   ),
 )===DONE===

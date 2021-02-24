@@ -7,7 +7,7 @@ Bug #25758 (var_export does not escape ' & \ inside array keys)
 ?>
 --EXPECT--
 array (
-  'quote\'' => 
+  'quote\'' =>
   array (
     0 => 'quote\'',
   ),

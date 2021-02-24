@@ -19,6 +19,6 @@ var_export($kake);
 ?>
 --EXPECT--
 kake::__set_state(array(
-   'mann' => 42,
-   'kvinne' => 43,
+  'mann' => 42,
+  'kvinne' => 43,
 ))

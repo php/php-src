@@ -112,26 +112,26 @@ string(20) "array (
 
 --Iteration: array(array(), array()) --
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
-string(55) "array (
-  0 => 
+string(53) "array (
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )"
@@ -139,36 +139,36 @@ string(55) "array (
 
 --Iteration: array(array(1, 2), array('a', 'b')) --
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
-string(107) "array (
-  0 => 
+string(105) "array (
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',

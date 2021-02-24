@@ -318,81 +318,81 @@ IntlDateFormatter locale= en_US ,datetype = -1 ,timetype =-1
 Formatted localtime_array is : 18951217 12:13 AM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2010-01-01 01:02:03.000000',
-   'timezone_type' => 3,
-   'timezone' => 'UTC',
+  'date' => '2010-01-01 01:02:03.000000',
+  'timezone_type' => 3,
+  'timezone' => 'UTC',
 ))
 ------------
 Formatted DateTime is : Thursday, December 31, 2009 3:02:03 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2010-01-01 01:02:03.000000',
-   'timezone_type' => 3,
-   'timezone' => 'UTC',
+  'date' => '2010-01-01 01:02:03.000000',
+  'timezone_type' => 3,
+  'timezone' => 'UTC',
 ))
 ------------
 Formatted DateTime is : December 31, 2009 3:02:03 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2010-01-01 01:02:03.000000',
-   'timezone_type' => 3,
-   'timezone' => 'UTC',
+  'date' => '2010-01-01 01:02:03.000000',
+  'timezone_type' => 3,
+  'timezone' => 'UTC',
 ))
 ------------
 Formatted DateTime is : Dec 31, 2009 3:02:03 PM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2010-01-01 01:02:03.000000',
-   'timezone_type' => 3,
-   'timezone' => 'UTC',
+  'date' => '2010-01-01 01:02:03.000000',
+  'timezone_type' => 3,
+  'timezone' => 'UTC',
 ))
 ------------
 Formatted DateTime is : 12/31/09 3:02 PM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2010-01-01 01:02:03.000000',
-   'timezone_type' => 3,
-   'timezone' => 'UTC',
+  'date' => '2010-01-01 01:02:03.000000',
+  'timezone_type' => 3,
+  'timezone' => 'UTC',
 ))
 ------------
 Formatted DateTime is : 20091231 03:02 PM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2000-12-30 19:04:05.000000',
-   'timezone_type' => 2,
-   'timezone' => 'PDT',
+  'date' => '2000-12-30 19:04:05.000000',
+  'timezone_type' => 2,
+  'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : Saturday, December 30, 2000 5:04:05 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2000-12-30 19:04:05.000000',
-   'timezone_type' => 2,
-   'timezone' => 'PDT',
+  'date' => '2000-12-30 19:04:05.000000',
+  'timezone_type' => 2,
+  'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : December 30, 2000 5:04:05 PM GMT-10:00
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2000-12-30 19:04:05.000000',
-   'timezone_type' => 2,
-   'timezone' => 'PDT',
+  'date' => '2000-12-30 19:04:05.000000',
+  'timezone_type' => 2,
+  'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : Dec 30, 2000 5:04:05 PM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2000-12-30 19:04:05.000000',
-   'timezone_type' => 2,
-   'timezone' => 'PDT',
+  'date' => '2000-12-30 19:04:05.000000',
+  'timezone_type' => 2,
+  'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : 12/30/00 5:04 PM
 ------------
 Date is: DateTime::__set_state(array(
-   'date' => '2000-12-30 19:04:05.000000',
-   'timezone_type' => 2,
-   'timezone' => 'PDT',
+  'date' => '2000-12-30 19:04:05.000000',
+  'timezone_type' => 2,
+  'timezone' => 'PDT',
 ))
 ------------
 Formatted DateTime is : 20001230 05:04 PM

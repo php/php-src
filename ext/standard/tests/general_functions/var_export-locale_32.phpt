@@ -744,26 +744,26 @@ string(20) "array (
 
 Iteration 7
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 string(55) "array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )"
@@ -771,36 +771,36 @@ string(55) "array (
 
 Iteration 8
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 string(107) "array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
@@ -933,17 +933,17 @@ string(36) "concreteClass::__set_state(array(
 
 Iteration 4
 Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))"
@@ -951,50 +951,50 @@ string(57) "Value::__set_state(array(
 
 Iteration 5
 myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -1002,50 +1002,50 @@ string(293) "myClass::__set_state(array(
 
 Iteration 6
 myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+  'foo_object' =>
   foo::__set_state(array(
   )),
-   'public_var' => 10,
-   'public_var1' => 
+  'public_var' => 10,
+  'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+  'private_var' =>
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+  'protected_var' => NULL,
+  'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -1080,17 +1080,17 @@ string(26) "foo::__set_state(array(
 
 Iteration 10
 Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+  'vars' =>
   array (
   ),
 ))"
