@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
     MySQL 8.0). (Nikita)
 
+- phpdbg:
+  . Fixed bug #80757 (Exit code is 0 when could not open file). (Felipe)
+
 - Session:
   . Fixed bug #80774 (session_name() problem with backslash). (cmb)
 
