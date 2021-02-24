@@ -415,13 +415,30 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
+static inline void php_var_export_maybe_whitespace(zval *struc, smart_str *buf) /* {{{ */
+{
+	while (Z_TYPE_P(struc) == IS_REFERENCE) {
+		struc = Z_REFVAL_P(struc);
+	}
+
+	switch (Z_TYPE_P(struc)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+			break;
+		default:
+			buffer_append_spaces(buf, 1);
+			break;
+	}
+}
+/* }}} */
+
 static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (zend_long) index);
 		smart_str_appendl(buf, " =>", 3);
-
+		php_var_export_maybe_whitespace(zv, buf);
 	} else { /* string key */
 		zend_string *tmp_str;
 		zend_string *ckey = php_addcslashes(key, "'\\", 2);
@@ -432,6 +449,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, tmp_str);
 		smart_str_appendl(buf, "' =>", 4);
+		php_var_export_maybe_whitespace(zv, buf);
 
 		zend_string_free(ckey);
 		zend_string_free(tmp_str);
@@ -462,6 +480,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		smart_str_append_long(buf, (zend_long) index);
 	}
 	smart_str_appendl(buf, " =>", 3);
+	php_var_export_maybe_whitespace(zv, buf);
 	php_var_export_ex(zv, level + 2, buf);
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
@@ -477,21 +496,7 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 	zend_string *key;
 	zval *val;
 
-	while (Z_TYPE_P(struc) == IS_REFERENCE) {
-		struc = Z_REFVAL_P(struc);
-	}
-
-	switch (Z_TYPE_P(struc)) {
-		case IS_ARRAY:
-		case IS_OBJECT:
-			break;
-		default:
-			if (level > 1) {
-				buffer_append_spaces(buf, 1);
-			}
-			break;
-	}
-
+again:
 	switch (Z_TYPE_P(struc)) {
 		case IS_FALSE:
 			smart_str_appendl(buf, "false", 5);
@@ -607,6 +612,10 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 				smart_str_appendl(buf, "))", 2);
 			}
 
+			break;
+		case IS_REFERENCE:
+			struc = Z_REFVAL_P(struc);
+			goto again;
 			break;
 		default:
 			smart_str_appendl(buf, "NULL", 4);
