@@ -50,8 +50,10 @@ static inline int has_crc32_insn() {
 # endif
 }
 
-# pragma GCC push_options
-# pragma GCC target ("+nothing+crc")
+# if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC push_options
+#  pragma GCC target ("+nothing+crc")
+# endif
 static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 	while (nr >= sizeof(uint64_t)) {
 		crc = __crc32d(crc, *(uint64_t *)p);
@@ -73,7 +75,9 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 	}
 	return crc;
 }
-# pragma GCC pop_options
+# if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC pop_options
+# endif
 #endif
 
 /* {{{ Calculate the crc32 polynomial of a string */
