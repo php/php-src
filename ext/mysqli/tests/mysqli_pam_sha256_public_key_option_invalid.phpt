@@ -54,10 +54,8 @@ if (strlen($row['Value']) != fwrite($fp, $row['Value'])) {
     die(sprintf("skip Failed to create pub key file"));
 }
 
-
-if (!$link->query("SET @@session.old_passwords=2")) {
-    die(sprintf("skip Cannot set @@session.old_passwords=2 [%d] %s", $link->errno, $link->error));
-}
+// Ignore errors because this variable exists only in MySQL 5.6 and 5.7
+$link->query("SET @@session.old_passwords=2");
 
 $link->query('DROP USER shatest');
 $link->query("DROP USER shatest@localhost");
@@ -68,13 +66,12 @@ if (!$link->query('CREATE USER shatest@"%" IDENTIFIED WITH sha256_password') ||
     die(sprintf("skip CREATE USER failed [%d] %s", $link->errno, $link->error));
 }
 
-if (!$link->query('SET PASSWORD FOR shatest@"%" = PASSWORD("shatest")') ||
-    !$link->query('SET PASSWORD FOR shatest@"localhost" = PASSWORD("shatest")')) {
+if (!$link->query('SET PASSWORD FOR shatest@"%" = "shatest"') ||
+    !$link->query('SET PASSWORD FOR shatest@"localhost" = "shatest"')) {
     die(sprintf("skip SET PASSWORD failed [%d] %s", $link->errno, $link->error));
 }
 
-if (!$link->query("DROP TABLE IF EXISTS test") ||
-    !$link->query("CREATE TABLE test (id INT)") ||
+if (!$link->query("CREATE TABLE test (id INT)") ||
     !$link->query("INSERT INTO test(id) VALUES (1), (2), (3)"))
     die(sprintf("SKIP [%d] %s\n", $link->errno, $link->error));
 
