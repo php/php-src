@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
 
+- PDO_ODBC:
+  . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
+    (cmb)
+
 01 Apr 2021, PHP 7.4.17
 
 - Core:
