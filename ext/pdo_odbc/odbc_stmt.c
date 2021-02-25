@@ -690,7 +690,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 			do {
 				C->fetched_len = 0;
 				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
-				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR, buf2, 256, &C->fetched_len);
+				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, 256, &C->fetched_len);
 
 				/* adjust `used` in case we have length info from the driver */
 				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
