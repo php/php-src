@@ -1533,6 +1533,11 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		}
 	}
 
+	if (intern->ptr) {
+		zval_ptr_dtor(&intern->obj);
+		zval_ptr_dtor(reflection_prop_name(object));
+	}
+
 	ZVAL_STR_COPY(reflection_prop_name(object), fptr->common.function_name);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -2082,6 +2087,10 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 	if (!ex) {
 		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
 		RETURN_THROWS();
+	}
+
+	if (intern->ce) {
+		zval_ptr_dtor(&intern->obj);
 	}
 
 	intern->ref_type = REF_TYPE_GENERATOR;
