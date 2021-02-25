@@ -676,7 +676,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 
 			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
 			 in order into the output buffer; 255 bytes are an optimistic assumption, since the driver may assert
-			 more NUL bytes at the end; we cater to that later, if actual length information is available
+			 more or less NUL bytes at the end; we cater to that later, if actual length information is available
 
 			 this loop has to work whether or not SQLGetData() provides the total column length.
 			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
@@ -695,7 +695,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 				/* adjust `used` in case we have length info from the driver */
 				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
 					SQLLEN fixed_used = orig_fetched_len - C->fetched_len;
-					ZEND_ASSERT(fixed_used <= used);
+					ZEND_ASSERT(fixed_used <= used + 1);
 					used = fixed_used;
 				}
 
