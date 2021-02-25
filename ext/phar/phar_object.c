@@ -1475,7 +1475,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
-						fname = expand_filepath(intern->file_name, NULL);
+						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
 						if (!fname) {
 							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
 							return ZEND_HASH_APPLY_STOP;
