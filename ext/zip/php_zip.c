@@ -280,8 +280,7 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 {
 	struct zip_source *zs;
 	char resolved_path[MAXPATHLEN];
-	zval exists_flag;
-
+	php_stream_statbuf ssb;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(filename)) {
 		return -1;
@@ -292,8 +291,7 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 		return -1;
 	}
 
-	php_stat(resolved_path, strlen(resolved_path), FS_EXISTS, &exists_flag);
-	if (Z_TYPE(exists_flag) == IS_FALSE) {
+	if (php_stream_stat_path_ex(resolved_path, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		return -1;
 	}

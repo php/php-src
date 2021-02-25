@@ -1443,7 +1443,6 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
 				char *test = NULL;
-				zval dummy;
 				spl_filesystem_object *intern = (spl_filesystem_object*)((char*)Z_OBJ_P(value) - Z_OBJ_P(value)->handlers->offset);
 
 				if (!base_len) {
@@ -1455,9 +1454,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 					case SPL_FS_DIR:
 						test = spl_filesystem_object_get_path(intern, NULL);
 						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
-						php_stat(fname, fname_len, FS_IS_DIR, &dummy);
-
-						if (Z_TYPE(dummy) == IS_TRUE) {
+						if (php_stream_stat_path(fname, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
 							/* ignore directories */
 							efree(fname);
 							return ZEND_HASH_APPLY_KEEP;
@@ -1478,7 +1475,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
-						fname = expand_filepath(intern->file_name, NULL);
+						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
 						if (!fname) {
 							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
 							return ZEND_HASH_APPLY_STOP;
@@ -4644,11 +4641,11 @@ PHP_METHOD(PharFileInfo, chmod)
 	/* hackish cache in php_stat needs to be cleared */
 	/* if this code fails to work, check main/streams/streams.c, _php_stream_stat_path */
 	if (BG(CurrentLStatFile)) {
-		efree(BG(CurrentLStatFile));
+		zend_string_release(BG(CurrentLStatFile));
 	}
 
 	if (BG(CurrentStatFile)) {
-		efree(BG(CurrentStatFile));
+		zend_string_release(BG(CurrentStatFile));
 	}
 
 	BG(CurrentLStatFile) = NULL;

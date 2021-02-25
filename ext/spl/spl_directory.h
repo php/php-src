@@ -58,11 +58,9 @@ typedef struct {
 struct _spl_filesystem_object {
 	void               *oth;
 	const spl_other_handler  *oth_handler;
-	char               *_path;
-	size_t             _path_len;
-	char               *orig_path;
-	char               *file_name;
-	size_t             file_name_len;
+	zend_string        *path;
+	zend_string        *orig_path;
+	zend_string        *file_name;
 	SPL_FS_OBJ_TYPE    type;
 	zend_long               flags;
 	zend_class_entry   *file_class;
@@ -71,8 +69,7 @@ struct _spl_filesystem_object {
 		struct {
 			php_stream         *dirp;
 			php_stream_dirent  entry;
-			char               *sub_path;
-			size_t             sub_path_len;
+			zend_string        *sub_path;
 			int                index;
 			int                is_recursive;
 			zend_function      *func_rewind;
