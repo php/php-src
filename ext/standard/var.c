@@ -722,16 +722,27 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 }
 /* }}} */
 
-static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
+static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function *fn, zval *retval) /* {{{ */
 {
-	zval fname;
-	int res;
+	zend_result res;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 
-	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
+	fci.size = sizeof(fci);
+	fci.object = obj;
+	fci.retval = retval;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.named_params = NULL;
+	ZVAL_UNDEF(&fci.function_name);
+
+	fci_cache.function_handler = fn;
+	fci_cache.object = obj;
+	fci_cache.called_scope = obj->ce;
+
 	BG(serialize_lock)++;
-	res = call_user_function(NULL, struc, &fname, retval, 0, 0);
+	res = zend_call_function(&fci, &fci_cache);
 	BG(serialize_lock)--;
-	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
 		zval_ptr_dtor(retval);
@@ -739,11 +750,8 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 	}
 
 	if (!HASH_OF(retval)) {
-		zend_class_entry *ce;
-		ZEND_ASSERT(Z_TYPE_P(struc) == IS_OBJECT);
-		ce = Z_OBJCE_P(struc);
 		zval_ptr_dtor(retval);
-		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(ce->name));
+		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
 		return FAILURE;
 	}
 
@@ -1067,25 +1075,28 @@ again:
 					return;
 				}
 
-				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
-					zval retval, tmp;
+				if (ce != PHP_IC_ENTRY) {
+					zval *zv = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP), 1);
 
-					ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
+					if (zv) {
+						zval retval, tmp;
 
-					if (php_var_serialize_call_sleep(&retval, &tmp) == FAILURE) {
-						if (!EG(exception)) {
-							/* we should still add element even if it's not OK,
-							 * since we already wrote the length of the array before */
-							smart_str_appendl(buf, "N;", 2);
+						ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
+						if (php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv), &retval) == FAILURE) {
+							if (!EG(exception)) {
+								/* we should still add element even if it's not OK,
+								 * since we already wrote the length of the array before */
+								smart_str_appendl(buf, "N;", 2);
+							}
+							OBJ_RELEASE(Z_OBJ(tmp));
+							return;
 						}
-						zval_ptr_dtor(&tmp);
+
+						php_var_serialize_class(buf, &tmp, &retval, var_hash);
+						zval_ptr_dtor(&retval);
+						OBJ_RELEASE(Z_OBJ(tmp));
 						return;
 					}
-
-					php_var_serialize_class(buf, &tmp, &retval, var_hash);
-					zval_ptr_dtor(&retval);
-					zval_ptr_dtor(&tmp);
-					return;
 				}
 
 				incomplete_class = php_var_serialize_class_name(buf, struc);

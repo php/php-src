@@ -222,8 +222,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	var_entries *var_hash = (*var_hashx)->entries.next;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
 	bool delayed_call_failed = 0;
-	zval wakeup_name;
-	ZVAL_UNDEF(&wakeup_name);
 
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_destroy( " ZEND_LONG_FMT ")\n", var_hash?var_hash->used_slots:-1L);
@@ -246,12 +244,26 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				/* Perform delayed __wakeup calls */
 				if (!delayed_call_failed) {
 					zval retval;
-					if (Z_ISUNDEF(wakeup_name)) {
-						ZVAL_STRINGL(&wakeup_name, "__wakeup", sizeof("__wakeup") - 1);
-					}
+					zend_fcall_info fci;
+					zend_fcall_info_cache fci_cache;
+
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+					fci.size = sizeof(fci);
+					fci.object = Z_OBJ_P(zv);
+					fci.retval = &retval;
+					fci.param_count = 0;
+					fci.params = NULL;
+					fci.named_params = NULL;
+					ZVAL_UNDEF(&fci.function_name);
+
+					fci_cache.function_handler = zend_hash_find_ptr(
+						&fci.object->ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
+					fci_cache.object = fci.object;
+					fci_cache.called_scope = fci.object->ce;
 
 					BG(serialize_lock)++;
-					if (call_user_function(NULL, zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
+					if (zend_call_function(&fci, &fci_cache) == FAILURE || Z_ISUNDEF(retval)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
@@ -287,8 +299,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
-
-	zval_ptr_dtor_nogc(&wakeup_name);
 
 	if ((*var_hashx)->ref_props) {
 		zend_hash_destroy((*var_hashx)->ref_props);
@@ -788,7 +798,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 	}
 
 	has_wakeup = Z_OBJCE_P(rval) != PHP_IC_ENTRY
-		&& zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1);
+		&& zend_hash_exists(&Z_OBJCE_P(rval)->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
 
 	ht = Z_OBJPROP_P(rval);
 	if (elements >= (zend_long)(HT_MAX_SIZE - zend_hash_num_elements(ht))) {
