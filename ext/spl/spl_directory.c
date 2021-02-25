@@ -195,9 +195,9 @@ PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_
 	}
 #endif
 	if (len) {
-		*len = ZSTR_LEN(intern->path);
+		*len = intern->path ? ZSTR_LEN(intern->path) : 0;
 	}
-	return ZSTR_VAL(intern->path);
+	return intern->path ? ZSTR_VAL(intern->path) : NULL;
 } /* }}} */
 
 static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
@@ -579,7 +579,7 @@ static zend_string *spl_filesystem_object_get_pathname(spl_filesystem_object *in
 				return intern->file_name;
 			}
 	}
-	return ZSTR_EMPTY_ALLOC();
+	return NULL;
 }
 /* }}} */
 
@@ -600,7 +600,11 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1);
 	path = spl_filesystem_object_get_pathname(intern);
-	ZVAL_STR_COPY(&tmp, path);
+	if (path) {
+		ZVAL_STR_COPY(&tmp, path);
+	} else {
+		ZVAL_EMPTY_STRING(&tmp);
+	}
 	zend_symtable_update(rv, pnstr, &tmp);
 	zend_string_release_ex(pnstr, 0);
 
@@ -1038,7 +1042,11 @@ PHP_METHOD(SplFileInfo, getPathname)
 		RETURN_THROWS();
 	}
 	path = spl_filesystem_object_get_pathname(intern);
-	RETURN_STR_COPY(path);
+	if (path) {
+		RETURN_STR_COPY(path);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -1359,7 +1367,7 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 	}
 
 	path = spl_filesystem_object_get_pathname(intern);
-	if (ZSTR_LEN(path)) {
+	if (path && ZSTR_LEN(path)) {
 		zend_string *dpath = zend_string_init(ZSTR_VAL(path), ZSTR_LEN(path), 0);
 		ZSTR_LEN(dpath) = php_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
 		spl_filesystem_object_create_info(intern, dpath, ce, return_value);
