@@ -101,8 +101,8 @@ max_execution_time=240
     require_once('table.inc');
 
     if (!$link = my_mysqli_connect($host, 'pamtest', 'pamtest', $db, $port, $socket)) {
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+        printf("[001] Cannot connect to the server using host=%s, user=pamtest, passwd=pamtest dbname=%s, port=%s, socket=%s\n",
+            $host, $db, $port, $socket);
     } else {
 
       if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
