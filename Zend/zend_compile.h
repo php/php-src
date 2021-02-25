@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 29...)                            |     |     |     */
+/* Class Flags (unused: 30...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -297,6 +297,8 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_HAS_AST_CONSTANTS       (1 << 24) /*  X  |     |     |     */
 #define ZEND_ACC_HAS_AST_PROPERTIES      (1 << 25) /*  X  |     |     |     */
 #define ZEND_ACC_HAS_AST_STATICS         (1 << 26) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_DYNAMIC_AST_PROPERTIES (1 << 29)
+                                                   /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* loaded from file cache to process memory               |     |     |     */
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */

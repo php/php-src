@@ -819,7 +819,11 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 	ZEND_ASSERT(instanceof_function(exception_ce, zend_ce_throwable)
 		&& "Exceptions must implement Throwable");
 
+	zend_object *orig_exception = EG(exception);
+	EG(exception) = NULL;
 	object_init_ex(&ex, exception_ce);
+	ZEND_ASSERT(!EG(exception));
+	EG(exception) = orig_exception;
 
 	if (message) {
 		ZVAL_STR(&tmp, message);

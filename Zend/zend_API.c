@@ -1414,6 +1414,10 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				val = (zval*)((char*)default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 			}
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				if (!(prop_info->flags & ZEND_ACC_STATIC)
+						&& GC_FLAGS(Z_AST_P(val)) & IS_AST_DYNAMIC) {
+					continue;
+				}
 				if (ZEND_TYPE_IS_SET(prop_info->type)) {
 					zval tmp;
 
@@ -1455,7 +1459,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 }
 /* }}} */
 
-static zend_always_inline void _object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
+static zend_always_inline zend_result _object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
 {
 	if (class_type->default_properties_count) {
 		zval *src = CE_DEFAULT_PROPERTIES_TABLE(class_type);
@@ -1468,14 +1472,50 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 				src++;
 				dst++;
 			} while (src != end);
+		} else if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_HAS_DYNAMIC_AST_PROPERTIES)) {
+			do {
+				ZVAL_COPY_PROP(dst, src);
+				if (Z_TYPE_P(dst) == IS_CONSTANT_AST) {
+					zend_property_info *prop_info = zend_get_property_info_for_slot(object, dst);
+					if (Z_EXTRA_P(src)) {
+						zend_throw_error(NULL,
+							"Trying to recursively instantiate %s "
+							"while evaluating default value for %s::$%s",
+							ZSTR_VAL(class_type->name), ZSTR_VAL(prop_info->ce->name),
+							zend_get_unmangled_property_name(prop_info->name));
+						goto failure;
+					}
+
+					Z_EXTRA_P(src) = 1;
+					zend_result result = zval_update_constant_ex(dst, prop_info->ce);
+					Z_EXTRA_P(src) = 0;
+
+					if (result == FAILURE || (ZEND_TYPE_IS_SET(prop_info->type)
+							&& !zend_verify_property_type(prop_info, dst, /* strict */ 1))) {
+failure:
+						/* On failure, initialize the remaining properties with UNDEF. */
+						zval_ptr_dtor_nogc(dst);
+						do {
+							ZVAL_UNDEF(dst);
+							src++;
+							dst++;
+						} while (src != end);
+						return FAILURE;
+					}
+				}
+				src++;
+				dst++;
+			} while (src != end);
 		} else {
 			do {
 				ZVAL_COPY_PROP(dst, src);
+				ZEND_ASSERT(Z_TYPE_P(dst) != IS_CONSTANT_AST);
 				src++;
 				dst++;
 			} while (src != end);
 		}
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1612,13 +1652,28 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 		ZVAL_OBJ(arg, obj);
 		if (properties) {
 			object_properties_init_ex(obj, properties);
-		} else {
-			_object_properties_init(obj, class_type);
+			return SUCCESS;
+		}
+
+		if (EXPECTED(_object_properties_init(obj, class_type) == SUCCESS)) {
+			return SUCCESS;
 		}
 	} else {
+		/* Report failure if an exception is thrown during create_object(). However, don't
+		 * report a failure if an exception already exists, as this causes problems with
+		 * extension code that does not handle exceptions early enough. */
+		bool had_exception = EG(exception) != NULL;
 		ZVAL_OBJ(arg, class_type->create_object(class_type));
+		if (EXPECTED(!EG(exception) || had_exception)) {
+			return SUCCESS;
+		}
 	}
-	return SUCCESS;
+
+	zend_object_store_ctor_failed(Z_OBJ_P(arg));
+	zval_ptr_dtor(arg);
+	ZVAL_NULL(arg);
+	Z_OBJ_P(arg) = NULL;
+	return FAILURE;
 }
 /* }}} */
 
@@ -3994,6 +4049,9 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 				ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
 			} else {
 				ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
+				if (GC_FLAGS(Z_AST_P(property)) & IS_AST_DYNAMIC) {
+					ce->ce_flags |= ZEND_ACC_HAS_DYNAMIC_AST_PROPERTIES;
+				}
 			}
 		}
 	}

@@ -721,6 +721,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
+/* ast flags */
+#define IS_AST_DYNAMIC				(1<<8)
+
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
 /* Recursion protection macros must be used only for arrays and objects */
