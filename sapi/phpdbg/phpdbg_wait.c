@@ -175,12 +175,12 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 
 	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("cwd"))) && Z_TYPE_P(zvp) == IS_STRING) {
 		if (VCWD_CHDIR(Z_STRVAL_P(zvp)) == SUCCESS) {
-			if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentStatFile), strlen(BG(CurrentStatFile)))) {
-				efree(BG(CurrentStatFile));
+			if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentStatFile)), ZSTR_LEN(BG(CurrentStatFile)))) {
+				zend_string_release(BG(CurrentStatFile));
 				BG(CurrentStatFile) = NULL;
 			}
-			if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentLStatFile), strlen(BG(CurrentLStatFile)))) {
-				efree(BG(CurrentLStatFile));
+			if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentLStatFile)), ZSTR_LEN(BG(CurrentLStatFile)))) {
+				zend_string_release(BG(CurrentLStatFile));
 				BG(CurrentLStatFile) = NULL;
 			}
 		}

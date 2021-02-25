@@ -287,10 +287,13 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path)
 static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_include_path, int silent) /* {{{ */
 {
 	zval tmp;
+	zend_string *fn = zend_string_init(intern->file_name, intern->file_name_len, 0);
 
 	intern->type = SPL_FS_FILE;
 
-	php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, &tmp);
+
+	php_stat(fn, FS_IS_DIR, &tmp);
+	zend_string_release(fn);
 	if (Z_TYPE(tmp) == IS_TRUE) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
@@ -1142,6 +1145,7 @@ PHP_METHOD(SplFileInfo, func_name) \
 { \
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS); \
 	zend_error_handling error_handling; \
+	zend_string *fn; \
 	if (zend_parse_parameters_none() == FAILURE) { \
 		RETURN_THROWS(); \
 	} \
@@ -1149,7 +1153,9 @@ PHP_METHOD(SplFileInfo, func_name) \
 		RETURN_THROWS(); \
 	} \
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);\
-	php_stat(intern->file_name, intern->file_name_len, func_num, return_value); \
+	fn = zend_string_init(intern->file_name, intern->file_name_len, 0); \
+	php_stat(fn, func_num, return_value); \
+	zend_string_release(fn); \
 	zend_restore_error_handling(&error_handling); \
 }
 /* }}} */
@@ -1459,6 +1465,7 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
 	bool allow_links = 0;
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+	zend_string *fn;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &allow_links) == FAILURE) {
 		RETURN_THROWS();
@@ -1470,12 +1477,16 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 			RETURN_THROWS();
 		}
 		if (!allow_links && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
-			php_stat(intern->file_name, intern->file_name_len, FS_IS_LINK, return_value);
+			fn = zend_string_init(intern->file_name, intern->file_name_len, 0);
+			php_stat(fn, FS_IS_LINK, return_value);
+			zend_string_release(fn);
 			if (zend_is_true(return_value)) {
 				RETURN_FALSE;
 			}
 		}
-		php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, return_value);
+		fn = zend_string_init(intern->file_name, intern->file_name_len, 0);
+		php_stat(fn, FS_IS_DIR, return_value);
+		zend_string_release(fn);
     }
 }
 /* }}} */
