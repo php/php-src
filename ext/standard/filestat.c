@@ -725,7 +725,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	zend_stat_t *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
-	const char *local;
+	const char *local = NULL;
 	php_stream_wrapper *wrapper = NULL;
 
 	if (IS_ACCESS_CHECK(type)) {
@@ -807,7 +807,9 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 			}
 		}
 
-		if (php_stream_stat_path_ex(ZSTR_VAL(filename), flags, &ssb, NULL)) {
+		if (!wrapper
+		 || !wrapper->wops->url_stat
+		 || wrapper->wops->url_stat(wrapper, local, flags | PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR, &ssb, NULL)) {
 			/* Error Occurred */
 			if (!IS_EXISTS_CHECK(type)) {
 				php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", ZSTR_VAL(filename));
@@ -864,12 +866,6 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	}
 
 	if (IS_ABLE_CHECK(type) && getuid() == 0) {
-		if (!wrapper) {
-			if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper && php_check_open_basedir(local)) {
-				RETURN_FALSE;
-			}
-		}
-
 		/* root has special perms on plain_wrapper */
 		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
