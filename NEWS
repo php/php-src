@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
 
+- IMAP:
+  . Fixed bug #80800 (imap_open() fails when the flags parameter includes
+    CL_EXPUNGE). (girgias)
+
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)

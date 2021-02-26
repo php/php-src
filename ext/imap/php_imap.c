@@ -735,7 +735,11 @@ PHP_FUNCTION(imap_open)
 		RETURN_THROWS();
 	}
 
-	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | CL_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
+	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
+	 * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
+	 * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
+	 * IMAPConnection object being destroyed naturally at the end of the PHP script */
+	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | PHP_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
 	 		| OP_SILENT | OP_PROTOTYPE | OP_SECURE)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of the OP_* constants, and CL_EXPUNGE");
 		RETURN_THROWS();
@@ -858,7 +862,11 @@ PHP_FUNCTION(imap_reopen)
 	}
 
 	/* TODO Verify these are the only options available as they are pulled from the php.net documentation */
-	if (options && ((options & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | OP_EXPUNGE | CL_EXPUNGE)) != 0)) {
+	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
+     * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
+     * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
+     * IMAPConnection object being destroyed naturally at the end of the PHP script */
+	if (options && ((options & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | OP_EXPUNGE | PHP_EXPUNGE)) != 0)) {
 		zend_argument_value_error(3, "must be a bitmask of OP_READONLY, OP_ANONYMOUS, OP_HALFOPEN, "
 			"OP_EXPUNGE, and CL_EXPUNGE");
 		RETURN_THROWS();
