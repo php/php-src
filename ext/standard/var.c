@@ -651,7 +651,7 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	data->n += 1;
 
-	if (!is_ref && Z_TYPE_P(var) != IS_OBJECT) {
+	if (!is_ref && (Z_TYPE_P(var) != IS_OBJECT || Z_REFCOUNT_P(var) == 1)) {
 		return 0;
 	}
 
@@ -691,32 +691,62 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ */
 {
-	smart_str_appendl(buf, "i:", 2);
-	smart_str_append_long(buf, val);
-	smart_str_appendc(buf, ';');
+	char b[32];
+	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, val);
+	size_t l = b + sizeof(b) - 1 - s;
+	size_t new_len = smart_str_alloc(buf, 2 + l + 1, 0);
+	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
+
+	ZSTR_LEN(buf->s) = new_len;
+	memcpy(res, "i:", 2);
+	res += 2;
+	memcpy(res, s, l);
+	res[l] = ';';
 }
 /* }}} */
 
 static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
 {
-	smart_str_appendl(buf, "s:", 2);
-	smart_str_append_unsigned(buf, len);
-	smart_str_appendl(buf, ":\"", 2);
-	smart_str_appendl(buf, str, len);
-	smart_str_appendl(buf, "\";", 2);
+	char b[32];
+	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, len);
+	size_t l = b + sizeof(b) - 1 - s;
+	size_t new_len = smart_str_alloc(buf, 2 + l + 2 + len + 2, 0);
+	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
+
+	ZSTR_LEN(buf->s) = new_len;
+	memcpy(res, "s:", 2);
+	res += 2;
+	memcpy(res, s, l);
+	res += l;
+	memcpy(res, ":\"", 2);
+	res += 2;
+	memcpy(res, str, len);
+	res += len;
+	memcpy(res, "\";", 2);
 }
 /* }}} */
 
 static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
 {
+	char b[32], *s, *res;
+	size_t l, new_len;
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
-	smart_str_appendl(buf, "O:", 2);
-	smart_str_append_unsigned(buf, ZSTR_LEN(class_name));
-	smart_str_appendl(buf, ":\"", 2);
-	smart_str_append(buf, class_name);
-	smart_str_appendl(buf, "\":", 2);
+	s = zend_print_long_to_buf(b + sizeof(b) - 1, ZSTR_LEN(class_name));
+	l = b + sizeof(b) - 1 - s;
+	new_len = smart_str_alloc(buf, 2 + l + 2 + ZSTR_LEN(class_name) + 2, 0);
+	res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
+	ZSTR_LEN(buf->s) = new_len;
+	memcpy(res, "O:", 2);
+	res += 2;
+	memcpy(res, s, l);
+	res += l;
+	memcpy(res, ":\"", 2);
+	res += 2;
+	memcpy(res, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	res += ZSTR_LEN(class_name);
+	memcpy(res, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
 }
@@ -992,11 +1022,19 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
-			smart_str_appendl(buf, "d:", 2);
+			char tmp_str[PHP_DOUBLE_MAX_LENGTH], *res;
+			size_t len, new_len;
+
 			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			smart_str_appends(buf, tmp_str);
-			smart_str_appendc(buf, ';');
+			len = strlen(tmp_str);
+			new_len = smart_str_alloc(buf, 2 + len + 1, 0);
+			res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
+			ZSTR_LEN(buf->s) = new_len;
+
+			memcpy(res, "d:", 2);
+			res += 2;
+			memcpy(res, tmp_str, len);
+			res[len] = ';';
 			return;
 		}
 
@@ -1025,9 +1063,9 @@ again:
 					}
 
 					php_var_serialize_class_name(buf, &obj);
-					smart_str_append_unsigned(buf, zend_array_count(Z_ARRVAL(retval)));
+					smart_str_append_unsigned(buf, zend_hash_num_elements(Z_ARRVAL(retval)));
 					smart_str_appendl(buf, ":{", 2);
-					ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(retval), index, key, data) {
+					ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), index, key, data) {
 						if (!key) {
 							php_var_serialize_long(buf, index);
 						} else {
@@ -1052,21 +1090,40 @@ again:
 					size_t serialized_length;
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash) == SUCCESS) {
-						smart_str_appendl(buf, "C:", 2);
-						smart_str_append_unsigned(buf, ZSTR_LEN(Z_OBJCE_P(struc)->name));
-						smart_str_appendl(buf, ":\"", 2);
-						smart_str_append(buf, Z_OBJCE_P(struc)->name);
-						smart_str_appendl(buf, "\":", 2);
+						char b1[32], b2[32], *s1, *s2, *res;
+						size_t l1, l2, new_len;
 
-						smart_str_append_unsigned(buf, serialized_length);
-						smart_str_appendl(buf, ":{", 2);
-						smart_str_appendl(buf, (char *) serialized_data, serialized_length);
-						smart_str_appendc(buf, '}');
+						s1 = zend_print_long_to_buf(b1 + sizeof(b1) - 1, ZSTR_LEN(Z_OBJCE_P(struc)->name));
+						l1 = b1 + sizeof(b1) - 1 - s1;
+						s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
+						l2 = b2 + sizeof(b2) - 1 - s2;
+						new_len = smart_str_alloc(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1, 0);
+						res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
+						ZSTR_LEN(buf->s) = new_len;
+						memcpy(res, "C:", 2);
+						res += 2;
+						memcpy(res, s1, l1);
+						res += l1;
+						memcpy(res, ":\"", 2);
+						res += 2;
+						memcpy(res, ZSTR_VAL(Z_OBJCE_P(struc)->name), ZSTR_LEN(Z_OBJCE_P(struc)->name));
+						res += ZSTR_LEN(Z_OBJCE_P(struc)->name);
+						memcpy(res, "\":", 2);
+						res += 2;
+
+						memcpy(res, s2, l2);
+						res += l2;
+						memcpy(res, ":{", 2);
+						res += 2;
+						memcpy(res, (char *) serialized_data, serialized_length);
+						res[serialized_length] = '}';
 					} else {
 						/* Mark this value in the var_hash, to avoid creating references to it. */
 						zval *var_idx = zend_hash_index_find(&var_hash->ht,
 							(zend_ulong) (zend_uintptr_t) Z_COUNTED_P(struc));
-						ZVAL_LONG(var_idx, -1);
+						if (var_idx) {
+							ZVAL_LONG(var_idx, -1);
+						}
 						smart_str_appendl(buf, "N;", 2);
 					}
 					if (serialized_data) {
