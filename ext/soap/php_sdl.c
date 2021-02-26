@@ -2117,11 +2117,8 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	HashTable tmp_bindings;
 	HashTable tmp_functions;
 
-#ifdef ZEND_WIN32
 	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#else
-	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#endif
+
 	if (f < 0) {return;}
 
 	zend_hash_init(&tmp_types, 0, NULL, NULL, 0);
