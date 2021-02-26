@@ -63,41 +63,24 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 	if (!zobj->properties) {
 		zend_property_info *prop_info;
 		zend_class_entry *ce = zobj->ce;
-		uint32_t flags = 0;
+		int i;
 
 		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
 			zend_hash_real_init_mixed(zobj->properties);
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (!(prop_info->flags & ZEND_ACC_STATIC)) {
-					flags |= prop_info->flags;
+			for (i = 0; i < ce->default_properties_count; i++) {
+				prop_info = ce->properties_info_table[i];
 
-					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-						HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
-					}
-
-					_zend_hash_append_ind(zobj->properties, prop_info->name,
-						OBJ_PROP(zobj, prop_info->offset));
+				if (!prop_info) {
+					continue;
 				}
-			} ZEND_HASH_FOREACH_END();
-			if (flags & ZEND_ACC_CHANGED) {
-				while (ce->parent && ce->parent->default_properties_count) {
-					ce = ce->parent;
-					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-						if (prop_info->ce == ce &&
-						    !(prop_info->flags & ZEND_ACC_STATIC) &&
-						    (prop_info->flags & ZEND_ACC_PRIVATE)) {
-							zval zv;
 
-							if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-								HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
-							}
-
-							ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
-							zend_hash_add(zobj->properties, prop_info->name, &zv);
-						}
-					} ZEND_HASH_FOREACH_END();
+				if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
+					HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
+
+				_zend_hash_append_ind(zobj->properties, prop_info->name,
+					OBJ_PROP(zobj, prop_info->offset));
 			}
 		}
 	}
@@ -1555,6 +1538,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		zend_property_info *info;
+		int i;
 
 		if (!zobj1->ce->default_properties_count) {
 			return 0;
@@ -1570,13 +1554,17 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		}
 		Z_PROTECT_RECURSION_P(o1);
 
-		ZEND_HASH_FOREACH_PTR(&zobj1->ce->properties_info, info) {
-			zval *p1 = OBJ_PROP(zobj1, info->offset);
-			zval *p2 = OBJ_PROP(zobj2, info->offset);
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			zval *p1, *p2;
 
-			if (info->flags & ZEND_ACC_STATIC) {
+			info = zobj1->ce->properties_info_table[i];
+
+			if (!info) {
 				continue;
 			}
+
+			p1 = OBJ_PROP(zobj1, info->offset);
+			p2 = OBJ_PROP(zobj2, info->offset);
 
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
@@ -1597,7 +1585,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
+		}
 
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
