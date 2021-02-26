@@ -191,17 +191,13 @@ object(C)#%d (5) {
 
 --> Using instance of D:
 in D::doForEachOnThis
-string(10) "Original f"
-string(10) "Original g"
 string(10) "Original a"
 string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
+string(10) "Original f"
+string(10) "Original g"
 object(D)#%d (7) {
-  ["f":"D":private]=>
-  string(9) "changed.f"
-  ["g":protected]=>
-  string(9) "changed.g"
   ["a"]=>
   string(9) "changed.a"
   ["b"]=>
@@ -212,6 +208,10 @@ object(D)#%d (7) {
   string(9) "changed.d"
   ["e":"C":private]=>
   string(10) "Original e"
+  ["f":"D":private]=>
+  string(9) "changed.f"
+  ["g":protected]=>
+  string(9) "changed.g"
 }
 
 --> Using instance of E:
@@ -220,8 +220,8 @@ string(12) "Overridden a"
 string(12) "Overridden b"
 string(12) "Overridden c"
 string(12) "Overridden d"
-string(12) "Overridden e"
 string(10) "Original g"
+string(12) "Overridden e"
 object(E)#%d (8) {
   ["a"]=>
   string(9) "changed.a"
@@ -231,14 +231,14 @@ object(E)#%d (8) {
   string(9) "changed.c"
   ["d":protected]=>
   string(9) "changed.d"
-  ["e":"E":private]=>
-  string(9) "changed.e"
+  ["e":"C":private]=>
+  string(10) "Original e"
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(9) "changed.g"
-  ["e":"C":private]=>
-  string(10) "Original e"
+  ["e":"E":private]=>
+  string(9) "changed.e"
 }
 
 
@@ -266,17 +266,13 @@ object(C)#%d (5) {
 
 --> Using instance of D:
 in C::doForEachC
-string(10) "Original g"
 string(10) "Original a"
 string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
 string(10) "Original e"
+string(10) "Original g"
 object(D)#%d (7) {
-  ["f":"D":private]=>
-  string(10) "Original f"
-  ["g":protected]=>
-  string(9) "changed.g"
   ["a"]=>
   string(9) "changed.a"
   ["b"]=>
@@ -287,6 +283,10 @@ object(D)#%d (7) {
   string(9) "changed.d"
   ["e":"C":private]=>
   string(9) "changed.e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
 }
 
 --> Using instance of E:
@@ -295,8 +295,8 @@ string(12) "Overridden a"
 string(12) "Overridden b"
 string(12) "Overridden c"
 string(12) "Overridden d"
-string(10) "Original g"
 string(10) "Original e"
+string(10) "Original g"
 object(E)#%d (8) {
   ["a"]=>
   string(9) "changed.a"
@@ -306,14 +306,14 @@ object(E)#%d (8) {
   string(9) "changed.c"
   ["d":protected]=>
   string(9) "changed.d"
-  ["e":"E":private]=>
-  string(12) "Overridden e"
+  ["e":"C":private]=>
+  string(9) "changed.e"
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(9) "changed.g"
-  ["e":"C":private]=>
-  string(9) "changed.e"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
 }
 
 
@@ -375,17 +375,13 @@ object(C)#%d (5) {
 
 --> Using instance of D:
 in C::doForEach
-string(10) "Original g"
 string(10) "Original a"
 string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
 string(10) "Original e"
+string(10) "Original g"
 object(D)#%d (7) {
-  ["f":"D":private]=>
-  string(10) "Original f"
-  ["g":protected]=>
-  string(9) "changed.g"
   ["a"]=>
   string(9) "changed.a"
   ["b"]=>
@@ -396,41 +392,19 @@ object(D)#%d (7) {
   string(9) "changed.d"
   ["e":"C":private]=>
   string(9) "changed.e"
-}
-in D::doForEach
-string(10) "Original f"
-string(10) "Original g"
-string(10) "Original a"
-string(10) "Original b"
-string(10) "Original c"
-string(10) "Original d"
-object(D)#%d (7) {
-  ["f":"D":private]=>
-  string(9) "changed.f"
-  ["g":protected]=>
-  string(9) "changed.g"
-  ["a"]=>
-  string(9) "changed.a"
-  ["b"]=>
-  string(9) "changed.b"
-  ["c"]=>
-  string(9) "changed.c"
-  ["d":protected]=>
-  string(9) "changed.d"
-  ["e":"C":private]=>
-  string(10) "Original e"
-}
-in E::doForEach
-string(10) "Original g"
-string(10) "Original a"
-string(10) "Original b"
-string(10) "Original c"
-string(10) "Original d"
-object(D)#%d (7) {
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(9) "changed.g"
+}
+in D::doForEach
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original f"
+string(10) "Original g"
+object(D)#%d (7) {
   ["a"]=>
   string(9) "changed.a"
   ["b"]=>
@@ -441,6 +415,32 @@ object(D)#%d (7) {
   string(9) "changed.d"
   ["e":"C":private]=>
   string(10) "Original e"
+  ["f":"D":private]=>
+  string(9) "changed.f"
+  ["g":protected]=>
+  string(9) "changed.g"
+}
+in E::doForEach
+string(10) "Original a"
+string(10) "Original b"
+string(10) "Original c"
+string(10) "Original d"
+string(10) "Original g"
+object(D)#%d (7) {
+  ["a"]=>
+  string(9) "changed.a"
+  ["b"]=>
+  string(9) "changed.b"
+  ["c"]=>
+  string(9) "changed.c"
+  ["d":protected]=>
+  string(9) "changed.d"
+  ["e":"C":private]=>
+  string(10) "Original e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(9) "changed.g"
 }
 
 --> Using instance of E:
@@ -449,8 +449,8 @@ string(12) "Overridden a"
 string(12) "Overridden b"
 string(12) "Overridden c"
 string(12) "Overridden d"
-string(10) "Original g"
 string(10) "Original e"
+string(10) "Original g"
 object(E)#%d (8) {
   ["a"]=>
   string(9) "changed.a"
@@ -460,14 +460,14 @@ object(E)#%d (8) {
   string(9) "changed.c"
   ["d":protected]=>
   string(9) "changed.d"
-  ["e":"E":private]=>
-  string(12) "Overridden e"
+  ["e":"C":private]=>
+  string(9) "changed.e"
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(9) "changed.g"
-  ["e":"C":private]=>
-  string(9) "changed.e"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
 }
 in D::doForEach
 string(12) "Overridden a"
@@ -485,22 +485,22 @@ object(E)#%d (8) {
   string(9) "changed.c"
   ["d":protected]=>
   string(9) "changed.d"
-  ["e":"E":private]=>
-  string(12) "Overridden e"
+  ["e":"C":private]=>
+  string(10) "Original e"
   ["f":"D":private]=>
   string(9) "changed.f"
   ["g":protected]=>
   string(9) "changed.g"
-  ["e":"C":private]=>
-  string(10) "Original e"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
 }
 in E::doForEach
 string(12) "Overridden a"
 string(12) "Overridden b"
 string(12) "Overridden c"
 string(12) "Overridden d"
-string(12) "Overridden e"
 string(10) "Original g"
+string(12) "Overridden e"
 object(E)#%d (8) {
   ["a"]=>
   string(9) "changed.a"
@@ -510,14 +510,14 @@ object(E)#%d (8) {
   string(9) "changed.c"
   ["d":protected]=>
   string(9) "changed.d"
-  ["e":"E":private]=>
-  string(9) "changed.e"
+  ["e":"C":private]=>
+  string(10) "Original e"
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(9) "changed.g"
-  ["e":"C":private]=>
-  string(10) "Original e"
+  ["e":"E":private]=>
+  string(9) "changed.e"
 }
 
 
@@ -545,10 +545,6 @@ string(10) "Original a"
 string(10) "Original b"
 string(10) "Original c"
 object(D)#%d (7) {
-  ["f":"D":private]=>
-  string(10) "Original f"
-  ["g":protected]=>
-  string(10) "Original g"
   ["a"]=>
   string(9) "changed.a"
   ["b"]=>
@@ -559,6 +555,10 @@ object(D)#%d (7) {
   string(10) "Original d"
   ["e":"C":private]=>
   string(10) "Original e"
+  ["f":"D":private]=>
+  string(10) "Original f"
+  ["g":protected]=>
+  string(10) "Original g"
 }
 
 --> Using instance of E:
@@ -574,12 +574,12 @@ object(E)#%d (8) {
   &string(9) "changed.c"
   ["d":protected]=>
   string(12) "Overridden d"
-  ["e":"E":private]=>
-  string(12) "Overridden e"
+  ["e":"C":private]=>
+  string(10) "Original e"
   ["f":"D":private]=>
   string(10) "Original f"
   ["g":protected]=>
   string(10) "Original g"
-  ["e":"C":private]=>
-  string(10) "Original e"
+  ["e":"E":private]=>
+  string(12) "Overridden e"
 }
