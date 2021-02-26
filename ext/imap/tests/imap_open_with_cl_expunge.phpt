@@ -39,5 +39,5 @@ New mailbox created
 
 -- Call to imap_close() --
 bool(true)
-There are now 0 msgs in mailbox '%sINBOX.imapopenwithclexpunge'
+There are now 0 msgs in mailbox '%sINBOX.phpttestimapopenwithclexpunge'
 bool(true)

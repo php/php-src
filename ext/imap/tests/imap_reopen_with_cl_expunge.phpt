@@ -44,5 +44,5 @@ bool(true)
 
 -- Call to imap_close() --
 bool(true)
-There are now 0 msgs in mailbox '%sINBOX.imapreopenwithclexpunge'
+There are now 0 msgs in mailbox '%sINBOX.phpttestimapreopenwithclexpunge'
 bool(true)
