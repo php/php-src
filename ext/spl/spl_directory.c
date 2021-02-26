@@ -214,18 +214,24 @@ static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *int
 			break;
 		case SPL_FS_DIR:
 			{
+				size_t name_len;
 				size_t path_len = 0;
 				char *path = spl_filesystem_object_get_path(intern, &path_len);
+
 				if (intern->file_name) {
 					zend_string_release(intern->file_name);
 				}
 				/* if there is parent path, amend it, otherwise just use the given path as is */
+				name_len = strlen(intern->u.dir.entry.d_name);
 				if (path_len == 0) {
-					intern->file_name = zend_strpprintf(
-						0, "%s", intern->u.dir.entry.d_name);
+					intern->file_name = zend_string_init(intern->u.dir.entry.d_name, name_len, 0);
 				} else {
-					intern->file_name = zend_strpprintf(
-						0, "%s%c%s", path, slash, intern->u.dir.entry.d_name);
+					zend_string *file_name = zend_string_alloc(path_len + 1 + name_len, 0);
+					memcpy(ZSTR_VAL(file_name), path, path_len);
+					ZSTR_VAL(file_name)[path_len] = slash;
+					memcpy(ZSTR_VAL(file_name) + path_len + 1, intern->u.dir.entry.d_name, name_len);
+					ZSTR_VAL(file_name)[path_len + 1 + name_len] = 0;
+					intern->file_name = file_name;
 				}
 			}
 			break;
@@ -1495,10 +1501,16 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 
 	subdir = Z_SPLFILESYSTEM_P(return_value);
 	if (subdir) {
+		size_t name_len = strlen(intern->u.dir.entry.d_name);
 		if (intern->u.dir.sub_path && ZSTR_LEN(intern->u.dir.sub_path)) {
-			subdir->u.dir.sub_path = zend_strpprintf(0, "%s%c%s", ZSTR_VAL(intern->u.dir.sub_path), slash, intern->u.dir.entry.d_name);
+			zend_string *sub_path = zend_string_alloc(ZSTR_LEN(intern->u.dir.sub_path) + 1 + name_len, 0);
+			memcpy(ZSTR_VAL(sub_path), ZSTR_VAL(intern->u.dir.sub_path), ZSTR_LEN(intern->u.dir.sub_path));
+			ZSTR_VAL(sub_path)[ZSTR_LEN(intern->u.dir.sub_path)] = slash;
+			memcpy(ZSTR_VAL(sub_path) + ZSTR_LEN(intern->u.dir.sub_path) + 1, intern->u.dir.entry.d_name, name_len);
+			ZSTR_VAL(sub_path)[ZSTR_LEN(intern->u.dir.sub_path) + 1 + name_len] = 0;
+			subdir->u.dir.sub_path = sub_path;
 		} else {
-			subdir->u.dir.sub_path = zend_string_init(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), 0);
+			subdir->u.dir.sub_path = zend_string_init(intern->u.dir.entry.d_name, name_len, 0);
 		}
 		subdir->info_class = intern->info_class;
 		subdir->file_class = intern->file_class;
