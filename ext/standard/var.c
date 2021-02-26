@@ -733,9 +733,10 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
-	s = zend_print_long_to_buf(b + sizeof(b) - 1, ZSTR_LEN(class_name));
+	size_t class_name_len = ZSTR_LEN(class_name);
+	s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
 	l = b + sizeof(b) - 1 - s;
-	new_len = smart_str_alloc(buf, 2 + l + 2 + ZSTR_LEN(class_name) + 2, 0);
+	new_len = smart_str_alloc(buf, 2 + l + 2 + class_name_len + 2, 0);
 	res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
 	ZSTR_LEN(buf->s) = new_len;
 	memcpy(res, "O:", 2);
@@ -744,8 +745,8 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 	res += l;
 	memcpy(res, ":\"", 2);
 	res += 2;
-	memcpy(res, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-	res += ZSTR_LEN(class_name);
+	memcpy(res, ZSTR_VAL(class_name), class_name_len);
+	res += class_name_len;
 	memcpy(res, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
