@@ -40,8 +40,9 @@ require_once(__DIR__.'/setup/clean.inc');
 --EXPECTF--
 Create a temporary mailbox and add 3 msgs
 New mailbox created
+bool(true)
 
 -- Call to imap_close() --
 bool(true)
-There are now 0 msgs in mailbox '%sINBOX.phpttestimapclosebasic'
+There are now 0 msgs in mailbox '%sINBOX.imapreopenwithclexpunge'
 bool(true)
