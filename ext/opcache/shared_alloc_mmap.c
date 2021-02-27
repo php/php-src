@@ -44,6 +44,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MPROTECT
   flags |= PROT_MPROTECT(PROT_EXEC);
 #endif
+#ifdef PROT_MAX
+  flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif
 #ifdef MAP_HUGETLB
 	size_t huge_page_size = 2 * 1024 * 1024;
 
