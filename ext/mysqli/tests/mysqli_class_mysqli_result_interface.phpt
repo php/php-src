@@ -162,11 +162,6 @@ num_rows
 type
 
 Object variables:
-current_field
-field_count
-lengths
-num_rows
-type
 
 Magic, magic properties:
 mysqli_result->current_field = '0'/integer ('0'/integer)

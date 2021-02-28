@@ -153,16 +153,6 @@ param_count
 sqlstate
 
 Object variables:
-affected_rows
-insert_id
-num_rows
-param_count
-field_count
-errno
-error
-error_list
-sqlstate
-id
 
 Magic, magic properties:
 mysqli_stmt object is not fully initialized

@@ -261,24 +261,6 @@ mysqli object is already closed
 mysqli object is already closed
 
 Object variables:
-Property access is not allowed yet
-Property access is not allowed yet
-client_version = '%s'
-connect_errno = '%s'
-connect_error = ''%s'
-mysqli object is already closed
-mysqli object is already closed
-Property access is not allowed yet
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
 
 Magic, magic properties:
 mysqli object is already closed
@@ -343,24 +325,6 @@ mysqli object is already closed
 mysqli object is already closed
 
 Object variables:
-Property access is not allowed yet
-Property access is not allowed yet
-client_version = '%s'
-connect_errno = '%s'
-connect_error = '%s'
-mysqli object is already closed
-mysqli object is already closed
-Property access is not allowed yet
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
 
 Magic, magic properties:
 mysqli object is already closed
