@@ -142,6 +142,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #69625 (FPM returns 200 status on request without
     SCRIPT_FILENAME env). (Jakub Zelenka)
+  . Fixed bug #80024 (Duplication of info about inherited socket after pool
+    removing). (Jakub Zelenka)
 
 - Intl:
   . Fixed bug #80425 (MessageFormatAdapter::getArgTypeList redefined). (Nikita)
