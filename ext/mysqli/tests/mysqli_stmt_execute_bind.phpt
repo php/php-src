@@ -125,10 +125,13 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
     assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>null, 'num' => null]);
     $stmt = null;
 
-    // 12. array keys are ignored. Even numerical indices are not considered (PDO does a weird thing with the numerical indices)
+    // 12. Only list arrays are allowed
     $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
-    $stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
-    assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
+    try {
+        $stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
+    } catch (ValueError $e) {
+        echo '[008] '.$e->getMessage()."\n";
+    }
     $stmt = null;
 
 
@@ -147,4 +150,5 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
 [005] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, int given
 [006] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, stdClass given
 [007] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
+[008] mysqli_stmt::execute(): Argument #1 ($params) must be a list array
 done!

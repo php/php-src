@@ -830,6 +830,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		unsigned int param_count;
 		MYSQLND_PARAM_BIND	*params;
 
+		if (!zend_array_is_list(input_params)) {
+			zend_argument_value_error(ERROR_ARG_POS(2), "must be a list array");
+			RETURN_THROWS();
+		}
+
 		hash_num_elements = zend_hash_num_elements(input_params);
 		param_count = mysql_stmt_param_count(stmt->stmt);
 		if (hash_num_elements != param_count) {
