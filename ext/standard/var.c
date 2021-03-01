@@ -926,6 +926,7 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, index, key, data) {
 			if (incomplete_class && zend_string_equals_literal(key, MAGIC_MEMBER)) {
+				incomplete_class = 0;
 				continue;
 			}
 
