@@ -412,7 +412,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
 				case BP_VAR_W: {
 				    zval value;
-					ZVAL_UNDEF(&value);
+					ZVAL_NULL(&value);
 					retval = zend_hash_index_update(ht, key.h, &value);
 			   }
 			}
