@@ -353,7 +353,7 @@ static char *find_address(char *list, char **state)
 				break;
 			}
 			p++;
-		} else if (*p == '\"') {
+		} else if (*p == '"') {
 			in_quotes = !in_quotes;
 		} else if (*p == ',' && !in_quotes) {
 			*p = '\0';
@@ -1022,7 +1022,7 @@ static char *get_angle_addr(char *address)
 				return NULL;
 			}
 			p1++;
-		} else if (*p1 == '\"') {
+		} else if (*p1 == '"') {
 			in_quotes = !in_quotes;
 		} else if (*p1 == '<' && !in_quotes) {
 			break;
@@ -1038,7 +1038,7 @@ static char *get_angle_addr(char *address)
 				return NULL;
 			}
 			p2++;
-		} else if (*p2 == '\"') {
+		} else if (*p2 == '"') {
 			in_quotes = !in_quotes;
 		} else if (*p2 == '>' && !in_quotes) {
 			break;
@@ -1068,7 +1068,7 @@ static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString)
 	int result;
 
 	if ((tmpAddress = get_angle_addr(EmailAddress)) != NULL) {
-		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString , tmpAddress);
+		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString, tmpAddress);
 		efree(tmpAddress);
 		return result;
 	}
