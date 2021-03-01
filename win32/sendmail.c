@@ -348,6 +348,10 @@ static char *find_address(char *list, char **state)
 	*state = NULL;
 	while ((p = strpbrk(p, ",\"\\")) != NULL) {
 		if (*p == '\\' && in_quotes) {
+			if (p[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				break;
+			}
 			p++;
 		} else if (*p == '\"') {
 			in_quotes = !in_quotes;
@@ -1013,6 +1017,10 @@ static char *get_angle_addr(char *address)
 
 	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {
 		if (*p1 == '\\' && in_quotes) {
+			if (p1[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				return NULL;
+			}
 			p1++;
 		} else if (*p1 == '\"') {
 			in_quotes = !in_quotes;
@@ -1025,6 +1033,10 @@ static char *get_angle_addr(char *address)
 	p2 = ++p1;
 	while ((p2 = strpbrk(p2, ">\"\\")) != NULL) {
 		if (*p2 == '\\' && in_quotes) {
+			if (p2[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				return NULL;
+			}
 			p2++;
 		} else if (*p2 == '\"') {
 			in_quotes = !in_quotes;
