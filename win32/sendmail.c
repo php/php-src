@@ -1024,7 +1024,7 @@ static char *get_angle_addr(char *address)
 			p1++;
 		} else if (*p1 == '\"') {
 			in_quotes = !in_quotes;
-		} else if (!in_quotes) {
+		} else if (*p1 == '<' && !in_quotes) {
 			break;
 		}
 		p1++;
@@ -1040,7 +1040,7 @@ static char *get_angle_addr(char *address)
 			p2++;
 		} else if (*p2 == '\"') {
 			in_quotes = !in_quotes;
-		} else if (!in_quotes) {
+		} else if (*p2 == '>' && !in_quotes) {
 			break;
 		}
 		p2++;
