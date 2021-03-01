@@ -365,7 +365,7 @@ num_index:
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, index);
 				case BP_VAR_W: {
 				    zval value;
-					ZVAL_UNDEF(&value);
+					ZVAL_NULL(&value);
 					retval = zend_hash_index_update(ht, index, &value);
 			   }
 			}
