@@ -87,6 +87,38 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
+ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj) /* {{{ */
+{
+	zend_property_info *prop_info;
+	zend_class_entry *ce = zobj->ce;
+	HashTable *ht;
+	zval* prop;
+	int i;
+
+	ZEND_ASSERT(!zobj->properties);
+	ht = zend_new_array(ce->default_properties_count);
+	if (ce->default_properties_count) {
+		zend_hash_real_init_mixed(ht);
+		for (i = 0; i < ce->default_properties_count; i++) {
+			prop_info = ce->properties_info_table[i];
+
+			if (!prop_info) {
+				continue;
+			}
+
+			prop = OBJ_PROP(zobj, prop_info->offset);
+			if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
+				continue;
+			}
+
+			Z_TRY_ADDREF_P(prop);
+			_zend_hash_append(ht, prop_info->name, prop);
+		}
+	}
+	return ht;
+}
+/* }}} */
+
 ZEND_API HashTable *zend_std_get_properties(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {

@@ -713,6 +713,13 @@ try_again:
 		case IS_OBJECT:
 			if (Z_OBJCE_P(op) == zend_ce_closure) {
 				convert_scalar_to_array(op);
+			} else if (Z_OBJ_P(op)->properties == NULL
+			 && Z_OBJ_HT_P(op)->get_properties_for == NULL
+			 && Z_OBJ_HT_P(op)->get_properties == zend_std_get_properties) {
+				/* Optimized version without rebulding properties HashTable */
+				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
+				OBJ_RELEASE(Z_OBJ_P(op));
+				ZVAL_ARR(op, ht);
 			} else {
 				HashTable *obj_ht = zend_get_properties_for(op, ZEND_PROP_PURPOSE_ARRAY_CAST);
 				if (obj_ht) {
