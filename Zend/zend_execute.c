@@ -4595,6 +4595,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 			}
 
 			ZVAL_COPY_VALUE(arg, &default_value);
+			if (ZEND_ARG_SEND_MODE(arg_info) & ZEND_SEND_BY_REF) {
+				ZVAL_NEW_REF(arg, arg);
+			}
 		}
 	}
 
