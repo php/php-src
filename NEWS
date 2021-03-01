@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
 
+- Dba:
+  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
+
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
