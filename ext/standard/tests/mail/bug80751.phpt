@@ -39,7 +39,7 @@ function find_and_delete_message($username, $subject) {
                 echo "From header found: ";
                 var_dump(strpos($header, 'From: "<bob@example.com>" <joe@example.com>') !== false);
                 echo "Cc header found: ";
-                var_dump(strpos($header, 'Cc: "Lastname, Firstname" <admin@mail.local>') !== false);
+                var_dump(strpos($header, 'Cc: "Lastname, Firstname\\\\" <admin@mail.local>') !== false);
                 imap_delete($imap_stream, $i);
                 $found = true;
                 break;
@@ -56,7 +56,7 @@ $to = "\"<bob@example.com>\" <{$users[1]}@$domain>";
 $subject = bin2hex(random_bytes(16));
 $message = 'hello';
 $headers = "From: \"<bob@example.com>\" <joe@example.com>\r\n"
-    . "Cc: \"Lastname, Firstname\" <{$users[2]}@$domain>\r\n"
+    . "Cc: \"Lastname, Firstname\\\\\" <{$users[2]}@$domain>\r\n"
     . "Bcc: \"Firstname \\\"Ni,ck\\\" Lastname\" <{$users[3]}@$domain>\r\n";
 
 $res = mail($to, $subject, $message, $headers);

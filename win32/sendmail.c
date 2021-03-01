@@ -346,8 +346,10 @@ static char *find_address(char *list, char **state)
 		p = list = *state;
 	}
 	*state = NULL;
-	while ((p = strpbrk(p, ",\"")) != NULL) {
-		if (*p == '\"' && (p <= list ||*(p - 1) != '\\')) {
+	while ((p = strpbrk(p, ",\"\\")) != NULL) {
+		if (*p == '\\' && in_quotes) {
+			p++;
+		} else if (*p == '\"') {
 			in_quotes = !in_quotes;
 		} else if (*p == ',' && !in_quotes) {
 			*p = '\0';
@@ -1009,8 +1011,10 @@ static char *get_angle_addr(char *address)
 	zend_bool in_quotes = 0;
 	char *p1 = address, *p2;
 
-	while ((p1 = strpbrk(p1, "<\"")) != NULL) {
-		if (*p1 == '\"' && (p1 <= address ||*(p1 - 1) != '\\')) {
+	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {
+		if (*p1 == '\\' && in_quotes) {
+			p1++;
+		} else if (*p1 == '\"') {
 			in_quotes = !in_quotes;
 		} else if (!in_quotes) {
 			break;
@@ -1019,8 +1023,10 @@ static char *get_angle_addr(char *address)
 	}
 	if (p1 == NULL) return NULL;
 	p2 = ++p1;
-	while ((p2 = strpbrk(p2, ">\"")) != NULL) {
-		if (*p2 == '\"' && (*(p2 - 1) != '\\')) {
+	while ((p2 = strpbrk(p2, ">\"\\")) != NULL) {
+		if (*p2 == '\\' && in_quotes) {
+			p2++;
+		} else if (*p2 == '\"') {
 			in_quotes = !in_quotes;
 		} else if (!in_quotes) {
 			break;
