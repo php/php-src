@@ -49,6 +49,6 @@ print_r($client->f());
 --EXPECT--
 B Object
 (
-    [y] => 6
     [x] => 5
+    [y] => 6
 )

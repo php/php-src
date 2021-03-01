@@ -173,10 +173,10 @@ int(5)
 array(5) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   ["f"]=>
   string(5) "first"
@@ -191,10 +191,10 @@ int(7)
 array(7) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   [1]=>
   string(5) "hello"

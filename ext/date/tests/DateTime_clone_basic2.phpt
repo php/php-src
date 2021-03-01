@@ -55,14 +55,14 @@ object(DateTimeExt1)#%d (5) {
   string(3) "GMT"
 }
 object(DateTimeExt2)#%d (7) {
-  ["property3"]=>
-  bool(true)
-  ["property4"]=>
-  float(10.5)
   ["property1"]=>
   int(99)
   ["property2"]=>
   string(5) "Hello"
+  ["property3"]=>
+  bool(true)
+  ["property4"]=>
+  float(10.5)
   ["date"]=>
   string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
@@ -71,14 +71,14 @@ object(DateTimeExt2)#%d (7) {
   string(3) "GMT"
 }
 object(DateTimeExt2)#%d (7) {
-  ["property3"]=>
-  bool(true)
-  ["property4"]=>
-  float(10.5)
   ["property1"]=>
   int(99)
   ["property2"]=>
   string(5) "Hello"
+  ["property3"]=>
+  bool(true)
+  ["property4"]=>
+  float(10.5)
   ["date"]=>
   string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>

@@ -235,25 +235,25 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test1)#%d (4) {
-    ["member2"]=>
-    int(102)
     ["member1"]=>
     int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
+    ["member2"]=>
+    int(102)
   }
   [1]=>
   object(Child_test1)#%d (4) {
-    ["member2"]=>
-    int(102)
     ["member1"]=>
     int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
+    ["member2"]=>
+    int(102)
   }
 }
 -- Iteration 4 --
@@ -281,25 +281,25 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test2)#%d (4) {
-    ["member1":"Child_test2":private]=>
-    int(102)
+    ["member1":"Test2":private]=>
+    int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
-    ["member1":"Test2":private]=>
-    int(100)
+    ["member1":"Child_test2":private]=>
+    int(102)
   }
   [1]=>
   object(Child_test2)#%d (4) {
-    ["member1":"Child_test2":private]=>
-    int(102)
+    ["member1":"Test2":private]=>
+    int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
-    ["member1":"Test2":private]=>
-    int(100)
+    ["member1":"Child_test2":private]=>
+    int(102)
   }
 }
 -- Iteration 6 --
@@ -369,25 +369,25 @@ array(2) {
 array(2) {
   [0]=>
   object(Child_test4)#%d (4) {
-    ["var1"]=>
-    int(103)
     ["member1"]=>
     int(100)
     ["member2":"Test4":private]=>
     int(101)
     ["member3":protected]=>
     int(102)
+    ["var1"]=>
+    int(103)
   }
   [1]=>
   object(Child_test4)#%d (4) {
-    ["var1"]=>
-    int(103)
     ["member1"]=>
     int(100)
     ["member2":"Test4":private]=>
     int(101)
     ["member3":protected]=>
     int(102)
+    ["var1"]=>
+    int(103)
   }
 }
 -- Iteration 10 --
