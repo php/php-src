@@ -333,6 +333,37 @@ PHPAPI char *GetSMErrorText(int index)
 	}
 }
 
+/* strtok_r like, but recognizes quoted-strings */
+static char *find_address(char *list, char **state)
+{
+	zend_bool in_quotes = 0;
+	char *p = list;
+
+	if (list == NULL) {
+		if (*state == NULL) {
+			return NULL;
+		}
+		p = list = *state;
+	}
+	*state = NULL;
+	while ((p = strpbrk(p, ",\"\\")) != NULL) {
+		if (*p == '\\' && in_quotes) {
+			if (p[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				break;
+			}
+			p++;
+		} else if (*p == '"') {
+			in_quotes = !in_quotes;
+		} else if (*p == ',' && !in_quotes) {
+			*p = '\0';
+			*state = p + 1;
+			break;
+		}
+		p++;
+	}
+	return list;
+}
 
 /*********************************************************************
 // Name:  SendText
@@ -357,7 +388,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 {
 	int res;
 	char *p;
-	char *tempMailTo, *token;
+	char *tempMailTo, *token, *token_state;
 	const char *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
@@ -411,7 +442,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 	tempMailTo = estrdup(mailTo);
 	/* Send mail to all rcpt's */
-	token = strtok(tempMailTo, ",");
+	token = find_address(tempMailTo, &token_state);
 	while (token != NULL)
 	{
 		SMTP_SKIP_SPACE(token);
@@ -425,14 +456,14 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			efree(tempMailTo);
 			return (res);
 		}
-		token = strtok(NULL, ",");
+		token = find_address(NULL, &token_state);
 	}
 	efree(tempMailTo);
 
 	if (mailCc && *mailCc) {
 		tempMailTo = estrdup(mailCc);
 		/* Send mail to all rcpt's */
-		token = strtok(tempMailTo, ",");
+		token = find_address(tempMailTo, &token_state);
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
@@ -446,7 +477,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 				efree(tempMailTo);
 				return (res);
 			}
-			token = strtok(NULL, ",");
+			token = find_address(NULL, &token_state);
 		}
 		efree(tempMailTo);
 	}
@@ -472,7 +503,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 			tempMailTo = estrndup(pos1, pos2 - pos1);
 		}
 
-		token = strtok(tempMailTo, ",");
+		token = find_address(tempMailTo, &token_state);
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
@@ -486,7 +517,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 				efree(tempMailTo);
 				return (res);
 			}
-			token = strtok(NULL, ",");
+			token = find_address(NULL,&token_state);
 		}
 		efree(tempMailTo);
 	}
@@ -497,7 +528,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	if (mailBcc && *mailBcc) {
 		tempMailTo = estrdup(mailBcc);
 		/* Send mail to all rcpt's */
-		token = strtok(tempMailTo, ",");
+		token = find_address(tempMailTo, &token_state);
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
@@ -511,7 +542,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 				efree(tempMailTo);
 				return (res);
 			}
-			token = strtok(NULL, ",");
+			token = find_address(NULL, &token_state);
 		}
 		efree(tempMailTo);
 	}
@@ -545,7 +576,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 				}
 			}
 
-			token = strtok(tempMailTo, ",");
+			token = find_address(tempMailTo, &token_state);
 			while (token != NULL)
 			{
 				SMTP_SKIP_SPACE(token);
@@ -559,7 +590,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 					efree(tempMailTo);
 					return (res);
 				}
-				token = strtok(NULL, ",");
+				token = find_address(NULL, &token_state);
 			}
 			efree(tempMailTo);
 
@@ -979,6 +1010,46 @@ static unsigned long GetAddr(LPSTR szHost)
 	return (lAddr);
 } /* end GetAddr() */
 
+/* returns the contents of an angle-addr (caller needs to efree) or NULL */
+static char *get_angle_addr(char *address)
+{
+	zend_bool in_quotes = 0;
+	char *p1 = address, *p2;
+
+	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {
+		if (*p1 == '\\' && in_quotes) {
+			if (p1[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				return NULL;
+			}
+			p1++;
+		} else if (*p1 == '"') {
+			in_quotes = !in_quotes;
+		} else if (*p1 == '<' && !in_quotes) {
+			break;
+		}
+		p1++;
+	}
+	if (p1 == NULL) return NULL;
+	p2 = ++p1;
+	while ((p2 = strpbrk(p2, ">\"\\")) != NULL) {
+		if (*p2 == '\\' && in_quotes) {
+			if (p2[1] == '\0') {
+				/* invalid address; let SMTP server deal with it */
+				return NULL;
+			}
+			p2++;
+		} else if (*p2 == '"') {
+			in_quotes = !in_quotes;
+		} else if (*p2 == '>' && !in_quotes) {
+			break;
+		}
+		p2++;
+	}
+	if (p2 == NULL) return NULL;
+
+	return estrndup(p1, p2 - p1);
+}
 
 /*********************************************************************
 // Name:  int FormatEmailAddress
@@ -994,13 +1065,12 @@ static unsigned long GetAddr(LPSTR szHost)
 // History:
 //********************************************************************/
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
-	char *tmpAddress1, *tmpAddress2;
+	char *tmpAddress;
 	int result;
 
-	if( (tmpAddress1 = strchr(EmailAddress, '<')) && (tmpAddress2 = strchr(tmpAddress1, '>'))  ) {
-		*tmpAddress2 = 0; // terminate the string temporarily.
-		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
-		*tmpAddress2 = '>'; // put it back the way it was.
+	if ((tmpAddress = get_angle_addr(EmailAddress)) != NULL) {
+		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString, tmpAddress);
+		efree(tmpAddress);
 		return result;
 	}
 	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
