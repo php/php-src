@@ -1158,6 +1158,57 @@ again:
 				}
 
 				incomplete_class = php_var_serialize_class_name(buf, struc);
+
+				if (Z_OBJ_P(struc)->properties == NULL
+				 && Z_OBJ_HT_P(struc)->get_properties_for == NULL
+				 && Z_OBJ_HT_P(struc)->get_properties == zend_std_get_properties) {
+					/* Optimized version without rebulding properties HashTable */
+					zend_object *obj = Z_OBJ_P(struc);
+					zend_class_entry *ce = obj->ce;
+					zend_property_info *prop_info;
+					zval *prop;
+					int i;
+
+					count = ce->default_properties_count;
+					for (i = 0; i < ce->default_properties_count; i++) {
+						prop_info = ce->properties_info_table[i];
+						if (!prop_info) {
+							count--;
+							continue;
+						}
+						prop = OBJ_PROP(obj, prop_info->offset);
+						if (Z_TYPE_P(prop) == IS_UNDEF) {
+							count--;
+							continue;
+						}
+					}
+					if (count) {
+						smart_str_append_unsigned(buf, count);
+						smart_str_appendl(buf, ":{", 2);
+						for (i = 0; i < ce->default_properties_count; i++) {
+							prop_info = ce->properties_info_table[i];
+							if (!prop_info) {
+								continue;
+							}
+							prop = OBJ_PROP(obj, prop_info->offset);
+							if (Z_TYPE_P(prop) == IS_UNDEF) {
+								continue;
+							}
+
+							php_var_serialize_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name));
+
+							if (Z_ISREF_P(prop) && Z_REFCOUNT_P(prop) == 1) {
+								prop = Z_REFVAL_P(prop);
+							}
+
+							php_var_serialize_intern(buf, prop, var_hash);
+						}
+						smart_str_appendc(buf, '}');
+					} else {
+						smart_str_appendl(buf, "0:{}", 4);
+					}
+					return;
+				}
 				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 				/* count after serializing name, since php_var_serialize_class_name
 				 * changes the count if the variable is incomplete class */
