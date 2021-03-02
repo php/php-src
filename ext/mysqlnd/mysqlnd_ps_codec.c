@@ -74,6 +74,11 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 			case 1:uval = (uint64_t) uint1korr(*row);break;
 		}
 
+		if (field->flags & ZEROFILL_FLAG) {
+			DBG_INF("stringify due to zerofill");
+			tmp_len = sprintf((char *)&tmp, "%0*" PRIu64, (int) field->length, uval);
+			DBG_INF_FMT("value=%s", tmp);
+		} else
 #if SIZEOF_ZEND_LONG==4
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");

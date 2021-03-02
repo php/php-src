@@ -1600,7 +1600,8 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
 					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
 				}
-			} else if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			} else if (as_int_or_float && perm_bind.php_type == IS_LONG
+					&& !(fields_metadata[i].flags & ZEROFILL_FLAG)) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
