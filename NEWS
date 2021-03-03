@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
 
+- Libxml:
+  . Fixed bug #51903 (simplexml_load_file() doesn't use HTTP headers). (cmb)
+
 - MySQLnd:
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
     MySQL 8.0). (Nikita)
