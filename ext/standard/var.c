@@ -269,7 +269,6 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 {
 	HashTable *myht = NULL;
 	zend_string *class_name;
-	int is_ref = 0;
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
@@ -279,25 +278,24 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		php_printf("%*c", level - 1, ' ');
 	}
 
-again:
 	switch (Z_TYPE_P(struc)) {
 	case IS_FALSE:
-		php_printf("%sbool(false)\n", COMMON);
+		PUTS("bool(false)\n");
 		break;
 	case IS_TRUE:
-		php_printf("%sbool(true)\n", COMMON);
+		PUTS("bool(true)\n");
 		break;
 	case IS_NULL:
-		php_printf("%sNULL\n", COMMON);
+		PUTS("NULL\n");
 		break;
 	case IS_LONG:
-		php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
+		php_printf("int(" ZEND_LONG_FMT ")\n", Z_LVAL_P(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
+		php_printf_unchecked("float(%.*H)\n", (int) PG(serialize_precision), Z_DVAL_P(struc));
 		break;
 	case IS_STRING:
-		php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
+		php_printf("string(%zd) \"", Z_STRLEN_P(struc));
 		PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
 		if (Z_REFCOUNTED_P(struc)) {
 			php_printf("\" refcount(%u)\n", Z_REFCOUNT_P(struc));
@@ -318,9 +316,9 @@ again:
 		count = zend_hash_num_elements(myht);
 		if (Z_REFCOUNTED_P(struc)) {
 			/* -1 because of ADDREF above. */
-			php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNT_P(struc) - 1);
+			php_printf("array(%d) refcount(%u){\n", count, Z_REFCOUNT_P(struc) - 1);
 		} else {
-			php_printf("%sarray(%d) interned {\n", COMMON, count);
+			php_printf("array(%d) interned {\n", count);
 		}
 		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
@@ -345,7 +343,7 @@ again:
 			GC_PROTECT_RECURSION(myht);
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
+		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
@@ -372,18 +370,19 @@ again:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-		php_printf("%sresource(%d) of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
+		php_printf("resource(%d) of type (%s) refcount(%u)\n", Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
 	case IS_REFERENCE:
-		//??? hide references with refcount==1 (for compatibility)
-		if (Z_REFCOUNT_P(struc) > 1) {
-			is_ref = 1;
+		php_printf("reference refcount(%u) {\n", Z_REFCOUNT_P(struc));
+		php_debug_zval_dump(Z_REFVAL_P(struc), level + 2);
+		if (level > 1) {
+			php_printf("%*c", level - 1, ' ');
 		}
-		struc = Z_REFVAL_P(struc);
-		goto again;
+		PUTS("}\n");
+		break;
 	default:
-		php_printf("%sUNKNOWN:0\n", COMMON);
+		PUTS("UNKNOWN:0\n");
 		break;
 	}
 }
