@@ -741,7 +741,7 @@ try_again:
 			bool trailing_data = false;
 			/* For BC reasons we allow errors so that we can warn on leading numeric string */
 			if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
-					/* allow errors */ true, NULL, &trailing_data)) {
+					/* allow errors */ true, NULL, &trailing_data, NULL)) {
 				if (UNEXPECTED(trailing_data)
 				 && EG(current_execute_data)->opline->opcode != ZEND_FETCH_DIM_UNSET) {
 					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));

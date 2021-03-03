@@ -256,7 +256,7 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 			bool trailing_data = false;
 			/* For BC reasons we allow errors so that we can warn on leading numeric string */
 			if (0 == (Z_TYPE_INFO_P(holder) = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op),
-					&Z_LVAL_P(holder), &Z_DVAL_P(holder),  /* allow errors */ true, NULL, &trailing_data))) {
+					&Z_LVAL_P(holder), &Z_DVAL_P(holder),  /* allow errors */ true, NULL, &trailing_data, NULL))) {
 				/* Will lead to invalid OP type error */
 				return FAILURE;
 			}
@@ -314,7 +314,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 
 				/* For BC reasons we allow errors so that we can warn on leading numeric string */
 				type = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
-					/* allow errors */ true, NULL, &trailing_data);
+					/* allow errors */ true, NULL, &trailing_data, NULL);
 				if (type == 0) {
 					*failed = 1;
 					return 0;
@@ -2907,9 +2907,11 @@ ZEND_API bool ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) 
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
+	bool is_zero_exponential1 = false;
+	bool is_zero_exponential2 = false;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL, &is_zero_exponential1)) &&
+		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL, &is_zero_exponential2))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -2919,6 +2921,10 @@ ZEND_API bool ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) 
 #endif
 			/* both values are integers overflown to the same side, and the
 			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
+		if (is_zero_exponential1 && is_zero_exponential2) {
+			/* Both values are of the form 0eNNN. Do not treat these as equal. */
 			goto string_cmp;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
@@ -2955,9 +2961,11 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
+	bool is_zero_exponential1 = false;
+	bool is_zero_exponential2 = false;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL, &is_zero_exponential1)) &&
+		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL, &is_zero_exponential2))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -2967,6 +2975,10 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 #endif
 			/* both values are integers overflown to the same side, and the
 			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
+		if (is_zero_exponential1 && is_zero_exponential2) {
+			/* Both values are of the form 0eNNN. Do not treat these as equal. */
 			goto string_cmp;
 		}
 		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
@@ -3050,7 +3062,7 @@ ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str
 /* }}} */
 
 ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
-	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data) /* {{{ */
+	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data, bool *is_zero_exponential) /* {{{ */
 {
 	const char *ptr;
 	int digits = 0, dp_or_e = 0;
@@ -3068,6 +3080,10 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 	}
 	if (trailing_data != NULL) {
 		*trailing_data = false;
+	}
+
+	if (is_zero_exponential != NULL) {
+		*is_zero_exponential = false;
 	}
 
 	/* Skip any whitespace
@@ -3103,6 +3119,10 @@ check_digits:
 				goto process_double;
 			} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
 				const char *e = ptr + 1;
+
+				if (is_zero_exponential && tmp_lval == 0) {
+					*is_zero_exponential = true;
+				}
 
 				if (*e == '-' || *e == '+') {
 					ptr = e++;

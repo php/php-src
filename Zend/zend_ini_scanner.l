@@ -158,7 +158,7 @@ static inline zend_result convert_to_number(zval *retval, const char *str, const
 	zend_long lval;
 	double dval;
 
-	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow, NULL)) != 0) {
+	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow, NULL, NULL)) != 0) {
 		if (type == IS_LONG) {
 			ZVAL_LONG(retval, lval);
 			return SUCCESS;
