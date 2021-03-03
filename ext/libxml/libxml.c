@@ -417,7 +417,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 			zval *header;
 
 			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
-				char *buf = "Content-Type:";
+				char buf[] = "Content-Type:";
 				if (Z_TYPE_P(header) == IS_STRING &&
 						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
 					char *needle = estrdup("charset=");
