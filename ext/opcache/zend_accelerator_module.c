@@ -910,9 +910,9 @@ ZEND_FUNCTION(opcache_is_script_cached)
 {
 	zend_string *script_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(script_name)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
