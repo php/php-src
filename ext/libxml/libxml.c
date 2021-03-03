@@ -425,7 +425,26 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), sizeof("charset=")-1);
 
 					if (encoding) {
-						enc = xmlParseCharEncoding(encoding + sizeof("charset=")-1);
+						char *end;
+						
+						encoding += sizeof("charset=")-1;
+						if (*encoding == '"') {
+							encoding++;
+						}
+						end = strchr(encoding, ';');
+						if (end == NULL) {
+							end = encoding + strlen(encoding);
+						}
+						end--; /* end == encoding-1 isn't a buffer underrun */
+						while (*end == ' ' || *end == '\t') {
+							end--;
+						}
+						if (*end == '"') {
+							end--;
+						}
+						if (encoding >= end) continue;
+						*(end+1) = '\0';
+						enc = xmlParseCharEncoding(encoding);
 						if (enc <= XML_CHAR_ENCODING_NONE) {
 							enc = XML_CHAR_ENCODING_NONE;
 						}
