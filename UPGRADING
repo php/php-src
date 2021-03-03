@@ -107,6 +107,11 @@ PHP 8.1 UPGRADE NOTES
     that ' is escaped to &#039; while previously it was left alone.
     Additionally, malformed UTF-8 will be replaced by a Unicode substitution
     character, instead of resulting in an empty string.
+  . debug_zval_dump() will now print reference wrappers with their refcount,
+    instead of only prepending a "&" to the value. This more accurately models
+    reference representation since PHP 7.0.
+  . debug_zval_dump() will not print "interned" instead of a dummy refcount of
+    one for interned strings and immutable arrays.
 
 ========================================
 2. New Features
