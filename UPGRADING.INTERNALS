@@ -1,6 +1,7 @@
 PHP 8.1 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
+  a. Removed Zend APIs
 
 2. Build system changes
 
@@ -10,6 +11,11 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 ========================
 1. Internal API changes
 ========================
+  a. The following APIs have been removed from the Zend Engine:
+     - The spl_ce_Aggregate, spl_ce_ArrayAccess, spl_ce_Countable, spl_ce_Iterator, spl_ce_Serializable,
+       spl_ce_Stringable, spl_ce_Traversable alias class entries have been removed in favor of zend_ce_aggregate,
+       zend_ce_arrayaccess, zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_stringable,
+       zend_ce_traversable.
 
 ========================
 2. Build system changes
