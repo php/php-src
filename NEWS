@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #78719 (http wrapper silently ignores long Location headers).
     (cmb)
 
+- Zip:
+  . Fixed bug #80825 (ZipArchive::isCompressionMethodSupported does not exist).
+    (cmb)
+
 18 Feb 2021, PHP 8.0.3
 
 - Core:
