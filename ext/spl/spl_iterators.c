@@ -85,6 +85,8 @@ typedef struct _spl_sub_iterator {
 	zval                    zobject;
 	zend_class_entry        *ce;
 	RecursiveIteratorState  state;
+	zend_function           *haschildren;
+	zend_function           *getchildren;
 } spl_sub_iterator;
 
 typedef struct _spl_recursive_it_object {
@@ -222,7 +224,6 @@ static void spl_recursive_it_get_current_key(zend_object_iterator *iter, zval *k
 static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zval *zthis)
 {
 	zend_object_iterator      *iterator;
-	zval                      *zobject;
 	zend_class_entry          *ce;
 	zval                      retval, child;
 	zend_object_iterator      *sub_iter;
@@ -251,12 +252,14 @@ next_step:
 				object->iterators[object->level].state = RS_TEST;
 				/* break; */
 			case RS_TEST:
-				ce = object->iterators[object->level].ce;
-				zobject = &object->iterators[object->level].zobject;
 				if (object->callHasChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
 				} else {
-					zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, NULL, "haschildren", &retval);
+					zend_class_entry *ce = object->iterators[object->level].ce;
+					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
+					zend_function **cache = &object->iterators[object->level].haschildren;
+
+					zend_call_method_with_0_params(obj, ce, cache, "haschildren", &retval);
 				}
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
@@ -313,12 +316,14 @@ next_step:
 				}
 				return /* self */;
 			case RS_CHILD:
-				ce = object->iterators[object->level].ce;
-				zobject = &object->iterators[object->level].zobject;
 				if (object->callGetChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
 				} else {
-					zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, NULL, "getchildren", &child);
+					zend_class_entry *ce = object->iterators[object->level].ce;
+					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
+					zend_function **cache = &object->iterators[object->level].getchildren;
+
+					zend_call_method_with_0_params(obj, ce, cache, "getchildren", &child);
 				}
 
 				if (EG(exception)) {
@@ -350,6 +355,16 @@ next_step:
 				object->iterators[object->level].iterator = sub_iter;
 				object->iterators[object->level].ce = ce;
 				object->iterators[object->level].state = RS_START;
+				if (object->level > 0
+				 && object->iterators[object->level - 1].ce == 0) {
+					object->iterators[object->level].haschildren =
+						object->iterators[object->level - 1].haschildren;
+					object->iterators[object->level].getchildren =
+						object->iterators[object->level - 1].getchildren;
+				} else {
+					object->iterators[object->level].haschildren = NULL;
+					object->iterators[object->level].getchildren = NULL;
+				}
 				if (sub_iter->funcs->rewind) {
 					sub_iter->funcs->rewind(sub_iter);
 				}
@@ -572,6 +587,8 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	ZVAL_OBJ(&intern->iterators[0].zobject, Z_OBJ_P(iterator));
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
+	intern->iterators[0].haschildren = NULL;
+	intern->iterators[0].getchildren = NULL;
 
 	zend_restore_error_handling(&error_handling);
 
@@ -761,7 +778,7 @@ PHP_METHOD(RecursiveIteratorIterator, callHasChildren)
 	if (Z_TYPE_P(zobject) == IS_UNDEF) {
 		RETURN_FALSE;
 	} else {
-		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, NULL, "haschildren", return_value);
+		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, &object->iterators[object->level].haschildren, "haschildren", return_value);
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
 			RETURN_FALSE;
 		}
@@ -785,7 +802,7 @@ PHP_METHOD(RecursiveIteratorIterator, callGetChildren)
 	if (Z_TYPE_P(zobject) == IS_UNDEF) {
 		return;
 	} else {
-		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, NULL, "getchildren", return_value);
+		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, &object->iterators[object->level].getchildren, "getchildren", return_value);
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
 			RETURN_NULL();
 		}
