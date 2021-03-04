@@ -7,6 +7,7 @@ Comparison of zero exponential strings
 var_dump("0" == "0e0");
 var_dump("0.0" == "0e0");
 var_dump(".0" == "0e0");
+var_dump("0e0" == "-0e0"); // ???
 // Zero exponentials are exactly identical
 var_dump("0e0" == "0e0");
 var_dump("0e00" == "0e00");
@@ -26,6 +27,7 @@ var_dump("0e10" > "0e2");
 
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)

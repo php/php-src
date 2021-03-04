@@ -3120,7 +3120,7 @@ check_digits:
 			} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
 				const char *e = ptr + 1;
 
-				if (is_zero_exponential && tmp_lval == 0) {
+				if (is_zero_exponential && tmp_lval == 0 && !neg) {
 					*is_zero_exponential = true;
 				}
 
