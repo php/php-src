@@ -1389,7 +1389,11 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	zend_string *str;
 
 	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1);
-	ZVAL_STRINGL(&zp[1], *signature, *signature_len);
+	if (*signature_len) {
+		ZVAL_STRINGL(&zp[1], *signature, *signature_len);
+	} else {
+		ZVAL_EMPTY_STRING(&zp[1]);
+	}
 	ZVAL_STRINGL(&zp[2], key, key_len);
 	php_stream_rewind(fp);
 	str = php_stream_copy_to_mem(fp, (size_t) end, 0);
