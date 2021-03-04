@@ -29,31 +29,31 @@ class mysqli
 
     public ?string $connect_error;
 
-    public int|string|null $errno;
+    public int $errno;
 
-    public ?string $error;
+    public string $error;
 
     public array $error_list;
 
-    public int|string|null $field_count;
+    public int $field_count;
 
-    public ?string $host_info;
+    public string $host_info;
 
     public ?string $info;
 
-    public int|string|null $insert_id;
+    public int|string $insert_id;
 
-    public ?string $server_info;
+    public string $server_info;
 
-    public int|string|null $server_version;
+    public int $server_version;
 
-    public ?string $sqlstate;
+    public string $sqlstate;
 
-    public int|string|null $protocol_version;
+    public int $protocol_version;
 
-    public int|string|null $thread_id;
+    public int $thread_id;
 
-    public int|string|null $warning_count;
+    public int $warning_count;
 
     public function __construct(
         ?string $hostname = null,
@@ -349,13 +349,13 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    public int|string|null $current_field;
+    public int $current_field;
 
-    public int|string|null $field_count;
+    public int $field_count;
 
     public ?array $lengths;
 
-    public int|string|null $num_rows;
+    public int|string $num_rows;
 
     public int|null $type;
 
@@ -446,21 +446,21 @@ class mysqli_stmt
 {
     public int|string|null $affected_rows;
 
-    public int|string|null $insert_id;
+    public int|string $insert_id;
 
-    public int|string|null $num_rows;
+    public int|string $num_rows;
 
-    public int|string|null $param_count;
+    public int $param_count;
 
-    public int|string|null $field_count;
+    public int $field_count;
 
-    public int|string|null $errno;
+    public int $errno;
 
-    public ?string $error;
+    public string $error;
 
     public array $error_list;
 
-    public ?string $sqlstate;
+    public string $sqlstate;
 
     public ?int $id;
 

@@ -71,38 +71,71 @@ if (!obj->ptr) { \
 	p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt; \
 }
 
-#define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
+#define MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
 static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
-	if (!p) {\
-		ZVAL_NULL(retval);\
-	} else {\
+	if (p) {\
 		l = (__ret_type)__int_func(p);\
 		if (l < ZEND_LONG_MAX) {\
 			ZVAL_LONG(retval, (zend_long) l);\
 		} else { \
 			ZVAL_NEW_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
 		} \
+	} else {\
+		return FAILURE; \
 	} \
 	return SUCCESS; \
 }
 
-#define MYSQLI_MAP_PROPERTY_FUNC_STRING(__func, __int_func, __get_type)\
+#define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
+static int __func(mysqli_object *obj, zval *retval, bool quiet) \
+{\
+	__ret_type l;\
+	__get_type;\
+	if (p) {\
+		l = (__ret_type)__int_func(p);\
+		ZEND_ASSERT(l < ZEND_LONG_MAX);\
+		ZVAL_LONG(retval, (zend_long) l);\
+	} else {\
+		return FAILURE; \
+	}\
+	return SUCCESS; \
+}
+
+#define MYSQLI_MAP_PROPERTY_FUNC_STR_OR_NULL(__func, __int_func, __get_type)\
 static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
-	if (!p) {\
-		ZVAL_NULL(retval);\
-	} else {\
+	if (p) {\
 		c = (char *)__int_func(p);\
-		if (!c) {\
-			ZVAL_NULL(retval);\
-		} else {\
+		if (c) {\
 			ZVAL_STRING(retval, c);\
+		} else {\
+			ZVAL_NULL(retval);\
 		}\
+	} else {\
+		return FAILURE; \
+	}\
+	return SUCCESS; \
+}
+
+#define MYSQLI_MAP_PROPERTY_FUNC_STR(__func, __int_func, __get_type)\
+static int __func(mysqli_object *obj, zval *retval, bool quiet)\
+{\
+	char *c;\
+	__get_type;\
+	if (p) {\
+		c = (char *)__int_func(p);\
+		if (c) {\
+			ZVAL_STRING(retval, c);\
+		} else {\
+			ZEND_UNREACHABLE();\
+		}\
+	} else {\
+		return FAILURE; \
 	}\
 	return SUCCESS; \
 }
@@ -228,15 +261,15 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 
 /* link properties */
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_errno_read, mysql_errno, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_STRING(link_error_read, mysql_error, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED))
+MYSQLI_MAP_PROPERTY_FUNC_STR(link_error_read, mysql_error, MYSQLI_GET_MYSQL(MYSQLI_STATUS_INITIALIZED))
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_field_count_read, mysql_field_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_STRING(link_host_info_read, mysql_get_host_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
-MYSQLI_MAP_PROPERTY_FUNC_STRING(link_info_read, mysql_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
-MYSQLI_MAP_PROPERTY_FUNC_LONG(link_insert_id_read, mysql_insert_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
+MYSQLI_MAP_PROPERTY_FUNC_STR(link_host_info_read, mysql_get_host_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
+MYSQLI_MAP_PROPERTY_FUNC_STR_OR_NULL(link_info_read, mysql_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
+MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR(link_insert_id_read, mysql_insert_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_protocol_version_read, mysql_get_proto_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_STRING(link_server_info_read, mysql_get_server_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
+MYSQLI_MAP_PROPERTY_FUNC_STR(link_server_info_read, mysql_get_server_info, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_server_version_read, mysql_get_server_version, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_STRING(link_sqlstate_read, mysql_sqlstate, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
+MYSQLI_MAP_PROPERTY_FUNC_STR(link_sqlstate_read, mysql_sqlstate, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID))
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_thread_id_read, mysql_thread_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 
@@ -292,7 +325,7 @@ static int result_lengths_read(mysqli_object *obj, zval *retval, bool quiet)
 
 MYSQLI_MAP_PROPERTY_FUNC_LONG(result_current_field_read, mysql_field_tell, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(result_field_count_read, mysql_num_fields, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
+MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR(result_num_rows_read, mysql_num_rows, MYSQLI_GET_RESULT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 
 /* statement properties */
 
@@ -390,13 +423,13 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 }
 /* }}} */
 
-MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
-MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
+MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
+MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), my_ulonglong, MYSQLI_LLU_SPEC)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_param_count_read, mysql_stmt_param_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_field_count_read, mysql_stmt_field_count, MYSQLI_GET_STMT(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_errno_read, mysql_stmt_errno, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED), zend_ulong, ZEND_ULONG_FMT)
-MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_error_read, mysql_stmt_error, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
-MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
+MYSQLI_MAP_PROPERTY_FUNC_STR(stmt_error_read, mysql_stmt_error, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
+MYSQLI_MAP_PROPERTY_FUNC_STR(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT(MYSQLI_STATUS_INITIALIZED))
 
 /* }}} */
 const mysqli_property_entry mysqli_link_property_entries[] = {
