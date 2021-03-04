@@ -2270,6 +2270,14 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	timelib_unixtime2local(now, (timelib_sll) sec);
 	php_date_set_time_fraction(now, usec);
 
+	if (!format
+	 && time_str_len == sizeof("now") - 1
+	 && memcmp(time_str, "now", sizeof("now") - 1) == 0) {
+		timelib_time_dtor(dateobj->time);
+		dateobj->time = now;
+		return 1;
+	}
+
 	options = TIMELIB_NO_CLONE;
 	if (flags & PHP_DATE_INIT_FORMAT) {
 		options |= TIMELIB_OVERRIDE_TIME;
@@ -3320,7 +3328,10 @@ PHP_FUNCTION(date_timestamp_get)
 	}
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	timelib_update_ts(dateobj->time, NULL);
+
+	if (!dateobj->time->sse_uptodate) {
+		timelib_update_ts(dateobj->time, NULL);
+	}
 
 	timestamp = timelib_date_to_int(dateobj->time, &epoch_does_not_fit_in_zend_long);
 
