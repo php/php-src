@@ -3749,7 +3749,9 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
-        $this->skips[$key][$code] = $result;
+        if (strpos($result, 'nocache') === false) {
+            $this->skips[$key][$code] = $result;
+        }
         $this->misses++;
 
         if (!$this->keepFile) {

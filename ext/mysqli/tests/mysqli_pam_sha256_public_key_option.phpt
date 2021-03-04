@@ -85,6 +85,7 @@ if (!$link->query(sprintf("GRANT SELECT ON TABLE %s.test TO shatest@'%%'", $db))
 }
 
 $link->close();
+echo "nocache";
 ?>
 --FILE--
 <?php

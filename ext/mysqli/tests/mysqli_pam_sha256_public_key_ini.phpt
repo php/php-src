@@ -88,6 +88,7 @@ if (!$link->query(sprintf("GRANT SELECT ON TABLE %s.test TO shatest@'%%'", $db))
 }
 
 $link->close();
+echo "nocache";
 ?>
 --INI--
 mysqlnd.sha256_server_public_key="test_sha256_ini"
