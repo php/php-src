@@ -704,6 +704,7 @@ static void zend_persist_op_array(zval *zv)
 		}
 	} else {
 		/* This can happen during preloading, if a dynamic function definition is declared. */
+		Z_PTR_P(zv) = old_op_array;
 	}
 }
 
