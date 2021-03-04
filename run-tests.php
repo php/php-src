@@ -2751,7 +2751,7 @@ COMMAND $cmd
         if (!strcmp($output, $wanted)) {
             $passed = true;
 
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
