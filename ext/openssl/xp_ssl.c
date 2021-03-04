@@ -907,7 +907,6 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 	} else {
 #ifdef PHP_WIN32
 		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 #else
 		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
 			php_error_docref(NULL, E_WARNING,
