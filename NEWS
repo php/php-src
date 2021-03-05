@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
     MySQL 8.0). (Nikita)
+  . Fixed bug #80837 (Calling stmt_store_result after fetch doesn't throw an
+    error). (Kamil Tekiela)
 
 - opcache:
   . Fixed bug #80805 (create simple class and get error in opcache.so). (Nikita)
