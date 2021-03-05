@@ -76,15 +76,12 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
-	if (p) {\
-		l = (__ret_type)__int_func(p);\
-		if (l < ZEND_LONG_MAX) {\
-			ZVAL_LONG(retval, (zend_long) l);\
-		} else { \
-			ZVAL_NEW_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
-		} \
-	} else {\
-		return FAILURE; \
+	ZEND_ASSERT(p);\
+	l = (__ret_type)__int_func(p);\
+	if (l < ZEND_LONG_MAX) {\
+		ZVAL_LONG(retval, (zend_long) l);\
+	} else { \
+		ZVAL_NEW_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
 	} \
 	return SUCCESS; \
 }
@@ -94,13 +91,10 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
-	if (p) {\
-		l = (__ret_type)__int_func(p);\
-		ZEND_ASSERT(l < ZEND_LONG_MAX);\
-		ZVAL_LONG(retval, (zend_long) l);\
-	} else {\
-		return FAILURE; \
-	}\
+	ZEND_ASSERT(p);\
+	l = (__ret_type)__int_func(p);\
+	ZEND_ASSERT(l < ZEND_LONG_MAX);\
+	ZVAL_LONG(retval, (zend_long) l);\
 	return SUCCESS; \
 }
 
@@ -109,15 +103,12 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
-	if (p) {\
-		c = (char *)__int_func(p);\
-		if (c) {\
-			ZVAL_STRING(retval, c);\
-		} else {\
-			ZVAL_NULL(retval);\
-		}\
+	ZEND_ASSERT(p);\
+	c = (char *)__int_func(p);\
+	if (c) {\
+		ZVAL_STRING(retval, c);\
 	} else {\
-		return FAILURE; \
+		ZVAL_NULL(retval);\
 	}\
 	return SUCCESS; \
 }
@@ -127,15 +118,12 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
-	if (p) {\
-		c = (char *)__int_func(p);\
-		if (c) {\
-			ZVAL_STRING(retval, c);\
-		} else {\
-			ZEND_UNREACHABLE();\
-		}\
+	ZEND_ASSERT(p);\
+	c = (char *)__int_func(p);\
+	if (c) {\
+		ZVAL_STRING(retval, c);\
 	} else {\
-		return FAILURE; \
+		ZEND_UNREACHABLE();\
 	}\
 	return SUCCESS; \
 }
