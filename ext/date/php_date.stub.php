@@ -398,6 +398,12 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
+    public static function createFromRecurrences(DateTimeInterface $start, DateInterval $interval, int $recurrences, int $options = 0): static {}
+
+    public static function createFromDates(DateTimeInterface $start, DateInterval $interval, DateTimeInterface $end, int $options = 0): static {}
+
+    public static function createFromIso8601(string $specification, int $options = 0): static {}
+
     /**
      * @param DateTimeInterface|string $start
      * @param DateInterval|int $interval

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 108136459e578cc699cffcb84d3335a11f8d5c9d */
+ * Stub hash: 0affb8dcab45c4067e2dfd30b34d0aa240de746e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -403,6 +403,25 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateInterval___set_state arginfo_class_DateTime___set_state
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromRecurrences, 0, 3, IS_STATIC, 0)
+	ZEND_ARG_OBJ_INFO(0, start, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, interval, DateInterval, 0)
+	ZEND_ARG_TYPE_INFO(0, recurrences, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromDates, 0, 3, IS_STATIC, 0)
+	ZEND_ARG_OBJ_INFO(0, start, DateTimeInterface, 0)
+	ZEND_ARG_OBJ_INFO(0, interval, DateInterval, 0)
+	ZEND_ARG_OBJ_INFO(0, end, DateTimeInterface, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromIso8601, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, specification, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DatePeriod___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, interval)
@@ -498,6 +517,9 @@ ZEND_METHOD(DateTimeZone, __set_state);
 ZEND_METHOD(DateInterval, __construct);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
+ZEND_METHOD(DatePeriod, createFromRecurrences);
+ZEND_METHOD(DatePeriod, createFromDates);
+ZEND_METHOD(DatePeriod, createFromIso8601);
 ZEND_METHOD(DatePeriod, __construct);
 ZEND_METHOD(DatePeriod, getStartDate);
 ZEND_METHOD(DatePeriod, getEndDate);
@@ -647,6 +669,9 @@ static const zend_function_entry class_DateInterval_methods[] = {
 
 
 static const zend_function_entry class_DatePeriod_methods[] = {
+	ZEND_ME(DatePeriod, createFromRecurrences, arginfo_class_DatePeriod_createFromRecurrences, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DatePeriod, createFromDates, arginfo_class_DatePeriod_createFromDates, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DatePeriod, createFromIso8601, arginfo_class_DatePeriod_createFromIso8601, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, __construct, arginfo_class_DatePeriod___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getStartDate, arginfo_class_DatePeriod_getStartDate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getEndDate, arginfo_class_DatePeriod_getEndDate, ZEND_ACC_PUBLIC)

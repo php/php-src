@@ -4124,28 +4124,16 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	return retval;
 } /* }}} */
 
-/* {{{ Creates new DatePeriod object. */
-PHP_METHOD(DatePeriod, __construct)
-{
-	php_period_obj   *dpobj;
-	php_date_obj     *dateobj;
-	zval *start, *end = NULL, *interval;
-	zend_long  recurrences = 0, options = 0;
-	char *isostr = NULL;
-	size_t   isostr_len = 0;
+static void construct_date_period(
+	INTERNAL_FUNCTION_PARAMETERS, zval *object, zval *start, zval *end, zval *interval, zend_long recurrences,
+	zend_long options, char *isostr, size_t isostr_len
+) {
+	php_period_obj *dpobj;
+	php_date_obj *dateobj;
 	timelib_time *clone;
 	zend_error_handling error_handling;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
-		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
-				zend_type_error("DatePeriod::__construct() accepts (DateTimeInterface, DateInterval, int [, int]), or (DateTimeInterface, DateInterval, DateTime [, int]), or (string [, int]) as arguments");
-				RETURN_THROWS();
-			}
-		}
-	}
-
-	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
+	dpobj = Z_PHPPERIOD_P(object);
 	dpobj->current = NULL;
 
 	if (isostr) {
@@ -4225,7 +4213,90 @@ PHP_METHOD(DatePeriod, __construct)
 
 	dpobj->initialized = 1;
 }
-/* }}} */
+
+PHP_METHOD(DatePeriod, createFromRecurrences)
+{
+	zval *start, *interval;
+	zend_long recurrences, options = 0;
+	zval object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(&object, zend_get_called_scope(execute_data));
+
+	construct_date_period(INTERNAL_FUNCTION_PARAM_PASSTHRU, &object, start, NULL, interval, recurrences, options, NULL, 0);
+	if (EG(exception)) {
+		zval_ptr_dtor(&object);
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_VALUE(return_value, &object);
+}
+
+PHP_METHOD(DatePeriod, createFromDates)
+{
+	zval *start, *end, *interval;
+	zend_long options = 0;
+	zval object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(&object, zend_get_called_scope(execute_data));
+
+	construct_date_period(INTERNAL_FUNCTION_PARAM_PASSTHRU, &object, start, end, interval, 0, options, NULL, 0);
+	if (EG(exception)) {
+		zval_ptr_dtor(&object);
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_VALUE(return_value, &object);
+}
+
+PHP_METHOD(DatePeriod, createFromIso8601)
+{
+	char *isostr;
+	size_t isostr_len;
+	zend_long options = 0;
+	zval object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(&object, zend_get_called_scope(execute_data));
+
+	construct_date_period(INTERNAL_FUNCTION_PARAM_PASSTHRU, &object, NULL, NULL, NULL, 0, options, isostr, isostr_len);
+	if (EG(exception)) {
+		zval_ptr_dtor(&object);
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_VALUE(return_value, &object);
+}
+
+/* Creates new DatePeriod object. */
+PHP_METHOD(DatePeriod, __construct)
+{
+	zval *start, *end = NULL, *interval;
+	zend_long recurrences = 0, options = 0;
+	char *isostr = NULL;
+	size_t isostr_len = 0;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+				zend_type_error("DatePeriod::__construct() accepts (DateTimeInterface, DateInterval, int [, int]), or (DateTimeInterface, DateInterval, DateTime [, int]), or (string [, int]) as arguments");
+				RETURN_THROWS();
+			}
+		}
+	}
+
+	construct_date_period(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_THIS, start, end, interval, recurrences, options, isostr, isostr_len);
+}
 
 /* {{{ Get start date. */
 PHP_METHOD(DatePeriod, getStartDate)
