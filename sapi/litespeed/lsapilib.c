@@ -152,7 +152,7 @@ static int s_ppid;
 static int s_restored_ppid = 0;
 static int s_pid = 0;
 static int s_slow_req_msecs = 0;
-static int s_keepListener = 0;
+static int s_keep_listener = 1;
 static int s_dump_debug_info = 0;
 static int s_pid_dump_debug_info = 0;
 static int s_req_processed = 0;
@@ -244,8 +244,8 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 {
     char buf[1024];
     char *p = buf;
-    if ((flag & LSAPI_LOG_TIMESTAMP_BITS) &&
-        !((flag & LSAPI_LOG_TIMESTAMP_STDERR) && s_stderr_is_pipe))
+    if ((flag & LSAPI_LOG_TIMESTAMP_BITS)
+        && !(s_stderr_is_pipe))
     {
         struct timeval  tv;
         struct tm       tm;
@@ -272,7 +272,7 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 
     if (flag & LSAPI_LOG_PID)
     {
-        p += snprintf(p, 100, "[%d] ", s_pid);
+        p += snprintf(p, 100, "[UID:%d][%d] ", getuid(), s_pid);
     }
 
     if (p > buf)
@@ -294,7 +294,13 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 
 #endif
 
-#define lsapi_log(...)  LSAPI_Log(LSAPI_LOG_TIMESTAMP_FULL|LSAPI_LOG_TIMESTAMP_STDERR|LSAPI_LOG_PID, __VA_ARGS__)
+#define lsapi_log(...)  LSAPI_Log(LSAPI_LOG_TIMESTAMP_FULL|LSAPI_LOG_PID, __VA_ARGS__)
+
+
+void lsapi_perror(const char * pMessage, int err_no)
+{
+    lsapi_log("%s, errno: %d (%s)\n", pMessage, err_no, strerror(err_no));
+}
 
 
 static int lsapi_parent_dead()
@@ -893,7 +899,8 @@ int LSAPI_is_suEXEC_Daemon(void)
 static int LSAPI_perror_r( LSAPI_Request * pReq, const char * pErr1, const char *pErr2 )
 {
     char achError[4096];
-    int n = snprintf(achError, sizeof(achError), "[%d] %s:%s: %s\n", getpid(),
+    int n = snprintf(achError, sizeof(achError), "[UID:%d][%d] %s:%s: %s\n",
+                     getuid(), getpid(),
                      pErr1, (pErr2)?pErr2:"", strerror(errno));
     if (n > (int)sizeof(achError))
         n = sizeof(achError);
@@ -939,7 +946,7 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
+            //lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
@@ -2938,6 +2945,7 @@ static void lsapi_sigchild( int signal )
 
 static int lsapi_init_children_status(void)
 {
+    char * pBuf;
     int size = 4096;
     int max_children;
     if (g_prefork_server->m_pChildrenStatus)
@@ -2945,7 +2953,6 @@ static int lsapi_init_children_status(void)
     max_children = g_prefork_server->m_iMaxChildren
                         + g_prefork_server->m_iExtraChildren;
 
-    char * pBuf;
     size = max_children * sizeof( lsapi_child_status ) * 2 + 3 * sizeof(int);
     size = (size + 4095) / 4096 * 4096;
     pBuf =( char*) mmap( NULL, size, PROT_READ | PROT_WRITE,
@@ -2978,9 +2985,9 @@ static void dump_debug_info( lsapi_child_status * pStatus, long tmCur )
             return;
     }
 
-    lsapi_log("Possible runaway process, PPID: %d, PID: %d, "
+    lsapi_log("Possible runaway process, UID: %d, PPID: %d, PID: %d, "
              "reqCount: %d, process time: %ld, checkpoint time: %ld, start "
-             "time: %ld\n", getpid(), pStatus->m_pid,
+             "time: %ld\n", getuid(), getppid(), pStatus->m_pid,
              pStatus->m_iReqCounter, tmCur - pStatus->m_tmReqBegin,
              tmCur - pStatus->m_tmLastCheckPoint, tmCur - pStatus->m_tmStart );
 
@@ -3008,12 +3015,11 @@ static void lsapi_check_child_status( long tmCur )
     while( pStatus < pEnd )
     {
         tobekilled = 0;
-        if ( pStatus->m_pid != 0 )
+        if ( pStatus->m_pid != 0 && pStatus->m_pid != -1)
         {
             ++count;
             if ( !pStatus->m_inProcess )
             {
-
                 if (g_prefork_server->m_iCurChildren - dying
                         > g_prefork_server->m_iMaxChildren
                     || idle > g_prefork_server->m_iMaxIdleChildren)
@@ -3030,7 +3036,7 @@ static void lsapi_check_child_status( long tmCur )
                         //tobekilled = SIGUSR1;
                     }
                 }
-                if ( !tobekilled )
+                if (!pStatus->m_iKillSent)
                     ++idle;
             }
             else
@@ -3184,6 +3190,9 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         *s_avail_pages = sysconf(_SC_AVPHYS_PAGES);
+//        lsapi_log("Memory total: %zd, free: %zd, free %%%zd\n",
+//                  s_total_pages, *s_avail_pages, *s_avail_pages * 100 / s_total_pages);
+
 #endif
         FD_ZERO( &readfds );
         FD_SET( pServer->m_fd, &readfds );
@@ -3196,7 +3205,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
             if (s_accepting_workers)
                 accepting = __sync_add_and_fetch(s_accepting_workers, 0);
 
-            if (pServer->m_iCurChildren > 0 && accepting > 0)
+            if (pServer->m_iCurChildren > 0
+                && accepting > 0)
             {
                 usleep(400);
                 while(accepting-- > 0)
@@ -3265,10 +3275,10 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                     __sync_add_and_fetch(s_busy_workers, 1);
                 lsapi_set_nblock( pReq->m_fd, 0 );
                 //keep it open if busy_count is used.
-                if (s_busy_workers
+                if (!s_keep_listener && s_busy_workers
                     && *s_busy_workers > (pServer->m_iMaxChildren >> 1))
-                    s_keepListener = 1;
-                if ((s_uid == 0 || !s_keepListener || !is_enough_free_mem())
+                    s_keep_listener = 1;
+                if ((s_uid == 0 || !s_keep_listener || !is_enough_free_mem())
                     && pReq->m_fdListen != -1 )
                 {
                     close( pReq->m_fdListen );
@@ -3289,7 +3299,9 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
             }
             else if ( pid == -1 )
             {
-                perror( "fork() failed, please increase process limit" );
+                lsapi_perror("fork() failed, please increase process limit", errno);
+                if (child_status)
+                    child_status->m_pid = 0;
             }
             else
             {
@@ -3312,7 +3324,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
         {
             if (( errno == EINTR )||( errno == EAGAIN))
                 continue;
-            perror( "accept() failed" );
+            lsapi_perror("accept() failed", errno);
             return -1;
         }
     }
@@ -3350,10 +3362,10 @@ int LSAPI_Postfork_Child(LSAPI_Request * pReq)
         __sync_add_and_fetch(s_busy_workers, 1);
     lsapi_set_nblock( pReq->m_fd, 0 );
     //keep it open if busy_count is used.
-    if (s_busy_workers
+    if (!s_keep_listener && s_busy_workers
         && *s_busy_workers > (max_children >> 1))
-        s_keepListener = 1;
-    if ((s_uid == 0 || !s_keepListener || !is_enough_free_mem())
+        s_keep_listener = 1;
+    if ((s_uid == 0 || !s_keep_listener || !is_enough_free_mem())
         && pReq->m_fdListen != -1 )
     {
         close(pReq->m_fdListen);
@@ -3512,7 +3524,7 @@ int LSAPI_Accept_Before_Fork(LSAPI_Request * pReq)
         {
             if ((errno == EINTR) || (errno == EAGAIN))
                 continue;
-            perror( "accept() failed" );
+            lsapi_perror("accept() failed", errno);
             ret = -1;
             break;
         }
@@ -3525,13 +3537,6 @@ int LSAPI_Accept_Before_Fork(LSAPI_Request * pReq)
     sigaction(SIGUSR1, &old_usr1, 0);
 
     return ret;
-}
-
-
-void lsapi_perror( const char * pMessage, int err_no )
-{
-    lsapi_log("%s, errno: %d (%s)\n", pMessage, err_no,
-              strerror( err_no ) );
 }
 
 
@@ -3620,9 +3625,21 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                 if ( s_worker_status )
                 {
                     s_worker_status->m_inProcess = 0;
-                    if (fd == pReq->m_fdListen
-                        && (s_keepListener != 2 || !is_enough_free_mem()))
-                        return -1;
+                    if (fd == pReq->m_fdListen)
+                    {
+                        if (s_keep_listener == 0 || !is_enough_free_mem())
+                            return -1;
+                        if (s_keep_listener == 1)
+                        {
+                            int wait_time = 10;
+                            if (s_busy_workers)
+                                wait_time += *s_busy_workers * 10;
+                            if (s_accepting_workers)
+                                wait_time >>= (*s_accepting_workers);
+                            if (wait_secs >= wait_time)
+                                return -1;
+                        }
+                    }
                 }
                 ++wait_secs;
                 if (( s_max_idle_secs > 0 )&&(wait_secs >= s_max_idle_secs ))
@@ -3657,7 +3674,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
 
                         lsapi_set_nblock( fd, 0 );
                         //init_conn_key( pReq->m_fd );
-                        if (!s_keepListener)
+                        if (!s_keep_listener)
                         {
                             close( pReq->m_fdListen );
                             pReq->m_fdListen = -1;
@@ -3949,7 +3966,7 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
     if ( p )
     {
         n = atoi( p );
-        s_keepListener = n;
+        s_keep_listener = n;
     }
 
     p = getenv( "LSAPI_AVOID_FORK" );
@@ -3958,7 +3975,7 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
         avoidFork = atoi( p );
         if (avoidFork)
         {
-            s_keepListener = 2;
+            s_keep_listener = 2;
             ch = *(p + strlen(p) - 1);
             if (  ch == 'G' || ch == 'g' )
                 avoidFork *= 1024 * 1024 * 1024;

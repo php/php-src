@@ -603,7 +603,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.7",
+    "LiteSpeed V7.9",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -806,7 +806,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
               Use ACTIVATE stage in legacy mode only.
 
               RUNTIME stage should be used here,
-              as with ACTIVATE it's impossible to change the option from script with ini_set 
+              as with ACTIVATE it's impossible to change the option from script with ini_set
             */
             if(!mod_lsapi_mode)
             {
