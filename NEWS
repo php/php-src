@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
   . Fixed bug #78719 (http wrapper silently ignores long Location headers).
     (cmb)
+  . Fixed bug #80838 (HTTP wrapper waits for HTTP 1 response after HTTP 101).
+    (manuelm)
 
 04 Mar 2021, php 7.4.16
 
