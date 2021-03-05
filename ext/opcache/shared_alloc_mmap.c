@@ -52,6 +52,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	/* allows tracking segments via tools such as vmmap */
 	fd = VM_MAKE_TAG(251U);
 #endif
+#ifdef PROT_MAX
+  flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif
 #ifdef MAP_HUGETLB
 	size_t huge_page_size = 2 * 1024 * 1024;
 
