@@ -26,7 +26,7 @@ var_dump($field->name);
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 string(1) "b"

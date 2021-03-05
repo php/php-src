@@ -94,7 +94,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 $link = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query('DROP PROCEDURE IF EXISTS p123');
 $link->close();

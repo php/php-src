@@ -84,7 +84,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 $link = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query('DROP PROCEDURE IF EXISTS процедурка');
 $link->query('DROP FUNCTION IF EXISTS функцийка');

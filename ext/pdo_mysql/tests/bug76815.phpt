@@ -30,7 +30,7 @@ echo "Ok.\n";
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 $pdo->query('DROP FUNCTION IF EXISTS tst');
 $pdo->query('DROP PROCEDURE IF EXISTS tst2');

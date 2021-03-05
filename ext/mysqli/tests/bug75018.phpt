@@ -33,7 +33,7 @@ while ($row = $result->fetch_assoc()) {
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 string(1) "0"
