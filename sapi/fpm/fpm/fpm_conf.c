@@ -132,6 +132,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
 	{ "pm.min_spare_servers",      &fpm_conf_set_integer,     WPO(pm_min_spare_servers) },
 	{ "pm.max_spare_servers",      &fpm_conf_set_integer,     WPO(pm_max_spare_servers) },
+	{ "pm.max_spawn_rate",         &fpm_conf_set_integer,     WPO(pm_max_spawn_rate) },
 	{ "pm.process_idle_timeout",   &fpm_conf_set_time,        WPO(pm_process_idle_timeout) },
 	{ "pm.max_requests",           &fpm_conf_set_integer,     WPO(pm_max_requests) },
 	{ "pm.status_path",            &fpm_conf_set_string,      WPO(pm_status_path) },
@@ -610,6 +611,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 
 	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
+	wp->config->pm_max_spawn_rate = 32; /* 32 by default */
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
 	wp->config->process_dumpable = 0;
@@ -848,7 +850,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			return -1;
 		}
 
-		/* pm.start_servers, pm.min_spare_servers, pm.max_spare_servers */
+		/* pm.start_servers, pm.min_spare_servers, pm.max_spare_servers, pm.max_spawn_rate */
 		if (wp->config->pm == PM_STYLE_DYNAMIC) {
 			struct fpm_worker_pool_config_s *config = wp->config;
 
@@ -879,6 +881,11 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			} else if (config->pm_start_servers < config->pm_min_spare_servers || config->pm_start_servers > config->pm_max_spare_servers) {
 				zlog(ZLOG_ALERT, "[pool %s] pm.start_servers(%d) must not be less than pm.min_spare_servers(%d) and not greater than pm.max_spare_servers(%d)", wp->config->name, config->pm_start_servers, config->pm_min_spare_servers, config->pm_max_spare_servers);
+				return -1;
+			}
+
+			if (config->pm_max_spawn_rate < 1) {
+				zlog(ZLOG_ALERT, "[pool %s] pm.max_spawn_rate must be a positive value", wp->config->name);
 				return -1;
 			}
 		} else if (wp->config->pm == PM_STYLE_ONDEMAND) {
@@ -1718,6 +1725,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);
 		zlog(ZLOG_NOTICE, "\tpm.min_spare_servers = %d",       wp->config->pm_min_spare_servers);
 		zlog(ZLOG_NOTICE, "\tpm.max_spare_servers = %d",       wp->config->pm_max_spare_servers);
+		zlog(ZLOG_NOTICE, "\tpm.max_spawn_rate = %d",          wp->config->pm_max_spawn_rate);
 		zlog(ZLOG_NOTICE, "\tpm.process_idle_timeout = %d",    wp->config->pm_process_idle_timeout);
 		zlog(ZLOG_NOTICE, "\tpm.max_requests = %d",            wp->config->pm_max_requests);
 		zlog(ZLOG_NOTICE, "\tpm.status_path = %s",             STR2STR(wp->config->pm_status_path));

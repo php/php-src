@@ -431,7 +431,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			zlog(ZLOG_DEBUG, "[pool %s] %d child(ren) have been created dynamically", wp->config->name, children_to_fork);
 
 			/* Double the spawn rate for the next iteration */
-			if (wp->idle_spawn_rate < FPM_MAX_SPAWN_RATE) {
+			if (wp->idle_spawn_rate < wp->config->pm_max_spawn_rate) {
 				wp->idle_spawn_rate *= 2;
 			}
 			continue;
