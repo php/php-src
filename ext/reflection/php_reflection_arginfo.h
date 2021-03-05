@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3594ec0b0c3ed7266223be9c6b426aac56e3aabe */
+ * Stub hash: eed674aa76185f0f66c6dcc6d2da96d8388dd873 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -100,6 +100,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionGenerator_getThis arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionGenerator_getExecutingGenerator arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionMethod_createFromMethodName, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_MASK(0, objectOrMethod, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
@@ -565,6 +569,7 @@ ZEND_METHOD(ReflectionGenerator, getTrace);
 ZEND_METHOD(ReflectionGenerator, getFunction);
 ZEND_METHOD(ReflectionGenerator, getThis);
 ZEND_METHOD(ReflectionGenerator, getExecutingGenerator);
+ZEND_METHOD(ReflectionMethod, createFromMethodName);
 ZEND_METHOD(ReflectionMethod, __construct);
 ZEND_METHOD(ReflectionMethod, __toString);
 ZEND_METHOD(ReflectionMethod, isPublic);
@@ -810,6 +815,7 @@ static const zend_function_entry class_ReflectionGenerator_methods[] = {
 
 
 static const zend_function_entry class_ReflectionMethod_methods[] = {
+	ZEND_ME(ReflectionMethod, createFromMethodName, arginfo_class_ReflectionMethod_createFromMethodName, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(ReflectionMethod, __construct, arginfo_class_ReflectionMethod___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, __toString, arginfo_class_ReflectionMethod___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isPublic, arginfo_class_ReflectionMethod_isPublic, ZEND_ACC_PUBLIC)

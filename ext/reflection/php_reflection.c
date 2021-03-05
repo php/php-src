@@ -3043,13 +3043,9 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 }
 /* }}} */
 
-/* {{{ Constructor. Throws an Exception in case the given method does not exist */
-ZEND_METHOD(ReflectionMethod, __construct)
-{
-	zend_object *arg1_obj;
-	zend_string *arg1_str;
-	zend_string *arg2_str = NULL;
-
+static void construct_reflection_method(
+	INTERNAL_FUNCTION_PARAMETERS, zval *object, zend_object *arg1_obj, zend_string *arg1_str, zend_string *arg2_str
+) {
 	zend_object *orig_obj = NULL;
 	zend_class_entry *ce = NULL;
 	zend_string *class_name = NULL;
@@ -3057,15 +3053,9 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	size_t method_name_len;
 	char *lcname;
 
-	zval *object;
 	reflection_object *intern;
 	zend_function *mptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(arg2_str)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (arg1_obj) {
 		if (!arg2_str) {
@@ -3109,7 +3099,6 @@ ZEND_METHOD(ReflectionMethod, __construct)
 		zend_string_release(class_name);
 	}
 
-	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
 	lcname = zend_str_tolower_dup(method_name, method_name_len);
@@ -3133,7 +3122,42 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 }
-/* }}} */
+
+ZEND_METHOD(ReflectionMethod, createFromMethodName)
+{
+	zend_string *method_name;
+	zval object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(method_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object_init_ex(&object, zend_get_called_scope(execute_data));
+
+	construct_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, &object, NULL, method_name, NULL);
+	if (EG(exception)) {
+		zval_ptr_dtor(&object);
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_VALUE(return_value, &object);
+}
+
+/* {{{ Constructor. Throws an Exception in case the given method does not exist */
+ZEND_METHOD(ReflectionMethod, __construct)
+{
+	zend_object *arg1_obj;
+	zend_string *arg1_str;
+	zend_string *arg2_str = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(arg2_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	construct_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_THIS, arg1_obj, arg1_str, arg2_str);
+}
 
 /* {{{ Returns a string representation */
 ZEND_METHOD(ReflectionMethod, __toString)
