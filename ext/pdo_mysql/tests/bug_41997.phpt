@@ -37,6 +37,12 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 var_dump($stmt->errorInfo());
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP PROCEDURE IF EXISTS p");
+?>
 --EXPECT--
 array(1) {
   [0]=>

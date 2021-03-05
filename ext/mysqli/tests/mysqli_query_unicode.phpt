@@ -82,6 +82,14 @@ mysqli_close($link);
 
     print "done!";
 ?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS процедурка');
+$link->query('DROP FUNCTION IF EXISTS функцийка');
+$link->close();
+?>
 --EXPECTF--
 array(1) {
   ["правилен"]=>
