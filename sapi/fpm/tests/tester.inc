@@ -1348,6 +1348,48 @@ class Tester
     }
 
     /**
+     * Expect log config options
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function expectLogConfigOptions(array $options)
+    {
+        $configOptions = $this->getConfigOptions();
+        foreach ($options as $name => $value) {
+            if (!isset($configOptions[$name])) {
+                return $this->error("Expected config option: {$name} = {$value} but {$name} is not set");
+            }
+            if ($configOptions[$name] != $value) {
+                return $this->error(
+                    "Expected config option: {$name} = {$value} but got: {$name} = {$configOptions[$name]}"
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get set config options
+     *
+     * @return array
+     */
+    private function getConfigOptions()
+    {
+        $options = [];
+
+        foreach ($this->getLogLines(-1) as $line) {
+            preg_match('/.+NOTICE:\s+(.+)\s=\s(.+)/', $line, $matches);
+            if ($matches) {
+                $options[$matches[1]] = $matches[2];
+            }
+        }
+
+        return $options;
+    }
+
+    /**
      * Print content of access log.
      */
     public function printAccessLog()
