@@ -2888,6 +2888,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEN
 
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
 
+	/* Do not suppress diagnostics when a class list is passed to @ */
+	if (opline->extended_value == 1) {
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	if (!E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))) {
 		do {
 			/* Do not silence fatal errors */
@@ -2924,20 +2929,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SILENCE_CATCH_SPEC_HANDLER(ZEN
 
 	/* Came from class list virtual catch blocks */
 	if (opline->extended_value == 2) {
-		if (EG(exception) == NULL) {
-			/* Free object (needed to not leak memory on @new) */
-			if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_OBJECT) {
-				//OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
-			}
-
-			/* Set value to NULL */
-			if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-		} else {
+		if (EG(exception) != NULL) {
 			zend_rethrow_exception(execute_data);
 			HANDLE_EXCEPTION();
 		}
+		/* Result is UNDEF means an exception has been caught */
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)
+				&& Z_TYPE_P(EX_VAR(opline->result.var)) == IS_UNDEF) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+        }
 	} else if (EG(exception) && opline->extended_value != 2) {
 		ZEND_ASSERT(EG(exception)->ce);
 		/* Only suppress Exception or a subclass of, and NOT Error throwable errors */

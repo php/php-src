@@ -9332,6 +9332,7 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
+	zend_op *silence_start_op;
 	zend_op *silence_catch_op;
 	uint32_t try_catch_offset;
 	uint32_t virtual_catch_op_num;
@@ -9341,7 +9342,7 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	try_catch_offset = zend_add_try_element(get_next_op_number());
 	CG(context).try_catch_offset = try_catch_offset;
 
-	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
+	silence_start_op = zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
 
 	if (expr_ast->kind == ZEND_AST_VAR) {
 		/* For @$var we need to force a FETCH instruction, otherwise the CV access will
@@ -9368,7 +9369,8 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 		zend_ast_list *classes = zend_ast_get_list(ast->child[1]);
 		uint32_t opnum_catch = (uint32_t)-1;
 
-		/* Inform SILENCE_CATCH opcode that there is an exception class list */
+		/* Inform SILENCE_START and SILENCE_CATCH opcode that there is an exception class list */
+		silence_start_op->extended_value = 1;
 		silence_catch_op->extended_value = 2;
 
 		ZEND_ASSERT(classes->children > 0 && "Should have at least one class");
