@@ -2946,8 +2946,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SILENCE_CATCH_SPEC_HANDLER(ZEN
 			DTRACE_EXCEPTION_CAUGHT((char *)EG(exception)->ce->name);
 		}
 #endif /* HAVE_DTRACE */
-		OBJ_RELEASE(EG(exception));
-		EG(exception) = NULL;
+		zend_clear_exception();
 
 		/* Free object (needed to not leak memory on @new) */
 		if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_OBJECT) {
