@@ -7354,8 +7354,6 @@ ZEND_VM_HANDLER(202, ZEND_SILENCE_CATCH, ANY, ANY)
 
 	SAVE_OPLINE();
 
-	zend_exception_restore();
-
 	/* Came from class list virtual catch blocks */
 	if (opline->extended_value == 2) {
 		if (EG(exception) == NULL) {
@@ -7373,6 +7371,13 @@ ZEND_VM_HANDLER(202, ZEND_SILENCE_CATCH, ANY, ANY)
 			HANDLE_EXCEPTION();
 		}
 	} else if (EG(exception) && opline->extended_value != 2) {
+		ZEND_ASSERT(EG(exception)->ce);
+		/* Only suppress Exception or a subclass of, and NOT Error throwable errors */
+		if (!instanceof_function(zend_ce_exception, EG(exception)->ce)) {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+
 #ifdef HAVE_DTRACE
 		if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
 			DTRACE_EXCEPTION_CAUGHT((char *)EG(exception)->ce->name);
@@ -7860,8 +7865,11 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 	}
 
-	/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed */
-	if (!is_in_silence_live_range(EX(func)->op_array, throw_op_num)) {
+	/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed
+	 * However, this can only happen if the exception is an instance of Exception
+	 * (Error never gets suppressed) */
+	if (!is_in_silence_live_range(EX(func)->op_array, throw_op_num)
+			|| !instanceof_function(zend_ce_exception, EG(exception)->ce)) {
 		cleanup_unfinished_calls(execute_data, throw_op_num);
 	}
 

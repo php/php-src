@@ -13,7 +13,7 @@ function test2($a) {
     return test1();
 }
 
-$var = @test2();
+$var = @test2(1);
 
 var_dump($var);
 
