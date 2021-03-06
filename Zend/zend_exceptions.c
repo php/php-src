@@ -252,6 +252,8 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 
 	object_properties_init(object, class_type);
 
+	/* Only build backtraces when we are not in a SILENCE live range */
+	// TODO Live SILENCE_EXCEPTION live range?
 	if (EG(current_execute_data)) {
 		zend_fetch_debug_backtrace(&trace,
 			skip_top_traces,
