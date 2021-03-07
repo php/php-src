@@ -227,7 +227,7 @@ static const char *zend_vm_opcodes_names[202] = {
 	"ZEND_VERIFY_NORETURN_TYPE",
 };
 
-static uint32_t zend_vm_opcodes_flags[201] = {
+static uint32_t zend_vm_opcodes_flags[202] = {
 	0x00000000,
 	0x00000b0b,
 	0x00000b0b,
@@ -429,6 +429,7 @@ static uint32_t zend_vm_opcodes_flags[201] = {
 	0x0000200b,
 	0x00000101,
 	0x00000101,
+	0x0000a103,
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {
