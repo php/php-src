@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b52d8502f60f8e7203ff2f2bebf70251ad3f8158 */
+ * Stub hash: 3e8a70345ed2b393dc09db5497c04383a207f3b8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -302,17 +302,23 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	INIT_CLASS_ENTRY(ce, "SoapFault", class_SoapFault_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 
-	zval property_feaultstring_default_value;
-	ZVAL_NULL(&property_feaultstring_default_value);
-	zend_string *property_feaultstring_name = zend_string_init("feaultstring", sizeof("feaultstring") - 1, 1);
-	zend_declare_property_ex(class_entry, property_feaultstring_name, &property_feaultstring_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property_feaultstring_name);
+	zval property_faultstring_default_value;
+	ZVAL_NULL(&property_faultstring_default_value);
+	zend_string *property_faultstring_name = zend_string_init("faultstring", sizeof("faultstring") - 1, 1);
+	zend_declare_property_ex(class_entry, property_faultstring_name, &property_faultstring_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_faultstring_name);
 
 	zval property_faultcode_default_value;
 	ZVAL_NULL(&property_faultcode_default_value);
 	zend_string *property_faultcode_name = zend_string_init("faultcode", sizeof("faultcode") - 1, 1);
 	zend_declare_property_ex(class_entry, property_faultcode_name, &property_faultcode_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_faultcode_name);
+
+	zval property_faultcodens_default_value;
+	ZVAL_NULL(&property_faultcodens_default_value);
+	zend_string *property_faultcodens_name = zend_string_init("faultcodens", sizeof("faultcodens") - 1, 1);
+	zend_declare_property_ex(class_entry, property_faultcodens_name, &property_faultcodens_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_faultcodens_name);
 
 	zval property_faultactor_default_value;
 	ZVAL_NULL(&property_faultactor_default_value);
@@ -393,12 +399,6 @@ static zend_class_entry *register_class_SoapServer(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapServer", class_SoapServer_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-
-	zval property___soap_fault_default_value;
-	ZVAL_NULL(&property___soap_fault_default_value);
-	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
-	zend_declare_property_ex(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property___soap_fault_name);
 
 	zval property_service_default_value;
 	ZVAL_NULL(&property_service_default_value);
@@ -500,11 +500,11 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_declare_property_ex(class_entry, property_compression_name, &property_compression_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_compression_name);
 
-	zval property_encoding_default_value;
-	ZVAL_NULL(&property_encoding_default_value);
-	zend_string *property_encoding_name = zend_string_init("encoding", sizeof("encoding") - 1, 1);
-	zend_declare_property_ex(class_entry, property_encoding_name, &property_encoding_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property_encoding_name);
+	zval property__encoding_default_value;
+	ZVAL_NULL(&property__encoding_default_value);
+	zend_string *property__encoding_name = zend_string_init("_encoding", sizeof("_encoding") - 1, 1);
+	zend_declare_property_ex(class_entry, property__encoding_name, &property__encoding_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property__encoding_name);
 
 	zval property__classmap_default_value;
 	ZVAL_NULL(&property__classmap_default_value);
@@ -589,6 +589,12 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, 1);
 	zend_declare_property_ex(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property___last_response_headers_name);
+
+	zval property___soap_fault_default_value;
+	ZVAL_NULL(&property___soap_fault_default_value);
+	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
+	zend_declare_property_ex(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property___soap_fault_name);
 
 	zval property___default_headers_default_value;
 	ZVAL_NULL(&property___default_headers_default_value);

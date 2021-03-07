@@ -25,7 +25,7 @@ object(stdClass)#2 (1) {
     ["queryLocator"]=>
     NULL
     ["records"]=>
-    object(SoapVar)#6 (4) {
+    object(SoapVar)#6 (6) {
       ["enc_type"]=>
       int(0)
       ["enc_value"]=>
@@ -58,6 +58,10 @@ object(stdClass)#2 (1) {
       string(13) "genericObject"
       ["enc_ns"]=>
       string(27) "urn:object.test.example.org"
+      ["enc_name"]=>
+      NULL
+      ["enc_namens"]=>
+      NULL
     }
     ["size"]=>
     string(1) "1"

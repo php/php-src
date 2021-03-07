@@ -3163,7 +3163,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	size_t uri_len = 0;
 	php_stream_context *context=NULL;
-	zval *tmp, *proxy_host, *proxy_port, orig_context, new_context;
+	zval *tmp, *proxy_host, *proxy_port, orig_context, new_context, rv;
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
@@ -3237,23 +3237,23 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		}
 	}
 
-	if (NULL != (tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr),
-			"_stream_context", sizeof("_stream_context")-1))) {
+	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_stream_context", sizeof("_stream_context")-1, 1, &rv);
+	if (tmp != NULL && Z_TYPE_P(tmp) != IS_NULL) {
 		context = php_stream_context_from_zval(tmp, 0);
 	} else {
 		context = php_stream_context_alloc();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
+	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_user_agent", sizeof("_user_agent")-1, 1, &rv);
+	if (tmp != NULL && Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
 		smart_str_appends(&headers, "User-Agent: ");
 		smart_str_appends(&headers, Z_STRVAL_P(tmp));
 		smart_str_appends(&headers, "\r\n");
 	}
 
-	if ((proxy_host = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1)) != NULL &&
-	    Z_TYPE_P(proxy_host) == IS_STRING &&
-	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
+	proxy_host = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1, 1, &rv);
+	if (proxy_host != NULL && Z_TYPE_P(proxy_host) == IS_STRING &&
+	    (proxy_port = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1, 1, &rv)) != NULL &&
 	    Z_TYPE_P(proxy_port) == IS_LONG) {
 	        zval str_proxy;
 	    	smart_str proxy = {0};

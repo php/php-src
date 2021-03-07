@@ -38,10 +38,13 @@ class SoapHeader
 class SoapFault extends Exception
 {
     /** @var string */
-    public $feaultstring;
+    public $faultstring;
 
     /** @var string|null */
     public $faultcode;
+
+    /** @var string|null */
+    public $faultcodens;
 
     /** @var string|null */
     public $faultactor;
@@ -82,9 +85,6 @@ class SoapVar
 
 class SoapServer
 {
-    /** @var array|null */
-    public $__soap_fault;
-
     /** @var resource */
     public $service;
 
@@ -163,7 +163,7 @@ class SoapClient
     public $compression;
 
     /** @var string|null */
-    public $encoding;
+    public $_encoding;
 
     /** @var array|null */
     public $_classmap;
@@ -206,6 +206,9 @@ class SoapClient
 
     /** @var string|null */
     public $__last_response_headers;
+
+    /** @var SoapFault|null */
+    public $__soap_fault;
 
     /** @var array|null */
     public $__default_headers;
