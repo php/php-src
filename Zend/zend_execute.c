@@ -1232,6 +1232,22 @@ ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *
 	zend_string_release(need_msg);
 }
 
+ZEND_API ZEND_COLD void zend_verify_noreturn_error(const zend_function *zf)
+{
+	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
+	const char *fname, *fsep, *fclass;
+	zend_string *need_msg;
+	const char *given_msg;
+
+	zend_verify_type_error_common(
+		zf, arg_info, NULL, &fname, &fsep, &fclass, &need_msg, &given_msg);
+
+	zend_type_error("%s%s%s(): Nothing was expected to be returned",
+		fclass, fsep, fname);
+
+	zend_string_release(need_msg);
+}
+
 #if ZEND_DEBUG
 static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, zval *value)
 {

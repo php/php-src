@@ -471,6 +471,9 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			case IS_VOID:
 				fprintf(stderr, " (void)");
 				break;
+			case IS_NORETURN:
+				fprintf(stderr, " (noreturn)");
+				break;
 			default:
 				fprintf(stderr, " (\?\?\?)");
 				break;

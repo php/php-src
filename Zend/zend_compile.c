@@ -174,6 +174,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("string")},
 	{ZEND_STRL("true")},
 	{ZEND_STRL("void")},
+	{ZEND_STRL("noreturn")},
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
 	{ZEND_STRL("mixed")},
@@ -223,6 +224,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
 	{ZEND_STRL("void"), IS_VOID},
+	{ZEND_STRL("noreturn"), IS_NORETURN},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
 	{ZEND_STRL("mixed"), IS_MIXED},
@@ -2444,6 +2446,18 @@ static void zend_emit_return_type_check(
 				}
 			}
 			/* we don't need run-time check */
+			return;
+		}
+
+		/* `return` is illegal in a noreturn function */
+		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NORETURN)) {
+			if (implicit) {
+				/* add run-time check in case we do end up returning */
+				zend_emit_op(NULL, ZEND_VERIFY_NORETURN_TYPE, expr, NULL);
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "A noreturn function must not return");
+			}
+
 			return;
 		}
 
@@ -6321,6 +6335,10 @@ static zend_type zend_compile_typename(
 		zend_error_noreturn(E_COMPILE_ERROR, "Void can only be used as a standalone type");
 	}
 
+	if ((type_mask & MAY_BE_NORETURN) && (ZEND_TYPE_HAS_CLASS(type) || type_mask != MAY_BE_NORETURN)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "noreturn can only be used as a standalone type");
+	}
+
 	if ((type_mask & (MAY_BE_NULL|MAY_BE_FALSE))
 			&& !ZEND_TYPE_HAS_CLASS(type) && !(type_mask & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
 		if (type_mask == MAY_BE_NULL) {
@@ -6566,6 +6584,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+			}
+
+			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_NORETURN) {
+				zend_error_noreturn(E_COMPILE_ERROR, "noreturn cannot be used as a parameter type");
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
@@ -7159,7 +7181,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
 
-			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE)) {
+			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_NORETURN|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Property %s::$%s cannot have type %s",
