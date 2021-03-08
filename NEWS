@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
 
+- Libxml:
+  . Fixed bug #51903 (simplexml_load_file() doesn't use HTTP headers). (cmb)
+
 - Opcache:
   . Fixed bug #80786 (PHP crash using JIT). (Nikita)
   . Fixed bug #80782 (DASM_S_RANGE_VREG on PHP_INT_MIN-1). (Dmitry)
