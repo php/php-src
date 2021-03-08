@@ -14,4 +14,8 @@ foo();
 // Note the lack of function call: function validated at compile-time
 ?>
 --EXPECTF--
-Fatal error: Nothing was expected to be returned in %s on line %d
+Fatal error: Uncaught TypeError: foo(): Nothing was expected to be returned in %s:%d
+Stack trace:
+#0 %s(%d): foo()
+#1 {main}
+  thrown in %s on line %d

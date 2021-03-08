@@ -1283,6 +1283,9 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	if (type_mask & MAY_BE_VOID) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_VOID));
 	}
+	if (type_mask & MAY_BE_NORETURN) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_NORETURN));
+	}
 
 	if (type_mask & MAY_BE_NULL) {
 		bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
@@ -2453,7 +2456,7 @@ static void zend_emit_return_type_check(
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NORETURN)) {
 			if (implicit) {
 				/* add run-time check in case we do end up returning */
-				zend_emit_op(NULL, ZEND_VERIFY_NORETURN_TYPE, expr, NULL);
+				zend_emit_op(NULL, ZEND_VERIFY_NORETURN_TYPE, NULL, NULL);
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR, "A noreturn function must not return");
 			}

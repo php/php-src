@@ -482,10 +482,21 @@ static inheritance_status zend_perform_covariant_type_check(
 			/* Replacing type that accepts self with static is okay */
 			added_types &= ~MAY_BE_STATIC;
 		}
+
+		if (added_types & MAY_BE_NORETURN) {
+			/* noreturn is the bottom type */
+			return INHERITANCE_SUCCESS;
+		}
+
 		if (added_types) {
 			/* Otherwise adding new types is illegal */
 			return INHERITANCE_ERROR;
 		}
+	}
+
+	if (fe_type_mask & MAY_BE_NORETURN) {
+		/* noreturn is the bottom type */
+		return INHERITANCE_SUCCESS;
 	}
 
 	zend_type *single_type;
