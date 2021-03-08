@@ -678,7 +678,7 @@ finish:
 			/* status codes of 1xx are "informational", and will be followed by a real response
 			 * e.g "100 Continue". RFC 7231 states that unexpected 1xx status MUST be parsed,
 			 * and MAY be ignored. As such, we need to skip ahead to the "real" status*/
-			if (response_code >= 100 && response_code < 200) {
+			if (response_code >= 100 && response_code < 200 && response_code != 101) {
 				/* consume lines until we find a line starting 'HTTP/1' */
 				while (
 					!php_stream_eof(stream)
