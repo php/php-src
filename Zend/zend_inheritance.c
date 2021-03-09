@@ -494,7 +494,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		}
 	}
 
-	if (fe_type_mask & MAY_BE_NORETURN) {
+	if (fe_type_mask == MAY_BE_NORETURN) {
 		/* noreturn is the bottom type */
 		return INHERITANCE_SUCCESS;
 	}
