@@ -12,7 +12,7 @@ class A
 
     public function bar(): noreturn
     {
-        throw new \Exception('parent');
+        throw new UnexpectedValueException('parent');
     }
 }
 
@@ -20,24 +20,24 @@ class B extends A
 {
     public function foo(): noreturn
     {
-        throw new \Exception('bad');
+        throw new UnexpectedValueException('bad');
     }
 
     public function bar(): noreturn
     {
-        throw new \Exception('child');
+        throw new UnexpectedValueException('child');
     }
 }
 
 try {
     (new B)->foo();
-} catch (Exception $e) {
+} catch (UnexpectedValueException $e) {
     // do nothing
 }
 
 try {
     (new B)->bar();
-} catch (Exception $e) {
+} catch (UnexpectedValueException $e) {
     // do nothing
 }
 
