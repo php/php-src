@@ -2454,13 +2454,11 @@ static void zend_emit_return_type_check(
 
 		/* `return` is illegal in a noreturn function */
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NORETURN)) {
-			if (implicit) {
-				/* add run-time check in case we do end up returning */
-				zend_emit_op(NULL, ZEND_VERIFY_NORETURN_TYPE, NULL, NULL);
-			} else {
+			if (!implicit) {
 				zend_error_noreturn(E_COMPILE_ERROR, "A noreturn function must not return");
 			}
 
+			/* implicit case is already handled */
 			return;
 		}
 
@@ -2504,7 +2502,16 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
 			&& !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR)) {
-		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1, 1);
+		zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
+
+		zend_type type = return_info->type;
+
+		if (ZEND_TYPE_IS_SET(type) && ZEND_TYPE_CONTAINS_CODE(type, IS_NORETURN)) {
+			zend_emit_op(NULL, ZEND_VERIFY_NORETURN_TYPE, NULL, NULL);
+			return;
+		}
+
+		zend_emit_return_type_check(NULL, return_info, 1);
 	}
 
 	zn.op_type = IS_CONST;
