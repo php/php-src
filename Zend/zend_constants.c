@@ -25,6 +25,7 @@
 #include "zend_operators.h"
 #include "zend_globals.h"
 #include "zend_API.h"
+#include <string.h>
 
 /* Protection from recursive self-referencing class constants */
 #define IS_CONSTANT_VISITED_MARK    0x80
@@ -376,11 +377,17 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		if (ce) {
 			c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constant_name);
 			if (c == NULL) {
-				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					goto failure;
+				if (!strcasecmp(ZSTR_VAL(constant_name), "class")) {
+					zval tmp;
+					ZVAL_NEW_STR(&tmp, class_name);
+					ret_constant = &tmp;
+				} else {
+					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+						zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+						goto failure;
+					}
+					ret_constant = NULL;
 				}
-				ret_constant = NULL;
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
 					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
