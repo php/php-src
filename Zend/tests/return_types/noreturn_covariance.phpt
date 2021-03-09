@@ -5,12 +5,12 @@ noreturn return type: acceptable covariance cases
 
 class A
 {
-    public function foo() : string
+    public function foo(): string
     {
         return "hello";
     }
 
-    public function bar() : noreturn
+    public function bar(): noreturn
     {
         throw new \Exception('parent');
     }
@@ -18,12 +18,12 @@ class A
 
 class B extends A
 {
-    public function foo() : noreturn
+    public function foo(): noreturn
     {
         throw new \Exception('bad');
     }
 
-    public function bar() : noreturn
+    public function bar(): noreturn
     {
         throw new \Exception('child');
     }

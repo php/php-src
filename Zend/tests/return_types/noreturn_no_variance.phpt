@@ -1,11 +1,11 @@
 --TEST--
-noreturn return type: prevent cases
+noreturn return type: prevent unacceptable cases
 --FILE--
 <?php
 
 class A
 {
-    public function bar() : noreturn
+    public function bar(): noreturn
     {
         throw new \Exception('parent');
     }
@@ -13,7 +13,7 @@ class A
 
 class B extends A
 {
-    public function bar() : string
+    public function bar(): string
     {
         return "hello";
     }
