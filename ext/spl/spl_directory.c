@@ -202,25 +202,25 @@ PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_
 
 static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
 {
-	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
+	if (intern->file_name) {
+		/* already known */
+		return SUCCESS;
+	}
 
 	switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			if (!intern->file_name) {
-				zend_throw_error(NULL, "Object not initialized");
-				return FAILURE;
-			}
+			zend_throw_error(NULL, "Object not initialized");
+			return FAILURE;
 			break;
 		case SPL_FS_DIR:
 			{
 				size_t name_len;
 				size_t path_len = 0;
-				char *path = spl_filesystem_object_get_path(intern, &path_len);
+				char *path;
+				char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-				if (intern->file_name) {
-					zend_string_release(intern->file_name);
-				}
+				path = spl_filesystem_object_get_path(intern, &path_len);
 				/* if there is parent path, amend it, otherwise just use the given path as is */
 				name_len = strlen(intern->u.dir.entry.d_name);
 				if (path_len == 0) {
@@ -241,6 +241,11 @@ static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *int
 
 static int spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
 {
+	if (intern->file_name) {
+		/* invalidate */
+		zend_string_release(intern->file_name);
+		intern->file_name = NULL;
+	}
 	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
 		intern->u.dir.entry.d_name[0] = '\0';
 		return 0;
