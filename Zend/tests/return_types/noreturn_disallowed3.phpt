@@ -1,5 +1,5 @@
 --TEST--
-noreturn return type: unacceptable cases: empty return
+noreturn return type: unacceptable cases: implicit return
 --FILE--
 <?php
 
@@ -10,8 +10,6 @@ function foo(): noreturn {
 }
 
 foo();
-
-// Note the lack of function call: function validated at compile-time
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: foo(): Nothing was expected to be returned in %s:%d
