@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
   . Fixed bug #80811 (Function exec without $output but with $restult_code
     parameter crashes). (Nikita)
+  . Fixed bug #80814 (threaded mod_php won't load on FreeBSD: No space
+    available for static Thread Local Storage). (Dmitry)
 
 - IMAP:
   . Fixed bug #80800 (imap_open() fails when the flags parameter includes
