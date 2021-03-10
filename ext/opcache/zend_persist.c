@@ -323,8 +323,9 @@ uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *s
 
 	/* We use type.name.gc.refcount to keep map_ptr of corresponding type */
 	if (ret <= 2) {
-		ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
-		ZEND_ASSERT(ret > 2);
+		do {
+			ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		} while (ret <= 2);
 		GC_SET_REFCOUNT(type_name, ret);
 	}
 	return ret;
