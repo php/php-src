@@ -347,6 +347,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		zend_string *class_name = zend_string_init(name, class_name_len, 0);
 		zend_class_constant *c = NULL;
 		zval *ret_constant = NULL;
+		char class_constant = -1;
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
@@ -371,22 +372,26 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 				goto failure;
 			}
 		} else {
-			ce = zend_fetch_class(class_name, flags);
+			class_constant = zend_string_equals_literal_ci(constant_name, "class");
+			ce = zend_fetch_class(class_name, class_constant ? flags | ZEND_FETCH_CLASS_NO_AUTOLOAD : flags);
 		}
-		if (ce) {
+
+		if (class_constant == 1 || (class_constant == -1 && zend_string_equals_literal_ci(constant_name, "class"))) {
+			zval zv;
+			if (ce) {
+				ZVAL_STR(&zv, ce->name);
+			} else {
+				ZVAL_STR_COPY(&zv, class_name); // FIXME: this introduces a memory leak
+			}
+			ret_constant = &zv;
+		} else if (ce) {
 			c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constant_name);
 			if (c == NULL) {
-				if (zend_string_equals_literal_ci(constant_name, "class")) {
-					zval tmp;
-					ZVAL_NEW_STR(&tmp, class_name);
-					ret_constant = &tmp;
-				} else {
-					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-						zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-						goto failure;
-					}
-					ret_constant = NULL;
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
 				}
+				ret_constant = NULL;
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
 					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
