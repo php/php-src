@@ -2454,7 +2454,7 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_mi
 	HANDLE_EXCEPTION();
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_verify_recv_arg_type_helper_SPEC(zval *op_1 ZEND_OPCODE_HANDLER_ARGS_DC)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_verify_recv_arg_type_helper_SPEC(zval *op_1 ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
 

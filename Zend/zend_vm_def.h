@@ -5375,7 +5375,7 @@ ZEND_VM_COLD_HELPER(zend_missing_arg_helper, ANY, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_COLD_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
+ZEND_VM_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 {
 	USE_OPLINE
 
