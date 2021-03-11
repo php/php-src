@@ -3177,8 +3177,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed
 	 * However, this can only happen if the exception is an instance of Exception
 	 * (Error never gets suppressed) */
-	if (!is_in_silence_live_range(EX(func)->op_array, throw_op_num)
-			|| !instanceof_function(zend_ce_exception, EG(exception)->ce)) {
+	if (!is_in_silence_live_range(EX(func)->op_array, throw_op_num)) {
 		cleanup_unfinished_calls(execute_data, throw_op_num);
 	}
 
