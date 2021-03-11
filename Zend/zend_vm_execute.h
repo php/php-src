@@ -2666,6 +2666,124 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fe_fetch_object_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *array;
+	zval *value;
+	uint32_t value_type;
+	HashTable *fe_ht;
+	HashPosition pos;
+	Bucket *p;
+	zend_object_iterator *iter;
+
+	array = EX_VAR(opline->op1.var);
+	SAVE_OPLINE();
+
+	ZEND_ASSERT(Z_TYPE_P(array) == IS_OBJECT);
+	if ((iter = zend_iterator_unwrap(array)) == NULL) {
+		/* plain object */
+
+		fe_ht = Z_OBJPROP_P(array);
+		pos = zend_hash_iterator_pos(Z_FE_ITER_P(array), fe_ht);
+		p = fe_ht->arData + pos;
+		while (1) {
+			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
+				/* reached end of iteration */
+				goto fe_fetch_r_exit;
+			}
+			pos++;
+			value = &p->val;
+			value_type = Z_TYPE_INFO_P(value);
+			if (EXPECTED(value_type != IS_UNDEF)) {
+				if (UNEXPECTED(value_type == IS_INDIRECT)) {
+					value = Z_INDIRECT_P(value);
+					value_type = Z_TYPE_INFO_P(value);
+					if (EXPECTED(value_type != IS_UNDEF)
+					 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
+						break;
+					}
+				} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
+						|| !p->key
+						|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
+					break;
+				}
+			}
+			p++;
+		}
+		EG(ht_iterators)[Z_FE_ITER_P(array)].pos = pos;
+		if (RETURN_VALUE_USED(opline)) {
+			if (UNEXPECTED(!p->key)) {
+				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+			} else if (ZSTR_VAL(p->key)[0]) {
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+			} else {
+				const char *class_name, *prop_name;
+				size_t prop_name_len;
+				zend_unmangle_property_name_ex(
+					p->key, &class_name, &prop_name, &prop_name_len);
+				ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
+			}
+		}
+	} else {
+		const zend_object_iterator_funcs *funcs = iter->funcs;
+		if (EXPECTED(++iter->index > 0)) {
+			/* This could cause an endless loop if index becomes zero again.
+			 * In case that ever happens we need an additional flag. */
+			funcs->move_forward(iter);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				UNDEF_RESULT();
+				HANDLE_EXCEPTION();
+			}
+			if (UNEXPECTED(funcs->valid(iter) == FAILURE)) {
+				/* reached end of iteration */
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					UNDEF_RESULT();
+					HANDLE_EXCEPTION();
+				}
+fe_fetch_r_exit:
+				ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+				ZEND_VM_CONTINUE();
+			}
+		}
+		value = funcs->get_current_data(iter);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+		if (!value) {
+			/* failure in get_current_data */
+			goto fe_fetch_r_exit;
+		}
+		if (RETURN_VALUE_USED(opline)) {
+			if (funcs->get_current_key) {
+				funcs->get_current_key(iter, EX_VAR(opline->result.var));
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					UNDEF_RESULT();
+					HANDLE_EXCEPTION();
+				}
+			} else {
+				ZVAL_LONG(EX_VAR(opline->result.var), iter->index);
+			}
+		}
+		value_type = Z_TYPE_INFO_P(value);
+	}
+
+	if (EXPECTED(opline->op2_type == IS_CV)) {
+		zval *variable_ptr = EX_VAR(opline->op2.var);
+		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
+	} else {
+		zval *res = EX_VAR(opline->op2.var);
+		zend_refcounted *gc = Z_COUNTED_P(value);
+
+		ZVAL_COPY_VALUE_EX(res, value, gc, value_type);
+		if (Z_TYPE_INFO_REFCOUNTED(value_type)) {
+			GC_ADDREF(gc);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21693,7 +21811,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 	}
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *array;
@@ -21704,129 +21822,41 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 	Bucket *p;
 
 	array = EX_VAR(opline->op1.var);
-	SAVE_OPLINE();
-	if (EXPECTED(Z_TYPE_P(array) == IS_ARRAY)) {
-		fe_ht = Z_ARRVAL_P(array);
-		pos = Z_FE_POS_P(array);
-		p = fe_ht->arData + pos;
-		while (1) {
-			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
-				/* reached end of iteration */
-fe_fetch_r_exit:
-				ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
-				ZEND_VM_CONTINUE();
-			}
-			pos++;
-			value = &p->val;
-			value_type = Z_TYPE_INFO_P(value);
-			ZEND_ASSERT(value_type != IS_INDIRECT);
-			if (EXPECTED(value_type != IS_UNDEF)) {
-				break;
-			}
-			p++;
+	if (UNEXPECTED(Z_TYPE_P(array) != IS_ARRAY)) {
+		ZEND_VM_TAIL_CALL(zend_fe_fetch_object_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+	fe_ht = Z_ARRVAL_P(array);
+	pos = Z_FE_POS_P(array);
+	p = fe_ht->arData + pos;
+	while (1) {
+		if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
+			/* reached end of iteration */
+			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+			ZEND_VM_CONTINUE();
 		}
-		Z_FE_POS_P(array) = pos;
-		if (RETURN_VALUE_USED(opline)) {
-			if (!p->key) {
-				ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-			} else {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-			}
+		pos++;
+		value = &p->val;
+		value_type = Z_TYPE_INFO_P(value);
+		ZEND_ASSERT(value_type != IS_INDIRECT);
+		if (EXPECTED(value_type != IS_UNDEF)) {
+			break;
 		}
-	} else {
-		zend_object_iterator *iter;
-
-		ZEND_ASSERT(Z_TYPE_P(array) == IS_OBJECT);
-		if ((iter = zend_iterator_unwrap(array)) == NULL) {
-			/* plain object */
-
-			fe_ht = Z_OBJPROP_P(array);
-			pos = zend_hash_iterator_pos(Z_FE_ITER_P(array), fe_ht);
-			p = fe_ht->arData + pos;
-			while (1) {
-				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
-					/* reached end of iteration */
-					goto fe_fetch_r_exit;
-				}
-				pos++;
-				value = &p->val;
-				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
-					if (UNEXPECTED(value_type == IS_INDIRECT)) {
-						value = Z_INDIRECT_P(value);
-						value_type = Z_TYPE_INFO_P(value);
-						if (EXPECTED(value_type != IS_UNDEF)
-						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
-							break;
-						}
-					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
-							|| !p->key
-							|| zend_check_property_access(Z_OBJ_P(array), p->key, 1) == SUCCESS) {
-						break;
-					}
-				}
-				p++;
-			}
-			EG(ht_iterators)[Z_FE_ITER_P(array)].pos = pos;
-			if (RETURN_VALUE_USED(opline)) {
-				if (UNEXPECTED(!p->key)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (ZSTR_VAL(p->key)[0]) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
-				} else {
-					const char *class_name, *prop_name;
-					size_t prop_name_len;
-					zend_unmangle_property_name_ex(
-						p->key, &class_name, &prop_name, &prop_name_len);
-					ZVAL_STRINGL(EX_VAR(opline->result.var), prop_name, prop_name_len);
-				}
-			}
+		p++;
+	}
+	Z_FE_POS_P(array) = pos;
+	if (RETURN_VALUE_USED(opline)) {
+		if (!p->key) {
+			ZVAL_LONG(EX_VAR(opline->result.var), p->h);
 		} else {
-			const zend_object_iterator_funcs *funcs = iter->funcs;
-			if (EXPECTED(++iter->index > 0)) {
-				/* This could cause an endless loop if index becomes zero again.
-				 * In case that ever happens we need an additional flag. */
-				funcs->move_forward(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					UNDEF_RESULT();
-					HANDLE_EXCEPTION();
-				}
-				if (UNEXPECTED(funcs->valid(iter) == FAILURE)) {
-					/* reached end of iteration */
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
-					}
-					goto fe_fetch_r_exit;
-				}
-			}
-			value = funcs->get_current_data(iter);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
-			}
-			if (!value) {
-				/* failure in get_current_data */
-				goto fe_fetch_r_exit;
-			}
-			if (RETURN_VALUE_USED(opline)) {
-				if (funcs->get_current_key) {
-					funcs->get_current_key(iter, EX_VAR(opline->result.var));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						UNDEF_RESULT();
-						HANDLE_EXCEPTION();
-					}
-				} else {
-					ZVAL_LONG(EX_VAR(opline->result.var), iter->index);
-				}
-			}
-			value_type = Z_TYPE_INFO_P(value);
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
 		}
 	}
 
 	if (EXPECTED(opline->op2_type == IS_CV)) {
 		zval *variable_ptr = EX_VAR(opline->op2.var);
+		SAVE_OPLINE();
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
@@ -21835,8 +21865,8 @@ fe_fetch_r_exit:
 		if (Z_TYPE_INFO_REFCOUNTED(value_type)) {
 			GC_ADDREF(gc);
 		}
+		ZEND_VM_NEXT_OPCODE();
 	}
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
