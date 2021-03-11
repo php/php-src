@@ -522,6 +522,10 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
 
+- PDO_PGSQL:
+  . Added PDO::pgsqlSetNoticeCallback to allow a callback to be triggered on
+    every notice sent (e.g. RAISE NOTICE).
+
 - PGSQL:
   . Added pg_change_password to alter a given user's password. It handles
     transparently the password encryption from the database settings.

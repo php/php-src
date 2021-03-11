@@ -178,6 +178,8 @@ PHP                                                                        NEWS
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
   . Added class PdoPgsql. (danack, kocsismate)
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
+  . Added PDO::pgsqlSetNoticeCallBack method to receive DB notices.
+    (outtersg) 
 
 - PDO_SQLITE:
   . Added class PdoSqlite. (danack, kocsismate)
