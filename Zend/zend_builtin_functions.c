@@ -377,7 +377,7 @@ ZEND_FUNCTION(error_reporting)
 
 	old_error_reporting = EG(error_reporting);
 
-	if (!err_is_null) {
+	if (!err_is_null && err != old_error_reporting) {
 		zend_string *new_val = zend_long_to_str(err);
 		if (UNEXPECTED(!new_val)) {
 			RETURN_THROWS();
