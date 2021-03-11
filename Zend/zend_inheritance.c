@@ -1797,6 +1797,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	zend_trait_precedence **precedences;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
+	zend_string *lc_trait_name;
 	zend_string *lcname;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
@@ -1811,9 +1812,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			cur_method_ref = &cur_precedence->trait_method;
-			trait = zend_fetch_class(cur_method_ref->class_name,
-							ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
-			if (!trait) {
+			lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
+			trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
+			zend_string_release_ex(lc_trait_name, 0);
+			if (!trait && !(trait->ce_flags & ZEND_ACC_LINKED)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 			}
 			zend_check_trait_usage(ce, trait, traits);
@@ -1836,10 +1838,13 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 
 			for (j = 0; j < cur_precedence->num_excludes; j++) {
 				zend_string* class_name = cur_precedence->exclude_class_names[j];
-				zend_class_entry *exclude_ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				zend_class_entry *exclude_ce;
 				uint32_t trait_num;
 
-				if (!exclude_ce) {
+				lc_trait_name = zend_string_tolower(class_name);
+				exclude_ce = zend_hash_find_ptr(EG(class_table), lc_trait_name);
+				zend_string_release_ex(lc_trait_name, 0);
+				if (!exclude_ce || !(exclude_ce->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
 				}
 				trait_num = zend_check_trait_usage(ce, exclude_ce, traits);
@@ -1881,8 +1886,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 			lcname = zend_string_tolower(cur_method_ref->method_name);
 			if (cur_method_ref->class_name) {
 				/* For all aliases with an explicit class name, resolve the class now. */
-				trait = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
-				if (!trait) {
+				lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
+				trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
+				zend_string_release_ex(lc_trait_name, 0);
+				if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 				}
 				zend_check_trait_usage(ce, trait, traits);
@@ -2608,13 +2615,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	 * with an exception and remove the class from the class table. This is only possible
 	 * if no variance obligations on the current class have been added during autoloading. */
 	zend_class_entry *parent = NULL;
-	zend_class_entry **interfaces = NULL;
 	zend_class_entry **traits_and_interfaces = NULL;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
 	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
 	zval *zv;
+	ALLOCA_FLAG(use_heap)
 
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
@@ -2630,18 +2637,18 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	if (ce->num_traits || ce->num_interfaces) {
-		traits_and_interfaces = emalloc(sizeof(zend_class_entry*) * (ce->num_traits + ce->num_interfaces));
+		traits_and_interfaces = do_alloca(sizeof(zend_class_entry*) * (ce->num_traits + ce->num_interfaces), use_heap);
 
 		for (i = 0; i < ce->num_traits; i++) {
 			zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
 				ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
 			if (UNEXPECTED(trait == NULL)) {
-				efree(traits_and_interfaces);
+				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
 			if (UNEXPECTED(!(trait->ce_flags & ZEND_ACC_TRAIT))) {
 				zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
-				efree(traits_and_interfaces);
+				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
 			for (j = 0; j < i; j++) {
@@ -2659,14 +2666,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	if (ce->num_interfaces) {
-		/* Also copy the parent interfaces here, so we don't need to reallocate later. */
-		uint32_t num_parent_interfaces = parent ? parent->num_interfaces : 0;
-		interfaces = emalloc(
-			sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
-		if (num_parent_interfaces) {
-			memcpy(interfaces, parent->interfaces,
-				sizeof(zend_class_entry *) * num_parent_interfaces);
-		}
 		for (i = 0; i < ce->num_interfaces; i++) {
 			zend_class_entry *iface = zend_fetch_class_by_name(
 				ce->interface_names[i].name, ce->interface_names[i].lc_name,
@@ -2674,11 +2673,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
 			if (!iface) {
 				check_unrecoverable_load_failure(ce);
-				efree(interfaces);
-				efree(traits_and_interfaces);
+				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
-			interfaces[num_parent_interfaces + i] = iface;
 			traits_and_interfaces[ce->num_traits + i] = iface;
 			if (iface) {
 				UPDATE_IS_CACHEABLE(iface);
@@ -2693,10 +2690,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
 				if (ret) {
 					if (traits_and_interfaces) {
-						efree(traits_and_interfaces);
-					}
-					if (traits_and_interfaces) {
-						efree(interfaces);
+						free_alloca(traits_and_interfaces, use_heap);
 					}
 					zv = zend_hash_find_ex(CG(class_table), key, 1);
 					Z_CE_P(zv) = ret;
@@ -2739,7 +2733,19 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	if (ce->num_traits) {
 		zend_do_bind_traits(ce, traits_and_interfaces);
 	}
-	if (interfaces) {
+	if (ce->num_interfaces) {
+		/* Also copy the parent interfaces here, so we don't need to reallocate later. */
+		uint32_t num_parent_interfaces = parent ? parent->num_interfaces : 0;
+		zend_class_entry **interfaces = emalloc(
+			sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
+
+		if (num_parent_interfaces) {
+			memcpy(interfaces, parent->interfaces,
+				sizeof(zend_class_entry *) * num_parent_interfaces);
+		}
+		memcpy(interfaces + num_parent_interfaces, traits_and_interfaces + ce->num_traits,
+				sizeof(zend_class_entry *) * ce->num_interfaces);
+
 		zend_do_implement_interfaces(ce, interfaces);
 	} else if (parent && parent->num_interfaces) {
 		zend_do_inherit_interfaces(ce, parent);
@@ -2797,7 +2803,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	if (traits_and_interfaces) {
-		efree(traits_and_interfaces);
+		free_alloca(traits_and_interfaces, use_heap);
 	}
 
 	return ce;
