@@ -305,7 +305,7 @@ void pdo_sqlstate_fini_error_table(void)
 	zend_hash_destroy(&err_hash);
 }
 
-int pdo_sqlstate_init_error_table(void)
+void pdo_sqlstate_init_error_table(void)
 {
 	size_t i;
 	const struct pdo_sqlstate_info *info;
@@ -317,8 +317,6 @@ int pdo_sqlstate_init_error_table(void)
 
 		zend_hash_str_add_ptr(&err_hash, info->state, sizeof(info->state), (void *)info);
 	}
-
-	return SUCCESS;
 }
 
 const char *pdo_sqlstate_state_to_description(char *state)

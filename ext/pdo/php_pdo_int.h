@@ -53,7 +53,7 @@ zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object
 
 extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 
-int pdo_sqlstate_init_error_table(void);
+void pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);
 const char *pdo_sqlstate_state_to_description(char *state);
 int pdo_hash_methods(pdo_dbh_object_t *dbh, int kind);
