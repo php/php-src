@@ -19,7 +19,7 @@ final class mysqli_driver
 
 class mysqli
 {
-    public int|string|null $affected_rows;
+    public int|string $affected_rows;
 
     public string $client_info;
 
@@ -357,7 +357,7 @@ class mysqli_result implements IteratorAggregate
 
     public int|string $num_rows;
 
-    public int|null $type;
+    public int $type;
 
     public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
 
@@ -444,7 +444,7 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    public int|string|null $affected_rows;
+    public int|string $affected_rows;
 
     public int|string $insert_id;
 
@@ -462,7 +462,7 @@ class mysqli_stmt
 
     public string $sqlstate;
 
-    public ?int $id;
+    public int $id;
 
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
@@ -587,11 +587,11 @@ class mysqli_stmt
 
 final class mysqli_warning
 {
-    public ?string $message;
+    public string $message;
 
-    public ?string $sqlstate;
+    public string $sqlstate;
 
-    public ?int $errno;
+    public int $errno;
 
     private function __construct() {}
 

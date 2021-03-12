@@ -175,27 +175,22 @@ static int link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
 
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+ 	ZEND_ASSERT(mysql);
 
-	if (!mysql) {
-		ZVAL_NULL(retval);
+	rc = mysql_affected_rows(mysql->mysql);
+
+	if (rc == (my_ulonglong) -1) {
+		ZVAL_LONG(retval, -1);
+		return SUCCESS;
+	}
+
+	if (rc < ZEND_LONG_MAX) {
+		ZVAL_LONG(retval, (zend_long) rc);
 	} else {
-		CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
-
-		rc = mysql_affected_rows(mysql->mysql);
-
-		if (rc == (my_ulonglong) -1) {
-			ZVAL_LONG(retval, -1);
-			return SUCCESS;
-		}
-
-		if (rc < ZEND_LONG_MAX) {
-			ZVAL_LONG(retval, (zend_long) rc);
-		} else {
-			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
-		}
+		ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 	}
 
 	return SUCCESS;
@@ -271,11 +266,8 @@ static int result_type_read(mysqli_object *obj, zval *retval, bool quiet)
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
  	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	if (!p) {
-		ZVAL_NULL(retval);
-	} else {
-		ZVAL_LONG(retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
-	}
+	ZEND_ASSERT(p);
+	ZVAL_LONG(retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
 
 	return SUCCESS;
 }
@@ -326,11 +318,8 @@ static int stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 
  	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	if (!p) {
-		ZVAL_NULL(retval);
-	} else {
-		ZVAL_LONG(retval, mysqli_stmt_get_id(p->stmt));
-	}
+	ZEND_ASSERT(p);
+	ZVAL_LONG(retval, mysqli_stmt_get_id(p->stmt));
 
 	return SUCCESS;
 }
@@ -346,21 +335,18 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 
  	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	if (!p) {
-		ZVAL_NULL(retval);
+	ZEND_ASSERT(p);
+	rc = mysql_stmt_affected_rows(p->stmt);
+
+	if (rc == (my_ulonglong) -1) {
+		ZVAL_LONG(retval, -1);
+		return SUCCESS;
+	}
+
+	if (rc < ZEND_LONG_MAX) {
+		ZVAL_LONG(retval, (zend_long) rc);
 	} else {
-		rc = mysql_stmt_affected_rows(p->stmt);
-
-		if (rc == (my_ulonglong) -1) {
-			ZVAL_LONG(retval, -1);
-			return SUCCESS;
-		}
-
-		if (rc < ZEND_LONG_MAX) {
-			ZVAL_LONG(retval, (zend_long) rc);
-		} else {
-			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
-		}
+		ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 	}
 
 	return SUCCESS;
