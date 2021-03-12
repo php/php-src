@@ -68,3 +68,6 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       of char* for the optional sequence/table name.
     - The php_pdo_str_tolower_dup() PDO_API has been removed use zend_str_tolower_dup()
       or zend_string_tolower_ex().
+    - A new PDO_API pdo_get_long_param(zend_long *lval, zval *value) has been
+      introduced to fetch integer values for driver attributes, it will throw
+      a type error and return false in case of failure.

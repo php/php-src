@@ -678,12 +678,24 @@ PHP_METHOD(PDO, inTransaction)
 }
 /* }}} */
 
-/* TODO: Make distinction between numeric and non-numeric strings */
-#define PDO_LONG_PARAM_CHECK \
-	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
-		zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value)); \
-		return false; \
-	} \
+PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
+{
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+		case IS_TRUE:
+		case IS_FALSE:
+			*lval = zval_get_long(value);
+			return true;
+		case IS_STRING:
+			if (IS_LONG == is_numeric_str_function(Z_STR_P(value), lval, NULL)) {
+				return true;
+			}
+			/* fallthrough */
+		default:
+			zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value));
+			return false;
+	}
+}
 
 /* Return false on failure, true otherwise */
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
@@ -692,8 +704,9 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
-			PDO_LONG_PARAM_CHECK;
-			lval = zval_get_long(value);
+			if (!pdo_get_long_param(&lval, value)) {
+				return false;
+			}
 			switch (lval) {
 				case PDO_ERRMODE_SILENT:
 				case PDO_ERRMODE_WARNING:
@@ -707,8 +720,9 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			return false;
 
 		case PDO_ATTR_CASE:
-			PDO_LONG_PARAM_CHECK;
-			lval = zval_get_long(value);
+			if (!pdo_get_long_param(&lval, value)) {
+				return false;
+			}
 			switch (lval) {
 				case PDO_CASE_NATURAL:
 				case PDO_CASE_UPPER:
@@ -722,8 +736,10 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			return false;
 
 		case PDO_ATTR_ORACLE_NULLS:
-			PDO_LONG_PARAM_CHECK;
-			dbh->oracle_nulls = zval_get_long(value);
+			if (!pdo_get_long_param(&lval, value)) {
+				return false;
+			}
+			dbh->oracle_nulls = lval;
 			return true;
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
@@ -735,10 +751,12 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 						return false;
 					}
 				}
+				lval = zval_get_long(value);
 			} else {
-				PDO_LONG_PARAM_CHECK;
+				if (!pdo_get_long_param(&lval, value)) {
+					return false;
+				}
 			}
-			lval = zval_get_long(value);
 			if (lval == PDO_FETCH_USE_DEFAULT) {
 				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
 				return false;
@@ -747,8 +765,11 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			return true;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
-			PDO_LONG_PARAM_CHECK;
-			dbh->stringify = zval_get_long(value) ? 1 : 0;
+			if (pdo_get_long_param(&lval, value) == false) {
+				return false;
+			}
+			/* TODO Check for proper boolean value? */
+			dbh->stringify = lval ? 1 : 0;
 			return true;
 
 		case PDO_ATTR_STATEMENT_CLASS: {
