@@ -23,7 +23,6 @@ MySQLPDOTest::skip();
         echo $e->getMessage(), \PHP_EOL;
     }
     try {
-        /* Currently passes... */
         $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 'pdo');
     } catch (\TypeError $e) {
         echo $e->getMessage(), \PHP_EOL;
@@ -72,6 +71,7 @@ MySQLPDOTest::skip();
 --EXPECTF--
 Attribute value must be of type int for selected attribute, array given
 Attribute value must be of type int for selected attribute, stdClass given
+Attribute value must be of type int for selected attribute, string given
 array(1) {
   [0]=>
   array(6) {
