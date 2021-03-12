@@ -2623,6 +2623,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	zval *zv;
 	ALLOCA_FLAG(use_heap)
 
+	SET_ALLOCA_FLAG(use_heap);
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
 	if (ce->parent_name) {
