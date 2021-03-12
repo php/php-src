@@ -1084,7 +1084,7 @@ PHP_METHOD(PDO, query)
 			/* now execute the statement */
 			PDO_STMT_CLEAR_ERR();
 			if (stmt->methods->executer(stmt)) {
-				int ret = 1;
+				bool ret = true;
 				if (!stmt->executed) {
 					if (stmt->dbh->alloc_own_columns) {
 						ret = pdo_stmt_describe_columns(stmt);

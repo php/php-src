@@ -125,7 +125,7 @@ iterate:
 }
 /* }}} */
 
-int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
+bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 {
 	int col;
 
@@ -133,7 +133,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 	for (col = 0; col < stmt->column_count; col++) {
 		if (!stmt->methods->describer(stmt, col)) {
-			return 0;
+			return false;
 		}
 
 		/* if we are applying case conversions on column names, do so now */
@@ -168,7 +168,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 		}
 
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
