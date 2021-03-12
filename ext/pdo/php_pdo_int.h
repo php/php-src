@@ -56,4 +56,4 @@ extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 void pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);
 const char *pdo_sqlstate_state_to_description(char *state);
-int pdo_hash_methods(pdo_dbh_object_t *dbh, int kind);
+bool pdo_hash_methods(pdo_dbh_object_t *dbh, int kind);

@@ -1173,7 +1173,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 /* }}} */
 
 /* {{{ overloaded object handlers for PDO class */
-int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
+bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 {
 	const zend_function_entry *funcs;
 	zend_internal_function func;
@@ -1182,11 +1182,11 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
-		return 0;
+		return false;
 	}
 	funcs =	dbh->methods->get_driver_methods(dbh, kind);
 	if (!funcs) {
-		return 0;
+		return false;
 	}
 
 	dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent);
@@ -1238,7 +1238,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		funcs++;
 	}
 
-	return 1;
+	return true;
 }
 
 static zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key)
