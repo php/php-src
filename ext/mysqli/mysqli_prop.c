@@ -119,7 +119,6 @@ static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet
 /* {{{ property link_client_info_read */
 static int link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 	ZVAL_STRING(retval, MYSQL_SERVER_VERSION);
 
 	return SUCCESS;

@@ -45,11 +45,7 @@ require_once('skipifconnectfailure.inc');
             echo $exception->getMessage() . "\n";
         }
 
-        try {
-            $mysqli->client_info;
-        } catch (Error $exception) {
-            echo $exception->getMessage() . "\n";
-        }
+        printf("mysqli->client_info = '%s'/%s\n", $mysqli->client_info, gettype($mysqli->client_info));
 
         printf("mysqli->client_version = '%s'/%s\n", $mysqli->client_version, gettype($mysqli->client_version));
 
@@ -242,7 +238,7 @@ Without RS
 
 Class variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
@@ -262,7 +258,7 @@ mysqli object is already closed
 
 Object variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
@@ -283,7 +279,7 @@ mysqli object is already closed
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-Property access is not allowed yet
+mysqli->client_info = '%s'/string
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
@@ -324,7 +320,7 @@ mysqli object is already closed
 
 Class variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
@@ -344,7 +340,7 @@ mysqli object is already closed
 
 Object variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
@@ -365,7 +361,7 @@ mysqli object is already closed
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-Property access is not allowed yet
+mysqli->client_info = '%s'/string
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
