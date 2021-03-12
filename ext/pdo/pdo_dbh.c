@@ -801,9 +801,8 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			}
 			return true;
 		}
-
-		default:
-			;
+		/* Don't throw a ValueError as the attribute might be a driver specific one */
+		default:;
 	}
 
 	if (!dbh->methods->set_attribute) {
