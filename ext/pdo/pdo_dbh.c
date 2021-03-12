@@ -34,7 +34,7 @@
 #include "zend_interfaces.h"
 #include "pdo_dbh_arginfo.h"
 
-static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
+static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
 void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error)
 {
@@ -375,6 +375,8 @@ PHP_METHOD(PDO, __construct)
 		php_error_docref(NULL, E_ERROR, "Out of memory");
 	}
 
+	/* pdo_dbh_attribute_set() can emit a Warning if the ERR_MODE is set to warning
+	 * As we are in a constructor we override the behaviour by replacing the error handler */
 	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
 
 	if (!call_factory) {
@@ -407,7 +409,8 @@ options:
 					continue;
 				}
 				ZVAL_DEREF(attr_value);
-				/* TODO: Check that this doesn't fail? */
+
+				/* TODO: Should the constructor fail when the attribute cannot be set? */
 				pdo_dbh_attribute_set(dbh, long_key, attr_value);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -675,16 +678,17 @@ PHP_METHOD(PDO, inTransaction)
 }
 /* }}} */
 
-static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
-{
-	zend_long lval;
-
 /* TODO: Make distinction between numeric and non-numeric strings */
 #define PDO_LONG_PARAM_CHECK \
 	if (Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE) { \
 		zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value)); \
-		return FAILURE; \
+		return false; \
 	} \
+
+/* Return false on failure, true otherwise */
+static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
+{
+	zend_long lval;
 
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
@@ -695,12 +699,12 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 				case PDO_ERRMODE_WARNING:
 				case PDO_ERRMODE_EXCEPTION:
 					dbh->error_mode = lval;
-					return SUCCESS;
+					return true;
 				default:
 					zend_value_error("Error mode must be one of the PDO::ERRMODE_* constants");
-					return FAILURE;
+					return false;
 			}
-			return FAILURE;
+			return false;
 
 		case PDO_ATTR_CASE:
 			PDO_LONG_PARAM_CHECK;
@@ -710,17 +714,17 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 				case PDO_CASE_UPPER:
 				case PDO_CASE_LOWER:
 					dbh->desired_case = lval;
-					return SUCCESS;
+					return true;
 				default:
 					zend_value_error("Case folding mode must be one of the PDO::CASE_* constants");
-					return FAILURE;
+					return false;
 			}
-			return FAILURE;
+			return false;
 
 		case PDO_ATTR_ORACLE_NULLS:
 			PDO_LONG_PARAM_CHECK;
 			dbh->oracle_nulls = zval_get_long(value);
-			return SUCCESS;
+			return true;
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -728,7 +732,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 				if ((tmp = zend_hash_index_find(Z_ARRVAL_P(value), 0)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
 					if (Z_LVAL_P(tmp) == PDO_FETCH_INTO || Z_LVAL_P(tmp) == PDO_FETCH_CLASS) {
 						zend_value_error("PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as the default fetch mode");
-						return FAILURE;
+						return false;
 					}
 				}
 			} else {
@@ -737,15 +741,15 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 			lval = zval_get_long(value);
 			if (lval == PDO_FETCH_USE_DEFAULT) {
 				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
-				return FAILURE;
+				return false;
 			}
 			dbh->default_fetch_type = lval;
-			return SUCCESS;
+			return true;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			PDO_LONG_PARAM_CHECK;
 			dbh->stringify = zval_get_long(value) ? 1 : 0;
-			return SUCCESS;
+			return true;
 
 		case PDO_ATTR_STATEMENT_CLASS: {
 			/* array(string classname, array(mixed ctor_args)) */
@@ -758,29 +762,29 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					);
 				PDO_HANDLE_DBH_ERR();
-				return FAILURE;
+				return false;
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
 					zend_zval_type_name(value));
-				return FAILURE;
+				return false;
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
 				zend_value_error("PDO::ATTR_STATEMENT_CLASS value must be an array with the format "
 					"array(classname, constructor_args)");
-				return FAILURE;
+				return false;
 			}
 			if (Z_TYPE_P(item) != IS_STRING || (pce = zend_lookup_class(Z_STR_P(item))) == NULL) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be a valid class");
-				return FAILURE;
+				return false;
 			}
 			if (!instanceof_function(pce, pdo_dbstmt_ce)) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
-				return FAILURE;
+				return false;
 			}
 			if (pce->constructor && !(pce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 				zend_type_error("User-supplied statement class cannot have a public constructor");
-				return FAILURE;
+				return false;
 			}
 			dbh->def_stmt_ce = pce;
 			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
@@ -791,11 +795,11 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 				if (Z_TYPE_P(item) != IS_ARRAY) {
 					zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
 						zend_zval_type_name(value));
-					return FAILURE;
+					return false;
 				}
 				ZVAL_COPY(&dbh->def_stmt_ctor_args, item);
 			}
-			return SUCCESS;
+			return true;
 		}
 
 		default:
@@ -808,7 +812,7 @@ static zend_result pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 	PDO_DBH_CLEAR_ERR();
 	if (dbh->methods->set_attribute(dbh, attr, value)) {
-		return SUCCESS;
+		return true;
 	}
 
 fail:
@@ -817,7 +821,7 @@ fail:
 	} else {
 		PDO_HANDLE_DBH_ERR();
 	}
-	return FAILURE;
+	return false;
 }
 /* }}} */
 
@@ -836,10 +840,7 @@ PHP_METHOD(PDO, setAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	if (pdo_dbh_attribute_set(dbh, attr, value) != FAILURE) {
- 		RETURN_TRUE;
- 	}
- 	RETURN_FALSE;
+	RETURN_BOOL(pdo_dbh_attribute_set(dbh, attr, value));
 }
 /* }}} */
 
