@@ -37,6 +37,14 @@ struct bug79096 {
 	uint64_t b;
 };
 
+typedef struct bug80847_01 {
+    uint64_t a;
+} bug80847_01;
+
+typedef struct bug80847_02 {
+    bug80847_01 b;
+} bug80847_02;
+
 #ifdef PHP_WIN32
 #	define PHP_ZEND_TEST_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4

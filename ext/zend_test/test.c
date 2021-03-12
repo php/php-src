@@ -342,3 +342,8 @@ void bug79177(void)
 {
 	bug79177_cb();
 }
+
+PHP_ZEND_TEST_API bug80847_02 bug80847(bug80847_02 b)
+{
+    return b;
+}
