@@ -15,7 +15,7 @@ $header = <<<CDEF
         bug80847_01 a;
     } bug80847_02;
 
-    bug80847_02 bug80847(bug80847_02);
+    bug80847_02 bug80847(bug80847_02 b);
 CDEF;
 
 if (PHP_OS_FAMILY !== 'Windows') {
