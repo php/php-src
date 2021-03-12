@@ -341,7 +341,7 @@ static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
 				t->elements[i] = &ffi_type_pointer;
 				break;
             case ZEND_FFI_TYPE_STRUCT:
-                t->elements[i] = zend_ffi_get_type(ZEND_FFI_TYPE(field->type));
+                t->elements[i] = &ffi_type_pointer;
                 break;
 			default:
 				efree(t);
