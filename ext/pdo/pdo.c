@@ -62,14 +62,6 @@ PDO_API zend_class_entry *php_pdo_get_exception(void) /* {{{ */
 }
 /* }}} */
 
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
-{
-	char *dest = emalloc(len + 1);
-	zend_str_tolower_copy(dest, src, len);
-	return dest;
-}
-/* }}} */
-
 /* {{{ Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {

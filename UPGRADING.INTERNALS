@@ -66,3 +66,5 @@ PHP 8.1 INTERNALS UPGRADE NOTES
     - The last_id handler now returns a zend_string* instead of returning a
       char* and the length as an out param, and accepts a zend_string* instead
       of char* for the optional sequence/table name.
+    - The php_pdo_str_tolower_dup() PDO_API has been removed use zend_str_tolower_dup()
+      or zend_string_tolower_ex().
