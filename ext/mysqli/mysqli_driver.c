@@ -28,7 +28,7 @@
 
 
 /* {{{ property driver_report_read */
-static int driver_reconnect_read(mysqli_object *obj, zval *retval)
+static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_BOOL(retval, MyG(reconnect));
 	return SUCCESS;
@@ -44,7 +44,7 @@ static int driver_reconnect_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_report_read */
-static int driver_report_read(mysqli_object *obj, zval *retval)
+static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MyG(report_mode));
 	return SUCCESS;
