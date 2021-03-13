@@ -90,7 +90,7 @@ ZEND_FUNCTION(mysqli_driver_construct)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = 1;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
 	(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
 #endif
 }
