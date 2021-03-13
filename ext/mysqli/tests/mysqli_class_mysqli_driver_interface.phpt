@@ -18,8 +18,7 @@ $expected_methods = [];
 
 foreach ($methods as $k => $method) {
     if (isset($expected_methods[$method])) {
-        unset($expected_methods[$method]);
-        unset($methods[$k]);
+        unset($expected_methods[$method], $methods[$k]);
     }
 }
 if (!empty($expected_methods)) {
@@ -30,19 +29,22 @@ if (!empty($methods)) {
     printf("Dumping list of unexpected methods.\n");
     var_dump($methods);
 }
-if (empty($expected_methods) && empty($methods))
+if (empty($expected_methods) && empty($methods)) {
     printf("ok\n");
+}
 
 printf("\nClass variables:\n");
 $variables = array_keys(get_class_vars(get_class($driver)));
 sort($variables);
-foreach ($variables as $var)
+foreach ($variables as $var) {
     printf("%s\n", $var);
+}
 
 printf("\nObject variables:\n");
 $variables = array_keys(get_object_vars($driver));
-foreach ($variables as $var)
+foreach ($variables as $var) {
     printf("%s\n", $var);
+}
 
 printf("\nMagic, magic properties:\n");
 
