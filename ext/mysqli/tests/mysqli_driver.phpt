@@ -27,11 +27,6 @@ if (($tmp = $driver->client_version) !== $client_version) {
     gettype($tmp), $tmp);
 }
 
-if (!is_int($tmp = $driver->driver_version) || (0 == $tmp)) {
-    printf("[004] Expecting int/any, got %s/%s\n",
-    gettype($tmp), $tmp);
-}
-
 $all_modes = [
     MYSQLI_REPORT_ALL,
     MYSQLI_REPORT_STRICT,
