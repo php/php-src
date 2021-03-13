@@ -68,6 +68,17 @@ PHP 8.1 UPGRADE NOTES
   . The IMAP functions now accept and return, respectively, IMAPConnection objects
     instead of resources.
 
+- LDAP:
+  . The LDAP functions now accept and return, respectively, LDAP objects
+    instead of "ldap link" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The LDAP functions now accept and return, respectively, LDAPResult objects
+    instead of "ldap result" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The LDAP functions now accept and return, respectively, LDAPResultEntry
+    objects instead of "ldap result entry" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+
 - MySQLi:
   . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
     zero for max_length. You can compute this information by iterating over the

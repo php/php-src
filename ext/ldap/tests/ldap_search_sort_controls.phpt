@@ -78,7 +78,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -146,7 +147,8 @@ array(1) {
     }
   }
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)

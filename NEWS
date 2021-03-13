@@ -20,6 +20,11 @@ PHP                                                                        NEWS
   . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
   . Implemented FR #73385 (Add xxHash support). (Anatol)
 
+- LDAP:
+  . Convert resource<ldap link> to object \LDAP. (Máté)
+  . Convert resource<ldap result> to object \LDAPResult. (Máté)
+  . Convert resource<ldap result entry> to object \LDAPResultEntry. (Máté)
+
 - MySQLi:
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
   . Fixed bug #80330 (Replace language in APIs and source code/docs).

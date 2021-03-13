@@ -44,25 +44,29 @@ var_dump(
 );
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(49)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(34)
 string(10) "invalid DN"

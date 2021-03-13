@@ -65,7 +65,8 @@ Warning: ldap_modify(): Modify: Assertion Failed in %s on line %d
 Warning: ldap_delete(): Delete: Assertion Failed in %s on line %d
 
 Warning: ldap_compare(): Compare: Assertion Failed in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -88,7 +89,8 @@ array(2) {
 }
 bool(false)
 bool(true)
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -110,7 +112,8 @@ array(2) {
   }
 }
 bool(false)
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -138,7 +141,8 @@ bool(false)
 bool(true)
 int(-1)
 bool(true)
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -149,7 +153,8 @@ array(4) {
   [2]=>
   string(10) "Antarctica"
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)
