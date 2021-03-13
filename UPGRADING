@@ -223,6 +223,10 @@ PHP 8.1 UPGRADE NOTES
   . The mysqli_driver::$driver_version property has been deprecated. The driver
     version is meaningless as it hasn't been updated in more than a decade. Use
     PHP_VERSION_ID instead.
+  . Calling mysqli::get_client_info in OO style or passing $mysqli argument to
+    mysqli_get_client_info() function has been deprecated. Use
+    mysqli_get_client_info() without any arguments to obtain the client
+    library version information.
 
 ========================================
 5. Changed Functions

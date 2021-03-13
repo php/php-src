@@ -1327,6 +1327,10 @@ PHP_FUNCTION(mysqli_get_client_info)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 			RETURN_THROWS();
 		}
+
+		if (ZEND_NUM_ARGS()) {
+			php_error_docref(NULL, E_DEPRECATED, "Passing connection object as an argument is deprecated");
+		}
 	}
 
 	RETURN_STRING(mysql_get_client_info());

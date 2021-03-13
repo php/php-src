@@ -136,6 +136,7 @@ class mysqli
     /**
      * @return string|null
      * @alias mysqli_get_client_info
+     * @deprecated 8.1.0
      */
     public function get_client_info() {}
 
