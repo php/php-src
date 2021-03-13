@@ -30,8 +30,13 @@ $link = ldap_connect("nonexistent" . $host);
 var_dump($link);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap link)
-resource(%d) of type (ldap link)
-resource(%d) of type (ldap link)
-resource(%d) of type (ldap link)
-resource(%d) of type (ldap link)
+object(LDAP)#%d (0) {
+}
+object(LDAP)#%d (0) {
+}
+object(LDAP)#%d (0) {
+}
+object(LDAP)#%d (0) {
+}
+object(LDAP)#%d (0) {
+}

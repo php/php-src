@@ -33,7 +33,8 @@ ldap_delete($link, "cn=userref,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'isc
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result entry)
+object(LDAPResultEntry)#%d (0) {
+}
 array(1) {
   [0]=>
   string(%d) "cn=userA,%s"

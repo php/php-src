@@ -104,7 +104,8 @@ array(1) {
     }
   }
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 int(1)
 bool(true)
 bool(false)

@@ -40,7 +40,8 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -61,7 +62,8 @@ array(2) {
 }
 
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -82,7 +84,8 @@ array(2) {
 }
 
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)

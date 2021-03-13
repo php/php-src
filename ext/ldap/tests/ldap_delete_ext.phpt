@@ -43,7 +43,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "dc=my-domain,$base");
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""

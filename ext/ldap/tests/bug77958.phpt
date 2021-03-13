@@ -42,7 +42,8 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
-resource(%d) of type (ldap result entry)
+object(LDAPResultEntry)#%d (0) {
+}
 array(3) {
   [0]=>
   string(14) "xx-xx-xx-xx-xx"

@@ -26,7 +26,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result entry)
+object(LDAPResultEntry)#%d (0) {
+}
 array(2) {
   [0]=>
   string(7) "testSN%d"
