@@ -54,7 +54,6 @@ printf("driver->client_info = '%s'\n", $driver->client_info);
 assert(mysqli_get_client_version() === $driver->client_version);
 printf("driver->client_version = '%s'\n", $driver->client_version);
 
-assert($driver->driver_version > 0);
 printf("driver->driver_version = '%s'\n", $driver->driver_version);
 
 assert(in_array($driver->report_mode, [
@@ -103,6 +102,8 @@ report_mode
 Magic, magic properties:
 driver->client_info = '%s'
 driver->client_version = '%d'
+
+Deprecated: The driver_version property is deprecated in %s on line %d
 driver->driver_version = '%d'
 driver->report_mode = '%d'
 driver->reconnect = ''

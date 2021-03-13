@@ -78,6 +78,7 @@ static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 /* {{{ property driver_driver_version_read */
 static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
+	zend_error(E_DEPRECATED, "The driver_version property is deprecated");
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 	return SUCCESS;
 }

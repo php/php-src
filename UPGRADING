@@ -212,6 +212,11 @@ PHP 8.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- MySQLi:
+  . The mysqli_driver::$driver_version property has been deprecated. The driver
+    version is meaningless as it hasn't been updated in more than a decade. Use
+    PHP_VERSION_ID instead.
+
 ========================================
 5. Changed Functions
 ========================================
