@@ -4,8 +4,10 @@
 
 final class mysqli_driver
 {
+    /** @deprecated 8.1.0 */
     public string $client_info;
 
+    /** @deprecated 8.1.0 */
     public int $client_version;
 
     public int $driver_version;
@@ -21,8 +23,10 @@ class mysqli
 {
     public int|string $affected_rows;
 
+    /** @deprecated 8.1.0 */
     public string $client_info;
 
+    /** @deprecated 8.1.0 */
     public int $client_version;
 
     public int $connect_errno;
@@ -136,6 +140,7 @@ class mysqli
     /**
      * @return string|null
      * @alias mysqli_get_client_info
+     * @deprecated 8.1.0
      */
     public function get_client_info() {}
 
