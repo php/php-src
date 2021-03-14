@@ -836,41 +836,79 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 	}
 }
 
+// TODO Handle complex types when added
+// TODO Update to handle union and intersection in the same loop
 static bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	zend_class_entry *ce;
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
-			if (ZEND_TYPE_HAS_NAME(*list_type)) {
-				zend_string *name = ZEND_TYPE_NAME(*list_type);
 
-				if (ZSTR_HAS_CE_CACHE(name)) {
-					ce = ZSTR_GET_CE_CACHE(name);
-					if (!ce) {
-						ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-						if (UNEXPECTED(!ce)) {
-							continue;
+		if (ZEND_TYPE_IS_INTERSECTION(info->type)) {
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
+				if (ZEND_TYPE_HAS_NAME(*list_type)) {
+					zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+					if (ZSTR_HAS_CE_CACHE(name)) {
+						ce = ZSTR_GET_CE_CACHE(name);
+						if (!ce) {
+							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+							if (UNEXPECTED(!ce)) {
+								/* Cannot resolve */
+								return false;
+							}
+						}
+					} else {
+						ce = resolve_single_class_type(name, info->ce);
+						if (!ce) {
+							/* Cannot resolve */
+							return false;
+						}
+						if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+							zend_string_release(name);
+							ZEND_TYPE_SET_CE(*list_type, ce);
 						}
 					}
 				} else {
-					ce = resolve_single_class_type(name, info->ce);
-					if (!ce) {
-						continue;
-					}
-					if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-						zend_string_release(name);
-						ZEND_TYPE_SET_CE(*list_type, ce);
-					}
+					ce = ZEND_TYPE_CE(*list_type);
 				}
-			} else {
-				ce = ZEND_TYPE_CE(*list_type);
-			}
-			if (instanceof_function(object_ce, ce)) {
-				return 1;
-			}
-		} ZEND_TYPE_LIST_FOREACH_END();
-		return 0;
+				if (!instanceof_function(object_ce, ce)) {
+					return false;
+				}
+			} ZEND_TYPE_LIST_FOREACH_END();
+			return true;
+		} else {
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
+				if (ZEND_TYPE_HAS_NAME(*list_type)) {
+					zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+					if (ZSTR_HAS_CE_CACHE(name)) {
+						ce = ZSTR_GET_CE_CACHE(name);
+						if (!ce) {
+							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+							if (UNEXPECTED(!ce)) {
+								continue;
+							}
+						}
+					} else {
+						ce = resolve_single_class_type(name, info->ce);
+						if (!ce) {
+							continue;
+						}
+						if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+							zend_string_release(name);
+							ZEND_TYPE_SET_CE(*list_type, ce);
+						}
+					}
+				} else {
+					ce = ZEND_TYPE_CE(*list_type);
+				}
+				if (instanceof_function(object_ce, ce)) {
+					return true;
+				}
+			} ZEND_TYPE_LIST_FOREACH_END();
+			return false;
+		}
 	} else {
 		if (UNEXPECTED(ZEND_TYPE_HAS_NAME(info->type))) {
 			zend_string *name = ZEND_TYPE_NAME(info->type);
@@ -907,7 +945,7 @@ static zend_always_inline bool i_zend_check_property_type(zend_property_info *in
 		return 1;
 	}
 
-	if (ZEND_TYPE_HAS_CLASS(info->type) && Z_TYPE_P(property) == IS_OBJECT
+	if (ZEND_TYPE_IS_COMPLEX(info->type) && Z_TYPE_P(property) == IS_OBJECT
 			&& zend_check_and_resolve_property_class_type(info, Z_OBJCE_P(property))) {
 		return 1;
 	}
@@ -969,25 +1007,82 @@ ZEND_API bool zend_value_instanceof_static(zval *zv) {
 # define HAVE_CACHE_SLOT 1
 #endif
 
+// TODO Handle complex types when added
+// TODO Update to handle union and intersection in the same loop
 static zend_always_inline bool zend_check_type_slow(
 		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
 		bool is_return_type, bool is_internal)
 {
 	uint32_t type_mask;
-	if (ZEND_TYPE_HAS_CLASS(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			zend_type *list_type;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-				if (HAVE_CACHE_SLOT && *cache_slot) {
-					ce = *cache_slot;
-				} else {
-					zend_string *name = ZEND_TYPE_NAME(*list_type);
+			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+					if (HAVE_CACHE_SLOT && *cache_slot) {
+						ce = *cache_slot;
+					} else {
+						zend_string *name = ZEND_TYPE_NAME(*list_type);
 
-					if (ZSTR_HAS_CE_CACHE(name)) {
-						ce = ZSTR_GET_CE_CACHE(name);
-						if (!ce) {
-							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+						if (ZSTR_HAS_CE_CACHE(name)) {
+							ce = ZSTR_GET_CE_CACHE(name);
+							if (!ce) {
+								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+								if (!ce) {
+									if (HAVE_CACHE_SLOT) {
+										cache_slot++;
+									}
+
+									/* Cannot resolve */
+									return false;
+								}
+							}
+						} else {
+							ce = zend_fetch_class(name,
+								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+							if (!ce) {
+								if (HAVE_CACHE_SLOT) {
+									cache_slot++;
+								}
+
+								/* Cannot resolve */
+								return false;
+							}
+						}
+					}
+
+					/* Perform actual type check */
+					/* Instance of a single type part of a union is sufficient to pass the type check */
+					if (!instanceof_function(Z_OBJCE_P(arg), ce)) {
+						return false;
+					}
+					if (HAVE_CACHE_SLOT) {
+						cache_slot++;
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+				return true;
+			} else {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+					if (HAVE_CACHE_SLOT && *cache_slot) {
+						ce = *cache_slot;
+					} else {
+						zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+						if (ZSTR_HAS_CE_CACHE(name)) {
+							ce = ZSTR_GET_CE_CACHE(name);
+							if (!ce) {
+								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+								if (!ce) {
+									if (HAVE_CACHE_SLOT) {
+										cache_slot++;
+									}
+									continue;
+								}
+							}
+						} else {
+							ce = zend_fetch_class(name,
+								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 							if (!ce) {
 								if (HAVE_CACHE_SLOT) {
 									cache_slot++;
@@ -995,27 +1090,18 @@ static zend_always_inline bool zend_check_type_slow(
 								continue;
 							}
 						}
-					} else {
-						ce = zend_fetch_class(name,
-							ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-						if (!ce) {
-							if (HAVE_CACHE_SLOT) {
-								cache_slot++;
-							}
-							continue;
-						}
+					}
+
+					/* Perform actual type check */
+					/* Instance of a single type part of a union is sufficient to pass the type check */
+					if (instanceof_function(Z_OBJCE_P(arg), ce)) {
+						return true;
 					}
 					if (HAVE_CACHE_SLOT) {
-						*cache_slot = ce;
+						cache_slot++;
 					}
-				}
-				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-					return 1;
-				}
-				if (HAVE_CACHE_SLOT) {
-					cache_slot++;
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
+				} ZEND_TYPE_LIST_FOREACH_END();
+			}
 		} else {
 			if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
 				ce = (zend_class_entry *) *cache_slot;
@@ -3129,7 +3215,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 		return 1;
 	}
 
-	if (ZEND_TYPE_HAS_CLASS(type) && zv_type == IS_OBJECT
+	if (ZEND_TYPE_IS_COMPLEX(type) && zv_type == IS_OBJECT
 			&& zend_check_and_resolve_property_class_type(info, Z_OBJCE_P(zv))) {
 		return 1;
 	}

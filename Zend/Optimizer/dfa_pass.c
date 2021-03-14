@@ -310,7 +310,7 @@ static inline bool can_elide_return_type_check(
 		return true;
 	}
 
-	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
 		zend_type *single_type;
 		ZEND_TYPE_FOREACH(arg_info->type, single_type) {
 			if (ZEND_TYPE_HAS_NAME(*single_type)) {

@@ -1324,40 +1324,74 @@ static zend_always_inline bool zend_jit_verify_type_common(zval *arg, zend_arg_i
 {
 	uint32_t type_mask;
 
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
+	if (ZEND_TYPE_IS_COMPLEX(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
 			zend_type *list_type;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-				if (*cache_slot) {
-					ce = *cache_slot;
-				} else {
-					zend_string *name = ZEND_TYPE_NAME(*list_type);
+			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
+					if (*cache_slot) {
+						ce = *cache_slot;
+					} else {
+						zend_string *name = ZEND_TYPE_NAME(*list_type);
 
-					if (ZSTR_HAS_CE_CACHE(name)) {
-						ce = ZSTR_GET_CE_CACHE(name);
-						if (!ce) {
-							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+						if (ZSTR_HAS_CE_CACHE(name)) {
+							ce = ZSTR_GET_CE_CACHE(name);
+							if (!ce) {
+								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+								if (!ce) {
+								/* Cannot resolve */
+								return false;
+								}
+							}
+						} else {
+							ce = zend_fetch_class(name,
+								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+							if (!ce) {
+								/* Cannot resolve */
+								return false;
+							}
+						}
+						*cache_slot = ce;
+					}
+					if (!instanceof_function(Z_OBJCE_P(arg), ce)) {
+						return false;
+					}
+					cache_slot++;
+				} ZEND_TYPE_LIST_FOREACH_END();
+				return true;
+			} else {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
+					if (*cache_slot) {
+						ce = *cache_slot;
+					} else {
+						zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+						if (ZSTR_HAS_CE_CACHE(name)) {
+							ce = ZSTR_GET_CE_CACHE(name);
+							if (!ce) {
+								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+								if (!ce) {
+									cache_slot++;
+									continue;
+								}
+							}
+						} else {
+							ce = zend_fetch_class(name,
+								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 							if (!ce) {
 								cache_slot++;
 								continue;
 							}
 						}
-					} else {
-						ce = zend_fetch_class(name,
-							ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-						if (!ce) {
-							cache_slot++;
-							continue;
-						}
+						*cache_slot = ce;
 					}
-					*cache_slot = ce;
-				}
-				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-					return 1;
-				}
-				cache_slot++;
-			} ZEND_TYPE_LIST_FOREACH_END();
+					if (instanceof_function(Z_OBJCE_P(arg), ce)) {
+						return 1;
+					}
+					cache_slot++;
+				} ZEND_TYPE_LIST_FOREACH_END();
+			}
 		} else {
 			if (EXPECTED(*cache_slot)) {
 				ce = (zend_class_entry *) *cache_slot;

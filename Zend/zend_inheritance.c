@@ -403,10 +403,58 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	zend_hash_add_ptr(ht, class_name, ce);
 }
 
+static inheritance_status zend_perform_intersection_covariant_class_type_check(
+		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce,
+		zend_class_entry *fe_scope, zend_type fe_type,
+		bool register_unresolved)
+{
+	bool have_unresolved = false;
+	zend_type *single_type;
+
+	/* Traverse the list of child types and check if it is either a subtype
+	 * of one of the parent types OR is not in the parent type list */
+	ZEND_TYPE_FOREACH(fe_type, single_type) {
+		zend_class_entry *fe_ce;
+		zend_string *fe_class_name = NULL;
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			fe_class_name =
+				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
+			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
+				return INHERITANCE_SUCCESS;
+			}
+
+			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name, register_unresolved);
+			fe_ce =
+				lookup_class(fe_scope, fe_class_name, register_unresolved);
+		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
+			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name, register_unresolved);
+			fe_ce = ZEND_TYPE_CE(*single_type);
+		} else {
+			/* standard type */
+			ZEND_ASSERT(0 && "This shouldn't happen yet");
+			continue;
+		}
+
+		if (!fe_ce || !proto_ce) {
+			have_unresolved = true;
+			continue;
+		}
+		if (unlinked_instanceof(fe_ce, proto_ce)) {
+			track_class_dependency(fe_ce, fe_class_name);
+			track_class_dependency(proto_ce, proto_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_ERROR;
+}
+
 static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type) {
 	bool have_unresolved = 0;
+
+	/* If the parent has 'object' as a return type, any class satisfies the co-variant check */
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
 		 * for forward-compatibility reasons, as we may have named types in the future that
@@ -430,6 +478,9 @@ static inheritance_status zend_perform_covariant_class_type_check(
 	}
 
 	zend_type *single_type;
+
+	/* Traverse the list of parent types and check if the current child (FE)
+	 * class is the subtype of at least one of them */
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		zend_class_entry *proto_ce;
 		zend_string *proto_class_name = NULL;
@@ -446,6 +497,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
+			/* standard type */
 			continue;
 		}
 
@@ -519,31 +571,69 @@ static inheritance_status zend_perform_covariant_type_check(
 	}
 
 	zend_type *single_type;
-	bool all_success = 1;
+	bool all_success = true;
 
-	/* First try to check whether we can succeed without resolving anything */
-	ZEND_TYPE_FOREACH(fe_type, single_type) {
-		inheritance_status status;
-		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *fe_class_name =
-				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
-			status = zend_perform_covariant_class_type_check(
-				fe_scope, fe_class_name, NULL, proto_scope, proto_type);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
-			status = zend_perform_covariant_class_type_check(
-				fe_scope, fe_ce->name, fe_ce, proto_scope, proto_type);
-		} else {
-			continue;
-		}
+	/* For intersection types loop over the parent types first as a child
+	 * can add them */
+	if (ZEND_TYPE_IS_INTERSECTION(proto_type) || ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+		/* First try to check whether we can succeed without resolving anything */
+		ZEND_TYPE_FOREACH(proto_type, single_type) {
+			inheritance_status status;
+			zend_string *proto_class_name;
+			zend_class_entry *proto_ce = NULL;
 
-		if (status == INHERITANCE_ERROR) {
-			return INHERITANCE_ERROR;
-		}
-		if (status != INHERITANCE_SUCCESS) {
-			all_success = 0;
-		}
-	} ZEND_TYPE_FOREACH_END();
+			if (ZEND_TYPE_HAS_NAME(*single_type)) {
+				proto_class_name = resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
+			} else if (ZEND_TYPE_HAS_CE(*single_type)) {
+				proto_ce = ZEND_TYPE_CE(*single_type);
+				proto_class_name = proto_ce->name;
+			} else {
+				/* standard type */
+				ZEND_ASSERT(0 && "This shouldn't happen yet");
+				continue;
+			}
+
+			status = zend_perform_intersection_covariant_class_type_check(
+				proto_scope, proto_class_name, proto_ce,
+				fe_scope, fe_type, /* register_unresolved */ false);
+
+			if (status == INHERITANCE_ERROR) {
+				return NHERITANCE_ERROR;
+			}
+			if (status != INHERITANCE_SUCCESS) {
+				ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
+				all_success = false;
+			}
+		} ZEND_TYPE_FOREACH_END();
+	}
+	/* Only union or single types both in parent and child */
+	else {
+		/* First try to check whether we can succeed without resolving anything */
+		ZEND_TYPE_FOREACH(fe_type, single_type) {
+			inheritance_status status;
+			if (ZEND_TYPE_HAS_NAME(*single_type)) {
+				zend_string *fe_class_name =
+					resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
+				status = zend_perform_covariant_class_type_check(
+					fe_scope, fe_class_name, NULL,
+					proto_scope, proto_type, /* register_unresolved */ 0);
+			} else if (ZEND_TYPE_HAS_CE(*single_type)) {
+				zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
+				status = zend_perform_covariant_class_type_check(
+					fe_scope, fe_ce->name, fe_ce,
+					proto_scope, proto_type, /* register_unresolved */ 0);
+			} else {
+				continue;
+			}
+
+			if (status == INHERITANCE_ERROR) {
+				return INHERITANCE_ERROR;
+			}
+			if (status != INHERITANCE_SUCCESS) {
+				all_success = 0;
+			}
+		} ZEND_TYPE_FOREACH_END();
+	}
 
 	/* All individual checks succeeded, overall success */
 	if (all_success) {
