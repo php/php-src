@@ -19,7 +19,7 @@ $fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
 pg_insert($db, $table_name, $fields) or print "Error in test 1\n";
 echo pg_insert($db, $table_name, $fields, PGSQL_DML_STRING)."\n";
 echo pg_insert($db, $table_name, $fields, PGSQL_DML_STRING|PGSQL_DML_ESCAPE)."\n";
-var_dump( pg_insert($db, $table_name, $fields, PGSQL_DML_EXEC) ); // Return resource
+var_dump( pg_insert($db, $table_name, $fields, PGSQL_DML_EXEC) );
 
 /* Invalid values */
 try {

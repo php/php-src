@@ -18,7 +18,7 @@ if (getenv("SKIP_REPEAT")) {
     die("skip Cannot repeat pgsql tests");
 }
 $conn = @pg_connect($conn_str);
-if (!is_resource($conn)) {
+if (!$conn) {
     die("skip could not connect\n");
 }
 

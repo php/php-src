@@ -50,6 +50,7 @@ unlink($tracefile);
 ?>
 --EXPECTF--
 bool(false)
-resource(%d) of type (pgsql result)
+object(PgSqlResult)#%d (0) {
+}
 bool(true)
 bool(true)
