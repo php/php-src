@@ -28,7 +28,7 @@
 
 
 /* {{{ property driver_report_read */
-static zend_result driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
+static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_BOOL(retval, MyG(reconnect));
 	return SUCCESS;
@@ -36,7 +36,7 @@ static zend_result driver_reconnect_read(mysqli_object *obj, zval *retval, bool 
 /* }}} */
 
 /* {{{ property driver_report_write */
-static zend_result driver_reconnect_write(mysqli_object *obj, zval *value)
+static int driver_reconnect_write(mysqli_object *obj, zval *value)
 {
 	MyG(reconnect) = Z_LVAL_P(value) > 0;
 	return SUCCESS;
@@ -44,7 +44,7 @@ static zend_result driver_reconnect_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_report_read */
-static zend_result driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
+static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MyG(report_mode));
 	return SUCCESS;
@@ -52,7 +52,7 @@ static zend_result driver_report_read(mysqli_object *obj, zval *retval, bool qui
 /* }}} */
 
 /* {{{ property driver_report_write */
-static zend_result driver_report_write(mysqli_object *obj, zval *value)
+static int driver_report_write(mysqli_object *obj, zval *value)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
 	return SUCCESS;
@@ -60,7 +60,7 @@ static zend_result driver_report_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static zend_result driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
+static int driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, mysql_get_client_version());
 	return SUCCESS;
@@ -68,7 +68,7 @@ static zend_result driver_client_version_read(mysqli_object *obj, zval *retval, 
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static zend_result driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
+static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 	return SUCCESS;
@@ -76,7 +76,7 @@ static zend_result driver_client_info_read(mysqli_object *obj, zval *retval, boo
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static zend_result driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
+static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	zend_error(E_DEPRECATED, "driver_version property is deprecated and will be removed in a future version PHP");
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
