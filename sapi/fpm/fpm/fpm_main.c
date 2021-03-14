@@ -152,6 +152,7 @@ typedef struct _php_cgi_globals_struct {
 	HashTable user_config_cache;
 	char *error_header;
 	char *fpm_config;
+	char *fpm_bootstrap;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -1392,6 +1393,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("fastcgi.error_header",    NULL, PHP_INI_SYSTEM, OnUpdateString, error_header, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("fpm.bootstrap_file", NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_bootstrap, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
@@ -1407,6 +1409,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
+	php_cgi_globals->fpm_bootstrap = NULL;
 }
 /* }}} */
 
@@ -1512,6 +1515,8 @@ int main(int argc, char *argv[])
 	int exit_status = FPM_EXIT_OK;
 	int cgi = 0, c, use_extended_info = 0;
 	zend_file_handle file_handle;
+
+	zend_file_handle bootstrap_file;
 
 	/* temporary locals */
 	int orig_optind = php_optind;
@@ -1836,24 +1841,49 @@ consult the installation file that came with this distribution, or visit \n\
 
 	/* library is already initialized, now init our request */
 	request = fpm_init_request(fcgi_fd);
+	int fpm_bootstrapped = CGIG(fpm_bootstrap) && CGIG(fpm_bootstrap)[0];
 
 	zend_first_try {
-		while (EXPECTED(fcgi_accept_request(request) >= 0)) {
-			char *primary_script = NULL;
-			request_body_fd = -1;
-			SG(server_context) = (void *) request;
-			init_request_info();
-
-			fpm_request_info();
-
-			/* request startup only after we've done all we can to
-			 *            get path_translated */
-			if (UNEXPECTED(php_request_startup() == FAILURE)) {
+		while (1) {
+			// moving this before init_request_info will break with dtrace
+			// support in php_request_startup(), can we remove?
+			if (UNEXPECTED(fpm_bootstrapped && php_request_startup() == FAILURE)) {
 				fcgi_finish_request(request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown();
 				return FPM_EXIT_SOFTWARE;
 			}
+
+			if (fpm_bootstrapped) {
+				zend_stream_init_filename(&bootstrap_file, CGIG(fpm_bootstrap));
+
+				if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &bootstrap_file) == FAILURE) {
+					fcgi_finish_request(request, 1);
+					SG(server_context) = NULL;
+					php_module_shutdown();
+					return FPM_EXIT_SOFTWARE;
+				}
+			}
+
+			if (UNEXPECTED(fcgi_accept_request(request) < 0)) {
+				break;
+			}
+
+			char *primary_script = NULL;
+			request_body_fd = -1;
+			SG(server_context) = (void *) request;
+
+			init_request_info();
+
+			fpm_request_info();
+
+			if (UNEXPECTED(fpm_bootstrapped == 0 && php_request_startup() == FAILURE)) {
+				fcgi_finish_request(request, 1);
+				SG(server_context) = NULL;
+				php_module_shutdown();
+				return FPM_EXIT_SOFTWARE;
+			}
+
 
 			/* check if request_method has been sent.
 			 * if not, it's certainly not an HTTP over fcgi request */
