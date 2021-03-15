@@ -820,12 +820,14 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	bool bval;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			{
-				/* Don't use pdo_get_long_param() API as zval_get_long accepts more things */
-				bool bval = zval_get_long(val)? 1 : 0;
+				if (!pdo_get_bool_param(&bval, val)) {
+					return false;
+				}
 
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
@@ -849,7 +851,10 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 			return true;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			H->fetch_table_names = zval_get_long(val)? 1 : 0;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->fetch_table_names = bval;
 			return true;
 
 		case PDO_FB_ATTR_DATE_FORMAT:

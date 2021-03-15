@@ -274,6 +274,7 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	zend_long lval;
+	bool bval;
 
 	switch(attr) {
 		case PDO_ATTR_DEFAULT_STR_PARAM:
@@ -295,7 +296,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			H->stringify_uniqueidentifier = lval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
-			H->skip_empty_rowsets = zval_is_true(val);
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
 			if (!pdo_get_long_param(&lval, val)) {

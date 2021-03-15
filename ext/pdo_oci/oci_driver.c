@@ -431,7 +431,8 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 		{
-			if (pdo_get_long_param(&lval, val) == false) {
+			bool bval;
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
 
@@ -446,7 +447,7 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 				dbh->in_txn = false;
 			}
 
-			dbh->auto_commit = (unsigned int)lval? 1 : 0;
+			dbh->auto_commit = (unsigned int) bval;
 			return true;
 		}
 		case PDO_ATTR_PREFETCH:

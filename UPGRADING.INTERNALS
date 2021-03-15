@@ -71,3 +71,6 @@ PHP 8.1 INTERNALS UPGRADE NOTES
     - A new PDO_API pdo_get_long_param(zend_long *lval, zval *value) has been
       introduced to fetch integer values for driver attributes, it will throw
       a type error and return false in case of failure.
+    - A new PDO_API pdo_get_bool_param(zend_long *bool, zval *value) has been
+      introduced to fetch boolean values for driver attributes, it will throw
+      a type error and return false in case of failure.

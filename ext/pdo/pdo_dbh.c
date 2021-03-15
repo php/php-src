@@ -696,11 +696,30 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
 			return false;
 	}
 }
+PDO_API bool pdo_get_bool_param(bool *bval, zval *value)
+{
+	switch (Z_TYPE_P(value)) {
+		case IS_TRUE:
+			*bval = true;
+			return true;
+		case IS_FALSE:
+			*bval = false;
+			return true;
+		case IS_LONG:
+			*bval = zval_is_true(value);
+			return true;
+		case IS_STRING: /* TODO Should string be allowed? */
+		default:
+			zend_type_error("Attribute value must be of type bool for selected attribute, %s given", zend_zval_type_name(value));
+			return false;
+	}
+}
 
 /* Return false on failure, true otherwise */
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /* {{{ */
 {
 	zend_long lval;
+	bool bval;
 
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
@@ -739,6 +758,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			if (!pdo_get_long_param(&lval, value)) {
 				return false;
 			}
+			/* TODO Check for valid value (NULL_NATURAL, NULL_EMPTY_STRING, NULL_TO_STRING)? */
 			dbh->oracle_nulls = lval;
 			return true;
 
@@ -765,11 +785,10 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			return true;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
-			if (pdo_get_long_param(&lval, value) == false) {
+			if (!pdo_get_bool_param(&bval, value)) {
 				return false;
 			}
-			/* TODO Check for proper boolean value? */
-			dbh->stringify = lval ? 1 : 0;
+			dbh->stringify = bval;
 			return true;
 
 		case PDO_ATTR_STATEMENT_CLASS: {
