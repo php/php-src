@@ -85,10 +85,6 @@ bool(false)
 object(mysqli)#%d (%d) {
   ["affected_rows"]=>
   int(-1)
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
-  int(%d)
   ["connect_errno"]=>
   int(0)
   ["connect_error"]=>

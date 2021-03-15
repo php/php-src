@@ -152,6 +152,9 @@ require_once('skipifconnectfailure.inc');
     }
     echo "ok\n";
 
+    printf("\nClass constants:\n");
+    $refl = new ReflectionClass($mysqli::class);
+    var_dump($refl->getConstants());
 
     printf("\nMagic, magic properties:\n");
 
@@ -160,14 +163,16 @@ require_once('skipifconnectfailure.inc');
         $mysqli->affected_rows, gettype($mysqli->affected_rows),
         mysqli_affected_rows($link), gettype(mysqli_affected_rows($link)));
 
-    assert(mysqli_get_client_info() === $mysqli->client_info);
+    $client_info = $mysqli->client_info;
+    assert(mysqli_get_client_info() === $client_info);
     printf("mysqli->client_info = '%s'/%s ('%s'/%s)\n",
-        $mysqli->client_info, gettype($mysqli->client_info),
+    $client_info, gettype($client_info),
         mysqli_get_client_info(), gettype(mysqli_get_client_info()));
 
-    assert(mysqli_get_client_version() === $mysqli->client_version);
+    $client_version = $mysqli->client_version;
+    assert(mysqli_get_client_version() === $client_version);
     printf("mysqli->client_version =  '%s'/%s ('%s'/%s)\n",
-        $mysqli->client_version, gettype($mysqli->client_version),
+    $client_version, gettype($client_version),
         mysqli_get_client_version(), gettype(mysqli_get_client_version()));
 
     assert(mysqli_errno($link) === $mysqli->errno);
@@ -272,9 +277,21 @@ ok
 Object variables:
 ok
 
+Class constants:
+array(2) {
+  ["CLIENT_VERSION"]=>
+  int(%d)
+  ["CLIENT_INFO"]=>
+  string(%d) "%s"
+}
+
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)
+
+Deprecated: Property access to the client_info constant is deprecated in %s
 mysqli->client_info = '%s'/string ('%s'/string)
+
+Deprecated: Property access to the client_version constant is deprecated in %s
 mysqli->client_version =  '%d'/integer ('%d'/integer)
 mysqli->errno = '0'/integer ('0'/integer)
 mysqli->error = ''/string (''/string)

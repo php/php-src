@@ -46,13 +46,19 @@ foreach ($variables as $var) {
     printf("%s\n", $var);
 }
 
+printf("\nClass constants:\n");
+$refl = new ReflectionClass($driver::class);
+var_dump($refl->getConstants());
+
 printf("\nMagic, magic properties:\n");
 
-assert(mysqli_get_client_info() === $driver->client_info);
-printf("driver->client_info = '%s'\n", $driver->client_info);
+$client_info = $driver->client_info;
+assert(mysqli_get_client_info() === $client_info);
+printf("driver->client_info = '%s'\n", $client_info);
 
-assert(mysqli_get_client_version() === $driver->client_version);
-printf("driver->client_version = '%s'\n", $driver->client_version);
+$client_version = $driver->client_version;
+assert(mysqli_get_client_version() === $client_version);
+printf("driver->client_version = '%s'\n", $client_version);
 
 printf("driver->driver_version = '%s'\n", $driver->driver_version);
 
@@ -96,8 +102,20 @@ Object variables:
 reconnect
 report_mode
 
+Class constants:
+array(2) {
+  ["CLIENT_VERSION"]=>
+  int(%d)
+  ["CLIENT_INFO"]=>
+  string(%d) "%s"
+}
+
 Magic, magic properties:
+
+Deprecated: Property access to the client_info constant is deprecated in %s
 driver->client_info = '%s'
+
+Deprecated: Property access to the client_version constant is deprecated in %s
 driver->client_version = '%d'
 
 Deprecated: The driver_version property is deprecated in %s on line %d

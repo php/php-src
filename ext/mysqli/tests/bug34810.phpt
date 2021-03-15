@@ -63,10 +63,6 @@ mysqli_close($link);
 object(mysqli)#%d (%d) {
   ["affected_rows"]=>
   int(0)
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
-  int(%d)
   ["connect_errno"]=>
   int(0)
   ["connect_error"]=>
@@ -100,10 +96,6 @@ object(mysqli)#%d (%d) {
   int(0)
 }
 object(mysqli)#%d (%d) {
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
-  int(%d)
   ["connect_errno"]=>
   int(0)
   ["connect_error"]=>
