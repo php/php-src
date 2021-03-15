@@ -2072,11 +2072,6 @@ out:
 	return fbc;
 }
 
-static int dbstmt_compare(zval *object1, zval *object2)
-{
-	return ZEND_UNCOMPARABLE;
-}
-
 zend_object_handlers pdo_dbstmt_object_handlers;
 zend_object_handlers pdo_row_object_handlers;
 
@@ -2474,11 +2469,6 @@ static zend_string *row_get_classname(const zend_object *object)
 	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
 }
 
-static int row_compare(zval *object1, zval *object2)
-{
-	return ZEND_UNCOMPARABLE;
-}
-
 void pdo_row_free_storage(zend_object *std)
 {
 	pdo_row_t *row = (pdo_row_t *)std;
@@ -2512,7 +2502,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
 	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
-	pdo_dbstmt_object_handlers.compare = dbstmt_compare;
+	pdo_dbstmt_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
 	pdo_row_ce = register_class_PDORow();
@@ -2536,5 +2526,5 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.get_class_name = row_get_classname;
-	pdo_row_object_handlers.compare = row_compare;
+	pdo_row_object_handlers.compare = zend_objects_not_comparable;
 }

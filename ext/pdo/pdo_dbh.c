@@ -1267,11 +1267,6 @@ out:
 	return fbc;
 }
 
-static int dbh_compare(zval *object1, zval *object2)
-{
-	return ZEND_UNCOMPARABLE;
-}
-
 static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
@@ -1300,7 +1295,7 @@ void pdo_dbh_init(void)
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
-	pdo_dbh_object_handlers.compare = dbh_compare;
+	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);
