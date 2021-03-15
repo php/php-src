@@ -2640,6 +2640,10 @@ matched:
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
+				/* Get next piece if no limit or limit not yet reached and something matched*/
+				if (limit_val != -1 && limit_val <= 1) {
+					break;
+				}
 				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {

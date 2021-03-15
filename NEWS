@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #80786 (PHP crash using JIT). (Nikita)
   . Fixed bug #80782 (DASM_S_RANGE_VREG on PHP_INT_MIN-1). (Dmitry)
 
+- PCRE:
+  . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
+    0-width fullstring match). (Kamil Tekiela)
+
 - Session:
   . Fixed bug #80774 (session_name() problem with backslash). (cmb)
 
