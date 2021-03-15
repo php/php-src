@@ -39,6 +39,18 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+try {
+    ldap_search($link, [], []);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    ldap_search($link, "", []);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
 --EXPECTF--
 Warning: ldap_search(): Search: No such object in %s on line %d
@@ -49,3 +61,5 @@ bool(false)
 ldap_search(): Argument #1 ($ldap) cannot be empty
 ldap_search(): Argument #2 ($base) must have the same number of elements as the links array
 ldap_search(): Argument #3 ($filter) must have the same number of elements as the links array
+ldap_search(): Argument #2 ($base) must be of type string when argument #1 ($ldap) is a resource
+ldap_search(): Argument #3 ($filter) must be of type string when argument #1 ($ldap) is a resource

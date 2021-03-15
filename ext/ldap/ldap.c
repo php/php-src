@@ -1602,11 +1602,15 @@ cleanup_parallel:
 
 		if (!base_dn_str) {
 			zend_argument_type_error(2, "must be of type string when argument #1 ($ldap) is a resource");
+			ret = 0;
+			goto cleanup;
 		}
 		ldap_base_dn = zend_string_copy(base_dn_str);
 
 		if (!filter_str) {
 			zend_argument_type_error(3, "must be of type string when argument #1 ($ldap) is a resource");
+			ret = 0;
+			goto cleanup;
 		}
 		ldap_filter = zend_string_copy(filter_str);
 
