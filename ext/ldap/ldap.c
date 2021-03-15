@@ -233,7 +233,7 @@ static void ldap_result_entry_free_obj(zend_object *obj)
 #define VERIFY_LDAP_RESULT_OPEN(lr) \
 { \
 	if (!lr->result) { \
-		zend_throw_error(NULL, "LDAP result has already been freed"); \
+		zend_throw_error(NULL, "LDAP result has already been closed"); \
 		RETURN_THROWS(); \
 	} \
 }
@@ -1167,7 +1167,6 @@ PHP_FUNCTION(ldap_connect)
 			size_t urllen = hostlen + sizeof( "ldap://:65535" );
 
 			if (port <= 0 || port > 65535) {
-				zval_ptr_dtor(return_value);
 				zend_argument_value_error(2, "must be between 1 and 65535");
 				RETURN_THROWS();
 			}
