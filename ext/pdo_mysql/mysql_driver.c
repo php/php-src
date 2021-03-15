@@ -402,11 +402,13 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 /* {{{ pdo_mysql_set_attribute */
 static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
-	zend_long lval = zval_get_long(val);
-	bool bval = lval ? 1 : 0;
+	zend_long lval;
+	/* Don't use pdo_get_long_param() API as zval_get_long accepts more things */
+	bool bval = zval_get_long(val) ? 1 : 0;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("attr=%l", attr);
+
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			/* ignore if the new value equals the old one */
@@ -419,6 +421,9 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			PDO_DBG_RETURN(true);
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
+			if (!pdo_get_long_param(&lval, val)) {
+				PDO_DBG_RETURN(false);
+			}
 			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL;
 			PDO_DBG_RETURN(true);
 
@@ -439,6 +444,9 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
+			if (!pdo_get_long_param(&lval, val)) {
+				PDO_DBG_RETURN(false);
+			}
 			if (lval < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
