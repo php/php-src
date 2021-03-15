@@ -1329,7 +1329,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 		}
 
 		if (ZEND_NUM_ARGS()) {
-			php_error_docref(NULL, E_WARNING, "This function doesn't require any arguments");
+			php_error_docref(NULL, E_DEPRECATED, "passing connection object as an argument is deprecated");
 		}
 	}
 
