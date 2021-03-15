@@ -824,6 +824,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			{
+				/* Don't use pdo_get_long_param() API as zval_get_long accepts more things */
 				bool bval = zval_get_long(val)? 1 : 0;
 
 				/* ignore if the new value equals the old one */
