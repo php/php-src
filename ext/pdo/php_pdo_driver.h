@@ -683,6 +683,7 @@ PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
 
 /* Normalization for fetching long param for driver attributes */
 PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
+PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
 
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 #endif /* PHP_PDO_DRIVER_H */

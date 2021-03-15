@@ -333,9 +333,14 @@ static bool odbc_handle_rollback(pdo_dbh_t *dbh)
 static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	bool bval;
+
 	switch (attr) {
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
-			H->assume_utf8 = zval_is_true(val);
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->assume_utf8 = bval;
 			return true;
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
