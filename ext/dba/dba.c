@@ -863,9 +863,9 @@ restart:
 				bool close_both;
 
 				close_both = (info->fp != info->lock.fp);
-				php_stream_close(info->lock.fp);
+				php_stream_free(info->lock.fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				if (close_both) {
-					php_stream_close(info->fp);
+					php_stream_free(info->fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				}
 				info->fp = NULL;
 				info->lock.fp = NULL;
