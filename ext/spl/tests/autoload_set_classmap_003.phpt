@@ -17,4 +17,4 @@ autoload_set_classmap Throw error if mapped file did not contain class
 
 ?>
 --EXPECTF--
-Error - Classmap entry "Foo" failed to load the class from "%s/ThisFileIsEmpty.php" (Class undefined after file included).
+Error - Error during autoloading from classmap. Entry "Foo" failed to load the class from "%s/ThisFileIsEmpty.php" (Class undefined after file included).

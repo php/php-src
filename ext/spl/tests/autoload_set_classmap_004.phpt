@@ -13,4 +13,4 @@ autoload_set_classmap Map can only be initialized once
 
 ?>
 --EXPECT--
-Error - The autoload classmap can only be initialized once per request.
+Error - Classmap Autoloader can only be initialized once per request.

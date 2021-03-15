@@ -5,6 +5,7 @@ autoload_set_classmap Reject non-string values
 
     try {
         autoload_set_classmap(['Foo' => 123]);
+        new Foo();
     }
     catch (\Throwable $ex) {
         echo get_class($ex) . ' - ' . $ex->getMessage();
@@ -12,4 +13,4 @@ autoload_set_classmap Reject non-string values
 
 ?>
 --EXPECT--
-ValueError - autoload_set_classmap(): Argument #1 ($mapping) Classmap entry for "Foo" expected string value, found int.
+Error - Error during autoloading from classmap. Entry "Foo" expected a string value, "int" given.
