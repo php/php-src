@@ -58,8 +58,6 @@ typedef enum _zend_ffi_tag_kind {
 
 static const char *zend_ffi_tag_kind_name[3] = {"enum", "struct", "union"};
 
-static ffi_type *zend_ffi_get_type(zend_ffi_type *type);
-
 typedef struct _zend_ffi_tag {
 	zend_ffi_tag_kind      kind;
 	zend_ffi_type         *type;
