@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70ba950885121dee91431621406a8188a5a40a54 */
+ * Stub hash: dc37ffc6559b505fa389a6b0445d00a210e8eddf */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -61,13 +61,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterator_to_array, 0, 1, IS_ARRA
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preserve_keys, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_set_classmap, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_set_classmap, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, mapping, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_get_classmap, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, mapping, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_autoload_get_classmap arginfo_spl_autoload_functions
 
 
 ZEND_FUNCTION(class_implements);

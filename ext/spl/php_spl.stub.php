@@ -35,6 +35,6 @@ function iterator_count(Traversable $iterator): int {}
 
 function iterator_to_array(Traversable $iterator, bool $preserve_keys = true): array {}
 
-function autoload_set_classmap(array $mapping): bool {}
+function autoload_set_classmap(array $mapping): void {}
 
-function autoload_get_classmap(array $mapping): array {}
+function autoload_get_classmap(): array {}

@@ -17,4 +17,4 @@ catch (\Throwable $ex) {
 
 ?>
 --EXPECTF--
-Error - Error during autoloading from classmap. Entry "foo" failed to load the class from "%s/ThisFileIsEmpty.php" (Class undefined after file included).
+Error - Error during autoloading from classmap. Entry "foo" failed to load the class from "%s/ThisFileIsEmpty.php" (Class undefined after file included)

@@ -13,4 +13,4 @@ catch (\Throwable $ex) {
 
 ?>
 --EXPECT--
-TypeError - Error during autoloading from classmap. Entry "foo" expected a string value, "int" given.
+TypeError - Error during autoloading from classmap. Entry "foo" expected a string value, int given
