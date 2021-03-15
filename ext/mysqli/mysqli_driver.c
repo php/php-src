@@ -83,18 +83,6 @@ static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool qui
 }
 /* }}} */
 
-ZEND_FUNCTION(mysqli_driver_construct)
-{
-#ifdef G0
-	MYSQLI_RESOURCE 	*mysqli_resource;
-
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = 1;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
-	(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
-#endif
-}
-
 const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"client_info", sizeof("client_info") - 1, driver_client_info_read, NULL},
 	{"client_version", sizeof("client_version") - 1, driver_client_version_read, NULL},
