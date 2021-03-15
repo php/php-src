@@ -93,9 +93,6 @@ reconnect
 report_mode
 
 Object variables:
-client_info
-client_version
-driver_version
 reconnect
 report_mode
 
