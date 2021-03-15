@@ -76,6 +76,9 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_value_instanceof_static(zval *zv);
 
+extern zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type);
+
+#define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources

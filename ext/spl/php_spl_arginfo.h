@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 54d193c03c2652ce40adabd10d88666a86e32728 */
+ * Stub hash: 70ba950885121dee91431621406a8188a5a40a54 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -61,6 +61,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterator_to_array, 0, 1, IS_ARRA
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preserve_keys, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_set_classmap, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, mapping, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_get_classmap, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, mapping, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(class_implements);
 ZEND_FUNCTION(class_parents);
@@ -77,6 +85,8 @@ ZEND_FUNCTION(spl_object_id);
 ZEND_FUNCTION(iterator_apply);
 ZEND_FUNCTION(iterator_count);
 ZEND_FUNCTION(iterator_to_array);
+ZEND_FUNCTION(autoload_set_classmap);
+ZEND_FUNCTION(autoload_get_classmap);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -95,5 +105,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iterator_apply, arginfo_iterator_apply)
 	ZEND_FE(iterator_count, arginfo_iterator_count)
 	ZEND_FE(iterator_to_array, arginfo_iterator_to_array)
+	ZEND_FE(autoload_set_classmap, arginfo_autoload_set_classmap)
+	ZEND_FE(autoload_get_classmap, arginfo_autoload_get_classmap)
 	ZEND_FE_END
 };
