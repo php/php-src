@@ -38,7 +38,7 @@ static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
 /* {{{ property driver_report_write */
 static int driver_reconnect_write(mysqli_object *obj, zval *value)
 {
-	MyG(reconnect) = Z_LVAL_P(value) > 0;
+	MyG(reconnect) = zval_get_long(value) > 0;
 	return SUCCESS;
 }
 /* }}} */
@@ -54,7 +54,7 @@ static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
 /* {{{ property driver_report_write */
 static int driver_report_write(mysqli_object *obj, zval *value)
 {
-	MyG(report_mode) = Z_LVAL_P(value);
+	MyG(report_mode) = zval_get_long(value);
 	return SUCCESS;
 }
 /* }}} */
