@@ -220,7 +220,7 @@ int main() {
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
     have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[have_shm_mmap_anon=no])
-  AC_MSG_RESULT([$have_shm_mmap_anon=yes])
+  AC_MSG_RESULT([$have_shm_mmap_anon])
 
   PHP_CHECK_FUNC_LIB(shm_open, rt, root)
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
