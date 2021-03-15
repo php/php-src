@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - opcache:
   . Fixed bug #80805 (create simple class and get error in opcache.so). (Nikita)
 
+- PCRE:
+  . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
+    0-width fullstring match). (Kamil Tekiela)
+
 - phpdbg:
   . Fixed bug #80757 (Exit code is 0 when could not open file). (Felipe)
 
