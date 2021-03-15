@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 7.4.18
 
+- DOM:
+  . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
 
 01 Apr 2021, PHP 7.4.17
 
