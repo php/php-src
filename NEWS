@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #80814 (threaded mod_php won't load on FreeBSD: No space
     available for static Thread Local Storage). (Dmitry)
 
+- Dba:
+  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
+
 - IMAP:
   . Fixed bug #80800 (imap_open() fails when the flags parameter includes
     CL_EXPUNGE). (girgias)
