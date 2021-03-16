@@ -79,16 +79,6 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(
 		zend_accel_hash        *accel_hash,
 		zend_string            *key);
 
-void* zend_accel_hash_str_find(
-		zend_accel_hash        *accel_hash,
-		const char             *key,
-		uint32_t               key_length);
-
-zend_accel_hash_entry* zend_accel_hash_str_find_entry(
-		zend_accel_hash        *accel_hash,
-		const char             *key,
-		uint32_t               key_length);
-
 int zend_accel_hash_unlink(
 		zend_accel_hash        *accel_hash,
 		const char             *key,

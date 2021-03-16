@@ -234,8 +234,8 @@ typedef struct _zend_accel_globals {
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	int                     key_len;
-	char                    key[MAXPATHLEN * 8];
+	zend_string             key;
+	char                    _key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -317,11 +317,11 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
 int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
 int  validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  zend_accel_invalidate(const char *filename, size_t filename_len, bool force);
+int  zend_accel_invalidate(zend_string *filename, bool force);
 int  accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key(const char *path, size_t path_length, int *key_len);
+zend_string *accel_make_persistent_key(zend_string *path);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #define IS_ACCEL_INTERNED(str) \

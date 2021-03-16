@@ -231,7 +231,7 @@ static zend_result init_ini_scanner(int scanner_mode, zend_file_handle *fh)
 	SCNG(yy_in) = fh;
 
 	if (fh != NULL) {
-		ini_filename = zend_strndup(fh->filename, strlen(fh->filename));
+		ini_filename = zend_string_copy(fh->filename);
 	} else {
 		ini_filename = NULL;
 	}
@@ -248,7 +248,7 @@ void shutdown_ini_scanner(void)
 {
 	zend_stack_destroy(&SCNG(state_stack));
 	if (ini_filename) {
-		free(ini_filename);
+		zend_string_release(ini_filename);
 	}
 }
 /* }}} */
@@ -263,7 +263,7 @@ ZEND_COLD int zend_ini_scanner_get_lineno(void)
 /* {{{ zend_ini_scanner_get_filename() */
 ZEND_COLD char *zend_ini_scanner_get_filename(void)
 {
-	return ini_filename ? ini_filename : "Unknown";
+	return ini_filename ? ZSTR_VAL(ini_filename) : "Unknown";
 }
 /* }}} */
 
@@ -278,7 +278,6 @@ zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mo
 	}
 
 	if (init_ini_scanner(scanner_mode, fh) == FAILURE) {
-		zend_file_handle_dtor(fh);
 		return FAILURE;
 	}
 

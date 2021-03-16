@@ -2015,9 +2015,11 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	{
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
+		zfd.primary_script = 1;
 		zend_try {
 			php_execute_script(&zfd);
 		} zend_end_try();
+		zend_destroy_file_handle(&zfd);
 	}
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
@@ -2136,6 +2138,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 	zend_stream_init_filename(&zfd, server->router);
+	zfd.primary_script = 1;
 
 	zend_try {
 		zval retval;
@@ -2148,6 +2151,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			}
 		}
 	} zend_end_try();
+
+	zend_destroy_file_handle(&zfd);
 
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));

@@ -200,32 +200,6 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, z
 		0);
 }
 
-/* Returns the data associated with key on success
- * Returns NULL if data doesn't exist
- */
-void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
-{
-	return zend_accel_hash_find_ex(
-		accel_hash,
-		key,
-		key_length,
-		zend_inline_hash_func(key, key_length),
-		1);
-}
-
-/* Returns the hash entry associated with key on success
- * Returns NULL if it doesn't exist
- */
-zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
-{
-	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(
-		accel_hash,
-		key,
-		key_length,
-		zend_inline_hash_func(key, key_length),
-		0);
-}
-
 int zend_accel_hash_unlink(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
 {
     zend_ulong hash_value;

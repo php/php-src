@@ -2450,17 +2450,6 @@ parent_loop_end:
 				}
 			} /* end !cgi && !fastcgi */
 
-			/*
-				we never take stdin if we're (f)cgi, always
-				rely on the web server giving us the info
-				we need in the environment.
-			*/
-			if (SG(request_info).path_translated || cgi || fastcgi) {
-				zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
-			} else {
-				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
-			}
-
 			/* request startup only after we've done all we can to
 			 * get path_translated */
 			if (php_request_startup() == FAILURE) {
@@ -2520,6 +2509,10 @@ parent_loop_end:
 					free(bindpath);
 					return FAILURE;
 				}
+			} else {
+				/* we never take stdin if we're (f)cgi */
+				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
+				file_handle.primary_script = 1;
 			}
 
 			if (CGIG(check_shebang_line)) {
@@ -2534,9 +2527,9 @@ parent_loop_end:
 					PG(during_request_startup) = 0;
 					exit_status = php_lint_script(&file_handle);
 					if (exit_status == SUCCESS) {
-						zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+						zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
 					} else {
-						zend_printf("Errors parsing %s\n", file_handle.filename);
+						zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
 					}
 					break;
 				case PHP_MODE_STRIP:
@@ -2557,22 +2550,22 @@ parent_loop_end:
 			}
 
 fastcgi_request_done:
-			{
-				if (SG(request_info).path_translated) {
-					efree(SG(request_info).path_translated);
-					SG(request_info).path_translated = NULL;
-				}
+			zend_destroy_file_handle(&file_handle);
 
-				php_request_shutdown((void *) 0);
+			if (SG(request_info).path_translated) {
+				efree(SG(request_info).path_translated);
+				SG(request_info).path_translated = NULL;
+			}
 
-				if (exit_status == 0) {
-					exit_status = EG(exit_status);
-				}
+			php_request_shutdown((void *) 0);
 
-				if (free_query_string && SG(request_info).query_string) {
-					free(SG(request_info).query_string);
-					SG(request_info).query_string = NULL;
-				}
+			if (exit_status == 0) {
+				exit_status = EG(exit_status);
+			}
+
+			if (free_query_string && SG(request_info).query_string) {
+				free(SG(request_info).query_string);
+				SG(request_info).query_string = NULL;
 			}
 
 			if (!fastcgi) {

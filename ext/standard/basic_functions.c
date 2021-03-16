@@ -1900,32 +1900,32 @@ PHP_FUNCTION(highlight_file)
 /* {{{ Return source with stripped comments and whitespace */
 PHP_FUNCTION(php_strip_whitespace)
 {
-	char *filename;
-	size_t filename_len;
+	zend_string *filename;
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_output_start_default();
 
-	zend_stream_init_filename(&file_handle, filename);
+	zend_stream_init_filename_ex(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
 	if (open_file_for_scanning(&file_handle) == FAILURE) {
 		zend_restore_lexical_state(&original_lex_state);
 		php_output_end();
+		zend_destroy_file_handle(&file_handle);
 		RETURN_EMPTY_STRING();
 	}
 
 	zend_strip();
 
-	zend_destroy_file_handle(&file_handle);
 	zend_restore_lexical_state(&original_lex_state);
 
 	php_output_get_contents(return_value);
 	php_output_discard();
+	zend_destroy_file_handle(&file_handle);
 }
 /* }}} */
 
@@ -2606,21 +2606,20 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 /* {{{ Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
-	char *filename = NULL;
-	size_t filename_len = 0;
+	zend_string *filename = NULL;
 	bool process_sections = 0;
 	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(process_sections)
 		Z_PARAM_LONG(scanner_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (filename_len == 0) {
+	if (ZSTR_LEN(filename) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
@@ -2634,13 +2633,14 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	/* Setup filehandle */
-	zend_stream_init_filename(&fh, filename);
+	zend_stream_init_filename_ex(&fh, filename);
 
 	array_init(return_value);
 	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	zend_destroy_file_handle(&fh);
 }
 /* }}} */
 

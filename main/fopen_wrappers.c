@@ -339,7 +339,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, z
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
 	char *path_info;
-	char *filename = NULL;
+	zend_string *filename = NULL;
 	zend_string *resolved_path = NULL;
 	size_t length;
 	bool orig_display_errors;
@@ -378,9 +378,10 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 			pw = getpwnam(user);
 #endif
 			if (pw && pw->pw_dir) {
-				spprintf(&filename, 0, "%s%c%s%c%s", pw->pw_dir, PHP_DIR_SEPARATOR, PG(user_dir), PHP_DIR_SEPARATOR, s + 1); /* Safe */
-			} else {
-				filename = SG(request_info).path_translated;
+				filename = zend_strpprintf(0, "%s%c%s%c%s", pw->pw_dir, PHP_DIR_SEPARATOR, PG(user_dir), PHP_DIR_SEPARATOR, s + 1); /* Safe */
+			} else if (SG(request_info).path_translated) {
+				filename = zend_string_init(SG(request_info).path_translated,
+					strlen(SG(request_info).path_translated), 0);
 			}
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
 			efree(pwbuf);
@@ -391,29 +392,29 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		size_t path_len = strlen(path_info);
-		filename = emalloc(length + path_len + 2);
+		filename = zend_string_alloc(length + path_len + 2, 0);
 		memcpy(filename, PG(doc_root), length);
-		if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-			filename[length++] = PHP_DIR_SEPARATOR;
+		if (!IS_SLASH(ZSTR_VAL(filename)[length - 1])) {	/* length is never 0 */
+			ZSTR_VAL(filename)[length++] = PHP_DIR_SEPARATOR;
 		}
 		if (IS_SLASH(path_info[0])) {
 			length--;
 		}
-		strncpy(filename + length, path_info, path_len + 1);
-	} else {
-		filename = SG(request_info).path_translated;
+		strncpy(ZSTR_VAL(filename) + length, path_info, path_len + 1);
+		ZSTR_LEN(filename) = length + path_len;
+	} else if (SG(request_info).path_translated) {
+		filename = zend_string_init(SG(request_info).path_translated,
+			strlen(SG(request_info).path_translated), 0);
 	}
 
 
 	if (filename) {
-		resolved_path = zend_resolve_path(filename, strlen(filename));
+		resolved_path = zend_resolve_path(filename);
 	}
 
 	if (!resolved_path) {
-		if (SG(request_info).path_translated != filename) {
-			if (filename) {
-				efree(filename);
-			}
+		if (filename) {
+			zend_string_release(filename);
 		}
 		/* we have to free SG(request_info).path_translated here because
 		 * php_destroy_request_info assumes that it will get
@@ -429,13 +430,13 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 
 	orig_display_errors = PG(display_errors);
 	PG(display_errors) = 0;
-	if (zend_stream_open(filename, file_handle) == FAILURE) {
+	zend_stream_init_filename_ex(file_handle, filename);
+	file_handle->primary_script = 1;
+	if (filename) {
+		zend_string_delref(filename);
+	}
+	if (zend_stream_open(file_handle) == FAILURE) {
 		PG(display_errors) = orig_display_errors;
-		if (SG(request_info).path_translated != filename) {
-			if (filename) {
-				efree(filename);
-			}
-		}
 		if (SG(request_info).path_translated) {
 			efree(SG(request_info).path_translated);
 			SG(request_info).path_translated = NULL;
@@ -443,13 +444,6 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		return FAILURE;
 	}
 	PG(display_errors) = orig_display_errors;
-
-	if (SG(request_info).path_translated != filename) {
-		if (SG(request_info).path_translated) {
-			efree(SG(request_info).path_translated);
-		}
-		SG(request_info).path_translated = filename;
-	}
 
 	return SUCCESS;
 }

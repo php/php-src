@@ -73,15 +73,15 @@ static uint32_t zend_version_info_length;
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API size_t (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
-ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
-ZEND_API zend_result (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
+ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
+ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
-ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 ZEND_API zend_result (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 ZEND_API zend_result (*zend_preload_autoload)(zend_string *filename) = NULL;
@@ -515,12 +515,12 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent) /* {{{ */
 }
 /* }}} */
 
-static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path) /* {{{ */
+static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path) /* {{{ */
 {
 	if (opened_path) {
-		*opened_path = zend_string_init(filename, strlen(filename), 0);
+		*opened_path = zend_string_copy(filename);
 	}
-	return fopen(filename, "rb");
+	return fopen(ZSTR_VAL(filename), "rb");
 }
 /* }}} */
 
@@ -1674,9 +1674,6 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		}
 
 		if (ret == FAILURE) {
-			/* If a failure occurred in one of the earlier files,
-			 * only destroy the following file handles. */
-			zend_file_handle_dtor(file_handle);
 			continue;
 		}
 
@@ -1684,7 +1681,6 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		if (file_handle->opened_path) {
 			zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
 		}
-		zend_destroy_file_handle(file_handle);
 		if (op_array) {
 			zend_execute(op_array, retval);
 			zend_exception_restore();

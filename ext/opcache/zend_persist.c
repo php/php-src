@@ -1247,7 +1247,7 @@ static void zend_persist_warnings(zend_persistent_script *script) {
 	}
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
 {
 	Bucket *p;
 
@@ -1256,10 +1256,6 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 
 	script = zend_shared_memdup_free(script, sizeof(zend_persistent_script));
-	if (key && *key) {
-		*key = zend_shared_memdup_put((void*)*key, key_length + 1);
-	}
-
 	script->corrupted = 0;
 	ZCG(current_persistent_script) = script;
 

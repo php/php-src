@@ -40,7 +40,7 @@ PHPAPI void php_handle_aborted_connection(void);
 PHPAPI int php_handle_auth_data(const char *auth);
 
 PHPAPI void php_html_puts(const char *str, size_t siz);
-PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode);
+PHPAPI int php_stream_open_for_zend_ex(zend_file_handle *handle, int mode);
 
 /* environment module */
 extern int php_init_environ(void);

@@ -566,7 +566,8 @@ int phpdbg_compile(void) /* {{{ */
 		return FAILURE;
 	}
 
-	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
+	zend_stream_init_filename(&fh, PHPDBG_G(exec));
+	if (php_stream_open_for_zend_ex(&fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
 		CG(skip_shebang) = 1;
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
 		zend_destroy_file_handle(&fh);
@@ -581,7 +582,7 @@ int phpdbg_compile(void) /* {{{ */
 	} else {
 		phpdbg_error("compile", "type=\"openfailure\" context=\"%s\"", "Could not open file %s", PHPDBG_G(exec));
 	}
-
+	zend_destroy_file_handle(&fh);
 	return FAILURE;
 } /* }}} */
 
