@@ -1194,7 +1194,7 @@ static void zend_verify_internal_read_property_type(zend_object *obj, zend_strin
 {
 	zend_property_info *prop_info =
 		zend_get_property_info(obj->ce, name, /* silent */ true);
-	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+	if (prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO && ZEND_TYPE_IS_SET(prop_info->type)) {
 		zend_verify_property_type(prop_info, val, /* strict */ true);
 	}
 }
