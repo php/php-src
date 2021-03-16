@@ -771,7 +771,7 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename
 	if (VCWD_STAT(ini_file, &sb) == 0) {
 		if (S_ISREG(sb.st_mode)) {
 			zend_file_handle fh;
-			int ret;
+			int ret = FAILURE;
 
 			zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
 			if (fh.handle.fp) {
