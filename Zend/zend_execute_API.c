@@ -264,7 +264,7 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 	zend_try {
-		zend_llist_destroy(&CG(open_files));
+		zend_stream_shutdown();
 	} zend_end_try();
 
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;

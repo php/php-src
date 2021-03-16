@@ -253,7 +253,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 	}
 
 	if (!zend_is_executing() || !PHAR_G(cwd)) {
-		return phar_save_resolve_path(filename, filename_len);
+		return NULL;
 	}
 
 	fname = (char*)zend_get_executed_filename();
@@ -267,7 +267,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 	}
 
 	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
-		return phar_save_resolve_path(filename, filename_len);
+		return NULL;
 	}
 
 	efree(entry);
@@ -277,7 +277,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 
 		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
-			return phar_save_resolve_path(filename, filename_len);
+			return NULL;
 		}
 splitted:
 		if (pphar) {

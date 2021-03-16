@@ -699,12 +699,14 @@ zend_first_try {
 	} else {
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, (char *) r->filename);
+		zfd.primary_script = 1;
 
 		if (!parent_req) {
 			php_execute_script(&zfd);
 		} else {
 			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
 		}
+		zend_destroy_file_handle(&zfd);
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
 			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));

@@ -4222,10 +4222,12 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 				zend_file_handle file_handle;
 				zend_string *resolved_path;
 
-				resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
+				resolved_path = zend_resolve_path(Z_STR_P(inc_filename));
 				if (EXPECTED(resolved_path)) {
 					if (zend_hash_exists(&EG(included_files), resolved_path)) {
-						goto already_compiled;
+						new_op_array = ZEND_FAKE_OP_ARRAY;
+						zend_string_release_ex(resolved_path, 0);
+						break;
 					}
 				} else if (UNEXPECTED(EG(exception))) {
 					break;
@@ -4239,7 +4241,8 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					resolved_path = zend_string_copy(Z_STR_P(inc_filename));
 				}
 
-				if (SUCCESS == zend_stream_open(ZSTR_VAL(resolved_path), &file_handle)) {
+				zend_stream_init_filename_ex(&file_handle, resolved_path);
+				if (SUCCESS == zend_stream_open(&file_handle)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = zend_string_copy(resolved_path);
@@ -4254,8 +4257,6 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 						}
 						return op_array;
 					} else {
-						zend_file_handle_dtor(&file_handle);
-already_compiled:
 						new_op_array = ZEND_FAKE_OP_ARRAY;
 					}
 				} else if (!EG(exception)) {
@@ -4264,6 +4265,7 @@ already_compiled:
 							ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,
 							Z_STRVAL_P(inc_filename));
 				}
+				zend_destroy_file_handle(&file_handle);
 				zend_string_release_ex(resolved_path, 0);
 			}
 			break;

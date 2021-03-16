@@ -554,6 +554,9 @@ END_EXTERN_C()
 /* Allow blocking reads on anonymous pipes on Windows. */
 #define STREAM_USE_BLOCKING_PIPE        0x00008000
 
+/* this flag is only used by include/require functions */
+#define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
+
 int php_init_stream_wrappers(int module_number);
 int php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);

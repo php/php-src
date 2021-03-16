@@ -2,6 +2,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
   a. Removed Zend APIs
+  b. Zend Stream API
 
 2. Build system changes
 
@@ -16,6 +17,20 @@ PHP 8.1 INTERNALS UPGRADE NOTES
        spl_ce_Stringable, spl_ce_Traversable alias class entries have been removed in favor of zend_ce_aggregate,
        zend_ce_arrayaccess, zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_stringable,
        zend_ce_traversable.
+  b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
+      - zend_file_handle.filename now is zend_string*
+      - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
+      - added zend_file_handle.primary_script flag. SAPIs should set it for main executed script.
+      - added zend_file_handle.in_list flag, which is set when a file_handle is added into CG(open_files)
+      - added zend_stream_init_filename_ex() function, that takes filename as zend_string*
+      - the "filename" parameter of functons zend_stream_open(), php_stream_open_for_zend_ex() and
+        callback zend_stream_open_function() has been removed (it's now passed as a "filename" field of the
+        file_handle parameter)
+      - in zend_fopen() and zend_resolve_path() callbacks filename now passed as zend_string*
+      - file_handles should be destroyed by zend_destroy_file_handle() function (usually in the same function
+        the same function where they were created by zend_stream_init_*()). Previously there were two different
+        destructors zend_destroy_file_handle() and zend_file_handle_dtor().
+      - zend_ini_scanner_globals.filename now is zend_string*
 
 ========================
 2. Build system changes

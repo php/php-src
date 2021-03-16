@@ -616,15 +616,14 @@ int php_init_config(void)
 		{
 			zval tmp;
 
-			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
+			ZVAL_NEW_STR(&tmp, zend_string_init(filename, strlen(filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
 				zend_string_release_ex(opened_path, 0);
-			} else {
-				efree((char *)fh.filename);
 			}
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
+		zend_destroy_file_handle(&fh);
 	}
 
 	/* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
@@ -693,6 +692,7 @@ int php_init_config(void)
 									zend_llist_add_element(&scanned_ini_list, &p);
 								}
 							}
+							zend_destroy_file_handle(&fh);
 						}
 					}
 					free(namelist[i]);
@@ -771,17 +771,20 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename
 	if (VCWD_STAT(ini_file, &sb) == 0) {
 		if (S_ISREG(sb.st_mode)) {
 			zend_file_handle fh;
+			int ret = FAILURE;
+
 			zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
 			if (fh.handle.fp) {
 				/* Reset active ini section */
 				RESET_ACTIVE_INI_HASH();
 
-				if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, target_hash) == SUCCESS) {
+				ret = zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, target_hash);
+				if (ret == SUCCESS) {
 					/* FIXME: Add parsed file to the list of user files read? */
-					return SUCCESS;
 				}
-				return FAILURE;
 			}
+			zend_destroy_file_handle(&fh);
+			return ret;
 		}
 	}
 	return FAILURE;

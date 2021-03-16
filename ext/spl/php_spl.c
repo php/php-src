@@ -239,20 +239,19 @@ PHP_FUNCTION(spl_classes)
 
 static int spl_autoload(zend_string *class_name, zend_string *lc_name, const char *ext, int ext_len) /* {{{ */
 {
-	char *class_file;
-	int class_file_len;
+	zend_string *class_file;
 	zval dummy;
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval result;
 	int ret;
 
-	class_file_len = (int)spprintf(&class_file, 0, "%s%.*s", ZSTR_VAL(lc_name), ext_len, ext);
+	class_file = zend_strpprintf(0, "%s%.*s", ZSTR_VAL(lc_name), ext_len, ext);
 
 #if DEFAULT_SLASH != '\\'
 	{
-		char *ptr = class_file;
-		char *end = ptr + class_file_len;
+		char *ptr = ZSTR_VAL(class_file);
+		char *end = ptr + ZSTR_LEN(class_file);
 
 		while ((ptr = memchr(ptr, '\\', (end - ptr))) != NULL) {
 			*ptr = DEFAULT_SLASH;
@@ -260,21 +259,20 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	}
 #endif
 
-	ret = php_stream_open_for_zend_ex(class_file, &file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE);
+	zend_stream_init_filename_ex(&file_handle, class_file);
+	ret = php_stream_open_for_zend_ex(&file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE);
 
 	if (ret == SUCCESS) {
 		zend_string *opened_path;
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = zend_string_init(class_file, class_file_len, 0);
+			file_handle.opened_path = zend_string_copy(class_file);
 		}
 		opened_path = zend_string_copy(file_handle.opened_path);
 		ZVAL_NULL(&dummy);
 		if (zend_hash_add(&EG(included_files), opened_path, &dummy)) {
 			new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
-			zend_destroy_file_handle(&file_handle);
 		} else {
 			new_op_array = NULL;
-			zend_file_handle_dtor(&file_handle);
 		}
 		zend_string_release_ex(opened_path, 0);
 		if (new_op_array) {
@@ -287,11 +285,13 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 				zval_ptr_dtor(&result);
 			}
 
-			efree(class_file);
+			zend_destroy_file_handle(&file_handle);
+			zend_string_release(class_file);
 			return zend_hash_exists(EG(class_table), lc_name);
 		}
 	}
-	efree(class_file);
+	zend_destroy_file_handle(&file_handle);
+	zend_string_release(class_file);
 	return 0;
 } /* }}} */
 

@@ -227,7 +227,6 @@ ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_e
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse();
-	zend_file_handle_dtor(fh);
 
 	shutdown_ini_scanner();
 

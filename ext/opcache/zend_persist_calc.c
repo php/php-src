@@ -558,7 +558,7 @@ static void zend_persist_warnings_calc(zend_persistent_script *script) {
 	}
 }
 
-uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, const char *key, unsigned int key_length, int for_shm)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
 {
 	Bucket *p;
 
@@ -573,10 +573,6 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
-	if (key) {
-		ADD_SIZE(key_length + 1);
-		zend_shared_alloc_register_xlat_entry(key, key);
-	}
 	ADD_STRING(new_persistent_script->script.filename);
 
 #if defined(__AVX__) || defined(__SSE2__)
