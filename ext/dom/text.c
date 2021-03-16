@@ -74,7 +74,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 	node = dom_object_get_node(obj);
 
 	if (node == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 

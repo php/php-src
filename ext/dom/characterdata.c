@@ -41,7 +41,7 @@ int dom_characterdata_data_read(dom_object *obj, zval *retval)
 	xmlChar *content;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -61,7 +61,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -90,7 +90,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 	long length = 0;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 

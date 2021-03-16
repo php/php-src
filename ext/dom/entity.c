@@ -41,7 +41,7 @@ int dom_entity_public_id_read(dom_object *obj, zval *retval)
 	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -66,7 +66,7 @@ int dom_entity_system_id_read(dom_object *obj, zval *retval)
 	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -92,7 +92,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval *retval)
 	char *content;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 

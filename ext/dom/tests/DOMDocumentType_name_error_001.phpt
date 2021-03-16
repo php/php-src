@@ -8,7 +8,11 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 --FILE--
 <?php
 $doctype = new DOMDocumentType();
-$name = $doctype->name;
+try {
+    $doctype->name;
+} catch (DOMException $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: main(): Invalid State Error in %s on line %d
+--EXPECT--
+Invalid State Error
