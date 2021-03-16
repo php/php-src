@@ -144,7 +144,7 @@ prof-use:
 
 %_arginfo.h: %.stub.php
 	@if test -e "$(top_srcdir)/build/gen_stub.php"; then \
-		if test ! -z "$(PHP)" && test -x "$(PHP)"; then \
+		if test ! -z "$(PHP)"; then \
 			echo Parse $< to generate $@;\
 			$(PHP) $(top_srcdir)/build/gen_stub.php $<; \
 		fi; \
