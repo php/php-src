@@ -1309,7 +1309,7 @@ static int cli_main( int argc, char * argv[] )
         }
         if ( ret == -1 ) {
             if ( *p ) {
-                zend_file_handle file_handle;
+				zend_file_handle file_handle;
 				zend_stream_init_fp(&file_handle, VCWD_FOPEN(*p, "rb"), NULL);
 				file_handle.primary_script = 1;
 
