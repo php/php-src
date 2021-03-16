@@ -2316,10 +2316,6 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	}
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 		uint32_t type = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
-
-		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			type |= MAY_BE_RC1 | MAY_BE_RCN;
-		}
 		if (ZEND_TYPE_HAS_CLASS(prop_info->type)) {
 			type |= MAY_BE_OBJECT;
 			if (pce) {
@@ -2331,6 +2327,9 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 					zend_string_release(lcname);
 				}
 			}
+		}
+		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			type |= MAY_BE_RC1 | MAY_BE_RCN;
 		}
 		return type;
 	}
