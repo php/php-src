@@ -6286,6 +6286,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -8613,6 +8618,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -10963,6 +10973,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -15382,6 +15397,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -16802,6 +16822,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -18114,6 +18139,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -31487,6 +31517,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -33400,6 +33435,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -35899,6 +35939,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -40086,6 +40131,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CONST != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -43752,6 +43802,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -48795,6 +48850,11 @@ fetch_obj_r_fast_copy:
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (IS_CV != IS_CONST) {
 			zend_tmp_string_release(tmp_name);

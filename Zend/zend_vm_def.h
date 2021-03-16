@@ -2106,6 +2106,11 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
+#if ZEND_DEBUG
+		if (!EG(exception) && zobj->handlers->read_property != zend_std_read_property) {
+			zend_verify_internal_read_property_type(zobj, name, retval);
+		}
+#endif
 
 		if (OP2_TYPE != IS_CONST) {
 			zend_tmp_string_release(tmp_name);

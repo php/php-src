@@ -1189,6 +1189,15 @@ static ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 		fbc->common.scope ? "::" : "",
 		ZSTR_VAL(fbc->common.function_name));
 }
+
+static void zend_verify_internal_read_property_type(zend_object *obj, zend_string *name, zval *val)
+{
+	zend_property_info *prop_info =
+		zend_get_property_info(obj->ce, name, /* silent */ true);
+	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+		zend_verify_property_type(prop_info, val, /* strict */ true);
+	}
+}
 #endif
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
