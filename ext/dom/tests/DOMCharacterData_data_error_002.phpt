@@ -8,7 +8,11 @@ Eric Berg <ehberg@gmail.com>
 --FILE--
 <?php
 $character_data = new DOMCharacterData();
-print $character_data->data;
+try {
+    print $character_data->data;
+} catch (DOMException $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: main(): Invalid State Error in %s on line %d
+--EXPECT--
+Invalid State Error
