@@ -2643,7 +2643,7 @@ PHP_FUNCTION(imageinterlace)
 		gdImageInterlace(im, INT);
 	}
 
-	RETURN_LONG(gdImageGetInterlaced(im));
+	RETURN_BOOL(gdImageGetInterlaced(im));
 }
 /* }}} */
 

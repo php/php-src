@@ -8,14 +8,14 @@ if (!extension_loaded('gd')) die('skip gd extension not available');
 <?php
 $im = imagecreatetruecolor(10, 10);
 imagefilledrectangle($im, 0, 0, 9, 9, imagecolorallocate($im, 255, 255, 255));
-imageinterlace($im, 1);
+imageinterlace($im, true);
 imagegif($im, __DIR__ . 'bug77700.gif');
 
 $im = imagecreatefromgif(__DIR__ . 'bug77700.gif');
 var_dump(imageinterlace($im));
 ?>
 --EXPECT--
-int(1)
+bool(true)
 --CLEAN--
 <?php
 unlink(__DIR__ . 'bug77700.gif');
