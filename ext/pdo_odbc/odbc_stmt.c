@@ -627,6 +627,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 static int odbc_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
+	array_init(return_value);
 	add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 	return 1;
 }
