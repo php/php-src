@@ -3733,7 +3733,7 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 	}
 
 #define GET_VALUE_FROM_STRUCT(n,m)            \
-	if (strcmp(ZSTR_VAL(name), m) == 0) { \
+	if (zend_string_equals_literal(name, m)) { \
 		value = obj->diff->n; \
 		break; \
 	}
@@ -3744,7 +3744,7 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 		GET_VALUE_FROM_STRUCT(h, "h");
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
-		if (strcmp(ZSTR_VAL(name), "f") == 0) {
+		if (zend_string_equals_literal(name, "f")) {
 			fvalue = obj->diff->us / 1000000.0;
 			break;
 		}
@@ -3782,7 +3782,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 	}
 
 #define SET_VALUE_FROM_STRUCT(n,m) \
-	if (strcmp(ZSTR_VAL(name), m) == 0) { \
+	if (zend_string_equals_literal(name, m)) { \
 		obj->diff->n = zval_get_long(value); \
 		break; \
 	}
@@ -3794,7 +3794,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 		SET_VALUE_FROM_STRUCT(h, "h");
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
-		if (strcmp(ZSTR_VAL(name), "f") == 0) {
+		if (zend_string_equals_literal(name, "f")) {
 			obj->diff->us = zval_get_double(value) * 1000000;
 			break;
 		}
@@ -3812,15 +3812,16 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 {
 	zval *ret;
 
-	if(zend_binary_strcmp("y", sizeof("y") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("m", sizeof("m") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("d", sizeof("d") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("h", sizeof("h") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("i", sizeof("i") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("s", sizeof("s") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("f", sizeof("f") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("days", sizeof("days") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("invert", sizeof("invert") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+	if (
+		zend_string_equals_literal(name, "y") ||
+		zend_string_equals_literal(name, "m") ||
+		zend_string_equals_literal(name, "d") ||
+		zend_string_equals_literal(name, "h") ||
+		zend_string_equals_literal(name, "i") ||
+		zend_string_equals_literal(name, "s") ||
+		zend_string_equals_literal(name, "f") ||
+		zend_string_equals_literal(name, "days") ||
+		zend_string_equals_literal(name, "invert") ) {
 		/* Fallback to read_property. */
 		ret = NULL;
 	} else {
