@@ -4,8 +4,7 @@
 
 class PDOStatement implements IteratorAggregate
 {
-    /** @var string|null */
-    public $queryString;
+    public string $queryString;
 
     /** @return bool */
     public function bindColumn(string|int $column, mixed &$var, int $type = 0, int $maxLength = 0, mixed $driverOptions = null) {}
@@ -69,4 +68,5 @@ class PDOStatement implements IteratorAggregate
 
 final class PDORow
 {
+    public string $queryString;
 }

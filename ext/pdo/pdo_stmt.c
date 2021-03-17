@@ -2262,7 +2262,9 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 	ZEND_ASSERT(stmt);
 
 	ZVAL_NULL(rv);
-	if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG)	{
+	if (zend_string_equals_literal(name, "queryString")) {
+		return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
+	} else if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG) {
 		if (lval >= 0 && lval < stmt->column_count) {
 			fetch_value(stmt, rv, lval, NULL);
 		}
@@ -2274,9 +2276,6 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 				fetch_value(stmt, rv, colno, NULL);
 				return rv;
 			}
-		}
-		if (zend_string_equals_literal(name, "queryString")) {
-			return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
 		}
 	}
 
@@ -2306,6 +2305,10 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 			return &EG(uninitialized_zval);
 		}
 
+		if (zend_string_equals_literal(Z_STR_P(member), "queryString")) {
+			return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
+		}
+
 		/* TODO: replace this with a hash of available column names to column
 		 * numbers */
 		for (colno = 0; colno < stmt->column_count; colno++) {
@@ -2313,9 +2316,6 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 				fetch_value(stmt, rv, colno, NULL);
 				return rv;
 			}
-		}
-		if (zend_string_equals_literal(Z_STR_P(member), "queryString")) {
-			return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
 		}
 	}
 
@@ -2428,6 +2428,10 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	}
 	props = zend_array_dup(stmt->std.properties);
 	for (i = 0; i < stmt->column_count; i++) {
+		if (zend_string_equals_literal(stmt->columns[i].name, "queryString")) {
+			continue;
+		}
+
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
 
