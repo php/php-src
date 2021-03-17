@@ -4634,7 +4634,7 @@ PHP_FUNCTION(strip_tags)
 static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 	const char *retval;
 
-	if (!strcmp("0", ZSTR_VAL(loc))) {
+	if (zend_string_equals_literal(loc, "0")) {
 		loc = NULL;
 	} else {
 		if (ZSTR_LEN(loc) >= 255) {
