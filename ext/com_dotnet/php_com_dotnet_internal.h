@@ -51,9 +51,9 @@ typedef struct _php_com_dotnet_object {
 static inline int php_com_is_valid_object(zval *zv)
 {
 	zend_class_entry *ce = Z_OBJCE_P(zv);
-	return strcmp("com", ce->name->val) == 0 ||
-		strcmp("dotnet", ce->name->val) == 0 ||
-		strcmp("variant", ce->name->val) == 0;
+	return zend_string_equals_literal(ce->name, "com") ||
+		zend_string_equals_literal(ce->name, "dotnet") ||
+		zend_string_equals_literal(ce->name, "variant");
 }
 
 #define CDNO_FETCH(zv)			(php_com_dotnet_object*)Z_OBJ_P(zv)
