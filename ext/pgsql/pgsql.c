@@ -4385,88 +4385,87 @@ PHP_FUNCTION(pg_meta_data)
 /* }}} */
 
 /* {{{ php_pgsql_get_data_type */
-static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t len)
+static php_pgsql_data_type php_pgsql_get_data_type(const zend_string *type_name)
 {
-	/* This is stupid way to do. I'll fix it when I decied how to support
+	/* This is stupid way to do. I'll fix it when I decide how to support
 	   user defined types. (Yasuo) */
-
 	/* boolean */
-	if (!strcmp(type_name, "bool")|| !strcmp(type_name, "boolean"))
+	if (zend_string_equals_literal(type_name, "bool")|| zend_string_equals_literal(type_name, "boolean"))
 		return PG_BOOL;
 	/* object id */
-	if (!strcmp(type_name, "oid"))
+	if (zend_string_equals_literal(type_name, "oid"))
 		return PG_OID;
 	/* integer */
-	if (!strcmp(type_name, "int2") || !strcmp(type_name, "smallint"))
+	if (zend_string_equals_literal(type_name, "int2") || zend_string_equals_literal(type_name, "smallint"))
 		return PG_INT2;
-	if (!strcmp(type_name, "int4") || !strcmp(type_name, "integer"))
+	if (zend_string_equals_literal(type_name, "int4") || zend_string_equals_literal(type_name, "integer"))
 		return PG_INT4;
-	if (!strcmp(type_name, "int8") || !strcmp(type_name, "bigint"))
+	if (zend_string_equals_literal(type_name, "int8") || zend_string_equals_literal(type_name, "bigint"))
 		return PG_INT8;
 	/* real and other */
-	if (!strcmp(type_name, "float4") || !strcmp(type_name, "real"))
+	if (zend_string_equals_literal(type_name, "float4") || zend_string_equals_literal(type_name, "real"))
 		return PG_FLOAT4;
-	if (!strcmp(type_name, "float8") || !strcmp(type_name, "double precision"))
+	if (zend_string_equals_literal(type_name, "float8") || zend_string_equals_literal(type_name, "double precision"))
 		return PG_FLOAT8;
-	if (!strcmp(type_name, "numeric"))
+	if (zend_string_equals_literal(type_name, "numeric"))
 		return PG_NUMERIC;
-	if (!strcmp(type_name, "money"))
+	if (zend_string_equals_literal(type_name, "money"))
 		return PG_MONEY;
 	/* character */
-	if (!strcmp(type_name, "text"))
+	if (zend_string_equals_literal(type_name, "text"))
 		return PG_TEXT;
-	if (!strcmp(type_name, "bpchar") || !strcmp(type_name, "character"))
+	if (zend_string_equals_literal(type_name, "bpchar") || zend_string_equals_literal(type_name, "character"))
 		return PG_CHAR;
-	if (!strcmp(type_name, "varchar") || !strcmp(type_name, "character varying"))
+	if (zend_string_equals_literal(type_name, "varchar") || zend_string_equals_literal(type_name, "character varying"))
 		return PG_VARCHAR;
 	/* time and interval */
-	if (!strcmp(type_name, "abstime"))
+	if (zend_string_equals_literal(type_name, "abstime"))
 		return PG_UNIX_TIME;
-	if (!strcmp(type_name, "reltime"))
+	if (zend_string_equals_literal(type_name, "reltime"))
 		return PG_UNIX_TIME_INTERVAL;
-	if (!strcmp(type_name, "tinterval"))
+	if (zend_string_equals_literal(type_name, "tinterval"))
 		return PG_UNIX_TIME_INTERVAL;
-	if (!strcmp(type_name, "date"))
+	if (zend_string_equals_literal(type_name, "date"))
 		return PG_DATE;
-	if (!strcmp(type_name, "time"))
+	if (zend_string_equals_literal(type_name, "time"))
 		return PG_TIME;
-	if (!strcmp(type_name, "time with time zone") || !strcmp(type_name, "timetz"))
+	if (zend_string_equals_literal(type_name, "time with time zone") || zend_string_equals_literal(type_name, "timetz"))
 		return PG_TIME_WITH_TIMEZONE;
-	if (!strcmp(type_name, "timestamp without time zone") || !strcmp(type_name, "timestamp"))
+	if (zend_string_equals_literal(type_name, "timestamp without time zone") || zend_string_equals_literal(type_name, "timestamp"))
 		return PG_TIMESTAMP;
-	if (!strcmp(type_name, "timestamp with time zone") || !strcmp(type_name, "timestamptz"))
+	if (zend_string_equals_literal(type_name, "timestamp with time zone") || zend_string_equals_literal(type_name, "timestamptz"))
 		return PG_TIMESTAMP_WITH_TIMEZONE;
-	if (!strcmp(type_name, "interval"))
+	if (zend_string_equals_literal(type_name, "interval"))
 		return PG_INTERVAL;
 	/* binary */
-	if (!strcmp(type_name, "bytea"))
+	if (zend_string_equals_literal(type_name, "bytea"))
 		return PG_BYTEA;
 	/* network */
-	if (!strcmp(type_name, "cidr"))
+	if (zend_string_equals_literal(type_name, "cidr"))
 		return PG_CIDR;
-	if (!strcmp(type_name, "inet"))
+	if (zend_string_equals_literal(type_name, "inet"))
 		return PG_INET;
-	if (!strcmp(type_name, "macaddr"))
+	if (zend_string_equals_literal(type_name, "macaddr"))
 		return PG_MACADDR;
 	/* bit */
-	if (!strcmp(type_name, "bit"))
+	if (zend_string_equals_literal(type_name, "bit"))
 		return PG_BIT;
-	if (!strcmp(type_name, "bit varying"))
+	if (zend_string_equals_literal(type_name, "bit varying"))
 		return PG_VARBIT;
 	/* geometric */
-	if (!strcmp(type_name, "line"))
+	if (zend_string_equals_literal(type_name, "line"))
 		return PG_LINE;
-	if (!strcmp(type_name, "lseg"))
+	if (zend_string_equals_literal(type_name, "lseg"))
 		return PG_LSEG;
-	if (!strcmp(type_name, "box"))
+	if (zend_string_equals_literal(type_name, "box"))
 		return PG_BOX;
-	if (!strcmp(type_name, "path"))
+	if (zend_string_equals_literal(type_name, "path"))
 		return PG_PATH;
-	if (!strcmp(type_name, "point"))
+	if (zend_string_equals_literal(type_name, "point"))
 		return PG_POINT;
-	if (!strcmp(type_name, "polygon"))
+	if (zend_string_equals_literal(type_name, "polygon"))
 		return PG_POLYGON;
-	if (!strcmp(type_name, "circle"))
+	if (zend_string_equals_literal(type_name, "circle"))
 		return PG_CIRCLE;
 
 	return PG_UNKNOWN;
@@ -4554,7 +4553,7 @@ static int php_pgsql_add_quotes(zval *src, bool should_free)
 
 /* Raise E_NOTICE to E_WARNING or Error? */
 #define PGSQL_CONV_CHECK_IGNORE() \
-	if (!err && Z_TYPE(new_val) == IS_STRING && !strcmp(Z_STRVAL(new_val), "NULL")) { \
+	if (!err && Z_TYPE(new_val) == IS_STRING && zend_string_equals_literal(Z_STR(new_val), "NULL")) { \
 		/* if new_value is string "NULL" and field has default value, remove element to use default value */ \
 		if (!(opt & PGSQL_CONV_IGNORE_DEFAULT) && Z_TYPE_P(has_default) == IS_TRUE) { \
 			zval_ptr_dtor(&new_val); \
@@ -4636,7 +4635,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			/* enums need to be treated like strings */
 			data_type = PG_TEXT;
 		} else {
-			data_type = php_pgsql_get_data_type(Z_STRVAL_P(type), Z_STRLEN_P(type));
+			data_type = php_pgsql_get_data_type(Z_STR_P(type));
 		}
 
 		/* TODO: Should E_NOTICE be converted to type error if PHP type cannot be converted to field type? */
@@ -4649,18 +4648,18 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							ZVAL_STRING(&new_val, "NULL");
 						}
 						else {
-							if (!strcmp(Z_STRVAL_P(val), "t") || !strcmp(Z_STRVAL_P(val), "T") ||
-								!strcmp(Z_STRVAL_P(val), "y") || !strcmp(Z_STRVAL_P(val), "Y") ||
-								!strcmp(Z_STRVAL_P(val), "true") || !strcmp(Z_STRVAL_P(val), "True") ||
-								!strcmp(Z_STRVAL_P(val), "yes") || !strcmp(Z_STRVAL_P(val), "Yes") ||
-								!strcmp(Z_STRVAL_P(val), "1")) {
+							if (zend_string_equals_literal(Z_STR_P(val), "t") || zend_string_equals_literal(Z_STR_P(val), "T") ||
+								zend_string_equals_literal(Z_STR_P(val), "y") || zend_string_equals_literal(Z_STR_P(val), "Y") ||
+								zend_string_equals_literal(Z_STR_P(val), "true") || zend_string_equals_literal(Z_STR_P(val), "True") ||
+								zend_string_equals_literal(Z_STR_P(val), "yes") || zend_string_equals_literal(Z_STR_P(val), "Yes") ||
+								zend_string_equals_literal(Z_STR_P(val), "1")) {
 								ZVAL_STRINGL(&new_val, "'t'", sizeof("'t'")-1);
 							}
-							else if (!strcmp(Z_STRVAL_P(val), "f") || !strcmp(Z_STRVAL_P(val), "F") ||
-									 !strcmp(Z_STRVAL_P(val), "n") || !strcmp(Z_STRVAL_P(val), "N") ||
-									 !strcmp(Z_STRVAL_P(val), "false") ||  !strcmp(Z_STRVAL_P(val), "False") ||
-									 !strcmp(Z_STRVAL_P(val), "no") ||  !strcmp(Z_STRVAL_P(val), "No") ||
-									 !strcmp(Z_STRVAL_P(val), "0")) {
+							else if (zend_string_equals_literal(Z_STR_P(val), "f") || zend_string_equals_literal(Z_STR_P(val), "F") ||
+									 zend_string_equals_literal(Z_STR_P(val), "n") || zend_string_equals_literal(Z_STR_P(val), "N") ||
+									 zend_string_equals_literal(Z_STR_P(val), "false") ||  zend_string_equals_literal(Z_STR_P(val), "False") ||
+									 zend_string_equals_literal(Z_STR_P(val), "no") ||  zend_string_equals_literal(Z_STR_P(val), "No") ||
+									 zend_string_equals_literal(Z_STR_P(val), "0")) {
 								ZVAL_STRINGL(&new_val, "'f'", sizeof("'f'")-1);
 							}
 							else {
@@ -5540,7 +5539,8 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 		} else {
 			smart_str_appendl(querystr, ZSTR_VAL(fld), ZSTR_LEN(fld));
 		}
-		if (where_cond && (Z_TYPE_P(val) == IS_TRUE || Z_TYPE_P(val) == IS_FALSE || (Z_TYPE_P(val) == IS_STRING && !strcmp(Z_STRVAL_P(val), "NULL")))) {
+		if (where_cond && (Z_TYPE_P(val) == IS_TRUE || Z_TYPE_P(val) == IS_FALSE ||
+				(Z_TYPE_P(val) == IS_STRING && zend_string_equals_literal(Z_STR_P(val), "NULL")))) {
 			smart_str_appends(querystr, " IS ");
 		} else {
 			smart_str_appendc(querystr, '=');
