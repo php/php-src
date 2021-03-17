@@ -129,6 +129,8 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
   . Added support for array unpacking with strings keys.
     RFC: https://wiki.php.net/rfc/array_unpacking_string_keys
+  . Added support for enumerations.
+    RFC: https://wiki.php.net/rfc/enumerations
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
