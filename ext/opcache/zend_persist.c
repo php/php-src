@@ -259,40 +259,35 @@ static void zend_persist_zval(zval *z)
 
 static HashTable *zend_persist_attributes(HashTable *attributes)
 {
-	HashTable *ptr = zend_shared_alloc_get_xlat_entry(attributes);
+	uint32_t i;
+	zval *v;
 
-	if (!ptr) {
-		uint32_t i;
-		zval *v;
+	if (!ZCG(current_persistent_script)->corrupted && zend_accel_in_shm(attributes)) {
+		return attributes;
+	}
 
-		if (!ZCG(current_persistent_script)->corrupted
-		 && zend_accel_in_shm(attributes)) {
-			return attributes;
+	zend_hash_persist(attributes);
+
+	ZEND_HASH_FOREACH_VAL(attributes, v) {
+		zend_attribute *attr = Z_PTR_P(v);
+		zend_attribute *copy = zend_shared_memdup_put_free(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
+
+		zend_accel_store_interned_string(copy->name);
+		zend_accel_store_interned_string(copy->lcname);
+
+		for (i = 0; i < copy->argc; i++) {
+			if (copy->args[i].name) {
+				zend_accel_store_interned_string(copy->args[i].name);
+			}
+			zend_persist_zval(&copy->args[i].value);
 		}
 
-		zend_hash_persist(attributes);
+		ZVAL_PTR(v, copy);
+	} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_FOREACH_VAL(attributes, v) {
-			zend_attribute *attr = Z_PTR_P(v);
-			zend_attribute *copy = zend_shared_memdup_put_free(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
-
-			zend_accel_store_interned_string(copy->name);
-			zend_accel_store_interned_string(copy->lcname);
-
-			for (i = 0; i < copy->argc; i++) {
-				if (copy->args[i].name) {
-					zend_accel_store_interned_string(copy->args[i].name);
-				}
-				zend_persist_zval(&copy->args[i].value);
-			}
-
-			ZVAL_PTR(v, copy);
-		} ZEND_HASH_FOREACH_END();
-
-		ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));
-		GC_SET_REFCOUNT(ptr, 2);
-		GC_TYPE_INFO(ptr) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
-	}
+	HashTable *ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));
+	GC_SET_REFCOUNT(ptr, 2);
+	GC_TYPE_INFO(ptr) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 
 	return ptr;
 }
@@ -450,7 +445,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				}
 			}
 			if (op_array->attributes) {
-				op_array->attributes = zend_persist_attributes(op_array->attributes);
+				op_array->attributes = zend_shared_alloc_get_xlat_entry(op_array->attributes);
+				ZEND_ASSERT(op_array->attributes != NULL);
 			}
 
 			if (op_array->try_catch_array) {
