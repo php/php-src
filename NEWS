@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.5
 
+- DOM:
+  . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
+
 - FFI:
   . Fixed bug #80847 (CData structs with fields of type struct can't be passed
     as C function argument). (Nickolas Daniel da Silva, Dmitry)
