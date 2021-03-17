@@ -627,7 +627,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
+		(url->host == NULL && (!zend_string_equals_literal(url->scheme, "mailto") && !zend_string_equals_literal(url->scheme, "news") && !zend_string_equals_literal(url->scheme, "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:
@@ -902,12 +902,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 						case 1: case 0:
 							break;
 						case 2:
-							if (!strcmp("::", Z_STRVAL_P(value))) {
+							if (zend_string_equals_literal(Z_STR_P(value), "::")) {
 								RETURN_VALIDATION_FAILED
 							}
 							break;
 						case 3:
-							if (!strcmp("::1", Z_STRVAL_P(value)) || !strcmp("5f:", Z_STRVAL_P(value))) {
+							if (zend_string_equals_literal(Z_STR_P(value), "::1") || zend_string_equals_literal(Z_STR_P(value), "5f:")) {
 								RETURN_VALIDATION_FAILED
 							}
 							break;
