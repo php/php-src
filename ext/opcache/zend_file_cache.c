@@ -461,18 +461,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		return;
 	}
 
-	if (op_array->static_variables) {
-		HashTable *ht;
-
-		SERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		UNSERIALIZE_PTR(ht);
-		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
-	}
-
 	if (op_array->scope) {
 		if (UNEXPECTED(zend_shared_alloc_get_xlat_entry(op_array->opcodes))) {
 			op_array->refcount = (uint32_t*)(intptr_t)-1;
+			SERIALIZE_PTR(op_array->static_variables);
 			SERIALIZE_PTR(op_array->literals);
 			SERIALIZE_PTR(op_array->opcodes);
 			SERIALIZE_PTR(op_array->arg_info);
@@ -488,6 +480,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			return;
 		}
 		zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
+	}
+
+	if (op_array->static_variables) {
+		HashTable *ht;
+
+		SERIALIZE_PTR(op_array->static_variables);
+		ht = op_array->static_variables;
+		UNSERIALIZE_PTR(ht);
+		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 	}
 
 	if (op_array->literals) {
@@ -1274,17 +1275,9 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		return;
 	}
 
-	if (op_array->static_variables) {
-		HashTable *ht;
-
-		UNSERIALIZE_PTR(op_array->static_variables);
-		ht = op_array->static_variables;
-		zend_file_cache_unserialize_hash(ht,
-				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
-	}
-
 	if (op_array->refcount) {
 		op_array->refcount = NULL;
+		UNSERIALIZE_PTR(op_array->static_variables);
 		UNSERIALIZE_PTR(op_array->literals);
 		UNSERIALIZE_PTR(op_array->opcodes);
 		UNSERIALIZE_PTR(op_array->arg_info);
@@ -1298,6 +1291,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
 		return;
+	}
+
+	if (op_array->static_variables) {
+		HashTable *ht;
+
+		UNSERIALIZE_PTR(op_array->static_variables);
+		ht = op_array->static_variables;
+		zend_file_cache_unserialize_hash(ht,
+				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
 	if (op_array->literals) {

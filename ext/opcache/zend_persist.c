@@ -480,6 +480,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->prototype = NULL;
 	}
 
+	if (op_array->scope
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
+		return;
+	}
+
 	if (op_array->static_variables && !zend_accel_in_shm(op_array->static_variables)) {
 		Bucket *p;
 
@@ -493,12 +499,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		/* make immutable array */
 		GC_SET_REFCOUNT(op_array->static_variables, 2);
 		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
-	}
-
-	if (op_array->scope
-	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
-	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
-		return;
 	}
 
 	if (op_array->literals) {
