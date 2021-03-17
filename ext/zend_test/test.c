@@ -615,3 +615,17 @@ void bug79177(void)
 {
 	bug79177_cb();
 }
+
+typedef struct bug80847_01 {
+	uint64_t b;
+	double c;
+} bug80847_01;
+typedef struct bug80847_02 {
+	bug80847_01 a;
+} bug80847_02;
+
+PHP_ZEND_TEST_API bug80847_02 ffi_bug80847(bug80847_02 s) {
+	s.a.b += 10;
+	s.a.c -= 10.0;
+    return s;
+}
