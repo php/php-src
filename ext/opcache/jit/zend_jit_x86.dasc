@@ -15511,7 +15511,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			op2_info = OP2_INFO();
 			if (opline->op1_type == IS_CV
 			 && !(op2_info & MAY_BE_UNDEF)
-			 && !(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			 && !(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 				if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				} else if ((op2_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_LONG) {

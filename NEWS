@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #80839 (PHP problem with JIT). (Dmitry)
+  . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
+    (Dmitry)
 
 01 Apr 2021, PHP 8.0.4
 
