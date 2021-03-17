@@ -2424,7 +2424,7 @@ void php_module_shutdown(void)
 /* {{{ php_execute_script */
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
-	zend_file_handle *prepend_file_p, *append_file_p;
+	zend_file_handle *prepend_file_p = NULL, *append_file_p = NULL;
 	zend_file_handle prepend_file, append_file;
 #ifdef HAVE_BROKEN_GETCWD
 	volatile int old_cwd_fd = -1;
@@ -2478,15 +2478,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 			zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
 			prepend_file_p = &prepend_file;
-		} else {
-			prepend_file_p = NULL;
 		}
 
 		if (PG(auto_append_file) && PG(auto_append_file)[0]) {
 			zend_stream_init_filename(&append_file, PG(auto_append_file));
 			append_file_p = &append_file;
-		} else {
-			append_file_p = NULL;
 		}
 		if (PG(max_input_time) != -1) {
 #ifdef PHP_WIN32
