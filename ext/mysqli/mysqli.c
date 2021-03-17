@@ -49,18 +49,6 @@ static PHP_GINIT_FUNCTION(mysqli);
 
 #define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
 
-#define REGISTER_MYSQLI_DRIVER_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(mysqli_driver_class_entry, const_name, sizeof(const_name)-1, (zend_long)value);
-
-#define REGISTER_MYSQLI_DRIVER_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(mysqli_driver_class_entry, const_name, sizeof(const_name)-1, value, sizeof(value)-1);
-
-#define REGISTER_MYSQLI_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(mysqli_link_class_entry, const_name, sizeof(const_name)-1, (zend_long)value);
-
-#define REGISTER_MYSQLI_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(mysqli_link_class_entry, const_name, sizeof(const_name)-1, value, sizeof(value)-1);
-
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;
 static zend_object_handlers mysqli_object_driver_handlers;
@@ -788,12 +776,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_AND_NO_CHAIN", TRANS_COR_AND_NO_CHAIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_RELEASE", TRANS_COR_RELEASE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_NO_RELEASE", TRANS_COR_NO_RELEASE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_MYSQLI_DRIVER_CLASS_CONST_LONG("CLIENT_VERSION", MYSQL_VERSION_ID);
-	REGISTER_MYSQLI_DRIVER_CLASS_CONST_STRING("CLIENT_INFO", MYSQL_SERVER_VERSION);
-
-	REGISTER_MYSQLI_CLASS_CONST_LONG("CLIENT_VERSION", MYSQL_VERSION_ID);
-	REGISTER_MYSQLI_CLASS_CONST_STRING("CLIENT_INFO", MYSQL_SERVER_VERSION);
 
 
 #ifdef MYSQLI_USE_MYSQLND

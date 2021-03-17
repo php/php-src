@@ -128,10 +128,6 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 /* {{{ property link_client_version_read */
 static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
-	if (quiet) {
-		return FAILURE;
-	}
-	zend_error(E_DEPRECATED, "Property access to the client_version constant is deprecated");
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 
 	return SUCCESS;
@@ -141,10 +137,6 @@ static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet
 /* {{{ property link_client_info_read */
 static int link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
-	if (quiet) {
-		return FAILURE;
-	}
-	zend_error(E_DEPRECATED, "Property access to the client_info constant is deprecated");
 	ZVAL_STRING(retval, MYSQL_SERVER_VERSION);
 
 	return SUCCESS;

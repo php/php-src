@@ -20,16 +20,12 @@ if (($tmp = $driver->client_info) !== $client_info) {
         gettype($tmp), $tmp);
 }
 
-assert(mysqli_driver::CLIENT_INFO === mysqli_get_client_info());
-
 $client_version = mysqli_get_client_version();
 if (($tmp = $driver->client_version) !== $client_version) {
     printf("[003] Expecting %s/%s, got %s/%s\n",
     gettype($client_version), $client_version,
     gettype($tmp), $tmp);
 }
-
-assert(mysqli_driver::CLIENT_VERSION === mysqli_get_client_version());
 
 $all_modes = [
     MYSQLI_REPORT_ALL,
@@ -125,10 +121,5 @@ $driver->reconnect = $reconnect;
 print "done!";
 ?>
 --EXPECTF--
-
-Deprecated: Property access to the client_info constant is deprecated in %s
-
-Deprecated: Property access to the client_version constant is deprecated in %s
-
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'NO_SQL' at line 1 in %s on line %d
 done!

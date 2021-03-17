@@ -32,10 +32,6 @@ require_once('skipifconnectfailure.inc');
             }
         }
 
-        printf("\nClass constants:\n");
-        $refl = new ReflectionClass($mysqli::class);
-        var_dump($refl->getConstants());
-
         printf("\nMagic, magic properties:\n");
         try {
             mysqli_affected_rows($mysqli);
@@ -49,11 +45,9 @@ require_once('skipifconnectfailure.inc');
             echo $exception->getMessage() . "\n";
         }
 
-        $client_info = $mysqli->client_info;
-        printf("mysqli->client_info = '%s'/%s\n", $client_info, gettype($client_info));
+        printf("mysqli->client_info = '%s'/%s\n", $mysqli->client_info, gettype($mysqli->client_info));
 
-        $client_version = $mysqli->client_version;
-        printf("mysqli->client_version = '%s'/%s\n", $client_version, gettype($client_version));
+        printf("mysqli->client_version = '%s'/%s\n", $mysqli->client_version, gettype($mysqli->client_version));
 
         try {
             mysqli_errno($mysqli);
@@ -244,11 +238,7 @@ Without RS
 
 Class variables:
 Property access is not allowed yet
-
-Deprecated: Property access to the client_info constant is deprecated in %s
 client_info = '%s'
-
-Deprecated: Property access to the client_version constant is deprecated in %s
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
@@ -268,22 +258,10 @@ mysqli object is already closed
 
 Object variables:
 
-Class constants:
-array(2) {
-  ["CLIENT_VERSION"]=>
-  int(%d)
-  ["CLIENT_INFO"]=>
-  string(%d) "%s"
-}
-
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-
-Deprecated: Property access to the client_info constant is deprecated in %s
 mysqli->client_info = '%s'/string
-
-Deprecated: Property access to the client_version constant is deprecated in %s
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
@@ -324,11 +302,7 @@ mysqli object is already closed
 
 Class variables:
 Property access is not allowed yet
-
-Deprecated: Property access to the client_info constant is deprecated in %s
 client_info = '%s'
-
-Deprecated: Property access to the client_version constant is deprecated in %s
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
@@ -348,22 +322,10 @@ mysqli object is already closed
 
 Object variables:
 
-Class constants:
-array(2) {
-  ["CLIENT_VERSION"]=>
-  int(%d)
-  ["CLIENT_INFO"]=>
-  string(%d) "%s"
-}
-
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-
-Deprecated: Property access to the client_info constant is deprecated in %s
 mysqli->client_info = '%s'/string
-
-Deprecated: Property access to the client_version constant is deprecated in %s
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed

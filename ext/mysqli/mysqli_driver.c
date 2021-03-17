@@ -62,10 +62,6 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* {{{ property driver_client_version_read */
 static int driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
-	if (quiet) {
-		return FAILURE;
-	}
-	zend_error(E_DEPRECATED, "Property access to the client_version constant is deprecated");
 	ZVAL_LONG(retval, mysql_get_client_version());
 	return SUCCESS;
 }
@@ -74,10 +70,6 @@ static int driver_client_version_read(mysqli_object *obj, zval *retval, bool qui
 /* {{{ property driver_client_info_read */
 static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
-	if (quiet) {
-		return FAILURE;
-	}
-	zend_error(E_DEPRECATED, "Property access to the client_info constant is deprecated");
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 	return SUCCESS;
 }
