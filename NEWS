@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.4
+?? ??? 2021, PHP 8.0.5
+
+- FFI:
+  . Fixed bug #80847 (CData structs with fields of type struct can't be passed
+    as C function argument). (Nickolas Daniel da Silva, Dmitry)
+
+01 Apr 2021, PHP 8.0.4
 
 - Core:
   . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
@@ -11,10 +17,6 @@ PHP                                                                        NEWS
 
 - Dba:
   . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
-
-- FFI:
-  . Fixed bug #80847 (CData structs with fields of type struct can't be passed
-    as C function argument). (Nickolas Daniel da Silva, Dmitry)
 
 - IMAP:
   . Fixed bug #80800 (imap_open() fails when the flags parameter includes
