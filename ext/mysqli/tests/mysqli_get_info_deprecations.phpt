@@ -26,6 +26,6 @@ print "done!";
 Deprecated: Method mysqli::get_client_info() is deprecated in %s
 client_info = '%s'
 
-Deprecated: mysqli_get_client_info(): passing connection object as an argument is deprecated in %s
+Deprecated: mysqli_get_client_info(): Passing connection object as an argument is deprecated in %s
 client_info = '%s'
 done!
