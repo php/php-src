@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #80847 (CData structs with fields of type struct can't be passed
     as C function argument). (Nickolas Daniel da Silva, Dmitry)
 
+- Opcache:
+  . Fixed bug #80839 (PHP problem with JIT). (Dmitry)
+
 01 Apr 2021, PHP 8.0.4
 
 - Core:

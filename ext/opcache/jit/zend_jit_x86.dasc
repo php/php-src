@@ -5221,6 +5221,9 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			|	add r4, 12
 			|.endif
 		}
+		/* concatination with empty string may increase refcount */
+		op1_info |= MAY_BE_RCN;
+		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		|5:
@@ -5247,6 +5250,9 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
+		/* concatination with empty string may increase refcount */
+		op1_info |= MAY_BE_RCN;
+		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		if (may_throw) {
