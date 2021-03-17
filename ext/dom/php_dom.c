@@ -1241,9 +1241,13 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 {
 	xmlNodePtr nodep;
 
-    if (parent == NULL || child == NULL || child->doc != parent->doc) {
-        return SUCCESS;
-    }
+	if (parent == NULL || child == NULL || child->doc != parent->doc) {
+		return SUCCESS;
+	}
+
+	if (child->type == XML_DOCUMENT_NODE) {
+		return FAILURE;
+	}
 
 	nodep = parent;
 
