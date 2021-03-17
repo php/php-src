@@ -398,6 +398,13 @@ static bool zend_have_seen_symbol(zend_string *name, uint32_t kind) {
 	return zv && (Z_LVAL_P(zv) & kind) != 0;
 }
 
+ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
+{
+
+	zend_file_handle_dtor(fh);
+}
+/* }}} */
+
 void init_compiler(void) /* {{{ */
 {
 	CG(arena) = zend_arena_create(64 * 1024);
@@ -405,7 +412,7 @@ void init_compiler(void) /* {{{ */
 	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures();
 	zend_init_rsrc_list();
-	zend_stream_init();
+	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 
 	CG(delayed_variance_obligations) = NULL;

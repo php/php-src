@@ -643,13 +643,11 @@ static void init_request_info( void )
     php_handle_auth_data(pAuth);
 }
 
-static int lsapi_execute_script(void)
+static int lsapi_execute_script( zend_file_handle * file_handle)
 {
-	zend_file_handle file_handle;
     char *p;
     int len;
-	zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
-	file_handle->primary_script = 1;
+	zend_stream_init_filename(file_handle, SG(request_info).path_translated);
 
     p = argv0;
     *p++ = ':';
@@ -660,8 +658,7 @@ static int lsapi_execute_script(void)
         len = 0;
     memccpy( p, SG(request_info).path_translated + len, 0, 46 );
 
-    php_execute_script(&file_handle);
-    zend_destroy_file_handle(&file_handle);
+    php_execute_script(file_handle);
     return 0;
 
 }
@@ -743,6 +740,8 @@ static int lsapi_module_main(int show_source)
 {
     struct sigaction act;
     int sa_rc;
+    zend_file_handle file_handle;
+    memset(&file_handle, 0, sizeof(file_handle));
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
@@ -768,7 +767,7 @@ static int lsapi_module_main(int show_source)
         php_get_highlight_struct(&syntax_highlighter_ini);
         highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini);
     } else {
-        lsapi_execute_script();
+        lsapi_execute_script( &file_handle);
     }
     zend_try {
         php_request_shutdown(NULL);
@@ -1309,9 +1308,8 @@ static int cli_main( int argc, char * argv[] )
         }
         if ( ret == -1 ) {
             if ( *p ) {
-				zend_file_handle file_handle;
+                zend_file_handle file_handle;
 				zend_stream_init_fp(&file_handle, VCWD_FOPEN(*p, "rb"), NULL);
-				file_handle.primary_script = 1;
 
                 if ( file_handle.handle.fp ) {
                     script_filename = *p;
@@ -1331,7 +1329,8 @@ static int cli_main( int argc, char * argv[] )
                             php_get_highlight_struct(&syntax_highlighter_ini);
                             highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini);
                         } else if (source_highlight == 2) {
-                            file_handle.filename = zend_string_init(*p, strlen(*p), 0);
+                            file_handle.filename = *p;
+                            file_handle.free_filename = 0;
                             file_handle.opened_path = NULL;
                             ret = php_lint_script(&file_handle);
                             if (ret==SUCCESS) {
@@ -1341,7 +1340,8 @@ static int cli_main( int argc, char * argv[] )
                             }
 
                         } else {
-                            file_handle.filename = zend_string_init(*p, strlen(*p), 0);
+                            file_handle.filename = *p;
+                            file_handle.free_filename = 0;
                             file_handle.opened_path = NULL;
 
                             php_execute_script(&file_handle);

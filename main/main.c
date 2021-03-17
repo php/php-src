@@ -1442,10 +1442,9 @@ PHP_FUNCTION(set_time_limit)
 /* }}} */
 
 /* {{{ php_fopen_wrapper_for_zend */
-static FILE *php_fopen_wrapper_for_zend(zend_string *filename, zend_string **opened_path)
+static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
-	*opened_path = filename;
-	return php_stream_open_wrapper_as_file(ZSTR_VAL(filename), "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE|STREAM_OPEN_FOR_ZEND_STREAM, opened_path);
+	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
 
@@ -1473,25 +1472,20 @@ static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static zend_result php_stream_open_for_zend(zend_file_handle *handle) /* {{{ */
+static zend_result php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
 {
-	return php_stream_open_for_zend_ex(handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
+	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
 }
 /* }}} */
 
-PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mode) /* {{{ */
+PHPAPI zend_result php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
 	zend_string *opened_path;
-	zend_string *filename;
-	php_stream *stream;
-
-	ZEND_ASSERT(handle->type == ZEND_HANDLE_FILENAME);
-	opened_path = filename = handle->filename;
-	stream = php_stream_open_wrapper((char *)ZSTR_VAL(filename), "rb", mode | STREAM_OPEN_FOR_ZEND_STREAM, &opened_path);
+	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);
 	if (stream) {
 		memset(handle, 0, sizeof(zend_file_handle));
 		handle->type = ZEND_HANDLE_STREAM;
-		handle->filename = filename;
+		handle->filename = (char*)filename;
 		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
@@ -1509,9 +1503,9 @@ PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mod
 }
 /* }}} */
 
-static zend_string *php_resolve_path_for_zend(zend_string *filename) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len) /* {{{ */
 {
-	return php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), PG(include_path));
+	return php_resolve_path(filename, filename_len, PG(include_path));
 }
 /* }}} */
 
@@ -2148,11 +2142,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions
 	   to be loaded later */
-	zend_stream_init();
 	if (php_init_config() == FAILURE) {
 		return FAILURE;
 	}
-	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
 	REGISTER_INI_ENTRIES();
@@ -2458,18 +2450,18 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #else
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 #endif
-			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
+			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 
  		/* Only lookup the real file path and add it to the included_files list if already opened
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
-		if (primary_file->filename &&
-		    strcmp("Standard input code", ZSTR_VAL(primary_file->filename)) &&
+ 		if (primary_file->filename &&
+ 		    strcmp("Standard input code", primary_file->filename) &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
-			if (expand_filepath(ZSTR_VAL(primary_file->filename), realfile)) {
+			if (expand_filepath(primary_file->filename, realfile)) {
 				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);
 				zend_hash_add_empty_element(&EG(included_files), primary_file->opened_path);
 			}
@@ -2497,14 +2489,6 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 
 		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
-
-	if (prepend_file_p) {
-		zend_destroy_file_handle(prepend_file_p);
-	}
-
-	if (append_file_p) {
-		zend_destroy_file_handle(append_file_p);
-	}
 
 	if (EG(exception)) {
 		zend_try {
@@ -2549,7 +2533,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 
 		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
-			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
+			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 		zend_execute_scripts(ZEND_REQUIRE, ret, 1, primary_file);
 	} zend_end_try();
@@ -2625,6 +2609,7 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 
 	zend_try {
 		op_array = zend_compile_file(file, ZEND_INCLUDE);
+		zend_destroy_file_handle(file);
 
 		if (op_array) {
 			destroy_op_array(op_array);
