@@ -491,7 +491,7 @@ try_again:
 		     (((use_ssl && orig->scheme != NULL && zend_string_equals_literal(orig->scheme, "https")) ||
 		      (!use_ssl && orig->scheme == NULL) ||
 		      (!use_ssl && !zend_string_equals_literal(orig->scheme, "https"))) &&
-		     strcmp(ZSTR_VAL(orig->host), ZSTR_VAL(phpurl->host)) == 0 &&
+		     zend_string_equals(orig->host, phpurl->host) &&
 		     orig->port == phpurl->port))) {
     } else {
 			php_stream_close(stream);

@@ -1275,9 +1275,9 @@ PHP_METHOD(SoapServer, handle)
 			    (encoding = zend_hash_str_find(Z_ARRVAL_P(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING")-1)) != NULL &&
 			    Z_TYPE_P(encoding) == IS_STRING) {
 
-				if (strcmp(Z_STRVAL_P(encoding),"gzip") == 0
-				||  strcmp(Z_STRVAL_P(encoding),"x-gzip") == 0
-				||  strcmp(Z_STRVAL_P(encoding),"deflate") == 0
+				if (zend_string_equals_literal(Z_STR_P(encoding), "gzip")
+					|| zend_string_equals_literal(Z_STR_P(encoding), "x-gzip")
+					|| zend_string_equals_literal(Z_STR_P(encoding), "deflate")
 				) {
 					zval filter_params;
 
