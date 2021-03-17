@@ -99,130 +99,131 @@ PHPAPI size_t core_globals_offset;
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
-	const char *facility = ZSTR_VAL(new_value);
+	const zend_string *facility = new_value;
 
 #ifdef LOG_AUTH
-	if (!strcmp(facility, "LOG_AUTH") || !strcmp(facility, "auth") || !strcmp(facility, "security")) {
+	if (zend_string_equals_literal(facility, "LOG_AUTH") || zend_string_equals_literal(facility, "auth")
+			|| zend_string_equals_literal(facility, "security")) {
 		PG(syslog_facility) = LOG_AUTH;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_AUTHPRIV
-	if (!strcmp(facility, "LOG_AUTHPRIV") || !strcmp(facility, "authpriv")) {
+	if (zend_string_equals_literal(facility, "LOG_AUTHPRIV") || zend_string_equals_literal(facility, "authpriv")) {
 		PG(syslog_facility) = LOG_AUTHPRIV;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_CRON
-	if (!strcmp(facility, "LOG_CRON") || !strcmp(facility, "cron")) {
+	if (zend_string_equals_literal(facility, "LOG_CRON") || zend_string_equals_literal(facility, "cron")) {
 		PG(syslog_facility) = LOG_CRON;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_DAEMON
-	if (!strcmp(facility, "LOG_DAEMON") || !strcmp(facility, "daemon")) {
+	if (zend_string_equals_literal(facility, "LOG_DAEMON") || zend_string_equals_literal(facility, "daemon")) {
 		PG(syslog_facility) = LOG_DAEMON;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_FTP
-	if (!strcmp(facility, "LOG_FTP") || !strcmp(facility, "ftp")) {
+	if (zend_string_equals_literal(facility, "LOG_FTP") || zend_string_equals_literal(facility, "ftp")) {
 		PG(syslog_facility) = LOG_FTP;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_KERN
-	if (!strcmp(facility, "LOG_KERN") || !strcmp(facility, "kern")) {
+	if (zend_string_equals_literal(facility, "LOG_KERN") || zend_string_equals_literal(facility, "kern")) {
 		PG(syslog_facility) = LOG_KERN;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LPR
-	if (!strcmp(facility, "LOG_LPR") || !strcmp(facility, "lpr")) {
+	if (zend_string_equals_literal(facility, "LOG_LPR") || zend_string_equals_literal(facility, "lpr")) {
 		PG(syslog_facility) = LOG_LPR;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_MAIL
-	if (!strcmp(facility, "LOG_MAIL") || !strcmp(facility, "mail")) {
+	if (zend_string_equals_literal(facility, "LOG_MAIL") || zend_string_equals_literal(facility, "mail")) {
 		PG(syslog_facility) = LOG_MAIL;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_INTERNAL_MARK
-	if (!strcmp(facility, "LOG_INTERNAL_MARK") || !strcmp(facility, "mark")) {
+	if (zend_string_equals_literal(facility, "LOG_INTERNAL_MARK") || zend_string_equals_literal(facility, "mark")) {
 		PG(syslog_facility) = LOG_INTERNAL_MARK;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_NEWS
-	if (!strcmp(facility, "LOG_NEWS") || !strcmp(facility, "news")) {
+	if (zend_string_equals_literal(facility, "LOG_NEWS") || zend_string_equals_literal(facility, "news")) {
 		PG(syslog_facility) = LOG_NEWS;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_SYSLOG
-	if (!strcmp(facility, "LOG_SYSLOG") || !strcmp(facility, "syslog")) {
+	if (zend_string_equals_literal(facility, "LOG_SYSLOG") || zend_string_equals_literal(facility, "syslog")) {
 		PG(syslog_facility) = LOG_SYSLOG;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_USER
-	if (!strcmp(facility, "LOG_USER") || !strcmp(facility, "user")) {
+	if (zend_string_equals_literal(facility, "LOG_USER") || zend_string_equals_literal(facility, "user")) {
 		PG(syslog_facility) = LOG_USER;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_UUCP
-	if (!strcmp(facility, "LOG_UUCP") || !strcmp(facility, "uucp")) {
+	if (zend_string_equals_literal(facility, "LOG_UUCP") || zend_string_equals_literal(facility, "uucp")) {
 		PG(syslog_facility) = LOG_UUCP;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL0
-	if (!strcmp(facility, "LOG_LOCAL0") || !strcmp(facility, "local0")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL0") || zend_string_equals_literal(facility, "local0")) {
 		PG(syslog_facility) = LOG_LOCAL0;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL1
-	if (!strcmp(facility, "LOG_LOCAL1") || !strcmp(facility, "local1")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL1") || zend_string_equals_literal(facility, "local1")) {
 		PG(syslog_facility) = LOG_LOCAL1;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL2
-	if (!strcmp(facility, "LOG_LOCAL2") || !strcmp(facility, "local2")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL2") || zend_string_equals_literal(facility, "local2")) {
 		PG(syslog_facility) = LOG_LOCAL2;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL3
-	if (!strcmp(facility, "LOG_LOCAL3") || !strcmp(facility, "local3")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL3") || zend_string_equals_literal(facility, "local3")) {
 		PG(syslog_facility) = LOG_LOCAL3;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL4
-	if (!strcmp(facility, "LOG_LOCAL4") || !strcmp(facility, "local4")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL4") || zend_string_equals_literal(facility, "local4")) {
 		PG(syslog_facility) = LOG_LOCAL4;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL5
-	if (!strcmp(facility, "LOG_LOCAL5") || !strcmp(facility, "local5")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL5") || zend_string_equals_literal(facility, "local5")) {
 		PG(syslog_facility) = LOG_LOCAL5;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL6
-	if (!strcmp(facility, "LOG_LOCAL6") || !strcmp(facility, "local6")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL6") || zend_string_equals_literal(facility, "local6")) {
 		PG(syslog_facility) = LOG_LOCAL6;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL7
-	if (!strcmp(facility, "LOG_LOCAL7") || !strcmp(facility, "local7")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL7") || zend_string_equals_literal(facility, "local7")) {
 		PG(syslog_facility) = LOG_LOCAL7;
 		return SUCCESS;
 	}
@@ -278,21 +279,21 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
 {
-	const char *filter = ZSTR_VAL(new_value);
+	const zend_string *filter = new_value;
 
-	if (!strcmp(filter, "all")) {
+	if (zend_string_equals_literal(filter, "all")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "no-ctrl")) {
+	if (zend_string_equals_literal(filter, "no-ctrl")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "ascii")) {
+	if (zend_string_equals_literal(filter, "ascii")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "raw")) {
+	if (zend_string_equals_literal(filter, "raw")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_RAW;
 		return SUCCESS;
 	}
@@ -585,7 +586,8 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && strcmp(ZSTR_VAL(new_value), "syslog")) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
+			new_value && zend_string_equals_literal(new_value, "syslog")) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
@@ -2465,7 +2467,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
 		if (primary_file->filename &&
-		    strcmp("Standard input code", ZSTR_VAL(primary_file->filename)) &&
+			!zend_string_equals_literal(primary_file->filename, "Standard input code") &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
