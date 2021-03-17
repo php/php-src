@@ -243,6 +243,7 @@ static int firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval
 		}
 	}
 
+	array_init(return_value);
 	add_assoc_long(return_value, "pdo_type", param_type);
 	return 1;
 }
