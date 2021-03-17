@@ -375,7 +375,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
  * http://msdn.microsoft.com/en-us/library/windows/desktop/aa384321%28v=vs.85%29.aspx
  * and http://curl.haxx.se/rfc/cookie_spec.html
  */
-#define DATE_FORMAT_COOKIE   "l, d-M-Y H:i:s T"
+#define DATE_FORMAT_COOKIE   "D, d-M-Y H:i:s T"
 
 #define SUNFUNCS_RET_TIMESTAMP 0
 #define SUNFUNCS_RET_STRING    1
