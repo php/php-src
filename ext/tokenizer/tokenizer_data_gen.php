@@ -1,7 +1,8 @@
 <?php
 
-$infile = 'Zend/zend_language_parser.h';
-$outfile = 'ext/tokenizer/tokenizer_data.c';
+$rootDir = __DIR__ . '/../..';
+$infile = $rootDir . '/Zend/zend_language_parser.h';
+$outfile = $rootDir . '/ext/tokenizer/tokenizer_data.c';
 
 if (!file_exists($infile)) {
     fwrite(STDERR, <<<ERROR
