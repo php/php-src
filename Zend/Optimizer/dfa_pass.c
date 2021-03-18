@@ -381,6 +381,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 				zend_op *send_array;
 				zend_op *send_needly;
 				bool strict = 0;
+				ZEND_ASSERT(!call_info->is_prototype);
 
 				if (call_info->caller_init_opline->extended_value == 2) {
 					send_array = call_info->caller_call_opline - 1;

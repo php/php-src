@@ -878,19 +878,8 @@ ZEND_API uint32_t zend_get_func_info(
 		}
 #endif
 
-		if (callee_func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			ret = zend_fetch_arg_info_type(NULL, callee_func->common.arg_info - 1, ce);
-			*ce_is_instanceof = 1;
-		} else {
-#if 0
-			fprintf(stderr, "Unknown internal function '%s'\n", func->common.function_name);
-#endif
-			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
-				| MAY_BE_RC1 | MAY_BE_RCN;
-		}
-		if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret |= MAY_BE_REF;
-		}
+		ret = zend_get_return_info_from_signature_only(
+			callee_func, /* script */ NULL, ce, ce_is_instanceof);
 
 #if ZEND_DEBUG
 		if (internal_ret) {
@@ -919,21 +908,18 @@ ZEND_API uint32_t zend_get_func_info(
 		}
 #endif
 	} else {
-		// FIXME: the order of functions matters!!!
-		zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
-		if (info) {
-			ret = info->return_info.type;
-			*ce = info->return_info.ce;
-			*ce_is_instanceof = info->return_info.is_instanceof;
+		if (!call_info->is_prototype) {
+			// FIXME: the order of functions matters!!!
+			zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
+			if (info) {
+				ret = info->return_info.type;
+				*ce = info->return_info.ce;
+				*ce_is_instanceof = info->return_info.is_instanceof;
+			}
 		}
 		if (!ret) {
-			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
-				| MAY_BE_RC1 | MAY_BE_RCN;
-			/* For generators RETURN_REFERENCE refers to the yielded values. */
-			if ((callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
-					&& !(callee_func->common.fn_flags & ZEND_ACC_GENERATOR)) {
-				ret |= MAY_BE_REF;
-			}
+			ret = zend_get_return_info_from_signature_only(
+				callee_func, /* TODO: script */ NULL, ce, ce_is_instanceof);
 		}
 	}
 	return ret;

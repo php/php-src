@@ -9186,7 +9186,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		while (call_info && call_info->caller_init_opline != opline) {
 			call_info = call_info->next_callee;
 		}
-		if (call_info && call_info->callee_func) {
+		if (call_info && call_info->callee_func && !call_info->is_prototype) {
 			func = call_info->callee_func;
 		}
 	}
@@ -9353,7 +9353,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		while (call_info && call_info->caller_init_opline != opline) {
 			call_info = call_info->next_callee;
 		}
-		if (call_info && call_info->callee_func) {
+		if (call_info && call_info->callee_func && !call_info->is_prototype) {
 			func = call_info->callee_func;
 		}
 	}
@@ -9678,6 +9678,8 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 	uint32_t num_args = 0;
 	zend_function *func = call_info->callee_func;
 
+	/* It's okay to handle prototypes here, because they can only increase the accepted arguments.
+	 * Anything legal for the parent method is also legal for the parent method. */
 	while (num_args < call_info->num_args) {
 		zend_arg_info *arg_info = func->op_array.arg_info + num_args;
 
@@ -9731,7 +9733,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		while (call_info && call_info->caller_call_opline != opline) {
 			call_info = call_info->next_callee;
 		}
-		if (call_info && call_info->callee_func) {
+		if (call_info && call_info->callee_func && !call_info->is_prototype) {
 			func = call_info->callee_func;
 		}
 	}

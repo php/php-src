@@ -6207,7 +6207,8 @@ done:
 						zend_call_info *call_info = jit_extension->func_info.callee_info;
 
 						while (call_info) {
-							if (call_info->caller_init_opline == init_opline) {
+							if (call_info->caller_init_opline == init_opline
+									&& !call_info->is_prototype) {
 								if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
 									if (init_opline->opcode == ZEND_INIT_STATIC_METHOD_CALL
 									 && init_opline->op1_type != IS_CONST) {

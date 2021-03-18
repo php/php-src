@@ -1340,6 +1340,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 			zend_op *opline = call_info->caller_init_opline;
 
 			if (opline && call_info->callee_func && opline->opcode == ZEND_INIT_FCALL) {
+				ZEND_ASSERT(!call_info->is_prototype);
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
 			}
 			call_info = call_info->next_callee;

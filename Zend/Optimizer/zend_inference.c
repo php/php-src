@@ -3979,18 +3979,38 @@ static int is_recursive_tail_call(const zend_op_array *op_array,
 	return 0;
 }
 
+uint32_t zend_get_return_info_from_signature_only(
+		const zend_function *func, const zend_script *script,
+		zend_class_entry **ce, bool *ce_is_instanceof) {
+	uint32_t type;
+	if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_arg_info *ret_info = func->common.arg_info - 1;
+		type = zend_fetch_arg_info_type(script, ret_info, ce);
+		*ce_is_instanceof = ce != NULL;
+	} else {
+		type = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+			| MAY_BE_RC1 | MAY_BE_RCN;
+		*ce = NULL;
+		*ce_is_instanceof = false;
+	}
+
+	/* For generators RETURN_REFERENCE refers to the yielded values. */
+	if ((func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			&& !(func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+		type |= MAY_BE_REF;
+	}
+	return type;
+}
+
 ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret)
 {
 	if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_arg_info *ret_info = op_array->arg_info - 1;
 		zend_ssa_range tmp_range = {0, 0, 0, 0};
-
-		ret->type = zend_fetch_arg_info_type(script, ret_info, &ret->ce);
-		if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret->type |= MAY_BE_REF;
-		}
-		ret->is_instanceof = (ret->ce) ? 1 : 0;
+		bool is_instanceof = false;
+		ret->type = zend_get_return_info_from_signature_only(
+			(zend_function *) op_array, script, &ret->ce, &is_instanceof);
+		ret->is_instanceof = is_instanceof;
 		ret->range = tmp_range;
 		ret->has_range = 0;
 	}

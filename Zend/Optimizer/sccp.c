@@ -1771,7 +1771,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			/* We're only interested in functions with up to three arguments right now */
-			if (call->num_args > 3 || call->send_unpack) {
+			if (call->num_args > 3 || call->send_unpack || call->is_prototype) {
 				SET_RESULT_BOT(result);
 				break;
 			}
