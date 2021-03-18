@@ -16,7 +16,7 @@ file_get_contents('error://test');
 --EXPECTF--
 Undefined constant self::INVALID
 
-Fatal error: Uncaught Error: Undefined constant self::INVALID in %s:%d
+Fatal error: Uncaught Error: Trying to use class for which initializer evaluation has previously failed in %s:%d
 Stack trace:
 #0 %sbug77664.php(%d): file_get_contents('error://test')
 #1 {main}

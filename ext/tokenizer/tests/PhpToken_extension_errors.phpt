@@ -31,5 +31,5 @@ try {
 ?>
 --EXPECT--
 Undefined constant "UNKNOWN"
-Undefined constant "UNKNOWN"
+Trying to use class for which initializer evaluation has previously failed
 Cannot instantiate abstract class MyPhpToken2

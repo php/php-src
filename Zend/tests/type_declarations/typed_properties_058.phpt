@@ -33,5 +33,5 @@ for ($i = 0; $i < 2; $i++) {
 --EXPECT--
 Cannot assign int to property B::$foo of type string
 int(5)
-Cannot assign int to property B::$foo of type string
-Cannot assign int to property B::$foo of type string
+Trying to use class for which initializer evaluation has previously failed
+Trying to use class for which initializer evaluation has previously failed
