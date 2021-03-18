@@ -35,9 +35,18 @@ $x->a->b = 42;
 $x->a->c = 42.5;
 var_dump($x);
 $y = $ffi->ffi_bug80847($x);
-var_dump($y);
+var_dump($x, $y);
 ?>
 --EXPECTF--
+object(FFI\CData:struct bug80847_02)#%d (1) {
+  ["a"]=>
+  object(FFI\CData:struct bug80847_01)#%d (2) {
+    ["b"]=>
+    int(42)
+    ["c"]=>
+    float(42.5)
+  }
+}
 object(FFI\CData:struct bug80847_02)#%d (1) {
   ["a"]=>
   object(FFI\CData:struct bug80847_01)#%d (2) {
