@@ -3519,6 +3519,12 @@ static zend_always_inline int _zend_update_type_info(
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 				tmp = zend_fetch_arg_info_type(script, ret_info, &ce);
+
+				// TODO: We could model more precisely how illegal types are converted.
+				uint32_t extra_types = t1 & ~tmp;
+				if (!extra_types) {
+					tmp &= t1;
+				}
 			}
 			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
@@ -4019,6 +4025,11 @@ void zend_func_return_info(const zend_op_array   *op_array,
 		return;
 	}
 
+	if (!ret->type) {
+		/* We will intersect the type later. */
+		ret->type = MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_KEY_ANY;
+	}
+
 	for (j = 0; j < blocks_count; j++) {
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) && blocks[j].len != 0) {
 			zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
@@ -4178,10 +4189,10 @@ void zend_func_return_info(const zend_op_array   *op_array,
 		if (tmp_has_range < 0) {
 			tmp_has_range = 0;
 		}
-		ret->type = tmp;
 		ret->ce = tmp_ce;
 		ret->is_instanceof = tmp_is_instanceof;
 	}
+	ret->type &= tmp;
 	ret->range = tmp_range;
 	ret->has_range = tmp_has_range;
 }
