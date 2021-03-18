@@ -8927,7 +8927,7 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	zend_compile_class_ref(&class_node, class_ast,
-		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION);
+		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION | ZEND_FETCH_CLASS_SILENT);
 
 	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL);
 

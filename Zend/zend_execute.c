@@ -1002,7 +1002,7 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 				} else {
 					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
-						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+						ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 					if (!ce) {
 						if (HAVE_CACHE_SLOT) {
 							cache_slot++;
@@ -1032,7 +1032,8 @@ static zend_always_inline bool zend_check_type_slow(
 					*cache_slot = ce;
 				}
 			} else {
-				ce = zend_fetch_class(ZEND_TYPE_NAME(*type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+				ce = zend_fetch_class(ZEND_TYPE_NAME(*type),
+					ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 				if (UNEXPECTED(!ce)) {
 					goto builtin_types;
 				}

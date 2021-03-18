@@ -1523,9 +1523,8 @@ check_fetch_type:
 			break;
 	}
 
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, NULL, fetch_type);
-	} else if ((ce = zend_lookup_class_ex(class_name, NULL, fetch_type)) == NULL) {
+	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	if (!ce) {
 		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
 			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
@@ -1543,11 +1542,8 @@ check_fetch_type:
 
 zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, int fetch_type) /* {{{ */
 {
-	zend_class_entry *ce;
-
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, key, fetch_type);
-	} else if ((ce = zend_lookup_class_ex(class_name, key, fetch_type)) == NULL) {
+	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);
+	if (!ce) {
 		if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 			return NULL;
 		}
