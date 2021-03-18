@@ -9,21 +9,21 @@ class C {
     public static $bar = [...self::ARR];
 }
 
-class D {
-    public const A = [...self::B];
-    public const B = [...self::A];
+try {
+    class D {
+        public const A = [...self::B];
+        public const B = [...self::A];
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 var_dump(C::FOO);
 var_dump(C::$bar);
 
-try {
-    var_dump(D::A);
-} catch (Error $ex) {
-    echo "Exception: " . $ex->getMessage() . "\n";
-}
 ?>
 --EXPECT--
+Cannot declare self-referencing constant self::B
 array(5) {
   [0]=>
   int(0)
@@ -44,4 +44,3 @@ array(3) {
   [2]=>
   int(3)
 }
-Exception: Cannot declare self-referencing constant self::B

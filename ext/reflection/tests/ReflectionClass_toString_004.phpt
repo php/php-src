@@ -3,9 +3,14 @@ Constant evaluation exception during ReflectionClass::__toString()
 --FILE--
 <?php
 
-class A {
-    const C = self::UNKNOWN;
+try {
+    class A {
+        const C = self::UNKNOWN;
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
+
 try {
     echo new ReflectionClass(A::class);
 } catch (Error $e) {
@@ -14,4 +19,5 @@ try {
 
 ?>
 --EXPECT--
+Undefined constant self::UNKNOWN
 Undefined constant self::UNKNOWN

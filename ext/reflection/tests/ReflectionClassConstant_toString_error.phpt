@@ -3,8 +3,12 @@ Exception thrown while converting ReflectionClassConstant to string
 --FILE--
 <?php
 
-class B {
-    const X = self::UNKNOWN;
+try {
+    class B {
+        const X = self::UNKNOWN;
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 try {
@@ -15,4 +19,5 @@ try {
 
 ?>
 --EXPECT--
+Undefined constant self::UNKNOWN
 Undefined constant self::UNKNOWN

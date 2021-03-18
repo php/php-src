@@ -10,8 +10,12 @@ class A {
     public int $foo = FOO;
 }
 
-class B {
-    public string $foo = FOO;
+try {
+    class B {
+        public string $foo = FOO;
+    }
+} catch (TypeError $e) {
+    echo $e->getMessage() . "\n";
 }
 
 $o = new A();
@@ -27,6 +31,7 @@ for ($i = 0; $i < 2; $i++) {
 }
 ?>
 --EXPECT--
+Cannot assign int to property B::$foo of type string
 int(5)
 Cannot assign int to property B::$foo of type string
 Cannot assign int to property B::$foo of type string

@@ -27,11 +27,11 @@ var_dump(test());
 
 ?>
 --EXPECT--
-object(Foo)#2 (1) {
+object(Foo)#1 (1) {
   ["prop"]=>
   int(0)
 }
-object(Foo)#3 (1) {
+object(Foo)#2 (1) {
   ["prop"]=>
   int(1)
 }
@@ -39,7 +39,7 @@ object(Foo)#5 (1) {
   ["prop"]=>
   int(2)
 }
-object(Foo)#1 (1) {
+object(Foo)#3 (1) {
   ["prop"]=>
   int(3)
 }

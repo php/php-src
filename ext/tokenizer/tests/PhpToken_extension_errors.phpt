@@ -5,8 +5,12 @@ PhpToken extensions that throw during construction
 --FILE--
 <?php
 
-class MyPhpToken1 extends PhpToken {
-    public $extra = UNKNOWN;
+try {
+    class MyPhpToken1 extends PhpToken {
+        public $extra = UNKNOWN;
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 try {
@@ -26,5 +30,6 @@ try {
 
 ?>
 --EXPECT--
+Undefined constant "UNKNOWN"
 Undefined constant "UNKNOWN"
 Cannot instantiate abstract class MyPhpToken2
