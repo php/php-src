@@ -1,7 +1,7 @@
 --TEST--
 TypeErrors will not contain param values in backtrace
---SKIPIF--
-<?php if (!extension_loaded("sodium")) die("skip ext/sodium required"); ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 declare(strict_types=1);

@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium auth
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $msg = random_bytes(1000);
