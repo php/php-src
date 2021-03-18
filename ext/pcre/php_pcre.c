@@ -767,8 +767,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
 			zend_string_release(_k);
 		}
-		pcre2_set_character_tables(cctx, tables);
 	}
+	pcre2_set_character_tables(cctx, tables);
 
 	/* Set extra options for the compile context. */
 	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
