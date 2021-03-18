@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
     (Dmitry)
 
+- PDO_ODBC:
+  . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
+    (cmb)
+
 01 Apr 2021, PHP 8.0.4
 
 - Core:

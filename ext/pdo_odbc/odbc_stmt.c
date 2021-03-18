@@ -650,6 +650,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
+		SQLLEN orig_fetched_len = SQL_NULL_DATA;
 		zend_ulong used = 0;
 		char *buf;
 		RETCODE rc;
@@ -660,6 +661,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 
 		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
  			256, &C->fetched_len);
+		orig_fetched_len = C->fetched_len;
 
 		if (rc == SQL_SUCCESS) {
 			/* all the data fit into our little buffer;
@@ -671,7 +673,8 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 			/* this is a 'long column'
 
 			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
-			 in order into the output buffer
+			 in order into the output buffer; 255 bytes are an optimistic assumption, since the driver may assert
+			 more or less NUL bytes at the end; we cater to that later, if actual length information is available
 
 			 this loop has to work whether or not SQLGetData() provides the total column length.
 			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
@@ -685,7 +688,14 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong
 			do {
 				C->fetched_len = 0;
 				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
-				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR, buf2, 256, &C->fetched_len);
+				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, 256, &C->fetched_len);
+
+				/* adjust `used` in case we have length info from the driver */
+				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
+					SQLLEN fixed_used = orig_fetched_len - C->fetched_len;
+					ZEND_ASSERT(fixed_used <= used + 1);
+					used = fixed_used;
+				}
 
 				/* resize output buffer and reassemble block */
 				if (rc==SQL_SUCCESS_WITH_INFO) {
