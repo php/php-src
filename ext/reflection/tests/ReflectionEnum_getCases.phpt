@@ -22,14 +22,14 @@ var_dump((new ReflectionEnum(IntEnum::class))->getCases());
 --EXPECT--
 array(2) {
   [0]=>
-  object(ReflectionEnumUnitCase)#2 (2) {
+  object(ReflectionEnumUnitCase)#6 (2) {
     ["name"]=>
     string(3) "Foo"
     ["class"]=>
     string(5) "Enum_"
   }
   [1]=>
-  object(ReflectionEnumUnitCase)#3 (2) {
+  object(ReflectionEnumUnitCase)#7 (2) {
     ["name"]=>
     string(3) "Bar"
     ["class"]=>
@@ -38,14 +38,14 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(ReflectionEnumBackedCase)#2 (2) {
+  object(ReflectionEnumBackedCase)#6 (2) {
     ["name"]=>
     string(3) "Foo"
     ["class"]=>
     string(7) "IntEnum"
   }
   [1]=>
-  object(ReflectionEnumBackedCase)#1 (2) {
+  object(ReflectionEnumBackedCase)#5 (2) {
     ["name"]=>
     string(3) "Bar"
     ["class"]=>

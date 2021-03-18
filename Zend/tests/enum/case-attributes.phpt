@@ -19,7 +19,7 @@ var_dump((new \ReflectionClassConstant(Foo::class, 'Bar'))->getAttributes(EnumCa
 
 ?>
 --EXPECT--
-object(EnumCaseAttribute)#1 (1) {
+object(EnumCaseAttribute)#2 (1) {
   ["value"]=>
   string(3) "Bar"
 }

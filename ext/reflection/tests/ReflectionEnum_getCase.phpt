@@ -32,7 +32,7 @@ test(IntEnum::class, 'Baz');
 
 ?>
 --EXPECT--
-object(ReflectionEnumUnitCase)#2 (2) {
+object(ReflectionEnumUnitCase)#4 (2) {
   ["name"]=>
   string(3) "Foo"
   ["class"]=>
@@ -40,7 +40,7 @@ object(ReflectionEnumUnitCase)#2 (2) {
 }
 ReflectionException: Enum_::Bar is not a case
 ReflectionException: Case Enum_::Baz does not exist
-object(ReflectionEnumBackedCase)#2 (2) {
+object(ReflectionEnumBackedCase)#4 (2) {
   ["name"]=>
   string(3) "Foo"
   ["class"]=>

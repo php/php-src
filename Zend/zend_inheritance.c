@@ -2710,6 +2710,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					}
 					zv = zend_hash_find_ex(CG(class_table), key, 1);
 					Z_CE_P(zv) = ret;
+					if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
+						zend_update_class_constants(ret);
+					}
 					return ret;
 				}
 			} else {
@@ -2831,6 +2834,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		free_alloca(traits_and_interfaces, use_heap);
 	}
 
+	if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
+		zend_update_class_constants(ce);
+	}
 	return ce;
 }
 /* }}} */
