@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e8a70345ed2b393dc09db5497c04383a207f3b8 */
+ * Stub hash: 4b3f45c3d10b2cb66258a02faf50a34e20ee2f35 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -303,7 +303,7 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 
 	zval property_faultstring_default_value;
-	ZVAL_NULL(&property_faultstring_default_value);
+	ZVAL_EMPTY_STRING(&property_faultstring_default_value);
 	zend_string *property_faultstring_name = zend_string_init("faultstring", sizeof("faultstring") - 1, 1);
 	zend_declare_property_ex(class_entry, property_faultstring_name, &property_faultstring_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_faultstring_name);
@@ -313,36 +313,6 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	zend_string *property_faultcode_name = zend_string_init("faultcode", sizeof("faultcode") - 1, 1);
 	zend_declare_property_ex(class_entry, property_faultcode_name, &property_faultcode_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_faultcode_name);
-
-	zval property_faultcodens_default_value;
-	ZVAL_NULL(&property_faultcodens_default_value);
-	zend_string *property_faultcodens_name = zend_string_init("faultcodens", sizeof("faultcodens") - 1, 1);
-	zend_declare_property_ex(class_entry, property_faultcodens_name, &property_faultcodens_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property_faultcodens_name);
-
-	zval property_faultactor_default_value;
-	ZVAL_NULL(&property_faultactor_default_value);
-	zend_string *property_faultactor_name = zend_string_init("faultactor", sizeof("faultactor") - 1, 1);
-	zend_declare_property_ex(class_entry, property_faultactor_name, &property_faultactor_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property_faultactor_name);
-
-	zval property_detail_default_value;
-	ZVAL_NULL(&property_detail_default_value);
-	zend_string *property_detail_name = zend_string_init("detail", sizeof("detail") - 1, 1);
-	zend_declare_typed_property(class_entry, property_detail_name, &property_detail_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
-	zend_string_release(property_detail_name);
-
-	zval property__name_default_value;
-	ZVAL_NULL(&property__name_default_value);
-	zend_string *property__name_name = zend_string_init("_name", sizeof("_name") - 1, 1);
-	zend_declare_property_ex(class_entry, property__name_name, &property__name_default_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(property__name_name);
-
-	zval property_headerfault_default_value;
-	ZVAL_NULL(&property_headerfault_default_value);
-	zend_string *property_headerfault_name = zend_string_init("headerfault", sizeof("headerfault") - 1, 1);
-	zend_declare_typed_property(class_entry, property_headerfault_name, &property_headerfault_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
-	zend_string_release(property_headerfault_name);
 
 	return class_entry;
 }

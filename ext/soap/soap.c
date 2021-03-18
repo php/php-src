@@ -2214,7 +2214,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 				ZVAL_OBJ(&exception_object, EG(exception));
 				msg = zval_get_string(zend_read_property(zend_ce_error, Z_OBJ(exception_object), "message", sizeof("message")-1, 0, &rv));
 				/* change class */
-				EG(exception)->ce = soap_fault_class_entry;
+				EG(exception)->ce = soap_fault_class_entry; // TODO Why does it sigterm when all SoapFault properties are declared?
 				set_soap_fault(&exception_object, NULL, "Client", ZSTR_VAL(msg), NULL, NULL, NULL);
 				zend_string_release_ex(msg, 0);
 			} else if (
@@ -3773,12 +3773,14 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
 					char *hdr_name = Z_TYPE(h->function_name) == IS_STRING
 						? Z_STRVAL(h->function_name) : NULL;
+					bool is_header = 0;
 
 					if (Z_TYPE(h->retval) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry)) {
 						zval *tmp;
 						sdlSoapBindingFunctionHeaderPtr hdr;
 						smart_str key = {0};
+						is_header = 1;
 
 						tmp = zend_read_property(soap_header_class_entry, Z_OBJ(h->retval), "namespace", sizeof("namespace")-1, 1, &rv);
 						if (tmp != NULL && Z_TYPE_P(tmp) == IS_STRING) {
@@ -3816,7 +3818,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 						if (serialize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, hdr_ret, version, 0, &xmlHdr) == SOAP_ENCODED) {
 							use = SOAP_ENCODED;
 						}
-						set_soap_header_attributes(xmlHdr, &h->retval, version);
+						if (is_header) {
+							set_soap_header_attributes(xmlHdr, &h->retval, version);
+						}
 					} else {
 						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head);
 						if (hdr_name) {
@@ -3826,7 +3830,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 							xmlNsPtr nsptr = encode_add_ns(xmlHdr,hdr_ns);
 							xmlSetNs(xmlHdr, nsptr);
 						}
-						set_soap_header_attributes(xmlHdr, &h->retval, version);
+						if (is_header) {
+							set_soap_header_attributes(xmlHdr, &h->retval, version);
+						}
 					}
 				}
 				h = h->next;

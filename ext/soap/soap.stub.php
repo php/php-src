@@ -38,23 +38,23 @@ class SoapHeader
 class SoapFault extends Exception
 {
     /** @var string */
-    public $faultstring;
+    public $faultstring = "";
 
     /** @var string|null */
     public $faultcode;
 
     /** @var string|null */
-    public $faultcodens;
+    //public $faultcodens;
 
     /** @var string|null */
-    public $faultactor;
+    //public $faultactor;
 
-    public mixed $detail = null;
+    //public mixed $detail = null;
 
     /** @var string|null */
-    public $_name;
+    //public $_name;
 
-    public mixed $headerfault = null;
+    //public mixed $headerfault = null;
 
     public function __construct(array|string|null $code, string $string, ?string $actor = null, mixed $details = null, ?string $name = null, mixed $headerFault = null) {}
 

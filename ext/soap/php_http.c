@@ -436,7 +436,7 @@ int make_http_soap_request(zval        *this_ptr,
 	}
 
 	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_stream_context", sizeof("_stream_context")-1, 1, &rv);
-	if (tmp != NULL) {
+	if (tmp != NULL && Z_TYPE_P(tmp) != IS_NULL) {
 		context = php_stream_context_from_zval(tmp, 0);
 	}
 
