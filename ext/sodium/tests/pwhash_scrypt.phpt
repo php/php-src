@@ -1,7 +1,9 @@
 --TEST--
 Check for libsodium scrypt
+--EXTENSIONS--
+sodium
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip";
+<?php
 if (!defined('SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES')) print "skip libsodium without scrypt"; ?>
 --FILE--
 <?php

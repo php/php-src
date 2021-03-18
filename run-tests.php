@@ -2057,14 +2057,25 @@ TEST $file
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
         [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
+        $missing = [];
         foreach ($extensions as $req_ext) {
             if (!in_array($req_ext, $loaded)) {
                 if ($req_ext == 'opcache') {
-                    $ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ini_settings['zend_extension'][] = $ext_file;
                 } else {
-                    $ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ini_settings['extension'][] = $ext_file;
+                }
+                if (!is_readable($ext_file)) {
+                    $missing[] = $req_ext;
                 }
             }
+        }
+        if ($missing) {
+            $message = 'Required extension' . (count($missing) > 1 ? 's' : '')
+                . ' missing: ' . implode(', ', $missing);
+            return skip_test($tested, $tested_file, $shortname, $message);
         }
     }
 

@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium KDF
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $key = sodium_crypto_kdf_keygen();
