@@ -293,15 +293,86 @@ static int zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *s
 }
 /* }}} */
 
+static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t size)
+{
+	zend_ffi_field *field;
+
+	ZEND_HASH_FOREACH_PTR(&type->record.fields, field) {
+		switch (ZEND_FFI_TYPE(field->type)->kind) {
+			case ZEND_FFI_TYPE_FLOAT:
+				t->elements[(*i)++] = &ffi_type_float;
+				break;
+			case ZEND_FFI_TYPE_DOUBLE:
+				t->elements[(*i)++] = &ffi_type_double;
+				break;
+#ifdef HAVE_LONG_DOUBLE
+			case ZEND_FFI_TYPE_LONGDOUBLE:
+				t->elements[(*i)++] = &ffi_type_longdouble;
+				break;
+#endif
+			case ZEND_FFI_TYPE_SINT8:
+			case ZEND_FFI_TYPE_UINT8:
+			case ZEND_FFI_TYPE_BOOL:
+			case ZEND_FFI_TYPE_CHAR:
+				t->elements[(*i)++] = &ffi_type_uint8;
+				break;
+			case ZEND_FFI_TYPE_SINT16:
+			case ZEND_FFI_TYPE_UINT16:
+				t->elements[(*i)++] = &ffi_type_uint16;
+				break;
+			case ZEND_FFI_TYPE_SINT32:
+			case ZEND_FFI_TYPE_UINT32:
+				t->elements[(*i)++] = &ffi_type_uint32;
+				break;
+			case ZEND_FFI_TYPE_SINT64:
+			case ZEND_FFI_TYPE_UINT64:
+				t->elements[(*i)++] = &ffi_type_uint64;
+				break;
+			case ZEND_FFI_TYPE_POINTER:
+				t->elements[(*i)++] = &ffi_type_pointer;
+				break;
+			case ZEND_FFI_TYPE_STRUCT: {
+				zend_ffi_type *field_type = ZEND_FFI_TYPE(field->type);
+				/* for unions we use only the first field */
+				int num_fields = !(field_type->attr & ZEND_FFI_ATTR_UNION) ?
+					zend_hash_num_elements(&field_type->record.fields) : 1;
+
+				if (num_fields > 1) {
+					size += sizeof(ffi_type*) * (num_fields - 1);
+					t = erealloc(t, size);
+					t->elements = (ffi_type**)(t + 1);
+				}
+				t = zend_ffi_face_struct_add_fields(t, field_type, i, size);
+				break;
+			}
+			default:
+				t->elements[(*i)++] = &ffi_type_void;
+				break;
+		}
+		if (type->attr & ZEND_FFI_ATTR_UNION) {
+			/* for unions we use only the first field */
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return t;
+}
+
 static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
 {
-	ffi_type *t = emalloc(sizeof(ffi_type) + sizeof(ffi_type*));
+	/* for unions we use only the first field */
+	int num_fields = !(type->attr & ZEND_FFI_ATTR_UNION) ?
+		zend_hash_num_elements(&type->record.fields) : 1;
+	size_t size = sizeof(ffi_type) + sizeof(ffi_type*) * (num_fields + 1);
+	ffi_type *t = emalloc(size);
+	int i;
 
 	t->size = type->size;
 	t->alignment = type->align;
 	t->type = FFI_TYPE_STRUCT;
 	t->elements = (ffi_type**)(t + 1);
-	t->elements[0] = NULL;
+	i = 0;
+	t = zend_ffi_face_struct_add_fields(t, type, &i, size);
+	t->elements[i] = NULL;
 	return t;
 }
 /* }}} */
