@@ -730,25 +730,19 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
+	if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_hash_val(key);
+	}
+
 	if (UNEXPECTED(HT_FLAGS(ht) & (HASH_FLAG_UNINITIALIZED|HASH_FLAG_PACKED))) {
 		if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 			zend_hash_real_init_mixed(ht);
-			if (!ZSTR_IS_INTERNED(key)) {
-				zend_string_addref(key);
-				HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-				zend_string_hash_val(key);
-			}
 			goto add_to_hash;
 		} else {
 			zend_hash_packed_to_hash(ht);
-			if (!ZSTR_IS_INTERNED(key)) {
-				zend_string_addref(key);
-				HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-				zend_string_hash_val(key);
-			}
 		}
 	} else if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
-		p = zend_hash_find_bucket(ht, key, 0);
+		p = zend_hash_find_bucket(ht, key, 1);
 
 		if (p) {
 			zval *data;
@@ -781,19 +775,15 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			ZVAL_COPY_VALUE(data, pData);
 			return data;
 		}
-		if (!ZSTR_IS_INTERNED(key)) {
-			zend_string_addref(key);
-			HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-		}
-	} else if (!ZSTR_IS_INTERNED(key)) {
-		zend_string_addref(key);
-		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
-		zend_string_hash_val(key);
 	}
 
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
 add_to_hash:
+	if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
+	}
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	arData = ht->arData;
