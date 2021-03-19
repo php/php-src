@@ -2031,7 +2031,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1);
 		}
 
-		if (PS(mod) && PS(session_status) != php_session_active && PS(mod) != &ps_mod_user) {
+		if (PS(session_status) != php_session_active && (!PS(mod) || PS(mod) != &ps_mod_user)) {
 			ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
 			ini_val = zend_string_init("user", sizeof("user") - 1, 0);
 			PS(set_handler) = 1;
