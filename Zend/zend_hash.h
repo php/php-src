@@ -32,6 +32,7 @@
 #define HASH_UPDATE_INDIRECT	(1<<2)
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
+#define HASH_LOOKUP				(1<<5)
 
 #define HASH_FLAG_CONSISTENCY      ((1<<0) | (1<<1))
 #define HASH_FLAG_PACKED           (1<<2)
@@ -205,6 +206,22 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 		} \
 	} while (0)
 
+
+/* Find or add NULL, if doesn't exist */
+ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
+ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
+
+#define ZEND_HASH_INDEX_LOOKUP(_ht, _h, _ret) do { \
+		if (EXPECTED(HT_FLAGS(_ht) & HASH_FLAG_PACKED)) { \
+			if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) { \
+				_ret = &_ht->arData[_h].val; \
+				if (EXPECTED(Z_TYPE_P(_ret) != IS_UNDEF)) { \
+					break; \
+				} \
+			} \
+		} \
+		_ret = zend_hash_index_lookup(_ht, _h); \
+	} while (0)
 
 /* Misc */
 static zend_always_inline bool zend_hash_exists(const HashTable *ht, zend_string *key)

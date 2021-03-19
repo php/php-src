@@ -2121,25 +2121,27 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
-		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-		return retval;
+		if (type != BP_VAR_W) {
+			ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+			return retval;
 num_undef:
-		switch (type) {
-			case BP_VAR_R:
-				zend_undefined_offset(hval);
-				/* break missing intentionally */
-			case BP_VAR_UNSET:
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
-					return NULL;
+			switch (type) {
+				case BP_VAR_R:
+					zend_undefined_offset(hval);
+					/* break missing intentionally */
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_RW:
+					if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
+						return NULL;
+					}
+					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+					break;
 				}
-				/* break missing intentionally */
-			case BP_VAR_W:
-				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-				break;
+		} else {
+			ZEND_HASH_INDEX_LOOKUP(ht, hval, retval);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
@@ -2149,30 +2151,31 @@ num_undef:
 			}
 		}
 str_index:
-		retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
-		if (!retval) {
-			switch (type) {
-				case BP_VAR_R:
-					zend_undefined_index(offset_key);
-					/* break missing intentionally */
-				case BP_VAR_UNSET:
-				case BP_VAR_IS:
-					retval = &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					/* Key may be released while throwing the undefined index warning. */
-					zend_string_addref(offset_key);
-					if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+		if (type != BP_VAR_W) {
+			retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
+			if (!retval) {
+				switch (type) {
+					case BP_VAR_R:
+						zend_undefined_index(offset_key);
+						/* break missing intentionally */
+					case BP_VAR_UNSET:
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_RW:
+						/* Key may be released while throwing the undefined index warning. */
+						zend_string_addref(offset_key);
+						if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+							zend_string_release(offset_key);
+							return NULL;
+						}
+						retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 						zend_string_release(offset_key);
-						return NULL;
-					}
-					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-					zend_string_release(offset_key);
-					break;
-				case BP_VAR_W:
-					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-					break;
+						break;
+				}
 			}
+		} else {
+			retval = zend_hash_lookup(ht, offset_key);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_REFERENCE)) {
 		dim = Z_REFVAL_P(dim);
