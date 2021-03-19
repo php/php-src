@@ -18,6 +18,10 @@ class A
     public function &baz()
     {
     }
+
+    public function someReturningStaticMethod() : static
+    {
+    }
 }
 
 class B extends A
@@ -33,6 +37,11 @@ class B extends A
     }
 
     public function &baz(): noreturn
+    {
+        throw new UnexpectedValueException('child');
+    }
+
+    public function someReturningStaticMethod(): noreturn
     {
         throw new UnexpectedValueException('child');
     }
@@ -52,6 +61,12 @@ try {
 
 try {
     (new B)->baz();
+} catch (UnexpectedValueException $e) {
+    // do nothing
+}
+
+try {
+    (new B)->someReturningStaticMethod();
 } catch (UnexpectedValueException $e) {
     // do nothing
 }
