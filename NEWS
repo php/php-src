@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
     (cmb)
 
+- Session:
+  . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
+    (cmb)
+
 01 Apr 2021, PHP 8.0.4
 
 - Core:
