@@ -259,16 +259,6 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 	return retval;
 }
 
-static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_w(HashTable *ht, zend_long idx)
-{
-	zval *retval = _zend_hash_index_find(ht, idx);
-
-	if (!retval) {
-		retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
-	}
-	return retval;
-}
-
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
 	zval *retval = zend_hash_find_ex(ht, str, 1);
@@ -281,15 +271,6 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 		}
 		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 		zend_string_release(str);
-	}
-	return retval;
-}
-
-static zval* ZEND_FASTCALL zend_jit_hash_lookup_w(HashTable *ht, zend_string *str)
-{
-	zval *retval = zend_hash_find_ex(ht, str, 1);
-	if (!retval) {
-		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
 	}
 	return retval;
 }
@@ -342,7 +323,6 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 {
 	zend_ulong idx;
 	register const char *tmp = str->val;
-	zval *retval;
 
 	do {
 		if (*tmp > '9') {
@@ -357,19 +337,11 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 			}
 		}
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
-			retval = zend_hash_index_find(ht, idx);
-			if (!retval) {
-				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
-			}
-			return retval;
+			return zend_hash_index_lookup(ht, idx);
 		}
 	} while (0);
 
-	retval = zend_hash_find(ht, str);
-	if (!retval) {
-		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
-	}
-	return retval;
+	return zend_hash_lookup(ht, str);
 }
 
 static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
@@ -713,18 +685,10 @@ str_index:
 	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
 		goto num_index;
 	}
-	retval = zend_hash_find(ht, offset_key);
-	if (!retval) {
-		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-	}
-	return retval;
+	return zend_hash_lookup(ht, offset_key);
 
 num_index:
-	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-	return retval;
-
-num_undef:
-	retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+	ZEND_HASH_INDEX_LOOKUP(ht, hval, retval);
 	return retval;
 }
 

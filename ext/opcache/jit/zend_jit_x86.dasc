@@ -5546,7 +5546,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	// hval = Z_LVAL_P(dim);
 						|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 					}
-					|	EXT_CALL zend_jit_hash_index_lookup_w, r0
+					|	EXT_CALL zend_hash_index_lookup, r0
 				}
 				break;
 			default:
@@ -5648,7 +5648,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (opline->op2_type != IS_CONST) {
 					|	EXT_CALL zend_jit_symtable_lookup_w, r0
 				} else {
-					|	EXT_CALL zend_jit_hash_lookup_w, r0
+					|	EXT_CALL zend_hash_lookup, r0
 				}
 				break;
 			default:
