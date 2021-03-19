@@ -1816,7 +1816,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 			lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
 			trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
 			zend_string_release_ex(lc_trait_name, 0);
-			if (!trait && !(trait->ce_flags & ZEND_ACC_LINKED)) {
+			if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 			}
 			zend_check_trait_usage(ce, trait, traits);
