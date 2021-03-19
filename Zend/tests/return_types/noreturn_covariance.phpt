@@ -14,6 +14,10 @@ class A
     {
         throw new UnexpectedValueException('parent');
     }
+
+    public function &baz()
+    {
+    }
 }
 
 class B extends A
@@ -27,6 +31,11 @@ class B extends A
     {
         throw new UnexpectedValueException('child');
     }
+
+    public function &baz(): noreturn
+    {
+        throw new UnexpectedValueException('child');
+    }
 }
 
 try {
@@ -37,6 +46,12 @@ try {
 
 try {
     (new B)->bar();
+} catch (UnexpectedValueException $e) {
+    // do nothing
+}
+
+try {
+    (new B)->baz();
 } catch (UnexpectedValueException $e) {
     // do nothing
 }
