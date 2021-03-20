@@ -126,12 +126,16 @@ bool(true)
 -- Iteration 5 --
 bool(true)
 
+Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
+
 Warning: session_encode(): Skipping numeric key 10 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 6 --
 bool(true)
+
+Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
 
 Warning: session_encode(): Skipping numeric key -10 in %s on line %d
 bool(false)
@@ -147,12 +151,16 @@ bool(true)
 -- Iteration 8 --
 bool(true)
 
+Deprecated: Implicit conversion to int from non-compatible float 0.000000 in %s on line %d
+
 Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 9 --
 bool(true)
+
+Deprecated: Implicit conversion to int from non-compatible float 0.500000 in %s on line %d
 
 Warning: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)

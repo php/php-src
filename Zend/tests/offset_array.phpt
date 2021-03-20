@@ -35,7 +35,7 @@ echo "Done\n";
 --EXPECTF--
 int(2)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float 0.083600 in %s on line %d
 int(1)
 
 Warning: Undefined array key "" in %s on line %d

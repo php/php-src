@@ -47,7 +47,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"
@@ -58,8 +58,12 @@ string(2) "ff"
 -- Iteration 4 --
 string(2) "00"
 -- Iteration 5 --
+
+Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
 string(2) "0a"
 -- Iteration 6 --
+
+Deprecated: Implicit conversion to int from non-compatible float -20.500000 in %s on line %d
 string(2) "ec"
 -- Iteration 7 --
 string(2) "48"

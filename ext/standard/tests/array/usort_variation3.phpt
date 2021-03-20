@@ -69,8 +69,10 @@ var_dump( usort($array_arg, 'cmp_function') );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing usort() : usage variation ***
+
+Deprecated: Implicit conversion to int from non-compatible float 8.900000 in %s on line %d
 bool(true)
 
 -- Sorted array after usort() function call --

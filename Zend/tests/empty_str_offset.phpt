@@ -99,31 +99,31 @@ bool(true)
 bool(false)
 - double ---
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -1.100000 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -4.100000 in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -0.800000 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -0.100000 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float 0.200000 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float 0.900000 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float 3.141593 in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float 100.500100 in %s on line %d
 bool(true)
 - array ---
 bool(true)

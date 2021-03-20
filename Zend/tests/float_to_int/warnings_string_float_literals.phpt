@@ -52,23 +52,23 @@ var_dump($instance->a);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 6.5 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 2.5 in %s on line %d
 Bitwise ops:
 int(3)
 int(1)
@@ -82,16 +82,16 @@ int(0)
 int(1)
 Function calls:
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(1)
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 60.5 in %s on line %d
 string(1) "<"
 Function returns:
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 3.5 in %s on line %d
 int(3)
 Typed property assignment:
 
-Deprecated: Implicit conversion to int from non-compatible float-string in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(1)

@@ -67,10 +67,38 @@ foreach($args_array as $args) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
+
+Deprecated: Implicit conversion to int from non-compatible float 2.200000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 0.200000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 10.200000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 123456.234000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float -1234.678900 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 1234.678900 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 12345.780000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 12.000000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float -12.000001 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float -123456.234000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 10.200000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 123456.234000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 2.200000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 0.200000 in %s on line %d
 2 +0 10
     123456 -1234 1234
     20000000000 200000     4000 22000000

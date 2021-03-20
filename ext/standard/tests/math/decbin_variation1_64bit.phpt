@@ -75,7 +75,7 @@ foreach($inputs as $i => $input) {
 }
 fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing decbin() : usage variations ***
 
 -- Iteration 1 --
@@ -97,18 +97,26 @@ decbin(): Argument #1 ($num) must be of type int, float given
 decbin(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
+
+Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
 string(4) "1010"
 
 -- Iteration 8 --
+
+Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
 string(64) "1111111111111111111111111111111111111111111111111111111111110110"
 
 -- Iteration 9 --
 string(37) "1110010111110100110010001101000001000"
 
 -- Iteration 10 --
+
+Deprecated: Implicit conversion to int from non-compatible float 0.000000 in %s on line %d
 string(1) "0"
 
 -- Iteration 11 --
+
+Deprecated: Implicit conversion to int from non-compatible float 0.500000 in %s on line %d
 string(1) "0"
 
 -- Iteration 12 --

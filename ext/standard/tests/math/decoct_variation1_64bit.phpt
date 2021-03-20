@@ -76,7 +76,7 @@ foreach($inputs as $i => $input) {
 fclose($fp);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing decoct() : usage variations ***
 
 -- Iteration 1 --
@@ -98,18 +98,26 @@ decoct(): Argument #1 ($num) must be of type int, float given
 decoct(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
+
+Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
 string(2) "12"
 
 -- Iteration 8 --
+
+Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
 string(22) "1777777777777777777766"
 
 -- Iteration 9 --
 string(13) "1627646215010"
 
 -- Iteration 10 --
+
+Deprecated: Implicit conversion to int from non-compatible float 0.000000 in %s on line %d
 string(1) "0"
 
 -- Iteration 11 --
+
+Deprecated: Implicit conversion to int from non-compatible float 0.500000 in %s on line %d
 string(1) "0"
 
 -- Iteration 12 --

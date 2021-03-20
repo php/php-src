@@ -141,7 +141,7 @@ static zend_always_inline bool is_long_compatible(double d) {
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
 	if (!is_long_compatible(d)) {
-		zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float");
+		zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", d);
 	}
 	return zend_dval_to_lval(d);
 }

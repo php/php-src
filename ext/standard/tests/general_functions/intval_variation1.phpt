@@ -109,18 +109,28 @@ int(12345)
 int(-2345)
 
 --float 10.5--
+
+Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
 int(10)
 
 --float -10.5--
+
+Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
 int(-10)
 
 --float 12.3456789e5--
+
+Deprecated: Implicit conversion to int from non-compatible float 1234567.890000 in %s on line %d
 int(1234567)
 
 --float -12.3456789e5--
+
+Deprecated: Implicit conversion to int from non-compatible float -1234567.890000 in %s on line %d
 int(-1234567)
 
 --float .5--
+
+Deprecated: Implicit conversion to int from non-compatible float 0.500000 in %s on line %d
 int(0)
 
 --empty array--

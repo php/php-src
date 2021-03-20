@@ -53,7 +53,7 @@ rmdir($file_path."/disk_free_space");
 float(%f)
 float(%f)
 *** Testing with newly created directory ***
- 
+
  Free Space before writing to a file
 float(%f)
 

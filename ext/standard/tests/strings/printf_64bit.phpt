@@ -374,7 +374,11 @@ Integer Iteration 1
 0
 1
 -1
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -2
 23333333
 -23333333
@@ -384,7 +388,11 @@ Integer Iteration 2
 0
 1
 -1
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -2
 23333333
 -23333333
@@ -394,7 +402,11 @@ Integer Iteration 3
 +0
 +1
 -1
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 +2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -2
 +23333333
 -23333333
@@ -404,7 +416,11 @@ Integer Iteration 4
       0
       1
      -1
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
       2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
      -2
 23333333
 -23333333
@@ -414,7 +430,11 @@ Integer Iteration 5
 0      
 1      
 -1     
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2      
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -2     
 23333333
 -23333333
@@ -424,7 +444,11 @@ Integer Iteration 6
 0000000
 0000001
 -000001
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 0000002
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -000002
 23333333
 -23333333
@@ -434,7 +458,11 @@ Integer Iteration 7
 0      
 1      
 -1     
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2      
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 -2     
 23333333
 -23333333
@@ -444,7 +472,11 @@ Integer Iteration 8
 ######0
 ######1
 #####-1
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 ######2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 #####-2
 23333333
 -23333333
@@ -468,7 +500,11 @@ Array
 0
 1
 1111111111111111111111111111111111111111111111111111111111111111
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 10
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 1111111111111111111111111111111111111111111111111111111111111110
 1011001000000100111010101
 1111111111111111111111111111111111111110100110111111011000101011
@@ -534,7 +570,11 @@ Array
 0
 1
 18446744073709551615
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 18446744073709551614
 23333333
 18446744073686218283
@@ -558,7 +598,11 @@ Array
 0
 1
 1777777777777777777777
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 1777777777777777777776
 131004725
 1777777777777646773053
@@ -582,7 +626,11 @@ Array
 0
 1
 ffffffffffffffff
+
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
 2
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
 fffffffffffffffe
 16409d5
 fffffffffe9bf62b

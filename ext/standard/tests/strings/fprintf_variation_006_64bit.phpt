@@ -29,7 +29,11 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+
 *** Testing fprintf() for unsigned integers ***
 
 0

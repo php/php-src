@@ -67,8 +67,10 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr1 argument ***
+
+Deprecated: Implicit conversion to int from non-compatible float 444.432000 in %s on line %d
 -- Iteration 1 --
 array(0) {
 }

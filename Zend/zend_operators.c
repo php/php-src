@@ -305,7 +305,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 			return 1;
 		case IS_DOUBLE:
 			if (!is_long_compatible(Z_DVAL_P(op))) {
-				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float");
+				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", Z_DVAL_P(op));
 				if (UNEXPECTED(EG(exception))) {
 					*failed = 1;
 				}
@@ -340,7 +340,8 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 					 * behaviour.
 					 */
 					if (!is_long_compatible(dval)) {
-						zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string");
+						zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
+							Z_STRVAL_P(op));
 						if (UNEXPECTED(EG(exception))) {
 							*failed = 1;
 						}
@@ -822,7 +823,7 @@ try_again:
 		case IS_DOUBLE:
 			if (EXPECTED(!is_lax)) {
 				if (!is_long_compatible(Z_DVAL_P(op))) {
-					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float");
+					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", Z_DVAL_P(op));
 					// TODO Need to handle this here?
 					//if (UNEXPECTED(EG(exception))) {}
 				}
@@ -846,7 +847,8 @@ try_again:
 					 /* Most usages are expected to not be (int) casts */
 					if (EXPECTED(!is_lax)) {
 						if (!is_long_compatible(dval)) {
-							zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string");
+							zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
+								Z_STRVAL_P(op));
 							// TODO Need to handle this here?
 							//if (UNEXPECTED(EG(exception))) {}
 						}

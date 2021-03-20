@@ -25,14 +25,22 @@ foreach ($values as $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "1010"
+
+Deprecated: Implicit conversion to int from non-compatible float 3950.500000 in %s on line %d
 string(12) "111101101110"
+
+Deprecated: Implicit conversion to int from non-compatible float 3950.500000 in %s on line %d
 string(12) "111101101110"
 string(2) "11"
 string(7) "1011111"
 string(4) "1010"
+
+Deprecated: Implicit conversion to int from non-compatible float-string 3950.5 in %s on line %d
 string(12) "111101101110"
+
+Deprecated: Implicit conversion to int from non-compatible float-string 3.9505e3 in %s on line %d
 string(12) "111101101110"
 string(6) "100111"
 decbin(): Argument #1 ($num) must be of type int, string given

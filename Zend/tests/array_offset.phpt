@@ -13,13 +13,13 @@ echo "Done\n";
 --EXPECTF--
 Warning: Undefined array key -1 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -1.100000 in %s on line %d
 
 Warning: Undefined array key -1 in %s on line %d
 
 Warning: Undefined array key -1 in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion to int from non-compatible float -1.100000 in %s on line %d
 
 Warning: Undefined array key -1 in %s on line %d
 Done

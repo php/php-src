@@ -93,6 +93,8 @@ echo "Done";
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+
+Deprecated: Implicit conversion to int from non-compatible float 444.432000 in %s on line %d
 -- Iteration 1 --
 int(1)
 array(1) {
