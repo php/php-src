@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #80847 (CData structs with fields of type struct can't be passed
     as C function argument). (Nickolas Daniel da Silva, Dmitry)
 
+- FPM:
+  . Fixed bug #80024 (Duplication of info about inherited socket after pool
+    removing). (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug #80839 (PHP problem with JIT). (Dmitry)
   . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
