@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #53826 (__callStatic fired in base class through a parent call if
     the method is private). (Nikita)
 
+- FPM:
+  . Added openmetrics status format. (Cees-Jan Kiewiet)
+
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
 

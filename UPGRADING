@@ -151,6 +151,10 @@ PHP 8.1 UPGRADE NOTES
         $file = new CURLStringFile($data, 'filename.txt', 'text/plain');
         curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => $file]);
 
+- FPM:
+  . Added openmetrics status format. It can be used by Prometheus to fetch FPM
+    metrics.
+
 - hash:
   . The following functions have changed signatures:
 
