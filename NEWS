@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 
 - FPM:
   . Added openmetrics status format. (Cees-Jan Kiewiet)
+  . Enable process renaming on macOS. (devnexen)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
