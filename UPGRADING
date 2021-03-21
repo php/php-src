@@ -370,6 +370,9 @@ PHP 8.1 UPGRADE NOTES
   . The filter.default ini setting is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- GD:
+  . The $num_points parameter of image(open|filled)polygon has been deprecated.
+
 - Hash:
   . The mhash(), mhash_keygen_s2k(), mhash_count(), mhash_get_block_size() and
     mhash_get_hash_name() functions are deprecated. Use the hash_*() APIs
