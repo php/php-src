@@ -3629,14 +3629,14 @@ PHP_FUNCTION(pg_connection_busy)
 }
 /* }}} */
 
-static int _php_pgsql_link_has_results(PGconn *pgsql) /* {{{ */
+static bool _php_pgsql_link_has_results(PGconn *pgsql) /* {{{ */
 {
 	PGresult *result;
 	while ((result = PQgetResult(pgsql))) {
 		PQclear(result);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
