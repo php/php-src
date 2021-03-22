@@ -4636,7 +4636,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRING(&new_val, "NULL");
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 							if (zend_string_equals_literal(Z_STR_P(val), "t") || zend_string_equals_literal(Z_STR_P(val), "T") ||
@@ -4678,7 +4678,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4697,7 +4697,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 							/* FIXME: better regex must be used */
@@ -4722,7 +4722,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4741,7 +4741,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 #define REGEX0 "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$"
@@ -4772,7 +4772,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4807,7 +4807,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
 							if (opt & PGSQL_CONV_FORCE_NULL) {
-								ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+								ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 							} else {
 								ZVAL_STRINGL(&new_val, "''", sizeof("''")-1);
 							}
@@ -4834,7 +4834,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4852,7 +4852,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 							/* better regex? */
@@ -4876,7 +4876,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4893,7 +4893,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 #define REGEX0 "^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])(\\/[0-9]{1,3})?$"
@@ -4915,7 +4915,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4933,7 +4933,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch(Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						} else if (zend_string_equals_literal_ci(Z_STR_P(val), "now()")) {
 							ZVAL_STRINGL(&new_val, "NOW()", sizeof("NOW()")-1);
 						} else {
@@ -4950,7 +4950,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4966,7 +4966,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch(Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 #define REGEX0 "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})$"
@@ -4983,7 +4983,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -4999,7 +4999,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch(Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 #define REGEX0 "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}){0,1}$"
@@ -5016,7 +5016,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -5032,7 +5032,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch(Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRING(&new_val, "NULL");
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 
@@ -5095,7 +5095,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRING(&new_val, "NULL");
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -5110,7 +5110,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch (Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRING(&new_val, "NULL");
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 							unsigned char *tmp;
@@ -5137,7 +5137,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
@@ -5153,7 +5153,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 				switch(Z_TYPE_P(val)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
-							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						}
 						else {
 #define REGEX0 "^([0-9a-f]{2,2}:){5,5}[0-9a-f]{2,2}$"
@@ -5169,7 +5169,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 						break;
 
 					case IS_NULL:
-						ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
+						ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						break;
 
 					default:
