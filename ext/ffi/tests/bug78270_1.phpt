@@ -1,8 +1,9 @@
 --TEST--
 FR #78270 (Usage of __vectorcall convention with FFI)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
 
 require_once('utils.inc');

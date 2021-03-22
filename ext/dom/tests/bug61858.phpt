@@ -1,9 +1,7 @@
 --TEST--
 Bug #61858 DOMAttr debug info generates E_WARNING
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

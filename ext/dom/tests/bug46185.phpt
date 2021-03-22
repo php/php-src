@@ -1,7 +1,7 @@
 --TEST--
 Bug #46185 (importNode changes the namespace of an XML element).
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $aDOM = new DOMDocument();

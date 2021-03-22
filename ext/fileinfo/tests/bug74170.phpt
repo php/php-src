@@ -1,11 +1,10 @@
 --TEST--
 Bug #74170 locale information change after mime_content_type
+--EXTENSIONS--
+fileinfo
+intl
 --SKIPIF--
 <?php
-if (!class_exists('finfo'))
-    die('skip no fileinfo extension');
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
 if (setlocale(LC_CTYPE, 'ru_RU.koi8r') === false)
     die('skip ru_RU.koi8r locale is not available');
 ?>

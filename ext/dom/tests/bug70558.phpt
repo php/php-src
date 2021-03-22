@@ -1,7 +1,7 @@
 --TEST--
 Bug #70558 ("Couldn't fetch" error in DOMDocument::registerNodeClass())
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

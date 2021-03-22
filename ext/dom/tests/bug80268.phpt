@@ -1,7 +1,7 @@
 --TEST--
 Bug #80268 (loadHTML() truncates at NUL bytes)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument;

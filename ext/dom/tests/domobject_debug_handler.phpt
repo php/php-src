@@ -1,7 +1,7 @@
 --TEST--
 Objects of DOM extension: debug info object handler.
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<<XML

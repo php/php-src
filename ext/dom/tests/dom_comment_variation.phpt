@@ -1,9 +1,7 @@
 --TEST--
 DOM Comment : Variation
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

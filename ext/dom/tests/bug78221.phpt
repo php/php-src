@@ -1,9 +1,7 @@
 --TEST--
 Bug #78221 (DOMNode::normalize() doesn't remove empty text nodes)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die('skip dom extension not available');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

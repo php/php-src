@@ -1,5 +1,7 @@
 --TEST--
 Bug #79282: Use-of-uninitialized-value in exif
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 

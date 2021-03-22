@@ -2055,7 +2055,7 @@ TEST $file
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
-            if (!in_array($req_ext, $loaded)) {
+            if (!in_array(strtolower($req_ext), $loaded)) {
                 if ($req_ext == 'opcache') {
                     $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
                     $ini_settings['zend_extension'][] = $ext_file;
@@ -3673,6 +3673,10 @@ class SkipCache
 
         $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
         $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extensions = array_map('strtolower', $extensions);
+        if (in_array('zend opcache', $extensions)) {
+            $extensions[] = 'opcache';
+        }
 
         $result = [$extDir, $extensions];
         $this->extensions[$php] = $result;

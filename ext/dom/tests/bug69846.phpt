@@ -1,7 +1,7 @@
 --TEST--
 Bug #69846 Segmenation fault (access violation) when iterating over DOMNodeList
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

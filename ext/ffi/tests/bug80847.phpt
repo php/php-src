@@ -1,9 +1,9 @@
 --TEST--
 Bug #80847 (Nested structs)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
-if (!extension_loaded('zend_test')) die('skip zend_test extension not available');
 if (PHP_OS_FAMILY == 'Windows' && ((1 << 31) > 0)) die('xfail libffi doesn\'t properly support passing big strctures by value on Windows/64');
 ?>
 --FILE--

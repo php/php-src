@@ -1,7 +1,7 @@
 --TEST--
 Bug #67949: DOMNodeList elements should be accessible through array notation
---SKIPIF--
-<?php require 'skipif.inc' ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
