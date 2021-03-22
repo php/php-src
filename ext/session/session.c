@@ -1923,13 +1923,24 @@ static PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
+static inline void set_user_save_handler_ini(void) {
+	zend_string *ini_name, *ini_val;
+
+	ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
+	ini_val = zend_string_init("user", sizeof("user") - 1, 0);
+	PS(set_handler) = 1;
+	zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	PS(set_handler) = 0;
+	zend_string_release_ex(ini_val, 0);
+	zend_string_release_ex(ini_name, 0);
+}
+
 /* {{{ proto bool session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
 {
 	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
-	zend_string *ini_name, *ini_val;
 
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Cannot change save handler when session is active");
@@ -2032,13 +2043,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 
 		if (PS(session_status) != php_session_active && (!PS(mod) || PS(mod) != &ps_mod_user)) {
-			ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
-			ini_val = zend_string_init("user", sizeof("user") - 1, 0);
-			PS(set_handler) = 1;
-			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-			PS(set_handler) = 0;
-			zend_string_release_ex(ini_val, 0);
-			zend_string_release_ex(ini_name, 0);
+			set_user_save_handler_ini();
 		}
 
 		RETURN_TRUE;
@@ -2066,14 +2071,8 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 	}
 
-	if (PS(mod) && PS(mod) != &ps_mod_user) {
-		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
-		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
-		PS(set_handler) = 1;
-		zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		PS(set_handler) = 0;
-		zend_string_release_ex(ini_val, 0);
-		zend_string_release_ex(ini_name, 0);
+	if (!PS(mod) || PS(mod) != &ps_mod_user) {
+		set_user_save_handler_ini();
 	}
 
 	for (i = 0; i < argc; i++) {
