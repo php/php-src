@@ -1362,10 +1362,10 @@ int main() {
   if (!dir)
     return 1;
   if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0) {
-    close(dir);
+    closedir(dir);
     return 0;
   }
-  close(dir);
+  closedir(dir);
   return 1;
 }
     ]])],[
