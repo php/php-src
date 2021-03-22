@@ -4107,6 +4107,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->attributes = NULL;
+	property_info->accessors = NULL;
 	property_info->ce = ce;
 	property_info->type = type;
 

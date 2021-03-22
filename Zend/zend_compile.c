@@ -7026,7 +7026,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 }
 /* }}} */
 
-void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
+zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *params_ast = decl->child[0];
@@ -7034,6 +7034,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
+	bool is_accessor = decl->kind == ZEND_AST_ACCESSOR;
 	zend_string *method_lcname;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
@@ -7064,7 +7065,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
-	if (is_method) {
+	if (is_accessor) {
+		zend_class_entry *ce = CG(active_class_entry);
+		op_array->scope = ce;
+		op_array->function_name = zend_string_copy(decl->name);
+	} else if (is_method) {
 		bool has_body = stmt_ast != NULL;
 		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
@@ -7146,8 +7151,188 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
+
+	return op_array;
 }
 /* }}} */
+
+static bool is_valid_set_param(zend_ast *param) {
+	zend_ast *type_ast = param->child[0];
+	zend_ast *default_ast = param->child[2];
+	if (param->attr || default_ast) {
+		return false;
+	}
+	if (type_ast) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Accessor \"set\" may not have a parameter type "
+			"(accessor types are determined by the property type)");
+	}
+	return true;
+}
+
+static void zend_compile_accessors(
+		zend_property_info *prop_info, zend_ast *prop_type_ast, zend_ast_list *accessors)
+{
+	zend_class_entry *ce = CG(active_class_entry);
+	zend_string *prop_name = prop_info->name;
+
+	if (accessors->children == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Accessor list cannot be empty");
+	}
+
+	for (uint32_t i = 0; i < accessors->children; i++) {
+		zend_ast_decl *accessor = (zend_ast_decl *) accessors->child[i];
+		zend_string *name = accessor->name;
+		zend_ast_list *param_list =
+			accessor->child[0] ? zend_ast_get_list(accessor->child[0]) : NULL;
+		zend_ast *stmt_ast = accessor->child[2];
+		zend_ast **return_ast_ptr = &accessor->child[3];
+		CG(zend_lineno) = accessor->start_lineno;
+		bool reset_return_ast = false, reset_param_type_ast = false;
+
+		if (*return_ast_ptr) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Accessor \"%s\" may not have a return type "
+				"(accessor types are determined by the property type)",
+				ZSTR_VAL(name));
+		}
+
+		if (zend_string_equals_literal_ci(name, "get")) {
+			if (param_list) {
+				if (param_list->children != 0) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Accessor \"get\" may not have parameters");
+				}
+			} else {
+				accessor->child[0] = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
+			}
+
+			reset_return_ast = true;
+			*return_ast_ptr = prop_type_ast;
+		} else if (zend_string_equals_literal_ci(name, "set")) {
+			if (param_list) {
+				if (param_list->children != 1 || !is_valid_set_param(param_list->child[0])) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Accessor \"set\" must have exactly one required by-value parameter");
+				}
+			} else {
+				zend_string *param_name = zend_string_init("value", sizeof("value")-1, 0);
+				zend_ast *param_name_ast = zend_ast_create_zval_from_str(param_name);
+				zend_ast *param = zend_ast_create(
+					ZEND_AST_PARAM, prop_type_ast, param_name_ast,
+					/* expr */ NULL, /* doc_comment */ NULL, /* attributes */ NULL);
+				accessor->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
+				reset_param_type_ast = true;
+			}
+			*return_ast_ptr = zend_ast_create_ex(ZEND_AST_TYPE, IS_VOID);
+			if (accessor->flags & ZEND_ACC_RETURN_REFERENCE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor \"set\" cannot return by reference");
+			}
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Unknown accessor \"%s\" for property %s::$%s",
+				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+		}
+
+		uint32_t accessor_visibility = accessor->flags & ZEND_ACC_PPP_MASK;
+		uint32_t prop_visibility = prop_info->flags & ZEND_ACC_PPP_MASK;
+		if (!accessor_visibility) {
+			/* Inherit the visibility of the property. */
+			accessor->flags |= prop_visibility;
+		} else {
+			if (accessor_visibility < prop_visibility) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Visibility of accessor cannot be higher than visibility of property");
+			}
+			if (accessor_visibility == prop_visibility) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Explicit accessor visibility cannot be the same as property visibility. "
+					"Omit the explicit accessor visibility");
+			}
+		}
+
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			if (accessor->flags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor in interface cannot be protected or private");
+			}
+			if (accessor->flags & ZEND_ACC_ABSTRACT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor in interface cannot be explicitly abstract. "
+					"All interface members are implicitly abstract");
+			}
+			accessor->flags |= ZEND_ACC_ABSTRACT;
+		}
+		if (prop_info->flags & ZEND_ACC_ABSTRACT) {
+			if (accessor->flags & ZEND_ACC_ABSTRACT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor on abstract property cannot be explicitly abstract");
+			}
+			accessor->flags |= ZEND_ACC_ABSTRACT;
+		}
+
+		if (accessor->flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be static");
+		}
+		if ((accessor->flags & ZEND_ACC_FINAL) && (accessor->flags & ZEND_ACC_PRIVATE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be both final and private");
+		}
+		if (accessor->flags & ZEND_ACC_ABSTRACT) {
+			if (stmt_ast) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Abstract accessor cannot have body");
+			}
+			if (accessor->flags & ZEND_ACC_PRIVATE) {
+				// TODO Trait exception?
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor cannot be both abstract and private");
+			}
+
+			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+		}
+
+		zend_string *prefixed_name = zend_strpprintf(0, "$%s::%s",
+			zend_get_unmangled_property_name(prop_name), ZSTR_VAL(name));
+		accessor->name = prefixed_name;
+
+		zend_function *func = (zend_function *) zend_compile_func_decl(
+			NULL, (zend_ast *) accessor, /* toplevel */ false);
+		if (stmt_ast) {
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+		} else {
+			// TODO: These could use a more compact representation.
+			// Currently we even allocate opcodes for body-less functions.
+			func->common.fn_flags |= ZEND_ACC_AUTO_PROP;
+		}
+
+		if (!prop_info->accessors) {
+			prop_info->accessors = ecalloc(1, sizeof(zend_property_accessors));
+		}
+
+		if (zend_string_equals_literal_ci(name, "get")) {
+			if (prop_info->accessors->get) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare accessor \"get\"");
+			}
+			prop_info->accessors->get = func;
+		} else if (zend_string_equals_literal_ci(name, "set")) {
+			if (prop_info->accessors->set) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare accessor \"set\"");
+			}
+			prop_info->accessors->set = func;
+		} else {
+			ZEND_UNREACHABLE();
+		}
+
+		zend_string_release(name);
+		/* Un-share type ASTs. Alternatively we could duplicate them. */
+		if (reset_return_ast) {
+			*return_ast_ptr = NULL;
+		}
+		if (reset_param_type_ast) {
+			zend_ast_get_list(accessor->child[0])->child[0]->child[0] = NULL;
+		}
+	}
+}
 
 void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
 {
@@ -7155,16 +7340,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
 
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include properties");
-	}
-
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Enums may not include properties");
-	}
-
-	if (flags & ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
 	for (i = 0; i < children; ++i) {
@@ -7173,10 +7350,22 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast **value_ast_ptr = &prop_ast->child[1];
 		zend_ast *doc_comment_ast = prop_ast->child[2];
+		zend_ast *accessors_ast = prop_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
+
+		if (!accessors_ast) {
+			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Interfaces may only include accessor properties");
+			}
+			if (flags & ZEND_ACC_ABSTRACT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Only accessor properties may be declared abstract");
+			}
+		}
 
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
@@ -7192,12 +7381,6 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
 		if (doc_comment_ast) {
 			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
-		}
-
-		if (flags & ZEND_ACC_FINAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
-				"the final modifier is allowed only for methods and classes",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
 		if (zend_hash_exists(&ce->properties_info, name)) {
@@ -7233,6 +7416,10 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		}
 
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+
+		if (accessors_ast) {
+			zend_compile_accessors(info, type_ast, zend_ast_get_list(accessors_ast));
+		}
 
 		if (attr_ast) {
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);

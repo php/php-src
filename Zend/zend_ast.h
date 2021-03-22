@@ -43,6 +43,7 @@ enum _zend_ast_kind {
 	ZEND_AST_METHOD,
 	ZEND_AST_CLASS,
 	ZEND_AST_ARROW_FUNC,
+	ZEND_AST_ACCESSOR,
 
 	/* list nodes */
 	ZEND_AST_ARG_LIST = 1 << ZEND_AST_IS_LIST_SHIFT,
@@ -157,7 +158,6 @@ enum _zend_ast_kind {
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
 	ZEND_AST_PROP_GROUP,
-	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_ENUM_CASE,
 
@@ -167,6 +167,7 @@ enum _zend_ast_kind {
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_PROP_ELEM,
 
 	/* 5 child nodes */
 	ZEND_AST_PARAM = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,

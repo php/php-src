@@ -270,10 +270,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
+%type <ast> accessor accessor_list accessor_property optional_parameter_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
-%type <num> class_modifiers class_modifier use_type backup_fn_flags
+%type <num> class_modifiers class_modifier use_type backup_fn_flags accessor_modifiers
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -876,6 +877,9 @@ attributed_class_statement:
 		variable_modifiers optional_type_without_static property_list ';'
 			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3, NULL);
 			  $$->attr = $1; }
+	|	variable_modifiers optional_type_without_static accessor_property
+			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, zend_ast_create_list(1, ZEND_AST_PROP_DECL, $3), NULL);
+			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $3, NULL);
 			  $$->attr = $1; }
@@ -983,9 +987,45 @@ property_list:
 
 property:
 		T_VARIABLE backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL)); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL), NULL); }
 	|	T_VARIABLE '=' expr backup_doc_comment
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL), NULL); }
+;
+
+accessor_property:
+		T_VARIABLE backup_doc_comment '{' accessor_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL), $4); }
+	|	T_VARIABLE '=' expr backup_doc_comment '{' accessor_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL), $6); }
+;
+
+accessor_list:
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
+	|	accessor_list accessor { $$ = zend_ast_list_add($1, $2); }
+;
+
+accessor_modifiers:
+		%empty { $$ = 0; }
+	|	non_empty_member_modifiers { $$ = $1; }
+;
+
+accessor:
+		accessor_modifiers returns_ref T_STRING
+		backup_doc_comment { $<num>$ = CG(zend_lineno); }
+		optional_parameter_list return_type '{' inner_statement_list '}'
+			{ $$ = zend_ast_create_decl(
+					ZEND_AST_ACCESSOR, $1 | $2, $<num>5, $4, zend_ast_get_str($3),
+					$6, NULL, $9, $7, NULL); }
+	|	accessor_modifiers returns_ref T_STRING
+		backup_doc_comment { $<num>$ = CG(zend_lineno); } ';'
+			{ $$ = zend_ast_create_decl(
+					ZEND_AST_ACCESSOR, $1 | $2, $<num>5, $4, zend_ast_get_str($3),
+					NULL, NULL, NULL, NULL, NULL); }
+;
+
+optional_parameter_list:
+		%empty { $$ = NULL; }
+	|	'(' parameter_list ')' { $$ = $2; }
 ;
 
 class_const_list:
@@ -1332,8 +1372,6 @@ callable_variable:
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 	|	array_object_dereferenceable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	array_object_dereferenceable '{' expr '}'
-			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
 	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
@@ -1370,8 +1408,6 @@ new_variable:
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 	|	new_variable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	new_variable '{' expr '}'
-			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
 	|	new_variable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 	|	new_variable T_NULLSAFE_OBJECT_OPERATOR property_name
