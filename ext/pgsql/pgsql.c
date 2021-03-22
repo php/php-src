@@ -4521,24 +4521,9 @@ static int php_pgsql_convert_match(const zend_string *str, const char *regex , s
 /* {{{ php_pgsql_add_quote
  * add quotes around string.
  */
-static int php_pgsql_add_quotes(zval *src, bool should_free)
+static zend_string *php_pgsql_add_quotes(zend_string *src)
 {
-	smart_str str = {0};
-
-	ZEND_ASSERT(Z_TYPE_P(src) == IS_STRING);
-
-	smart_str_appendc(&str, 'E');
-	smart_str_appendc(&str, '\'');
-	smart_str_appendl(&str, Z_STRVAL_P(src), Z_STRLEN_P(src));
-	smart_str_appendc(&str, '\'');
-	smart_str_0(&str);
-
-	if (should_free) {
-		zval_ptr_dtor(src);
-	}
-	ZVAL_NEW_STR(src, str.s);
-
-	return SUCCESS;
+	return zend_string_concat3("E'", strlen("E'"), ZSTR_VAL(src), ZSTR_LEN(src), "'", strlen("'"));
 }
 /* }}} */
 
@@ -4751,8 +4736,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								if (php_pgsql_convert_match(Z_STR_P(val), REGEX1, sizeof(REGEX1)-1, 1) == FAILURE) {
 									err = 1;
 								} else {
-									ZVAL_STRING(&new_val, Z_STRVAL_P(val));
-									php_pgsql_add_quotes(&new_val, 1);
+									ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 								}
 							}
 							else {
@@ -4818,9 +4802,8 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							ZSTR_LEN(str) = PQescapeStringConn(pg_link, ZSTR_VAL(str), Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
-							str = zend_string_truncate(str, ZSTR_LEN(str), 0);
-							ZVAL_NEW_STR(&new_val, str);
-							php_pgsql_add_quotes(&new_val, 1);
+							ZVAL_STR(&new_val, php_pgsql_add_quotes(str));
+							zend_string_release_ex(str, false);
 						}
 						break;
 
@@ -4906,8 +4889,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								err = 1;
 							}
 							else {
-								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 #undef REGEX1
@@ -4942,8 +4924,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 							if (php_pgsql_convert_match(Z_STR_P(val), REGEX0, sizeof(REGEX0)-1, 1) == FAILURE) {
 								err = 1;
 							} else {
-								ZVAL_STRING(&new_val, Z_STRVAL_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 						}
@@ -4975,8 +4956,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								err = 1;
 							}
 							else {
-								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 						}
@@ -5008,8 +4988,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								err = 1;
 							}
 							else {
-								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 						}
@@ -5087,8 +5066,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								err = 1;
 							}
 							else {
-								ZVAL_STRING(&new_val, Z_STRVAL_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 						}
@@ -5115,15 +5093,14 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 						else {
 							unsigned char *tmp;
 							size_t to_len;
-							smart_str s = {0};
+							zend_string *tmp_zstr;
+
 							tmp = PQescapeByteaConn(pg_link, (unsigned char *)Z_STRVAL_P(val), Z_STRLEN_P(val), &to_len);
-							ZVAL_STRINGL(&new_val, (char *)tmp, to_len - 1); /* PQescapeBytea's to_len includes additional '\0' */
+							tmp_zstr = zend_string_init((char *)tmp, to_len - 1, false); /* PQescapeBytea's to_len includes additional '\0' */
 							PQfreemem(tmp);
-							php_pgsql_add_quotes(&new_val, 1);
-							smart_str_appendl(&s, Z_STRVAL(new_val), Z_STRLEN(new_val));
-							smart_str_0(&s);
-							zval_ptr_dtor(&new_val);
-							ZVAL_NEW_STR(&new_val, s.s);
+
+							ZVAL_STR(&new_val, php_pgsql_add_quotes(tmp_zstr));
+							zend_string_release_ex(tmp_zstr, false);
 						}
 						break;
 
@@ -5161,8 +5138,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								err = 1;
 							}
 							else {
-								ZVAL_STRINGL(&new_val, Z_STRVAL_P(val), Z_STRLEN_P(val));
-								php_pgsql_add_quotes(&new_val, 1);
+								ZVAL_STR(&new_val, php_pgsql_add_quotes(Z_STR_P(val)));
 							}
 #undef REGEX0
 						}
