@@ -2066,7 +2066,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 	}
 
-	if (PS(mod) && PS(mod) != &ps_mod_user) {
+	if (!PS(mod) || PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
 		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
 		PS(set_handler) = 1;
