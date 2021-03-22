@@ -4520,8 +4520,7 @@ static int php_pgsql_add_quotes(zval *src, bool should_free)
 {
 	smart_str str = {0};
 
-	assert(Z_TYPE_P(src) == IS_STRING);
-	assert(should_free == 1 || should_free == 0);
+	ZEND_ASSERT(Z_TYPE_P(src) == IS_STRING);
 
 	smart_str_appendc(&str, 'E');
 	smart_str_appendc(&str, '\'');
@@ -5315,9 +5314,9 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	int ret = FAILURE;
 	zend_string *fld;
 
-	assert(pg_link != NULL);
-	assert(table != NULL);
-	assert(Z_TYPE_P(var_array) == IS_ARRAY);
+	ZEND_ASSERT(pg_link != NULL);
+	ZEND_ASSERT(table != NULL);
+	ZEND_ASSERT(Z_TYPE_P(var_array) == IS_ARRAY);
 
 	ZVAL_UNDEF(&converted);
 	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
@@ -5578,11 +5577,11 @@ PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var
 	smart_str querystr = {0};
 	int ret = FAILURE;
 
-	assert(pg_link != NULL);
-	assert(table != NULL);
-	assert(Z_TYPE_P(var_array) == IS_ARRAY);
-	assert(Z_TYPE_P(ids_array) == IS_ARRAY);
-	assert(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
+	ZEND_ASSERT(pg_link != NULL);
+	ZEND_ASSERT(table != NULL);
+	ZEND_ASSERT(Z_TYPE_P(var_array) == IS_ARRAY);
+	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0
 			|| zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
@@ -5688,10 +5687,10 @@ PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids
 	smart_str querystr = {0};
 	int ret = FAILURE;
 
-	assert(pg_link != NULL);
-	assert(table != NULL);
-	assert(Z_TYPE_P(ids_array) == IS_ARRAY);
-	assert(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
+	ZEND_ASSERT(pg_link != NULL);
+	ZEND_ASSERT(table != NULL);
+	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
 		return FAILURE;
@@ -5785,7 +5784,8 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 	size_t num_fields;
 	int pg_numrows, pg_row;
 	uint32_t i;
-	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
+
+	ZEND_ASSERT(Z_TYPE_P(ret_array) == IS_ARRAY);
 
 	pg_numrows = PQntuples(pg_result);
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
@@ -5825,11 +5825,11 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 	int ret = FAILURE;
 	PGresult *pg_result;
 
-	assert(pg_link != NULL);
-	assert(table != NULL);
-	assert(Z_TYPE_P(ids_array) == IS_ARRAY);
-	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
-	assert(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
+	ZEND_ASSERT(pg_link != NULL);
+	ZEND_ASSERT(table != NULL);
+	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	ZEND_ASSERT(Z_TYPE_P(ret_array) == IS_ARRAY);
+	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
 		return FAILURE;
