@@ -176,12 +176,12 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_ESCAPE            (1<<12)    /* No convert, but escape only */
 
 /* exported functions */
-PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended);
-PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt);
-PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, zend_ulong opt, zend_string **sql);
-PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_ulong opt , zend_string **sql);
-PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_ulong opt, zend_string **sql);
-PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_ulong opt, long fetch_option, zend_string **sql );
+PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended);
+PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt);
+PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, zend_ulong opt, zend_string **sql);
+PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_ulong opt , zend_string **sql);
+PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_ulong opt, zend_string **sql);
+PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_ulong opt, long fetch_option, zend_string **sql );
 PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long fetch_option);
 
 /* internal functions */

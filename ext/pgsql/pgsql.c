@@ -4231,7 +4231,7 @@ PHP_FUNCTION(pg_flush)
  * table_name must not be empty
  * TODO: Add meta_data cache for better performance
  */
-PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended)
+PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended)
 {
 	PGresult *pg_result;
 	char *src, *tmp_name, *tmp_name2 = NULL;
@@ -4556,7 +4556,7 @@ static int php_pgsql_add_quotes(zval *src, bool should_free)
 /* {{{ php_pgsql_convert
  * check and convert array values (fieldname=>value pair) for sql
  */
-PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
+PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
 {
 	zend_string *field = NULL;
 	zval meta, *def, *type, *not_null, *has_default, *is_enum, *val, new_val;
@@ -5306,13 +5306,13 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 /* }}} */
 
 /* {{{ php_pgsql_insert */
-PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
 	zval *val, converted;
 	char buf[256];
 	char *tmp;
 	smart_str querystr = {0};
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	zend_string *fld;
 
 	ZEND_ASSERT(pg_link != NULL);
@@ -5572,11 +5572,11 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 /* }}} */
 
 /* {{{ php_pgsql_update */
-PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval var_converted, ids_converted;
 	smart_str querystr = {0};
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
@@ -5682,11 +5682,11 @@ PHP_FUNCTION(pg_update)
 /* }}} */
 
 /* {{{ php_pgsql_delete */
-PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
@@ -5819,11 +5819,11 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 /* }}} */
 
 /* {{{ php_pgsql_select */
- PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
+ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	PGresult *pg_result;
 
 	ZEND_ASSERT(pg_link != NULL);
