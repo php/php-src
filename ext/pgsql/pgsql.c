@@ -4236,7 +4236,7 @@ PHP_FUNCTION(pg_flush)
  * table_name must not be empty
  * TODO: Add meta_data cache for better performance
  */
-PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, bool extended)
+PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string *table_name, zval *meta, bool extended)
 {
 	PGresult *pg_result;
 	char *src, *tmp_name, *tmp_name2 = NULL;
@@ -4246,9 +4246,9 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const char *table
 	int i, num_rows;
 	zval elem;
 
-	ZEND_ASSERT(*table_name);
+	ZEND_ASSERT(ZSTR_LEN(table_name) != 0);
 
-	src = estrdup(table_name);
+	src = estrdup(ZSTR_VAL(table_name));
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
 	if (!tmp_name) {
 		// TODO ValueError (empty table name)?
@@ -4302,7 +4302,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const char *table
 
 	pg_result = PQexec(pg_link, ZSTR_VAL(querystr.s));
 	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK || (num_rows = PQntuples(pg_result)) == 0) {
-		php_error_docref(NULL, E_WARNING, "Table '%s' doesn't exists", table_name);
+		php_error_docref(NULL, E_WARNING, "Table '%s' doesn't exists", ZSTR_VAL(table_name));
 		smart_str_free(&querystr);
 		PQclear(pg_result);
 		return FAILURE;
@@ -4369,7 +4369,7 @@ PHP_FUNCTION(pg_meta_data)
 	}
 
 	array_init(return_value);
-	if (php_pgsql_meta_data(pgsql, ZSTR_VAL(table_name), return_value, extended) == FAILURE) {
+	if (php_pgsql_meta_data(pgsql, table_name, return_value, extended) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value)); /* destroy array */
 		RETURN_FALSE;
 	}
@@ -4560,7 +4560,7 @@ static int php_pgsql_add_quotes(zval *src, bool should_free)
 /* {{{ php_pgsql_convert
  * check and convert array values (fieldname=>value pair) for sql
  */
-PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
+PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *table_name, const zval *values, zval *result, zend_ulong opt)
 {
 	zend_string *field = NULL;
 	zval meta, *def, *type, *not_null, *has_default, *is_enum, *val, new_val;
@@ -4573,10 +4573,10 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const char *table_n
 	ZEND_ASSERT(!(opt & ~PGSQL_CONV_OPTS));
 	ZEND_ASSERT(table_name);
 	/* Table name cannot be empty for php_pgsql_meta_data() */
-	ZEND_ASSERT(*table_name);
+	ZEND_ASSERT(ZSTR_LEN(table_name) != 0);
 
 	array_init(&meta);
-/* table_name is escaped by php_pgsql_meta_data */
+	/* table_name is escaped by php_pgsql_meta_data */
 	if (php_pgsql_meta_data(pg_link, table_name, &meta, 0) == FAILURE) {
 		zval_ptr_dtor(&meta);
 		return FAILURE;
@@ -5246,7 +5246,7 @@ PHP_FUNCTION(pg_convert)
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
 	array_init(return_value);
-	if (php_pgsql_convert(pg_link, ZSTR_VAL(table_name), values, return_value, option) == FAILURE) {
+	if (php_pgsql_convert(pg_link, table_name, values, return_value, option) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
@@ -5276,23 +5276,22 @@ static bool do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link,
 }
 /* }}} */
 
-static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const char *table) /* {{{ */
+static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const zend_string *table) /* {{{ */
 {
-	size_t table_len = strlen(table);
-
 	/* schema.table should be "schema"."table" */
-	const char *dot = memchr(table, '.', table_len);
-	size_t len = dot ? dot - table : table_len;
-	if (_php_pgsql_identifier_is_escaped(table, len)) {
-		smart_str_appendl(querystr, table, len);
+	const char *dot = memchr(ZSTR_VAL(table), '.', ZSTR_LEN(table));
+	size_t len = dot ? dot - ZSTR_VAL(table) : ZSTR_LEN(table);
+
+	if (_php_pgsql_identifier_is_escaped(ZSTR_VAL(table), len)) {
+		smart_str_appendl(querystr, ZSTR_VAL(table), len);
 	} else {
-		char *escaped = PQescapeIdentifier(pg_link, table, len);
+		char *escaped = PQescapeIdentifier(pg_link, ZSTR_VAL(table), len);
 		smart_str_appends(querystr, escaped);
 		PQfreemem(escaped);
 	}
 	if (dot) {
 		const char *after_dot = dot + 1;
-		len = table_len - len - 1;
+		len = ZSTR_LEN(table) - len - 1;
 		/* "schema"."table" format */
 		if (_php_pgsql_identifier_is_escaped(after_dot, len)) {
 			smart_str_appendc(querystr, '.');
@@ -5308,7 +5307,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 /* }}} */
 
 /* {{{ php_pgsql_insert */
-PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
 	zval *val, converted;
 	char buf[256];
@@ -5459,7 +5458,7 @@ PHP_FUNCTION(pg_insert)
 	if (option & PGSQL_DML_EXEC) {
 		/* return resource when executed */
 		option = option & ~PGSQL_DML_EXEC;
-		if (php_pgsql_insert(pg_link, ZSTR_VAL(table), values, option|PGSQL_DML_STRING, &sql) == FAILURE) {
+		if (php_pgsql_insert(pg_link, table, values, option|PGSQL_DML_STRING, &sql) == FAILURE) {
 			RETURN_FALSE;
 		}
 		pg_result = PQexec(pg_link, ZSTR_VAL(sql));
@@ -5499,7 +5498,7 @@ PHP_FUNCTION(pg_insert)
 				}
 			break;
 		}
-	} else if (php_pgsql_insert(pg_link, ZSTR_VAL(table), values, option, &sql) == FAILURE) {
+	} else if (php_pgsql_insert(pg_link, table, values, option, &sql) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (return_sql) {
@@ -5573,7 +5572,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 /* }}} */
 
 /* {{{ php_pgsql_update */
-PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const zend_string *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval var_converted, ids_converted;
 	smart_str querystr = {0};
@@ -5671,7 +5670,7 @@ PHP_FUNCTION(pg_update)
 	if (php_pgsql_flush_query(pg_link)) {
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
-	if (php_pgsql_update(pg_link, ZSTR_VAL(table), values, ids, option, &sql) == FAILURE) {
+	if (php_pgsql_update(pg_link, table, values, ids, option, &sql) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (option & PGSQL_DML_STRING) {
@@ -5682,7 +5681,7 @@ PHP_FUNCTION(pg_update)
 /* }}} */
 
 /* {{{ php_pgsql_delete */
-PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *table, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -5766,7 +5765,7 @@ PHP_FUNCTION(pg_delete)
 	if (php_pgsql_flush_query(pg_link)) {
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
-	if (php_pgsql_delete(pg_link, ZSTR_VAL(table), ids, option, &sql) == FAILURE) {
+	if (php_pgsql_delete(pg_link, table, ids, option, &sql) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (option & PGSQL_DML_STRING) {
@@ -5818,7 +5817,7 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 /* }}} */
 
 /* {{{ php_pgsql_select */
- PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
+ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -5914,7 +5913,7 @@ PHP_FUNCTION(pg_select)
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
 	array_init(return_value);
-	if (php_pgsql_select(pg_link, ZSTR_VAL(table), ids, return_value, option, result_type, &sql) == FAILURE) {
+	if (php_pgsql_select(pg_link, table, ids, return_value, option, result_type, &sql) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
