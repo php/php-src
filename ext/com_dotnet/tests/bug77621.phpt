@@ -1,9 +1,7 @@
 --TEST--
 Bug #77621 (Already defined constants are not properly reported)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --INI--
 com.autoregister_verbose=1
 --FILE--

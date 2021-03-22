@@ -1,9 +1,7 @@
 --TEST--
 Bug #77177 (Serializing or unserializing COM objects crashes)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 $com = new COM("WScript.Shell");
