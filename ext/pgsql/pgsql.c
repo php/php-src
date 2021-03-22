@@ -278,11 +278,11 @@ static void _free_result(zend_resource *rsrc)
 }
 /* }}} */
 
-static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t len) /* {{{ */
+static bool _php_pgsql_identifier_is_escaped(const char *identifier, size_t len) /* {{{ */
 {
 	/* Handle edge case. Cannot be a escaped string */
 	if (len <= 2) {
-		return FAILURE;
+		return false;
 	}
 	/* Detect double quotes */
 	if (identifier[0] == '"' && identifier[len-1] == '"') {
@@ -291,14 +291,14 @@ static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t le
 		/* Detect wrong format of " inside of escaped string */
 		for (i = 1; i < len-1; i++) {
 			if (identifier[i] == '"' && (identifier[++i] != '"' || i == len-1)) {
-				return FAILURE;
+				return false;
 			}
 		}
 	} else {
-		return FAILURE;
+		return false;
 	}
 	/* Escaped properly */
-	return SUCCESS;
+	return true;
 }
 /* }}} */
 
@@ -5201,7 +5201,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		}
 		/* If field is NULL and HAS DEFAULT, should be skipped */
 		if (!skip_field) {
-			if (_php_pgsql_detect_identifier_escape(ZSTR_VAL(field), ZSTR_LEN(field)) == SUCCESS) {
+			if (_php_pgsql_identifier_is_escaped(ZSTR_VAL(field), ZSTR_LEN(field))) {
 				zend_hash_update(Z_ARRVAL_P(result), field, &new_val);
 			} else {
 				char *escaped = PQescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
@@ -5292,7 +5292,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 	/* schema.table should be "schema"."table" */
 	const char *dot = memchr(table, '.', table_len);
 	size_t len = dot ? dot - table : table_len;
-	if (_php_pgsql_detect_identifier_escape(table, len) == SUCCESS) {
+	if (_php_pgsql_identifier_is_escaped(table, len)) {
 		smart_str_appendl(querystr, table, len);
 	} else {
 		char *escaped = PQescapeIdentifier(pg_link, table, len);
@@ -5303,7 +5303,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 		const char *after_dot = dot + 1;
 		len = table_len - len - 1;
 		/* "schema"."table" format */
-		if (_php_pgsql_detect_identifier_escape(after_dot, len) == SUCCESS) {
+		if (_php_pgsql_identifier_is_escaped(after_dot, len)) {
 			smart_str_appendc(querystr, '.');
 			smart_str_appendl(querystr, after_dot, len);
 		} else {
