@@ -1346,6 +1346,25 @@ int zend_accel_invalidate(zend_string *filename, bool force)
 	return SUCCESS;
 }
 
+static zend_string* accel_new_interned_key(zend_string *key)
+{
+	zend_string *new_key;
+
+	GC_ADDREF(key);
+	new_key = accel_new_interned_string(key);
+	if (UNEXPECTED(new_key == key)) {
+		new_key = zend_shared_alloc(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(ZSTR_LEN(key)), 8));
+		if (EXPECTED(new_key)) {
+			GC_SET_REFCOUNT(new_key, 2);
+			GC_TYPE_INFO(new_key) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT);
+			ZSTR_H(new_key) = ZSTR_H(key);
+			ZSTR_LEN(new_key) = ZSTR_LEN(key);
+			memcpy(ZSTR_VAL(new_key), ZSTR_VAL(key), ZSTR_LEN(new_key) + 1);
+		}
+	}
+	return new_key;
+}
+
 /* Adds another key for existing cached script */
 static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 {
@@ -1355,11 +1374,10 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 			ZSMMG(memory_exhausted) = 1;
 			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH);
 		} else {
-			char *new_key = zend_shared_alloc(ZSTR_LEN(key) + 1);
+			zend_string *new_key = accel_new_interned_key(key);
 			if (new_key) {
-				memcpy(new_key, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-				if (zend_accel_hash_update(&ZCSG(hash), new_key, ZSTR_LEN(key), 1, bucket)) {
-					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", new_key);
+				if (zend_accel_hash_update(&ZCSG(hash), new_key, 1, bucket)) {
+					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", ZSTR_VAL(new_key));
 				}
 			} else {
 				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
@@ -1577,19 +1595,18 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
-	bucket = zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(new_persistent_script->script.filename), ZSTR_LEN(new_persistent_script->script.filename), 0, new_persistent_script);
+	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);
 	if (bucket) {
 		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->script.filename));
 		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
-		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
+		    memcmp(ZSTR_VAL(key), "phar://", sizeof("phar://") - 1) != 0 &&
 		    !zend_string_equals(new_persistent_script->script.filename, key)) {
 			/* link key to the same persistent script in hash table */
-			char *new_key = zend_shared_alloc(ZSTR_LEN(key) + 1);
+			zend_string *new_key = accel_new_interned_key(key);
 
 			if (new_key) {
-				memcpy(new_key, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-				if (zend_accel_hash_update(&ZCSG(hash), new_key, ZSTR_LEN(key), 1, bucket)) {
+				if (zend_accel_hash_update(&ZCSG(hash), new_key, 1, bucket)) {
 					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", ZSTR_VAL(key));
 				} else {
 					zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
@@ -3528,11 +3545,11 @@ static void preload_activate(void)
 
 static void preload_restart(void)
 {
-	zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(ZCSG(preload_script)->script.filename), ZSTR_LEN(ZCSG(preload_script)->script.filename), 0, ZCSG(preload_script));
+	zend_accel_hash_update(&ZCSG(hash), ZCSG(preload_script)->script.filename, 0, ZCSG(preload_script));
 	if (ZCSG(saved_scripts)) {
 		zend_persistent_script **p = ZCSG(saved_scripts);
 		while (*p) {
-			zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL((*p)->script.filename), ZSTR_LEN((*p)->script.filename), 0, *p);
+			zend_accel_hash_update(&ZCSG(hash), (*p)->script.filename, 0, *p);
 			p++;
 		}
 	}
@@ -4472,7 +4489,7 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
-	bucket = zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(new_persistent_script->script.filename), ZSTR_LEN(new_persistent_script->script.filename), 0, new_persistent_script);
+	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);
 	if (bucket) {
 		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->script.filename));
 	}

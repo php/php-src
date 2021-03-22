@@ -1882,7 +1882,7 @@ use_process_mem:
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 		script->dynamic_members.last_used = ZCG(request_time);
 
-		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
+		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);
 
 		zend_shared_alloc_unlock();
 		zend_accel_error(ACCEL_LOG_INFO, "File cached script loaded into memory '%s'", ZSTR_VAL(script->script.filename));
