@@ -2708,16 +2708,16 @@ PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *
 			}
 		}
 	} else {
-		unsigned char xlat[256], j = 0;
+		unsigned char xlat[256];
 
-		do { xlat[j] = j; } while (++j != 0);
+		memset(xlat, 0, sizeof(xlat));
 
 		for (i = 0; i < trlen; i++) {
-			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i] - str_from[i];
 		}
 
 		for (i = 0; i < len; i++) {
-			str[i] = xlat[(size_t)(unsigned char) str[i]];
+			str[i] += xlat[(size_t)(unsigned char) str[i]];
 		}
 	}
 
@@ -2742,41 +2742,38 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
 				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), i);
 				ZSTR_VAL(new_str)[i] = ch_to;
-				break;
+				i++;
+				for (; i < ZSTR_LEN(str); i++) {
+					ZSTR_VAL(new_str)[i] = (ZSTR_VAL(str)[i] != ch_from) ? ZSTR_VAL(str)[i] : ch_to;
+				}
+				ZSTR_VAL(new_str)[i] = 0;
+				return new_str;
 			}
 		}
-		for (; i < ZSTR_LEN(str); i++) {
-			ZSTR_VAL(new_str)[i] = (ZSTR_VAL(str)[i] != ch_from) ? ZSTR_VAL(str)[i] : ch_to;
-		}
 	} else {
-		unsigned char xlat[256], j = 0;
+		unsigned char xlat[256];
 
-		do { xlat[j] = j; } while (++j != 0);
+		memset(xlat, 0, sizeof(xlat));;
 
 		for (i = 0; i < trlen; i++) {
-			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i] - str_from[i];
 		}
 
 		for (i = 0; i < ZSTR_LEN(str); i++) {
-			if (ZSTR_VAL(str)[i] != xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]]) {
+			if (xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]]) {
 				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
 				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), i);
-				ZSTR_VAL(new_str)[i] = xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
-				break;
+				do {
+					ZSTR_VAL(new_str)[i] = ZSTR_VAL(str)[i] + xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
+					i++;
+				} while (i < ZSTR_LEN(str));
+				ZSTR_VAL(new_str)[i] = 0;
+				return new_str;
 			}
 		}
-
-		for (;i < ZSTR_LEN(str); i++) {
-			ZSTR_VAL(new_str)[i] = xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
-		}
 	}
 
-	if (!new_str) {
-		return zend_string_copy(str);
-	}
-
-	ZSTR_VAL(new_str)[ZSTR_LEN(new_str)] = 0;
-	return new_str;
+	return zend_string_copy(str);
 }
 /* }}} */
 
