@@ -3079,7 +3079,7 @@ PHP_FUNCTION(pg_copy_to)
 	ExecStatusType status;
 	char *csv = (char *)NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|Ss", &pgsql_link,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rP|Ss", &pgsql_link,
 			&table_name, &pg_delimiter, &pg_null_as, pg_null_as_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -3173,7 +3173,7 @@ PHP_FUNCTION(pg_copy_from)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSa|Ss", &pgsql_link,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rPa|Ss", &pgsql_link,
 			&table_name, &pg_rows, &pg_delimiter, &pg_null_as,
 			&pg_null_as_len) == FAILURE) {
 		RETURN_THROWS();
@@ -4353,7 +4353,7 @@ PHP_FUNCTION(pg_meta_data)
 	bool extended=0;
 	PGconn *pgsql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rP|b",
 							  &pgsql_link, &table_name, &extended) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -5223,7 +5223,7 @@ PHP_FUNCTION(pg_convert)
 	PGconn *pg_link;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
-							  "rSa|l", &pgsql_link, &table_name, &values, &option) == FAILURE) {
+							  "rPa|l", &pgsql_link, &table_name, &values, &option) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -5432,7 +5432,7 @@ PHP_FUNCTION(pg_insert)
 	ExecStatusType status;
 	zend_string *sql = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSa|l", &pgsql_link, &table,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rPa|l", &pgsql_link, &table,
 			&values, &option) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -5648,7 +5648,7 @@ PHP_FUNCTION(pg_update)
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSaa|l", &pgsql_link, &table,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rPaa|l", &pgsql_link, &table,
 			&values, &ids, &option) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -5743,7 +5743,7 @@ PHP_FUNCTION(pg_delete)
 	PGconn *pg_link;
 	zend_string *sql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSa|l", &pgsql_link, &table,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rPa|l", &pgsql_link, &table,
 			&ids, &option) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -5886,7 +5886,7 @@ PHP_FUNCTION(pg_select)
 	zend_string *sql = NULL;
 
 	/* TODO Document result_type param on php.net (apparently it was added in PHP 7.1) */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSa|ll", &pgsql_link, &table,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rPa|ll", &pgsql_link, &table,
 			&ids, &option, &result_type) == FAILURE) {
 		RETURN_THROWS();
 	}
