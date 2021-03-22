@@ -971,7 +971,6 @@ PHP_FUNCTION(pg_query)
 {
 	zval *pgsql_link = NULL;
 	char *query;
-	int  argc = ZEND_NUM_ARGS();
 	size_t query_len;
 	int leftover = 0;
 	zend_resource *link;
@@ -979,14 +978,14 @@ PHP_FUNCTION(pg_query)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (argc == 1) {
-		if (zend_parse_parameters(argc, "s", &query, &query_len) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rs", &pgsql_link, &query, &query_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -1068,7 +1067,6 @@ PHP_FUNCTION(pg_query_params)
 	zval *pv_param_arr, *tmp;
 	char *query;
 	size_t query_len;
-	int argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	int num_params = 0;
 	char **params = NULL;
@@ -1078,14 +1076,14 @@ PHP_FUNCTION(pg_query_params)
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
 
-	if (argc == 2) {
-		if (zend_parse_parameters(argc, "sa", &query, &query_len, &pv_param_arr) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &query, &query_len, &pv_param_arr) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -1178,7 +1176,6 @@ PHP_FUNCTION(pg_prepare)
 	zval *pgsql_link = NULL;
 	char *query, *stmtname;
 	size_t query_len, stmtname_len;
-	int argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	PGconn *pgsql;
 	zend_resource *link;
@@ -1186,14 +1183,14 @@ PHP_FUNCTION(pg_prepare)
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
 
-	if (argc == 2) {
-		if (zend_parse_parameters(argc, "ss", &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rss", &pgsql_link, &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &pgsql_link, &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -1260,7 +1257,6 @@ PHP_FUNCTION(pg_execute)
 	zval *pv_param_arr, *tmp;
 	char *stmtname;
 	size_t stmtname_len;
-	int argc = ZEND_NUM_ARGS();
 	int leftover = 0;
 	int num_params = 0;
 	char **params = NULL;
@@ -1270,14 +1266,14 @@ PHP_FUNCTION(pg_execute)
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
 
-	if (argc == 2) {
-		if (zend_parse_parameters(argc, "sa", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
+	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rsa", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -1764,9 +1760,9 @@ PHP_FUNCTION(pg_fetch_result)
 	zend_long row, field_offset;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int pgsql_row, argc = ZEND_NUM_ARGS();
+	int pgsql_row;
 
-	if (argc == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_RESOURCE(result)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
@@ -1784,7 +1780,7 @@ PHP_FUNCTION(pg_fetch_result)
 	}
 
 	pgsql_result = pg_result->result;
-	if (argc == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		if (pg_result->row < 0) {
 			pg_result->row = 0;
 		}
@@ -1806,7 +1802,7 @@ PHP_FUNCTION(pg_fetch_result)
 		pgsql_row = (int)row;
 	}
 
-	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, argc);
+	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, ZEND_NUM_ARGS());
 	if (field_offset < 0) {
 		RETURN_THROWS();
 	}
@@ -2103,9 +2099,9 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	zend_long row, field_offset;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int pgsql_row, argc = ZEND_NUM_ARGS();
+	int pgsql_row;
 
-	if (argc == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_RESOURCE(result)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
@@ -2123,7 +2119,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 
 	pgsql_result = pg_result->result;
-	if (argc == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		if (pg_result->row < 0) {
 			pg_result->row = 0;
 		}
@@ -2144,7 +2140,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		pgsql_row = (int)row;
 	}
 
-	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, argc);
+	field_offset = field_arg_to_offset(pgsql_result, field_name, field_offset, ZEND_NUM_ARGS());
 	if (field_offset < 0) {
 		RETURN_THROWS();
 	}
@@ -2294,15 +2290,14 @@ PHP_FUNCTION(pg_lo_create)
 	zval *pgsql_link = NULL, *oid = NULL;
 	PGconn *pgsql;
 	Oid pgsql_oid, wanted_oid = InvalidOid;
-	int argc = ZEND_NUM_ARGS();
 	zend_resource *link;
 
-	if (zend_parse_parameters(argc, "|zz", &pgsql_link, &oid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &pgsql_link, &oid) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	/* Overloaded method uses default link if arg 1 is not a resource, set oid pointer */
-	if ((argc == 1) && (Z_TYPE_P(pgsql_link) != IS_RESOURCE)) {
+	if ((ZEND_NUM_ARGS() == 1) && (Z_TYPE_P(pgsql_link) != IS_RESOURCE)) {
 		oid = pgsql_link;
 		pgsql_link = NULL;
 	}
@@ -2368,10 +2363,9 @@ PHP_FUNCTION(pg_lo_unlink)
 	PGconn *pgsql;
 	Oid oid;
 	zend_resource *link;
-	int argc = ZEND_NUM_ARGS();
 
 	/* accept string type since Oid type is unsigned int */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "rS", &pgsql_link, &oid_string) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "rS", &pgsql_link, &oid_string) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
@@ -2379,7 +2373,7 @@ PHP_FUNCTION(pg_lo_unlink)
 		}
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rl", &pgsql_link, &oid_long) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2388,7 +2382,7 @@ PHP_FUNCTION(pg_lo_unlink)
 		oid = (Oid)oid_long;
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "S", &oid_string) == SUCCESS) {
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "S", &oid_string) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
 			zend_value_error("Invalid OID value passed");
@@ -2397,7 +2391,7 @@ PHP_FUNCTION(pg_lo_unlink)
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "l", &oid_long) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2437,11 +2431,10 @@ PHP_FUNCTION(pg_lo_open)
 	int pgsql_mode=0, pgsql_lofd;
 	int create = 0;
 	pgLofp *pgsql_lofp;
-	int argc = ZEND_NUM_ARGS();
 	zend_resource *link;
 
 	/* accept string type since Oid is unsigned int */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rSs", &pgsql_link, &oid_string, &mode_string, &mode_strlen) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
@@ -2450,7 +2443,7 @@ PHP_FUNCTION(pg_lo_open)
 		}
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rls", &pgsql_link, &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2459,7 +2452,7 @@ PHP_FUNCTION(pg_lo_open)
 		oid = (Oid)oid_long;
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "Ss", &oid_string, &mode_string, &mode_strlen) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
@@ -2469,7 +2462,7 @@ PHP_FUNCTION(pg_lo_open)
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "ls", &oid_long, &mode_string, &mode_strlen) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2578,11 +2571,11 @@ PHP_FUNCTION(pg_lo_read)
 	zval *pgsql_id;
 	zend_long len;
 	size_t buf_len = PGSQL_LO_READ_BUF_SIZE;
-	int nbytes, argc = ZEND_NUM_ARGS();
+	int nbytes;
 	zend_string *buf;
 	pgLofp *pgsql;
 
-	if (zend_parse_parameters(argc, "r|l", &pgsql_id, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_id, &len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2590,7 +2583,7 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_THROWS();
 	}
 
-	if (argc > 1) {
+	if (ZEND_NUM_ARGS() > 1) {
 		buf_len = len < 0 ? 0 : len;
 	}
 
@@ -2680,16 +2673,15 @@ PHP_FUNCTION(pg_lo_import)
 	zval *pgsql_link = NULL, *oid = NULL;
 	char *file_in;
 	size_t name_len;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	Oid returned_oid;
 	zend_resource *link;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rp|z", &pgsql_link, &file_in, &name_len, &oid) == SUCCESS) {
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 									  "p|z", &file_in, &name_len, &oid) == SUCCESS) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
@@ -2758,11 +2750,10 @@ PHP_FUNCTION(pg_lo_export)
 	zend_long oid_long;
 	Oid oid;
 	PGconn *pgsql;
-	int argc = ZEND_NUM_ARGS();
 	zend_resource *link;
 
 	/* allow string to handle large OID value correctly */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rlp", &pgsql_link, &oid_long, &file_out, &name_len) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2771,7 +2762,7 @@ PHP_FUNCTION(pg_lo_export)
 		oid = (Oid)oid_long;
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "rSp", &pgsql_link, &oid_string, &file_out, &name_len) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
@@ -2780,7 +2771,7 @@ PHP_FUNCTION(pg_lo_export)
 		}
 		link = Z_RES_P(pgsql_link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 									  "lp",  &oid_long, &file_out, &name_len) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
@@ -2790,7 +2781,7 @@ PHP_FUNCTION(pg_lo_export)
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	}
-	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc,
+	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 								 "Sp", &oid_string, &file_out, &name_len) == SUCCESS) {
 		if (!is_valid_oid_string(oid_string, &oid)) {
 			/* wrong integer format */
@@ -2922,18 +2913,17 @@ PHP_FUNCTION(pg_set_error_verbosity)
 {
 	zval *pgsql_link = NULL;
 	zend_long verbosity;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	zend_resource *link;
 
-	if (argc == 1) {
-		if (zend_parse_parameters(argc, "l", &verbosity) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &verbosity) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rl", &pgsql_link, &verbosity) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pgsql_link, &verbosity) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -2957,18 +2947,17 @@ PHP_FUNCTION(pg_set_client_encoding)
 	char *encoding;
 	size_t encoding_len;
 	zval *pgsql_link = NULL;
-	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
 	zend_resource *link;
 
-	if (argc == 1) {
-		if (zend_parse_parameters(argc, "s", &encoding, &encoding_len) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &encoding, &encoding_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rs", &pgsql_link, &encoding, &encoding_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &encoding, &encoding_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
@@ -3051,16 +3040,16 @@ PHP_FUNCTION(pg_put_line)
 	size_t query_len;
 	PGconn *pgsql;
 	zend_resource *link;
-	int result = 0, argc = ZEND_NUM_ARGS();
+	int result = 0;
 
-	if (argc == 1) {
-		if (zend_parse_parameters(argc, "s", &query, &query_len) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rs", &pgsql_link, &query, &query_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &query, &query_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
