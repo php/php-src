@@ -164,8 +164,7 @@ again:
 					php_object_property_dump(val, num, key, level);
 				} ZEND_HASH_FOREACH_END();
 				if (is_temp) {
-					zend_hash_destroy(myht);
-					efree(myht);
+					zend_array_destroy(myht);
 				}
 			}
 			if (level > 1) {
