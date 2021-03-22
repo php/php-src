@@ -2,8 +2,8 @@
 Test unixtojd() function : error conditions
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --INI--
 date.timezone=UTC
 --FILE--

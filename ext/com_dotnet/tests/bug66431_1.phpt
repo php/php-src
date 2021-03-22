@@ -1,9 +1,9 @@
 --TEST--
 Bug #66431 Special Character via COM Interface (CP_UTF8), Application.Word
+--EXTENSIONS--
+com_dotnet
 --SKIPIF--
 <?php
-if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; }
-
 try {
     new COM("word.application", NULL, CP_UTF8);
 } catch (Exception $e) {

@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_graph() function : usage variations - different data types as $c arg
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

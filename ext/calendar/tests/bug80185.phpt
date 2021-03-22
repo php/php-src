@@ -1,8 +1,9 @@
 --TEST--
 Bug #80185 (jdtounix() fails after 2037)
+--EXTENSIONS--
+calendar
 --SKIPIF--
 <?php
-if (!extension_loaded('calendar')) die('skip ext/calendar required');
 if (PHP_INT_SIZE != 8) die("skip for 64bit platforms only");
 ?>
 --FILE--

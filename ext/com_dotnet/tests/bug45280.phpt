@@ -1,9 +1,7 @@
 --TEST--
 Bug #45280 (Reflection of instantiated COM classes causes PHP to crash)
---SKIPIF--
-<?php
-if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; }
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 $dict = new COM("Scripting.Dictionary");
