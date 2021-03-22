@@ -12,6 +12,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   a. ext/hash
   b. ext/pdo
   c. ext/standard
+  d. ext/pgsql
 
 ========================
 1. Internal API changes
@@ -94,3 +95,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   c. ext/standard
     - The PHP API php_fputcsv() now takes an extra zend_string* argument at the end
       for a custom EOL sequence, passing NULL provides the old default of "\n".
+
+  d. ext/pgsql
+    - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
+      php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() have had
+      their return type formalized to zend_result.
