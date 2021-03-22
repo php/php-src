@@ -2855,7 +2855,8 @@ static int php_rinit_session(zend_bool auto_start) /* {{{ */
 {
 	php_rinit_session_globals();
 
-	if (PS(mod) == NULL) {
+	PS(mod) = NULL;
+	{
 		char *value;
 
 		value = zend_ini_string("session.save_handler", sizeof("session.save_handler") - 1, 0);
