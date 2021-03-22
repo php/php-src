@@ -1498,7 +1498,6 @@ PHP_FUNCTION(pg_last_notice)
 	zval *pgsql_link = NULL;
 	zval *notice, *notices;
 	pgsql_link_handle *link;
-	PGconn *pg_link;
 	zend_long option = PGSQL_NOTICE_LAST;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &pgsql_link, pgsql_link_ce, &option) == FAILURE) {
@@ -1507,7 +1506,6 @@ PHP_FUNCTION(pg_last_notice)
 
 	link = Z_PGSQL_LINK_P(pgsql_link);
 	CHECK_PGSQL_LINK(link);
-	pg_link = link->conn;
 
 	notices = zend_hash_index_find(&PGG(notices), (zend_ulong) Z_OBJ_P(pgsql_link)->handle);
 	switch (option) {
@@ -3307,7 +3305,6 @@ PHP_FUNCTION(pg_escape_string)
 	}
 
 	to = zend_string_safe_alloc(ZSTR_LEN(from), 2, 0, 0);
-	//  TODO When can it ben null?
 	if (link) {
 		pgsql = link->conn;
 		ZSTR_LEN(to) = PQescapeStringConn(pgsql, ZSTR_VAL(to), ZSTR_VAL(from), ZSTR_LEN(from), NULL);
