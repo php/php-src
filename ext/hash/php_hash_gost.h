@@ -31,6 +31,6 @@ typedef struct {
 
 PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *args);
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *, const unsigned char *, size_t);
-PHP_HASH_API void PHP_GOSTFinal(unsigned char[64], PHP_GOST_CTX *);
+PHP_HASH_API void PHP_GOSTFinal(unsigned char[32], PHP_GOST_CTX *);
 
 #endif
