@@ -5250,27 +5250,26 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
-static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, zend_ulong opt) /* {{{ */
+static bool do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, zend_ulong opt) /* {{{ */
 {
 	if (opt & PGSQL_DML_ASYNC) {
 		if (PQsendQuery(pg_link, ZSTR_VAL(querystr->s))) {
-			return 0;
+			return true;
 		}
-	}
-	else {
+	} else {
 		PGresult *pg_result;
 
 		pg_result = PQexec(pg_link, ZSTR_VAL(querystr->s));
 		if (PQresultStatus(pg_result) == expect) {
 			PQclear(pg_result);
-			return 0;
+			return true;
 		} else {
 			php_error_docref(NULL, E_WARNING, "%s", PQresultErrorMessage(pg_result));
 			PQclear(pg_result);
 		}
 	}
 
-	return -1;
+	return false;
 }
 /* }}} */
 
@@ -5400,7 +5399,7 @@ no_values:
 	smart_str_0(&querystr);
 
 	if ((opt & (PGSQL_DML_EXEC|PGSQL_DML_ASYNC)) &&
-		do_exec(&querystr, PGRES_COMMAND_OK, pg_link, (opt & PGSQL_CONV_OPTS)) == 0) {
+		do_exec(&querystr, PGRES_COMMAND_OK, pg_link, (opt & PGSQL_CONV_OPTS))) {
 		ret = SUCCESS;
 	}
 	else if (opt & PGSQL_DML_STRING) {
@@ -5619,7 +5618,7 @@ PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const char *table, z
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
 
-	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt) == 0) {
+	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt)) {
 		ret = SUCCESS;
 	} else if (opt & PGSQL_DML_STRING) {
 		ret = SUCCESS;
@@ -5716,7 +5715,7 @@ PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const char *table, z
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
 
-	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt) == 0) {
+	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt)) {
 		ret = SUCCESS;
 	} else if (opt & PGSQL_DML_STRING) {
 		ret = SUCCESS;
