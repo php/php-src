@@ -3,10 +3,8 @@ DOMDocument::$validateOnParse - effectual determination (dom_document_validate_o
 --CREDITS--
 Hans Zaunere
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

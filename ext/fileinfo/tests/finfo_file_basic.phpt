@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_file() function : basic functionality
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';

@@ -1,7 +1,7 @@
 --TEST--
 Bug #74428 (Unsigned rational numbers are written out as signed rationals)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0

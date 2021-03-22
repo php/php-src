@@ -1,7 +1,7 @@
 --TEST--
 Bug #34276 (setAttributeNS and default namespace)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<<HERE

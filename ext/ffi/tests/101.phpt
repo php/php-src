@@ -1,7 +1,8 @@
 --TEST--
 FFI 101: PHP symbols (function address)
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('utils.inc'); ?>
 <?php
 try {

@@ -1,7 +1,7 @@
 --TEST--
 Bug #68398: msooxml matches too many archives
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 

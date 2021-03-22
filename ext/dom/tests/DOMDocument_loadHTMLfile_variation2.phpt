@@ -6,8 +6,8 @@ Verifies the behavior if a not-well formed document is loaded
 Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
 assert.bail=true
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

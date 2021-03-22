@@ -2,10 +2,8 @@
 DOMDocument::relaxNGValidate() should fail on invalid RelaxNG file source
 --CREDITS--
 Knut Urdalen <knut@php.net>
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $rng = __DIR__.'/foo.rng';

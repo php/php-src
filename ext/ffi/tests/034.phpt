@@ -1,7 +1,7 @@
 --TEST--
 FFI 034: FFI::typeof(), FFI::sizeof(), FFI::alignof()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
