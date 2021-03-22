@@ -37,6 +37,16 @@ class Test2 {
     }
 }
 
+class Test3 {
+    private function getBool() {
+        return true;
+    }
+
+    private function getBool2(): bool {
+        return $this->getBool();
+    }
+}
+
 ?>
 --EXPECTF--
 $_main:
@@ -91,3 +101,16 @@ Test2::getInt3:
 0003 V1 = DO_FCALL
 0004 VERIFY_RETURN_TYPE V1
 0005 RETURN V1
+
+Test3::getBool:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (after optimizer)
+     ; %s
+0000 RETURN bool(true)
+
+Test3::getBool2:
+     ; (lines=2, args=0, vars=0, tmps=1)
+     ; (after optimizer)
+     ; %s
+0000 V0 = QM_ASSIGN bool(true)
+0001 RETURN bool(true)

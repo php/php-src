@@ -1236,7 +1236,6 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && ssa->ops[op_1].op1_def == v
 				 && ssa->ops[op_1].op1_use >= 0
 				 && ssa->ops[op_1].op1_use_chain == -1
-				 && ssa->vars[v].use_chain >= 0
 				 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
@@ -1245,10 +1244,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
 
 						int ret = ssa->vars[v].use_chain;
-
-						ssa->ops[ret].op1_use = orig_var;
-						ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
-						ssa->vars[orig_var].use_chain = ret;
+						if (ret >= 0) {
+							ssa->ops[ret].op1_use = orig_var;
+							ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+							ssa->vars[orig_var].use_chain = ret;
+						}
 
 						ssa->vars[v].definition = -1;
 						ssa->vars[v].use_chain = -1;
