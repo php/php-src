@@ -2569,13 +2569,12 @@ PHP_FUNCTION(pg_lo_close)
 PHP_FUNCTION(pg_lo_read)
 {
 	zval *pgsql_id;
-	zend_long len;
-	size_t buf_len = PGSQL_LO_READ_BUF_SIZE;
+	zend_long buffer_length = PGSQL_LO_READ_BUF_SIZE;
 	int nbytes;
 	zend_string *buf;
 	pgLofp *pgsql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_id, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_id, &buffer_length) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2583,16 +2582,18 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
-		buf_len = len < 0 ? 0 : len;
+	if (buffer_length < 0) {
+		zend_argument_value_error(2, "must be greater or equal than 0");
+		RETURN_THROWS();
 	}
 
-	buf = zend_string_alloc(buf_len, 0);
+	buf = zend_string_alloc(buffer_length, 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, ZSTR_VAL(buf), ZSTR_LEN(buf)))<0) {
 		zend_string_efree(buf);
 		RETURN_FALSE;
 	}
 
+	/* TODO Use truncate API? */
 	ZSTR_LEN(buf) = nbytes;
 	ZSTR_VAL(buf)[ZSTR_LEN(buf)] = '\0';
 	RETURN_NEW_STR(buf);
