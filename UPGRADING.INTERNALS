@@ -100,3 +100,6 @@ PHP 8.1 INTERNALS UPGRADE NOTES
     - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
       php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() have had
       their return type formalized to zend_result.
+    - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
+      php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() now accept a
+      zend_string* instead of a char* for the table name.
