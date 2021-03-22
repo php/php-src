@@ -35,6 +35,7 @@ require_once('skipifconnectfailure.inc');
         'fetch_fields'          => true,
         'fetch_object'          => true,
         'fetch_row'             => true,
+        'fetch_column'          => true,
         'field_seek'            => true,
         'free'                  => true,
         'free_result'           => true,
