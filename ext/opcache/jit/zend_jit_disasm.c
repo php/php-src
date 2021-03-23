@@ -14,21 +14,29 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
+   |          Hao Sun <hao.sun@arm.com>                                   |
    +----------------------------------------------------------------------+
 */
 
-#define HAVE_DISASM 1
-#define DISASM_INTEL_SYNTAX 0
 
-#include "jit/libudis86/itab.c"
-#include "jit/libudis86/decode.c"
-#include "jit/libudis86/syn.c"
-#if DISASM_INTEL_SYNTAX
-# include "jit/libudis86/syn-intel.c"
+#ifdef HAVE_CAPSTONE
+# define HAVE_DISASM 1
+# include <capstone/capstone.h>
+# define HAVE_CAPSTONE_ITER 1
 #else
-# include "jit/libudis86/syn-att.c"
-#endif
-#include "jit/libudis86/udis86.c"
+# define HAVE_DISASM 1
+# define DISASM_INTEL_SYNTAX 0
+
+# include "jit/libudis86/itab.c"
+# include "jit/libudis86/decode.c"
+# include "jit/libudis86/syn.c"
+# if DISASM_INTEL_SYNTAX
+#  include "jit/libudis86/syn-intel.c"
+# else
+#  include "jit/libudis86/syn-att.c"
+# endif
+# include "jit/libudis86/udis86.c"
+#endif /* HAVE_CAPSTONE */
 
 static void zend_jit_disasm_add_symbol(const char *name,
                                        uint64_t    addr,
@@ -47,8 +55,6 @@ static void zend_jit_disasm_add_symbol(const char *name,
 #ifndef _WIN32
 #include <dlfcn.h>
 #endif
-
-static struct ud ud;
 
 struct _sym_node {
 	uint64_t          addr;
@@ -214,12 +220,34 @@ static const char* zend_jit_disasm_find_symbol(uint64_t  addr,
 	return NULL;
 }
 
-static const char* zend_jit_disasm_resolver(struct ud *ud,
+#ifdef HAVE_CAPSTONE
+static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
+{
+	unsigned int i;
+
+	if (cs_insn_group(cs, insn, X86_GRP_JUMP)) {
+		for (i = 0; i < insn->detail->x86.op_count; i++) {
+			if (insn->detail->x86.operands[i].type == X86_OP_IMM) {
+				return insn->detail->x86.operands[i].imm;
+			}
+		}
+	}
+
+	return 0;
+}
+#endif
+
+static const char* zend_jit_disasm_resolver(
+#ifndef HAVE_CAPSTONE
+                                            struct ud *ud,
+#endif
                                             uint64_t   addr,
                                             int64_t   *offset)
 {
 #ifndef _WIN32
+# ifndef HAVE_CAPSTONE
 	((void)ud);
+# endif
 	const char *name;
 	void *a = (void*)(zend_uintptr_t)(addr);
 	Dl_info info;
@@ -261,16 +289,69 @@ static int zend_jit_disasm(const char    *name,
 	zval zv, *z;
 	zend_long n, m;
 	HashTable labels;
-	const struct ud_operand *op;
 	uint64_t addr;
 	int b;
+#ifdef HAVE_CAPSTONE
+	csh cs;
+	cs_insn *insn;
+# ifdef HAVE_CAPSTONE_ITER
+	const uint8_t *cs_code;
+	size_t cs_size;
+	uint64_t cs_addr;
+# else
+	size_t count, i;
+# endif
+	const char *sym;
+	int64_t offset = 0;
+	char *p, *q, *r;
+#else
+	struct ud ud;
+	const struct ud_operand *op;
+#endif
+
+#ifdef HAVE_CAPSTONE
+# if defined(__x86_64__) || defined(_WIN64)
+	if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK)
+		return 0;
+	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+#  if DISASM_INTEL_SYNTAX
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
+#  else
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
+#  endif
+# else
+	if (cs_open(CS_ARCH_X86, CS_MODE_32, &cs) != CS_ERR_OK)
+		return 0;
+	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+#  if DISASM_INTEL_SYNTAX
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
+#  else
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
+#  endif
+# endif
+#else
+	ud_init(&ud);
+# if defined(__x86_64__) || defined(_WIN64)
+	ud_set_mode(&ud, 64);
+# else
+	ud_set_mode(&ud, 32);
+# endif
+# if DISASM_INTEL_SYNTAX
+	ud_set_syntax(&ud, UD_SYN_INTEL);
+# else
+	ud_set_syntax(&ud, UD_SYN_ATT);
+# endif
+	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
+#endif /* HAVE_CAPSTONE */
 
 	if (name) {
 		fprintf(stderr, "%s: ; (%s)\n", name, filename ? filename : "unknown");
 	}
 
+#ifndef HAVE_CAPSTONE
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
 	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
+#endif
 
 	zend_hash_init(&labels, 8, NULL, NULL, 0);
 	if (op_array && cfg) {
@@ -284,6 +365,26 @@ static int zend_jit_disasm(const char    *name,
 			}
 		}
 	}
+#ifdef HAVE_CAPSTONE
+	ZVAL_TRUE(&zv);
+# ifdef HAVE_CAPSTONE_ITER
+	cs_code = start;
+	cs_size = (uint8_t*)end - (uint8_t*)start;
+	cs_addr = (uint64_t)(uintptr_t)cs_code;
+	insn = cs_malloc(cs);
+	while (cs_disasm_iter(cs, &cs_code, &cs_size, &cs_addr, insn)) {
+		if ((addr = zend_jit_disasm_branch_target(cs, insn))) {
+# else
+	count = cs_disasm(cs, start, (uint8_t*)end - (uint8_t*)start, (uintptr_t)start, 0, &insn);
+	for (i = 0; i < count; i++) {
+		if ((addr = zend_jit_disasm_branch_target(cs, &(insn[i])))) {
+# endif
+			if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
+				zend_hash_index_add(&labels, addr, &zv);
+			}
+		}
+	}
+#else
 	ZVAL_TRUE(&zv);
 	while (ud_disassemble(&ud)) {
 		op = ud_insn_opr(&ud, 0);
@@ -294,6 +395,7 @@ static int zend_jit_disasm(const char    *name,
 			}
 		}
 	}
+#endif
 
 	zend_hash_sort(&labels, zend_jit_cmp_labels, 0);
 
@@ -309,6 +411,88 @@ static int zend_jit_disasm(const char    *name,
 		}
 	} ZEND_HASH_FOREACH_END();
 
+#ifdef HAVE_CAPSTONE
+# ifdef HAVE_CAPSTONE_ITER
+	cs_code = start;
+	cs_size = (uint8_t*)end - (uint8_t*)start;
+	cs_addr = (uint64_t)(uintptr_t)cs_code;
+	while (cs_disasm_iter(cs, &cs_code, &cs_size, &cs_addr, insn)) {
+		z = zend_hash_index_find(&labels, insn->address);
+# else
+	for (i = 0; i < count; i++) {
+		z = zend_hash_index_find(&labels, insn[i].address);
+# endif
+		if (z) {
+			if (Z_LVAL_P(z) < 0) {
+				fprintf(stderr, ".ENTRY" ZEND_LONG_FMT ":\n", -Z_LVAL_P(z));
+			} else {
+				fprintf(stderr, ".L" ZEND_LONG_FMT ":\n", Z_LVAL_P(z));
+			}
+		}
+
+# ifdef HAVE_CAPSTONE_ITER
+		fprintf(stderr, "\t%s ", insn->mnemonic);
+		p = insn->op_str;
+# else
+		fprintf(stderr, "\t%s ", insn[i].mnemonic);
+		p = insn[i].op_str;
+# endif
+		/* Try to replace the target addresses with a symbols */
+		while ((q = strchr(p, 'x')) != NULL) {
+			if (p != q && *(q-1) == '0') {
+				r = q + 1;
+				addr = 0;
+				while (1) {
+					if (*r >= '0' && *r <= '9') {
+						addr = addr * 16 + (*r - '0');
+					} else if (*r >= 'A' && *r <= 'F') {
+						addr = addr * 16 + (*r - 'A' + 10);
+					} else if (*r >= 'a' && *r <= 'f') {
+						addr = addr * 16 + (*r - 'a' + 10);
+					} else {
+						break;
+					}
+					r++;
+				}
+				if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)end) {
+					if ((z = zend_hash_index_find(&labels, addr))) {
+						if (Z_LVAL_P(z) < 0) {
+							fwrite(p, 1, q - p - 1, stderr);
+							fprintf(stderr, ".ENTRY" ZEND_LONG_FMT, -Z_LVAL_P(z));
+						} else {
+							fwrite(p, 1, q - p - 1, stderr);
+							fprintf(stderr, ".L" ZEND_LONG_FMT, Z_LVAL_P(z));
+						}
+					} else {
+						fwrite(p, 1, r - p, stderr);
+					}
+				} else if ((sym = zend_jit_disasm_resolver(addr, &offset))) {
+					fwrite(p, 1, q - p - 1, stderr);
+					fputs(sym, stderr);
+					if (offset != 0) {
+						if (offset > 0) {
+							fprintf(stderr, "+%" PRIx64, offset);
+						} else {
+							fprintf(stderr, "-%" PRIx64, offset);
+						}
+					}
+				} else {
+					fwrite(p, 1, r - p, stderr);
+				}
+				p = r;
+			} else {
+				fwrite(p, 1, q - p + 1, stderr);
+				p = q + 1;
+			}
+		}
+		fprintf(stderr, "%s\n", p);
+	}
+# ifdef HAVE_CAPSTONE_ITER
+	cs_free(insn, 1);
+# else
+	cs_free(insn, count);
+# endif
+#else
 	ud_set_input_buffer(&ud, (uint8_t*)start, (uint8_t*)end - (uint8_t*)start);
 	ud_set_pc(&ud, (uint64_t)(uintptr_t)start);
 
@@ -351,28 +535,20 @@ static int zend_jit_disasm(const char    *name,
 		}
 		fprintf(stderr, "\t%s\n", ud_insn_asm(&ud));
 	}
+#endif
 	fprintf(stderr, "\n");
 
 	zend_hash_destroy(&labels);
+
+#ifdef HAVE_CAPSTONE
+	cs_close(&cs);
+#endif
 
 	return 1;
 }
 
 static int zend_jit_disasm_init(void)
 {
-	ud_init(&ud);
-#if defined(__x86_64__) || defined(_WIN64)
-	ud_set_mode(&ud, 64);
-#else
-	ud_set_mode(&ud, 32);
-#endif
-#if DISASM_INTEL_SYNTAX
-	ud_set_syntax(&ud, UD_SYN_INTEL);
-#else
-	ud_set_syntax(&ud, UD_SYN_ATT);
-#endif
-	ud_set_sym_resolver(&ud, zend_jit_disasm_resolver);
-
 #ifndef ZTS
 #define REGISTER_EG(n)  \
 	zend_jit_disasm_add_symbol("EG("#n")", \

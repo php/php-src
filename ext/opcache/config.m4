@@ -70,6 +70,14 @@ if test "$PHP_OPCACHE" != "no"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
+    PKG_CHECK_MODULES([CAPSTONE], [capstone >= 3.0.0],
+        [have_capstone="yes"], [have_capstone="no"])
+    if test "$have_capstone" = "yes"; then
+        AC_DEFINE(HAVE_CAPSTONE, 1, [ ])
+        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+    fi
+
     PHP_SUBST(DASM_FLAGS)
 
     AC_MSG_CHECKING(for opagent in default path)

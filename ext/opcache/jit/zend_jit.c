@@ -206,7 +206,7 @@ static bool zend_long_is_power_of_two(zend_long x)
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_helpers.c"
-#include "jit/zend_jit_disasm_x86.c"
+#include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
 #include "jit/zend_jit_gdb.c"
 #include "jit/zend_jit_perf_dump.c"
