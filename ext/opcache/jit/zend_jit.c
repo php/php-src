@@ -1510,7 +1510,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 				if (!ZEND_REGSET_IN(*hints, it->reg) &&
 				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
 				    (!current->used_as_hint ||
-				     (it->reg != ZREG_R0 && it->reg != ZREG_R1 && it->reg != ZREG_XMM0 && it->reg != ZREG_XMM1))) {
+				     !ZEND_REGSET_IN(zend_jit_get_low_priority_regset(), it->reg))) {
 					hint = it->reg;
 				}
 			} else {
@@ -1640,10 +1640,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 	low_priority_regs = *hints;
 	if (current->used_as_hint) {
 		/* TODO: Avoid most often scratch registers. Find a better way ??? */
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R1);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM1);
+		low_priority_regs = ZEND_REGSET_UNION(low_priority_regs, zend_jit_get_low_priority_regset());
 	}
 
 	ZEND_REGSET_FOREACH(available, i) {

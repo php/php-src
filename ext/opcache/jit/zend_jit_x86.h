@@ -74,18 +74,20 @@ typedef enum _zend_reg {
 	ZREG_NULL,
 
 	ZREG_ZVAL_TRY_ADDREF,
-	ZREG_ZVAL_COPY_R0,
+	ZREG_ZVAL_COPY_GPR0,
 } zend_reg;
 
 typedef struct _zend_jit_registers_buf {
 #if defined(__x86_64__) || defined(_WIN64)
-	uint64_t r[16];
-	double xmm[16];
+	uint64_t gpr[16]; /* general purpose integer register */
+	double   fpr[16]; /* floating point registers */
 #else
-	uint32_t r[8];
-	double xmm[8];
+	uint32_t gpr[8]; /* general purpose integer register */
+	double   fpr[8]; /* floating point registers */
 #endif
 } zend_jit_registers_buf;
+
+#define ZREG_FIRST_FPR ZREG_XMM0
 
 #define ZREG_RAX ZREG_R0
 #define ZREG_RCX ZREG_R1
