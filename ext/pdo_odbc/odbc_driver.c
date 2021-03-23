@@ -372,6 +372,26 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	return 0;
 }
 
+static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
+{
+	RETCODE ret;
+	UCHAR d_name[32];
+	SQLSMALLINT len;
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+
+	/*
+	 * SQL_ATTR_CONNECTION_DEAD is tempting, but only in ODBC 3.5,
+	 * and not all drivers implement it properly
+	 */
+	ret = SQLGetInfo(H->dbc, SQL_DATA_SOURCE_READ_ONLY, d_name,
+		sizeof(d_name), &len);
+
+	if (ret != SQL_SUCCESS || len == 0) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static const struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_closer,
 	odbc_handle_preparer,
@@ -384,7 +404,7 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	odbc_handle_get_attr,	/* get attr */
-	NULL, /* check_liveness */
+	odbc_handle_check_liveness, /* check_liveness */
 	NULL, /* get_driver_methods */
 	NULL, /* request_shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
