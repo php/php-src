@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #80024 (Duplication of info about inherited socket after pool
     removing). (Jakub Zelenka)
 
+- LibXML:
+  . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
+
 - PDO_ODBC:
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
     (cmb)
