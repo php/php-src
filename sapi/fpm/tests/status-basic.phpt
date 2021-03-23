@@ -20,10 +20,6 @@ EOT;
 $expectedStatusData = [
     'pool'                 => 'unconfined',
     'process manager'      => 'static',
-    'listen queue'         => 0,
-    'max listen queue'     => 0,
-    'idle processes'       => 0,
-    'active processes'     => 1,
     'total processes'      => 1,
     'max active processes' => 1,
     'max children reached' => 0,
