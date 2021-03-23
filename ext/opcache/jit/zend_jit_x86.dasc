@@ -110,7 +110,6 @@
  */
 
 #include "Zend/zend_cpuinfo.h"
-#include "jit/zend_jit_x86.h"
 
 #ifdef HAVE_VALGRIND
 # include <valgrind/valgrind.h>
@@ -139,6 +138,18 @@ const char* zend_reg_name[] = {
 # define GCC_GLOBAL_REGS 1
 #else
 # define GCC_GLOBAL_REGS 0
+#endif
+
+/* Simulate x86 fastcall */
+#ifdef _WIN64
+# define ZREG_FCARG1a ZREG_RCX
+# define ZREG_FCARG2a ZREG_RDX
+#elif defined(__x86_64__)
+# define ZREG_FCARG1a ZREG_RDI
+# define ZREG_FCARG2a ZREG_RSI
+#else
+# define ZREG_FCARG1a ZREG_RCX
+# define ZREG_FCARG2a ZREG_RDX
 #endif
 
 #if ZTS
