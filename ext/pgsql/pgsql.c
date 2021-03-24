@@ -160,7 +160,6 @@ static zend_function *pgsql_link_get_constructor(zend_object *object) {
 static void pgsql_link_free(pgsql_link_handle *link)
 {
 	PGresult *res;
-	zval *hash;
 
 	while ((res = PQgetResult(link->conn))) {
 		PQclear(res);
@@ -168,14 +167,10 @@ static void pgsql_link_free(pgsql_link_handle *link)
 	PQfinish(link->conn);
 	PGG(num_links)--;
 
-	/* Remove connection hash for this link */
-	hash = zend_hash_index_find(&PGG(hashes), (uintptr_t) link->conn);
-	if (hash) {
-		zend_hash_index_del(&PGG(hashes), (uintptr_t) link->conn);
-		zend_hash_del(&PGG(regular_list), Z_STR_P(hash));
-	}
+	zend_hash_del(&PGG(regular_list), link->hash);
 
 	link->conn = NULL;
+	zend_string_release(link->hash);
 }
 
 static void pgsql_link_free_obj(zend_object *obj)
@@ -406,7 +401,6 @@ static PHP_GINIT_FUNCTION(pgsql)
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initialize notice message hash at MINIT only */
 	zend_hash_init(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&pgsql_globals->hashes, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&pgsql_globals->regular_list, 0, NULL, ZVAL_PTR_DTOR, 1);
 }
 
@@ -578,7 +572,6 @@ PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(&PGG(notices));
-	zend_hash_destroy(&PGG(hashes));
 	zend_hash_destroy(&PGG(regular_list));
 
 	return SUCCESS;
@@ -763,6 +756,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		object_init_ex(return_value, pgsql_link_ce);
 		link = Z_PGSQL_LINK_P(return_value);
 		link->conn = pgsql;
+		link->hash = zend_string_copy(str.s);
 
 		/* add it to the hash */
 		ZVAL_COPY(&new_index_ptr, return_value);
@@ -772,11 +766,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * when the connection is closed. This uses the address of the connection rather than the
 		 * zend_resource, because the resource destructor is passed a stack copy of the resource
 		 * structure. */
-		{
-			zval tmp;
-			ZVAL_STR_COPY(&tmp, str.s);
-			zend_hash_index_update(&PGG(hashes), (uintptr_t) pgsql, &tmp);
-		}
+
 		PGG(num_links)++;
 	}
 	/* set notice processor */

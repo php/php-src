@@ -145,6 +145,7 @@ typedef enum _php_pgsql_data_type {
 
 typedef struct pgsql_link_handle {
 	PGconn *conn;
+	zend_string *hash;
 	zend_object std;
 } pgsql_link_handle;
 
