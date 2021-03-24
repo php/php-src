@@ -1128,7 +1128,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 /* {{{ Common functions shared by extensions */
 int php_libxml_xmlCheckUTF8(const unsigned char *s)
 {
-	int i;
+	size_t i;
 	unsigned char c;
 
 	for (i = 0; (c = s[i++]);) {
