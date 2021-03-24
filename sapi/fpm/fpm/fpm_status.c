@@ -508,7 +508,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			spprintf(&buffer, 0, short_syntax,
 					scoreboard.pool,
 					PM2STR(scoreboard.pm),
-					scoreboard.start_epoch,
+					(unsigned long long) scoreboard.start_epoch,
 					(unsigned long) (now_epoch - scoreboard.start_epoch),
 					scoreboard.requests,
 					scoreboard.lq,
