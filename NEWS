@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #80024 (Duplication of info about inherited socket after pool
     removing). (Jakub Zelenka)
 
+- LibXML:
+  . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
+
 - Opcache:
   . Fixed bug #80839 (PHP problem with JIT). (Dmitry)
   . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
