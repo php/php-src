@@ -171,6 +171,9 @@ static void pgsql_link_free(pgsql_link_handle *link)
 
 	link->conn = NULL;
 	zend_string_release(link->hash);
+	if (link->notices) {
+		zend_hash_destroy(link->notices);
+	}
 }
 
 static void pgsql_link_free_obj(zend_object *obj)
@@ -298,14 +301,15 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 	PGG(num_links)--;
 }
 
-static void _php_pgsql_notice_handler(void *resource_id, const char *message)
+static void _php_pgsql_notice_handler(void *link, const char *message)
 {
 	if (PGG(ignore_notices)) {
 		return;
 	}
 
+	HashTable *notices, tmp_notices;
 	zval tmp;
-	zval *notices = zend_hash_index_find(&PGG(notices), (zend_ulong)resource_id);
+	zval *notices = notices = ((pgsql_link_handle *) link)->notices;
 	if (!notices) {
 		array_init(&tmp);
 		notices = &tmp;
@@ -400,7 +404,6 @@ static PHP_GINIT_FUNCTION(pgsql)
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initialize notice message hash at MINIT only */
-	zend_hash_init(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&pgsql_globals->regular_list, 0, NULL, ZVAL_PTR_DTOR, 1);
 }
 
@@ -571,7 +574,6 @@ PHP_MINIT_FUNCTION(pgsql)
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
-	zend_hash_destroy(&PGG(notices));
 	zend_hash_destroy(&PGG(regular_list));
 
 	return SUCCESS;
@@ -589,7 +591,6 @@ PHP_RINIT_FUNCTION(pgsql)
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
 	/* clean up notice messages */
-	zend_hash_clean(&PGG(notices));
 	zend_hash_clean(&PGG(hashes));
 	zend_hash_destroy(&PGG(field_oids));
 	zend_hash_destroy(&PGG(table_oids));
@@ -711,6 +712,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		object_init_ex(return_value, pgsql_link_ce);
 		link = Z_PGSQL_LINK_P(return_value);
 		link->conn = pgsql;
+		link->hash = zend_string_copy(str.s);
+		link->notices = NULL;
 	} else { /* Non persistent connection */
 		zval *index_ptr, new_index_ptr;
 
@@ -757,6 +760,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link = Z_PGSQL_LINK_P(return_value);
 		link->conn = pgsql;
 		link->hash = zend_string_copy(str.s);
+		link->notices = NULL;
 
 		/* add it to the hash */
 		ZVAL_COPY(&new_index_ptr, return_value);
@@ -771,9 +775,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	/* set notice processor */
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_OBJECT) {
-		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void*)(zend_uintptr_t)Z_OBJ_P(return_value)->handle);
+		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, link);
 	}
-	php_pgsql_set_default_link(pgsql_link_from_obj(Z_OBJ_P(return_value)));
+	php_pgsql_set_default_link(link);
 
 cleanup:
 	smart_str_free(&str);
@@ -1484,7 +1488,8 @@ PHP_FUNCTION(pg_affected_rows)
 PHP_FUNCTION(pg_last_notice)
 {
 	zval *pgsql_link = NULL;
-	zval *notice, *notices;
+	zval *notice;
+	HashTable *notices;
 	pgsql_link_handle *link;
 	zend_long option = PGSQL_NOTICE_LAST;
 
@@ -1495,12 +1500,12 @@ PHP_FUNCTION(pg_last_notice)
 	link = Z_PGSQL_LINK_P(pgsql_link);
 	CHECK_PGSQL_LINK(link);
 
-	notices = zend_hash_index_find(&PGG(notices), (zend_ulong) Z_OBJ_P(pgsql_link)->handle);
+	notices = link->notices;
 	switch (option) {
 		case PGSQL_NOTICE_LAST:
 			if (notices) {
-				zend_hash_internal_pointer_end(Z_ARRVAL_P(notices));
-				if ((notice = zend_hash_get_current_data(Z_ARRVAL_P(notices))) == NULL) {
+				zend_hash_internal_pointer_end(notices);
+				if ((notice = zend_hash_get_current_data(notices)) == NULL) {
 					RETURN_EMPTY_STRING();
 				}
 				RETURN_COPY(notice);
@@ -1510,7 +1515,7 @@ PHP_FUNCTION(pg_last_notice)
 			break;
 		case PGSQL_NOTICE_ALL:
 			if (notices) {
-				RETURN_COPY(notices);
+				RETURN_ARR(zend_array_dup(notices));
 			} else {
 				array_init(return_value);
 				return;
@@ -1518,7 +1523,7 @@ PHP_FUNCTION(pg_last_notice)
 			break;
 		case PGSQL_NOTICE_CLEAR:
 			if (notices) {
-				zend_hash_clean(&PGG(notices));
+				zend_hash_clean(link->notices);
 			}
 			RETURN_TRUE;
 			break;

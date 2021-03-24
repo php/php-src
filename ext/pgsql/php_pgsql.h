@@ -146,6 +146,7 @@ typedef enum _php_pgsql_data_type {
 typedef struct pgsql_link_handle {
 	PGconn *conn;
 	zend_string *hash;
+	HashTable *notices;
 	zend_object std;
 } pgsql_link_handle;
 
@@ -185,7 +186,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long allow_persistent;
 	zend_long auto_reset_persistent;
 	int ignore_notices,log_notices;
-	HashTable notices;  /* notice message for each connection */
 	pgsql_link_handle *default_link; /* default link when connection is omitted */
 	HashTable hashes; /* hashes for each connection */
 	HashTable field_oids;
