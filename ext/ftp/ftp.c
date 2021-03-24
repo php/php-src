@@ -1931,6 +1931,14 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 					/* SSL wants a write. Really odd. Let's bail out. */
 					done = 1;
 					break;
+# ifdef PHP_WIN32
+				case SSL_ERROR_SYSCALL:
+					if (WSAGetLastError() == WSAECONNABORTED) {
+						/* suppress spurious warning if connection is aborted */
+						done = 1;
+					}
+					break;
+# endif
 				default:
 					if ((sslerror = ERR_get_error())) {
 						ERR_error_string_n(sslerror, buf, sizeof(buf));
