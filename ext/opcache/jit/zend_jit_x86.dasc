@@ -15796,17 +15796,6 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 	return regset;
 }
 
-static zend_regset zend_jit_get_low_priority_regset(void)
-{
-	zend_regset regset = ZEND_REGSET_EMPTY;
-
-	ZEND_REGSET_INCL(regset, ZREG_R0);
-	ZEND_REGSET_INCL(regset, ZREG_R1);
-	ZEND_REGSET_INCL(regset, ZREG_XMM0);
-	ZEND_REGSET_INCL(regset, ZREG_XMM1);
-	return regset;
-}
-
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
