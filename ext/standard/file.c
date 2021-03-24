@@ -1467,7 +1467,6 @@ PHP_FUNCTION(unlink)
 PHP_FUNCTION(fsync)
 {
 	zval *res;
-	int ret;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1489,7 +1488,6 @@ PHP_FUNCTION(fsync)
 PHP_FUNCTION(fdatasync)
 {
 	zval *res;
-	int ret;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
