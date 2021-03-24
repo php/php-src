@@ -18,7 +18,7 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 
-if(substr(PHP_OS, 0, 3) == "WIN")  {
+if(PHP_OS_FAMILY == 'Windows')  {
     $data = str_replace("\r",'', $data);
 }
 

@@ -1406,10 +1406,10 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	return ret;
 }
 
-PHPAPI int _php_stream_sync(php_stream *stream, int dataonly)
+PHPAPI int _php_stream_sync(php_stream *stream, bool data_only)
 {
 	int op = PHP_STREAM_SYNC_FSYNC;
-	if (dataonly) {
+	if (data_only) {
 		op = PHP_STREAM_SYNC_FDSYNC;
 	}
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, op, NULL);

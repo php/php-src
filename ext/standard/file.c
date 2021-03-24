@@ -1481,12 +1481,7 @@ PHP_FUNCTION(fsync)
 		RETURN_FALSE;
 	}
 
-	ret = php_stream_sync(stream, 0);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-
+    RETURN_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
 }
 /* }}} */
 
@@ -1508,12 +1503,7 @@ PHP_FUNCTION(fdatasync)
 		RETURN_FALSE;
 	}
 
-	ret = php_stream_sync(stream, 1);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-
+    RETURN_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
 }
 /* }}} */
 
