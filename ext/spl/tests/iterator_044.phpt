@@ -94,7 +94,11 @@ Warning: Undefined array key "foo" in %s on line %d
 NULL
 ===3===
 NULL
+
+Deprecated: CachingIterator::offsetExists(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: CachingIterator::offsetGet(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 
 Warning: Undefined array key "" in %s on line %d
 NULL
@@ -133,7 +137,11 @@ bool(true)
 int(1)
 ===3===
 NULL
+
+Deprecated: CachingIterator::offsetExists(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: CachingIterator::offsetGet(): Passing null to parameter #1 ($key) of type string is deprecated in %s on line %d
 
 Warning: Undefined array key "" in %s on line %d
 NULL

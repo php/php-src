@@ -14,7 +14,6 @@ $values = array(10,
                 "0x5F",
                 true,
                 false,
-                null,
                 );
 
 foreach ($values as $value) {
@@ -38,5 +37,4 @@ string(4) "7556"
 string(2) "47"
 decoct(): Argument #1 ($num) must be of type int, string given
 string(1) "1"
-string(1) "0"
 string(1) "0"

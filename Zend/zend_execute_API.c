@@ -285,27 +285,33 @@ void shutdown_executor(void) /* {{{ */
 			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
 				break;
 			}
-			if (op_array->static_variables) {
+			if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 				if (ht) {
-					zend_array_release(ht);
+					zend_array_destroy(ht);
 					ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
 			zend_class_entry *ce = Z_PTR_P(zv);
+
 			if (ce->default_static_members_count) {
 				zend_cleanup_internal_class_data(ce);
 			}
+
+			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
+				zend_cleanup_mutable_class_data(ce);
+			}
+
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 				zend_op_array *op_array;
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
-						if (op_array->static_variables) {
+						if (ZEND_MAP_PTR(op_array->static_variables_ptr)) {
 							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 							if (ht) {
-								zend_array_release(ht);
+								zend_array_destroy(ht);
 								ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 							}
 						}
@@ -1059,7 +1065,15 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
 					(ce->ce_flags & ZEND_ACC_NEARLY_LINKED))) {
-				ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+				if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+					if (!CG(unlinked_uses)) {
+						ALLOC_HASHTABLE(CG(unlinked_uses));
+						zend_hash_init(CG(unlinked_uses), 0, NULL, NULL, 0);
+					}
+					zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce);
+				} else {
+					ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+				}
 				return ce;
 			}
 			return NULL;
@@ -1210,6 +1224,7 @@ ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *re
 		}
 
 		EG(no_extensions)=0;
+		zend_destroy_static_vars(new_op_array);
 		destroy_op_array(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		retval = SUCCESS;

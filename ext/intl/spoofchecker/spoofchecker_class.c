@@ -90,12 +90,9 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
  */
 void spoofchecker_register_Spoofchecker_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Spoofchecker' class. */
-	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
-	ce.create_object = Spoofchecker_object_create;
-	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
+	Spoofchecker_ce_ptr = register_class_Spoofchecker();
+	Spoofchecker_ce_ptr->create_object = Spoofchecker_object_create;
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);

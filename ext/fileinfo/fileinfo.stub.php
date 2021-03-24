@@ -1,11 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class finfo
 {
     /** @alias finfo_open */
-    public function __construct(int $flags = FILEINFO_NONE, string $magic_database = "") {}
+    public function __construct(int $flags = FILEINFO_NONE, ?string $magic_database = null) {}
 
     /**
      * @param resource|null $context
@@ -28,7 +28,7 @@ class finfo
     public function set_flags(int $flags) {}
 }
 
-function finfo_open(int $flags = FILEINFO_NONE, string $magic_database = ""): finfo|false {}
+function finfo_open(int $flags = FILEINFO_NONE, ?string $magic_database = null): finfo|false {}
 
 function finfo_close(finfo $finfo): bool {}
 

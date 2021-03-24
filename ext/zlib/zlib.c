@@ -1337,10 +1337,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	php_output_handler_conflict_register(ZEND_STRL("ob_gzhandler"), php_zlib_output_conflict_check);
 	php_output_handler_conflict_register(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), php_zlib_output_conflict_check);
 
-	zend_class_entry inflate_ce;
-	INIT_CLASS_ENTRY(inflate_ce, "InflateContext", class_InflateContext_methods);
-	inflate_context_ce = zend_register_internal_class(&inflate_ce);
-	inflate_context_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
 	inflate_context_ce->serialize = zend_class_serialize_deny;
 	inflate_context_ce->unserialize = zend_class_unserialize_deny;
@@ -1350,11 +1347,9 @@ static PHP_MINIT_FUNCTION(zlib)
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
 	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
+	inflate_context_object_handlers.compare = zend_objects_not_comparable;
 
-	zend_class_entry deflate_ce;
-	INIT_CLASS_ENTRY(deflate_ce, "DeflateContext", class_DeflateContext_methods);
-	deflate_context_ce = zend_register_internal_class(&deflate_ce);
-	deflate_context_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
 	deflate_context_ce->serialize = zend_class_serialize_deny;
 	deflate_context_ce->unserialize = zend_class_unserialize_deny;
@@ -1364,6 +1359,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
 	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;
+	deflate_context_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);

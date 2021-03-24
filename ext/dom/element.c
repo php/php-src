@@ -933,7 +933,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 	xmlChar *local, *nsuri;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -942,7 +942,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
-	nsuri = xmlCharStrndup(uri, uri_len);
+	nsuri = xmlCharStrndup(uri ? uri : "", uri_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
 
 }

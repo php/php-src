@@ -374,10 +374,6 @@ void dom_child_node_remove(dom_object *context)
 	xmlNodePtr children;
 	int stricterror;
 
-	if (dom_node_children_valid(child) == FAILURE) {
-		return;
-	}
-
 	stricterror = dom_get_strict_error(context->document);
 
 	if (dom_node_is_read_only(child) == SUCCESS ||
@@ -388,6 +384,10 @@ void dom_child_node_remove(dom_object *context)
 
 	if (!child->parent) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return;
+	}
+
+	if (dom_node_children_valid(child->parent) == FAILURE) {
 		return;
 	}
 

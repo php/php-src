@@ -1,6 +1,14 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+final class __PHP_Incomplete_Class
+{
+}
+
+class AssertionError extends Error
+{
+}
 
 /* main/main.c */
 
@@ -318,7 +326,7 @@ function ini_get(string $option): string|false {}
 
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-function ini_set(string $option, string $value): string|false {}
+function ini_set(string $option, string|int|float|bool|null $value): string|false {}
 
 /** @alias ini_set */
 function ini_alter(string $option, string $value): string|false {}
@@ -1144,7 +1152,7 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /* password.c */
 
-function password_get_info(string $hash): ?array {}
+function password_get_info(string $hash): array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 

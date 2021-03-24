@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 32433e63feea7cc46737000498e248da713ab5a3 */
+ * Stub hash: 08192d87d2ac5d35092cfcf4a2cdcc50f7ec4ada */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_snmpget, 0, 3, stdClass, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -241,3 +241,23 @@ static const zend_function_entry class_SNMP_methods[] = {
 static const zend_function_entry class_SNMPException_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SNMP(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SNMPException(zend_class_entry *class_entry_RuntimeException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SNMPException", class_SNMPException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+
+	return class_entry;
+}

@@ -47,7 +47,4 @@ void        intl_errors_set( intl_error* err, UErrorCode code, const char* msg, 
 // Other error helpers
 smart_str	intl_parse_error_to_string( UParseError* pe );
 
-// exported to be called on extension MINIT
-void		intl_register_IntlException_class( void );
-
 #endif // INTL_ERROR_H

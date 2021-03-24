@@ -63,12 +63,9 @@ zend_object *Collator_object_create(zend_class_entry *ce )
  */
 void collator_register_Collator_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Collator' class. */
-	INIT_CLASS_ENTRY( ce, "Collator", class_Collator_methods );
-	ce.create_object = Collator_object_create;
-	Collator_ce_ptr = zend_register_internal_class( &ce );
+	Collator_ce_ptr = register_class_Collator();
+	Collator_ce_ptr->create_object = Collator_object_create;
 
 	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);

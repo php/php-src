@@ -87,17 +87,17 @@ if ($r)
     do_e_q($s);
 
 echo "Test 2.4: Type: AFC:  Length: strlen\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1), SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 0, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 2.5: Type: AFC.  Length: strlen-1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)-1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, -1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 2.6: Type: AFC.  Length: strlen+1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)+1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
@@ -159,17 +159,17 @@ if ($r)
     do_e_q($s);
 
 echo "Test 4.4: Type: AFC:  Length: strlen\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1), SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 0, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 4.5: Type: AFC.  Length: strlen-1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)-1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, -1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 4.6: Type: AFC.  Length: strlen+1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)+1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, +1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 

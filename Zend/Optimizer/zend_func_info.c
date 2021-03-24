@@ -212,7 +212,7 @@ static const func_info_t func_infos[] = {
 	F1("base64_decode",                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("base64_encode",                MAY_BE_STRING),
 	F1("password_hash",                MAY_BE_STRING),
-	F1("password_get_info",            MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("password_get_info",            MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("convert_uuencode",             MAY_BE_STRING),
 	F1("convert_uudecode",             MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pow",                          MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),

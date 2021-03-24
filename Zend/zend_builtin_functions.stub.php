@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class stdClass
+{
+}
 
 function zend_version(): string {}
 

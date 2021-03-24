@@ -1153,6 +1153,10 @@ mysqli.max_persistent = -1
 ; https://php.net/mysqli.allow_local_infile
 ;mysqli.allow_local_infile = On
 
+; It allows the user to specify a folder where files that can be sent via LOAD DATA
+; LOCAL can exist. It is ignored if mysqli.allow_local_infile is enabled.
+;mysqli.local_infile_directory =
+
 ; Allow or prevent persistent links.
 ; https://php.net/mysqli.allow-persistent
 mysqli.allow_persistent = On

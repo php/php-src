@@ -9,7 +9,7 @@ require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-$filename = __DIR__."/tmp_savehtmlfile".time().".html";
+$filename = __DIR__."/DOMDocument_saveHTMLFile_formatOutput.html";
 $doc = new DOMDocument('1.0');
 $doc->formatOutput = true;
 $root = $doc->createElement('html');

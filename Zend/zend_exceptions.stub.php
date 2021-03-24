@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries
- * @generate-class-entries
- */
+/** @generate-class-entries */
 
 interface Throwable extends Stringable
 {

@@ -432,10 +432,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-	zend_class_entry ce_socket;
-	INIT_CLASS_ENTRY(ce_socket, "Socket", class_Socket_methods);
-	socket_ce = zend_register_internal_class(&ce_socket);
-	socket_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	socket_ce = register_class_Socket();
 	socket_ce->create_object = socket_create_object;
 	socket_ce->serialize = zend_class_serialize_deny;
 	socket_ce->unserialize = zend_class_unserialize_deny;
@@ -446,11 +443,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
+	socket_object_handlers.compare = zend_objects_not_comparable;
 
-	zend_class_entry ce_address_info;
-	INIT_CLASS_ENTRY(ce_address_info, "AddressInfo", class_AddressInfo_methods);
-	address_info_ce = zend_register_internal_class(&ce_address_info);
-	address_info_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
 	address_info_ce->serialize = zend_class_serialize_deny;
 	address_info_ce->unserialize = zend_class_unserialize_deny;
@@ -460,6 +455,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
+	address_info_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);

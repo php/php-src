@@ -721,16 +721,12 @@ static zend_object* helper_new(zend_class_entry *ce)
 
 int php_com_persist_minit(INIT_FUNC_ARGS)
 {
-	zend_class_entry ce;
-
 	memcpy(&helper_handlers, &std_object_handlers, sizeof(helper_handlers));
 	helper_handlers.free_obj = helper_free_storage;
 	helper_handlers.clone_obj = helper_clone;
 
-	INIT_CLASS_ENTRY(ce, "COMPersistHelper", class_COMPersistHelper_methods);
-	ce.create_object = helper_new;
-	helper_ce = zend_register_internal_class(&ce);
-	helper_ce->ce_flags |= ZEND_ACC_FINAL;
+	helper_ce = register_class_COMPersistHelper();
+	helper_ce->create_object = helper_new;
 
 	le_istream = zend_register_list_destructors_ex(istream_dtor,
 			NULL, "com_dotnet_istream_wrapper", module_number);

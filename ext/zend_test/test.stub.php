@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries static
- * @generate-class-entries
- */
+/** @generate-class-entries static */
 
 namespace {
 
@@ -19,7 +16,7 @@ class _ZendTestClass implements _ZendTestInterface {
 
     public int $intProp = 123;
     public ?stdClass $classProp = null;
-    //public stdClass|Iterator|null $classUnionProp = null;
+    public stdClass|Iterator|null $classUnionProp = null;
 
     public static function is_object(): int {}
 
@@ -88,5 +85,15 @@ namespace ZendTestNS2 {
 class Foo {
     public function method(): void {}
 }
+
+}
+
+namespace ZendTestNS2\ZendSubNS {
+
+class Foo {
+    public function method(): void {}
+}
+
+function namespaced_func(): bool {}
 
 }

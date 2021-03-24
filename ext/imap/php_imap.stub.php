@@ -1,8 +1,9 @@
 <?php
 
-/** @generate-function-entries */
-final class IMAPConnection {
+/** @generate-class-entries */
 
+/** @strict-properties */
+final class IMAPConnection {
 }
 
 function imap_open(string $mailbox, string $user, string $password, int $flags = 0, int $retries = 0, array $options = []): IMAPConnection|false {}

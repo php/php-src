@@ -49,7 +49,7 @@ extern PHPAPI zend_class_entry *php_ce_incomplete_class;
 extern "C" {
 #endif
 
-PHPAPI void php_register_incomplete_class(void);
+PHPAPI void php_register_incomplete_class_handlers(void);
 PHPAPI zend_string *php_lookup_class_name(zend_object *object);
 PHPAPI void php_store_class_name(zval *object, zend_string *name);
 

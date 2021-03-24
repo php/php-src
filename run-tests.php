@@ -25,10 +25,16 @@
 
 /* $Id$ */
 
+/* Temporary variables while this file is being refactored. */
+/** @var ?JUnit */
+$junit = null;
+
+/* End temporary variables. */
+
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
  *
- * Minimum required PHP version: 7.1.0
+ * Minimum required PHP version: 7.4.0
  */
 
 function show_usage(): void
@@ -156,6 +162,10 @@ function main(): void
     global $workers, $workerID;
     global $context_line_count;
 
+    // Temporary for the duration of refactoring
+    /** @var JUnit */
+    global $junit;
+
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
     $workerID = 0;
@@ -247,7 +257,7 @@ function main(): void
         $DETAILED = 0;
     }
 
-    junit_init();
+    $junit = new JUnit($environment, $workerID);
 
     if (getenv('SHOW_ONLY_GROUPS')) {
         $SHOW_ONLY_GROUPS = explode(",", getenv('SHOW_ONLY_GROUPS'));
@@ -340,7 +350,7 @@ function main(): void
     if (function_exists('sapi_windows_vt100_support') && !sapi_windows_vt100_support(STDOUT, true)) {
         $colorize = false;
     }
-    if (array_key_exists('NO_COLOR', $_ENV)) {
+    if (array_key_exists('NO_COLOR', $environment)) {
         $colorize = false;
     }
     $selected_tests = false;
@@ -772,9 +782,9 @@ function main(): void
         save_or_mail_results();
     }
 
-    junit_save_xml();
+    $junit->saveXML();
     if (getenv('REPORT_EXIT_STATUS') !== '0' && getenv('REPORT_EXIT_STATUS') !== 'no' &&
-            ($sum_results['FAILED'] || $sum_results['LEAKED'])) {
+            ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
         exit(1);
     }
 }
@@ -861,7 +871,6 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
         'xdebug' => ['xdebug.mode=off'],
-        'mbstring' => ['mbstring.func_overload=0'],
     ];
 
     foreach ($info_params_ex as $ext => $ini_overwrites_ex) {
@@ -1280,6 +1289,9 @@ function system_with_timeout(
     }
     if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
         $data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
+    } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
+        // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
+        $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
     }
 
     proc_close($proc);
@@ -1364,6 +1376,8 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
 {
     global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
+    global $junit;
+
     // The PHP binary running run-tests.php, and run-tests.php itself
     // This PHP executable is *not* necessarily the same as the tested version
     $thisPHP = PHP_BINARY;
@@ -1446,7 +1460,7 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
             [], // Inherit our stdin, stdout and stderr
             $pipes,
             null,
-            $_ENV + [
+            $GLOBALS['environment'] + [
                 "TEST_PHP_WORKER" => $i,
                 "TEST_PHP_URI" => $sockUri,
             ],
@@ -1562,9 +1576,7 @@ escape:
                                     }
                                 }
                             }
-                            if (junit_enabled()) {
-                                junit_merge_results($message["junit"]);
-                            }
+                            $junit->mergeResults($message["junit"]);
                             // no break
                         case "ready":
                             // Schedule sequential tests only once we are down to one worker.
@@ -1704,6 +1716,8 @@ function run_worker(): void
 {
     global $workerID, $workerSock;
 
+    global $junit;
+
     $sockUri = getenv("TEST_PHP_URI");
 
     $workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
@@ -1750,9 +1764,9 @@ function run_worker(): void
                 run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
                 send_message($workerSock, [
                     "type" => "tests_finished",
-                    "junit" => junit_enabled() ? $GLOBALS['JUNIT'] : null,
+                    "junit" => $junit->isEnabled() ? $junit : null,
                 ]);
-                junit_init();
+                $junit->clear();
                 break;
             default:
                 send_message($workerSock, [
@@ -1789,9 +1803,11 @@ function show_file_block(string $file, string $block, ?string $section = null): 
 }
 
 function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+    global $junit;
+
     show_result('SKIP', $tested, $tested_file, "reason: $reason");
-    junit_init_suite(junit_get_suitename_for($shortname));
-    junit_mark_test_as('SKIP', $shortname, $tested, 0, $reason);
+    $junit->initSuite($junit->getSuiteName($shortname));
+    $junit->markTestAs('SKIP', $shortname, $tested, 0, $reason);
     return 'SKIPPED';
 }
 
@@ -1814,6 +1830,16 @@ function run_test(string $php, $file, array $env): string
     global $num_repeats;
     // Parallel testing
     global $workerID;
+
+    // Temporary
+    /** @var JUnit */
+    global $junit;
+
+    static $skipCache;
+    if (!$skipCache) {
+        $skipCache = new SkipCache($cfg['keep']['skip']);
+    }
+
     $temp_filenames = null;
     $org_file = $file;
 
@@ -1963,7 +1989,7 @@ TEST $file
             'info' => "$bork_info [$file]",
         ];
 
-        junit_mark_test_as('BORK', $shortname, $tested_file, 0, $bork_info);
+        $junit->markTestAs('BORK', $shortname, $tested_file, 0, $bork_info);
         return 'BORKED';
     }
 
@@ -2137,9 +2163,8 @@ TEST $file
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        $ext_dir = `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo ini_get('extension_dir');"`;
         $extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-        $loaded = explode(",", `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         foreach ($extensions as $req_ext) {
             if (!in_array($req_ext, $loaded)) {
@@ -2199,7 +2224,6 @@ TEST $file
     if (array_key_exists('SKIPIF', $section_text)) {
         if (trim($section_text['SKIPIF'])) {
             show_file_block('skip', $section_text['SKIPIF']);
-            save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
@@ -2208,14 +2232,15 @@ TEST $file
                 $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
             }
 
-            junit_start_timer($shortname);
+            $junit->startTimer($shortname);
 
             $startTime = microtime(true);
-            $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0 \"$test_skipif\"", $env);
-            $output = trim($output);
+            $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
+            $output = $skipCache->checkSkip($commandLine, $section_text['SKIPIF'], $test_skipif, $temp_skipif, $env);
+
             $time = microtime(true) - $startTime;
 
-            junit_finish_timer($shortname);
+            $junit->stopTimer($shortname);
 
             if ($time > $slow_min_ms / 1000) {
                 $PHP_FAILED_TESTS['SLOW'][] = [
@@ -2227,10 +2252,6 @@ TEST $file
                 ];
             }
 
-            if (!$cfg['keep']['skip']) {
-                @unlink($test_skipif);
-            }
-
             if (!strncasecmp('skip', $output, 4)) {
                 if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
                     show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
@@ -2238,12 +2259,8 @@ TEST $file
                     show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
                 }
 
-                if (!$cfg['keep']['skip']) {
-                    @unlink($test_skipif);
-                }
-
                 $message = !empty($m[1]) ? $m[1] : '';
-                junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
+                $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
                 return 'SKIPPED';
             }
 
@@ -2265,7 +2282,7 @@ TEST $file
                     'info' => "$output [$file]",
                 ];
 
-                junit_mark_test_as('BORK', $shortname, $tested, null, $output);
+                $junit->markTestAs('BORK', $shortname, $tested, null, $output);
                 return 'BORKED';
             }
         }
@@ -2276,7 +2293,7 @@ TEST $file
         || array_key_exists("DEFLATE_POST", $section_text))) {
         $message = "ext/zlib required";
         show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
-        junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
+        $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
         return 'SKIPPED';
     }
 
@@ -2316,7 +2333,7 @@ TEST $file
             // a redirected test never fails
             $IN_REDIRECT = false;
 
-            junit_mark_test_as('PASS', $shortname, $tested);
+            $junit->markTestAs('PASS', $shortname, $tested);
             return 'REDIR';
         } else {
             $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
@@ -2346,7 +2363,7 @@ TEST $file
             'info' => "$bork_info [$file]",
         ];
 
-        junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
+        $junit->markTestAs('BORK', $shortname, $tested, null, $bork_info);
 
         return 'BORKED';
     }
@@ -2417,7 +2434,7 @@ TEST $file
         $env['REQUEST_METHOD'] = 'POST';
 
         if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+            $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
 
@@ -2448,7 +2465,7 @@ TEST $file
         $env['REQUEST_METHOD'] = 'PUT';
 
         if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+            $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
 
@@ -2503,6 +2520,7 @@ TEST $file
         $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
+    $orig_cmd = $cmd;
     if ($valgrind) {
         $env['USE_ZEND_ALLOC'] = '0';
         $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
@@ -2524,13 +2542,13 @@ COMMAND $cmd
 ";
     }
 
-    junit_start_timer($shortname);
+    $junit->startTimer($shortname);
     $hrtime = hrtime();
     $startTime = $hrtime[0] * 1000000000 + $hrtime[1];
 
     $out = system_with_timeout($cmd, $env, $section_text['STDIN'] ?? null, $captureStdIn, $captureStdOut, $captureStdErr);
 
-    junit_finish_timer($shortname);
+    $junit->stopTimer($shortname);
     $hrtime = hrtime();
     $time = $hrtime[0] * 1000000000 + $hrtime[1] - $startTime;
     if ($time >= $slow_min_ms * 1000000) {
@@ -2705,7 +2723,7 @@ COMMAND $cmd
 
         if (preg_match("/^$wanted_re\$/s", $output)) {
             $passed = true;
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
@@ -2719,7 +2737,7 @@ COMMAND $cmd
                     $info = " (warn: XLEAK section but test passes)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    junit_mark_test_as('PASS', $shortname, $tested);
+                    $junit->markTestAs('PASS', $shortname, $tested);
                     return 'PASSED';
                 }
             }
@@ -2733,7 +2751,7 @@ COMMAND $cmd
         if (!strcmp($output, $wanted)) {
             $passed = true;
 
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
@@ -2747,7 +2765,7 @@ COMMAND $cmd
                     $info = " (warn: XLEAK section but test passes)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    junit_mark_test_as('PASS', $shortname, $tested);
+                    $junit->markTestAs('PASS', $shortname, $tested);
                     return 'PASSED';
                 }
             }
@@ -2810,32 +2828,6 @@ COMMAND $cmd
             error("Cannot create test diff - $diff_filename");
         }
 
-        // write .sh
-        if (strpos($log_format, 'S') !== false) {
-            $sh_script = <<<SH
-#!/bin/sh
-
-case "$1" in
-"gdb")
-    gdb --args {$cmd}
-    ;;
-"valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 ${cmd}
-    ;;
-"rr")
-    rr record $2 ${cmd}
-    ;;
-*)
-    {$cmd}
-    ;;
-esac
-SH;
-            if (file_put_contents($sh_filename, $sh_script) === false) {
-                error("Cannot create test shell script - $sh_filename");
-            }
-            chmod($sh_filename, 0755);
-        }
-
         // write .log
         if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
@@ -2846,6 +2838,34 @@ $output
 ") === false) {
             error("Cannot create test log - $log_filename");
             error_report($file, $log_filename, $tested);
+        }
+    }
+
+    if (!$passed || $leaked) {
+        // write .sh
+        if (strpos($log_format, 'S') !== false) {
+            $sh_script = <<<SH
+#!/bin/sh
+
+case "$1" in
+"gdb")
+    gdb --args {$orig_cmd}
+    ;;
+"valgrind")
+    USE_ZEND_ALLOC=0 valgrind $2 ${orig_cmd}
+    ;;
+"rr")
+    rr record $2 ${orig_cmd}
+    ;;
+*)
+    {$orig_cmd}
+    ;;
+esac
+SH;
+            if (file_put_contents($sh_filename, $sh_script) === false) {
+                error("Cannot create test shell script - $sh_filename");
+            }
+            chmod($sh_filename, 0755);
         }
     }
 
@@ -2867,7 +2887,7 @@ $output
 
     $diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
-    junit_mark_test_as($restype, $shortname, $tested, null, $info, $diff);
+    $junit->markTestAs($restype, $shortname, $tested, null, $info, $diff);
 
     return $restype[0] . 'ED';
 }
@@ -3363,7 +3383,7 @@ function clear_show_test(): void
     // Parallel testing
     global $workerID;
 
-    if (!$workerID) {
+    if (!$workerID && isset($line_length)) {
         // Write over the last line to avoid random trailing chars on next echo
         echo str_repeat(" ", $line_length), "\r";
     }
@@ -3394,6 +3414,7 @@ function show_result(
                 case 'FAIL':
                 case 'BORK':
                 case 'LEAK':
+                case 'LEAK&FAIL':
                     // Light Red
                     $color = "\e[1;31m{$result}\e[0m"; break;
                 default: // Yellow
@@ -3410,246 +3431,14 @@ function show_result(
 
 }
 
-function junit_init(): void
+class JUnit
 {
-    // Check whether a junit log is wanted.
-    global $workerID;
-    $JUNIT = getenv('TEST_PHP_JUNIT');
-    if (empty($JUNIT)) {
-        $GLOBALS['JUNIT'] = false;
-        return;
-    }
-    if ($workerID) {
-        $fp = null;
-    } elseif (!$fp = fopen($JUNIT, 'w')) {
-        error("Failed to open $JUNIT for writing.");
-    }
-    $GLOBALS['JUNIT'] = [
-        'fp' => $fp,
-        'name' => 'PHP',
-        'test_total' => 0,
-        'test_pass' => 0,
-        'test_fail' => 0,
-        'test_error' => 0,
-        'test_skip' => 0,
-        'test_warn' => 0,
-        'execution_time' => 0,
-        'suites' => [],
-        'files' => []
-    ];
-}
+    private bool $enabled = true;
+    private $fp = null;
+    private array $suites = [];
+    private array $rootSuite = self::EMPTY_SUITE + ['name' => 'php'];
 
-function junit_save_xml(): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    $xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>' . PHP_EOL;
-    $xml .= sprintf(
-        '<testsuites name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
-        $JUNIT['name'],
-        $JUNIT['test_total'],
-        $JUNIT['test_fail'],
-        $JUNIT['test_error'],
-        $JUNIT['test_skip'],
-        $JUNIT['execution_time']
-    );
-    $xml .= junit_get_suite_xml();
-    $xml .= '</testsuites>';
-    fwrite($JUNIT['fp'], $xml);
-}
-
-function junit_get_suite_xml(string $suite_name = ''): string
-{
-    global $JUNIT;
-
-    $result = "";
-
-    foreach ($JUNIT['suites'] as $suite_name => $suite) {
-        $result .= sprintf(
-            '<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
-            $suite['name'],
-            $suite['test_total'],
-            $suite['test_fail'],
-            $suite['test_error'],
-            $suite['test_skip'],
-            $suite['execution_time']
-        );
-
-        if (!empty($suite_name)) {
-            foreach ($suite['files'] as $file) {
-                $result .= $JUNIT['files'][$file]['xml'];
-            }
-        }
-
-        $result .= '</testsuite>' . PHP_EOL;
-    }
-
-    return $result;
-}
-
-function junit_enabled(): bool
-{
-    global $JUNIT;
-    return !empty($JUNIT);
-}
-
-/**
- * @param array|string $type
- */
-function junit_mark_test_as(
-    $type,
-    string $file_name,
-    string $test_name,
-    ?int $time = null,
-    string $message = '',
-    string $details = ''
-): void {
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    $suite = junit_get_suitename_for($file_name);
-
-    junit_suite_record($suite, 'test_total');
-
-    $time = $time ?? junit_get_timer($file_name);
-    junit_suite_record($suite, 'execution_time', $time);
-
-    $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
-    $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function (array $c): string {
-        return sprintf('[[0x%02x]]', ord($c[0]));
-    }, $escaped_details);
-    $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
-
-    $escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
-    $JUNIT['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
-
-    if (is_array($type)) {
-        $output_type = $type[0] . 'ED';
-        $temp = array_intersect(['XFAIL', 'XLEAK', 'FAIL', 'WARN'], $type);
-        $type = reset($temp);
-    } else {
-        $output_type = $type . 'ED';
-    }
-
-    if ('PASS' == $type || 'XFAIL' == $type || 'XLEAK' == $type) {
-        junit_suite_record($suite, 'test_pass');
-    } elseif ('BORK' == $type) {
-        junit_suite_record($suite, 'test_error');
-        $JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
-    } elseif ('SKIP' == $type) {
-        junit_suite_record($suite, 'test_skip');
-        $JUNIT['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
-    } elseif ('WARN' == $type) {
-        junit_suite_record($suite, 'test_warn');
-        $JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
-    } elseif ('FAIL' == $type) {
-        junit_suite_record($suite, 'test_fail');
-        $JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
-    } else {
-        junit_suite_record($suite, 'test_error');
-        $JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
-    }
-
-    $JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
-}
-
-function junit_suite_record(string $suite, string $param, int $value = 1): void
-{
-    global $JUNIT;
-
-    $JUNIT[$param] += $value;
-    $JUNIT['suites'][$suite][$param] += $value;
-}
-
-function junit_get_timer(string $file_name): int
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return 0;
-    }
-
-    if (isset($JUNIT['files'][$file_name]['total'])) {
-        return number_format($JUNIT['files'][$file_name]['total'], 4);
-    }
-
-    return 0;
-}
-
-function junit_start_timer(string $file_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    if (!isset($JUNIT['files'][$file_name]['start'])) {
-        $JUNIT['files'][$file_name]['start'] = microtime(true);
-
-        $suite = junit_get_suitename_for($file_name);
-        junit_init_suite($suite);
-        $JUNIT['suites'][$suite]['files'][$file_name] = $file_name;
-    }
-}
-
-function junit_get_suitename_for(string $file_name): string
-{
-    return junit_path_to_classname(dirname($file_name));
-}
-
-function junit_path_to_classname(string $file_name): string
-{
-    global $JUNIT;
-
-    if (!junit_enabled()) {
-        return '';
-    }
-
-    $ret = $JUNIT['name'];
-    $_tmp = [];
-
-    // lookup whether we're in the PHP source checkout
-    $max = 5;
-    if (is_file($file_name)) {
-        $dir = dirname(realpath($file_name));
-    } else {
-        $dir = realpath($file_name);
-    }
-    do {
-        array_unshift($_tmp, basename($dir));
-        $chk = $dir . DIRECTORY_SEPARATOR . "main" . DIRECTORY_SEPARATOR . "php_version.h";
-        $dir = dirname($dir);
-    } while (!file_exists($chk) && --$max > 0);
-    if (file_exists($chk)) {
-        if ($max) {
-            array_shift($_tmp);
-        }
-        foreach ($_tmp as $p) {
-            $ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
-        }
-        return $ret;
-    }
-
-    return $JUNIT['name'] . '.' . str_replace([DIRECTORY_SEPARATOR, '-'], '.', $file_name);
-}
-
-function junit_init_suite(string $suite_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    if (!empty($JUNIT['suites'][$suite_name])) {
-        return;
-    }
-
-    $JUNIT['suites'][$suite_name] = [
-        'name' => $suite_name,
+    private const EMPTY_SUITE = [
         'test_total' => 0,
         'test_pass' => 0,
         'test_fail' => 0,
@@ -3659,62 +3448,354 @@ function junit_init_suite(string $suite_name): void
         'files' => [],
         'execution_time' => 0,
     ];
-}
 
-function junit_finish_timer(string $file_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
+    public function __construct(array $env, int $workerID)
+    {
+        // Check whether a junit log is wanted.
+        $fileName = $env['TEST_PHP_JUNIT'] ?? null;
+        if (empty($fileName)) {
+            $this->enabled = false;
+            return;
+        }
+        if (!$workerID && !$this->fp = fopen($fileName, 'w')) {
+            throw new Exception("Failed to open $fileName for writing.");
+        }
     }
 
-    if (!isset($JUNIT['files'][$file_name]['start'])) {
-        error("Timer for $file_name was not started!");
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 
-    if (!isset($JUNIT['files'][$file_name]['total'])) {
-        $JUNIT['files'][$file_name]['total'] = 0;
+    public function clear(): void
+    {
+        $this->rootSuite = self::EMPTY_SUITE + ['name' => 'php'];
+        $this->suites = [];
     }
 
-    $start = $JUNIT['files'][$file_name]['start'];
-    $JUNIT['files'][$file_name]['total'] += microtime(true) - $start;
-    unset($JUNIT['files'][$file_name]['start']);
-}
-
-function junit_merge_results(array $junit): void
-{
-    global $JUNIT;
-    $JUNIT['test_total'] += $junit['test_total'];
-    $JUNIT['test_pass']  += $junit['test_pass'];
-    $JUNIT['test_fail']  += $junit['test_fail'];
-    $JUNIT['test_error'] += $junit['test_error'];
-    $JUNIT['test_skip']  += $junit['test_skip'];
-    $JUNIT['test_warn']  += $junit['test_warn'];
-    $JUNIT['execution_time'] += $junit['execution_time'];
-    $JUNIT['files'] += $junit['files'];
-    foreach ($junit['suites'] as $name => $suite) {
-        if (!isset($JUNIT['suites'][$name])) {
-            $JUNIT['suites'][$name] = $suite;
-            continue;
+    public function saveXML(): void
+    {
+        if (!$this->enabled) {
+            return;
         }
 
-        $SUITE =& $JUNIT['suites'][$name];
-        $SUITE['test_total'] += $suite['test_total'];
-        $SUITE['test_pass']  += $suite['test_pass'];
-        $SUITE['test_fail']  += $suite['test_fail'];
-        $SUITE['test_error'] += $suite['test_error'];
-        $SUITE['test_skip']  += $suite['test_skip'];
-        $SUITE['test_warn']  += $suite['test_warn'];
-        $SUITE['execution_time'] += $suite['execution_time'];
-        $SUITE['files'] += $suite['files'];
+        $xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>' . PHP_EOL;
+        $xml .= sprintf(
+            '<testsuites name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+            $this->rootSuite['name'],
+            $this->rootSuite['test_total'],
+            $this->rootSuite['test_fail'],
+            $this->rootSuite['test_error'],
+            $this->rootSuite['test_skip'],
+            $this->rootSuite['execution_time']
+        );
+        $xml .= $this->getSuitesXML();
+        $xml .= '</testsuites>';
+        fwrite($this->fp, $xml);
     }
+
+    private function getSuitesXML(string $suite_name = '')
+    {
+        // FIXME: $suite_name gets overwritten
+        $result = '';
+
+        foreach ($this->suites as $suite_name => $suite) {
+            $result .= sprintf(
+                '<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+                $suite['name'],
+                $suite['test_total'],
+                $suite['test_fail'],
+                $suite['test_error'],
+                $suite['test_skip'],
+                $suite['execution_time']
+            );
+
+            if (!empty($suite_name)) {
+                foreach ($suite['files'] as $file) {
+                    $result .= $this->rootSuite['files'][$file]['xml'];
+                }
+            }
+
+            $result .= '</testsuite>' . PHP_EOL;
+        }
+
+        return $result;
+    }
+
+    public function markTestAs(
+        $type,
+        string $file_name,
+        string $test_name,
+        ?int $time = null,
+        string $message = '',
+        string $details = ''
+    ): void {
+        if (!$this->enabled) {
+            return;
+        }
+
+        $suite = $this->getSuiteName($file_name);
+
+        $this->record($suite, 'test_total');
+
+        $time = $time ?? $this->getTimer($file_name);
+        $this->record($suite, 'execution_time', $time);
+
+        $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+        $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+            return sprintf('[[0x%02x]]', ord($c[0]));
+        }, $escaped_details);
+        $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        $escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
+        $this->rootSuite['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
+
+        if (is_array($type)) {
+            $output_type = $type[0] . 'ED';
+            $temp = array_intersect(['XFAIL', 'XLEAK', 'FAIL', 'WARN'], $type);
+            $type = reset($temp);
+        } else {
+            $output_type = $type . 'ED';
+        }
+
+        if ('PASS' == $type || 'XFAIL' == $type || 'XLEAK' == $type) {
+            $this->record($suite, 'test_pass');
+        } elseif ('BORK' == $type) {
+            $this->record($suite, 'test_error');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
+        } elseif ('SKIP' == $type) {
+            $this->record($suite, 'test_skip');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
+        } elseif ('WARN' == $type) {
+            $this->record($suite, 'test_warn');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
+        } elseif ('FAIL' == $type) {
+            $this->record($suite, 'test_fail');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
+        } else {
+            $this->record($suite, 'test_error');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
+        }
+
+        $this->rootSuite['files'][$file_name]['xml'] .= "</testcase>\n";
+    }
+
+    private function record(string $suite, string $param, $value = 1): void
+    {
+        $this->rootSuite[$param] += $value;
+        $this->suites[$suite][$param] += $value;
+    }
+
+    private function getTimer(string $file_name)
+    {
+        if (!$this->enabled) {
+            return 0;
+        }
+
+        if (isset($this->rootSuite['files'][$file_name]['total'])) {
+            return number_format($this->rootSuite['files'][$file_name]['total'], 4);
+        }
+
+        return 0;
+    }
+
+    public function startTimer(string $file_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['start'])) {
+            $this->rootSuite['files'][$file_name]['start'] = microtime(true);
+
+            $suite = $this->getSuiteName($file_name);
+            $this->initSuite($suite);
+            $this->suites[$suite]['files'][$file_name] = $file_name;
+        }
+    }
+
+    public function getSuiteName(string $file_name): string
+    {
+        return $this->pathToClassName(dirname($file_name));
+    }
+
+    private function pathToClassName(string $file_name): string
+    {
+        if (!$this->enabled) {
+            return '';
+        }
+
+        $ret = $this->rootSuite['name'];
+        $_tmp = [];
+
+        // lookup whether we're in the PHP source checkout
+        $max = 5;
+        if (is_file($file_name)) {
+            $dir = dirname(realpath($file_name));
+        } else {
+            $dir = realpath($file_name);
+        }
+        do {
+            array_unshift($_tmp, basename($dir));
+            $chk = $dir . DIRECTORY_SEPARATOR . "main" . DIRECTORY_SEPARATOR . "php_version.h";
+            $dir = dirname($dir);
+        } while (!file_exists($chk) && --$max > 0);
+        if (file_exists($chk)) {
+            if ($max) {
+                array_shift($_tmp);
+            }
+            foreach ($_tmp as $p) {
+                $ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+            }
+            return $ret;
+        }
+
+        return $this->rootSuite['name'] . '.' . str_replace([DIRECTORY_SEPARATOR, '-'], '.', $file_name);
+    }
+
+    public function initSuite(string $suite_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!empty($this->suites[$suite_name])) {
+            return;
+        }
+
+        $this->suites[$suite_name] = self::EMPTY_SUITE + ['name' => $suite_name];
+    }
+
+    public function stopTimer(string $file_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['start'])) {
+            throw new Exception("Timer for $file_name was not started!");
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['total'])) {
+            $this->rootSuite['files'][$file_name]['total'] = 0;
+        }
+
+        $start = $this->rootSuite['files'][$file_name]['start'];
+        $this->rootSuite['files'][$file_name]['total'] += microtime(true) - $start;
+        unset($this->rootSuite['files'][$file_name]['start']);
+    }
+
+    public function mergeResults(?JUnit $other): void
+    {
+        if (!$this->enabled || !$other) {
+            return;
+        }
+
+        $this->mergeSuites($this->rootSuite, $other->rootSuite);
+        foreach ($other->suites as $name => $suite) {
+            if (!isset($this->suites[$name])) {
+                $this->suites[$name] = $suite;
+                continue;
+            }
+
+            $this->mergeSuites($this->suites[$name], $suite);
+        }
+    }
+
+    private function mergeSuites(array &$dest, array $source): void
+    {
+        $dest['test_total'] += $source['test_total'];
+        $dest['test_pass']  += $source['test_pass'];
+        $dest['test_fail']  += $source['test_fail'];
+        $dest['test_error'] += $source['test_error'];
+        $dest['test_skip']  += $source['test_skip'];
+        $dest['test_warn']  += $source['test_warn'];
+        $dest['execution_time'] += $source['execution_time'];
+        $dest['files'] += $source['files'];
+    }
+}
+
+class SkipCache
+{
+    private bool $keepFile;
+
+    private array $skips = [];
+    private array $extensions = [];
+
+    private int $hits = 0;
+    private int $misses = 0;
+    private int $extHits = 0;
+    private int $extMisses = 0;
+
+    public function __construct(bool $keepFile)
+    {
+        $this->keepFile = $keepFile;
+    }
+
+    public function checkSkip(string $php, string $code, string $checkFile, string $tempFile, array $env): string
+    {
+        // Extension tests frequently use something like <?php require 'skipif.inc';
+        // for skip checks. This forces us to cache per directory to avoid pollution.
+        $dir = dirname($checkFile);
+        $key = "$php => $dir";
+
+        if (isset($this->skips[$key][$code])) {
+            $this->hits++;
+            if ($this->keepFile) {
+                save_text($checkFile, $code, $tempFile);
+            }
+            return $this->skips[$key][$code];
+        }
+
+        save_text($checkFile, $code, $tempFile);
+        $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
+        if (strpos($result, 'nocache') !== 0) {
+            $this->skips[$key][$code] = $result;
+        } else {
+            $result = '';
+        }
+        $this->misses++;
+
+        if (!$this->keepFile) {
+            @unlink($checkFile);
+        }
+
+        return $result;
+    }
+
+    public function getExtensions(string $php): array
+    {
+        if (isset($this->extensions[$php])) {
+            $this->extHits++;
+            return $this->extensions[$php];
+        }
+
+        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+
+        $result = [$extDir, $extensions];
+        $this->extensions[$php] = $result;
+        $this->extMisses++;
+
+        return $result;
+    }
+
+//    public function __destruct()
+//    {
+//        echo "Skips: {$this->hits} hits, {$this->misses} misses.\n";
+//        echo "Extensions: {$this->extHits} hits, {$this->extMisses} misses.\n";
+//        echo "Cache distribution:\n";
+//
+//        foreach ($this->skips as $php => $cache) {
+//            echo "$php: " . count($cache) . "\n";
+//        }
+//    }
 }
 
 class RuntestsValgrind
 {
     protected $version = '';
     protected $header = '';
-    protected $version_3_3_0 = false;
     protected $version_3_8_0 = false;
     protected $tool = null;
 
@@ -3744,7 +3825,6 @@ class RuntestsValgrind
         $this->version = $version;
         $this->header = sprintf(
             "%s (%s)", trim($header), $this->tool);
-        $this->version_3_3_0 = version_compare($version, '3.3.0', '>=');
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 
@@ -3757,13 +3837,9 @@ class RuntestsValgrind
 
         /* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
         if ($this->version_3_8_0) {
-            /* valgrind 3.3.0+ doesn't have --log-file-exactly option */
             return "$vcmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
-        } elseif ($this->version_3_3_0) {
-            return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
-        } else {
-            return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
         }
+        return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
     }
 }
 

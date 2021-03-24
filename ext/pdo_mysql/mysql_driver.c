@@ -521,6 +521,24 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->local_infile);
 			break;
 
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+		case PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY:
+		{
+			const char* local_infile_directory = NULL;
+#ifdef PDO_USE_MYSQLND
+			local_infile_directory = H->server->data->options->local_infile_directory;
+#else
+			mysql_get_option(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, &local_infile_directory);
+#endif
+			if (local_infile_directory) {
+				ZVAL_STRING(return_value, local_infile_directory);
+			} else {
+				ZVAL_NULL(return_value);
+			}
+			break;
+		}
+#endif
+
 		default:
 			PDO_DBG_RETURN(0);
 	}
@@ -724,6 +742,17 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		}
 
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+		zend_string *local_infile_directory = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, NULL);
+		if (local_infile_directory && !php_check_open_basedir(ZSTR_VAL(local_infile_directory))) {
+			if (mysql_options(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, (const char *)ZSTR_VAL(local_infile_directory))) {
+				zend_string_release(local_infile_directory);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			zend_string_release(local_infile_directory);
+		}
+#endif
 #ifdef MYSQL_OPT_RECONNECT
 		/* since 5.0.3, the default for this option is 0 if not specified.
 		 * we want the old behaviour

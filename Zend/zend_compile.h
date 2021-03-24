@@ -233,7 +233,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 23...)                            |     |     |     */
+/* Class Flags (unused: 28...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -284,6 +284,16 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* stored in opcache (may be partially)                   |     |     |     */
 #define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* temporary flag used during delayed variance checks     |     |     |     */
+#define ZEND_ACC_CACHEABLE               (1 << 23) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+#define ZEND_ACC_HAS_AST_CONSTANTS       (1 << 24) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_AST_PROPERTIES      (1 << 25) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_AST_STATICS         (1 << 26) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* loaded from file cache to process memory               |     |     |     */
+#define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
@@ -446,7 +456,12 @@ struct _zend_op_array {
 	zend_string *doc_comment;
 
 	int last_literal;
+	uint32_t num_dynamic_func_defs;
 	zval *literals;
+
+	/* Functions that are declared dynamically are stored here and
+	 * referenced by index from opcodes. */
+	zend_op_array **dynamic_func_defs;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -771,7 +786,7 @@ bool zend_handle_encoding_declaration(zend_ast *ast);
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
 
-ZEND_API zend_result do_bind_function(zval *lcname);
+ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline);
@@ -785,6 +800,7 @@ void zend_verify_namespace(void);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
+void zend_init_static_variables_map_ptr(zend_op_array *op_array);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
@@ -801,7 +817,9 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
+ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_type_release(zend_type type, bool persistent);

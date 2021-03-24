@@ -485,16 +485,15 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (key) {
-				zend_throw_error(NULL, "Cannot unpack array with string keys");
-				return FAILURE;
+				zend_hash_update(Z_ARRVAL_P(result), key, val);
 			} else {
 				if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
 					zend_throw_error(NULL,
 						"Cannot add element to the array as the next element is already occupied");
 					return FAILURE;
 				}
-				Z_TRY_ADDREF_P(val);
 			}
+			Z_TRY_ADDREF_P(val);
 		} ZEND_HASH_FOREACH_END();
 		return SUCCESS;
 	}

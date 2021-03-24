@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed inclusion order for phpize builds on Windows. (cmb)
   . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
+  . Fixed bug #75474 (function scope static variables are not bound to a unique
+    function). (Nikita)
+  . Fixed bug #53826 (__callStatic fired in base class through a parent call if
+    the method is private). (Nikita)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
@@ -14,12 +18,20 @@ PHP                                                                        NEWS
 
 - hash:
   . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
-  . Implemented xxHash support. (Anatol)
+  . Implemented FR #73385 (Add xxHash support). (Anatol)
 
 - MySQLi:
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
   . Fixed bug #80330 (Replace language in APIs and source code/docs).
     (Darek Ślusarczyk)
+  . Fixed bug #80329 (Add option to specify LOAD DATA LOCAL white list folder
+    (including libmysql)). (Darek Ślusarczyk)
+
+- MySQLnd:
+  . Fixed bug #80761 (PDO uses too much memory). (Nikita)
+
+- Opcache:
+  . Added inheritance cache. (Dmitry)
 
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
@@ -34,5 +46,9 @@ PHP                                                                        NEWS
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSpellConfig. (Sara)
+
+- SPL:
+  . Fixed bug #80724 (FilesystemIterator::FOLLOW_SYMLINKS remove KEY_AS_FILE
+    from bitmask). (Cameron Porter)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

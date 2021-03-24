@@ -108,10 +108,7 @@ static void shmop_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(shmop)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
-	shmop_ce = zend_register_internal_class(&ce);
-	shmop_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	shmop_ce = register_class_Shmop();
 	shmop_ce->create_object = shmop_create_object;
 	shmop_ce->serialize = zend_class_serialize_deny;
 	shmop_ce->unserialize = zend_class_unserialize_deny;
@@ -121,6 +118,7 @@ PHP_MINIT_FUNCTION(shmop)
 	shmop_object_handlers.free_obj = shmop_free_obj;
 	shmop_object_handlers.get_constructor = shmop_get_constructor;
 	shmop_object_handlers.clone_obj = NULL;
+	shmop_object_handlers.compare = zend_objects_not_comparable;
 
 	return SUCCESS;
 }

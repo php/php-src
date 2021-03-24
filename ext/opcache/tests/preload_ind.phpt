@@ -12,6 +12,5 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 OK
---EXPECTF--
-Warning: Can't preload class C with unresolved property types in %s on line %d
+--EXPECT--
 OK

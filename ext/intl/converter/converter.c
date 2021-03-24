@@ -966,10 +966,7 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 
 /* {{{ php_converter_minit */
 int php_converter_minit(INIT_FUNC_ARGS) {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
-	php_converter_ce = zend_register_internal_class(&ce);
+	php_converter_ce = register_class_UConverter();
 	php_converter_ce->create_object = php_converter_create_object;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);

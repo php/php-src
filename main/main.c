@@ -401,7 +401,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* }}} */
 
 /* {{{ php_get_display_errors_mode() helper function */
-static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
+static zend_uchar php_get_display_errors_mode(zend_string *value)
 {
 	zend_uchar mode;
 
@@ -409,21 +409,26 @@ static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
-	if (value_length == 2 && !strcasecmp("on", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 3 && !strcasecmp("yes", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 4 && !strcasecmp("true", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 6 && !strcasecmp(value, "stderr")) {
-		mode = PHP_DISPLAY_ERRORS_STDERR;
-	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else {
-		ZEND_ATOL(mode, value);
-		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
-			mode = PHP_DISPLAY_ERRORS_STDOUT;
-		}
+	if (zend_string_equals_literal_ci(value, "on")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+	if (zend_string_equals_literal_ci(value, "yes")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+
+	if (zend_string_equals_literal_ci(value, "true")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+	if (zend_string_equals_literal_ci(value, "stderr")) {
+		return PHP_DISPLAY_ERRORS_STDERR;
+	}
+	if (zend_string_equals_literal_ci(value, "stdout")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+
+	ZEND_ATOL(mode, ZSTR_VAL(value));
+	if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
 	return mode;
@@ -433,7 +438,7 @@ static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = php_get_display_errors_mode(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	PG(display_errors) = php_get_display_errors_mode(new_value);
 
 	return SUCCESS;
 }
@@ -444,21 +449,17 @@ static PHP_INI_DISP(display_errors_mode)
 {
 	zend_uchar mode;
 	bool cgi_or_cli;
-	size_t tmp_value_length;
-	char *tmp_value;
+	zend_string *temporary_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		tmp_value = (ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL );
-		tmp_value_length = (ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
+		temporary_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
 	} else if (ini_entry->value) {
-		tmp_value = ZSTR_VAL(ini_entry->value);
-		tmp_value_length = ZSTR_LEN(ini_entry->value);
+		temporary_value = ini_entry->value;
 	} else {
-		tmp_value = NULL;
-		tmp_value_length = 0;
+		temporary_value = NULL;
 	}
 
-	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
+	mode = php_get_display_errors_mode(temporary_value);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
 	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg"));
@@ -1826,6 +1827,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	/* 15. Free Willy (here be crashes) */
+	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);

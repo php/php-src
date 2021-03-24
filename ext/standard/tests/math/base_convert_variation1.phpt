@@ -4,10 +4,6 @@ Test base_convert() function : usage variations - different data types as $numbe
 <?php
 echo "*** Testing base_convert() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 abc
@@ -32,10 +28,6 @@ $inputs = array(
        1.234567E-2,
        .5,
 
-       // null data
-/*11*/ NULL,
-       null,
-
        // boolean data
 /*13*/ true,
        false,
@@ -51,12 +43,6 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-
-       // undefined data
-/*23*/ @$undefined_var,
-
-       // unset data
-/*24*/ @$unset_var,
 
        // resource variable
 /*25*/ $fp
@@ -121,7 +107,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 string(1) "5"
 
 -- Iteration 11 --
-string(1) "0"
+string(1) "1"
 
 -- Iteration 12 --
 string(1) "0"
@@ -133,19 +119,23 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 15 --
-string(1) "1"
+string(1) "0"
 
 -- Iteration 16 --
 string(1) "0"
 
 -- Iteration 17 --
-string(1) "0"
+base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 19 --
-base_convert(): Argument #1 ($num) must be of type string, array given
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+string(1) "0"
 
 -- Iteration 20 --
 
@@ -153,20 +143,4 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 string(1) "0"
 
 -- Iteration 21 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
-
--- Iteration 22 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
-
--- Iteration 23 --
-string(1) "0"
-
--- Iteration 24 --
-string(1) "0"
-
--- Iteration 25 --
 base_convert(): Argument #1 ($num) must be of type string, resource given

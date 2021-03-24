@@ -41,6 +41,9 @@
 # Standard object files generated during build process
 *.o
 
+# Dependency files generated during build process
+*.dep
+
 # Cache directories created by Autoconf tools
 autom4te.cache/
 

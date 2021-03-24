@@ -85,7 +85,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 			if (hnd->read_int_func) {
 				retint = hnd->read_int_func(obj->ptr);
 				if (retint == -1) {
-					php_error_docref(NULL, E_WARNING, "Internal libxml error returned");
+					zend_throw_error(NULL, "Failed to read property due to libxml error");
 					return FAILURE;
 				}
 			}
@@ -100,15 +100,13 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 				ZVAL_EMPTY_STRING(rv);
 			}
 			break;
-		/* this IS_FALSE actually means it's a BOOL type */
-		case IS_FALSE:
+		case _IS_BOOL:
 			ZVAL_BOOL(rv, retint);
 			break;
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
-		default:
-			ZVAL_NULL(rv);
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	return SUCCESS;
@@ -1147,8 +1145,6 @@ PHP_METHOD(XMLReader, expand)
 PHP_MINIT_FUNCTION(xmlreader)
 {
 
-	zend_class_entry ce;
-
 	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
 	xmlreader_object_handlers.dtor_obj = zend_objects_destroy_object;
@@ -1159,9 +1155,8 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.get_method = xmlreader_get_method;
 	xmlreader_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "XMLReader", class_XMLReader_methods);
-	ce.create_object = xmlreader_objects_new;
-	xmlreader_class_entry = zend_register_internal_class(&ce);
+	xmlreader_class_entry = register_class_XMLReader();
+	xmlreader_class_entry->create_object = xmlreader_objects_new;
 
 	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1), sizeof(zend_internal_function));
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;
@@ -1172,10 +1167,10 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "baseURI", NULL, xmlTextReaderConstBaseUri, IS_STRING);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_LONG);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasAttributes", xmlTextReaderHasAttributes, NULL, IS_FALSE);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasValue", xmlTextReaderHasValue, NULL, IS_FALSE);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "isDefault", xmlTextReaderIsDefault, NULL, IS_FALSE);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "isEmptyElement", xmlTextReaderIsEmptyElement, NULL, IS_FALSE);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasAttributes", xmlTextReaderHasAttributes, NULL, _IS_BOOL);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasValue", xmlTextReaderHasValue, NULL, _IS_BOOL);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "isDefault", xmlTextReaderIsDefault, NULL, _IS_BOOL);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "isEmptyElement", xmlTextReaderIsEmptyElement, NULL, _IS_BOOL);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "localName", NULL, xmlTextReaderConstLocalName, IS_STRING);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "name", NULL, xmlTextReaderConstName, IS_STRING);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "namespaceURI", NULL, xmlTextReaderConstNamespaceUri, IS_STRING);

@@ -1,13 +1,81 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 final class mysqli_driver
 {
+    /** @var string|null */
+    public $client_info;
+
+    /** @var int|null */
+    public $client_version;
+
+    /** @var int|null */
+    public $driver_version;
+
+    /** @var bool|null */
+    public $reconnect;
+
+    /** @var int|null */
+    public $report_mode;
 }
 
 class mysqli
 {
+    /** @var int|string|null */
+    public $affected_rows;
+
+    /** @var string|null */
+    public $client_info;
+
+    /** @var string|null */
+    public $client_version;
+
+    /** @var int|null */
+    public $connect_errno;
+
+    /** @var string|null */
+    public $connect_error;
+
+    /** @var int|string|null */
+    public $errno;
+
+    /** @var string|null */
+    public $error;
+
+    /** @var array|null */
+    public $error_list;
+
+    /** @var int|null */
+    public $field_count;
+
+    /** @var string|null */
+    public $host_info;
+
+    /** @var string|null */
+    public $info;
+
+    /** @var int|string|null */
+    public $insert_id;
+
+    /** @var string|null */
+    public $server_info;
+
+    /** @var int|string|null */
+    public $server_version;
+
+    /** @var string|null */
+    public $sqlstate;
+
+    /** @var int|string|null */
+    public $protocol_version;
+
+    /** @var int|string|null */
+    public $thread_id;
+
+    /** @var int|string|null */
+    public $warning_count;
+
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,
@@ -256,11 +324,11 @@ class mysqli
      * @alias mysqli_ssl_set
      */
     public function ssl_set(
-        string $key,
-        string $certificate,
-        string $ca_certificate,
-        string $ca_path,
-        string $cipher_algos
+        ?string $key,
+        ?string $certificate,
+        ?string $ca_certificate,
+        ?string $ca_path,
+        ?string $cipher_algos
     ) {}
 
     /**
@@ -302,6 +370,21 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
+    /** @var int|string|null */
+    public $current_field;
+
+    /** @var int|string|null */
+    public $field_count;
+
+    /** @var array|null */
+    public $lengths;
+
+    /** @var int|string|null */
+    public $num_rows;
+
+    /** @var int|null */
+    public $type;
+
     public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
@@ -387,6 +470,36 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
+    /** @var int|string|null */
+    public $affected_rows;
+
+    /** @var int|string|null */
+    public $insert_id;
+
+    /** @var int|string|null */
+    public $num_rows;
+
+    /** @var int|string|null */
+    public $param_count;
+
+    /** @var int|string|null */
+    public $field_count;
+
+    /** @var int|string|null */
+    public $errno;
+
+    /** @var string|null */
+    public $error;
+
+    /** @var array|null */
+    public $error_list;
+
+    /** @var string|null */
+    public $sqlstate;
+
+    /** @var int|null */
+    public $id;
+
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
     /**
@@ -510,6 +623,15 @@ class mysqli_stmt
 
 final class mysqli_warning
 {
+    /** @var string|null */
+    public $message;
+
+    /** @var string|null */
+    public $sqlstate;
+
+    /** @var int|null */
+    public $errno;
+
     private function __construct() {}
 
     public function next(): bool {}
@@ -517,6 +639,8 @@ final class mysqli_warning
 
 final class mysqli_sql_exception extends RuntimeException
 {
+    /** @var string */
+    protected $sqlstate = "00000";
 }
 
 function mysqli_affected_rows(mysqli $mysql): int|string {}
@@ -746,11 +870,11 @@ function mysqli_sqlstate(mysqli $mysql): string {}
 
 function mysqli_ssl_set(
     mysqli $mysql,
-    string $key,
-    string $certificate,
-    string $ca_certificate,
-    string $ca_path,
-    string $cipher_algos
+    ?string $key,
+    ?string $certificate,
+    ?string $ca_certificate,
+    ?string $ca_path,
+    ?string $cipher_algos
 ): bool {}
 
 function mysqli_stat(mysqli $mysql): string|false {}

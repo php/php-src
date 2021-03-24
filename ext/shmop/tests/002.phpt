@@ -27,11 +27,11 @@ try {
 }
 
 // Warning outputs: Unable to attach or create shared memory segment
-var_dump(shmop_open(null, 'a', 0644, 1024));
+var_dump(shmop_open(0, 'a', 0644, 1024));
 
 // Shared memory segment size must be greater than zero
 try {
-    shmop_open(null, 'a', 0644, 1024);
+    shmop_open(0, 'a', 0644, 1024);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }

@@ -42,7 +42,7 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 
 		if (Z_TYPE(flags) != IS_LONG) {
 			zend_error_noreturn(E_ERROR,
-				"Attribute::__construct(): Argument #1 ($flags) must must be of type int, %s given",
+				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
 				zend_zval_type_name(&flags)
 			);
 		}
@@ -263,15 +263,12 @@ ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcnam
 void zend_register_attribute_ce(void)
 {
 	zend_internal_attribute *attr;
-	zend_class_entry ce;
-	zend_string *str;
-	zval tmp;
 
 	zend_hash_init(&internal_attributes, 8, NULL, free_internal_attribute, 1);
 
-	INIT_CLASS_ENTRY(ce, "Attribute", class_Attribute_methods);
-	zend_ce_attribute = zend_register_internal_class(&ce);
-	zend_ce_attribute->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_attribute = register_class_Attribute();
+	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr->validator = validate_attribute;
 
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS"), ZEND_ATTRIBUTE_TARGET_CLASS);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_FUNCTION"), ZEND_ATTRIBUTE_TARGET_FUNCTION);
@@ -281,14 +278,6 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
-
-	ZVAL_UNDEF(&tmp);
-	str = zend_string_init(ZEND_STRL("flags"), 1);
-	zend_declare_typed_property(zend_ce_attribute, str, &tmp, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
-	zend_string_release(str);
-
-	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
-	attr->validator = validate_attribute;
 }
 
 void zend_attributes_shutdown(void)

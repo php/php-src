@@ -15,6 +15,6 @@ files/frontcontroller16.phar
 --EXPECTF--
 Fatal error: Uncaught TypeError: Phar::webPhar(): Argument #5 ($rewrite) must be a valid callback or null, class "fail" not found in %s:%d
 Stack trace:
-#0 %s(%d): Phar::webPhar('test.phar', '/index.php', '', Array, Array)
+#0 %s(%d): Phar::webPhar('test.phar', '/index.php', NULL, Array, Array)
 #1 {main}
   thrown in %s on line %d

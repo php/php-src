@@ -95,10 +95,10 @@ PDOStatementX::__destruct()
 PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
-  ["test1"]=>
-  int(1)
   ["queryString"]=>
   string(24) "SELECT val, id FROM test"
+  ["test1"]=>
+  int(1)
   ["test2"]=>
   int(22)
 }

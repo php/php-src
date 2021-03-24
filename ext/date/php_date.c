@@ -1603,10 +1603,7 @@ static int date_interval_has_property(zend_object *object, zend_string *name, in
 
 static void date_register_classes(void) /* {{{ */
 {
-	zend_class_entry ce_date, ce_immutable, ce_timezone, ce_interval, ce_period, ce_interface;
-
-	INIT_CLASS_ENTRY(ce_interface, "DateTimeInterface", class_DateTimeInterface_methods);
-	date_ce_interface = zend_register_internal_interface(&ce_interface);
+	date_ce_interface = register_class_DateTimeInterface();
 	date_ce_interface->interface_gets_implemented = implement_date_interface_handler;
 
 #define REGISTER_DATE_INTERFACE_CONST_STRING(const_name, value) \
@@ -1626,9 +1623,8 @@ static void date_register_classes(void) /* {{{ */
 	REGISTER_DATE_INTERFACE_CONST_STRING("RSS",              DATE_FORMAT_RFC1123);
 	REGISTER_DATE_INTERFACE_CONST_STRING("W3C",              DATE_FORMAT_RFC3339);
 
-	INIT_CLASS_ENTRY(ce_date, "DateTime", class_DateTime_methods);
-	ce_date.create_object = date_object_new_date;
-	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL);
+	date_ce_date = register_class_DateTime(date_ce_interface);
+	date_ce_date->create_object = date_object_new_date;
 	memcpy(&date_object_handlers_date, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
@@ -1636,21 +1632,17 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.compare = date_object_compare_date;
 	date_object_handlers_date.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_date.get_gc = date_object_get_gc;
-	zend_class_implements(date_ce_date, 1, date_ce_interface);
 
-	INIT_CLASS_ENTRY(ce_immutable, "DateTimeImmutable", class_DateTimeImmutable_methods);
-	ce_immutable.create_object = date_object_new_date;
-	date_ce_immutable = zend_register_internal_class_ex(&ce_immutable, NULL);
+	date_ce_immutable = register_class_DateTimeImmutable(date_ce_interface);
+	date_ce_immutable->create_object = date_object_new_date;
 	memcpy(&date_object_handlers_immutable, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare = date_object_compare_date;
 	date_object_handlers_immutable.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_immutable.get_gc = date_object_get_gc;
-	zend_class_implements(date_ce_immutable, 1, date_ce_interface);
 
-	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", class_DateTimeZone_methods);
-	ce_timezone.create_object = date_object_new_timezone;
-	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL);
+	date_ce_timezone = register_class_DateTimeZone();
+	date_ce_timezone->create_object = date_object_new_timezone;
 	memcpy(&date_object_handlers_timezone, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
@@ -1678,9 +1670,8 @@ static void date_register_classes(void) /* {{{ */
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("ALL_WITH_BC", PHP_DATE_TIMEZONE_GROUP_ALL_W_BC);
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("PER_COUNTRY", PHP_DATE_TIMEZONE_PER_COUNTRY);
 
-	INIT_CLASS_ENTRY(ce_interval, "DateInterval", class_DateInterval_methods);
-	ce_interval.create_object = date_object_new_interval;
-	date_ce_interval = zend_register_internal_class_ex(&ce_interval, NULL);
+	date_ce_interval = register_class_DateInterval();
+	date_ce_interval->create_object = date_object_new_interval;
 	memcpy(&date_object_handlers_interval, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_interval.offset = XtOffsetOf(php_interval_obj, std);
 	date_object_handlers_interval.free_obj = date_object_free_storage_interval;
@@ -1693,11 +1684,9 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 	date_object_handlers_interval.compare = date_interval_compare_objects;
 
-	INIT_CLASS_ENTRY(ce_period, "DatePeriod", class_DatePeriod_methods);
-	ce_period.create_object = date_object_new_period;
-	date_ce_period = zend_register_internal_class_ex(&ce_period, NULL);
+	date_ce_period = register_class_DatePeriod(zend_ce_aggregate);
+	date_ce_period->create_object = date_object_new_period;
 	date_ce_period->get_iterator = date_object_period_get_iterator;
-	zend_class_implements(date_ce_period, 1, zend_ce_aggregate);
 	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
@@ -2280,6 +2269,14 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	php_date_get_current_time_with_fraction(&sec, &usec);
 	timelib_unixtime2local(now, (timelib_sll) sec);
 	php_date_set_time_fraction(now, usec);
+
+	if (!format
+	 && time_str_len == sizeof("now") - 1
+	 && memcmp(time_str, "now", sizeof("now") - 1) == 0) {
+		timelib_time_dtor(dateobj->time);
+		dateobj->time = now;
+		return 1;
+	}
 
 	options = TIMELIB_NO_CLONE;
 	if (flags & PHP_DATE_INIT_FORMAT) {
@@ -3331,7 +3328,10 @@ PHP_FUNCTION(date_timestamp_get)
 	}
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	timelib_update_ts(dateobj->time, NULL);
+
+	if (!dateobj->time->sse_uptodate) {
+		timelib_update_ts(dateobj->time, NULL);
+	}
 
 	timestamp = timelib_date_to_int(dateobj->time, &epoch_does_not_fit_in_zend_long);
 

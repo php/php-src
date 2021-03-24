@@ -2558,6 +2558,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	smart_str main_metadata_str = {0};
 	int free_user_stub, free_fp = 1, free_ufp = 1;
 	int manifest_hack = 0;
+	php_stream *shared_cfp = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -2835,10 +2836,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			return EOF;
 		}
 
-		/* create new file that holds the compressed version */
+		/* create new file that holds the compressed versions */
 		/* work around inability to specify freedom in write and strictness
 		in read count */
-		entry->cfp = php_stream_fopen_tmpfile();
+		if (shared_cfp == NULL) {
+			shared_cfp = php_stream_fopen_tmpfile();
+		}
+		entry->cfp = shared_cfp;
 		if (!entry->cfp) {
 			if (error) {
 				spprintf(error, 0, "unable to create temporary file");
@@ -2847,8 +2851,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			return EOF;
+			goto cleanup;
 		}
+		/* for real phars, header_offset is unused; we misuse it here to store the offset in the temp file */
+		ZEND_ASSERT(entry->header_offset == 0);
+		entry->header_offset = php_stream_tell(entry->cfp);
 		php_stream_flush(file);
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
 			if (closeoldfile) {
@@ -2858,7 +2865,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 		if (SUCCESS != php_stream_copy_to_stream_ex(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
@@ -2869,15 +2876,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 		php_stream_filter_flush(filter, 1);
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
+		entry->compressed_filesize = ((uint32_t) php_stream_tell(entry->cfp)) - entry->header_offset;
 		/* generate crc on compressed file */
-		php_stream_rewind(entry->cfp);
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
@@ -2933,7 +2939,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			spprintf(error, 0, "unable to write manifest header of new phar \"%s\"", phar->fname);
 		}
 
-		return EOF;
+		goto cleanup;
 	}
 
 	phar->alias_len = restore_alias_len;
@@ -2954,7 +2960,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", phar->fname);
 		}
 
-		return EOF;
+		goto cleanup;
 	}
 	smart_str_free(&main_metadata_str);
 
@@ -2990,7 +2996,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 					spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
 				}
 			}
-			return EOF;
+			goto cleanup;
 		}
 
 		/* set the manifest meta-data:
@@ -3024,7 +3030,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 	} ZEND_HASH_FOREACH_END();
 	/* Hack - see bug #65028, add padding byte to the end of the manifest */
@@ -3040,7 +3046,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write manifest padding byte");
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 	}
 
@@ -3053,7 +3059,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 		if (entry->cfp) {
 			file = entry->cfp;
-			php_stream_rewind(file);
+			php_stream_seek(file, entry->header_offset, SEEK_SET);
 		} else {
 			file = phar_get_efp(entry, 0);
 			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
@@ -3064,7 +3070,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				if (error) {
 					spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 				}
-				return EOF;
+				goto cleanup;
 			}
 		}
 
@@ -3076,7 +3082,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 
 		/* this will have changed for all files that have either changed compression or been modified */
@@ -3093,14 +3099,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 
 		entry->is_modified = 0;
 
 		if (entry->cfp) {
-			php_stream_close(entry->cfp);
 			entry->cfp = NULL;
+			entry->header_offset = 0;
 		}
 
 		if (entry->fp_type == PHAR_MOD) {
@@ -3115,6 +3121,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			entry->fp_type = PHAR_FP;
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (shared_cfp != NULL) {
+		php_stream_close(shared_cfp);
+		shared_cfp = NULL;
+	}
 
 	/* append signature */
 	if (global_flags & PHAR_HDR_SIGNATURE) {
@@ -3244,6 +3255,19 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		}
 		return EOF;
 	}
+
+	return EOF;
+
+cleanup:
+	if (shared_cfp != NULL) {
+		php_stream_close(shared_cfp);
+	}
+	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+		if (entry->cfp) {
+			entry->cfp = NULL;
+			entry->header_offset = 0;
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	return EOF;
 }

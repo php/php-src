@@ -580,11 +580,7 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
-void curl_multi_register_class(const zend_function_entry *method_entries) {
-	zend_class_entry ce_multi;
-	INIT_CLASS_ENTRY(ce_multi, "CurlMultiHandle", method_entries);
-	curl_multi_ce = zend_register_internal_class(&ce_multi);
-	curl_multi_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+void curl_multi_register_handlers(void) {
 	curl_multi_ce->create_object = curl_multi_create_object;
 	curl_multi_ce->serialize = zend_class_serialize_deny;
 	curl_multi_ce->unserialize = zend_class_unserialize_deny;
@@ -596,4 +592,5 @@ void curl_multi_register_class(const zend_function_entry *method_entries) {
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
 	curl_multi_handlers.clone_obj = NULL;
 	curl_multi_handlers.cast_object = curl_cast_object;
+	curl_multi_handlers.compare = zend_objects_not_comparable;
 }

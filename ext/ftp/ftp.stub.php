@@ -1,6 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+/** @strict-properties */
+final class FTPConnection
+{
+}
 
 function ftp_connect(string $hostname, int $port = 21, int $timeout = 90): FTPConnection|false {}
 

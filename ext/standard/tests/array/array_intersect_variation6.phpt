@@ -30,12 +30,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
-
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
@@ -102,72 +96,54 @@ array(1) {
   int(1)
 }
 -- Iterator 5 --
-array(1) {
-  [1]=>
-  string(5) "float"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
-array(1) {
-  [1]=>
-  string(5) "float"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
 -- Iterator 6 --
-array(1) {
-  [2]=>
-  string(2) "f4"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
-array(1) {
-  [2]=>
-  string(2) "f4"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
 -- Iterator 7 --
 array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
 }
 array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
 }
 -- Iterator 8 --
-array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+array(1) {
+  [3]=>
+  string(5) "hello"
 }
-array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+array(1) {
+  [3]=>
+  string(5) "hello"
 }
 -- Iterator 9 --
-array(2) {
-  [3]=>
-  string(5) "hello"
-  [6]=>
-  string(6) "string"
-}
-array(2) {
-  [3]=>
-  string(5) "hello"
-  [6]=>
-  string(6) "string"
-}
--- Iterator 10 --
-array(1) {
-  [3]=>
-  string(5) "hello"
-}
-array(1) {
-  [3]=>
-  string(5) "hello"
-}
--- Iterator 11 --
 array(3) {
   [0]=>
   int(1)

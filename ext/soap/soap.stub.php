@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function use_soap_error_handler(bool $enable = true): bool {}
 
@@ -25,7 +25,7 @@ class SoapFault extends Exception
 
 class SoapVar
 {
-    public function __construct(mixed $data, ?int $encoding, string $typeName = "", string $typeNamespace = "", string $nodeName = "", string $nodeNamespace = "") {}
+    public function __construct(mixed $data, ?int $encoding, ?string $typeName = null, ?string $typeNamespace = null, ?string $nodeName = null, ?string $nodeNamespace = null) {}
 }
 
 class SoapServer
@@ -108,5 +108,5 @@ class SoapClient
     public function __setSoapHeaders($headers = null) {}
 
     /** @return string|null */
-    public function __setLocation(string $location = "") {}
+    public function __setLocation(?string $location = null) {}
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 05ea5d884642e75721f90728fb24b7ad5ce46897 */
+ * Stub hash: 65836ce6bd16316bb022bc75ce5e2fbbdd1880b7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -295,3 +295,13 @@ static const zend_function_entry class_IntlChar_methods[] = {
 	ZEND_ME(IntlChar, toupper, arginfo_class_IntlChar_toupper, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_IntlChar(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlChar", class_IntlChar_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

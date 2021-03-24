@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6a121ed9817667820f05677a772781d6b788796b */
+ * Stub hash: 9e9dc1cd1302038f351f6075393494d1a58f0d74 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_createCharacterInstance, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -72,8 +72,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec arginfo_class_IntlBreakIterator_createCodePointInstance
 
-#define arginfo_class_IntlPartsIterator_getBreakIterator arginfo_class_IntlBreakIterator_createCodePointInstance
-
 #define arginfo_class_IntlCodePointBreakIterator_getLastCodePoint arginfo_class_IntlBreakIterator_createCodePointInstance
 
 
@@ -104,7 +102,6 @@ ZEND_METHOD(IntlRuleBasedBreakIterator, getBinaryRules);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRules);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatus);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
-ZEND_METHOD(IntlPartsIterator, getBreakIterator);
 ZEND_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
 
@@ -145,13 +142,38 @@ static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
 };
 
 
-static const zend_function_entry class_IntlPartsIterator_methods[] = {
-	ZEND_ME(IntlPartsIterator, getBreakIterator, arginfo_class_IntlPartsIterator_getBreakIterator, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-
 static const zend_function_entry class_IntlCodePointBreakIterator_methods[] = {
 	ZEND_ME(IntlCodePointBreakIterator, getLastCodePoint, arginfo_class_IntlCodePointBreakIterator_getLastCodePoint, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *class_entry_IteratorAggregate)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator", class_IntlRuleBasedBreakIterator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_entry *class_entry_IntlBreakIterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator", class_IntlCodePointBreakIterator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
+
+	return class_entry;
+}

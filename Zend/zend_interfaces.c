@@ -596,31 +596,25 @@ ZEND_METHOD(InternalIterator, rewind) {
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
-	zend_class_entry ce;
+	zend_ce_traversable = register_class_Traversable();
+	zend_ce_traversable->interface_gets_implemented = zend_implement_traversable;
 
-	REGISTER_MAGIC_INTERFACE(traversable, Traversable);
+	zend_ce_aggregate = register_class_IteratorAggregate(zend_ce_traversable);
+	zend_ce_aggregate->interface_gets_implemented = zend_implement_aggregate;
 
-	REGISTER_MAGIC_INTERFACE(aggregate, IteratorAggregate);
-	REGISTER_MAGIC_IMPLEMENT(aggregate, traversable);
+	zend_ce_iterator = register_class_Iterator(zend_ce_traversable);
+	zend_ce_iterator->interface_gets_implemented = zend_implement_iterator;
 
-	REGISTER_MAGIC_INTERFACE(iterator, Iterator);
-	REGISTER_MAGIC_IMPLEMENT(iterator, traversable);
+	zend_ce_serializable = register_class_Serializable();
+	zend_ce_serializable->interface_gets_implemented = zend_implement_serializable;
 
-	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
+	zend_ce_arrayaccess = register_class_ArrayAccess();
 
-	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
-	zend_ce_arrayaccess = zend_register_internal_interface(&ce);
+	zend_ce_countable = register_class_Countable();
 
-	INIT_CLASS_ENTRY(ce, "Countable", class_Countable_methods);
-	zend_ce_countable = zend_register_internal_interface(&ce);
+	zend_ce_stringable = register_class_Stringable();
 
-	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
-	zend_ce_stringable = zend_register_internal_interface(&ce);
-
-	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
-	zend_ce_internal_iterator = zend_register_internal_class(&ce);
-	zend_class_implements(zend_ce_internal_iterator, 1, zend_ce_iterator);
-	zend_ce_internal_iterator->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_internal_iterator = register_class_InternalIterator(zend_ce_iterator);
 	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;
 	zend_ce_internal_iterator->serialize = zend_class_serialize_deny;
 	zend_ce_internal_iterator->unserialize = zend_class_unserialize_deny;

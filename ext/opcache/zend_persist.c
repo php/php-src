@@ -36,6 +36,7 @@
 #endif
 
 #define zend_set_str_gc_flags(str) do { \
+	GC_SET_REFCOUNT(str, 2); \
 	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
@@ -81,6 +82,7 @@
 typedef void (*zend_persist_func_t)(zval*);
 
 static void zend_persist_zval(zval *z);
+static void zend_persist_op_array(zval *zv);
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -115,7 +117,11 @@ static void zend_hash_persist(HashTable *ht)
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		void *data = HT_GET_DATA_ADDR(ht);
-		data = zend_shared_memdup_free(data, HT_USED_SIZE(ht));
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			data = zend_shared_memdup(data, HT_USED_SIZE(ht));
+		} else {
+			data = zend_shared_memdup_free(data, HT_USED_SIZE(ht));
+		}
 		HT_SET_DATA_ADDR(ht, data);
 	} else if (ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
@@ -133,7 +139,9 @@ static void zend_hash_persist(HashTable *ht)
 		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
 		HT_HASH_RESET(ht);
 		memcpy(ht->arData, old_buckets, ht->nNumUsed * sizeof(Bucket));
-		efree(old_data);
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+			efree(old_data);
+		}
 
 		/* rehash */
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
@@ -150,7 +158,9 @@ static void zend_hash_persist(HashTable *ht)
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, old_data, HT_USED_SIZE(ht));
-		efree(old_data);
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+			efree(old_data);
+		}
 		HT_SET_DATA_ADDR(ht, data);
 	}
 }
@@ -201,33 +211,29 @@ static void zend_persist_zval(zval *z)
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = 0;
+			} else if (!ZCG(current_persistent_script)->corrupted
+			 && zend_accel_in_shm(Z_ARR_P(z))) {
+				/* pass */
 			} else {
 				Bucket *p;
 
 				if (!Z_REFCOUNTED_P(z)) {
 					Z_ARR_P(z) = zend_shared_memdup_put(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist(Z_ARRVAL_P(z));
-					ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
-						if (p->key) {
-							zend_accel_memdup_interned_string(p->key);
-						}
-						zend_persist_zval(&p->val);
-					} ZEND_HASH_FOREACH_END();
 				} else {
 					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
 					Z_ARR_P(z) = zend_shared_memdup_put_free(Z_ARR_P(z), sizeof(zend_array));
-					zend_hash_persist(Z_ARRVAL_P(z));
-					ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
-						if (p->key) {
-							zend_accel_store_interned_string(p->key);
-						}
-						zend_persist_zval(&p->val);
-					} ZEND_HASH_FOREACH_END();
-					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = 0;
-					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
-					GC_ADD_FLAGS(Z_COUNTED_P(z), IS_ARRAY_IMMUTABLE);
 				}
+				zend_hash_persist(Z_ARRVAL_P(z));
+				ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
+					if (p->key) {
+						zend_accel_store_interned_string(p->key);
+					}
+					zend_persist_zval(&p->val);
+				} ZEND_HASH_FOREACH_END();
+				/* make immutable array */
+				Z_TYPE_FLAGS_P(z) = 0;
+				GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
+				GC_ADD_FLAGS(Z_COUNTED_P(z), IS_ARRAY_IMMUTABLE);
 			}
 			break;
 		case IS_CONSTANT_AST:
@@ -235,7 +241,8 @@ static void zend_persist_zval(zval *z)
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = 0;
-			} else {
+			} else if (ZCG(current_persistent_script)->corrupted
+			 || !zend_accel_in_shm(Z_AST_P(z))) {
 				zend_ast_ref *old_ref = Z_AST_P(z);
 				Z_AST_P(z) = zend_shared_memdup_put(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
@@ -257,6 +264,11 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	if (!ptr) {
 		uint32_t i;
 		zval *v;
+
+		if (!ZCG(current_persistent_script)->corrupted
+		 && zend_accel_in_shm(attributes)) {
+			return attributes;
+		}
 
 		zend_hash_persist(attributes);
 
@@ -285,17 +297,46 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-static void zend_persist_type(zend_type *type, bool use_arena) {
+uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *scope)
+{
+	uint32_t ret;
+
+	if (zend_string_equals_literal_ci(type_name, "self")) {
+		if (!scope || (scope->ce_flags & ZEND_ACC_TRAIT)) {
+			return 0;
+		}
+		type_name = scope->name;
+	} else if (zend_string_equals_literal_ci(type_name, "parent")) {
+		if (!scope || !scope->parent) {
+			return 0;
+		}
+		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
+			type_name = scope->parent->name;
+		} else {
+			type_name = scope->parent_name;
+		}
+	}
+
+	ZEND_ASSERT(GC_FLAGS(type_name) & GC_IMMUTABLE);
+	ZEND_ASSERT(GC_FLAGS(type_name) & IS_STR_PERMANENT);
+	ret = GC_REFCOUNT(type_name);
+
+	/* We use type.name.gc.refcount to keep map_ptr of corresponding type */
+	if (ret <= 2) {
+		do {
+			ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		} while (ret <= 2);
+		GC_SET_REFCOUNT(type_name, ret);
+	}
+	return ret;
+}
+
+static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {
-			if (!ZCG(is_immutable_class) && use_arena) {
-				list = zend_shared_memdup_arena_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
-			} else {
-				/* Moved from arena to SHM because type list was fully resolved. */
-				list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
-				ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
-			}
+			list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+			ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
 		} else {
 			list = zend_shared_memdup_put_free(list, ZEND_TYPE_LIST_SIZE(list->num_types));
 		}
@@ -308,6 +349,14 @@ static void zend_persist_type(zend_type *type, bool use_arena) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			zend_accel_store_interned_string(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
+			if (!ZCG(current_persistent_script)->corrupted) {
+				uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
+
+				if (ptr) {
+					single_type->type_mask |= _ZEND_TYPE_CACHE_BIT;
+					single_type->ce_cache__ptr = ptr;
+				}
+			}
 		}
 	} ZEND_TYPE_FOREACH_END();
 }
@@ -352,6 +401,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		if (scope) {
 			op_array->scope = scope;
 		}
+
 		if (op_array->prototype) {
 			zend_function *ptr = zend_shared_alloc_get_xlat_entry(op_array->prototype);
 
@@ -367,7 +417,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				op_array->static_variables = zend_shared_alloc_get_xlat_entry(op_array->static_variables);
 				ZEND_ASSERT(op_array->static_variables != NULL);
 			}
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
 			if (op_array->literals) {
 				op_array->literals = zend_shared_alloc_get_xlat_entry(op_array->literals);
 				ZEND_ASSERT(op_array->literals != NULL);
@@ -435,7 +484,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->prototype = NULL;
 	}
 
-	if (op_array->static_variables) {
+	if (op_array->static_variables && !zend_accel_in_shm(op_array->static_variables)) {
 		Bucket *p;
 
 		zend_hash_persist(op_array->static_variables);
@@ -449,7 +498,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		GC_SET_REFCOUNT(op_array->static_variables, 2);
 		GC_TYPE_INFO(op_array->static_variables) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
 	}
-	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
+
+	if (op_array->scope
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
+		return;
+	}
 
 	if (op_array->literals) {
 		zval *p, *end;
@@ -551,7 +605,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	if (op_array->filename) {
@@ -575,7 +628,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (arg_info[i].name) {
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
-			zend_persist_type(&arg_info[i].type, 0);
+			zend_persist_type(&arg_info[i].type, op_array->scope);
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
@@ -612,6 +665,17 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	if (op_array->num_dynamic_func_defs) {
+		op_array->dynamic_func_defs = zend_shared_memdup_put_free(
+			op_array->dynamic_func_defs, sizeof(zend_function *) * op_array->num_dynamic_func_defs);
+		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+			zval tmp;
+			ZVAL_PTR(&tmp, op_array->dynamic_func_defs[i]);
+			zend_persist_op_array(&tmp);
+			op_array->dynamic_func_defs[i] = Z_PTR(tmp);
+		}
+	}
+
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 
 #ifdef HAVE_JIT
@@ -625,24 +689,27 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 static void zend_persist_op_array(zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
-
+	zend_op_array *old_op_array;
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	op_array = Z_PTR_P(zv) = zend_shared_memdup(Z_PTR_P(zv), sizeof(zend_op_array));
-	zend_persist_op_array_ex(op_array, NULL);
-	if (!ZCG(current_persistent_script)->corrupted) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+
+	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+	if (!old_op_array) {
+		op_array = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_op_array));
+		zend_persist_op_array_ex(op_array, NULL);
+		if (!ZCG(current_persistent_script)->corrupted) {
+			op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+			if (op_array->static_variables) {
+				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+			}
 		}
 	} else {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ZCG(arena_mem));
-		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(sizeof(void*)));
-		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+		/* This can happen during preloading, if a dynamic function definition is declared. */
+		Z_PTR_P(zv) = old_op_array;
 	}
 }
 
-static void zend_persist_class_method(zval *zv)
+static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
 	zend_op_array *old_op_array;
@@ -654,11 +721,7 @@ static void zend_persist_class_method(zval *zv)
 			if (old_op_array) {
 				Z_PTR_P(zv) = old_op_array;
 			} else {
-				if (ZCG(is_immutable_class)) {
-					op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_internal_function));
-				} else {
-					op_array = Z_PTR_P(zv) = zend_shared_memdup_arena_put(op_array, sizeof(zend_internal_function));
-				}
+				op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_internal_function));
 				if (op_array->scope) {
 					void *persist_ptr;
 
@@ -673,6 +736,14 @@ static void zend_persist_class_method(zval *zv)
 				}
 			}
 		}
+		return;
+	}
+
+	if ((op_array->fn_flags & ZEND_ACC_IMMUTABLE)
+	 && !op_array->static_variables
+	 && !ZCG(current_persistent_script)->corrupted
+	 && zend_accel_in_shm(op_array)) {
+		zend_shared_alloc_register_xlat_entry(op_array, op_array);
 		return;
 	}
 
@@ -692,33 +763,27 @@ static void zend_persist_class_method(zval *zv)
 		}
 		return;
 	}
-	if (ZCG(is_immutable_class)) {
-		op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
-	} else {
-		op_array = Z_PTR_P(zv) = zend_shared_memdup_arena_put(op_array, sizeof(zend_op_array));
-	}
+	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
 	zend_persist_op_array_ex(op_array, NULL);
-	if (ZCG(is_immutable_class)) {
+	if ((ce->ce_flags & ZEND_ACC_LINKED)
+	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
 		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 		}
 	} else {
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ZCG(arena_mem));
-		ZCG(arena_mem) = (void*)(((char*)ZCG(arena_mem)) + ZEND_ALIGNED_SIZE(sizeof(void*)));
-		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+		}
 	}
 }
 
 static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 {
 	zend_class_entry *ce;
-	if (ZCG(is_immutable_class)) {
-		prop = zend_shared_memdup_put(prop, sizeof(zend_property_info));
-	} else {
-		prop = zend_shared_memdup_arena_put(prop, sizeof(zend_property_info));
-	}
+	prop = zend_shared_memdup_put(prop, sizeof(zend_property_info));
 	ce = zend_shared_alloc_get_xlat_entry(prop->ce);
 	if (ce) {
 		prop->ce = ce;
@@ -738,7 +803,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	if (prop->attributes) {
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
-	zend_persist_type(&prop->type, 1);
+	zend_persist_type(&prop->type, ce);
 	return prop;
 }
 
@@ -750,12 +815,11 @@ static void zend_persist_class_constant(zval *zv)
 	if (c) {
 		Z_PTR_P(zv) = c;
 		return;
+	} else if (!ZCG(current_persistent_script)->corrupted
+	 && zend_accel_in_shm(Z_PTR_P(zv))) {
+		return;
 	}
-	if (ZCG(is_immutable_class)) {
-		c = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_class_constant));
-	} else {
-		c = Z_PTR_P(zv) = zend_shared_memdup_arena_put(Z_PTR_P(zv), sizeof(zend_class_constant));
-	}
+	c = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_class_constant));
 	zend_persist_zval(&c->value);
 	ce = zend_shared_alloc_get_xlat_entry(c->ce);
 	if (ce) {
@@ -783,39 +847,35 @@ static void zend_persist_class_constant(zval *zv)
 	}
 }
 
-static void zend_persist_class_entry(zval *zv)
+zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 {
 	Bucket *p;
-	zend_class_entry *orig_ce = Z_PTR_P(zv), *ce = orig_ce;
+	zend_class_entry *ce = orig_ce;
 
 	if (ce->type == ZEND_USER_CLASS) {
 		/* The same zend_class_entry may be reused by class_alias */
 		zend_class_entry *new_ce = zend_shared_alloc_get_xlat_entry(ce);
 		if (new_ce) {
-			Z_PTR_P(zv) = new_ce;
-			return;
+			return new_ce;
 		}
-		if ((ce->ce_flags & ZEND_ACC_LINKED)
-		 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
-		 && (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)
-		 && !ZCG(current_persistent_script)->corrupted) {
-			ZCG(is_immutable_class) = 1;
-			ce = Z_PTR_P(zv) = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
+		ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
-		} else {
-			ZCG(is_immutable_class) = 0;
-			ce = Z_PTR_P(zv) = zend_shared_memdup_arena_put(ce, sizeof(zend_class_entry));
 		}
-		ce->ce_flags |= ZEND_ACC_CACHED;
-		zend_accel_store_interned_string(ce->name);
-		if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			zend_accel_store_interned_string(ce->parent_name);
+		ce->inheritance_cache = NULL;
+
+		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+			zend_accel_store_interned_string(ce->name);
+			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+				zend_accel_store_interned_string(ce->parent_name);
+			}
 		}
+
 		zend_hash_persist(&ce->function_table);
 		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
-			zend_persist_class_method(&p->val);
+			zend_persist_class_method(&p->val, ce);
 		} ZEND_HASH_FOREACH_END();
 		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {
@@ -825,6 +885,15 @@ static void zend_persist_class_entry(zval *zv)
 			for (i = 0; i < ce->default_properties_count; i++) {
 				zend_persist_zval(&ce->default_properties_table[i]);
 			}
+		}
+		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+		 && (ce->ce_flags & ZEND_ACC_LINKED)
+		 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+			ZEND_MAP_PTR_NEW(ce->mutable_data);
+		} else if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+		} else {
+			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		if (ce->default_static_members_table) {
 			int i;
@@ -837,7 +906,11 @@ static void zend_persist_class_entry(zval *zv)
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
 			if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-				ZEND_MAP_PTR_NEW(ce->static_members_table);
+				if (ce->ce_flags & ZEND_ACC_LINKED) {
+					ZEND_MAP_PTR_NEW(ce->static_members_table);
+				} else {
+					ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
+				}
 			} else {
 				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 			}
@@ -853,23 +926,6 @@ static void zend_persist_class_entry(zval *zv)
 		} ZEND_HASH_FOREACH_END();
 		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
-		if (ce->info.user.filename) {
-			zend_accel_store_string(ce->info.user.filename);
-		}
-		if (ce->info.user.doc_comment) {
-			if (ZCG(accel_directives).save_comments) {
-				zend_accel_store_interned_string(ce->info.user.doc_comment);
-			} else {
-				if (!zend_shared_alloc_get_xlat_entry(ce->info.user.doc_comment)) {
-					zend_shared_alloc_register_xlat_entry(ce->info.user.doc_comment, ce->info.user.doc_comment);
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
-				}
-				ce->info.user.doc_comment = NULL;
-			}
-		}
-		if (ce->attributes) {
-			ce->attributes = zend_persist_attributes(ce->attributes);
-		}
 		zend_hash_persist(&ce->properties_info);
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
 			zend_property_info *prop = Z_PTR(p->val);
@@ -895,13 +951,8 @@ static void zend_persist_class_entry(zval *zv)
 
 			size_t size = sizeof(zend_property_info *) * ce->default_properties_count;
 			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
-			if (ZCG(is_immutable_class)) {
-				ce->properties_info_table = zend_shared_memdup(
-					ce->properties_info_table, size);
-			} else {
-				ce->properties_info_table = zend_shared_memdup_arena(
-					ce->properties_info_table, size);
-			}
+			ce->properties_info_table = zend_shared_memdup(
+				ce->properties_info_table, size);
 
 			for (i = 0; i < ce->default_properties_count; i++) {
 				if (ce->properties_info_table[i]) {
@@ -912,6 +963,36 @@ static void zend_persist_class_entry(zval *zv)
 					}
 				}
 			}
+		}
+
+		if (ce->iterator_funcs_ptr) {
+			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
+		}
+
+		if (ce->ce_flags & ZEND_ACC_CACHED) {
+			return ce;
+		}
+
+		ce->ce_flags |= ZEND_ACC_CACHED;
+
+		if (ce->info.user.filename) {
+			zend_accel_store_string(ce->info.user.filename);
+		}
+
+		if (ce->info.user.doc_comment) {
+			if (ZCG(accel_directives).save_comments) {
+				zend_accel_store_interned_string(ce->info.user.doc_comment);
+			} else {
+				if (!zend_shared_alloc_get_xlat_entry(ce->info.user.doc_comment)) {
+					zend_shared_alloc_register_xlat_entry(ce->info.user.doc_comment, ce->info.user.doc_comment);
+					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				}
+				ce->info.user.doc_comment = NULL;
+			}
+		}
+
+		if (ce->attributes) {
+			ce->attributes = zend_persist_attributes(ce->attributes);
 		}
 
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_LINKED)) {
@@ -973,14 +1054,12 @@ static void zend_persist_class_entry(zval *zv)
 					ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 			}
 		}
-
-		if (ce->iterator_funcs_ptr) {
-			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
-		}
 	}
+
+	return ce;
 }
 
-static void zend_update_parent_ce(zend_class_entry *ce)
+void zend_update_parent_ce(zend_class_entry *ce)
 {
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
 		if (ce->parent) {
@@ -1145,7 +1224,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		zend_accel_store_interned_string(p->key);
-		zend_persist_class_entry(&p->val);
+		Z_CE(p->val) = zend_persist_class_entry(Z_CE(p->val));
 	} ZEND_HASH_FOREACH_END();
     ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
@@ -1198,9 +1277,6 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 #endif
 
-	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
-	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
-
 #ifdef HAVE_JIT
 	if (JIT_G(on) && for_shm) {
 		zend_jit_unprotect();
@@ -1217,6 +1293,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		zend_persist_op_array(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	if (!script->corrupted) {
+		ZEND_MAP_PTR_INIT(script->script.main_op_array.run_time_cache, NULL);
+		if (script->script.main_op_array.static_variables) {
+			ZEND_MAP_PTR_NEW(script->script.main_op_array.static_variables_ptr);
+		}
+	}
 	zend_persist_warnings(script);
 
 	if (for_shm) {

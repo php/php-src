@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e33e2614c969c59b79c6062f7a347a8e8e486d85 */
+ * Stub hash: c01b6c9d6a6754a2fffde1279bec3a984e6a2f34 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UConverter___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destination_encoding, IS_STRING, 1, "null")
@@ -113,3 +113,13 @@ static const zend_function_entry class_UConverter_methods[] = {
 	ZEND_ME(UConverter, transcode, arginfo_class_UConverter_transcode, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_UConverter(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

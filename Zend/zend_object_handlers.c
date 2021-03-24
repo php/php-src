@@ -63,44 +63,59 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 	if (!zobj->properties) {
 		zend_property_info *prop_info;
 		zend_class_entry *ce = zobj->ce;
-		uint32_t flags = 0;
+		int i;
 
 		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
 			zend_hash_real_init_mixed(zobj->properties);
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (!(prop_info->flags & ZEND_ACC_STATIC)) {
-					flags |= prop_info->flags;
+			for (i = 0; i < ce->default_properties_count; i++) {
+				prop_info = ce->properties_info_table[i];
 
-					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-						HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
-					}
-
-					_zend_hash_append_ind(zobj->properties, prop_info->name,
-						OBJ_PROP(zobj, prop_info->offset));
+				if (!prop_info) {
+					continue;
 				}
-			} ZEND_HASH_FOREACH_END();
-			if (flags & ZEND_ACC_CHANGED) {
-				while (ce->parent && ce->parent->default_properties_count) {
-					ce = ce->parent;
-					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-						if (prop_info->ce == ce &&
-						    !(prop_info->flags & ZEND_ACC_STATIC) &&
-						    (prop_info->flags & ZEND_ACC_PRIVATE)) {
-							zval zv;
 
-							if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-								HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
-							}
-
-							ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
-							zend_hash_add(zobj->properties, prop_info->name, &zv);
-						}
-					} ZEND_HASH_FOREACH_END();
+				if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
+					HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
+
+				_zend_hash_append_ind(zobj->properties, prop_info->name,
+					OBJ_PROP(zobj, prop_info->offset));
 			}
 		}
 	}
+}
+/* }}} */
+
+ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj) /* {{{ */
+{
+	zend_property_info *prop_info;
+	zend_class_entry *ce = zobj->ce;
+	HashTable *ht;
+	zval* prop;
+	int i;
+
+	ZEND_ASSERT(!zobj->properties);
+	ht = zend_new_array(ce->default_properties_count);
+	if (ce->default_properties_count) {
+		zend_hash_real_init_mixed(ht);
+		for (i = 0; i < ce->default_properties_count; i++) {
+			prop_info = ce->properties_info_table[i];
+
+			if (!prop_info) {
+				continue;
+			}
+
+			prop = OBJ_PROP(zobj, prop_info->offset);
+			if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
+				continue;
+			}
+
+			Z_TRY_ADDREF_P(prop);
+			_zend_hash_append(ht, prop_info->name, prop);
+		}
+	}
+	return ht;
 }
 /* }}} */
 
@@ -1263,11 +1278,29 @@ static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_
 }
 /* }}} */
 
+static zend_always_inline zend_function *get_static_method_fallback(
+		zend_class_entry *ce, zend_string *function_name)
+{
+	zend_object *object;
+	if (ce->__call &&
+		(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
+		instanceof_function(object->ce, ce)) {
+		/* Call the top-level defined __call().
+		 * see: tests/classes/__call_004.phpt  */
+
+		ZEND_ASSERT(object->ce->__call);
+		return zend_get_user_call_function(object->ce, function_name);
+	} else if (ce->__callstatic) {
+		return zend_get_user_callstatic_function(ce, function_name);
+	} else {
+		return NULL;
+	}
+}
+
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
 	zend_function *fbc = NULL;
 	zend_string *lc_function_name;
-	zend_object *object;
 	zend_class_entry *scope;
 
 	if (EXPECTED(key != NULL)) {
@@ -1293,19 +1326,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (UNEXPECTED(!key)) {
 				zend_string_release_ex(lc_function_name, 0);
 			}
-			if (ce->__call &&
-				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
-			    instanceof_function(object->ce, ce)) {
-				/* Call the top-level defined __call().
-				 * see: tests/classes/__call_004.phpt  */
-
-				ZEND_ASSERT(object->ce->__call);
-				return zend_get_user_call_function(object->ce, function_name);
-			} else if (ce->__callstatic) {
-				return zend_get_user_callstatic_function(ce, function_name);
-			} else {
-	   			return NULL;
-			}
+			return get_static_method_fallback(ce, function_name);
 		}
 	} while (0);
 
@@ -1321,12 +1342,11 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		if (UNEXPECTED(fbc->common.scope != scope)) {
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-				if (ce->__callstatic) {
-					fbc = zend_get_user_callstatic_function(ce, function_name);
-				} else {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
 					zend_bad_method_call(fbc, function_name, scope);
-					fbc = NULL;
 				}
+				fbc = fallback_fbc;
 			}
 		}
 	}
@@ -1550,6 +1570,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		zend_property_info *info;
+		int i;
 
 		if (!zobj1->ce->default_properties_count) {
 			return 0;
@@ -1565,13 +1586,17 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		}
 		Z_PROTECT_RECURSION_P(o1);
 
-		ZEND_HASH_FOREACH_PTR(&zobj1->ce->properties_info, info) {
-			zval *p1 = OBJ_PROP(zobj1, info->offset);
-			zval *p2 = OBJ_PROP(zobj2, info->offset);
+		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
+			zval *p1, *p2;
 
-			if (info->flags & ZEND_ACC_STATIC) {
+			info = zobj1->ce->properties_info_table[i];
+
+			if (!info) {
 				continue;
 			}
+
+			p1 = OBJ_PROP(zobj1, info->offset);
+			p2 = OBJ_PROP(zobj2, info->offset);
 
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
@@ -1592,7 +1617,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
+		}
 
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
@@ -1607,6 +1632,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	}
 }
 /* }}} */
+
+ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
+{
+	return ZEND_UNCOMPARABLE;
+}
 
 ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {

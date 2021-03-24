@@ -569,9 +569,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {

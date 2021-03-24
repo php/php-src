@@ -79,7 +79,7 @@ typedef struct _php_basic_globals {
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
-	char *CurrentStatFile, *CurrentLStatFile;
+	zend_string *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
 
 	/* mt_rand.c */

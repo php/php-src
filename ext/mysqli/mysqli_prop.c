@@ -267,7 +267,7 @@ static int result_lengths_read(mysqli_object *obj, zval *retval, bool quiet)
 #ifdef MYSQLI_USE_MYSQLND
 	const size_t *ret;
 #else
-	const zend_ulong *ret;
+	const unsigned long *ret;
 #endif
 	uint32_t field_count;
 

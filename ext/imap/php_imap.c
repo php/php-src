@@ -444,7 +444,6 @@ static PHP_GINIT_FUNCTION(imap)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(imap)
 {
-	zend_class_entry ce;
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
 
 	REGISTER_INI_ENTRIES();
@@ -478,10 +477,7 @@ PHP_MINIT_FUNCTION(imap)
 	ssl_onceonlyinit ();
 #endif
 
-
-	INIT_CLASS_ENTRY(ce, "IMAPConnection", class_IMAPConnection_methods);
-	php_imap_ce = zend_register_internal_class(&ce);
-	php_imap_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_imap_ce = register_class_IMAPConnection();
 	php_imap_ce->create_object = imap_object_create;
 	php_imap_ce->serialize = zend_class_serialize_deny;
 	php_imap_ce->unserialize = zend_class_unserialize_deny;
@@ -786,7 +782,11 @@ PHP_FUNCTION(imap_open)
 		RETURN_THROWS();
 	}
 
-	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | CL_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
+	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
+	 * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
+	 * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
+	 * IMAPConnection object being destroyed naturally at the end of the PHP script */
+	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | PHP_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
 	 		| OP_SILENT | OP_PROTOTYPE | OP_SECURE)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of the OP_* constants, and CL_EXPUNGE");
 		RETURN_THROWS();
@@ -905,7 +905,11 @@ PHP_FUNCTION(imap_reopen)
 	GET_IMAP_STREAM(imap_conn_struct, imap_conn_obj);
 
 	/* TODO Verify these are the only options available as they are pulled from the php.net documentation */
-	if (options && ((options & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | OP_EXPUNGE | CL_EXPUNGE)) != 0)) {
+	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
+     * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
+     * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
+     * IMAPConnection object being destroyed naturally at the end of the PHP script */
+	if (options && ((options & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | OP_EXPUNGE | PHP_EXPUNGE)) != 0)) {
 		zend_argument_value_error(3, "must be a bitmask of OP_READONLY, OP_ANONYMOUS, OP_HALFOPEN, "
 			"OP_EXPUNGE, and CL_EXPUNGE");
 		RETURN_THROWS();

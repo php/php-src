@@ -292,8 +292,6 @@ PDO_API zend_string *php_pdo_int64_to_str(int64_t i64) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)
 {
-	zend_class_entry ce;
-
 	if (FAILURE == pdo_sqlstate_init_error_table()) {
 		return FAILURE;
 	}
@@ -303,11 +301,7 @@ PHP_MINIT_FUNCTION(pdo)
 	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
-	INIT_CLASS_ENTRY(ce, "PDOException", class_PDOException_methods);
-
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException);
-
-	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC);
+	pdo_exception_ce = register_class_PDOException(spl_ce_RuntimeException);
 
 	pdo_dbh_init();
 	pdo_stmt_init();

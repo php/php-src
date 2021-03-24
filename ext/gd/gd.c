@@ -217,10 +217,7 @@ void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 
 static void php_gd_object_minit_helper()
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "GdImage", class_GdImage_methods);
-	gd_image_ce = zend_register_internal_class(&ce);
-	gd_image_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
 	gd_image_ce->serialize = zend_class_serialize_deny;
 	gd_image_ce->unserialize = zend_class_unserialize_deny;
@@ -230,6 +227,7 @@ static void php_gd_object_minit_helper()
 	php_gd_image_object_handlers.clone_obj = NULL;
 	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
 	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
+	php_gd_image_object_handlers.compare = zend_objects_not_comparable;
 	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
 }
 
@@ -287,10 +285,7 @@ static zend_function *php_gd_font_object_get_constructor(zend_object *object)
 
 static void php_gd_font_minit_helper()
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
-	gd_font_ce = zend_register_internal_class(&ce);
-	gd_font_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	gd_font_ce = register_class_GdFont();
 	gd_font_ce->create_object = php_gd_font_object_create;
 	gd_font_ce->serialize = zend_class_serialize_deny;
 	gd_font_ce->unserialize = zend_class_unserialize_deny;
@@ -1826,7 +1821,6 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	char *file = NULL;
 	zend_long quality = 0, type = 0;
 	gdImagePtr im;
-	char *fn = NULL;
 	FILE *fp;
 	size_t file_len = 0;
 	int argc = ZEND_NUM_ARGS();
@@ -1834,28 +1828,35 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc, "O|pll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
-		RETURN_THROWS();
+	switch (image_type) {
+		case PHP_GDIMG_TYPE_GD:
+			if (zend_parse_parameters(argc, "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		case PHP_GDIMG_TYPE_GD2:
+			if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
-	if (argc > 1) {
-		fn = file;
-		if (argc >= 3) {
-			q = quality;
-			if (argc == 4) {
-				t = type;
-			}
+	if (argc >= 3) {
+		q = quality;
+		if (argc == 4) {
+			t = type;
 		}
 	}
 
-	if (argc >= 2 && file_len) {
-		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
+	if (file_len) {
+		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
 
-		fp = VCWD_FOPEN(fn, "wb");
+		fp = VCWD_FOPEN(file, "wb");
 		if (!fp) {
-			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", fn);
+			php_error_docref(NULL, E_WARNING, "Unable to open \"%s\" for writing", file);
 			RETURN_FALSE;
 		}
 

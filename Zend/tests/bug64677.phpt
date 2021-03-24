@@ -7,7 +7,7 @@ class cat {
     }
 }
 $cat = new cat();
-$cat->show_output('Files: ', trim(`cd .`)); // this gives invalid args to shell_exec
+$cat->show_output('Files: ', trim((string) `cd .`)); // this gives invalid args to shell_exec
 $cat->show_output('Files: ', `cd .`); // this causes a segmentation fault
 $cat->show_output(`cd .`); // this causes a segmentation fault
 

@@ -63,12 +63,7 @@ PHP_HASH_API void PHP_XXH32Update(PHP_XXH32_CTX *ctx, const unsigned char *in, s
 	
 PHP_HASH_API void PHP_XXH32Final(unsigned char digest[4], PHP_XXH32_CTX *ctx)
 {
-	XXH32_hash_t const h = XXH32_digest(&ctx->s);
-
-	digest[0] = (unsigned char)((h >> 24) & 0xff);
-	digest[1] = (unsigned char)((h >> 16) & 0xff);
-	digest[2] = (unsigned char)((h >> 8) & 0xff);
-	digest[3] = (unsigned char)(h & 0xff);
+	XXH32_canonicalFromHash((XXH32_canonical_t*)digest, XXH32_digest(&ctx->s));
 }
 
 PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
@@ -132,16 +127,7 @@ PHP_HASH_API void PHP_XXH64Update(PHP_XXH64_CTX *ctx, const unsigned char *in, s
 
 PHP_HASH_API void PHP_XXH64Final(unsigned char digest[8], PHP_XXH64_CTX *ctx)
 {
-	XXH64_hash_t const h = XXH64_digest(&ctx->s);
-
-	digest[0] = (unsigned char)((h >> 56) & 0xff);
-	digest[1] = (unsigned char)((h >> 48) & 0xff);
-	digest[2] = (unsigned char)((h >> 40) & 0xff);
-	digest[3] = (unsigned char)((h >> 32) & 0xff);
-	digest[4] = (unsigned char)((h >> 24) & 0xff);
-	digest[5] = (unsigned char)((h >> 16) & 0xff);
-	digest[6] = (unsigned char)((h >> 8) & 0xff);
-	digest[7] = (unsigned char)(h & 0xff);
+	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH64_digest(&ctx->s));
 }
 
 PHP_HASH_API int PHP_XXH64Copy(const php_hash_ops *ops, PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
@@ -165,21 +151,51 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 	0
 };
 
-PHP_HASH_API void PHP_XXH3_64_Init(PHP_XXH3_64_CTX *ctx, HashTable *args)
+typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
+typedef XXH_errorcode (*xxh3_reset_with_seed_func_t)(XXH3_state_t*, XXH64_hash_t);
+
+zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
+		xxh3_reset_with_seed_func_t func_init_seed, xxh3_reset_with_secret_func_t func_init_secret, const char* algo_name)
 {
-	/* TODO integrate also XXH3_64bits_reset_withSecret(). */
-	XXH64_hash_t seed = 0;
+	memset(&ctx->s, 0, sizeof ctx->s);
 
 	if (args) {
 		zval *_seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
-		/* This might be a bit too restrictive, but thinking that a seed might be set
-			once and for all, it should be done a clean way. */
+		zval *_secret = zend_hash_str_find_deref(args, "secret", sizeof("secret") - 1);
+
+		if (_seed && _secret) {
+			zend_throw_error(NULL, "%s: Only one of seed or secret is to be passed for initialization", algo_name);
+			return;
+		}
+
 		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
-			seed = (XXH64_hash_t)Z_LVAL_P(_seed);
+			/* This might be a bit too restrictive, but thinking that a seed might be set
+				once and for all, it should be done a clean way. */
+			func_init_seed(&ctx->s, (XXH64_hash_t)Z_LVAL_P(_seed));
+			return;
+		} else if (_secret) {
+			convert_to_string(_secret);
+			size_t len = Z_STRLEN_P(_secret);
+			if (len < PHP_XXH3_SECRET_SIZE_MIN) {
+				zend_throw_error(NULL, "%s: Secret length must be >= %u bytes, %zu bytes passed", algo_name, XXH3_SECRET_SIZE_MIN, len);
+				return;
+			}
+			if (len > sizeof(ctx->secret)) {
+				len = sizeof(ctx->secret);
+				php_error_docref(NULL, E_WARNING, "%s: Secret content exceeding %zu bytes discarded", algo_name, sizeof(ctx->secret));
+			}
+			memcpy((unsigned char *)ctx->secret, Z_STRVAL_P(_secret), len);
+			func_init_secret(&ctx->s, ctx->secret, len);
+			return;
 		}
 	}
 
-	XXH3_64bits_reset_withSeed(&ctx->s, seed);
+	func_init_seed(&ctx->s, 0);
+}
+
+PHP_HASH_API void PHP_XXH3_64_Init(PHP_XXH3_64_CTX *ctx, HashTable *args)
+{
+	_PHP_XXH3_Init(ctx, args, XXH3_64bits_reset_withSeed, XXH3_64bits_reset_withSecret, "xxh3");
 }
 
 PHP_HASH_API void PHP_XXH3_64_Update(PHP_XXH3_64_CTX *ctx, const unsigned char *in, size_t len)
@@ -189,16 +205,7 @@ PHP_HASH_API void PHP_XXH3_64_Update(PHP_XXH3_64_CTX *ctx, const unsigned char *
 
 PHP_HASH_API void PHP_XXH3_64_Final(unsigned char digest[8], PHP_XXH3_64_CTX *ctx)
 {
-	XXH64_hash_t const h = XXH3_64bits_digest(&ctx->s);
-
-	digest[0] = (unsigned char)((h >> 56) & 0xff);
-	digest[1] = (unsigned char)((h >> 48) & 0xff);
-	digest[2] = (unsigned char)((h >> 40) & 0xff);
-	digest[3] = (unsigned char)((h >> 32) & 0xff);
-	digest[4] = (unsigned char)((h >> 24) & 0xff);
-	digest[5] = (unsigned char)((h >> 16) & 0xff);
-	digest[6] = (unsigned char)((h >> 8) & 0xff);
-	digest[7] = (unsigned char)(h & 0xff);
+	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH3_64bits_digest(&ctx->s));
 }
 
 PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
@@ -238,19 +245,7 @@ const php_hash_ops php_hash_xxh3_128_ops = {
 
 PHP_HASH_API void PHP_XXH3_128_Init(PHP_XXH3_128_CTX *ctx, HashTable *args)
 {
-	/* TODO integrate also XXH3_128__64bits_reset_withSecret(). */
-	XXH64_hash_t seed = 0;
-
-	if (args) {
-		zval *_seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
-		/* This might be a bit too restrictive, but thinking that a seed might be set
-			once and for all, it should be done a clean way. */
-		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
-			seed = (XXH64_hash_t)Z_LVAL_P(_seed);
-		}
-	}
-
-	XXH3_128bits_reset_withSeed(&ctx->s, seed);
+	_PHP_XXH3_Init(ctx, args, XXH3_128bits_reset_withSeed, XXH3_128bits_reset_withSecret, "xxh128");
 }
 
 PHP_HASH_API void PHP_XXH3_128_Update(PHP_XXH3_128_CTX *ctx, const unsigned char *in, size_t len)
@@ -260,24 +255,7 @@ PHP_HASH_API void PHP_XXH3_128_Update(PHP_XXH3_128_CTX *ctx, const unsigned char
 
 PHP_HASH_API void PHP_XXH3_128_Final(unsigned char digest[16], PHP_XXH3_128_CTX *ctx)
 {
-	XXH128_hash_t const h = XXH3_128bits_digest(&ctx->s);
-
-	digest[0]  = (unsigned char)((h.high64 >> 56) & 0xff);
-	digest[1]  = (unsigned char)((h.high64 >> 48) & 0xff);
-	digest[2]  = (unsigned char)((h.high64 >> 40) & 0xff);
-	digest[3]  = (unsigned char)((h.high64 >> 32) & 0xff);
-	digest[4]  = (unsigned char)((h.high64 >> 24) & 0xff);
-	digest[5]  = (unsigned char)((h.high64 >> 16) & 0xff);
-	digest[6]  = (unsigned char)((h.high64 >> 8) & 0xff);
-	digest[7]  = (unsigned char)(h.high64 & 0xff);
-	digest[8]  = (unsigned char)((h.low64 >> 56) & 0xff);
-	digest[9]  = (unsigned char)((h.low64 >> 48) & 0xff);
-	digest[10] = (unsigned char)((h.low64 >> 40) & 0xff);
-	digest[11] = (unsigned char)((h.low64 >> 32) & 0xff);
-	digest[12] = (unsigned char)((h.low64 >> 24) & 0xff);
-	digest[13] = (unsigned char)((h.low64 >> 16) & 0xff);
-	digest[14] = (unsigned char)((h.low64 >> 8) & 0xff);
-	digest[15] = (unsigned char)(h.low64 & 0xff);
+	XXH128_canonicalFromHash((XXH128_canonical_t*)digest, XXH3_128bits_digest(&ctx->s));
 }
 
 PHP_HASH_API int PHP_XXH3_128_Copy(const php_hash_ops *ops, PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)

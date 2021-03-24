@@ -1,9 +1,37 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class XMLReader
 {
+    public int $attributeCount;
+
+    public string $baseURI;
+
+    public int $depth;
+
+    public bool $hasAttributes;
+
+    public bool $hasValue;
+
+    public bool $isDefault;
+
+    public bool $isEmptyElement;
+
+    public string $localName;
+
+    public string $name;
+
+    public string $namespaceURI;
+
+    public int $nodeType;
+
+    public string $prefix;
+
+    public string $value;
+
+    public string $xmlLang;
+
     /** @return bool */
     public function close() {}
 

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class PharException extends Exception
 {
@@ -174,7 +174,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     final public static function unlinkArchive(string $filename): bool {}
 
     final public static function webPhar(
-        ?string $alias = null, ?string $index = null, string $fileNotFoundScript = "",
+        ?string $alias = null, ?string $index = null, ?string $fileNotFoundScript = null,
         array $mimeTypes = [], ?callable $rewrite = null): void {}
 }
 
@@ -473,7 +473,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
 
     /** @implementation-alias Phar::webPhar */
     final public static function webPhar(
-        ?string $alias = null, ?string $index = null, string $fileNotFoundScript = "",
+        ?string $alias = null, ?string $index = null, ?string $fileNotFoundScript = null,
         array $mimeTypes = [], ?callable $rewrite = null): void {}
 }
 

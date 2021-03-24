@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c84a06c889c19e2a81edbf43e4be53f3491d03be */
+ * Stub hash: 60b4c809624eb4c1ef610e5c5820acfc87f6b07f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
@@ -60,7 +60,7 @@ static const zend_function_entry class_PhpToken_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)
+static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -94,4 +94,3 @@ zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringab
 
 	return class_entry;
 }
-

@@ -92,7 +92,6 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	char const *aend = a + a_len,
 			   *bend = b + b_len;
 	int fractional, result;
-	short leading = 1;
 
 	if (a_len == 0 || b_len == 0) {
 		return (a_len == b_len ? 0 : (a_len > b_len ? 1 : -1));
@@ -100,19 +99,19 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 
 	ap = a;
 	bp = b;
+
+	ca = *ap; cb = *bp;
+
+	/* skip over leading zeros */
+	while (ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
+		ca = *++ap;
+	}
+
+	while (cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
+		cb = *++bp;
+	}
+
 	while (1) {
-		ca = *ap; cb = *bp;
-
-		/* skip over leading zeros */
-		while (leading && ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
-			ca = *++ap;
-		}
-
-		while (leading && cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
-			cb = *++bp;
-		}
-
-		leading = 0;
 
 		/* Skip consecutive whitespace */
 		while (isspace((int)(unsigned char)ca)) {
@@ -166,6 +165,8 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			return -1;
 		else if (bp >= bend)
 			return 1;
+
+		ca = *ap; cb = *bp;
 	}
 }
 /* }}} */

@@ -112,10 +112,8 @@ PHP_RINIT_FUNCTION(dir)
 PHP_MINIT_FUNCTION(dir)
 {
 	static char dirsep_str[2], pathsep_str[2];
-	zend_class_entry dir_class_entry;
 
-	INIT_CLASS_ENTRY(dir_class_entry, "Directory", class_Directory_methods);
-	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
+	dir_class_entry_ptr = register_class_Directory();
 
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
@@ -319,12 +317,12 @@ PHP_FUNCTION(chdir)
 		RETURN_FALSE;
 	}
 
-	if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentStatFile), strlen(BG(CurrentStatFile)))) {
-		efree(BG(CurrentStatFile));
+	if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentStatFile)), ZSTR_LEN(BG(CurrentStatFile)))) {
+		zend_string_release(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
 	}
-	if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentLStatFile), strlen(BG(CurrentLStatFile)))) {
-		efree(BG(CurrentLStatFile));
+	if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentLStatFile)), ZSTR_LEN(BG(CurrentLStatFile)))) {
+		zend_string_release(BG(CurrentLStatFile));
 		BG(CurrentLStatFile) = NULL;
 	}
 

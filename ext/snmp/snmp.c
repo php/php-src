@@ -1358,7 +1358,7 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 		RETURN_THROWS();
 	}
 
-	switch((int) a1) {
+	switch (a1) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
@@ -1959,7 +1959,6 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 PHP_MINIT_FUNCTION(snmp)
 {
 	netsnmp_log_handler *logh;
-	zend_class_entry ce, cex;
 
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
@@ -1985,12 +1984,11 @@ PHP_MINIT_FUNCTION(snmp)
 	php_snmp_object_handlers.get_gc = php_snmp_get_gc;
 
 	/* Register SNMP Class */
-	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
-	ce.create_object = php_snmp_object_new;
+	php_snmp_ce = register_class_SNMP();
+	php_snmp_ce->create_object = php_snmp_object_new;
 	php_snmp_object_handlers.offset = XtOffsetOf(php_snmp_object, zo);
 	php_snmp_object_handlers.clone_obj = NULL;
 	php_snmp_object_handlers.free_obj = php_snmp_object_free_storage;
-	php_snmp_ce = zend_register_internal_class(&ce);
 
 	/* Register SNMP Class properties */
 	zend_hash_init(&php_snmp_properties, 0, NULL, free_php_snmp_properties, 1);
@@ -2035,8 +2033,7 @@ PHP_MINIT_FUNCTION(snmp)
 	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
 
 	/* Register SNMPException class */
-	INIT_CLASS_ENTRY(cex, "SNMPException", NULL);
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
+	php_snmp_exception_ce = register_class_SNMPException(spl_ce_RuntimeException);
 
 	return SUCCESS;
 }

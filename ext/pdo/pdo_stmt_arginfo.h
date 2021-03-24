@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 17cecd2e7b3f80314e18bbd44e51b54c9ed061a7 */
+ * Stub hash: d25ba8b84022d6c6208dd45412772d72196c934f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -135,7 +135,7 @@ static const zend_function_entry class_PDORow_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -152,7 +152,7 @@ zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_Iter
 	return class_entry;
 }
 
-zend_class_entry *register_class_PDORow()
+static zend_class_entry *register_class_PDORow(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -162,4 +162,3 @@ zend_class_entry *register_class_PDORow()
 
 	return class_entry;
 }
-

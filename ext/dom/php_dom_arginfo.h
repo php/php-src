@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b8099cbadc28541bf0206c6173e82e5ba2f48ce */
+ * Stub hash: c41e6d58eb8b0bbdb07401c4f1eb92c6ba3d324c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -106,7 +106,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 0,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifiedName, IS_STRING, 0, "\"\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, doctype, DOMDocumentType, 1, "null")
 ZEND_END_ARG_INFO()
@@ -184,10 +184,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMElement_getElementsByTagName arginfo_class_DOMElement_getAttribute
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_getElementsByTagNameNS, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DOMElement_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
 
 #define arginfo_class_DOMElement_hasAttribute arginfo_class_DOMElement_getAttribute
 
@@ -292,7 +289,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocument_getElementsByTagName arginfo_class_DOMElement_getAttribute
 
-#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getElementsByTagNameNS
+#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_importNode, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
@@ -649,6 +646,11 @@ static const zend_function_entry class_DOMNode_methods[] = {
 };
 
 
+static const zend_function_entry class_DOMNameSpaceNode_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_DOMImplementation_methods[] = {
 	ZEND_ME(DOMImplementation, getFeature, arginfo_class_DOMImplementation_getFeature, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMImplementation, hasFeature, arginfo_class_DOMImplementation_hasFeature, ZEND_ACC_PUBLIC)
@@ -845,3 +847,236 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 #endif
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMDocumentType", class_DOMDocumentType_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMCdataSection(zend_class_entry *class_entry_DOMText)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMCdataSection", class_DOMCdataSection_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMText);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMComment(zend_class_entry *class_entry_DOMCharacterData)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMComment", class_DOMComment_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMCharacterData);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMParentNode(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMParentNode", class_DOMParentNode_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMChildNode(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMChildNode", class_DOMChildNode_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMNode(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMNode", class_DOMNode_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMNameSpaceNode(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMNameSpaceNode", class_DOMNameSpaceNode_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMImplementation(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMImplementation", class_DOMImplementation_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMDocumentFragment", class_DOMDocumentFragment_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_class_implements(class_entry, 1, class_entry_DOMParentNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMNodeList", class_DOMNodeList_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMCharacterData(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMChildNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMCharacterData", class_DOMCharacterData_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_class_implements(class_entry, 1, class_entry_DOMChildNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMAttr", class_DOMAttr_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode, zend_class_entry *class_entry_DOMChildNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMElement", class_DOMElement_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_class_implements(class_entry, 2, class_entry_DOMParentNode, class_entry_DOMChildNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMDocument(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMDocument", class_DOMDocument_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_class_implements(class_entry, 1, class_entry_DOMParentNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMException", class_DOMException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_code_default_value;
+	ZVAL_LONG(&property_code_default_value, 0);
+	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_code_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DOMCharacterData)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMText", class_DOMText_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMCharacterData);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", class_DOMNamedNodeMap_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMEntity", class_DOMEntity_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMEntityReference(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMEntityReference", class_DOMEntityReference_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMNotation", class_DOMNotation_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entry *class_entry_DOMNode)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMProcessingInstruction", class_DOMProcessingInstruction_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DOMXPath(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DOMXPath", class_DOMXPath_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

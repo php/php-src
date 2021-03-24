@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function variant_set(variant $variant, mixed $value): void {}
 
@@ -71,18 +71,22 @@ class variant
     public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
 }
 
-class com
+class com extends variant
 {
     public function __construct(string $module_name, array|string|null $server_name = null, int $codepage = CP_ACP, string $typelib = "") {}
 }
 
 #if HAVE_MSCOREE_H
-class dotnet
+class dotnet extends variant
 {
     public function __construct(string $assembly_name, string $datatype_name, int $codepage = CP_ACP) {}
 }
 #endif
 
-final class com_exception extends exception
+final class com_safearray_proxy
+{
+}
+
+final class com_exception extends Exception
 {
 }

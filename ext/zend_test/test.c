@@ -51,6 +51,9 @@ static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
+static zend_class_entry *zend_test_ns_foo_class;
+static zend_class_entry *zend_test_ns2_foo_class;
+static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_object_handlers zend_test_class_handlers;
 
 static ZEND_FUNCTION(zend_test_func)
@@ -236,6 +239,12 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);
@@ -323,6 +332,10 @@ static ZEND_METHOD(ZendTestNS2_Foo, method) {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_output", "1", PHP_INI_SYSTEM, OnUpdateBool, observer_show_output, zend_zend_test_globals, zend_test_globals)
@@ -353,21 +366,6 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
-	{
-		zend_string *name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
-		zend_string *class_name1 = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
-		zend_string *class_name2 = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
-		zend_type_list *type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
-		type_list->num_types = 2;
-		type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name1, 0, 0);
-		type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name2, 0, 0);
-		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
-		zval val;
-		ZVAL_NULL(&val);
-		zend_declare_typed_property(zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, type);
-		zend_string_release(name);
-	}
-
 	zend_test_child_class = register_class__ZendTestChildClass(zend_test_class);
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -382,6 +380,10 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_internal_attribute *attr = zend_internal_attribute_register(zend_test_attribute, ZEND_ATTRIBUTE_TARGET_ALL);
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
+
+	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
+	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
+	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

@@ -159,40 +159,33 @@ static PHP_GINIT_FUNCTION(com_dotnet)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
-	zend_class_entry ce, *tmp;
+	zend_class_entry *tmp;
 
 	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
-	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
-	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	php_com_exception_class_entry = register_class_com_exception(zend_ce_exception);
 /*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 
-	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
-	php_com_saproxy_class_entry = zend_register_internal_class(&ce);
-	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
-	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
-	ce.create_object = php_com_object_new;
-	php_com_variant_class_entry = zend_register_internal_class(&ce);
+	php_com_variant_class_entry = register_class_variant();
+	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
 	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
-	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
-	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
+	tmp = register_class_com(php_com_variant_class_entry);
+	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 	tmp->serialize = zend_class_serialize_deny;
 	tmp->unserialize = zend_class_unserialize_deny;
 
 #if HAVE_MSCOREE_H
-	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
-	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
+	tmp = register_class_dotnet(php_com_variant_class_entry);
+	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 	tmp->serialize = zend_class_serialize_deny;
 	tmp->unserialize = zend_class_unserialize_deny;

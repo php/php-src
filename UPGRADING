@@ -27,6 +27,38 @@ PHP 8.1 UPGRADE NOTES
     array is no longer supported. For example, array_pop($GLOBALS) will result
     in an error.
     RFC: https://wiki.php.net/rfc/restrict_globals_usage
+  . Passing null to a non-nullable argument of a built-in function is
+    deprecated. This matches the behavior of user-defined functions, where null
+    is never accepted by non-nullable arguments.
+    user-defined functions.
+
+        var_dump(str_contains("foobar", null));
+        // Deprecated: Passing null to parameter #2 ($needle) of type string
+        //             is deprecated
+
+    RFC: https://wiki.php.net/rfc/deprecate_null_to_scalar_internal_arg
+  . When a method using static variables is inherited, the inherited method
+    will now initialize the static variables to their original values, rather
+    than the values at the time of inheritance:
+
+        class A {
+            public function counter() {
+                static $counter = 0;
+                $counter++;
+                return $counter;
+            }
+        }
+
+        var_dump((new A)->counter()); // int(1)
+
+        eval('class B extends A {}'); // eval() to prevent early binding.
+
+        var_dump((new B)->counter()); // int(1), previously int(2)
+        var_dump((new A)->counter()); // int(2)
+        var_dump((new B)->counter()); // int(2), previously int(3)
+
+    Previously the behavior would be different depending on whether A::counter()
+    was called before class B was declared, or after it was declared.
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
@@ -75,6 +107,11 @@ PHP 8.1 UPGRADE NOTES
     that ' is escaped to &#039; while previously it was left alone.
     Additionally, malformed UTF-8 will be replaced by a Unicode substitution
     character, instead of resulting in an empty string.
+  . debug_zval_dump() will now print reference wrappers with their refcount,
+    instead of only prepending a "&" to the value. This more accurately models
+    reference representation since PHP 7.0.
+  . debug_zval_dump() will not print "interned" instead of a dummy refcount of
+    one for interned strings and immutable arrays.
 
 ========================================
 2. New Features
@@ -82,11 +119,19 @@ PHP 8.1 UPGRADE NOTES
 
 - Core:
   . It is now possible to specify octal integer by using the explicit "0o"/"0O"
-    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer literals
+    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer
+    literals.
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
+  . Added support for array unpacking with strings keys.
+    RFC: https://wiki.php.net/rfc/array_unpacking_string_keys
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
+  . Added CURLStringFile, which can be used to post a file from a string rather
+    than a file:
+
+        $file = new CURLStringFile($data, 'filename.txt', 'text/plain');
+        curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => $file]);
 
 - hash:
   . The following functions have changed signatures:
@@ -126,6 +171,28 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
+    Secret usage is supported through passing the `secret` key in the `$options` array, too:
+
+    ```php
+    $h = hash("xxh3", $data, options: ["secret" => "at least 136 bytes long secret here"]);
+    echo $h, "\n";
+    ```
+
+    Note, that the quality of the custom secret is crucial for the quality of the resulting hash. It is
+    highly recommended for the secret to use the best possible entropy.
+
+- MySQLi:
+  . The mysqli.local_infile_directory ini setting has been added, which can be
+    used to specify a directory from which files are allowed to be loaded. It
+    is only meaningful if mysqli.allow_local_infile is not enabled, as all
+    directories are allowed in that case.
+
+- PDO MySQL:
+  . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
+    can be used to specify a directory from which files are allowed to be
+    loaded. It is only meaningful if PDO::MYSQL_ATTR_LOCAL_INFILE is not
+    enabled, as all directories are allowed in that case.
+
 - PDO SQLite:
   . SQLite's "file:" DSN syntax is now supported, which allows specifying
     additional flags. This feature is not available if open_basedir is set.
@@ -148,6 +215,15 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- Core:
+  . Properties order used in foreach, var_dump(), serialize(), object comparison
+    etc. was changed. Now properties are naturally ordered according to their
+    declaration and inheritance. Properties declared in a base class are going
+    to be before the child properties. This order is consistent with internal
+    layout of properies in zend_objct structure and repeats the order in
+    default_properties_table[] and properties_info_table[]. The old order was
+    not documented and was caused by class inheritance implementation details.
 
 - Filter:
   . The FILTER_FLAG_ALLOW_OCTAL flag of the FILTER_VALIDATE_INT filter now accept

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class IntlDateFormatter
 {
@@ -8,14 +8,14 @@ class IntlDateFormatter
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar
      */
-    public function __construct(?string $locale, int $dateType, int $timeType, $timezone = null, $calendar = null, string $pattern = "") {}
+    public function __construct(?string $locale, int $dateType, int $timeType, $timezone = null, $calendar = null, ?string $pattern = null) {}
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return IntlDateFormatter|null
      * @alias datefmt_create
      */
-    public static function create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = "") {}
+    public static function create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, ?string $pattern = null) {}
 
     /**
      * @return int|false

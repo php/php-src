@@ -264,6 +264,7 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
 	xml_parser_object_handlers.clone_obj = NULL;
+	xml_parser_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_NO_MEMORY", XML_ERROR_NO_MEMORY, CONST_CS|CONST_PERSISTENT);

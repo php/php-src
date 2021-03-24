@@ -9,10 +9,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 echo "*** Testing decoct() : usage variations ***\n";
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 
 // heredoc string
 $heredoc = <<<EOT
@@ -44,10 +40,6 @@ $inputs = array(
        12.3456789000E-10,
        .5,
 
-       // null data
-/*12*/ NULL,
-       null,
-
        // boolean data
 /*14*/ true,
        false,
@@ -66,12 +58,6 @@ $inputs = array(
 
        // object data
 /*24*/ new classA(),
-
-       // undefined data
-/*25*/ @$undefined_var,
-
-       // unset data
-/*26*/ @$unset_var,
 
        // resource variable
 /*27*/ $fp
@@ -127,7 +113,7 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 12 --
-string(1) "0"
+string(1) "1"
 
 -- Iteration 13 --
 string(1) "0"
@@ -139,37 +125,25 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 16 --
-string(1) "1"
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 17 --
-string(1) "0"
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 18 --
-decoct(): Argument #1 ($num) must be of type int, string given
+decoct(): Argument #1 ($num) must be of type int, array given
 
 -- Iteration 19 --
 decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 20 --
-decoct(): Argument #1 ($num) must be of type int, array given
+decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 21 --
 decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 22 --
-decoct(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 23 --
-decoct(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 24 --
 decoct(): Argument #1 ($num) must be of type int, classA given
 
--- Iteration 25 --
-string(1) "0"
-
--- Iteration 26 --
-string(1) "0"
-
--- Iteration 27 --
+-- Iteration 23 --
 decoct(): Argument #1 ($num) must be of type int, resource given

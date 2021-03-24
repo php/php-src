@@ -95,6 +95,10 @@ struct _zend_compiler_globals {
 	bool skip_shebang;
 	bool increment_lineno;
 
+	bool variable_width_locale;   /* UTF-8, Shift-JIS, Big5, ISO 2022, EUC, etc */
+	bool ascii_compatible_locale; /* locale uses ASCII characters as singletons */
+	                              /* and don't use them as lead/trail units     */
+
 	zend_string *doc_comment;
 	uint32_t extra_fn_flags;
 
@@ -126,6 +130,8 @@ struct _zend_compiler_globals {
 
 	HashTable *delayed_variance_obligations;
 	HashTable *delayed_autoloads;
+	HashTable *unlinked_uses;
+	zend_class_entry *current_linking_class;
 
 	uint32_t rtd_key_counter;
 
@@ -205,7 +211,7 @@ struct _zend_executor_globals {
 	/* timeout support */
 	zend_long timeout_seconds;
 
-	int lambda_count;
+	int capture_warnings_during_sccp;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;

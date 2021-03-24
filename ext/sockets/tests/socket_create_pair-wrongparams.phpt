@@ -11,10 +11,10 @@ if (!extension_loaded('sockets')) {
 --FILE--
 <?php
 
-var_dump(socket_create_pair(AF_INET, null, null, $sockets));
+var_dump(socket_create_pair(AF_INET, 0, 0, $sockets));
 
 try {
-    var_dump(socket_create_pair(31337, null, null, $sockets));
+    var_dump(socket_create_pair(31337, 0, 0, $sockets));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

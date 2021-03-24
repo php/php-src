@@ -115,6 +115,67 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		myht = Z_ARRVAL_P(val);
 		prop_ht = NULL;
 		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : php_json_determine_array_type(val);
+	} else if (Z_OBJ_P(val)->properties == NULL
+	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
+	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties) {
+		/* Optimized version without rebulding properties HashTable */
+		zend_object *obj = Z_OBJ_P(val);
+		zend_class_entry *ce = obj->ce;
+		zend_property_info *prop_info;
+		zval *prop;
+		int i;
+
+		if (GC_IS_RECURSIVE(obj)) {
+			encoder->error_code = PHP_JSON_ERROR_RECURSION;
+			smart_str_appendl(buf, "null", 4);
+			return FAILURE;
+		}
+
+		PHP_JSON_HASH_PROTECT_RECURSION(obj);
+		smart_str_appendc(buf, '{');
+		for (i = 0; i < ce->default_properties_count; i++) {
+			prop_info = ce->properties_info_table[i];
+			if (!prop_info) {
+				continue;
+			}
+			if (ZSTR_VAL(prop_info->name)[0] == '\0' && ZSTR_LEN(prop_info->name) > 0) {
+				/* Skip protected and private members. */
+				continue;
+			}
+			prop = OBJ_PROP(obj, prop_info->offset);
+			if (Z_TYPE_P(prop) == IS_UNDEF) {
+				continue;
+			}
+
+			if (need_comma) {
+				smart_str_appendc(buf, ',');
+			} else {
+				need_comma = 1;
+			}
+
+			php_json_pretty_print_char(buf, options, '\n');
+			php_json_pretty_print_indent(buf, options, encoder);
+
+			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
+					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
+					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
+					buf->s) {
+				ZSTR_LEN(buf->s) -= 4;
+				smart_str_appendl(buf, "\"\"", 2);
+			}
+
+			smart_str_appendc(buf, ':');
+			php_json_pretty_print_char(buf, options, ' ');
+
+			if (php_json_encode_zval(buf, prop, options, encoder) == FAILURE &&
+					!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+				PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
+				return FAILURE;
+			}
+		}
+		smart_str_appendc(buf, '}');
+		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
+		return SUCCESS;
 	} else {
 		prop_ht = myht = zend_get_properties_for(val, ZEND_PROP_PURPOSE_JSON);
 		r = PHP_JSON_OUTPUT_OBJECT;

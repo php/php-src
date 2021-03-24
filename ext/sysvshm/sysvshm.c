@@ -99,10 +99,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
-	sysvshm_ce = zend_register_internal_class(&ce);
-	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
 	sysvshm_ce->serialize = zend_class_serialize_deny;
 	sysvshm_ce->unserialize = zend_class_unserialize_deny;
@@ -112,6 +109,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
 	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;
+	sysvshm_object_handlers.compare = zend_objects_not_comparable;
 
 	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;

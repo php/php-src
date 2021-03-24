@@ -332,6 +332,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	unsigned int allow_local_infile = MyG(allow_local_infile);
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
 
+#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+	if (MyG(local_infile_directory) && !php_check_open_basedir(MyG(local_infile_directory))) {
+		mysql_options(mysql->mysql, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, MyG(local_infile_directory));
+	}
+#endif
+
 end:
 	if (!mysqli_resource) {
 		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));

@@ -678,7 +678,7 @@ finish:
 			/* status codes of 1xx are "informational", and will be followed by a real response
 			 * e.g "100 Continue". RFC 7231 states that unexpected 1xx status MUST be parsed,
 			 * and MAY be ignored. As such, we need to skip ahead to the "real" status*/
-			if (response_code >= 100 && response_code < 200) {
+			if (response_code >= 100 && response_code < 200 && response_code != 101) {
 				/* consume lines until we find a line starting 'HTTP/1' */
 				while (
 					!php_stream_eof(stream)
@@ -730,24 +730,16 @@ finish:
 
 	/* read past HTTP headers */
 
-	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
-
 	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
 
-		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
+		if (http_header_line != NULL) {
+			efree(http_header_line);
+		}
+		if ((http_header_line = php_stream_get_line(stream, NULL, 0, &http_header_line_length)) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;
-			if (*e != '\n') {
-				do { /* partial header */
-					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
-						php_stream_wrapper_log_error(wrapper, options, "Failed to read HTTP headers");
-						goto out;
-					}
-					e = http_header_line + http_header_line_length - 1;
-				} while (*e != '\n');
-				continue;
-			}
+
 			while (e >= http_header_line && (*e == '\n' || *e == '\r')) {
 				e--;
 			}

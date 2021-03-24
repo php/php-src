@@ -15,6 +15,6 @@ Content-type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught PharException: Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed in %sfrontcontroller12.php:2
 Stack trace:
-#0 %sfrontcontroller12.php(2): Phar::webPhar('whatever', 'index.php', '', Array)
+#0 %sfrontcontroller12.php(2): Phar::webPhar('whatever', 'index.php', NULL, Array)
 #1 {main}
   thrown in %sfrontcontroller12.php on line 2

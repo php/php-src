@@ -186,11 +186,7 @@ static void php_enchant_dict_free(zend_object *object) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(enchant)
 {
-	zend_class_entry bce, dce;
-
-	INIT_CLASS_ENTRY(bce, "EnchantBroker", class_EnchantBroker_methods);
-	enchant_broker_ce = zend_register_internal_class(&bce);
-	enchant_broker_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
 	enchant_broker_ce->serialize = zend_class_serialize_deny;
 	enchant_broker_ce->unserialize = zend_class_unserialize_deny;
@@ -199,10 +195,9 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
 	enchant_broker_handlers.free_obj = php_enchant_broker_free;
 	enchant_broker_handlers.clone_obj = NULL;
+	enchant_broker_handlers.compare = zend_objects_not_comparable;
 
-	INIT_CLASS_ENTRY(dce, "EnchantDictionary", class_EnchantDictionary_methods);
-	enchant_dict_ce = zend_register_internal_class(&dce);
-	enchant_dict_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
 	enchant_dict_ce->serialize = zend_class_serialize_deny;
 	enchant_dict_ce->unserialize = zend_class_unserialize_deny;
@@ -211,6 +206,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);
 	enchant_dict_handlers.free_obj = php_enchant_dict_free;
 	enchant_dict_handlers.clone_obj = NULL;
+	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL",  PHP_ENCHANT_ISPELL,  CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);

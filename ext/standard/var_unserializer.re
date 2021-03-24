@@ -222,8 +222,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	var_entries *var_hash = (*var_hashx)->entries.next;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
 	bool delayed_call_failed = 0;
-	zval wakeup_name;
-	ZVAL_UNDEF(&wakeup_name);
 
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_destroy( " ZEND_LONG_FMT ")\n", var_hash?var_hash->used_slots:-1L);
@@ -246,12 +244,26 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				/* Perform delayed __wakeup calls */
 				if (!delayed_call_failed) {
 					zval retval;
-					if (Z_ISUNDEF(wakeup_name)) {
-						ZVAL_STRINGL(&wakeup_name, "__wakeup", sizeof("__wakeup") - 1);
-					}
+					zend_fcall_info fci;
+					zend_fcall_info_cache fci_cache;
+
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+					fci.size = sizeof(fci);
+					fci.object = Z_OBJ_P(zv);
+					fci.retval = &retval;
+					fci.param_count = 0;
+					fci.params = NULL;
+					fci.named_params = NULL;
+					ZVAL_UNDEF(&fci.function_name);
+
+					fci_cache.function_handler = zend_hash_find_ptr(
+						&fci.object->ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
+					fci_cache.object = fci.object;
+					fci_cache.called_scope = fci.object->ce;
 
 					BG(serialize_lock)++;
-					if (call_user_function(NULL, zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
+					if (zend_call_function(&fci, &fci_cache) == FAILURE || Z_ISUNDEF(retval)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
@@ -287,8 +299,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
-
-	zval_ptr_dtor_nogc(&wakeup_name);
 
 	if ((*var_hashx)->ref_props) {
 		zend_hash_destroy((*var_hashx)->ref_props);
@@ -342,12 +352,9 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 }
 
 static inline int unserialize_allowed_class(
-		zend_string *class_name, php_unserialize_data_t *var_hashx)
+		zend_string *lcname, php_unserialize_data_t *var_hashx)
 {
 	HashTable *classes = (*var_hashx)->allowed_classes;
-	zend_string *lcname;
-	int res;
-	ALLOCA_FLAG(use_heap)
 
 	if(classes == NULL) {
 		return 1;
@@ -356,11 +363,7 @@ static inline int unserialize_allowed_class(
 		return 0;
 	}
 
-	ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(class_name), use_heap);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-	res = zend_hash_exists(classes, lcname);
-	ZSTR_ALLOCA_FREE(lcname, use_heap);
-	return res;
+	return zend_hash_exists(classes, lcname);
 }
 
 #define YYFILL(n) do { } while (0)
@@ -450,7 +453,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 
 static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 
-static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_object *obj)
+static zend_always_inline int process_nested_array_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements)
 {
 	if (var_hash) {
 		if ((*var_hash)->max_depth > 0 && (*var_hash)->cur_depth >= (*var_hash)->max_depth) {
@@ -467,6 +470,124 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
 		zend_ulong idx;
+
+		ZVAL_UNDEF(&key);
+
+		if (!php_var_unserialize_internal(&key, p, max, NULL, 1)) {
+			zval_ptr_dtor(&key);
+			goto failure;
+		}
+
+		data = NULL;
+		ZVAL_UNDEF(&d);
+
+		if (Z_TYPE(key) == IS_LONG) {
+			idx = Z_LVAL(key);
+numeric_key:
+			if (UNEXPECTED((old_data = zend_hash_index_find(ht, idx)) != NULL)) {
+				//??? update hash
+				var_push_dtor(var_hash, old_data);
+				data = zend_hash_index_update(ht, idx, &d);
+			} else {
+				data = zend_hash_index_add_new(ht, idx, &d);
+			}
+		} else if (Z_TYPE(key) == IS_STRING) {
+			if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
+				goto numeric_key;
+			}
+			if (UNEXPECTED((old_data = zend_hash_find(ht, Z_STR(key))) != NULL)) {
+				//??? update hash
+				var_push_dtor(var_hash, old_data);
+				data = zend_hash_update(ht, Z_STR(key), &d);
+			} else {
+				data = zend_hash_add_new(ht, Z_STR(key), &d);
+			}
+		} else {
+			zval_ptr_dtor(&key);
+			goto failure;
+		}
+
+		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
+			zval_ptr_dtor(&key);
+			goto failure;
+		}
+
+		if (BG(unserialize).level > 1) {
+			var_push_dtor(var_hash, data);
+		}
+		zval_ptr_dtor_str(&key);
+
+		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
+			(*p)--;
+			goto failure;
+		}
+	}
+
+	if (var_hash) {
+		(*var_hash)->cur_depth--;
+	}
+	return 1;
+
+failure:
+	if (var_hash) {
+		(*var_hash)->cur_depth--;
+	}
+	return 0;
+}
+
+static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
+{
+	if (zend_hash_num_elements(&ce->properties_info) > 0) {
+		zend_property_info *existing_propinfo;
+		const char *unmangled_class = NULL;
+		const char *unmangled_prop;
+		size_t unmangled_prop_len;
+
+		if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR_P(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
+			zval_ptr_dtor_str(key);
+			return -1;
+		}
+
+		if (unmangled_class == NULL) {
+			existing_propinfo = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(key));
+			if (existing_propinfo != NULL) {
+				zval_ptr_dtor_str(key);
+				ZVAL_STR_COPY(key, existing_propinfo->name);
+				return 1;
+			}
+		} else {
+			if (!strcmp(unmangled_class, "*")
+			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
+				existing_propinfo = zend_hash_str_find_ptr(
+					&ce->properties_info, unmangled_prop, unmangled_prop_len);
+				if (existing_propinfo != NULL) {
+					zval_ptr_dtor_str(key);
+					ZVAL_STR_COPY(key, existing_propinfo->name);
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+static zend_always_inline int process_nested_object_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_object *obj)
+{
+	if (var_hash) {
+		if ((*var_hash)->max_depth > 0 && (*var_hash)->cur_depth >= (*var_hash)->max_depth) {
+			php_error_docref(NULL, E_WARNING,
+				"Maximum depth of " ZEND_LONG_FMT " exceeded. "
+				"The depth limit can be changed using the max_depth unserialize() option "
+				"or the unserialize_max_depth ini setting",
+				(*var_hash)->max_depth);
+			return 0;
+		}
+		(*var_hash)->cur_depth++;
+	}
+
+	while (elements-- > 0) {
+		zval key, *data, d, *old_data;
 		zend_property_info *info = NULL;
 
 		ZVAL_UNDEF(&key);
@@ -479,118 +600,71 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		data = NULL;
 		ZVAL_UNDEF(&d);
 
-		if (!obj) {
-			if (Z_TYPE(key) == IS_LONG) {
-				idx = Z_LVAL(key);
-numeric_key:
-				if (UNEXPECTED((old_data = zend_hash_index_find(ht, idx)) != NULL)) {
-					//??? update hash
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_index_update(ht, idx, &d);
-				} else {
-					data = zend_hash_index_add_new(ht, idx, &d);
-				}
-			} else if (Z_TYPE(key) == IS_STRING) {
-				if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
-					goto numeric_key;
-				}
-				if (UNEXPECTED((old_data = zend_hash_find(ht, Z_STR(key))) != NULL)) {
-					//??? update hash
-					var_push_dtor(var_hash, old_data);
-					data = zend_hash_update(ht, Z_STR(key), &d);
-				} else {
-					data = zend_hash_add_new(ht, Z_STR(key), &d);
-				}
-			} else {
-				zval_ptr_dtor(&key);
-				goto failure;
-			}
-		} else {
-			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-				if (obj && zend_hash_num_elements(&obj->ce->properties_info) > 0) {
-					zend_property_info *existing_propinfo;
-					zend_string *new_key;
-					const char *unmangled_class = NULL;
-					const char *unmangled_prop;
-					size_t unmangled_prop_len;
-					zend_string *unmangled;
-
-					if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
-						zval_ptr_dtor(&key);
-						goto failure;
-					}
-
-					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
-
-					existing_propinfo = zend_hash_find_ptr(&obj->ce->properties_info, unmangled);
-                    if ((unmangled_class == NULL || !strcmp(unmangled_class, "*") || !strcasecmp(unmangled_class, ZSTR_VAL(obj->ce->name)))
-                            && (existing_propinfo != NULL)
-							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
-						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
-							new_key = zend_mangle_property_name(
-								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), 0);
-							zend_string_release_ex(unmangled, 0);
-						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
-							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
-								new_key = zend_mangle_property_name(
-									unmangled_class, strlen(unmangled_class),
-										ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-										0);
-							} else {
-								new_key = zend_mangle_property_name(
-									ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
-									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-									0);
-							}
-							zend_string_release_ex(unmangled, 0);
-						} else {
-							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
-							new_key = unmangled;
+			if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+declared_property:
+					/* This is a property with a declaration */
+					old_data = Z_INDIRECT_P(old_data);
+					info = zend_get_typed_property_info_for_slot(obj, old_data);
+					if (info) {
+						if (Z_ISREF_P(old_data)) {
+							/* If the value is overwritten, remove old type source from ref. */
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
 						}
-						zval_ptr_dtor_str(&key);
-						ZVAL_STR(&key, new_key);
-					} else {
-						zend_string_release_ex(unmangled, 0);
-					}
-				}
 
-				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-						/* This is a property with a declaration */
-						old_data = Z_INDIRECT_P(old_data);
-						info = zend_get_typed_property_info_for_slot(obj, old_data);
-						if (info) {
-							if (Z_ISREF_P(old_data)) {
-								/* If the value is overwritten, remove old type source from ref. */
-								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
-							}
-
-							if ((*var_hash)->ref_props) {
-								/* Remove old entry from ref_props table, if it exists. */
-								zend_hash_index_del(
-									(*var_hash)->ref_props, (zend_uintptr_t) old_data);
-							}
+						if ((*var_hash)->ref_props) {
+							/* Remove old entry from ref_props table, if it exists. */
+							zend_hash_index_del(
+								(*var_hash)->ref_props, (zend_uintptr_t) old_data);
 						}
-						var_push_dtor(var_hash, old_data);
-						Z_TRY_DELREF_P(old_data);
-						ZVAL_COPY_VALUE(old_data, &d);
-						data = old_data;
-					} else {
-						var_push_dtor(var_hash, old_data);
-						data = zend_hash_update_ind(ht, Z_STR(key), &d);
 					}
+					var_push_dtor(var_hash, old_data);
+					Z_TRY_DELREF_P(old_data);
+					ZVAL_UNDEF(old_data);
+					data = old_data;
 				} else {
-					data = zend_hash_add_new(ht, Z_STR(key), &d);
+					int ret = is_property_visibility_changed(obj->ce, &key);
+
+					if (EXPECTED(!ret)) {
+						var_push_dtor(var_hash, old_data);
+						data = zend_hash_update(ht, Z_STR(key), &d);
+					} else if (ret < 0) {
+						goto failure;
+					} else {
+						goto second_try;
+					}
 				}
-			} else if (Z_TYPE(key) == IS_LONG) {
-				/* object properties should include no integers */
-				convert_to_string(&key);
-				goto string_key;
 			} else {
-				zval_ptr_dtor(&key);
-				goto failure;
+				int ret = is_property_visibility_changed(obj->ce, &key);
+
+				if (EXPECTED(!ret)) {
+					data = zend_hash_add_new(ht, Z_STR(key), &d);
+				} else if (ret < 0) {
+					goto failure;
+				} else {
+second_try:
+					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+						if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+							goto declared_property;
+						} else {
+							var_push_dtor(var_hash, old_data);
+							data = zend_hash_update(ht, Z_STR(key), &d);
+						}
+					} else {
+						data = zend_hash_add_new(ht, Z_STR(key), &d);
+					}
+				}
 			}
+			zval_ptr_dtor_str(&key);
+		} else if (Z_TYPE(key) == IS_LONG) {
+			/* object properties should include no integers */
+			convert_to_string(&key);
+			goto string_key;
+		} else {
+			zval_ptr_dtor(&key);
+			goto failure;
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
@@ -599,7 +673,6 @@ string_key:
 				 * The data is still stored in the property. */
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
 			}
-			zval_ptr_dtor(&key);
 			goto failure;
 		}
 
@@ -607,7 +680,6 @@ string_key:
 			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
 				zval_ptr_dtor(data);
 				ZVAL_UNDEF(data);
-				zval_ptr_dtor_nogc(&key);
 				goto failure;
 			}
 
@@ -628,7 +700,6 @@ string_key:
 		if (BG(unserialize).level > 1) {
 			var_push_dtor(var_hash, data);
 		}
-		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -707,7 +778,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		array_init_size(&ary, elements);
 		/* Avoid reallocation due to packed -> mixed conversion. */
 		zend_hash_real_init_mixed(Z_ARRVAL(ary));
-		if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements, NULL)) {
+		if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
 			zval_ptr_dtor(&ary);
@@ -727,7 +798,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 	}
 
 	has_wakeup = Z_OBJCE_P(rval) != PHP_IC_ENTRY
-		&& zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1);
+		&& zend_hash_exists(&Z_OBJCE_P(rval)->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
 
 	ht = Z_OBJPROP_P(rval);
 	if (elements >= (zend_long)(HT_MAX_SIZE - zend_hash_num_elements(ht))) {
@@ -735,7 +806,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 	}
 
 	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
+	if (!process_nested_object_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -1025,7 +1096,7 @@ use_double:
 	 * prohibit "r:" references to non-objects, as we only generate them for objects. */
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(rval));
 
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, NULL)) {
+	if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements)) {
 		return 0;
 	}
 
@@ -1071,22 +1142,55 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
-	if (!zend_is_valid_class_name(class_name)) {
-		zend_string_release_ex(class_name, 0);
+	if (len == 0) {
+		/* empty class names are not allowed */
 		return 0;
 	}
 
+	if (str[0] == '\000') {
+		/* runtime definition keys are not allowed */
+		return 0;
+	}
+
+	if (str[0] == '\\') {
+		/* class name can't start from namespace separator */
+		return 0;
+	}
+
+	class_name = zend_string_init(str, len, 0);
+
 	do {
-		if(!unserialize_allowed_class(class_name, var_hash)) {
+		zend_string *lc_name = zend_string_tolower(class_name);
+
+		if(!unserialize_allowed_class(lc_name, var_hash)) {
+			zend_string_release_ex(lc_name, 0);
+			if (!zend_is_valid_class_name(class_name)) {
+				zend_string_release_ex(class_name, 0);
+				return 0;
+			}
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
 
+		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		if (ce
+		 && (ce->ce_flags & ZEND_ACC_LINKED)
+		 && !(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+			zend_string_release_ex(lc_name, 0);
+			break;
+		}
+
+		if (!zend_is_valid_class_name(class_name)) {
+			zend_string_release_ex(lc_name, 0);
+			zend_string_release_ex(class_name, 0);
+			return 0;
+		}
+
 		/* Try to find class directly */
 		BG(serialize_lock)++;
-		ce = zend_lookup_class(class_name);
+		ce = zend_lookup_class_ex(class_name, lc_name, 0);
+		zend_string_release_ex(lc_name, 0);
 		if (ce) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {

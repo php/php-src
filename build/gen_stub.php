@@ -818,9 +818,10 @@ class FuncInfo {
             }
 
             if ($namespace) {
+                // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    $namespace, $declarationName, $this->getArgInfoName());
+                    addslashes($namespace), $declarationName, $this->getArgInfoName());
             } else {
                 return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
@@ -1046,16 +1047,30 @@ class PropertyInfo
         if ($this->type) {
             $arginfoType = $this->type->toArginfoType();
             if ($arginfoType->hasClassType()) {
-                $simpleType = $this->type->tryToSimpleType();
+                if (count($arginfoType->classTypes) >= 2) {
+                    foreach ($arginfoType->classTypes as $classType) {
+                        $className = $classType->name;
+                        $code .= "\tzend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\") - 1, 1);\n";
+                    }
 
-                $className = $arginfoType->classTypes[0]->name;
-                $code .= "	zend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
-                if ($simpleType) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, " .  ((int) $this->type->isNullable()) . ", 0)";
-                } elseif (count($arginfoType->classTypes) === 1) {
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
+                    $classTypeCount = count($arginfoType->classTypes);
+                    $code .= "\tzend_type_list *property_{$propertyName}_type_list = malloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
+                    $code .= "\tproperty_{$propertyName}_type_list->num_types = $classTypeCount;\n";
+
+                    foreach ($arginfoType->classTypes as $k => $classType) {
+                        $className = $classType->name;
+                        $code .= "\tproperty_{$propertyName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, 0);\n";
+                    }
+
+                    $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
+
+                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_PTR(property_{$propertyName}_type_list, _ZEND_TYPE_LIST_BIT, 0, $typeMaskCode);\n";
+                    $typeCode = "property_{$propertyName}_type";
                 } else {
-                    throw new Exception("Property $this->name has an unsupported union type");
+                    $className = $arginfoType->classTypes[0]->name;
+                    $code .= "\tzend_string *property_{$propertyName}_class_{$className} = zend_string_init(\"$className\", sizeof(\"$className\")-1, 1);\n";
+
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$className}, 0, " . $arginfoType->toTypeMask() . ")";
                 }
             } else {
                 $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
@@ -1113,10 +1128,11 @@ class PropertyInfo
                 break;
 
             case "string":
-                if (empty($value)) {
+                if ($value === "") {
                     $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
                 } else {
-                    $code .= "\tZVAL_STRING(&$zvalName, \"$value\");\n";
+                    $code .= "\tzend_string *{$zvalName}_str = zend_string_init(\"$value\", sizeof(\"$value\") - 1, 1);\n";
+                    $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
                 }
                 break;
 
@@ -1216,13 +1232,13 @@ class ClassInfo {
 
         $escapedName = implode("_", $this->name->parts);
 
-        $code = "zend_class_entry *register_class_$escapedName(" . implode(", ", $params) . ")\n";
+        $code = "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
 
         $code .= "{\n";
         $code .= "\tzend_class_entry ce, *class_entry;\n\n";
         if (count($this->name->parts) > 1) {
             $className = $this->name->getLast();
-            $namespace = $this->name->slice(0, -1);
+            $namespace = addslashes((string) $this->name->slice(0, -1));
 
             $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
         } else {
@@ -1259,7 +1275,7 @@ class ClassInfo {
 
         $code .= "\n\treturn class_entry;\n";
 
-        $code .= "}\n\n";
+        $code .= "}\n";
 
         return $code;
     }
@@ -1781,12 +1797,14 @@ function parseStubFile(string $code): FileInfo {
                 $fileInfo->generateLegacyArginfo = true;
             } else if ($tag->name === 'generate-class-entries') {
                 $fileInfo->generateClassEntries = true;
+                $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
             }
         }
     }
 
+    // Generating class entries require generating function/method entries
     if ($fileInfo->generateClassEntries && !$fileInfo->generateFunctionEntries) {
-        throw new Exception("Function entry generation must be enabled when generating class entries");
+        $fileInfo->generateFunctionEntries = true;
     }
 
     handleStatements($fileInfo, $stmts, $prettyPrinter);
@@ -1978,10 +1996,10 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
 }
 
 function generateClassEntryCode(FileInfo $fileInfo): string {
-    $code = "\n";
+    $code = "";
 
     foreach ($fileInfo->classInfos as $class) {
-        $code .= $class->getRegistration();
+        $code .= "\n" . $class->getRegistration();
     }
 
     return $code;

@@ -268,12 +268,9 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
  */
 void calendar_register_IntlCalendar_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCalendar", class_IntlCalendar_methods);
-	ce.create_object = Calendar_object_create;
-	Calendar_ce_ptr = zend_register_internal_class(&ce);
+	Calendar_ce_ptr = register_class_IntlCalendar();
+	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
@@ -331,8 +328,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("WALLTIME_NEXT_VALID",			UCAL_WALLTIME_NEXT_VALID);
 
 	/* Create and register 'IntlGregorianCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", class_IntlGregorianCalendar_methods);
-	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr);
+	GregorianCalendar_ce_ptr = register_class_IntlGregorianCalendar(Calendar_ce_ptr);
 }
 /* }}} */

@@ -356,9 +356,9 @@ ZEND_METHOD(Closure, fromCallable)
 	zval *callable;
 	char *error = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callable) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(callable)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {
 		/* It's already a closure */
@@ -486,6 +486,10 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
+		/* We don't own the static variables of fake closures. */
+		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+			zend_destroy_static_vars(&closure->func.op_array);
+		}
 		destroy_op_array(&closure->func.op_array);
 	}
 
@@ -615,7 +619,9 @@ static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /*
 
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
-	return (closure->func.type == ZEND_USER_FUNCTION) ?
+	/* Fake closures don't own the static variables they reference. */
+	return (closure->func.type == ZEND_USER_FUNCTION
+			&& !(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) ?
 		ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr) : NULL;
 }
 /* }}} */
@@ -629,11 +635,7 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 
 void zend_register_closure_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
-	zend_ce_closure = zend_register_internal_class(&ce);
-	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_closure = register_class_Closure();
 	zend_ce_closure->create_object = zend_closure_new;
 	zend_ce_closure->serialize = zend_class_serialize_deny;
 	zend_ce_closure->unserialize = zend_class_unserialize_deny;
@@ -664,7 +666,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
+static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -683,12 +685,15 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
-		if (closure->func.op_array.static_variables) {
-			closure->func.op_array.static_variables =
-				zend_array_dup(closure->func.op_array.static_variables);
+		/* For fake closures, we want to reuse the static variables of the original function. */
+		if (!is_fake) {
+			if (closure->func.op_array.static_variables) {
+				closure->func.op_array.static_variables =
+					zend_array_dup(closure->func.op_array.static_variables);
+			}
+			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
+				&closure->func.op_array.static_variables);
 		}
-		ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-			&closure->func.op_array.static_variables);
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
 		if (!ZEND_MAP_PTR_GET(closure->func.op_array.run_time_cache)
@@ -758,11 +763,16 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 }
 /* }}} */
 
+ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr)
+{
+	zend_create_closure_ex(res, func, scope, called_scope, this_ptr, /* is_fake */ false);
+}
+
 ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
 {
 	zend_closure *closure;
 
-	zend_create_closure(res, func, scope, called_scope, this_ptr);
+	zend_create_closure_ex(res, func, scope, called_scope, this_ptr, /* is_fake */ true);
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;

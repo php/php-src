@@ -28,13 +28,11 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 echo "\n*** testing file info ***";
-stat_fn(NULL);
 stat_fn(false);
 stat_fn('');
 stat_fn(' ');
 stat_fn('|');
-echo "\n*** testing touch ***";
-var_dump(touch(NULL));
+echo "\n*** testing touch ***\n";
 var_dump(touch(false));
 var_dump(touch(''));
 
@@ -49,11 +47,6 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing file info ***
--- File '' --
--- File access time is => 
--- File modification time is => 
--- inode change time is => 
-
 -- File '' --
 -- File access time is => 
 -- File modification time is => 
@@ -86,7 +79,7 @@ Warning: filemtime(): stat failed for | in %s on line %d
 Warning: filectime(): stat failed for | in %s on line %d
 
 
-*** testing touch ***bool(false)
+*** testing touch ***
 bool(false)
 bool(false)
 

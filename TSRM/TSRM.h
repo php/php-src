@@ -147,7 +147,7 @@ TSRM_API const char *tsrm_api_name(void);
 # define __has_attribute(x) 0
 #endif
 
-#if !__has_attribute(tls_model)
+#if !__has_attribute(tls_model) || defined(__FreeBSD__)
 # define TSRM_TLS_MODEL_ATTR
 #elif __PIC__
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))

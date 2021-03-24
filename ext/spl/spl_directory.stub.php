@@ -1,8 +1,8 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-class SplFileInfo
+class SplFileInfo implements Stringable
 {
     public function __construct(string $filename) {}
 

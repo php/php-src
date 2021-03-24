@@ -575,9 +575,10 @@ static inline int ct_eval_add_array_unpack(zval *result, zval *array) {
 	SEPARATE_ARRAY(result);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
 		if (key) {
-			return FAILURE;
+			value = zend_hash_update(Z_ARR_P(result), key, value);
+		} else {
+			value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		}
-		value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		if (!value) {
 			return FAILURE;
 		}
@@ -787,6 +788,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "array_diff")
 		|| zend_string_equals_literal(name, "array_diff_assoc")
 		|| zend_string_equals_literal(name, "array_diff_key")
+		|| zend_string_equals_literal(name, "array_flip")
 		|| zend_string_equals_literal(name, "array_is_list")
 		|| zend_string_equals_literal(name, "array_key_exists")
 		|| zend_string_equals_literal(name, "array_keys")
@@ -803,6 +805,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 #endif
 		|| zend_string_equals_literal(name, "imagetypes")
 		|| zend_string_equals_literal(name, "in_array")
+		|| zend_string_equals_literal(name, "implode")
 		|| zend_string_equals_literal(name, "ltrim")
 		|| zend_string_equals_literal(name, "php_sapi_name")
 		|| zend_string_equals_literal(name, "php_uname")
@@ -827,41 +830,6 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		return true;
 	}
 
-	/* For the following functions we need to check arguments to prevent warnings during
-	 * evaluation. */
-	if (num_args == 1) {
-		if (zend_string_equals_literal(name, "array_flip")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return false;
-			}
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				/* Throws warning for non int/string values. */
-				if (Z_TYPE_P(entry) != IS_LONG && Z_TYPE_P(entry) != IS_STRING) {
-					return false;
-				}
-			} ZEND_HASH_FOREACH_END();
-			return true;
-		}
-		if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return false;
-			}
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				/* May throw warning during conversion to string. */
-				if (Z_TYPE_P(entry) > IS_STRING) {
-					return false;
-				}
-			} ZEND_HASH_FOREACH_END();
-			return true;
-		}
-		return false;
-	}
-
 	if (num_args == 2) {
 		if (zend_string_equals_literal(name, "str_repeat")) {
 			/* Avoid creating overly large strings at compile-time. */
@@ -870,29 +838,6 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 				&& Z_TYPE_P(args[1]) == IS_LONG
 				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024
 				&& !overflow;
-		} else if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if ((Z_TYPE_P(args[0]) != IS_STRING || Z_TYPE_P(args[1]) != IS_ARRAY)
-					&& (Z_TYPE_P(args[0]) != IS_ARRAY || Z_TYPE_P(args[1]) != IS_STRING)) {
-				return false;
-			}
-
-			/* May throw warning during conversion to string. */
-			if (Z_TYPE_P(args[0]) == IS_ARRAY) {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return false;
-					}
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[1]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return false;
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-			return true;
 		}
 		return false;
 	}
@@ -970,6 +915,10 @@ static inline int ct_eval_func_call(
 	execute_data->prev_execute_data = &dummy_frame;
 	EG(current_execute_data) = execute_data;
 
+	/* Enable suppression and counting of warnings. */
+	ZEND_ASSERT(EG(capture_warnings_during_sccp) == 0);
+	EG(capture_warnings_during_sccp) = 1;
+
 	EX(func) = func;
 	EX_NUM_ARGS() = num_args;
 	for (i = 0; i < num_args; i++) {
@@ -987,6 +936,12 @@ static inline int ct_eval_func_call(
 		zend_clear_exception();
 		retval = FAILURE;
 	}
+
+	if (EG(capture_warnings_during_sccp) > 1) {
+		zval_ptr_dtor(result);
+		retval = FAILURE;
+	}
+	EG(capture_warnings_during_sccp) = 0;
 
 	efree(execute_data);
 	EG(current_execute_data) = prev_execute_data;

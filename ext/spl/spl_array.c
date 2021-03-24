@@ -412,7 +412,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
 				case BP_VAR_W: {
 				    zval value;
-					ZVAL_UNDEF(&value);
+					ZVAL_NULL(&value);
 					retval = zend_hash_index_update(ht, key.h, &value);
 			   }
 			}
@@ -1133,7 +1133,7 @@ PHP_METHOD(ArrayObject, __construct)
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
-	zend_class_entry *ce_get_iterator = spl_ce_Iterator;
+	zend_class_entry *ce_get_iterator = spl_ce_ArrayIterator;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
@@ -1184,7 +1184,7 @@ PHP_METHOD(ArrayObject, setIteratorClass)
 {
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
+	zend_class_entry *ce_get_iterator = spl_ce_ArrayIterator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_CLASS(ce_get_iterator)
@@ -1817,7 +1817,7 @@ PHP_METHOD(ArrayObject, __unserialize)
 			RETURN_THROWS();
 		}
 
-		if (!instanceof_function(ce, spl_ce_Iterator)) {
+		if (!instanceof_function(ce, zend_ce_iterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
@@ -1842,11 +1842,9 @@ PHP_METHOD(ArrayObject, __debugInfo)
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
-	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, class_ArrayObject_methods);
-	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
-	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
-	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
+	spl_ce_ArrayObject = register_class_ArrayObject(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
+	spl_ce_ArrayObject->create_object = spl_array_object_new;
+
 	memcpy(&spl_handler_ArrayObject, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.offset = XtOffsetOf(spl_array_object, std);
@@ -1870,16 +1868,12 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.dtor_obj = zend_objects_destroy_object;
 	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 
-	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, class_ArrayIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Iterator);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Serializable);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
-	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
+	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
+	spl_ce_ArrayIterator->create_object = spl_array_object_new;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
 	spl_ce_ArrayIterator->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
+	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
@@ -1887,8 +1881,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, class_RecursiveArrayIterator_methods);
-	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
+	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
+	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 	spl_ce_RecursiveArrayIterator->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 

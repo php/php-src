@@ -547,12 +547,6 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 
 	ZEND_ASSERT(!EG(exception) && "stream_fixup() should have failed");
 	zend_llist_add_element(&CG(open_files), file_handle);
-	if (file_handle->handle.stream.handle >= (void*)file_handle && file_handle->handle.stream.handle <= (void*)(file_handle+1)) {
-		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&CG(open_files));
-		size_t diff = (char*)file_handle->handle.stream.handle - (char*)file_handle;
-		fh->handle.stream.handle = (void*)(((char*)fh) + diff);
-		file_handle->handle.stream.handle = fh->handle.stream.handle;
-	}
 
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
@@ -636,6 +630,7 @@ static zend_op_array *zend_compile(int type)
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
 		op_array->line_end = last_lineno;
+		zend_init_static_variables_map_ptr(op_array);
 		pass_two(op_array);
 		zend_oparray_context_end(&original_oparray_context);
 		zend_file_context_end(&original_file_context);

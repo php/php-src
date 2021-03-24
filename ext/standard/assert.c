@@ -32,8 +32,6 @@ ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
 
-static zend_class_entry *assertion_error_ce;
-
 #define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
 #define SAFE_STRING(s) ((s)?(s):"")
@@ -45,6 +43,8 @@ enum {
 	ASSERT_WARNING,
 	ASSERT_EXCEPTION
 };
+
+PHPAPI zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
 {
@@ -89,8 +89,6 @@ static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{
 
 PHP_MINIT_FUNCTION(assert) /* {{{ */
 {
-	zend_class_entry ce;
-
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
@@ -100,9 +98,6 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
-
-	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
 
 	return SUCCESS;
 }

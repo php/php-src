@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class ReflectionException extends Exception
 {
@@ -18,6 +18,8 @@ interface Reflector extends Stringable
 
 abstract class ReflectionFunctionAbstract implements Reflector
 {
+    public string $name;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 
@@ -147,6 +149,8 @@ final class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
+    public string $class;
+
     public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
     public function __toString(): string {}
@@ -199,6 +203,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
 class ReflectionClass implements Reflector
 {
+    public string $name;
+
     final private function __clone(): void {}
 
     public function __construct(object|string $objectOrClass) {}
@@ -369,6 +375,9 @@ class ReflectionObject extends ReflectionClass
 
 class ReflectionProperty implements Reflector
 {
+    public string $name;
+    public string $class;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 
@@ -434,6 +443,9 @@ class ReflectionProperty implements Reflector
 
 class ReflectionClassConstant implements Reflector
 {
+    public string $name;
+    public string $class;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 
@@ -471,6 +483,8 @@ class ReflectionClassConstant implements Reflector
 
 class ReflectionParameter implements Reflector
 {
+    public string $name;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 
@@ -575,6 +589,8 @@ class ReflectionUnionType extends ReflectionType
 
 class ReflectionExtension implements Reflector
 {
+    public string $name;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 
@@ -618,6 +634,8 @@ class ReflectionExtension implements Reflector
 
 class ReflectionZendExtension implements Reflector
 {
+    public string $name;
+
     /** @implementation-alias ReflectionClass::__clone */
     final private function __clone(): void {}
 

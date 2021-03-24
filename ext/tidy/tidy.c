@@ -89,16 +89,6 @@
 		} \
 	}
 
-#define REGISTER_TIDY_CLASS(classname, name, parent, __flags) \
-	{ \
-		zend_class_entry ce; \
-		INIT_CLASS_ENTRY(ce, # classname, class_ ## classname ## _methods); \
-		ce.create_object = tidy_object_new_ ## name; \
-		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent); \
-		tidy_ce_ ## name->ce_flags |= __flags;  \
-		memcpy(&tidy_object_handlers_ ## name, &std_object_handlers, sizeof(zend_object_handlers)); \
-		tidy_object_handlers_ ## name.clone_obj = NULL; \
-	}
 
 #define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
 #define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
@@ -826,8 +816,16 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidySetPanicCall(php_tidy_panic);
 
 	REGISTER_INI_ENTRIES();
-	REGISTER_TIDY_CLASS(tidy, doc,	NULL, 0);
-	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL);
+
+	tidy_ce_doc = register_class_tidy();
+	tidy_ce_doc->create_object = tidy_object_new_doc;
+	memcpy(&tidy_object_handlers_doc, &std_object_handlers, sizeof(zend_object_handlers));
+	tidy_object_handlers_doc.clone_obj = NULL;
+
+	tidy_ce_node = register_class_tidyNode();
+	tidy_ce_node->create_object = tidy_object_new_node;
+	memcpy(&tidy_object_handlers_node, &std_object_handlers, sizeof(zend_object_handlers));
+	tidy_object_handlers_node.clone_obj = NULL;
 
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;

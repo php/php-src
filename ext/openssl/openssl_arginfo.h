@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d4f73f86e6f16a74ab5b60bb79c4a9f29e9bc4fb */
+ * Stub hash: e881a9190424d49fa39ac76f6c13044b65ba2f7f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -530,3 +530,36 @@ static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[
 static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_OpenSSLCertificate(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "OpenSSLCertificate", class_OpenSSLCertificate_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OpenSSLCertificateSigningRequest(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "OpenSSLCertificateSigningRequest", class_OpenSSLCertificateSigningRequest_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "OpenSSLAsymmetricKey", class_OpenSSLAsymmetricKey_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}

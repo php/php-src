@@ -1,9 +1,6 @@
 <?php
 
-/**
- * @generate-function-entries
- * @generate-class-entries
- */
+/** @generate-class-entries */
 
 /** @strict-properties */
 final class Generator implements Iterator

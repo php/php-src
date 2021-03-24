@@ -11,7 +11,12 @@ require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 ?>
 --FILE--
+<?php
+class Unknown {
+}
+$x = new Test;
+$x->prop = new Unknown;
+?>
 ===DONE===
---EXPECTF--
-Warning: Can't preload class Test with unresolved property types in %s on line %d
+--EXPECT--
 ===DONE===

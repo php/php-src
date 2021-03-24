@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8175feea632f2832e43d830e70dc9332377b9f22 */
+ * Stub hash: 84df891ffafa76a34679f4d298f1a1e91a5c23bf */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -226,3 +226,44 @@ static const zend_function_entry class_SessionHandler_methods[] = {
 	ZEND_ME(SessionHandler, create_sid, arginfo_class_SessionHandler_create_sid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SessionHandlerInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SessionHandlerInterface", class_SessionHandlerInterface_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SessionIdInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SessionIdInterface", class_SessionIdInterface_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SessionUpdateTimestampHandlerInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SessionUpdateTimestampHandlerInterface", class_SessionUpdateTimestampHandlerInterface_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SessionHandler(zend_class_entry *class_entry_SessionHandlerInterface, zend_class_entry *class_entry_SessionIdInterface)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SessionHandler", class_SessionHandler_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_SessionHandlerInterface, class_entry_SessionIdInterface);
+
+	return class_entry;
+}

@@ -12,6 +12,8 @@ oci8.privileged_connect=1
 --FILE--
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 // Run Test
 
 echo "Test 1\n";

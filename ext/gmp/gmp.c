@@ -527,9 +527,7 @@ static ZEND_GINIT_FUNCTION(gmp)
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(gmp)
 {
-	zend_class_entry tmp_ce;
-	INIT_CLASS_ENTRY(tmp_ce, "GMP", class_GMP_methods);
-	gmp_ce = zend_register_internal_class(&tmp_ce);
+	gmp_ce = register_class_GMP();
 	gmp_ce->create_object = gmp_create_object;
 	gmp_ce->serialize = gmp_serialize;
 	gmp_ce->unserialize = gmp_unserialize;
@@ -630,7 +628,7 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 	}
 	default: {
 		zend_long lval;
-		if (!zend_parse_arg_long_slow(val, &lval)) {
+		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {
 			zend_argument_type_error(arg_pos, "must be of type GMP|string|int, %s given", zend_zval_type_name(val));
 			return FAILURE;
 		}

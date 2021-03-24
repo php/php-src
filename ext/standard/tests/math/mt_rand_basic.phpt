@@ -54,7 +54,6 @@ for ($x = 0; $x < count($min); $x++) {
 echo "\nNon-numeric cases\n";
 $min = array(true,
              false,
-             null,
              "10",
              "10.5");
 
@@ -93,7 +92,6 @@ PASSED: range min = 256 max = 448
 
 Non-numeric cases
 PASSED range min = 1 max = 100
-PASSED range min = 0 max = 100
 PASSED range min = 0 max = 100
 PASSED range min = 10 max = 100
 PASSED range min = 10 max = 100

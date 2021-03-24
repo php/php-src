@@ -45,9 +45,8 @@ if (strlen($row['Value']) < 100) {
     die(sprintf("skip Server misconfiguration? RSA pub key is suspicious, [%d] %s\n", $link->errno, $link->error));
 }
 
-if (!$link->query("SET @@session.old_passwords=2")) {
-    die(sprintf("skip Cannot set @@session.old_passwords=2 [%d] %s", $link->errno, $link->error));
-}
+// Ignore errors because this variable exists only in MySQL 5.6 and 5.7
+$link->query("SET @@session.old_passwords=2");
 
 $link->query('DROP USER shatest');
 $link->query("DROP USER shatest@localhost");
@@ -58,8 +57,8 @@ if (!$link->query('CREATE USER shatest@"%" IDENTIFIED WITH sha256_password') ||
     die(sprintf("skip CREATE USER failed [%d] %s", $link->errno, $link->error));
 }
 
-if (!$link->query('SET PASSWORD FOR shatest@"%" = PASSWORD("shatest")') ||
-    !$link->query('SET PASSWORD FOR shatest@"localhost" = PASSWORD("shatest")')) {
+if (!$link->query('SET PASSWORD FOR shatest@"%" = "shatest"') ||
+    !$link->query('SET PASSWORD FOR shatest@"localhost" = "shatest"')) {
     die(sprintf("skip SET PASSWORD failed [%d] %s", $link->errno, $link->error));
 }
 
@@ -75,6 +74,7 @@ if (!$link->query(sprintf("GRANT SELECT ON TABLE %s.test TO shatest@'%%'", $db))
 }
 
 $link->close();
+echo "nocache";
 ?>
 --FILE--
 <?php

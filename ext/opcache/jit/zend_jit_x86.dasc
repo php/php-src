@@ -2933,7 +2933,7 @@ static int zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model)
+#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__)
 		size_t ret;
 
 		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
@@ -2952,7 +2952,7 @@ static int zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__i386__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if 1
+#if !defined(__FreeBSD__)
 		size_t ret;
 
 		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
@@ -4329,12 +4329,17 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		}
 
 		do {
-			if ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
-			    (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1)) {
+			if ((sizeof(void*) == 8 || Z_MODE(res_addr) != IS_REG) &&
+			    ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
+			     (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1))) {
 				if (opcode == ZEND_ADD) {
 					|.if X64
 						|	mov64 rax, 0x43e0000000000000
-						|	SET_ZVAL_LVAL res_addr, rax
+						if (Z_MODE(res_addr) == IS_REG) {
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+						} else {
+							|	SET_ZVAL_LVAL res_addr, rax
+						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0
 						|	SET_ZVAL_W2 res_addr, 0x41e00000
@@ -4343,7 +4348,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 				} else if (opcode == ZEND_SUB) {
 					|.if X64
 						|	mov64 rax, 0xc3e0000000000000
-						|	SET_ZVAL_LVAL res_addr, rax
+						if (Z_MODE(res_addr) == IS_REG) {
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+						} else {
+							|	SET_ZVAL_LVAL res_addr, rax
+						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0x00200000
 						|	SET_ZVAL_W2 res_addr, 0xc1e00000
@@ -4428,7 +4437,14 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
                                      zend_jit_addr   res_addr,
                                      uint32_t        res_use_info)
 {
-	zend_reg result_reg, tmp_reg;
+	zend_reg result_reg, tmp_reg_gp;
+
+	if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
+		/* ASSIGN_DIM_OP */
+		tmp_reg_gp = ZREG_R1;
+	} else {
+		tmp_reg_gp = ZREG_R0;
+	}
 
 	if (zend_is_commutative(opcode)
 	 && (Z_MODE(res_addr) != IS_REG || Z_MODE(op1_addr) != IS_REG || Z_REG(res_addr) != Z_REG(op1_addr))) {
@@ -4437,13 +4453,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 		} else {
 			result_reg = ZREG_XMM0;
 		}
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
-			/* ASSIGN_DIM_OP */
-			tmp_reg = ZREG_R1;
-		} else {
-			tmp_reg = ZREG_R0;
-		}
-		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr, tmp_reg
+		|	SSE_GET_ZVAL_LVAL result_reg, op2_addr, tmp_reg_gp
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
 			/* ASSIGN_DIM_OP */
 			if (CAN_USE_AVX()) {
@@ -4485,7 +4495,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, tmp_reg_gp
 				|	AVX_MATH_REG opcode, result_reg, op1_reg, tmp_reg
 			}
 		} else {
@@ -4495,7 +4505,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 			 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 				/* +/- 0 */
 			} else {
-				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_R0
+				|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr, tmp_reg_gp
 				|	SSE_MATH_REG opcode, result_reg, tmp_reg
 			}
 		}
@@ -7119,7 +7129,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					break;
 				case ZEND_IS_NOT_IDENTICAL:
 					if (exit_addr) {
-						|1:
+						| jp >1
 						| je &exit_addr
 						|1:
 					} else {
@@ -7212,10 +7222,10 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_NOT_IDENTICAL:
 					|	jp >1
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 					|	je => target_label
 					|1:
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
@@ -9197,7 +9207,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 #endif
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
-		/* recursive call */		
+		/* recursive call */
 		if (!(func->op_array.fn_flags & ZEND_ACC_IMMUTABLE) ||
 		    (sizeof(void*) == 8 && !IS_SIGNED_32BIT(func))) {
 			|	mov r0, EX->func
@@ -9878,7 +9888,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				if (func && !(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 					if (ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
-					} else if (!zend_accel_in_shm(func->op_array.opcodes)) {
+					} else if ((func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+					        && (!func->op_array.scope || (func->op_array.scope->ce_flags & ZEND_ACC_LINKED))) {
+						|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
+					} else {
 						/* the called op_array may be not persisted yet */
 						|	test r2, 1
 						|	jz >1
@@ -12611,11 +12624,12 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	return 1;
 }
 
-static zend_property_info* zend_get_known_property_info(zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
+static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
 
-	if (!ce ||
+	if ((on_this && (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) ||
+	    !ce ||
 	    !(ce->ce_flags & ZEND_ACC_LINKED) ||
 	    (ce->ce_flags & ZEND_ACC_TRAIT) ||
 	    ce->create_object) {
@@ -12745,7 +12759,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	prop_info = zend_get_known_property_info(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -12784,7 +12798,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13140,7 +13154,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13188,7 +13202,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13514,7 +13528,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13571,7 +13585,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -13847,7 +13861,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -13903,7 +13917,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
@@ -14236,6 +14250,38 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1
 		|	SET_ZVAL_LVAL res_addr, r0
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+	}
+	return 1;
+}
+
+static int zend_jit_count(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, int may_throw)
+{
+	zend_jit_addr res_addr = RES_ADDR();
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv;
+		zend_long count;
+
+		zv = RT_CONSTANT(opline, opline->op1);
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+		count = zend_hash_num_elements(Z_ARRVAL_P(zv));
+
+		|	SET_ZVAL_LVAL res_addr, count
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+	} else {
+		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY);
+		// Note: See the implementation of ZEND_COUNT in Zend/zend_vm_def.h - arrays do not contain IS_UNDEF starting in php 8.1+.
+
+		|	GET_ZVAL_PTR r0, op1_addr
+		// Sign-extend the 32-bit value to a potentially 64-bit zend_long
+		|	mov eax, dword [r0 + offsetof(HashTable, nNumOfElements)]
+		|	SET_ZVAL_LVAL res_addr, r0
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+	}
+
+	if (may_throw) {
+		return zend_jit_check_exception(Dst);
 	}
 	return 1;
 }

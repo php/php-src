@@ -30,19 +30,8 @@ zend_class_entry *Locale_ce_ptr = NULL;
  */
 void locale_register_Locale_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Locale' class. */
-	INIT_CLASS_ENTRY( ce, "Locale", class_Locale_methods );
-	ce.create_object = NULL;
-	Locale_ce_ptr = zend_register_internal_class( &ce );
-
-	/* Declare 'Locale' class properties. */
-	if( !Locale_ce_ptr )
-	{
-		zend_error( E_ERROR,
-			"Locale: Failed to register Locale class.");
-		return;
-	}
+	Locale_ce_ptr = register_class_Locale();
+	Locale_ce_ptr->create_object = NULL;
 }
 /* }}} */

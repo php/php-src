@@ -1194,8 +1194,9 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		DBG_RETURN(PASS);
 	} else if (EODATA_MARKER == *p && packet->header.size < 8) {
 		/* Premature EOF. That should be COM_FIELD_LIST. But we don't support COM_FIELD_LIST anymore, thus this should not happen */
-		DBG_INF("Premature EOF. That should be COM_FIELD_LIST");
-		DBG_RETURN(PASS);
+		DBG_ERR("Premature EOF. That should be COM_FIELD_LIST");
+		php_error_docref(NULL, E_WARNING, "Premature EOF in result field metadata");
+		DBG_RETURN(FAIL);
 	}
 
 	meta = packet->metadata;
@@ -1380,52 +1381,40 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	} else {
+		/* If the packet is split in multiple chunks, allocate a temporary buffer that we can
+		 * reallocate, and only afterwards copy it to the pool when we know the final size. */
+		zend_uchar *buf = NULL;
+		while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
+			buf = erealloc(buf, *data_size + header.size);
+			p = buf + *data_size;
+			*data_size += header.size;
+
+			if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
+				DBG_ERR("Empty row packet body");
+				SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
+				set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+				efree(buf);
+				DBG_RETURN(FAIL);
+			}
+			if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
+				efree(buf);
+				DBG_RETURN(FAIL);
+			}
+		}
+
+		buffer->ptr = pool->get_chunk(pool, *data_size + header.size + prealloc_more_bytes);
+		if (buf) {
+			memcpy(buffer->ptr, buf, *data_size);
+			efree(buf);
+		}
+		p = (zend_uchar *) buffer->ptr + *data_size;
 		*data_size += header.size;
-		buffer->ptr = pool->get_chunk(pool, *data_size + prealloc_more_bytes);
-		p = buffer->ptr;
 
 		if (UNEXPECTED(PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info)))) {
 			DBG_ERR("Empty row packet body");
 			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 			set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-		} else {
-			while (header.size >= MYSQLND_MAX_PACKET_SIZE) {
-				if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {
-					ret = FAIL;
-					break;
-				}
-
-				*data_size += header.size;
-
-				/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
-				if (!header.size) {
-					break;
-				}
-
-				/*
-				  We have to realloc the buffer.
-				*/
-				buffer->ptr = pool->resize_chunk(pool, buffer->ptr, *data_size - header.size, *data_size + prealloc_more_bytes);
-				if (!buffer->ptr) {
-					SET_OOM_ERROR(error_info);
-					ret = FAIL;
-					break;
-				}
-				/* The position could have changed, recalculate */
-				p = (zend_uchar *) buffer->ptr + (*data_size - header.size);
-
-				if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
-					DBG_ERR("Empty row packet body");
-					SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
-					set_packet_error(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-					break;
-				}
-			}
 		}
-	}
-	if (ret == FAIL && buffer->ptr) {
-		pool->free_chunk(pool, buffer->ptr);
-		buffer->ptr = NULL;
 	}
 	DBG_RETURN(ret);
 }
@@ -1611,7 +1600,8 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
 					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
 				}
-			} else if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			} else if (as_int_or_float && perm_bind.php_type == IS_LONG
+					&& !(fields_metadata[i].flags & ZEROFILL_FLAG)) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
@@ -1653,7 +1643,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				ZVAL_DOUBLE(current_field, atof((char *) p));
+				ZVAL_DOUBLE(current_field, zend_strtod((char *) p, NULL));
 				*(p + len) = save;
 			} else {
 				ZVAL_STRINGL_FAST(current_field, (char *)p, len);
@@ -1736,23 +1726,6 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 end:
 	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_rowp_free_mem */
-static void
-php_mysqlnd_rowp_free_mem(void * _packet)
-{
-	MYSQLND_PACKET_ROW *p;
-
-	DBG_ENTER("php_mysqlnd_rowp_free_mem");
-	p = (MYSQLND_PACKET_ROW *) _packet;
-	if (p->row_buffer.ptr) {
-		p->result_set_memory_pool->free_chunk(p->result_set_memory_pool, p->row_buffer.ptr);
-		p->row_buffer.ptr = NULL;
-	}
-	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -2203,7 +2176,7 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 	{
 		php_mysqlnd_rowp_read, /* read */
 		NULL, /* write */
-		php_mysqlnd_rowp_free_mem,
+		NULL,
 	}, /* PROT_ROW_PACKET */
 	{
 		php_mysqlnd_stats_read, /* read */

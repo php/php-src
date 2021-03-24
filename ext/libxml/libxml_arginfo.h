@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2de903a36e16ddd4ff7ca0ff5be0c2be4697bd7e */
+ * Stub hash: 252fdc1cd83d2d3322cc040baf2bf3c7fde29254 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -52,7 +52,7 @@ static const zend_function_entry class_LibXMLError_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_LibXMLError()
+static zend_class_entry *register_class_LibXMLError(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -97,4 +97,3 @@ zend_class_entry *register_class_LibXMLError()
 
 	return class_entry;
 }
-

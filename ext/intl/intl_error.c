@@ -203,17 +203,6 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 }
 /* }}} */
 
-void intl_register_IntlException_class( void )
-{
-	zend_class_entry ce;
-
-	/* Create and register 'IntlException' class. */
-	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
-	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		zend_ce_exception );
-	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
-}
-
 smart_str intl_parse_error_to_string( UParseError* pe )
 {
 	smart_str    ret = {0};

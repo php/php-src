@@ -130,7 +130,7 @@ typedef struct {
 	 * are only supported since C++20). */
 	void *ptr;
 	uint32_t type_mask;
-	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
+	uint32_t ce_cache__ptr; /* map_ptr offset */
 } zend_type;
 
 typedef struct {
@@ -138,13 +138,15 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
-#define _ZEND_TYPE_MASK ((1u << 24) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
+#define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_CE_BIT   (1u << 22)
-#define _ZEND_TYPE_LIST_BIT (1u << 21)
+#define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_CE_BIT   (1u << 23)
+#define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
+/* CE cached in map_ptr area */
+#define _ZEND_TYPE_CACHE_BIT (1u << 21)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Type mask excluding the flags above. */
@@ -167,6 +169,9 @@ typedef struct {
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
 
+#define ZEND_TYPE_HAS_CE_CACHE(t) \
+	((((t).type_mask) & _ZEND_TYPE_CACHE_BIT) != 0)
+
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
 
@@ -184,6 +189,13 @@ typedef struct {
 
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
+
+#define ZEND_TYPE_CE_CACHE(t) \
+	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR((t).ce_cache))
+
+#define ZEND_TYPE_SET_CE_CACHE(t, ce) do { \
+		*((zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR((t).ce_cache)) = ce; \
+	} while (0)
 
 #define ZEND_TYPE_LIST_SIZE(num_types) \
 	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
@@ -254,10 +266,10 @@ typedef struct {
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
 #define ZEND_TYPE_INIT_NONE(extra_flags) \
-	{ NULL, (extra_flags) }
+	{ NULL, (extra_flags), 0 }
 
 #define ZEND_TYPE_INIT_MASK(_type_mask) \
-	{ NULL, (_type_mask) }
+	{ NULL, (_type_mask), 0 }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code)))) \
@@ -265,10 +277,10 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
 	{ (void *) (ptr), \
-		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags), 0 }
 
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
-	{ (void *) (ptr), (type_mask) }
+	{ (void *) (ptr), (type_mask), 0 }
 
 #define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(_ce, _ZEND_TYPE_CE_BIT, allow_null, extra_flags)
@@ -613,6 +625,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
 #define GC_TRY_ADDREF(p)			zend_gc_try_addref(&(p)->gc)
+#define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
@@ -1168,6 +1181,13 @@ static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
 	}
 }
 
+static zend_always_inline void zend_gc_try_delref(zend_refcounted_h *p) {
+	if (!(p->u.type_info & GC_IMMUTABLE)) {
+		ZEND_RC_MOD_CHECK(p);
+		--p->refcount;
+	}
+}
+
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
 	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
@@ -1339,9 +1359,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			zend_string *_str = Z_STR_P(_zv);			\
 			ZEND_ASSERT(Z_REFCOUNTED_P(_zv));			\
 			ZEND_ASSERT(!ZSTR_IS_INTERNED(_str));		\
-			Z_DELREF_P(_zv);							\
 			ZVAL_NEW_STR(_zv, zend_string_init(			\
 				ZSTR_VAL(_str),	ZSTR_LEN(_str), 0));	\
+			GC_DELREF(_str);							\
 		}												\
 	} while (0)
 
@@ -1349,10 +1369,8 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		zval *__zv = (zv);								\
 		zend_array *_arr = Z_ARR_P(__zv);				\
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
-			if (Z_REFCOUNTED_P(__zv)) {					\
-				GC_DELREF(_arr);						\
-			}											\
 			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
+			GC_TRY_DELREF(_arr);						\
 		}												\
 	} while (0)
 

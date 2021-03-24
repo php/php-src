@@ -30,12 +30,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
-
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
@@ -100,62 +94,40 @@ array(0) {
 array(0) {
 }
 -- Iteration 5 --
-array(1) {
-  [2]=>
-  string(5) "float"
+array(0) {
 }
-array(1) {
-  [2]=>
-  string(5) "float"
+array(0) {
 }
 -- Iteration 6 --
 array(2) {
-  [4]=>
-  string(2) "f3"
-  [33333333]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
 }
 array(2) {
-  [4]=>
-  string(2) "f3"
-  [33333333]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["pen
+"]=>
+  int(33)
 }
 -- Iteration 7 --
-array(0) {
+array(1) {
+  ["Hello world"]=>
+  string(6) "string"
 }
-array(0) {
+array(1) {
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 8 --
-array(2) {
-  ["	Hello"]=>
-  int(111)
-  ["pen
-"]=>
-  int(33)
+array(0) {
 }
-array(2) {
-  ["	Hello"]=>
-  int(111)
-  ["pen
-"]=>
-  int(33)
+array(0) {
 }
 -- Iteration 9 --
-array(1) {
-  ["Hello world"]=>
-  string(6) "string"
-}
-array(1) {
-  ["Hello world"]=>
-  string(6) "string"
-}
--- Iteration 10 --
-array(0) {
-}
-array(0) {
-}
--- Iteration 11 --
 array(1) {
   [133]=>
   string(3) "int"

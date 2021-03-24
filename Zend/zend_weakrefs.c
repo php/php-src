@@ -597,11 +597,7 @@ ZEND_METHOD(WeakMap, getIterator)
 
 void zend_register_weakref_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "WeakReference", class_WeakReference_methods);
-	zend_ce_weakref = zend_register_internal_class(&ce);
-	zend_ce_weakref->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_ce_weakref = register_class_WeakReference();
 
 	zend_ce_weakref->create_object = zend_weakref_new;
 	zend_ce_weakref->serialize = zend_class_serialize_deny;
@@ -613,11 +609,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.free_obj = zend_weakref_free;
 	zend_weakref_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
-	zend_ce_weakmap = zend_register_internal_class(&ce);
-	zend_ce_weakmap->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
-	zend_class_implements(
-		zend_ce_weakmap, 3, zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
+	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;

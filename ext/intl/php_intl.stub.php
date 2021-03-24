@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class IntlException extends Exception
+{
+}
 
 /* calendar */
 
@@ -154,7 +158,7 @@ function intl_error_name(int $errorCode): string {}
 /* dateformat */
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = ""): ?IntlDateFormatter {}
+function datefmt_create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, ?string $pattern = null): ?IntlDateFormatter {}
 
 function datefmt_get_datetype(IntlDateFormatter $formatter): int|false {}
 
@@ -204,7 +208,7 @@ function datefmt_get_error_message(IntlDateFormatter $formatter): string {}
 
 /* formatter */
 
-function numfmt_create(string $locale, int $style, string $pattern = ""): ?NumberFormatter {}
+function numfmt_create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
 
 function numfmt_format(NumberFormatter $formatter, int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 

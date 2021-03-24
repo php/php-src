@@ -3404,6 +3404,12 @@ function toolset_setup_common_ldlags()
 				ADD_FLAG('LDFLAGS', "/GUARD:CF");
 			}
 		}
+		if (PHP_VS_LINK_COMPAT != "no") {
+			// Allow compatible IL versions, do not require an exact match.
+			// Prevents build failures where different libs were built with different (but compatible) IL versions.
+			// See fatal error C1047.
+			ADD_FLAG("LDFLAGS", "/d2:-AllowCompatibleILVersions ");
+		}
 	}
 }
 
@@ -3752,4 +3758,10 @@ function setup_verbosity()
 		CMD_MOD1 = "@";
 		CMD_MOD2 = "@";
 	}
+}
+
+try {
+	ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
+} catch (e) {
+	STDOUT.WriteLine("problem: " + e);
 }

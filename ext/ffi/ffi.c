@@ -4880,22 +4880,15 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(ffi)
 {
-	zend_class_entry ce;
-
 	REGISTER_INI_ENTRIES();
 
 	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0;
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "Exception", NULL);
-	zend_ffi_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ffi_exception_ce = register_class_FFI_Exception(zend_ce_error);
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "ParserException", NULL);
-	zend_ffi_parser_exception_ce = zend_register_internal_class_ex(&ce, zend_ffi_exception_ce);
-	zend_ffi_parser_exception_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_parser_exception_ce = register_class_FFI_ParserException(zend_ffi_exception_ce);
 
-	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
-	zend_ffi_ce = zend_register_internal_class(&ce);
-	zend_ffi_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
 	zend_ffi_ce->serialize = zend_class_serialize_deny;
 	zend_ffi_ce->unserialize = zend_class_unserialize_deny;
@@ -4930,9 +4923,7 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "CData", NULL);
-	zend_ffi_cdata_ce = zend_register_internal_class(&ce);
-	zend_ffi_cdata_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
 	zend_ffi_cdata_ce->serialize = zend_class_serialize_deny;
@@ -5008,9 +4999,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_cdata_free_handlers.get_gc               = zend_fake_get_gc;
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", class_FFI_CType_methods);
-	zend_ffi_ctype_ce = zend_register_internal_class(&ce);
-	zend_ffi_ctype_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_ctype_ce = register_class_FFI_CType();
 	zend_ffi_ctype_ce->create_object = zend_ffi_ctype_new;
 	zend_ffi_ctype_ce->serialize = zend_class_serialize_deny;
 	zend_ffi_ctype_ce->unserialize = zend_class_unserialize_deny;

@@ -660,6 +660,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, auto_global_copy_ctor);
 
 	compiler_globals->script_encoding_list = NULL;
+	compiler_globals->current_linking_class = NULL;
 
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 	/* Map region is going to be created and resized at run-time. */
@@ -713,7 +714,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
-	executor_globals->lambda_count = 0;
+	executor_globals->capture_warnings_during_sccp = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	executor_globals->in_autoload = NULL;
@@ -1298,6 +1299,14 @@ static ZEND_COLD void zend_error_impl(
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
 
+	/* If we're executing a function during SCCP, count any warnings that may be emitted,
+	 * but don't perform any other error handling. */
+	if (EG(capture_warnings_during_sccp)) {
+		ZEND_ASSERT(!(type & E_FATAL_ERRORS) && "Fatal error during SCCP");
+		EG(capture_warnings_during_sccp)++;
+		return;
+	}
+
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1687,6 +1696,7 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 					ret = zend_exception_error(EG(exception), E_ERROR);
 				}
 			}
+			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));
 		} else if (type==ZEND_REQUIRE) {

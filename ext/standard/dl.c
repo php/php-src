@@ -247,8 +247,9 @@ static void php_dl_error(const char *filename)
 
 PHPAPI void *php_load_shlib(const char *path, char **errp)
 {
-    php_dl_error(filename);
-    (*errp) = estrdup("No DL support");
+	php_dl_error(path);
+	(*errp) = estrdup("No DL support");
+	return NULL;
 }
 
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)

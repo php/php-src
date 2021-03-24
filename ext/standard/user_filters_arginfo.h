@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e3ab7a87eb78ef3a7f96ad18f5dff6c6d8032ca2 */
+ * Stub hash: d0653a1b2a1f33744b41a9b5f047ec4330bac091 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_filter, 0, 0, 4)
 	ZEND_ARG_INFO(0, in)
@@ -25,3 +25,25 @@ static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_ME(php_user_filter, onClose, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_php_user_filter(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "php_user_filter", class_php_user_filter_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_filtername_default_value;
+	ZVAL_EMPTY_STRING(&property_filtername_default_value);
+	zend_string *property_filtername_name = zend_string_init("filtername", sizeof("filtername") - 1, 1);
+	zend_declare_property_ex(class_entry, property_filtername_name, &property_filtername_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_filtername_name);
+
+	zval property_params_default_value;
+	ZVAL_EMPTY_STRING(&property_params_default_value);
+	zend_string *property_params_name = zend_string_init("params", sizeof("params") - 1, 1);
+	zend_declare_property_ex(class_entry, property_params_name, &property_params_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_params_name);
+
+	return class_entry;
+}
