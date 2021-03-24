@@ -53,8 +53,10 @@ pg_close($dbh);
 
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
-resource(%d) of type (pgsql result)
+object(PgSqlResult)#%d (0) {
+}
+object(PgSqlResult)#%d (0) {
+}
 array(1) {
   [0]=>
   string(1) "f"

@@ -49,7 +49,8 @@ try {
 }
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
+object(PgSqlResult)#%d (0) {
+}
 string(0) ""
 array(0) {
 }

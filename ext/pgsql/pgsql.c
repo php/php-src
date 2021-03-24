@@ -78,7 +78,7 @@
 		zend_throw_error(NULL, "No PostgreSQL connection opened yet"); \
 		RETURN_THROWS(); \
 	}
-#define FETCH_DEFAULT_LINK() (PGG(default_link) ? pgsql_link_from_obj(Z_OBJ_P(PGG(default_link))) : NULL)
+#define FETCH_DEFAULT_LINK() PGG(default_link)
 
 #define CHECK_PGSQL_LINK(link_handle) \
 	if (link_handle->conn == NULL) { \
@@ -281,10 +281,8 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 		zend_string_release(msgbuf); \
 } \
 
-static void php_pgsql_set_default_link(zval *link)
+static void php_pgsql_set_default_link(pgsql_link_handle *link)
 {
-	GC_ADDREF(Z_OBJ_P(link));
-
 	if (PGG(default_link) != NULL) {
 		pgsql_link_free(FETCH_DEFAULT_LINK());
 	}
@@ -730,7 +728,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 */
 		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
 			&& (index_ptr = zend_hash_find_ptr(&PGG(regular_list), str.s)) != NULL) {
-			php_pgsql_set_default_link(index_ptr);
+			php_pgsql_set_default_link(pgsql_link_from_obj(Z_OBJ_P(index_ptr)));
 			GC_ADDREF(Z_OBJ_P(index_ptr));
 			ZVAL_COPY(return_value, index_ptr);
 
@@ -768,7 +766,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* add it to the hash */
 		ZVAL_COPY(&new_index_ptr, return_value);
-		zend_hash_update_mem(&PGG(regular_list), str.s, (void *) &new_index_ptr, sizeof(zval));
+		zend_hash_update(&PGG(regular_list), str.s, &new_index_ptr);
 
 		/* Keep track of link => hash mapping, so we can remove the hash entry from regular_list
 		 * when the connection is closed. This uses the address of the connection rather than the
@@ -785,7 +783,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_OBJECT) {
 		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void*)(zend_uintptr_t)Z_OBJ_P(return_value)->handle);
 	}
-	php_pgsql_set_default_link(return_value);
+	php_pgsql_set_default_link(pgsql_link_from_obj(Z_OBJ_P(return_value)));
 
 cleanup:
 	smart_str_free(&str);
@@ -846,8 +844,8 @@ PHP_FUNCTION(pg_close)
 	if (!pgsql_link) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-		pgsql_link_free(link);
 		PGG(default_link) = NULL;
+		pgsql_link_free(link);
 		RETURN_TRUE;
 	}
 
@@ -2330,11 +2328,12 @@ PHP_FUNCTION(pg_lo_create)
 	} else if ((Z_TYPE_P(pgsql_link) == IS_OBJECT && instanceof_function(Z_OBJCE_P(pgsql_link), pgsql_link_ce))) {
 		link = Z_PGSQL_LINK_P(pgsql_link);
 		CHECK_PGSQL_LINK(link);
-		pgsql = link->conn;
 	} else {
 		zend_argument_type_error(1, "must be of type PgSql when the connection is provided");
 		RETURN_THROWS();
 	}
+
+	pgsql = link->conn;
 
 	if (oid) {
 		switch (Z_TYPE_P(oid)) {
@@ -3300,7 +3299,7 @@ PHP_FUNCTION(pg_escape_string)
 				RETURN_THROWS();
 			}
 			link = Z_PGSQL_LINK_P(pgsql_link);
-            CHECK_PGSQL_LINK(link);
+			CHECK_PGSQL_LINK(link);
 			break;
 	}
 
