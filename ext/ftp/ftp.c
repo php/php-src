@@ -1936,8 +1936,9 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 					if (WSAGetLastError() == WSAECONNABORTED) {
 						/* suppress spurious warning if connection is aborted */
 						done = 1;
+						break;
 					}
-					break;
+					/* fallthrough */
 # endif
 				default:
 					if ((sslerror = ERR_get_error())) {
