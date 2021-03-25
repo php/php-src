@@ -35,11 +35,7 @@
 #define YYMARKER        s->ptr
 #define YYFILL(n)		{ RET(PDO_PARSER_EOI); }
 
-typedef struct Scanner {
-	const char *ptr, *cur, *tok, *end;
-} Scanner;
-
-static int scan(Scanner *s)
+static int default_scanner(pdo_parser_t *s)
 {
 	const char *cursor = s->cur;
 
@@ -81,7 +77,7 @@ static void free_param_name(zval *el) {
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery)
 {
-	Scanner s;
+	pdo_parser_t s;
 	char *newbuffer;
 	ptrdiff_t t;
 	uint32_t bindno = 0;
@@ -91,6 +87,9 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;
 	struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
+	int (*scan)(pdo_parser_t *s);
+
+	scan = stmt->dbh->methods->parser ? stmt->dbh->methods->parser : default_scanner;
 
 	s.cur = ZSTR_VAL(inquery);
 	s.end = s.cur + ZSTR_LEN(inquery) + 1;
