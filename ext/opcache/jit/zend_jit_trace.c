@@ -1843,6 +1843,19 @@ propagate_arg:
 				case ZEND_CHECK_UNDEF_ARGS:
 				case ZEND_INCLUDE_OR_EVAL:
 					max_used_stack = used_stack = -1;
+					break;
+				case ZEND_TYPE_CHECK:
+					if (opline->extended_value == MAY_BE_RESOURCE) {
+						// TODO: support for is_resource() ???
+						break;
+					}
+					if (op1_type != IS_UNKNOWN
+					 && (opline->extended_value == (1 << op1_type)
+					  || opline->extended_value == MAY_BE_ANY - (1 << op1_type))) {
+						/* add guards only for exact checks, to avoid code duplication */
+						ADD_OP1_TRACE_GUARD();
+					}
+					break;
 				default:
 					break;
 			}
@@ -4900,6 +4913,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
 						if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);

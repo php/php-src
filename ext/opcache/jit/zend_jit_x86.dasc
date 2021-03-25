@@ -10908,7 +10908,6 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	uint32_t  mask;
-	zend_uchar type;
 	zend_jit_addr op1_addr = OP1_ADDR();
 
 	// TODO: support for is_resource() ???
@@ -10952,19 +10951,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 		mask = opline->extended_value;
-		switch (mask) {
-			case MAY_BE_NULL:   type = IS_NULL;   break;
-			case MAY_BE_FALSE:  type = IS_FALSE;  break;
-			case MAY_BE_TRUE:   type = IS_TRUE;   break;
-			case MAY_BE_LONG:   type = IS_LONG;   break;
-			case MAY_BE_DOUBLE: type = IS_DOUBLE; break;
-			case MAY_BE_STRING: type = IS_STRING; break;
-			case MAY_BE_ARRAY:  type = IS_ARRAY;  break;
-			case MAY_BE_OBJECT: type = IS_OBJECT; break;
-			default:
-				type = 0;
-		}
-
 		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
 			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 			if (exit_addr) {
@@ -10984,6 +10970,31 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 				return 0;
 			}
 		} else {
+			bool invert = 0;
+			zend_uchar type;
+
+			switch (mask) {
+				case MAY_BE_NULL:   type = IS_NULL;   break;
+				case MAY_BE_FALSE:  type = IS_FALSE;  break;
+				case MAY_BE_TRUE:   type = IS_TRUE;   break;
+				case MAY_BE_LONG:   type = IS_LONG;   break;
+				case MAY_BE_DOUBLE: type = IS_DOUBLE; break;
+				case MAY_BE_STRING: type = IS_STRING; break;
+				case MAY_BE_ARRAY:  type = IS_ARRAY;  break;
+				case MAY_BE_OBJECT: type = IS_OBJECT; break;
+				case MAY_BE_ANY - MAY_BE_NULL:     type = IS_NULL;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_FALSE:    type = IS_FALSE;  invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_TRUE:     type = IS_TRUE;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_LONG:     type = IS_LONG;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_DOUBLE:   type = IS_DOUBLE; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_STRING:   type = IS_STRING; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_ARRAY:    type = IS_ARRAY;  invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_OBJECT:   type = IS_OBJECT; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_RESOURCE: type = IS_OBJECT; invert = 1; break;
+				default:
+					type = 0;
+			}
+
 			if (op1_info & MAY_BE_REF) {
 				|	LOAD_ZVAL_ADDR r0, op1_addr
 				|	ZVAL_DEREF r0, op1_info
@@ -11115,26 +11126,51 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 					}
 				}
 				if (exit_addr) {
-					if (smart_branch_opcode == ZEND_JMPNZ) {
-						|	je &exit_addr
+					if (invert) {
+						if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	jne &exit_addr
+						} else {
+							|	je &exit_addr
+						}
 					} else {
-						|	jne &exit_addr
+						if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	je &exit_addr
+						} else {
+							|	jne &exit_addr
+						}
 					}
 				} else if (smart_branch_opcode) {
-					if (smart_branch_opcode == ZEND_JMPZ) {
-						|	jne =>target_label
-					} else if (smart_branch_opcode == ZEND_JMPNZ) {
-						|	je =>target_label
-					} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-						|	jne =>target_label
-						|	jmp =>target_label2
+					if (invert) {
+						if (smart_branch_opcode == ZEND_JMPZ) {
+							|	je =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	jne =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+							|	je =>target_label
+							|	jmp =>target_label2
+						} else {
+							ZEND_UNREACHABLE();
+						}
 					} else {
-						ZEND_UNREACHABLE();
+						if (smart_branch_opcode == ZEND_JMPZ) {
+							|	jne =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	je =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+							|	jne =>target_label
+							|	jmp =>target_label2
+						} else {
+							ZEND_UNREACHABLE();
+						}
 					}
 				} else {
 					zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
-					|	sete al
+					if (invert) {
+						|	setne al
+					} else {
+						|	sete al
+					}
 					|	movzx eax, al
 					|	add eax, 2
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
