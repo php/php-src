@@ -7942,7 +7942,7 @@ static int zend_jit_identical(dasm_State    **Dst,
 		if (opline->op1_type != IS_CONST) {
 			|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		}
-	} else {
+	} else if ((op1_info & op2_info & MAY_BE_ANY) != 0) {
 		if (opline->op1_type != IS_CONST) {
 			if (Z_MODE(op1_addr) == IS_REG) {
 				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
@@ -7964,12 +7964,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 		}
 	}
-	if (opline->op1_type & (IS_CV|IS_VAR)) {
-		|	ZVAL_DEREF FCARG1a, op1_info
-	}
-	if (opline->op2_type & (IS_CV|IS_VAR)) {
-		|	ZVAL_DEREF FCARG2a, op2_info
-	}
 
 	if ((op1_info & op2_info & MAY_BE_ANY) == 0) {
 		if ((opline->opcode != ZEND_CASE_STRICT &&
@@ -7984,7 +7978,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 			|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
 		}
 		if (smart_branch_opcode) {
-			zend_jit_check_exception_undef_result(Dst, opline);
+			if (may_throw) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			}
 			if (exit_addr) {
 				if (smart_branch_opcode == ZEND_JMPZ) {
 					|	jmp &exit_addr
@@ -7994,12 +7990,24 @@ static int zend_jit_identical(dasm_State    **Dst,
 			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO res_addr, (opline->opcode != ZEND_IS_NOT_IDENTICAL ? IS_FALSE : IS_TRUE)
-			zend_jit_check_exception(Dst);
+			if (may_throw) {
+				zend_jit_check_exception(Dst);
+			}
 		}
-	} else if (has_concrete_type(op1_info) &&
-	           has_concrete_type(op2_info) &&
-	           concrete_type(op1_info) == concrete_type(op2_info) &&
-	           concrete_type(op1_info) <= IS_TRUE) {
+		return 1;
+	}
+	
+	if (opline->op1_type & (IS_CV|IS_VAR)) {
+		|	ZVAL_DEREF FCARG1a, op1_info
+	}
+	if (opline->op2_type & (IS_CV|IS_VAR)) {
+		|	ZVAL_DEREF FCARG2a, op2_info
+	}
+
+	if (has_concrete_type(op1_info)
+	 && has_concrete_type(op2_info)
+	 && concrete_type(op1_info) == concrete_type(op2_info)
+	 && concrete_type(op1_info) <= IS_TRUE) {
 		if (smart_branch_opcode) {
 			if (exit_addr) {
 				if (smart_branch_opcode == ZEND_JMPNZ) {
@@ -8046,7 +8054,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 				|	jne >8
 				|	SET_EX_OPLINE opline, r0
 				|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
-				zend_jit_check_exception_undef_result(Dst, opline);
+				if (may_throw) {
+					zend_jit_check_exception_undef_result(Dst, opline);
+				}
 				if (exit_addr && smart_branch_opcode == ZEND_JMPNZ) {
 					|	jmp &exit_addr
 				} else if (identical_label != (uint32_t)-1) {
@@ -8076,7 +8086,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 		    (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 			|	SET_EX_OPLINE opline, r0
 			|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
-			zend_jit_check_exception_undef_result(Dst, opline);
+			if (may_throw) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			}
 		}
 		if (exit_addr) {
 			if (smart_branch_opcode == ZEND_JMPZ) {
@@ -8095,7 +8107,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 				|	jne >8
 				|	SET_EX_OPLINE opline, r0
 				|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
-				zend_jit_check_exception_undef_result(Dst, opline);
+				if (may_throw) {
+					zend_jit_check_exception_undef_result(Dst, opline);
+				}
 				if (exit_addr && smart_branch_opcode == ZEND_JMPNZ) {
 					|	jmp &exit_addr
 				} else if (identical_label != (uint32_t)-1) {
@@ -8126,7 +8140,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 		    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 			|	SET_EX_OPLINE opline, r0
 			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
-			zend_jit_check_exception_undef_result(Dst, opline);
+			if (may_throw) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			}
 		}
 		if (smart_branch_opcode) {
 			if (exit_addr) {
@@ -8156,7 +8172,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 				}
 				|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
-				zend_jit_check_exception_undef_result(Dst, opline);
+				if (may_throw) {
+					zend_jit_check_exception_undef_result(Dst, opline);
+				}
 				|	mov r0, aword T1 // restore
 			}
 		if (smart_branch_opcode) {
