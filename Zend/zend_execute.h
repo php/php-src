@@ -70,7 +70,7 @@ ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_index_write(HashTabl
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value);
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, zval *value);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);

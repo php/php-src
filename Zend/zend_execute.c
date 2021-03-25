@@ -685,18 +685,12 @@ static ZEND_COLD void zend_verify_type_error_common(
 }
 
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value)
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
 	zend_string *need_msg;
 	const char *given_msg;
-
-	if (EG(exception)) {
-		/* The type verification itself might have already thrown an exception
-		 * through a promoted warning. */
-		return;
-	}
 
 	zend_verify_type_error_common(
 		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
