@@ -3210,12 +3210,18 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-			tmp = t2 & MAY_BE_REF;
+			tmp = 0;
+			if (opline->op2_type == IS_CV) {
+				tmp = t2 & MAY_BE_REF;
+			}
 			if (t1 & MAY_BE_OBJECT) {
 				if (opline->opcode == ZEND_FE_FETCH_RW) {
 					tmp |= MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= MAY_BE_REF | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					if (opline->op2_type != IS_CV) {
+						tmp |= MAY_BE_REF;
+					}
 				}
 			}
 			if (t1 & MAY_BE_ARRAY) {
@@ -3228,6 +3234,9 @@ static zend_always_inline int _zend_update_type_info(
 					}
 					if (t1 & MAY_BE_ARRAY_OF_REF) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+						if (opline->op2_type != IS_CV) {
+							tmp |= MAY_BE_REF;
+						}
 					} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					}
