@@ -375,18 +375,13 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
 {
 	RETCODE ret;
-	UCHAR d_name[32];
-	SQLSMALLINT len;
+	SQLUINTEGER dead;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
-	/*
-	 *  XXX: Should we be using SQL_ATTR_CONNECTION_DEAD? Procedural ODBC
-	 *  uses this check, but it might be problematic per #20298
-	 */
-	ret = SQLGetInfo(H->dbc, SQL_DATA_SOURCE_READ_ONLY, d_name,
-		sizeof(d_name), &len);
+	/* ODBC 3.5; procedural ODBC uses SQLGetInfo read only instead */
+	ret = SQLGetConnectAttr(H->dbc, SQL_ATTR_CONNECTION_DEAD, &dead, 0, NULL);
 
-	if (ret != SQL_SUCCESS || len == 0) {
+	if (ret != SQL_SUCCESS || dead == SQL_CD_TRUE) {
 		return FAILURE;
 	}
 	return SUCCESS;
