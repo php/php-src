@@ -259,6 +259,7 @@ int fuzzer_do_request_from_buffer(
 			if (execute) {
 				zend_execute(op_array, NULL);
 			}
+			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
