@@ -386,7 +386,7 @@ static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
 	ret = SQLGetInfo(H->dbc, SQL_DATA_SOURCE_READ_ONLY, d_name,
 		sizeof(d_name), &len);
 
-	if(ret != SQL_SUCCESS || len == 0) {
+	if (ret != SQL_SUCCESS || len == 0) {
 		return FAILURE;
 	}
 	return SUCCESS;
