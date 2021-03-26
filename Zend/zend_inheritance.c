@@ -2008,10 +2008,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 	zend_property_info *coliding_prop;
 	zend_property_info *new_prop;
 	zend_string* prop_name;
-	const char* class_name_unused;
 	bool not_compatible;
 	zval* prop_value;
-	uint32_t flags;
 	zend_string *doc_comment;
 
 	/* In the following steps the properties are inserted into the property table
@@ -2023,22 +2021,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 		if (!traits[i]) {
 			continue;
 		}
-		ZEND_HASH_FOREACH_PTR(&traits[i]->properties_info, property_info) {
-			/* first get the unmangeld name if necessary,
-			 * then check whether the property is already there
-			 */
-			flags = property_info->flags;
-			if (flags & ZEND_ACC_PUBLIC) {
-				prop_name = zend_string_copy(property_info->name);
-			} else {
-				const char *pname;
-				size_t pname_len;
-
-				/* for private and protected we need to unmangle the names */
-				zend_unmangle_property_name_ex(property_info->name,
-											&class_name_unused, &pname, &pname_len);
-				prop_name = zend_string_init(pname, pname_len, 0);
-			}
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
+			uint32_t flags = property_info->flags;
 
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
