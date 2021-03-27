@@ -119,7 +119,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 	} else if (Z_OBJ_P(val)->properties == NULL
 	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
 	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties) {
-		/* Optimized version without rebulding properties HashTable */
+		/* Optimized version without rebuilding properties HashTable */
 		zend_object *obj = Z_OBJ_P(val);
 		zend_class_entry *ce = obj->ce;
 		zend_property_info *prop_info;
@@ -133,7 +133,11 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		}
 
 		PHP_JSON_HASH_PROTECT_RECURSION(obj);
+
 		smart_str_appendc(buf, '{');
+
+		++encoder->depth;
+
 		for (i = 0; i < ce->default_properties_count; i++) {
 			prop_info = ce->properties_info_table[i];
 			if (!prop_info) {
@@ -173,6 +177,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 				PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 				return FAILURE;
 			}
+		}
+
+		--encoder->depth;
+
+		if (need_comma) {
+			php_json_pretty_print_char(buf, options, '\n');
+			php_json_pretty_print_indent(buf, options, encoder);
 		}
 		smart_str_appendc(buf, '}');
 		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
