@@ -40,6 +40,7 @@ local action_names = {
   "STOP", "SECTION", "ESC", "REL_EXT",
   "ALIGN", "REL_LG", "LABEL_LG",
   "REL_PC", "LABEL_PC", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML",
+  "VREG"
 }
 
 -- Maximum number of section buffer positions for dasm_put().
@@ -246,7 +247,7 @@ local map_cond = {
 
 local parse_reg_type
 
-local function parse_reg(expr)
+local function parse_reg(expr, shift)
   if not expr then werror("expected register name") end
   local tname, ovreg = match(expr, "^([%w_]+):(@?%l%d+)$")
   local tp = map_type[tname or expr]
@@ -266,18 +267,29 @@ local function parse_reg(expr)
       elseif parse_reg_type ~= rt then
 	werror("register size mismatch")
       end
-      return r, tp
+      return shl(r, shift or 0), tp
     end
+  end
+  -- Allow Rx(...) for dynamic register names
+  local vrt, vreg = match(expr, "^R([xwqdshb])(%b())$")
+  if vreg then
+    if not parse_reg_type then
+      parse_reg_type = vrt
+    elseif parse_reg_type ~= vrt then
+      werror("register size mismatch")
+    end
+    if shift then waction("VREG", shift, vreg) end
+    return 0
   end
   werror("bad register name `"..expr.."'")
 end
 
 local function parse_reg_base(expr)
   if expr == "sp" then return 0x3e0 end
-  local base, tp = parse_reg(expr)
+  local base, tp = parse_reg(expr, 5)
   if parse_reg_type ~= "x" then werror("bad register type") end
   parse_reg_type = false
-  return shl(base, 5), tp
+  return base, tp
 end
 
 local parse_ctx = {}
@@ -403,7 +415,7 @@ local function parse_imm_load(imm, scale)
     end
     werror("out of range immediate `"..imm.."'")
   else
-    waction("IMML", 0, imm)
+    waction("IMML", scale, imm)
     return 0
   end
 end
@@ -470,7 +482,7 @@ local function parse_load(params, nparams, n, op)
       if reg and tailr ~= "" then
 	local base, tp = parse_reg_base(reg)
 	if tp then
-	  waction("IMML", 0, format(tp.ctypefmt, tailr))
+	  waction("IMML", shr(op, 30), format(tp.ctypefmt, tailr))
 	  return op + base
 	end
       end
@@ -494,7 +506,7 @@ local function parse_load(params, nparams, n, op)
 	op = op + parse_imm_load(imm, scale)
       else
 	local p2b, p3b, p3s = match(p2a, "^,%s*([^,%s]*)%s*,?%s*(%S*)%s*(.*)$")
-	op = op + shl(parse_reg(p2b), 16) + 0x00200800
+	op = op + parse_reg(p2b, 16) + 0x00200800
 	if parse_reg_type ~= "x" and parse_reg_type ~= "w" then
 	  werror("bad index register type")
 	end
@@ -891,15 +903,15 @@ local function parse_template(params, template, nparams, pos)
   for p in gmatch(sub(template, 9), ".") do
     local q = params[n]
     if p == "D" then
-      op = op + parse_reg(q); n = n + 1
+      op = op + parse_reg(q, 0); n = n + 1
     elseif p == "N" then
-      op = op + shl(parse_reg(q), 5); n = n + 1
+      op = op + parse_reg(q, 5); n = n + 1
     elseif p == "M" then
-      op = op + shl(parse_reg(q), 16); n = n + 1
+      op = op + parse_reg(q, 16); n = n + 1
     elseif p == "A" then
-      op = op + shl(parse_reg(q), 10); n = n + 1
+      op = op + parse_reg(q, 10); n = n + 1
     elseif p == "m" then
-      op = op + shl(parse_reg(params[n-1]), 16)
+      op = op + parse_reg(params[n-1], 16)
 
     elseif p == "p" then
       if q == "sp" then params[n] = "@x31" end
