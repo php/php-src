@@ -154,6 +154,10 @@ PHP 8.1 UPGRADE NOTES
 - FPM:
   . Added openmetrics status format. It can be used by Prometheus to fetch FPM
     metrics.
+  . Added new pool option for the dynamic process manager called
+    pm.max_spawn_rate. It allows to start number of children in a faster rate
+    when dynamic pm is selected. The default value is 32 which was the previous
+    hard coded value.
 
 - hash:
   . The following functions have changed signatures:

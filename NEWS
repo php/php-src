@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - FPM:
   . Added openmetrics status format. (Cees-Jan Kiewiet)
   . Enable process renaming on macOS. (devnexen)
+  . Added pm.max_spawn_rate option to configure max spawn child processes rate.
+    (Paulius Sapragonas)
 
 - FTP:
   . Convert resource<ftp> to object \FTPConnection. (Sara)
