@@ -147,8 +147,8 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
 [002] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 4 present
 [003] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
 [004] No data supplied for parameters in prepared statement
-[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, int given
-[006] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, stdClass given
+[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, int given
+[006] mysqli_stmt::execute(): Argument #1 ($params) must be of type array, stdClass given
 [007] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
 [008] mysqli_stmt::execute(): Argument #1 ($params) must be a list array
 done!

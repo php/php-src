@@ -505,7 +505,7 @@ class mysqli_stmt
      * @return bool
      * @alias mysqli_stmt_execute
      */
-    public function execute(?array $params = null) {}
+    public function execute(array $params = []) {}
 
     /**
      * @return bool|null
@@ -642,10 +642,10 @@ function mysqli_error(mysqli $mysql): string {}
 
 function mysqli_error_list(mysqli $mysql): array {}
 
-function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
+function mysqli_stmt_execute(mysqli_stmt $statement, array $params = []): bool {}
 
 /** @alias mysqli_stmt_execute */
-function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
+function mysqli_execute(mysqli_stmt $statement, array $params = []): bool {}
 
 function mysqli_fetch_field(mysqli_result $result): object|false {}
 
