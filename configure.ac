@@ -141,9 +141,9 @@ echo "#define PHP_RELEASE_VERSION $PHP_RELEASE_VERSION" >> php_version.h.new
 echo "#define PHP_EXTRA_VERSION \"$PHP_EXTRA_VERSION\"" >> php_version.h.new
 echo "#define PHP_VERSION \"$PHP_VERSION\"" >> php_version.h.new
 echo "#define PHP_VERSION_ID $PHP_VERSION_ID" >> php_version.h.new
-cmp php_version.h.new $srcdir/main/php_version.h >/dev/null 2>&1
+cmp php_version.h.new "$srcdir/main/php_version.h" >/dev/null 2>&1
 if test $? -ne 0 ; then
-  rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
+  rm -f "$srcdir/main/php_version.h" && mv php_version.h.new "$srcdir/main/php_version.h" && \
   echo 'Updated main/php_version.h'
 else
   rm -f php_version.h.new
@@ -153,22 +153,23 @@ dnl Settings we want to make before the checks.
 dnl ----------------------------------------------------------------------------
 
 php_shtool=$srcdir/build/shtool
-T_MD=`$php_shtool echo -n -e %B`
-T_ME=`$php_shtool echo -n -e %b`
+T_MD=`"$php_shtool" echo -n -e %B`
+T_ME=`"$php_shtool" echo -n -e %b`
 
 PHP_INIT_BUILD_SYSTEM
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-abs_srcdir=`(cd $srcdir; pwd)`
+abs_srcdir=`(cd "$srcdir"; pwd)`
+abs_srcdir_escaped="$(echo "$abs_srcdir" | "$SED" 's/ /\\ /g')"
 abs_builddir=`pwd`
 
 dnl Because `make install` is often performed by the superuser, we create the
 dnl libs subdirectory as the user who configures PHP. Otherwise, the current
 dnl user will not be able to delete libs or the contents of libs.
 
-$php_shtool mkdir -p libs
+"$php_shtool" mkdir -p libs
 rm -f libs/*
 
 dnl Checks for programs.
@@ -786,7 +787,7 @@ if test "$PHP_GCOV" = "yes"; then
   fi
 
   dnl Check if ccache is being used.
-  case `$php_shtool path $CC` in
+  case `"$php_shtool" path $CC` in
     *ccache*[)] gcc_ccache=yes;;
     *[)] gcc_ccache=no;;
   esac
@@ -1222,7 +1223,8 @@ case `eval echo $datadir` in
 esac
 
 phplibdir=`pwd`/modules
-$php_shtool mkdir -p $phplibdir
+phplibdir=$(echo "$phplibdir" | "$SED" 's/ /\\ /g')
+"$php_shtool" mkdir -p "$phplibdir"
 phptempdir=`pwd`/libs
 
 old_exec_prefix=$exec_prefix
@@ -1233,7 +1235,7 @@ libdir=`eval echo $libdir`
 datadir=`eval eval echo $datadir`
 
 dnl Build extension directory path.
-ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' "$srcdir/Zend/zend_modules.h"|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
 
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO
@@ -1527,9 +1529,9 @@ PHP_GEN_GLOBAL_MAKEFILE
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
 dnl Make directories when building in a separate build directory.
-$php_shtool mkdir -p pear
-$php_shtool mkdir -p scripts
-$php_shtool mkdir -p scripts/man1
+"$php_shtool" mkdir -p pear
+"$php_shtool" mkdir -p scripts
+"$php_shtool" mkdir -p scripts/man1
 
 ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
@@ -1564,7 +1566,7 @@ fi
 
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
+test -d Zend || "$php_shtool" mkdir Zend
 
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
@@ -1573,10 +1575,10 @@ FEO
 dnl Run this only when generating all the files.
 if test -n "\$REDO_ALL"; then
   echo "creating main/internal_functions.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
+  AWK="$AWK" sh "$srcdir/build/genif.sh" "$srcdir/main/internal_functions.c.in" "$EXT_STATIC" > main/internal_functions.c
 
   echo "creating main/internal_functions_cli.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
+  AWK="$AWK" sh "$srcdir/build/genif.sh" "$srcdir/main/internal_functions.c.in" "$EXT_CLI_STATIC" > main/internal_functions_cli.c
 
     if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then

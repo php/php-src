@@ -2,8 +2,8 @@
 #
 # Generate credits_*.h headers from the ext/*/CREDITS and sapi/*/CREDITS files.
 
-# Go to project root directory
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+# Go to project root directory.
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)"
 
 awkprog='
 BEGIN { FS = "\n|\r\n|\r"; RS = "" }

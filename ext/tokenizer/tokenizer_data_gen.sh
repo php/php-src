@@ -3,7 +3,7 @@
 # Generate the tokenizer extension data file from the parser header file.
 
 # Go to project root directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)"
 
 infile="Zend/zend_language_parser.h"
 outfile="ext/tokenizer/tokenizer_data.c"

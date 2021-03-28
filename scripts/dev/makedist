@@ -6,7 +6,7 @@
 # Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
 # Go to project root directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)"
 
 # Process options and arguments.
 while :; do

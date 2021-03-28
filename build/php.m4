@@ -43,7 +43,7 @@ dnl Execute code, if variable is not set in namespace.
 dnl
 AC_DEFUN([PHP_RUN_ONCE],[
   changequote({,})
-  unique=`echo $2|$SED 's/[^a-zA-Z0-9]/_/g'`
+  unique=`echo $2|"$SED" 's/[^a-zA-Z0-9]/_/g'`
   changequote([,])
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
   if test -n "$unique" && test "`eval $cmd`" = "" ; then
@@ -59,13 +59,14 @@ dnl Expands path to an absolute path and assigns it to variable.
 dnl
 AC_DEFUN([PHP_EXPAND_PATH],[
   if test -z "$1" || echo "$1" | grep '^/' >/dev/null ; then
-    $2=$1
+    $2=$(echo "$1" | "$SED" 's/ /\\ /g')
   else
     changequote({,})
-    ep_dir=`echo $1|$SED 's%/*[^/][^/]*/*$%%'`
+    ep_dir=`echo $1|"$SED" 's%/*[^/][^/]*/*$%%'`
     changequote([,])
     ep_realdir=`(cd "$ep_dir" && pwd)`
-    $2="$ep_realdir"/`basename "$1"`
+    ep_realdir_escaped="$(echo "$ep_realdir" | "$SED" 's/ /\\ /g')"
+    $2="$ep_realdir_escaped"/`basename "$1"`
   fi
 ])
 
@@ -135,12 +136,12 @@ dnl Creates build directories and Makefile placeholders.
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-test -d include || $php_shtool mkdir include
+test -d include || "$php_shtool" mkdir include
 > Makefile.objects
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the grep line itself.
 pattern=define
-$EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/dev/null
+$EGREP $pattern'.*include/php' "$srcdir/configure" | "$SED" 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl
@@ -149,17 +150,18 @@ dnl
 dnl Generates the global makefile.
 dnl
 AC_DEFUN([PHP_GEN_GLOBAL_MAKEFILE],[
+  abs_builddir_escaped="$(echo "$abs_builddir" | "$SED" 's/ /\\ /g')"
   cat >Makefile <<EOF
-srcdir = $abs_srcdir
-builddir = $abs_builddir
-top_srcdir = $abs_srcdir
-top_builddir = $abs_builddir
+srcdir = $abs_srcdir_escaped
+builddir = $abs_builddir_escaped
+top_srcdir = $abs_srcdir_escaped
+top_builddir = $abs_builddir_escaped
 EOF
   for i in $PHP_VAR_SUBST; do
     eval echo "$i = \$$i" >> Makefile
   done
 
-  cat $abs_srcdir/build/Makefile.global Makefile.fragments Makefile.objects >> Makefile
+  cat "$abs_srcdir/build/Makefile.global" Makefile.fragments Makefile.objects >> Makefile
 ])
 
 dnl
@@ -173,7 +175,11 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
   ifelse($1,,src=$ext_srcdir/Makefile.frag,src=$1)
   ifelse($2,,ac_srcdir=$ext_srcdir,ac_srcdir=$2)
   ifelse($3,,ac_builddir=$ext_builddir,ac_builddir=$3)
-  test -f "$src" && $SED -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
+
+  ac_srcdir_double_escaped="$(echo "$ac_srcdir" | "$SED" 's/ /\\\\ /g')"
+  ac_builddir_double_escaped="$(echo "$ac_builddir" | "$SED" 's/ /\\\\ /g')"
+
+  test -f "$src" && "$SED" -e "s#\$(srcdir)#$ac_srcdir_double_escaped#g" -e "s#\$(builddir)#$ac_builddir_double_escaped#g" "$src" >> Makefile.fragments
 ])
 
 dnl
@@ -228,9 +234,9 @@ AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl Relative to source- or build-directory?
 dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
-  ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I\"$abs_srcdir\"" ;;
+  /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I\"$ac_bdir\" -I\"$abs_srcdir/$ac_bdir\"" ;;
+  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I\"$ac_bdir\" -I\"$ac_srcdir\"" ;;
   esac
 
 dnl how to build .. shared or static?
@@ -251,15 +257,16 @@ dnl Append to the array which has been dynamically chosen at m4 time.
 
 dnl Choose the right compiler/flags/etc. for the source-file.
       case $ac_src in
-        *.c[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-        *.s[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-        *.S[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
-        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $3 $ac_inc $b_cxx_meta -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $6$b_cxx_post" ;;
+        *.c[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c \"$ac_srcdir$ac_src\" -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.s[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c \"$ac_srcdir$ac_src\" -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.S[)] ac_comp="$b_c_pre $3 $ac_inc $b_c_meta -c \"$ac_srcdir$ac_src\" -o $ac_bdir$ac_obj.$b_lo $6$b_c_post" ;;
+        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $3 $ac_inc $b_cxx_meta -c \"$ac_srcdir$ac_src\" -o $ac_bdir$ac_obj.$b_lo $6$b_cxx_post" ;;
       esac
 
 dnl Create a rule for the object/source combo.
+    ac_srcdir_escaped="$(echo "$ac_srcdir" | "$SED" 's/ /\\ /g')"
     cat >>Makefile.objects<<EOF
-$ac_bdir[$]ac_obj.lo: $ac_srcdir[$]ac_src
+$ac_bdir[$]ac_obj.lo: $ac_srcdir_escaped[$]ac_src
 	$ac_comp
 EOF
   done
@@ -335,7 +342,7 @@ dnl Stores the location of libgcc in libgcc_libpath.
 dnl
 AC_DEFUN([PHP_LIBGCC_LIBPATH],[
   changequote({,})
-  libgcc_libpath=`$1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%'`
+  libgcc_libpath=`$1 --print-libgcc-file-name|"$SED" 's%/*[^/][^/]*$%%'`
   changequote([,])
 ])
 
@@ -474,9 +481,9 @@ AC_DEFUN([PHP_ADD_INCLUDE],[
     PHP_EXPAND_PATH($1, ai_p)
     PHP_RUN_ONCE(INCLUDEPATH, $ai_p, [
       if test "$2"; then
-        INCLUDES="-I$ai_p $INCLUDES"
+        INCLUDES="-I\"$ai_p\" $INCLUDES"
       else
-        INCLUDES="$INCLUDES -I$ai_p"
+        INCLUDES="$INCLUDES -I\"$ai_p\""
       fi
     ])
   fi
@@ -653,7 +660,7 @@ ext_output="yes, shared"
 ext_shared=yes
 case [$]$1 in
 shared,*[)]
-  $1=`echo "[$]$1"|$SED 's/^shared,//'`
+  $1=`echo "[$]$1"|"$SED" 's/^shared,//'`
   ;;
 shared[)]
   $1=yes
@@ -906,7 +913,7 @@ AC_DEFUN([PHP_ADD_BUILD_DIR],[
   ifelse($2,,[
     BUILD_DIR="$BUILD_DIR $1"
   ], [
-    $php_shtool mkdir -p $1
+    "$php_shtool" mkdir -p $1
   ])
 ])
 
@@ -914,7 +921,7 @@ dnl
 dnl PHP_GEN_BUILD_DIRS
 dnl
 AC_DEFUN([PHP_GEN_BUILD_DIRS],[
-  $php_shtool mkdir -p $BUILD_DIR
+  "$php_shtool" mkdir -p $BUILD_DIR
 ])
 
 dnl
@@ -937,7 +944,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
   ext_dir=[]PHP_EXT_DIR($1)
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|"$SED" "s#@ext_srcdir@#$ext_srcdir#g"|"$SED" "s#@ext_builddir@#$ext_builddir#g"`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -1945,7 +1952,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   unset ICONV_DIR
 
   dnl Create the directories for a VPATH build.
-  $php_shtool mkdir -p ext/iconv
+  "$php_shtool" mkdir -p ext/iconv
 
   echo > ext/iconv/php_have_bsd_iconv.h
   echo > ext/iconv/php_have_ibm_iconv.h
@@ -2091,7 +2098,7 @@ dnl
 dnl This macro is used to get a comparable version for Apache.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
-  ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
+  ac_output=`$1 -v 2>&1 | grep version | "$SED" -e 's/Oracle-HTTP-//'`
   ac_IFS=$IFS
 IFS="- /.
 "
@@ -2166,11 +2173,11 @@ dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    if test -f "$abs_srcdir/include/php/ext/pdo/php_pdo_driver.h"; then
       pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    elif test -f "$abs_srcdir/ext/pdo/php_pdo_driver.h"; then
       pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
+    elif test -f "$phpincludedir/ext/pdo/php_pdo_driver.h"; then
       pdo_cv_inc_path=$phpincludedir/ext
     fi
   ])
@@ -2355,7 +2362,7 @@ dnl DTrace objects.
   case [$]php_sapi_module in
   shared[)]
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_objs="[$]dtrace_objs `echo $ac_lo | "$SED" -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
     done;
     ;;
   *[)]
@@ -2366,12 +2373,13 @@ dnl DTrace objects.
 dnl Generate Makefile.objects entries. The empty $ac_provsrc command stops an
 dnl implicit circular dependency in GNU Make which causes the .d file to be
 dnl overwritten (Bug 61268).
+  ac_srcdir_escaped="$(echo "$ac_srcdir" | "$SED" 's/ /\\ /g')"
   cat>>Makefile.objects<<EOF
 
 $abs_srcdir/$ac_provsrc:;
 
-$ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
-	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
+$ac_bdir[$]ac_hdrobj: $abs_srcdir_escaped/$ac_provsrc
+	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir_escaped[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
 
 \$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
 
@@ -2379,12 +2387,12 @@ EOF
 
   case $host_alias in
   *solaris*|*linux*|*freebsd*)
-    dtrace_prov_name="`echo $ac_provsrc | $SED -e 's#\(.*\)\/##'`.o"
-    dtrace_lib_dir="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#'`/.libs"
-    dtrace_d_obj="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#'`.o"
+    dtrace_prov_name="`echo $ac_provsrc | "$SED" -e 's#\(.*\)\/##'`.o"
+    dtrace_lib_dir="`echo $ac_bdir[$]ac_provsrc | "$SED" -e 's#\(.*\)/[^/]*#\1#'`/.libs"
+    dtrace_d_obj="`echo $ac_bdir[$]ac_provsrc | "$SED" -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#'`.o"
     dtrace_nolib_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_lib_objs="[$]dtrace_lib_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_lib_objs="[$]dtrace_lib_objs `echo $ac_lo | "$SED" -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
     done;
     dnl Always attempt to create both PIC and non-PIC DTrace objects (Bug 63692)
     cat>>Makefile.objects<<EOF
@@ -2713,6 +2721,6 @@ dnl
 AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
   AC_MSG_NOTICE([patching $1])
 
-  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
+  "$SED" -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
     > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
 ])
