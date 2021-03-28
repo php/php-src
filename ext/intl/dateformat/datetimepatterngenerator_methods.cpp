@@ -50,7 +50,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (dtpgo->dtpg != NULL) {
-		intl_errors_set(DTPATTERNGEN_ERROR_P(dtpgo), U_ILLEGAL_ARGUMENT_ERROR, "datetimepatterngenerator_create: cannot call constructor twice", 0);
+		intl_errors_set(DTPATTERNGEN_ERROR_P(dtpgo), U_ILLEGAL_ARGUMENT_ERROR, "Cannot call constructor twice", 0);
 		return FAILURE;
 	}
 
@@ -66,7 +66,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (U_FAILURE(DTPATTERNGEN_ERROR_CODE(dtpgo))) {
 		intl_error_set(NULL, DTPATTERNGEN_ERROR_CODE(dtpgo),
-				"datetimepatterngenerator_create: error creating DateTimePatternGenerator",
+				"Error creating DateTimePatternGenerator",
 				0);
 		goto error;
 	}
@@ -129,11 +129,11 @@ U_CFUNC PHP_FUNCTION(datetimepatterngenerator_get_best_pattern)
 
 	intl_stringFromChar(skeleton_uncleaned, skeleton_str, skeleton_len, DTPATTERNGEN_ERROR_CODE_P(dtpgo));
 
-	INTL_METHOD_CHECK_STATUS(dtpgo, "datetimepatterngenerator_get_best_pattern: skeleton was not a valid UTF-8 string");
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Skeleton is not a valid UTF-8 string");
 
 	skeleton = dtpgo->dtpg->getSkeleton(skeleton_uncleaned, DTPATTERNGEN_ERROR_CODE(dtpgo));
 
-	INTL_METHOD_CHECK_STATUS(dtpgo, "datetimepatterngenerator_get_best_pattern: error getting cleaned skeleton");
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Error getting cleaned skeleton");
 
 	{
 		zend_string *u8str;
@@ -141,11 +141,11 @@ U_CFUNC PHP_FUNCTION(datetimepatterngenerator_get_best_pattern)
 
 		result = dtpgo->dtpg->getBestPattern(skeleton, DTPATTERNGEN_ERROR_CODE(dtpgo));
 
-		INTL_METHOD_CHECK_STATUS(dtpgo, "datetimepatterngenerator_get_best_pattern: error retrieving pattern");
+		INTL_METHOD_CHECK_STATUS(dtpgo, "Error retrieving pattern");
 
 		u8str = intl_charFromString(result, DTPATTERNGEN_ERROR_CODE_P(dtpgo));
 
-		INTL_METHOD_CHECK_STATUS(dtpgo, "datetimepatterngenerator_get_best_pattern: error converting result to UTF-8");
+		INTL_METHOD_CHECK_STATUS(dtpgo, "Error converting result to UTF-8");
 
 		RETVAL_STR(u8str);
 	}
