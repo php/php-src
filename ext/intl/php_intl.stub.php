@@ -213,6 +213,10 @@ function datefmt_get_error_code(IntlDateFormatter $formatter): int {}
 
 function datefmt_get_error_message(IntlDateFormatter $formatter): string {}
 
+function datetimepatterngenerator_create(?string $locale = null): ?IntlDateTimePatternGenerator {}
+
+function datetimepatterngenerator_get_best_pattern(IntlDateTimePatternGenerator $patternGenerator, string $skeleton): string|false {}
+
 /* formatter */
 
 function numfmt_create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
