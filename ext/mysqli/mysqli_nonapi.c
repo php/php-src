@@ -449,8 +449,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (!mode || (mode & ~MYSQLI_BOTH)) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_FETCH_NUM, "
-		                 "MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");
 		RETURN_THROWS();
 	}
 
