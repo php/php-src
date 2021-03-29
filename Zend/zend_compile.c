@@ -49,7 +49,6 @@
 			(target)->u.op = src; \
 		} \
 	} while (0)
-
 #define FC(member) (CG(file_context).member)
 
 typedef struct _zend_loop_var {
