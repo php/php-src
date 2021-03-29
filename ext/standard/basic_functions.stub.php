@@ -867,7 +867,7 @@ function unlink(string $filename, $context = null): bool {}
 function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $stream */
-function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
+function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
 
 /** @param resource $stream */
 function fgetcsv($stream, ?int $length = null, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
