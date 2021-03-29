@@ -4956,7 +4956,7 @@ void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 		/* Mark this as an "expression throw" for opcache. */
 		opline->extended_value = ZEND_THROW_IS_EXPR;
 		result->op_type = IS_CONST;
-		ZVAL_BOOL(&result->u.constant, 1);
+		ZVAL_TRUE(&result->u.constant);
 	}
 }
 /* }}} */
@@ -8855,7 +8855,7 @@ void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	result->op_type = IS_CONST;
-	ZVAL_BOOL(&result->u.constant, 1);
+	ZVAL_TRUE(&result->u.constant);
 }
 /* }}} */
 
