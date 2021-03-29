@@ -41,7 +41,6 @@
 			target = (src)->u.op; \
 		} \
 	} while (0)
-
 #define GET_NODE(target, src) do { \
 		(target)->op_type = src ## _type; \
 		if ((target)->op_type == IS_CONST) { \
