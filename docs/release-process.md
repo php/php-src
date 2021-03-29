@@ -37,14 +37,13 @@
 
     Moving extensions from php-src to PECL:
 
-    * Ask someone with Git admin access to create a new empty repository on
-      https://git.php.net under the PECL projects and a belonging GitHub mirror.
+    * Ask someone with Git admin access to create a new empty repository GitHub.
 
     * Clone a new copy of the php-src repository (it will rewrite history, keep
       contributors commits and include only the extension folder):
 
         ```sh
-        git clone https://git.php.net/repository/php-src.git ext-name
+        git clone git@github.com:php/php-src.git ext-name
         cd ext-name
         git filter-branch --prune-empty --subdirectory-filter ext/ext-name master
         ```
@@ -52,7 +51,7 @@
     * Set remote Git push URL for the PECL extension:
 
         ```sh
-        git remote set-url origin git@git.php.net:pecl/category/ext-name
+        git remote set-url origin git@github.com:php/pecl-ext-name.git
         ```
 
     * Create branch and tags structure appropriate for the extension and push:
@@ -204,7 +203,7 @@
     sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
     ```
  6. For RCs, post tweet with release announcement (and link to news article on
-    php.net) ([@official_php](https://twitter.com/official_php))  
+    php.net) ([@official_php](https://twitter.com/official_php))
 
 ## Rolling a stable release
 
@@ -347,9 +346,9 @@
     php-announce@ is its own completely separate email. This is to make sure
     that replies to the announcement on php-general@ or internals@ will not
     accidentally hit the php-announce@ mailinglist.
-    
-11. Post tweet with release announcement and link to news article on php.net 
-    ([@official_php](https://twitter.com/official_php))  
+
+11. Post tweet with release announcement and link to news article on php.net
+    ([@official_php](https://twitter.com/official_php))
 
 ## Re-releasing the same version (or -pl)
 
@@ -403,7 +402,9 @@
     Bump API version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`,
     and `main/php.h`.
 
-    Example: https://git.php.net/?p=php-src.git;a=commit;h=a63c99b
+    Example:
+    https://github.com/php/php-src/commit/a63c99ba624cff86292ffde97089428e68c6fc10
+
     Push the new branch and the commit just added to master.
 
  3. Immediately notify internals@ of the branch cut and advise the new merging
