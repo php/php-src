@@ -128,6 +128,12 @@ PHP 8.1 UPGRADE NOTES
     reference representation since PHP 7.0.
   . debug_zval_dump() will not print "interned" instead of a dummy refcount of
     one for interned strings and immutable arrays.
+  . fputcsv() now accepts a new "eol" argument which allow to define a custom
+    eol sequence, the default remains the same and is "\n".
+
+- SPL:
+  . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
+    define a custom eol sequence, the default remains the same and is "\n".
 
 ========================================
 2. New Features

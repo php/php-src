@@ -83,3 +83,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
       of char* for the optional sequence/table name.
     - The php_pdo_str_tolower_dup() PDO_API has been removed use zend_str_tolower_dup()
       or zend_string_tolower_ex().
+
+  c. ext/standard
+    - The PHP API php_fputcsv() now takes an extra zend_string* argument at the end
+      for a custom EOL sequence, passing NULL provides the old default of "\n".
