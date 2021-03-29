@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
     (cmb)
 
+- SOAP:
+  . Fixed bug #69668 (SOAP special XML characters in namespace URIs not
+    encoded). (cmb)
+
 01 Apr 2021, PHP 8.0.4
 
 - Core:
