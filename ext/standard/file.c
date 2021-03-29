@@ -1853,7 +1853,7 @@ PHP_FUNCTION(fputcsv)
 /* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str) */
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str)
 {
-	int count, i = 0;
+	uint32_t count, i = 0;
 	size_t ret;
 	zval *field_tmp;
 	smart_str csvline = {0};
@@ -1899,7 +1899,7 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 		}
 		zend_tmp_string_release(tmp_field_str);
 	} ZEND_HASH_FOREACH_END();
-	
+
 	if (eol_str) {
 		smart_str_append(&csvline, eol_str);
 	} else {
