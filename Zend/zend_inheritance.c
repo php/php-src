@@ -2080,8 +2080,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
 					}
-
-					zend_string_release_ex(prop_name, 0);
 					continue;
 				}
 			}
@@ -2108,8 +2106,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					GC_ADDREF(new_prop->attributes);
 				}
 			}
-
-			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
