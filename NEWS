@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #69668 (SOAP special XML characters in namespace URIs not
     encoded). (cmb)
 
+- Standard:
+  . Fixed bug #80915 (Taking a reference to $_SERVER hides its values from
+    phpinfo()). (Rowan Tommins)
+
 01 Apr 2021, PHP 8.0.4
 
 - Core:
