@@ -236,7 +236,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 			}
 		}
 		Z_ADDREF_P(zv);
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), zv);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), zv);
 	} ZEND_HASH_FOREACH_END();
 }
 

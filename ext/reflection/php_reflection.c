@@ -2046,7 +2046,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameters)
 			i < fptr->common.required_num_args,
 			&parameter
 		);
-		add_next_index_zval(return_value, &parameter);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &parameter);
 
 		arg_info++;
 	}
@@ -4239,7 +4239,7 @@ ZEND_METHOD(ReflectionClass, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter)
+static void _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
 		return;
@@ -4248,7 +4248,7 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	if (mptr->common.fn_flags & filter) {
 		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
-		add_next_index_zval(retval, &method);
+		zend_hash_next_index_insert_new(ht, &method);
 	}
 }
 /* }}} */
@@ -4274,7 +4274,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-		_addmethod(mptr, ce, return_value, filter);
+		_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
 	} ZEND_HASH_FOREACH_END();
 
 	if (instanceof_function(ce, zend_ce_closure)) {
@@ -4289,7 +4289,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 		}
 		zend_function *closure = zend_get_closure_invoke_method(obj);
 		if (closure) {
-			_addmethod(closure, ce, return_value, filter);
+			_addmethod(closure, ce, Z_ARRVAL_P(return_value), filter);
 		}
 		if (!has_obj) {
 			zval_ptr_dtor(&obj_tmp);
@@ -4392,7 +4392,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 /* }}} */
 
 /* {{{ _addproperty */
-static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, zval *retval, long filter)
+static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, HashTable *ht, long filter)
 {
 	if ((pptr->flags & ZEND_ACC_PRIVATE) && pptr->ce != ce) {
 		return;
@@ -4401,7 +4401,7 @@ static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_
 	if (pptr->flags	& filter) {
 		zval property;
 		reflection_property_factory(ce, key, pptr, &property);
-		add_next_index_zval(retval, &property);
+		zend_hash_next_index_insert_new(ht, &property);
 	}
 }
 /* }}} */
@@ -4450,7 +4450,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
-		_addproperty(prop_info, key, ce, return_value, filter);
+		_addproperty(prop_info, key, ce, Z_ARRVAL_P(return_value), filter);
 	} ZEND_HASH_FOREACH_END();
 
 	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0) {
@@ -4543,7 +4543,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 		if (Z_ACCESS_FLAGS(constant->value) & filter) {
 			zval class_const;
 			reflection_class_constant_factory(name, constant, &class_const);
-			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &class_const);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -6626,7 +6626,7 @@ ZEND_METHOD(ReflectionEnum, getCases)
 		if (Z_ACCESS_FLAGS(constant->value) & ZEND_CLASS_CONST_IS_CASE) {
 			zval class_const;
 			reflection_enum_case_factory(ce, name, constant, &class_const);
-			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &class_const);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
 		}
 	} ZEND_HASH_FOREACH_END();
 }

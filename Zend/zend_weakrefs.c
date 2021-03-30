@@ -411,7 +411,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 		Z_TRY_ADDREF_P(val);
 		add_assoc_zval(&pair, "value", val);
 
-		zend_hash_next_index_insert(ht, &pair);
+		zend_hash_next_index_insert_new(ht, &pair);
 	} ZEND_HASH_FOREACH_END();
 
 	return ht;
