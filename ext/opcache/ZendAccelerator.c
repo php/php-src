@@ -1675,7 +1675,7 @@ static void zend_accel_set_auto_globals(int mask)
 	int n = 1;
 
 	for (i = 0; i < ag_size ; i++) {
-		if ((mask & n) && !(ZCG(auto_globals_mask) & n)) {
+		if (mask & n) {
 			ZCG(auto_globals_mask) |= n;
 			zend_is_auto_global(jit_auto_globals_str[i]);
 		}
@@ -1948,8 +1948,8 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 		}
 		replay_warnings(persistent_script);
 
-	    if (persistent_script->ping_auto_globals_mask) {
-			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
+	    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 		}
 
 		return zend_accel_load_script(persistent_script, 1);
@@ -2273,8 +2273,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
     /* Fetch jit auto globals used in the script before execution */
-    if (persistent_script->ping_auto_globals_mask) {
-		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
+    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 	}
 
 	return zend_accel_load_script(persistent_script, from_shared_memory);
@@ -3538,8 +3538,8 @@ static void preload_shutdown(void)
 
 static void preload_activate(void)
 {
-	if (ZCSG(preload_script)->ping_auto_globals_mask) {
-		zend_accel_set_auto_globals(ZCSG(preload_script)->ping_auto_globals_mask);
+	if (ZCSG(preload_script)->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+		zend_accel_set_auto_globals(ZCSG(preload_script)->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 	}
 }
 
@@ -4564,8 +4564,8 @@ static zend_result preload_autoload(zend_string *filename)
 
 	zend_hash_add_empty_element(&EG(included_files), filename);
 
-	if (persistent_script->ping_auto_globals_mask) {
-		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
+	if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 	}
 
 	op_array = zend_accel_load_script(persistent_script, 1);
