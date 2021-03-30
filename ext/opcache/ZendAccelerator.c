@@ -1641,7 +1641,6 @@ static const struct jit_auto_global_info
     { "_SERVER",  sizeof("_SERVER")-1},
     { "_ENV",     sizeof("_ENV")-1},
     { "_REQUEST", sizeof("_REQUEST")-1},
-    { "GLOBALS",  sizeof("GLOBALS")-1},
 };
 
 static zend_string *jit_auto_globals_str[4];
