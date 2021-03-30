@@ -2904,7 +2904,11 @@ static void php_date_add(zval *object, zval *interval, zval *return_value) /* {{
 	intobj = Z_PHPINTERVAL_P(interval);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
-	new_time = timelib_add(dateobj->time, intobj->diff);
+	if (intobj->civil_or_wall == PHP_DATE_WALL) {
+		new_time = timelib_add_wall(dateobj->time, intobj->diff);
+	} else {
+		new_time = timelib_add(dateobj->time, intobj->diff);
+	}
 	timelib_time_dtor(dateobj->time);
 	dateobj->time = new_time;
 } /* }}} */
@@ -2957,7 +2961,11 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 		return;
 	}
 
-	new_time = timelib_sub(dateobj->time, intobj->diff);
+	if (intobj->civil_or_wall == PHP_DATE_WALL) {
+		new_time = timelib_sub_wall(dateobj->time, intobj->diff);
+	} else {
+		new_time = timelib_sub(dateobj->time, intobj->diff);
+	}
 	timelib_time_dtor(dateobj->time);
 	dateobj->time = new_time;
 } /* }}} */
@@ -2996,21 +3004,22 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time *t)
 {
-       tzobj->initialized = 1;
-       tzobj->type = t->zone_type;
-       switch (t->zone_type) {
-               case TIMELIB_ZONETYPE_ID:
-                       tzobj->tzi.tz = t->tz_info;
-                       break;
-               case TIMELIB_ZONETYPE_OFFSET:
-                       tzobj->tzi.utc_offset = t->z;
-                       break;
-               case TIMELIB_ZONETYPE_ABBR:
-                       tzobj->tzi.z.utc_offset = t->z;
-                       tzobj->tzi.z.dst = t->dst;
-                       tzobj->tzi.z.abbr = timelib_strdup(t->tz_abbr);
-                       break;
-       }
+	tzobj->initialized = 1;
+	tzobj->type = t->zone_type;
+
+	switch (t->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+			tzobj->tzi.tz = t->tz_info;
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			tzobj->tzi.utc_offset = t->z;
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			tzobj->tzi.z.utc_offset = t->z;
+			tzobj->tzi.z.dst = t->dst;
+			tzobj->tzi.z.abbr = timelib_strdup(t->tz_abbr);
+			break;
+	}
 }
 
 
@@ -3359,8 +3368,6 @@ PHP_FUNCTION(date_diff)
 	dateobj2 = Z_PHPDATE_P(object2);
 	DATE_CHECK_INITIALIZED(dateobj1->time, DateTimeInterface);
 	DATE_CHECK_INITIALIZED(dateobj2->time, DateTimeInterface);
-	timelib_update_ts(dateobj1->time, NULL);
-	timelib_update_ts(dateobj2->time, NULL);
 
 	php_date_instantiate(date_ce_interval, return_value);
 	interval = Z_PHPINTERVAL_P(return_value);
@@ -3369,6 +3376,7 @@ PHP_FUNCTION(date_diff)
 		interval->diff->invert = 0;
 	}
 	interval->initialized = 1;
+	interval->civil_or_wall = PHP_DATE_CIVIL;
 }
 /* }}} */
 
@@ -3848,6 +3856,7 @@ PHP_METHOD(DateInterval, __construct)
 		php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
 		diobj->diff = reltime;
 		diobj->initialized = 1;
+		diobj->civil_or_wall = PHP_DATE_WALL;
 	}
 	zend_restore_error_handling(&error_handling);
 }
@@ -3930,6 +3939,14 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	PHP_DATE_INTERVAL_READ_PROPERTY_I64("special_amount", special.amount);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_weekday_relative", have_weekday_relative, unsigned int, 0);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_special_relative", have_special_relative, unsigned int, 0);
+	{
+		zval *z_arg = zend_hash_str_find(myht, "civil_or_wall", sizeof("civil_or_wall") - 1);
+		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
+		if (z_arg) {
+			zend_long val = zval_get_long(z_arg);
+			(*intobj)->civil_or_wall = val;
+		}
+	}
 	(*intobj)->initialized = 1;
 
 	return 0;
@@ -3996,6 +4013,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
+	diobj->civil_or_wall = PHP_DATE_CIVIL;
 
 cleanup:
 	timelib_time_dtor(time);
