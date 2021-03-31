@@ -289,9 +289,9 @@ static void LSCRIU_Wink_Server_is_Ready(void)
         // Not used for native
         return;
     }
-    if (getenv("LSAPI_UNIQE"))
+    if (getenv("LSAPI_UNIQUE"))
         snprintf(sem_name, sizeof sem_name - 1, "lsphp[hash=%s].is_ready",
-                 getenv("LSAPI_UNIQE"));
+                 getenv("LSAPI_UNIQUE"));
     else
         snprintf(sem_name, sizeof sem_name - 1, "lsphp[euid=0x%x].is_ready",
                  geteuid());
