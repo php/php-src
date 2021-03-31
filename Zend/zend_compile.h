@@ -233,7 +233,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Flag to differenciate cases from constants.            |     |     |     */
+/* Flag to differentiate cases from constants.            |     |     |     */
 /* Stored in Z_ACCESS_FLAGS, must not conflict with       |     |     |     */
 /* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
@@ -1103,7 +1103,7 @@ END_EXTERN_C()
 #define ZEND_COMPILE_EXTENDED_FCALL             (1<<1)
 #define ZEND_COMPILE_EXTENDED_INFO              (ZEND_COMPILE_EXTENDED_STMT|ZEND_COMPILE_EXTENDED_FCALL)
 
-/* call op_array handler of extendions */
+/* call op_array handler of extensions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<2)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
@@ -1111,7 +1111,7 @@ END_EXTERN_C()
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
- * may apper in run-time */
+ * may appear in run-time */
 #define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<4)
 
 /* generate ZEND_DECLARE_CLASS_DELAYED opcode to delay early binding */

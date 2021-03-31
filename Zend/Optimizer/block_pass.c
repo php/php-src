@@ -1458,7 +1458,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/*       is not used on the following path and             */
 					/*       should be used once on the branch path.           */
 					/*                                                         */
-					/*       The pattern works well only if jums processed in  */
+					/*       The pattern works well only if jumps processed in */
 					/*       direct order, otherwise it breaks JMPZ_EX         */
 					/*       sequences too early.                              */
 					last_op->result.var = target->result.var;

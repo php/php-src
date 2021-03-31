@@ -416,7 +416,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 
 		if (ret == (size_t)-1 && errno == EINTR) {
 			/* Read was interrupted, retry once,
-			   If read still fails, giveup with feof==0
+			   If read still fails, give up with feof==0
 			   so script can retry if desired */
 			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}

@@ -113,7 +113,7 @@ zend_function *zend_optimizer_get_called_func(
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
 void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline);
 void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_t *shiftlist);
-int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_arrya, zend_ssa *ssa, zend_call_info **call_map);
+int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map);
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_dtor_effects);
 int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa);
 

@@ -25,21 +25,21 @@
 #define OPTERRARG (3)
 
 // Print error message to stderr and return -2 to distinguish it from '?' command line option.
-static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err) /* {{{ */
+static int php_opt_error(int argc, char * const *argv, int optint, int optchr, int err, int show_err) /* {{{ */
 {
 	if (show_err)
 	{
-		fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr+1);
+		fprintf(stderr, "Error in argument %d, char %d: ", optint, optchr+1);
 		switch(err)
 		{
 		case OPTERRCOLON:
 			fprintf(stderr, ": in flags\n");
 			break;
 		case OPTERRNF:
-			fprintf(stderr, "option not found %c\n", argv[oint][optchr]);
+			fprintf(stderr, "option not found %c\n", argv[optint][optchr]);
 			break;
 		case OPTERRARG:
-			fprintf(stderr, "no argument for option %c\n", argv[oint][optchr]);
+			fprintf(stderr, "no argument for option %c\n", argv[optint][optchr]);
 			break;
 		default:
 			fprintf(stderr, "unknown\n");

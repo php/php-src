@@ -40,7 +40,7 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->limit_extensions) {
 		fpm_worker_pool_free_limit_extensions(wp->limit_extensions);
 	}
-	fpm_unix_free_socket_premissions(wp);
+	fpm_unix_free_socket_permissions(wp);
 	free(wp);
 }
 /* }}} */

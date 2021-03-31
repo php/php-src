@@ -119,7 +119,7 @@ static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long in
 	t.tv_sec = (int)(timeout / 1000);
 	t.tv_nsec = (timeout % 1000) * 1000 * 1000;
 
-	/* wait for inconming event or timeout. We want at least one event or timeout */
+	/* wait for incoming event or timeout. We want at least one event or timeout */
 	nget = 1;
 	ret = port_getn(pfd, events, nevents, &nget, &t);
 	if (ret < 0) {

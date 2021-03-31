@@ -931,7 +931,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 # if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 		/* Create a map region, used for indirect pointers from shared to
-		 * process memory. It's allocatred once and never resized.
+		 * process memory. It's allocated once and never resized.
 		 * All processes must map it into the same address space.
 		 */
 		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
@@ -1374,8 +1374,8 @@ static ZEND_COLD void zend_error_impl(
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 			ZVAL_UNDEF(&EG(user_error_handler));
 
-			/* User error handler may include() additinal PHP files.
-			 * If an error was generated during comilation PHP will compile
+			/* User error handler may include() additional PHP files.
+			 * If an error was generated during compilation PHP will compile
 			 * such scripts recursively, but some CG() variables may be
 			 * inconsistent. */
 

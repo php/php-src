@@ -716,7 +716,7 @@ try_again:
 			} else if (Z_OBJ_P(op)->properties == NULL
 			 && Z_OBJ_HT_P(op)->get_properties_for == NULL
 			 && Z_OBJ_HT_P(op)->get_properties == zend_std_get_properties) {
-				/* Optimized version without rebulding properties HashTable */
+				/* Optimized version without rebuilding properties HashTable */
 				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
 				OBJ_RELEASE(Z_OBJ_P(op));
 				ZVAL_ARR(op, ht);
@@ -2965,7 +2965,7 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 #else
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
 #endif
-			/* both values are integers overflown to the same side, and the
+			/* both values are integers overflowed to the same side, and the
 			 * double comparison may have resulted in crucial accuracy lost */
 			goto string_cmp;
 		}

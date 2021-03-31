@@ -297,7 +297,7 @@ static bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 				zend_class_entry *ce = zend_lookup_class_ex(
 					ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
 					ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
-				/* Avoid recursing if class implements ifself. */
+				/* Avoid recursing if class implements itself. */
 				if (ce && ce != ce1 && unlinked_instanceof(ce, ce2)) {
 					return 1;
 				}
@@ -1734,7 +1734,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			) {
 				fn_copy = *fn;
 
-				/* if it is 0, no modifieres has been changed */
+				/* if it is 0, no modifiers have been changed */
 				if (alias->modifiers) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
@@ -1988,11 +1988,11 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static zend_class_entry* find_first_definition(zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *prop_name, zend_class_entry *coliding_ce) /* {{{ */
+static zend_class_entry* find_first_definition(zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *prop_name, zend_class_entry *colliding_ce) /* {{{ */
 {
 	size_t i;
 
-	if (coliding_ce == ce) {
+	if (colliding_ce == ce) {
 		for (i = 0; i < current_trait; i++) {
 			if (traits[i]
 			 && zend_hash_exists(&traits[i]->properties_info, prop_name)) {
@@ -2001,7 +2001,7 @@ static zend_class_entry* find_first_definition(zend_class_entry *ce, zend_class_
 		}
 	}
 
-	return coliding_ce;
+	return colliding_ce;
 }
 /* }}} */
 
@@ -2009,7 +2009,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 {
 	size_t i;
 	zend_property_info *property_info;
-	zend_property_info *coliding_prop;
+	zend_property_info *colliding_prop;
 	zend_property_info *new_prop;
 	zend_string* prop_name;
 	bool not_compatible;
@@ -2029,28 +2029,28 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			uint32_t flags = property_info->flags;
 
 			/* next: check for conflicts with current class */
-			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
-				if ((coliding_prop->flags & ZEND_ACC_PRIVATE) && coliding_prop->ce != ce) {
+			if ((colliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
+				if ((colliding_prop->flags & ZEND_ACC_PRIVATE) && colliding_prop->ce != ce) {
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
 					not_compatible = 1;
 
-					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
+					if ((colliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC)) &&
-						property_types_compatible(property_info, coliding_prop) == INHERITANCE_SUCCESS
+						property_types_compatible(property_info, colliding_prop) == INHERITANCE_SUCCESS
 					) {
 						/* the flags are identical, thus, the properties may be compatible */
 						zval *op1, *op2;
 						zval op1_tmp, op2_tmp;
 
 						if (flags & ZEND_ACC_STATIC) {
-							op1 = &ce->default_static_members_table[coliding_prop->offset];
+							op1 = &ce->default_static_members_table[colliding_prop->offset];
 							op2 = &traits[i]->default_static_members_table[property_info->offset];
 							ZVAL_DEINDIRECT(op1);
 							ZVAL_DEINDIRECT(op2);
 						} else {
-							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)];
+							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(colliding_prop->offset)];
 							op2 = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
 
@@ -2079,7 +2079,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					if (not_compatible) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
-								ZSTR_VAL(find_first_definition(ce, traits, i, prop_name, coliding_prop->ce)->name),
+								ZSTR_VAL(find_first_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
 								ZSTR_VAL(property_info->ce->name),
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
@@ -2122,7 +2122,7 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 
 	ZEND_ASSERT(ce->num_traits > 0);
 
-	/* complete initialization of trait strutures in ce */
+	/* complete initialization of trait structures in ce */
 	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
 
 	/* first care about all methods to be flattened into the class */
@@ -2136,7 +2136,7 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 		efree(exclude_tables);
 	}
 
-	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
+	/* then flatten the properties into it, to, mostly to notify developer about problems */
 	zend_do_traits_property_binding(ce, traits);
 }
 /* }}} */

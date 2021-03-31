@@ -113,12 +113,12 @@ PHP 8.1 UPGRADE NOTES
 - PDO SQLite:
   . Integers and floats in results sets will now be returned using native PHP
     types. You can restore the previous behavior by enabling the
-    PDO::ATTR_STRINGFIY_FETCHES option.
+    PDO::ATTR_STRINGIFY_FETCHES option.
 
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
   . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),
-    html_entitity_decode() and get_html_translation_table() now use
+    html_entity_decode() and get_html_translation_table() now use
     ENT_QUOTES | ENT_SUBSTITUTE rather than ENT_COMPAT by default. This means
     that ' is escaped to &#039; while previously it was left alone.
     Additionally, malformed UTF-8 will be replaced by a Unicode substitution
@@ -187,7 +187,7 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
-    A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
+    A valid seed value is within the range from 0 to the platform defined UINT_MAX, usually 4294967295.
 
   . Added xxHash. The implementation brings in the following arguments
 
@@ -262,7 +262,7 @@ PHP 8.1 UPGRADE NOTES
     etc. was changed. Now properties are naturally ordered according to their
     declaration and inheritance. Properties declared in a base class are going
     to be before the child properties. This order is consistent with internal
-    layout of properies in zend_objct structure and repeats the order in
+    layout of properties in zend_object structure and repeats the order in
     default_properties_table[] and properties_info_table[]. The old order was
     not documented and was caused by class inheritance implementation details.
 

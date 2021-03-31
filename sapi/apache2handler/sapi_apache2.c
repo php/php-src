@@ -189,7 +189,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 
 	/*
 	 * This loop is needed because ap_get_brigade() can return us partial data
-	 * which would cause premature termination of request read. Therefor we
+	 * which would cause premature termination of request read. Therefore we
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
@@ -675,7 +675,7 @@ zend_first_try {
 		/*
 		 * check if coming due to ErrorDocument
 		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
-		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
+		 * during processing of the request by PHP during POST processing. Therefore we need to re-use the exiting
 		 * PHP instance to handle the request rather then creating a new one.
 		*/
 		if (parent_req && parent_req->status != HTTP_OK && parent_req->status != 413 && strcmp(r->protocol, "INCLUDED")) {

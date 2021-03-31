@@ -708,7 +708,7 @@ try_again:
 			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 			return;
 		}
-		/* If there are no more deletegated values, resume the generator
+		/* If there are no more delegated values, resume the generator
 		 * after the "yield from" expression. */
 	}
 

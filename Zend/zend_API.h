@@ -590,7 +590,7 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem);
  */
 ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, uint32_t *param_count, zval **params);
 
-/** Free arguments connected with zend_fcall_info *fci andset back saved ones.
+/** Free arguments connected with zend_fcall_info *fci and set back saved ones.
  */
 ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_count, zval *params);
 

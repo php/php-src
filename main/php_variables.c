@@ -788,7 +788,7 @@ static bool php_auto_globals_create_files(zend_string *name)
 	return 0; /* don't rearm */
 }
 
-/* Upgly hack to fix HTTP_PROXY issue, see bug #72573 */
+/* Ugly hack to fix HTTP_PROXY issue, see bug #72573 */
 static void check_http_proxy(HashTable *var_table)
 {
 	if (zend_hash_str_exists(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1)) {

@@ -152,7 +152,7 @@ static int fpm_event_devpoll_wait(struct fpm_event_queue_s *queue, unsigned long
 	dopoll.dp_nfds = npollfds;
 	dopoll.dp_timeout = (int)timeout;
 
-	/* wait for inconming event or timeout */
+	/* wait for incoming event or timeout */
 	ret = ioctl(dpfd, DP_POLL, &dopoll);
 
 	if (ret < 0) {

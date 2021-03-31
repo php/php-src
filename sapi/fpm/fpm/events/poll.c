@@ -136,7 +136,7 @@ static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long in
 		memcpy(active_pollfds, pollfds, sizeof(struct pollfd) * npollfds);
 	}
 
-	/* wait for inconming event or timeout */
+	/* wait for incoming event or timeout */
 	ret = poll(active_pollfds, npollfds, timeout);
 	if (ret == -1) {
 

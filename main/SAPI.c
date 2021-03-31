@@ -575,8 +575,8 @@ static void sapi_update_response_code(int ncode)
 }
 
 /*
- * since zend_llist_del_element only remove one matched item once,
- * we should remove them by ourself
+ * since zend_llist_del_element only removes one matched item once,
+ * we should remove them manually
  */
 static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;

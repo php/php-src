@@ -586,7 +586,7 @@ static int zend_add_ns_func_name_literal(zend_string *name) /* {{{ */
 	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(&lc_name);
 
-	/* Lowercased unqualfied name */
+	/* Lowercased unqualified name */
 	if (zend_get_unqualified_name(name, &unqualified_name, &unqualified_name_len)) {
 		lc_name = zend_string_alloc(unqualified_name_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), unqualified_name, unqualified_name_len);
@@ -715,7 +715,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			switch (opline->opcode) {
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
-					/* boolean resuls don't have to be freed */
+					/* boolean results don't have to be freed */
 					return;
 				case ZEND_POST_INC_STATIC_PROP:
 				case ZEND_POST_DEC_STATIC_PROP:
@@ -3234,7 +3234,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			if (zend_propagate_list_refs(var_ast)) {
 				if (!zend_is_variable_or_call(expr_ast)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot assign reference to non referencable value");
+						"Cannot assign reference to non referenceable value");
 				}
 
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);

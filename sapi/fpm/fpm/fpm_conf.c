@@ -893,7 +893,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			struct fpm_worker_pool_config_s *config = wp->config;
 
 			if (!fpm_event_support_edge_trigger()) {
-				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanisme is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
+				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanism is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
 				return -1;
 			}
 
@@ -907,7 +907,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				config->listen_backlog = FPM_BACKLOG_DEFAULT;
 			}
 
-			/* certainely useless but proper */
+			/* certainly useless but proper */
 			config->pm_start_servers = 0;
 			config->pm_min_spare_servers = 0;
 			config->pm_max_spare_servers = 0;
@@ -1688,7 +1688,7 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
-	zlog(ZLOG_NOTICE, "\tevents.mechanism = %s",            fpm_event_machanism_name());
+	zlog(ZLOG_NOTICE, "\tevents.mechanism = %s",            fpm_event_mechanism_name());
 #ifdef HAVE_SYSTEMD
 	zlog(ZLOG_NOTICE, "\tsystemd_interval = %ds",           fpm_global_config.systemd_interval/1000);
 #endif

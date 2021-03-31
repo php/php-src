@@ -541,7 +541,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 		}
 	} FOREACH_PHI_END();
 
-	/* Mark reacable instruction without side effects as dead */
+	/* Mark reachable instruction without side effects as dead */
 	int b = ssa->cfg.blocks_count;
 	while (b > 0) {
 		int	op_data = -1;
