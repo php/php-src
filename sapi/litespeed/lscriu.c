@@ -469,7 +469,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
 }
 
 
-static void LSCRIU_Wait_Dump_Finsh_Or_Restored(int pid_parent)
+static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 {
     // Now get restored.  We know if we're restored if the ppid changes!
     // If we're dumped, we're killed (no use worrying about that!).
@@ -528,7 +528,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
                                   s_fd_native);
         close(s_fd_native);
 
-        LSCRIU_Wait_Dump_Finsh_Or_Restored(iPidParent);
+        LSCRIU_Wait_Dump_Finish_Or_Restored(iPidParent);
         LSCRIU_Restored_Error(0, "Restored!");
         LSAPI_reset_server_state();
         s_restored = 1;
