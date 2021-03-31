@@ -41,7 +41,7 @@ slprintf same as snprintf with the difference that it actually returns the
 spprintf is the dynamical version of snprintf. It allocates the buffer in size
          as needed and allows a maximum setting as snprintf (turn this feature
          off by setting max_len to 0). spprintf is a little bit slower than
-         snprintf and offers possible memory leakes if you miss freeing the
+         snprintf and offers possible memory leaks if you miss freeing the
          buffer allocated by the function. Therefore this function should be
          used where either no maximum is known or the maximum is much bigger
          than normal size required. spprintf always terminates the buffer.
