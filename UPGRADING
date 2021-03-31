@@ -118,7 +118,7 @@ PHP 8.1 UPGRADE NOTES
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
   . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),
-    html_entitity_decode() and get_html_translation_table() now use
+    html_entity_decode() and get_html_translation_table() now use
     ENT_QUOTES | ENT_SUBSTITUTE rather than ENT_COMPAT by default. This means
     that ' is escaped to &#039; while previously it was left alone.
     Additionally, malformed UTF-8 will be replaced by a Unicode substitution
