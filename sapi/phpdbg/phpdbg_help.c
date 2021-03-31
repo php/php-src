@@ -87,7 +87,7 @@ void pretty_print(char *text)
 	 * $P substitutes the prompt sequence
 	 * Lines are wrapped by replacing the last blank with a CR before <term width>
 	 * characters.  (This defaults to 100 if the width can't be detected).  In the
-	 * pathelogical case where no blanks are found, then the wrap occurs at the
+	 * pathological case where no blanks are found, then the wrap occurs at the
 	 * first blank.
 	 */
 	for (p = text, q = new; *p; p++) {
