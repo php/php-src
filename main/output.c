@@ -884,7 +884,7 @@ static inline php_output_handler *php_output_handler_init(zend_string *name, siz
 }
 /* }}} */
 
-/* {{{ static int php_output_handler_appen(php_output_handler *handler, const php_output_buffer *buf)
+/* {{{ static int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
  * Appends input to the output handlers buffer and indicates whether the buffer does not have to be processed by the output handler */
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
 {
