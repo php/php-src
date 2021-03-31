@@ -926,7 +926,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 	}
 	if (func_flags & ZEND_FUNC_IRREDUCIBLE) {
-		fprintf(stderr, ", irreducable");
+		fprintf(stderr, ", irreducible");
 	}
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");
