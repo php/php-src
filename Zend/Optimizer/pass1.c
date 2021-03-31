@@ -312,7 +312,7 @@ constant_binary_op:
 			}
 			if (send1_opline->opcode != ZEND_SEND_VAL ||
 			    send1_opline->op1_type != IS_CONST) {
-				/* don't colllect constants after unknown function call */
+				/* don't collect constants after unknown function call */
 				collect_constants = 0;
 				break;
 			}
@@ -324,7 +324,7 @@ constant_binary_op:
 				}
 				if (send1_opline->opcode != ZEND_SEND_VAL ||
 				    send1_opline->op1_type != IS_CONST) {
-					/* don't colllect constants after unknown function call */
+					/* don't collect constants after unknown function call */
 					collect_constants = 0;
 					break;
 				}
@@ -336,7 +336,7 @@ constant_binary_op:
 			if (init_opline->opcode != ZEND_INIT_FCALL ||
 			    init_opline->op2_type != IS_CONST ||
 			    Z_TYPE(ZEND_OP2_LITERAL(init_opline)) != IS_STRING) {
-				/* don't colllect constants after unknown function call */
+				/* don't collect constants after unknown function call */
 				collect_constants = 0;
 				break;
 			}
@@ -505,7 +505,7 @@ constant_binary_op:
 					break;
 				}
 			}
-			/* don't colllect constants after any other function call */
+			/* don't collect constants after any other function call */
 			collect_constants = 0;
 			break;
 		}
