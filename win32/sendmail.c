@@ -306,7 +306,7 @@ PHPAPI void TSMClose(void)
 	Ack(NULL);
 	/* to guarantee that the cleanup is not made twice and
 	   compromise the rest of the application if sockets are used
-	   elesewhere
+	   elsewhere
 	*/
 
 	shutdown(PW32G(mail_socket), 0);
