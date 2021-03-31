@@ -254,7 +254,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		goto Finished;
 	}
 
-	/* Different identity, we need a new impersontated token as well */
+	/* Different identity, we need a new impersonated token as well */
 	if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
 		if (TWG(impersonation_token_sid)) {
 			free(TWG(impersonation_token_sid));
