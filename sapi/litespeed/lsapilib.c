@@ -4181,7 +4181,7 @@ void lsapi_MD5Update(struct lsapi_MD5Context *ctx, unsigned char const *buf, uns
 
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern
+ * Final wrap-up - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void lsapi_MD5Final(unsigned char digest[16], struct lsapi_MD5Context *ctx)
