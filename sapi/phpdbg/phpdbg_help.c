@@ -383,7 +383,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "(and list out options if not unique), so **help exp** will give help on the **export** command, "
 "but **help ex** will list the summary for **exec** and **export**." CR CR
 
-"Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
+"Type **help aliases** to show a full alias list, including any registered phpdbginit functions" CR
 "Type **help syntax** for a general introduction to the command syntax." CR
 "Type **help options** for a list of phpdbg command line options." CR
 "Type **help phpdbginit** to show how to customize the debugger environment."
