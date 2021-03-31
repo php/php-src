@@ -366,7 +366,7 @@ print
 - if the type is "User"
  - it has these attributes
    - startline: the first line of code where the method or function is defined
-   - endline: the lastt line of code where the method or function is defined
+   - endline: the last line of code where the method or function is defined
    - file: the file of code where the method or function is defined
  - is followed by the oplines of that method or function (&lt;print> elements)
 - &lt;print line="%u" opline="%p" opcode="%s" op="%s" />
