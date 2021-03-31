@@ -233,7 +233,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Flag to differenciate cases from constants.            |     |     |     */
+/* Flag to differentiate cases from constants.            |     |     |     */
 /* Stored in Z_ACCESS_FLAGS, must not conflict with       |     |     |     */
 /* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
