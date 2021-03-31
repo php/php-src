@@ -118,7 +118,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		} else { /* delay signal handling */
 			SIGG(blocked) = 1; /* signal is blocked */
 
-			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotton */
+			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotten */
 				SIGG(pavail) = queue->next;
 				queue->zend_signal.signo = signo;
 				queue->zend_signal.siginfo = siginfo;
