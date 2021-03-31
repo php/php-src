@@ -1660,14 +1660,6 @@ static int zend_accel_get_auto_globals(void)
 	return mask;
 }
 
-static int zend_accel_get_auto_globals_no_jit(void)
-{
-	if (zend_hash_exists(&EG(symbol_table), jit_auto_globals_str[3])) {
-		return 8;
-	}
-	return 0;
-}
-
 static void zend_accel_set_auto_globals(int mask)
 {
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
@@ -1869,8 +1861,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
        will have to ping the used auto global variables before execution */
 	if (PG(auto_globals_jit)) {
 		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals();
-	} else {
-		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
 	}
 
 	if (ZCG(accel_directives).validate_timestamps) {
@@ -4702,8 +4692,6 @@ static int accel_preload(const char *config, bool in_child)
 
 		if (PG(auto_globals_jit)) {
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
-		} else {
-			ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
 		}
 
 		/* Cleanup executor */
