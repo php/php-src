@@ -1950,7 +1950,7 @@ void dummy_invalid_parameter_handler(
 		const wchar_t *function,
 		const wchar_t *file,
 		unsigned int   line,
-		uintptr_t      pEwserved)
+		uintptr_t      pReserved)
 {
 	static int called = 0;
 	char buf[1024];
