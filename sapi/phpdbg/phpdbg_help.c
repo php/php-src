@@ -514,7 +514,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 /******************************** Help Codicils ********************************/
 {"aliases!", CR
 "Note that aliases can be used for either command or sub-command keywords or both, so **info b** "
-"is a synomyn for **info break** and **l func** for **list func**, etc." CR CR
+"is a synonym for **info break** and **l func** for **list func**, etc." CR CR
 
 "Note that help will also accept any alias as a parameter and provide help on that command, for example **h p** will provide help on the print command."
 },
