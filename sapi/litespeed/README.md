@@ -162,7 +162,7 @@ behavior of LSAPI application.
   In Self Managed Mode, `LSAI_MAX_IDLE_CHILDREN` controls how many idle children
   processes are allowed. Excessive idle children processes will be killed by the
   parent process immediately. When `LSAPI_AVOID_FORK` is set to 0, the default
-  value is 1/3 of `LSAPI_CHIDLREN`, When `LSAPI_AVOID_FORK` is set to 1, the
+  value is 1/3 of `LSAPI_CHILDREN`, When `LSAPI_AVOID_FORK` is set to 1, the
   default value is `LSAPI_CHILDREN`.
 
 * `LSAPI_MAX_PROCESS_TIME` (default value: 300 seconds)
