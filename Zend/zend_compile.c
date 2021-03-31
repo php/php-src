@@ -586,7 +586,7 @@ static int zend_add_ns_func_name_literal(zend_string *name) /* {{{ */
 	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(&lc_name);
 
-	/* Lowercased unqualfied name */
+	/* Lowercased unqualified name */
 	if (zend_get_unqualified_name(name, &unqualified_name, &unqualified_name_len)) {
 		lc_name = zend_string_alloc(unqualified_name_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), unqualified_name, unqualified_name_len);
