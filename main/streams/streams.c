@@ -368,7 +368,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	php_stream_context *context;
 
 	/* During shutdown resources may be released before other resources still holding them.
-	 * When only resoruces are referenced this is not a problem, because they are refcounted
+	 * When only resources are referenced this is not a problem, because they are refcounted
 	 * and will only be fully freed once the refcount drops to zero. However, if php_stream*
 	 * is held directly, we don't have this guarantee. To avoid use-after-free we ignore all
 	 * stream free operations in shutdown unless they come from the resource list destruction,
