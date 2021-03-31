@@ -3778,7 +3778,7 @@ static bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
  *    E.g. 0+$i and 0.0+$i only differ by that cast. If then the consuming instruction of this
  *    result will perform a double cast anyway, the conversion is safe.
  *
- * The checks happens recursively, while keeping track of which variables are already visisted to
+ * The checks happens recursively, while keeping track of which variables are already visited to
  * avoid infinite loops. An iterative, worklist driven approach would be possible, but the state
  * management more cumbersome to implement, so we don't bother for now.
  */
