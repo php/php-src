@@ -1,6 +1,6 @@
 /*
 ** DynASM PPC/PPC64 encoding engine.
-** Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+** Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 ** Released under the MIT license. See dynasm.lua for full copyright notice.
 */
 
@@ -354,6 +354,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_REL_LG:
 	  CK(n >= 0, UNDEF_LG);
+	  /* fallthrough */
 	case DASM_REL_PC:
 	  CK(n >= 0, UNDEF_PC);
 	  n = *DASM_POS2PTR(D, n) - (int)((char *)cp - base);

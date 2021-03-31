@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM x86/x64 module.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -985,6 +985,7 @@ end
 --   "u"       Use VEX encoding, vvvv unused.
 --   "v"/"V"   Use VEX encoding, vvvv from 1st/2nd operand (the operand is
 --             removed from the list used by future characters).
+--   "w"       Use VEX encoding, vvvv from 3rd operand.
 --   "L"       Force VEX.L
 --
 -- All of the following characters force a flush of the opcode:
@@ -1566,8 +1567,8 @@ local map_op = {
   vrcpss_3 =	"rrro:F30FV53rM|rrx/ood:",
   vrsqrtps_2 =	"rmoy:0Fu52rM",
   vrsqrtss_3 =	"rrro:F30FV52rM|rrx/ood:",
-  vroundpd_3 =	"rmioy:660F3AV09rMU",
-  vroundps_3 =	"rmioy:660F3AV08rMU",
+  vroundpd_3 =	"rmioy:660F3Au09rMU",
+  vroundps_3 =	"rmioy:660F3Au08rMU",
   vroundsd_4 =	"rrrio:660F3AV0BrMU|rrxi/ooq:",
   vroundss_4 =	"rrrio:660F3AV0ArMU|rrxi/ood:",
   vshufpd_4 =	"rrmioy:660FVC6rMU",
@@ -1707,6 +1708,91 @@ local map_op = {
   -- Intel ADX
   adcx_2 =	"rmqd:660F38F6rM",
   adox_2 =	"rmqd:F30F38F6rM",
+
+  -- BMI1
+  andn_3 =	"rrmqd:0F38VF2rM",
+  bextr_3 =	"rmrqd:0F38wF7rM",
+  blsi_2 =	"rmqd:0F38vF33m",
+  blsmsk_2 =	"rmqd:0F38vF32m",
+  blsr_2 =	"rmqd:0F38vF31m",
+  tzcnt_2 =	"rmqdw:F30FBCrM",
+
+  -- BMI2
+  bzhi_3 =	"rmrqd:0F38wF5rM",
+  mulx_3 =	"rrmqd:F20F38VF6rM",
+  pdep_3 =	"rrmqd:F20F38VF5rM",
+  pext_3 =	"rrmqd:F30F38VF5rM",
+  rorx_3 =	"rmSqd:F20F3AuF0rMS",
+  sarx_3 =	"rmrqd:F30F38wF7rM",
+  shrx_3 =	"rmrqd:F20F38wF7rM",
+  shlx_3 =	"rmrqd:660F38wF7rM",
+
+  -- FMA3
+  vfmaddsub132pd_3 = "rrmoy:660F38VX96rM",
+  vfmaddsub132ps_3 = "rrmoy:660F38V96rM",
+  vfmaddsub213pd_3 = "rrmoy:660F38VXA6rM",
+  vfmaddsub213ps_3 = "rrmoy:660F38VA6rM",
+  vfmaddsub231pd_3 = "rrmoy:660F38VXB6rM",
+  vfmaddsub231ps_3 = "rrmoy:660F38VB6rM",
+
+  vfmsubadd132pd_3 = "rrmoy:660F38VX97rM",
+  vfmsubadd132ps_3 = "rrmoy:660F38V97rM",
+  vfmsubadd213pd_3 = "rrmoy:660F38VXA7rM",
+  vfmsubadd213ps_3 = "rrmoy:660F38VA7rM",
+  vfmsubadd231pd_3 = "rrmoy:660F38VXB7rM",
+  vfmsubadd231ps_3 = "rrmoy:660F38VB7rM",
+
+  vfmadd132pd_3 = "rrmoy:660F38VX98rM",
+  vfmadd132ps_3 = "rrmoy:660F38V98rM",
+  vfmadd132sd_3 = "rrro:660F38VX99rM|rrx/ooq:",
+  vfmadd132ss_3 = "rrro:660F38V99rM|rrx/ood:",
+  vfmadd213pd_3 = "rrmoy:660F38VXA8rM",
+  vfmadd213ps_3 = "rrmoy:660F38VA8rM",
+  vfmadd213sd_3 = "rrro:660F38VXA9rM|rrx/ooq:",
+  vfmadd213ss_3 = "rrro:660F38VA9rM|rrx/ood:",
+  vfmadd231pd_3 = "rrmoy:660F38VXB8rM",
+  vfmadd231ps_3 = "rrmoy:660F38VB8rM",
+  vfmadd231sd_3 = "rrro:660F38VXB9rM|rrx/ooq:",
+  vfmadd231ss_3 = "rrro:660F38VB9rM|rrx/ood:",
+
+  vfmsub132pd_3 = "rrmoy:660F38VX9ArM",
+  vfmsub132ps_3 = "rrmoy:660F38V9ArM",
+  vfmsub132sd_3 = "rrro:660F38VX9BrM|rrx/ooq:",
+  vfmsub132ss_3 = "rrro:660F38V9BrM|rrx/ood:",
+  vfmsub213pd_3 = "rrmoy:660F38VXAArM",
+  vfmsub213ps_3 = "rrmoy:660F38VAArM",
+  vfmsub213sd_3 = "rrro:660F38VXABrM|rrx/ooq:",
+  vfmsub213ss_3 = "rrro:660F38VABrM|rrx/ood:",
+  vfmsub231pd_3 = "rrmoy:660F38VXBArM",
+  vfmsub231ps_3 = "rrmoy:660F38VBArM",
+  vfmsub231sd_3 = "rrro:660F38VXBBrM|rrx/ooq:",
+  vfmsub231ss_3 = "rrro:660F38VBBrM|rrx/ood:",
+
+  vfnmadd132pd_3 = "rrmoy:660F38VX9CrM",
+  vfnmadd132ps_3 = "rrmoy:660F38V9CrM",
+  vfnmadd132sd_3 = "rrro:660F38VX9DrM|rrx/ooq:",
+  vfnmadd132ss_3 = "rrro:660F38V9DrM|rrx/ood:",
+  vfnmadd213pd_3 = "rrmoy:660F38VXACrM",
+  vfnmadd213ps_3 = "rrmoy:660F38VACrM",
+  vfnmadd213sd_3 = "rrro:660F38VXADrM|rrx/ooq:",
+  vfnmadd213ss_3 = "rrro:660F38VADrM|rrx/ood:",
+  vfnmadd231pd_3 = "rrmoy:660F38VXBCrM",
+  vfnmadd231ps_3 = "rrmoy:660F38VBCrM",
+  vfnmadd231sd_3 = "rrro:660F38VXBDrM|rrx/ooq:",
+  vfnmadd231ss_3 = "rrro:660F38VBDrM|rrx/ood:",
+
+  vfnmsub132pd_3 = "rrmoy:660F38VX9ErM",
+  vfnmsub132ps_3 = "rrmoy:660F38V9ErM",
+  vfnmsub132sd_3 = "rrro:660F38VX9FrM|rrx/ooq:",
+  vfnmsub132ss_3 = "rrro:660F38V9FrM|rrx/ood:",
+  vfnmsub213pd_3 = "rrmoy:660F38VXAErM",
+  vfnmsub213ps_3 = "rrmoy:660F38VAErM",
+  vfnmsub213sd_3 = "rrro:660F38VXAFrM|rrx/ooq:",
+  vfnmsub213ss_3 = "rrro:660F38VAFrM|rrx/ood:",
+  vfnmsub231pd_3 = "rrmoy:660F38VXBErM",
+  vfnmsub231ps_3 = "rrmoy:660F38VBErM",
+  vfnmsub231sd_3 = "rrro:660F38VXBFrM|rrx/ooq:",
+  vfnmsub231ss_3 = "rrro:660F38VBFrM|rrx/ood:",
 }
 
 ------------------------------------------------------------------------------
@@ -1796,7 +1882,7 @@ end
 
 ------------------------------------------------------------------------------
 
-local map_vexarg = { u = false, v = 1, V = 2 }
+local map_vexarg = { u = false, v = 1, V = 2, w = 3 }
 
 -- Process pattern string.
 local function dopattern(pat, args, sz, op, needrex)

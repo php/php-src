@@ -1,6 +1,6 @@
 /*
 ** DynASM MIPS encoding engine.
-** Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+** Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 ** Released under the MIT license. See dynasm.lua for full copyright notice.
 */
 
@@ -350,18 +350,20 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_REL_LG:
 	  CK(n >= 0, UNDEF_LG);
+	  /* fallthrough */
 	case DASM_REL_PC:
 	  CK(n >= 0, UNDEF_PC);
 	  n = *DASM_POS2PTR(D, n);
 	  if (ins & 2048)
-	    n = n - (int)((char *)cp - base);
-	  else
 	    n = (n + (int)(size_t)base) & 0x0fffffff;
-	patchrel:
+	  else
+	    n = n - (int)((char *)cp - base);
+	patchrel: {
+	  unsigned int e = 16 + ((ins >> 12) & 15);
 	  CK((n & 3) == 0 &&
-	     ((n + ((ins & 2048) ? 0x00020000 : 0)) >>
-	       ((ins & 2048) ? 18 : 28)) == 0, RANGE_REL);
-	  cp[-1] |= ((n>>2) & ((ins & 2048) ? 0x0000ffff: 0x03ffffff));
+	     ((n + ((ins & 2048) ? 0 : (1<<(e+1)))) >> (e+2)) == 0, RANGE_REL);
+	  cp[-1] |= ((n>>2) & ((1<<e)-1));
+	  }
 	  break;
 	case DASM_LABEL_LG:
 	  ins &= 2047; if (ins >= 20) D->globals[ins-10] = (void *)(base + n);
