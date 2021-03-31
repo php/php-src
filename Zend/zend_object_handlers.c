@@ -742,7 +742,7 @@ found:
 			goto exit;
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
-			/* Writes to uninitializde typed properties bypass __set(). */
+			/* Writes to uninitialized typed properties bypass __set(). */
 			Z_PROP_FLAG_P(variable_ptr) = 0;
 			goto write_std_property;
 		}
