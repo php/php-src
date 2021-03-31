@@ -4764,7 +4764,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 				} else if (Z_OBJ_P(expr)->properties == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
 				} else {
 					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
@@ -19015,7 +19015,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 				} else if (Z_OBJ_P(expr)->properties == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
 				} else {
 					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
@@ -21630,7 +21630,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 				} else if (Z_OBJ_P(expr)->properties == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
 				} else {
 					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);
@@ -38237,7 +38237,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 				} else if (Z_OBJ_P(expr)->properties == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
 				} else {
 					HashTable *obj_ht = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_ARRAY_CAST);

@@ -716,7 +716,7 @@ try_again:
 			} else if (Z_OBJ_P(op)->properties == NULL
 			 && Z_OBJ_HT_P(op)->get_properties_for == NULL
 			 && Z_OBJ_HT_P(op)->get_properties == zend_std_get_properties) {
-				/* Optimized version without rebulding properties HashTable */
+				/* Optimized version without rebuilding properties HashTable */
 				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
 				OBJ_RELEASE(Z_OBJ_P(op));
 				ZVAL_ARR(op, ht);
