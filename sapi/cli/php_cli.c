@@ -1338,7 +1338,7 @@ exit_loop:
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
-		 * since we cannot check if EG(ini_directives) has been initialised
+		 * since we cannot check if EG(ini_directives) has been initialized
 		 * because the executor's constructor does not set initialize it.
 		 * Apart from that there seems no need for zend_ini_deactivate() yet.
 		 * So we goto out_err.*/

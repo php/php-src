@@ -133,7 +133,7 @@ inactive
 
 - by type
  - op_array: nothing was yet compiled (probably because no execution context set)
- - symbol_table: no symbol table present (not yet initiailized or already destructed)
+ - symbol_table: no symbol table present (not yet initialized or already destructed)
  - noexec: not in execution
  - memory_manager: using the native memory manager (malloc, free, realloc) instead of e.g. the Zend MM
  - notfound: file not found
