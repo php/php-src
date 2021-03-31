@@ -154,7 +154,7 @@ static char *get_help(const char * const key)
 	phpdbg_help_text_t *p;
 
 	/* Note that phpdbg_help_text is not assumed to be collated in key order.  This is an
-	   inconvience that means that help can't be logically grouped Not worth
+	   inconvenience that means that help can't be logically grouped Not worth
 	   the savings */
 
 	for (p = phpdbg_help_text; p->key; p++) {
