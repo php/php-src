@@ -88,7 +88,7 @@ versa.
 
 Brief instructions are as follow:
 
-1. Login to web administration interface, go to 'Server'->'Ext App' tab, add an
+1. Log into web administration interface, go to 'Server'->'Ext App' tab, add an
    external application of type "LSAPI app", "Command" should be set to a shell
    command that executes the PHP binary you just built. "Instances" should be
    set to "1". Add "LSAPI_CHILDREN" environment variable to match the value of
