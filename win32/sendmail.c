@@ -170,7 +170,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //          2) appname: Name of the application to use in the X-mailer
 //                      field of the message. if NULL is given the application
 //                      name is used as given by the GetCommandLine() function
-//                      max accespted length of name = 100
+//                      max accepted length of name = 100
 // Output:  1) error:   Returns the error code if something went wrong or
 //                      SUCCESS otherwise.
 //
