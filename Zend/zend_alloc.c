@@ -210,7 +210,7 @@ int zend_mm_use_huge_pages = 0;
  * free_tail  - number of continuous free pages at the end of chunk
  *
  * free_map   - bitset (a bit for each page). The bit is set if the corresponding
- *              page is allocated. Allocator for "lage sizes" may easily find a
+ *              page is allocated. Allocator for "large sizes" may easily find a
  *              free page (or a continuous number of pages) searching for zero
  *              bits.
  *
