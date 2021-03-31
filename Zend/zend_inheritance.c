@@ -297,7 +297,7 @@ static bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 				zend_class_entry *ce = zend_lookup_class_ex(
 					ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
 					ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
-				/* Avoid recursing if class implements ifself. */
+				/* Avoid recursing if class implements itself. */
 				if (ce && ce != ce1 && unlinked_instanceof(ce, ce2)) {
 					return 1;
 				}
