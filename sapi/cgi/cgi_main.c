@@ -2011,7 +2011,7 @@ consult the installation file that came with this distribution, or visit \n\
 			int running = 0;
 			pid_t pid;
 
-			/* Create a process group for ourself & children */
+			/* Create a process group for us & children */
 			setsid();
 			pgroup = getpgrp();
 #ifdef DEBUG_FASTCGI
