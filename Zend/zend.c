@@ -1374,7 +1374,7 @@ static ZEND_COLD void zend_error_impl(
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 			ZVAL_UNDEF(&EG(user_error_handler));
 
-			/* User error handler may include() additinal PHP files.
+			/* User error handler may include() additional PHP files.
 			 * If an error was generated during comilation PHP will compile
 			 * such scripts recursively, but some CG() variables may be
 			 * inconsistent. */
