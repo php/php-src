@@ -2118,7 +2118,7 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 
 	ZEND_ASSERT(ce->num_traits > 0);
 
-	/* complete initialization of trait strutures in ce */
+	/* complete initialization of trait structures in ce */
 	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
 
 	/* first care about all methods to be flattened into the class */
