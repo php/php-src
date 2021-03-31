@@ -1,5 +1,5 @@
 --TEST--
-ZE2 ArrayAccess::offsetGet ambiguties
+ZE2 ArrayAccess::offsetGet ambiguities
 --FILE--
 <?php
 class ObjectOne implements ArrayAccess {

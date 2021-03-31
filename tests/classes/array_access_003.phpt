@@ -1,5 +1,5 @@
 --TEST--
-ZE2 ArrayAccess::offsetGet ambiguties
+ZE2 ArrayAccess::offsetGet ambiguities
 --INI--
 error_reporting=4095
 --FILE--
