@@ -120,7 +120,7 @@ static int fpm_event_epoll_wait(struct fpm_event_queue_s *queue, unsigned long i
 	/* ensure we have a clean epoolfds before calling epoll_wait() */
 	memset(epollfds, 0, sizeof(struct epoll_event) * nepollfds);
 
-	/* wait for inconming event or timeout */
+	/* wait for incoming event or timeout */
 	ret = epoll_wait(epollfd, epollfds, nepollfds, timeout);
 	if (ret == -1) {
 
