@@ -41,7 +41,7 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #80761 (PDO uses too much memory). (Nikita)
 
-- Opcache:
+- OPcache:
   . Added inheritance cache. (Dmitry)
 
 - OpenSSL:
