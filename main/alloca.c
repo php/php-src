@@ -119,7 +119,7 @@ find_stack_direction ()
 #endif /* STACK_DIRECTION == 0 */
 
 /* An "alloca header" is used to:
-   (a) chain together all alloca'ed blocks;
+   (a) chain together all alloca'd blocks;
    (b) keep track of stack depth.
 
    It is very important that sizeof(header) agree with malloc
