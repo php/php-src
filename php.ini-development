@@ -1605,7 +1605,7 @@ zend.assertions = 1
 ; https://php.net/com.allow-dcom
 ;com.allow_dcom = true
 
-; autoregister constants of a component's typlib on com_load()
+; autoregister constants of a component's typelib on com_load()
 ; https://php.net/com.autoregister-typelib
 ;com.autoregister_typelib = true
 
