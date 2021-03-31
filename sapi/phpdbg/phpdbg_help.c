@@ -386,7 +386,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
 "Type **help syntax** for a general introduction to the command syntax." CR
 "Type **help options** for a list of phpdbg command line options." CR
-"Type **help phpdbginit** to show how to customise the debugger environment."
+"Type **help phpdbginit** to show how to customize the debugger environment."
 },
 {"options", CR
 "Below are the command line options supported by phpdbg" CR CR
