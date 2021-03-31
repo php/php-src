@@ -45,7 +45,7 @@ struct _zend_call_info {
 struct _zend_func_info {
 	int                     num;
 	uint32_t                flags;
-	zend_ssa                ssa;          /* Static Single Assignmnt Form  */
+	zend_ssa                ssa;          /* Static Single Assignment Form  */
 	zend_call_info         *caller_info;  /* where this function is called from */
 	zend_call_info         *callee_info;  /* which functions are called from this one */
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
