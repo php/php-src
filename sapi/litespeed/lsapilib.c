@@ -944,7 +944,7 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            //lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
+            //lsapi_log("enter LVE (%d) : result: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
