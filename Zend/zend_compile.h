@@ -1103,7 +1103,7 @@ END_EXTERN_C()
 #define ZEND_COMPILE_EXTENDED_FCALL             (1<<1)
 #define ZEND_COMPILE_EXTENDED_INFO              (ZEND_COMPILE_EXTENDED_STMT|ZEND_COMPILE_EXTENDED_FCALL)
 
-/* call op_array handler of extendions */
+/* call op_array handler of extensions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<2)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
