@@ -174,7 +174,7 @@ struct _zend_vm_stack {
 /*
  * In general in RELEASE build ZEND_ASSERT() must be zero-cost, but for some
  * reason, GCC generated worse code, performing CSE on assertion code and the
- * following "slow path" and moving memory read operatins from slow path into
+ * following "slow path" and moving memory read operations from slow path into
  * common header. This made a degradation for the fast path.
  * The following "#if ZEND_DEBUG" eliminates it.
  */
