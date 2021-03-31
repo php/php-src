@@ -3230,7 +3230,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			if (zend_propagate_list_refs(var_ast)) {
 				if (!zend_is_variable_or_call(expr_ast)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot assign reference to non referencable value");
+						"Cannot assign reference to non referenceable value");
 				}
 
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
