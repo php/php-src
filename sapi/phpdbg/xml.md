@@ -166,7 +166,7 @@ break / info break
 
 - id: the breakpoint id (if the leave command was executed, the id has the value "leave")
 - num: the nth opline of a function/method/file
-- add: has value "success"/"fail": a brekpoint was successfully/not added
+- add: has value "success"/"fail": a breakpoint was successfully/not added
 - pending: the breakpoint is waiting for resolving (e.g. a file opline on a not yet loaded file)
 - deleted: has value "success"/"fail": a breakpoint was successfully/not deleted
 - eval: the condition on conditional breakpoints
