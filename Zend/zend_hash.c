@@ -1842,7 +1842,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht)
  * return codes are possible:
  * ZEND_HASH_APPLY_KEEP   - continue
  * ZEND_HASH_APPLY_STOP   - stop iteration
- * ZEND_HASH_APPLY_REMOVE - delete the element, combineable with the former
+ * ZEND_HASH_APPLY_REMOVE - delete the element, combinable with the former
  */
 
 ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_func)
