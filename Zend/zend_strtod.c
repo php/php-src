@@ -4213,7 +4213,7 @@ zend_dtoa
 	 *
 	 * Perhaps we should just compute leading 28 bits of S once
 	 * and for all and pass them and a shift to quorem, so it
-	 * can do shifts and ors to compute the numerator for q.
+	 * can do shifts and ORs to compute the numerator for q.
 	 */
 	i = dshift(S, s2);
 	b2 += i;
