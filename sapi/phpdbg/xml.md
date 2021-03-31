@@ -558,7 +558,7 @@ set
 - generally enables / disables quietness silently with no further xml answer
 - if the boolean switch is omitted, it emits current state in a &lt;setquiet active="" /> where active is on or off
 
-### setpping ###
+### stepping ###
 
 - sets stepping to either opcode or line (so a step command will either advance one op or one line)
 - if no further argument is passed, it emits current state in a &lt;setoplog type="" /> where active is opcode or line
