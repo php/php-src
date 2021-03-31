@@ -1730,7 +1730,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			) {
 				fn_copy = *fn;
 
-				/* if it is 0, no modifieres have been changed */
+				/* if it is 0, no modifiers have been changed */
 				if (alias->modifiers) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
