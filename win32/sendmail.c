@@ -305,7 +305,7 @@ PHPAPI void TSMClose(void)
 	Post("QUIT\r\n");
 	Ack(NULL);
 	/* to guarantee that the cleanup is not made twice and
-	   compomise the rest of the application if sockets are used
+	   compromise the rest of the application if sockets are used
 	   elesewhere
 	*/
 
