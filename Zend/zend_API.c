@@ -2899,7 +2899,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		zend_unregister_ini_entries(module->module_number);
 	}
 
-	/* Deinitilaise module globals */
+	/* Deinitialize module globals */
 	if (module->globals_size) {
 #ifdef ZTS
 		if (*module->globals_id_ptr) {
