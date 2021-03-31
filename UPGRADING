@@ -262,7 +262,7 @@ PHP 8.1 UPGRADE NOTES
     etc. was changed. Now properties are naturally ordered according to their
     declaration and inheritance. Properties declared in a base class are going
     to be before the child properties. This order is consistent with internal
-    layout of properies in zend_objct structure and repeats the order in
+    layout of properies in zend_object structure and repeats the order in
     default_properties_table[] and properties_info_table[]. The old order was
     not documented and was caused by class inheritance implementation details.
 
