@@ -444,7 +444,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"phpdbginit", CR
-"Phpdgb uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
+"Phpdbg uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
 "for the file named **.phpdbginit** in the current working directory.  This location can be "
 "overridden on the command line using the **-i** switch (see **help options** for a more "
 "details)." CR CR
