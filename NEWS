@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.5
 
+- Core:
+  . Changed PowerPC CPU registers used by Zend VM to work around GCC bug.
+    Old registers (r28/r29) might be clobbered by _restgpr routine used for
+    return from C function compiled with -Os. (Dmitry)
+
 - DOM:
   . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
 

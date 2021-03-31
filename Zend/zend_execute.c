@@ -54,11 +54,11 @@
 #  define ZEND_VM_FP_GLOBAL_REG "%r14"
 #  define ZEND_VM_IP_GLOBAL_REG "%r15"
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
-#  define ZEND_VM_FP_GLOBAL_REG "r28"
-#  define ZEND_VM_IP_GLOBAL_REG "r29"
+#  define ZEND_VM_FP_GLOBAL_REG "r14"
+#  define ZEND_VM_IP_GLOBAL_REG "r15"
 # elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
-#  define ZEND_VM_FP_GLOBAL_REG "r28"
-#  define ZEND_VM_IP_GLOBAL_REG "r29"
+#  define ZEND_VM_FP_GLOBAL_REG "r14"
+#  define ZEND_VM_IP_GLOBAL_REG "r15"
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
 #  define ZEND_VM_FP_GLOBAL_REG "x27"
 #  define ZEND_VM_IP_GLOBAL_REG "x28"
