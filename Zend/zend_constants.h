@@ -84,7 +84,7 @@ ZEND_API void zend_register_string_constant(const char *name, size_t name_len, c
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number);
 ZEND_API zend_result zend_register_constant(zend_constant *c);
 #ifdef ZTS
-void zend_copy_constants(HashTable *target, HashTable *sourc);
+void zend_copy_constants(HashTable *target, HashTable *source);
 #endif
 
 ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);
