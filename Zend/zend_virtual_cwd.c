@@ -943,7 +943,7 @@ retry_reparse_tag_cloud:
 			if (i <= start + 1) {
 				j = start;
 			} else {
-				/* some leading directories may be unaccessable */
+				/* some leading directories may be inaccessible */
 				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL);
 				if (j > start && j != (size_t)-1) {
 					path[j++] = DEFAULT_SLASH;
