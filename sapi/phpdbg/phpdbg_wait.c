@@ -125,7 +125,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (!php_var_unserialize(&zv, (const unsigned char **) &msg, (unsigned char *) msg + len, &var_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, arborting");
+		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, aborting");
 		return;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
