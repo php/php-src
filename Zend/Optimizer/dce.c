@@ -527,7 +527,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 	ctx.phi_dead = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
-	/* Mark reacable instruction without side effects as dead */
+	/* Mark reachable instruction without side effects as dead */
 	int b = ssa->cfg.blocks_count;
 	while (b > 0) {
 		int	op_data = -1;
