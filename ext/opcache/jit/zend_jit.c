@@ -4234,11 +4234,19 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	}
 
 	for (i = 0; i <= 256; i++) {
-		if (zend_get_user_opcode_handler(i) != NULL) {
-			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
-			JIT_G(enabled) = 0;
-			JIT_G(on) = 0;
-			return FAILURE;
+		switch (i) {
+			/* JIT has no effect on these opcodes */
+			case ZEND_BEGIN_SILENCE:
+			case ZEND_END_SILENCE:
+			case ZEND_EXIT:
+				break;
+			default:
+				if (zend_get_user_opcode_handler(i) != NULL) {
+					zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
+					JIT_G(enabled) = 0;
+					JIT_G(on) = 0;
+					return FAILURE;
+				}
 		}
 	}
 
