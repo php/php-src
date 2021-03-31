@@ -340,7 +340,7 @@ static const char *_php_stream_pretty_free_options(int close_options, char *out)
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM)
 		strcat(out, "RELEASE_STREAM, ");
 	if (close_options & PHP_STREAM_FREE_PRESERVE_HANDLE)
-		strcat(out, "PREVERSE_HANDLE, ");
+		strcat(out, "PRESERVE_HANDLE, ");
 	if (close_options & PHP_STREAM_FREE_RSRC_DTOR)
 		strcat(out, "RSRC_DTOR, ");
 	if (close_options & PHP_STREAM_FREE_PERSISTENT)
