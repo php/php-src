@@ -516,7 +516,7 @@ set
 
 ### prompt ###
 
-- without other args, a &lt;setpromt str="" /> tag is emitted where the value of the str attribute is the value of the prompt
+- without other args, a &lt;setprompt str="" /> tag is emitted where the value of the str attribute is the value of the prompt
 - when there is another arg, the prompt is changed to that arg, no further xml answer
 
 ### break ###
