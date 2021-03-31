@@ -316,7 +316,7 @@ PHPAPI void TSMClose(void)
 
 /*********************************************************************
 // Name:  char *GetSMErrorText
-// Input:   Error index returned by the menber functions
+// Input:   Error index returned by the member functions
 // Output:  pointer to a string containing the error description
 // Description:
 // Author/Date:  jcar 20/9/96
