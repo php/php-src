@@ -1111,7 +1111,7 @@ END_EXTERN_C()
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
- * may apper in run-time */
+ * may appear in run-time */
 #define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<4)
 
 /* generate ZEND_DECLARE_CLASS_DELAYED opcode to delay early binding */
