@@ -295,7 +295,7 @@ pm.max_spare_servers = 3
 ;      it can accept the following format:
 ;      - %{seconds}d (default)
 ;      - %{milliseconds}d
-;      - %{mili}d
+;      - %{milli}d
 ;      - %{microseconds}d
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
@@ -340,7 +340,7 @@ pm.max_spare_servers = 3
 ;  %u: remote user
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
-;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
 
 ; The log file for slow requests
 ; Default Value: not set
