@@ -760,7 +760,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"list",
-"The list command displays source code for the given argument.  The target type is specficied by "
+"The list command displays source code for the given argument.  The target type is specified by "
 "a second subcommand keyword:" CR CR
 
 "  **Type**     **Alias**  **Purpose**" CR
