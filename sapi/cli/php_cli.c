@@ -947,7 +947,7 @@ do_repeat:
 			is_ps_title_available() == PS_TITLE_SUCCESS,
 			CONST_CS, 0);
 
-		*arg_excp = arg_free; /* reconstuct argv */
+		*arg_excp = arg_free; /* reconstruct argv */
 
 		if (hide_argv) {
 			int i;
