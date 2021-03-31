@@ -715,7 +715,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			switch (opline->opcode) {
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
-					/* boolean resuls don't have to be freed */
+					/* boolean results don't have to be freed */
 					return;
 				case ZEND_POST_INC_STATIC_PROP:
 				case ZEND_POST_DEC_STATIC_PROP:
