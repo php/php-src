@@ -659,7 +659,7 @@ static int LSCRIU_Init_Env_Parameters(void)
 }
 
 
-void LSCRIU_inc_req_procssed()
+void LSCRIU_inc_req_processed()
 {
     if (!LSCRIU_Get_Global_Counter_Type()) {
         ++s_requests_count;

@@ -1567,7 +1567,7 @@ int main( int argc, char * argv[] )
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         if (is_criu && !result) {
-            LSCRIU_inc_req_procssed();
+            LSCRIU_inc_req_processed();
         }
 #endif
         if ( slow_script_msec ) {
