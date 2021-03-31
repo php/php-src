@@ -60,7 +60,7 @@ int phpdbg_btree_delete(phpdbg_btree *tree, zend_ulong idx);
 int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr, int flags);
 #define phpdbg_btree_insert(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_INSERT)
 #define phpdbg_btree_update(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_UPDATE)
-#define phpdbg_btree_overwrite(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_OWERWRITE)
+#define phpdbg_btree_overwrite(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_OVERWRITE)
 
 
 /* debugging functions */
