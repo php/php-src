@@ -132,7 +132,7 @@ behavior of LSAPI application.
   "Self Managed Mode". When set to 0, the internal process manager will stop and
   start children process on demand to save system resource. This is preferred in
   a shared hosting environment. When set to 1, the internal process manager will
-  try to avoid freqently stopping and starting children process. This might be
+  try to avoid frequently stopping and starting children process. This might be
   preferred in a dedicate hosting environment.
 
 * `LSAPI_EXTRA_CHILDREN` (default: 1/3 of `LSAPI_CHILDREN` or 0)
