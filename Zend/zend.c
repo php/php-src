@@ -931,7 +931,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 # if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 		/* Create a map region, used for indirect pointers from shared to
-		 * process memory. It's allocatred once and never resized.
+		 * process memory. It's allocated once and never resized.
 		 * All processes must map it into the same address space.
 		 */
 		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
