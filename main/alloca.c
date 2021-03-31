@@ -253,7 +253,7 @@ struct stack_segment_linkage
     long ssusr1;		/* Reserved for user.  */
     long ssusr2;		/* Reserved for user.  */
     long sstpid;		/* Process ID for pid based multi-tasking.  */
-    long ssgvup;		/* Pointer to multitasking thread giveup.  */
+    long ssgvup;		/* Pointer to multitasking thread give up.  */
     long sscray[7];		/* Reserved for Cray Research.  */
     long ssa0;
     long ssa1;
