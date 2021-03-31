@@ -3,11 +3,14 @@ PHP 8.1 INTERNALS UPGRADE NOTES
 1. Internal API changes
   a. Removed Zend APIs
   b. Zend Stream API
+  c. zend_get_opcode_id()
 
 2. Build system changes
 
 3. Module changes
   a. ext/hash
+  b. ext/pdo
+  c. ext/standard
 
 ========================
 1. Internal API changes
@@ -31,6 +34,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
         the same function where they were created by zend_stream_init_*()). Previously there were two different
         destructors zend_destroy_file_handle() and zend_file_handle_dtor().
       - zend_ini_scanner_globals.filename now is zend_string*
+  c. Added the zend_get_opcode_id() function, which is intended to get opcode id from name.
 
 ========================
 2. Build system changes
