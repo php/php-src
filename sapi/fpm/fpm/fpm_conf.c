@@ -892,7 +892,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			struct fpm_worker_pool_config_s *config = wp->config;
 
 			if (!fpm_event_support_edge_trigger()) {
-				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanisme is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
+				zlog(ZLOG_ALERT, "[pool %s] ondemand process manager can ONLY be used when events.mechanism is either epoll (Linux) or kqueue (*BSD).", wp->config->name);
 				return -1;
 			}
 
