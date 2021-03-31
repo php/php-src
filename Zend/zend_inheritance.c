@@ -2132,7 +2132,7 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 		efree(exclude_tables);
 	}
 
-	/* then flatten the properties into it, to, mostly to notfiy developer about problems */
+	/* then flatten the properties into it, to, mostly to notify developer about problems */
 	zend_do_traits_property_binding(ce, traits);
 }
 /* }}} */
