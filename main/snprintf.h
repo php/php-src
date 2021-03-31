@@ -23,7 +23,7 @@ sprintf  offers the ability to make a lot of failures since it does not know
          the size of the buffer it uses. Therefore usage of sprintf often
          results in possible entries for buffer overrun attacks. So please
          use this version only if you are sure the call is safe. sprintf
-         always terminstes the buffer it writes to.
+         always terminates the buffer it writes to.
 
 snprintf knows the buffers size and will not write behind it. But you will
          have to use either a static buffer or allocate a dynamic buffer
