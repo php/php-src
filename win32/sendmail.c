@@ -235,7 +235,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			found = 1;
 
 			/* Real offset is memaddress from the original headers + difference of
-			 * string found in the lowercase headrs + 5 characters to jump over
+			 * string found in the lowercase headers + 5 characters to jump over
 			 * the from: */
 			pos1 = headers + (pos1 - lookup) + 5;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -484,7 +484,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	/* Send mail to all Cc rcpt's */
 	else if (headers && (pos1 = strstr(headers_lc, "cc:")) && ((pos1 == headers_lc) || (*(pos1-1) == '\n'))) {
 		/* Real offset is memaddress from the original headers + difference of
-		 * string found in the lowercase headrs + 3 characters to jump over
+		 * string found in the lowercase headers + 3 characters to jump over
 		 * the cc: */
 		pos1 = headers + (pos1 - headers_lc) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -549,7 +549,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	else if (headers) {
 		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
-			 * string found in the lowercase headrs + 4 characters to jump over
+			 * string found in the lowercase headers + 4 characters to jump over
 			 * the bcc: */
 			pos1 = headers + (pos1 - headers_lc) + 4;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
