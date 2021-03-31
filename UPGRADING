@@ -187,7 +187,7 @@ PHP 8.1 UPGRADE NOTES
     echo $h, "\n";
     ```
 
-    A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
+    A valid seed value is within the range from 0 to the platform defined UINT_MAX, usually 4294967295.
 
   . Added xxHash. The implementation brings in the following arguments
 
