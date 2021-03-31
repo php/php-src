@@ -663,7 +663,7 @@ void phpdbg_queue_element_for_recreation(phpdbg_watch_element *element) {
 	}
 }
 
-bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *element) {
+bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *element) {
 	zval *zv;
 	HashTable *ht = HT_FROM_ZVP(parent);
 
@@ -688,7 +688,7 @@ bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *eleme
 				next = Z_REFVAL_P(next);
 			}
 
-			if (!phpdbg_try_readding_watch_element(next, element->child)) {
+			if (!phpdbg_try_re_adding_watch_element(next, element->child)) {
 				return 0;
 			}
 		} else if (phpdbg_check_watch_diff(WATCH_ON_ZVAL, &element->backup.zv, zv)) {
@@ -734,7 +734,7 @@ void phpdbg_dequeue_elements_for_recreation() {
 			} else {
 				ZVAL_ARR(zv, element->parent_container);
 			}
-			if (!phpdbg_try_readding_watch_element(zv, element)) {
+			if (!phpdbg_try_re_adding_watch_element(zv, element)) {
 				phpdbg_automatic_dequeue_free(element);
 			}
 		} else {
