@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: der.c,v 1.20 2020/06/07 19:10:37 christos Exp $")
+FILE_RCSID("@(#)$File: der.c,v 1.21 2020/06/15 00:58:10 christos Exp $")
 #endif
 #else
 #define SIZE_T_FORMAT "z"
@@ -249,7 +249,6 @@ der_data(char *buf, size_t blen, uint32_t tag, const void *q, uint32_t len)
 		return snprintf(buf, blen,
 		    "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c GMT", d[0], d[1], d[2],
 		    d[3], d[4], d[5], d[6], d[7], d[8], d[9], d[10], d[11]);
-		break;
 	default:
 		break;
 	}

@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.127 2020/05/31 00:11:06 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.129 2020/12/08 21:26:00 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -72,7 +72,7 @@ typedef void (*sig_t)(int);
 #include <bzlib.h>
 #endif
 
-#if defined(HAVE_XZLIB_H) && defined(XZLIBSUPPORT)
+#if defined(HAVE_LZMA_H) && defined(XZLIBSUPPORT)
 #define BUILTIN_XZLIB
 #include <lzma.h>
 #endif
@@ -847,8 +847,23 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 	for (i = 0; i < __arraycount(fdp); i++)
 		fdp[i][0] = fdp[i][1] = -1;
 
-	if ((fd == -1 && pipe(fdp[STDIN_FILENO]) == -1) ||
-	    pipe(fdp[STDOUT_FILENO]) == -1 || pipe(fdp[STDERR_FILENO]) == -1) {
+	/*
+	 * There are multithreaded users who run magic_file()
+	 * from dozens of threads. If two parallel magic_file() calls
+	 * analyze two large compressed files, both will spawn
+	 * an uncompressing child here, which writes out uncompressed data.
+	 * We read some portion, then close the pipe, then waitpid() the child.
+	 * If uncompressed data is larger, child shound get EPIPE and exit.
+	 * However, with *parallel* calls OTHER child may unintentionally
+	 * inherit pipe fds, thus keeping pipe open and making writes in
+	 * our child block instead of failing with EPIPE!
+	 * (For the bug to occur, two threads must mutually inherit their pipes,
+	 * and both must have large outputs. Thus it happens not that often).
+	 * To avoid this, be sure to create pipes with O_CLOEXEC.
+	 */
+	if ((fd == -1 && file_pipe_closexec(fdp[STDIN_FILENO]) == -1) ||
+	    file_pipe_closexec(fdp[STDOUT_FILENO]) == -1 ||
+	    file_pipe_closexec(fdp[STDERR_FILENO]) == -1) {
 		closep(fdp[STDIN_FILENO]);
 		closep(fdp[STDOUT_FILENO]);
 		return makeerror(newch, n, "Cannot create pipe, %s",
@@ -879,16 +894,20 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 			if (fdp[STDIN_FILENO][1] > 2)
 				(void) close(fdp[STDIN_FILENO][1]);
 		}
+		file_clear_closexec(STDIN_FILENO);
+
 ///FIXME: if one of the fdp[i][j] is 0 or 1, this can bomb spectacularly
 		if (copydesc(STDOUT_FILENO, fdp[STDOUT_FILENO][1]))
 			(void) close(fdp[STDOUT_FILENO][1]);
 		if (fdp[STDOUT_FILENO][0] > 2)
 			(void) close(fdp[STDOUT_FILENO][0]);
+		file_clear_closexec(STDOUT_FILENO);
 
 		if (copydesc(STDERR_FILENO, fdp[STDERR_FILENO][1]))
 			(void) close(fdp[STDERR_FILENO][1]);
 		if (fdp[STDERR_FILENO][0] > 2)
 			(void) close(fdp[STDERR_FILENO][0]);
+		file_clear_closexec(STDERR_FILENO);
 
 		(void)execvp(compr[method].argv[0],
 		    RCAST(char *const *, RCAST(intptr_t, compr[method].argv)));

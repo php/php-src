@@ -23,4 +23,4 @@ var_dump($type);
 
 ?>
 --EXPECT--
-string(60) "ASCII text, with very long lines, with CRLF line terminators"
+string(67) "ASCII text, with very long lines (8191), with CRLF line terminators"
