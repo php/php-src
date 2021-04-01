@@ -1,5 +1,5 @@
 --TEST--
-openbase_dir runtime tightning
+openbase_dir runtime hardening
 --SKIPIF--
 <?php
 if(PHP_OS_FAMILY === "Windows") {
