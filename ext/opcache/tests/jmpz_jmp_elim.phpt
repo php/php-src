@@ -1,7 +1,7 @@
 --TEST--
 Edge-cases in elimination of JMPZ JMP with same target
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

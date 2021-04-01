@@ -1,5 +1,7 @@
 --TEST--
 Refcount inference when adding array elements
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

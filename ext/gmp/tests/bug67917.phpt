@@ -1,7 +1,7 @@
 --TEST--
 Bug #67917: Using GMP objects with overloaded operators can cause memory exhaustion
---SKIPIF--
-<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

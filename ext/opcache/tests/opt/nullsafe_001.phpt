@@ -4,8 +4,8 @@ Nullsafe basic optimization
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
---SKIPIF--
-<?php require_once(__DIR__ . '/../skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

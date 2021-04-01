@@ -1,5 +1,7 @@
 --TEST--
 Bug #74670: Integer Underflow when unserializing GMP and possible other classes
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 $str = 'C:3:"GMP":4:{s:6666666666:""}';

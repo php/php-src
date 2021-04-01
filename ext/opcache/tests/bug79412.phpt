@@ -3,8 +3,8 @@ Bug #79412 (Opcache chokes and uses 100% CPU on specific script)
 --INI--
 opcache.enable=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $limitPerRun = 10;

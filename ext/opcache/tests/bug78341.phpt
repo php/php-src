@@ -1,5 +1,7 @@
 --TEST--
 Bug #78341: Failure to detect smart branch in DFA pass
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

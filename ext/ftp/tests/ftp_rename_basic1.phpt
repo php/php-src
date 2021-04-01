@@ -1,9 +1,8 @@
 --TEST--
 FTP basic ftp_rename calls
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

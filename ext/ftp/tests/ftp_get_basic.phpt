@@ -2,10 +2,9 @@
 FTP ftp_get file for both binary and ASCII transfer modes
 --CREDITS--
 Nathaniel McHugh
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';
