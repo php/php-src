@@ -225,6 +225,7 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 {
 	unsigned int i;
 
+#if defined(__x86_64__) || defined(i386)
 	if (cs_insn_group(cs, insn, X86_GRP_JUMP)) {
 		for (i = 0; i < insn->detail->x86.op_count; i++) {
 			if (insn->detail->x86.operands[i].type == X86_OP_IMM) {
@@ -232,6 +233,14 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 			}
 		}
 	}
+#elif defined(__aarch64__)
+	if (cs_insn_group(cs, insn, ARM64_GRP_JUMP)) {
+		for (i = 0; i < insn->detail->arm64.op_count; i++) {
+			if (insn->detail->arm64.operands[i].type == ARM64_OP_IMM)
+				return insn->detail->arm64.operands[i].imm;
+		}
+	}
+#endif
 
 	return 0;
 }
@@ -319,6 +328,11 @@ static int zend_jit_disasm(const char    *name,
 #  else
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
 #  endif
+# elif defined(__aarch64__)
+	if (cs_open(CS_ARCH_ARM64, CS_MODE_ARM, &cs) != CS_ERR_OK)
+		return 0;
+	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
 # else
 	if (cs_open(CS_ARCH_X86, CS_MODE_32, &cs) != CS_ERR_OK)
 		return 0;
@@ -431,7 +445,11 @@ static int zend_jit_disasm(const char    *name,
 		}
 
 # ifdef HAVE_CAPSTONE_ITER
+#  if defined(__aarch64__)
+		fprintf(stderr, "    "ZEND_XLONG_FMT":\t%s ", insn->address, insn->mnemonic);
+#  else
 		fprintf(stderr, "\t%s ", insn->mnemonic);
+#  endif
 		p = insn->op_str;
 # else
 		fprintf(stderr, "\t%s ", insn[i].mnemonic);

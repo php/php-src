@@ -22,6 +22,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #if defined(__linux__)
 #include <sys/syscall.h>

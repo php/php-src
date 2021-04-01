@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
+   |          Hao Sun <hao.sun@arm.com>                                   |
    +----------------------------------------------------------------------+
 */
 
@@ -26,11 +27,24 @@
 #define ZEND_REGSET_IS_EMPTY(regset) \
 	(regset == ZEND_REGSET_EMPTY)
 
+#define ZEND_REGSET_IS_SINGLETON(regset) \
+	(regset && !(regset & (regset - 1)))
+
+#if (ZREG_NUM <= 32)
 #define ZEND_REGSET(reg) \
 	(1u << (reg))
+#else
+#define ZEND_REGSET(reg) \
+	(1ull << (reg))
+#endif
 
+#if (ZREG_NUM <= 32)
 #define ZEND_REGSET_INTERVAL(reg1, reg2) \
 	(((1u << ((reg2) - (reg1) + 1)) - 1) << (reg1))
+#else
+#define ZEND_REGSET_INTERVAL(reg1, reg2) \
+	(((1ull << ((reg2) - (reg1) + 1)) - 1) << (reg1))
+#endif
 
 #define ZEND_REGSET_IN(regset, reg) \
 	(((regset) & ZEND_REGSET(reg)) != 0)
@@ -50,7 +64,11 @@
 #define ZEND_REGSET_DIFFERENCE(set1, set2) \
 	((set1) & ~(set2))
 
-#ifndef _WIN32
+#if defined (__aarch64__)
+# define ZEND_REGSET_FIRST(set)  ((zend_reg)__builtin_ctzll(set))
+# define ZEND_REGSET_SECOND(set) ((zend_reg)__builtin_ctzll(set ^ (1ull << ZEND_REGSET_FIRST(set))))
+# define ZEND_REGSET_LAST(set)   ((zend_reg)(__builtin_clzll(set)^63))
+#elif !defined(_WIN32)
 # if (ZREG_NUM <= 32)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
@@ -710,5 +728,18 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 		return 0;
 	}
 }
+
+/* Instruction cache flush */
+#ifndef JIT_CACHE_FLUSH
+#  if defined (__aarch64__)
+#    if ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_builtin(__builtin___clear_cache))
+#      define JIT_CACHE_FLUSH(from, to) __builtin___clear_cache((char*)(from), (char*)(to))
+#    else
+#      error "Missing builtin to flush instruction cache for AArch64"
+#    endif
+#  else /* Not required to implement on archs with unified caches */
+#    define JIT_CACHE_FLUSH(from, to)
+#  endif
+#endif /* !JIT_CACHE_FLUSH */
 
 #endif /* ZEND_JIT_INTERNAL_H */
