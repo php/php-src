@@ -4095,7 +4095,8 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 		/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed
 		 * However, this can only happen if the exception is an instance of Exception
 		 * (Error never gets suppressed) */
-		if (UNEXPECTED(is_in_silence_live_range(EX(func)->op_array, op_num))) {
+		if (UNEXPECTED(is_in_silence_live_range(EX(func)->op_array, op_num)
+				&& instanceof_function(zend_ce_exception, EG(exception)->ce))) {
 			return;
 		}
 		zend_execute_data *call = EX(call);
