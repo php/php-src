@@ -29,7 +29,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
-      i[[34567]]86*|x86*)
+      i[[34567]]86*|x86*|aarch64)
         ;;
       *)
         AC_MSG_WARN([JIT not supported by host architecture])
@@ -77,6 +77,7 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
 
     PHP_SUBST(DASM_FLAGS)
+    PHP_SUBST(DASM_ARCH)
 
     AC_MSG_CHECKING(for opagent in default path)
     for i in /usr/local /usr; do
