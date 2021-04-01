@@ -28,7 +28,12 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
+#if defined(__x86_64__) || defined(i386)
 #include "zend_jit_x86.h"
+#elif defined(__aarch64__)
+#include "zend_jit_arm64.h"
+#endif
+
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -36,9 +41,12 @@
 # if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
 register const zend_op* volatile opline __asm__("%r15");
-# else
+# elif defined(i386)
 register zend_execute_data* volatile execute_data __asm__("%esi");
 register const zend_op* volatile opline __asm__("%edi");
+# elif defined(__aarch64__)
+register zend_execute_data* volatile execute_data __asm__("x27");
+register const zend_op* volatile opline __asm__("x28");
 # endif
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif

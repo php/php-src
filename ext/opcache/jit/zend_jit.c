@@ -39,7 +39,14 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
+#if defined(__x86_64__) || defined(i386)
 #include "jit/zend_jit_x86.h"
+#elif defined (__aarch64__)
+#include "jit/zend_jit_arm64.h"
+#else
+#error "JIT not supported on this platform"
+#endif
+
 #include "jit/zend_jit_internal.h"
 
 #ifdef ZTS
@@ -204,7 +211,12 @@ static bool zend_long_is_power_of_two(zend_long x)
 #define OP2_RANGE()      OP_RANGE(ssa_op, op2)
 #define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
 
+#if defined(__x86_64__) || defined(i386)
 #include "dynasm/dasm_x86.h"
+#elif defined(__aarch64__)
+#include "dynasm/dasm_arm64.h"
+#endif
+
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
@@ -216,7 +228,11 @@ static bool zend_long_is_power_of_two(zend_long x)
 #endif
 #include "jit/zend_jit_vtune.c"
 
+#if defined(__x86_64__) || defined(i386)
 #include "jit/zend_jit_x86.c"
+#elif defined(__aarch64__)
+#include "jit/zend_jit_arm64.c"
+#endif
 
 #if _WIN32
 # include <Windows.h>
@@ -298,14 +314,31 @@ static void handle_dasm_error(int ret) {
 		case DASM_S_RANGE_PC:
 			fprintf(stderr, "DASM_S_RANGE_PC %d\n", ret & 0xffffffu);
 			break;
+#ifdef DASM_S_RANGE_VREG
 		case DASM_S_RANGE_VREG:
 			fprintf(stderr, "DASM_S_RANGE_VREG\n");
 			break;
+#endif
+#ifdef DASM_S_UNDEF_L
 		case DASM_S_UNDEF_L:
 			fprintf(stderr, "DASM_S_UNDEF_L\n");
 			break;
+#endif
+#ifdef DASM_S_UNDEF_LG
+		case DASM_S_UNDEF_LG:
+			fprintf(stderr, "DASM_S_UNDEF_LG\n");
+			break;
+#endif
+#ifdef DASM_S_RANGE_REL
+		case DASM_S_RANGE_REL:
+			fprintf(stderr, "DASM_S_RANGE_REL\n");
+			break;
+#endif
 		case DASM_S_UNDEF_PC:
 			fprintf(stderr, "DASM_S_UNDEF_PC\n");
+			break;
+		default:
+			fprintf(stderr, "DASM_S_%0x\n", ret & 0xff000000u);
 			break;
 	}
 	ZEND_UNREACHABLE();
@@ -390,6 +423,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
+
+	/* flush the hardware I-cache */
+	JIT_CACHE_FLUSH(entry, entry + size);
 
 	if (trace_num) {
 		zend_jit_trace_add_code(entry, size);
