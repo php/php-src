@@ -1105,7 +1105,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 
 	ret_buf = zend_string_alloc(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
-	 * data is guaranteedly buffered */
+	 * data is guaranteed to be buffered */
 	ZSTR_LEN(ret_buf) = php_stream_read(stream, ZSTR_VAL(ret_buf), tent_ret_len);
 
 	if (found_delim) {
