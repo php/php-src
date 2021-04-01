@@ -3,10 +3,9 @@ FTP with bogus resource
 --CREDITS--
 Michael Paul da Rosa <michael [at] michaelpaul [dot] com [dot] br>
 PHP TestFest Dublin 2017
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 $ftp = tmpfile();

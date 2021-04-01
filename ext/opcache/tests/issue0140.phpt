@@ -5,8 +5,9 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.revalidate_freq=0
 opcache.file_update_protection=0
+--EXTENSIONS--
+opcache
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow tests excluded by request") ?>
 --FILE--
 <?php

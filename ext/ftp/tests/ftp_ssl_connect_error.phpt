@@ -1,9 +1,11 @@
 --TEST--
 Test ftp_ssl_connect() function : error conditions
+--EXTENSIONS--
+ftp
+pcntl
+openssl
 --SKIPIF--
 <?php
-$ssl = 1;
-require 'skipif.inc';
 if (!function_exists("ftp_ssl_connect")) die("skip ftp_ssl is disabled");
 ?>
 --FILE--

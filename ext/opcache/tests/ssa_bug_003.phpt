@@ -1,7 +1,7 @@
 --TEST--
 Incorrect elision of return type checks
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

@@ -2,12 +2,8 @@
 shmop extension error messages
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
---SKIPIF--
-<?php
-    if (!extension_loaded("shmop")) {
-        die("skip shmop() extension not available");
-    }
-?>
+--EXTENSIONS--
+shmop
 --FILE--
 <?php
 

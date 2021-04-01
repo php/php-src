@@ -8,9 +8,10 @@ opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 opcache.jit=function
 opcache.preload={PWD}/preload_bug80634.inc
+--EXTENSIONS--
+opcache
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 ?>
 --FILE--

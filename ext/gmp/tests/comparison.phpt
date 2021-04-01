@@ -1,7 +1,7 @@
 --TEST--
 Overloaded GMP comparison in sort() etc
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
