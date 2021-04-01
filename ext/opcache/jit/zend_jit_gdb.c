@@ -20,7 +20,12 @@
    +----------------------------------------------------------------------+
 */
 
+
+#if defined(__x86_64__) || defined(i386)
 #define HAVE_GDB
+#else
+#warning Missing GDB JIT support on this platform
+#endif
 
 #ifdef HAVE_GDB
 
