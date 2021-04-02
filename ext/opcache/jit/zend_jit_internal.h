@@ -53,10 +53,10 @@
 #ifndef _WIN32
 # if (ZREG_NUM <= 32)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
-#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31)))
+#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
 # elif(ZREG_NUM <= 64)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctzll(set))
-#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63)))
+#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63))
 # else
 #  errir "Too many registers"
 # endif
