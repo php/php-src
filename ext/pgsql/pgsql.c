@@ -164,15 +164,20 @@ static void pgsql_link_free(pgsql_link_handle *link)
 	while ((res = PQgetResult(link->conn))) {
 		PQclear(res);
 	}
-	PQfinish(link->conn);
+	if (!link->persistent) {
+		PQfinish(link->conn);
+	}
 	PGG(num_links)--;
 
 	zend_hash_del(&PGG(regular_list), link->hash);
 
 	link->conn = NULL;
 	zend_string_release(link->hash);
+
 	if (link->notices) {
 		zend_hash_destroy(link->notices);
+		FREE_HASHTABLE(link->notices);
+		link->notices = NULL;
 	}
 }
 
@@ -281,46 +286,46 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 
 static void php_pgsql_set_default_link(pgsql_link_handle *link)
 {
-	if (PGG(default_link) != NULL) {
-		pgsql_link_free(FETCH_DEFAULT_LINK());
-	}
-
 	PGG(default_link) = link;
 }
 
 static void _close_pgsql_plink(zend_resource *rsrc)
 {
-	PGconn *link = (PGconn *)rsrc->ptr;
-	PGresult *res;
+	if (rsrc->ptr) {
+		PGconn *link = (PGconn *)rsrc->ptr;
+		PGresult *res;
 
-	while ((res = PQgetResult(link))) {
-		PQclear(res);
+		while ((res = PQgetResult(link))) {
+			PQclear(res);
+		}
+		PQfinish(link);
+		PGG(num_persistent)--;
+		PGG(num_links)--;
+		rsrc->ptr = NULL;
 	}
-	PQfinish(link);
-	PGG(num_persistent)--;
-	PGG(num_links)--;
 }
 
-static void _php_pgsql_notice_handler(void *link, const char *message)
+static void _php_pgsql_notice_handler(void *l, const char *message)
 {
 	if (PGG(ignore_notices)) {
 		return;
 	}
 
+	pgsql_link_handle *link;
 	HashTable *notices, tmp_notices;
 	zval tmp;
-	zval *notices = notices = ((pgsql_link_handle *) link)->notices;
-	if (!notices) {
-		array_init(&tmp);
-		notices = &tmp;
-		zend_hash_index_update(&PGG(notices), (zend_ulong)resource_id, notices);
+
+	link = ((pgsql_link_handle *) l);
+	if (!link->notices) {
+		link->notices = zend_new_array(1);
 	}
 
 	zend_string *trimmed_message = _php_pgsql_trim_message(message);
 	if (PGG(log_notices)) {
 		php_error_docref(NULL, E_NOTICE, "%s", ZSTR_VAL(trimmed_message));
 	}
-	add_next_index_str(notices, trimmed_message);
+
+	add_next_index_str(link->notices, trimmed_message);
 }
 
 static int _rollback_transactions(zval *el)
@@ -329,8 +334,9 @@ static int _rollback_transactions(zval *el)
 	PGresult *res;
 	zend_resource *rsrc = Z_RES_P(el);
 
-	if (rsrc->type != le_plink)
-		return 0;
+	if (rsrc->type != le_plink) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 
 	link = (PGconn *) rsrc->ptr;
 
@@ -350,7 +356,7 @@ static int _rollback_transactions(zval *el)
 		PGG(ignore_notices) = orig;
 	}
 
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static void _free_ptr(zend_resource *rsrc)
@@ -403,7 +409,6 @@ static PHP_GINIT_FUNCTION(pgsql)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
-	/* Initialize notice message hash at MINIT only */
 	zend_hash_init(&pgsql_globals->regular_list, 0, NULL, ZVAL_PTR_DTOR, 1);
 }
 
@@ -590,11 +595,8 @@ PHP_RINIT_FUNCTION(pgsql)
 
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
-	/* clean up notice messages */
-	zend_hash_clean(&PGG(hashes));
 	zend_hash_destroy(&PGG(field_oids));
 	zend_hash_destroy(&PGG(table_oids));
-	zend_hash_clean(&PGG(regular_list));
 	/* clean up persistent connection */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
@@ -714,6 +716,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link->conn = pgsql;
 		link->hash = zend_string_copy(str.s);
 		link->notices = NULL;
+		link->persistent = 1;
 	} else { /* Non persistent connection */
 		zval *index_ptr, new_index_ptr;
 
@@ -761,6 +764,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link->conn = pgsql;
 		link->hash = zend_string_copy(str.s);
 		link->notices = NULL;
+		link->persistent = 0;
 
 		/* add it to the hash */
 		ZVAL_COPY(&new_index_ptr, return_value);
@@ -838,8 +842,8 @@ PHP_FUNCTION(pg_close)
 	if (!pgsql_link) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
+		zend_hash_del(&PGG(regular_list), link->hash);
 		PGG(default_link) = NULL;
-		pgsql_link_free(link);
 		RETURN_TRUE;
 	}
 
@@ -847,6 +851,7 @@ PHP_FUNCTION(pg_close)
 	CHECK_PGSQL_LINK(link);
 
 	if (link == FETCH_DEFAULT_LINK()) {
+		zend_hash_del(&PGG(regular_list), link->hash);
 		PGG(default_link) = NULL;
 	}
 	pgsql_link_free(link);
@@ -3328,7 +3333,6 @@ PHP_FUNCTION(pg_escape_bytea)
 				RETURN_THROWS();
 			}
 			link = FETCH_DEFAULT_LINK();
-			CHECK_DEFAULT_LINK(link);
 			break;
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &pgsql_link, pgsql_link_ce, &from) == FAILURE) {
@@ -5643,7 +5647,6 @@ PHP_FUNCTION(pg_update)
 	zval *pgsql_link, *values, *ids;
 	pgsql_link_handle *link;
 	zend_string *table;
-	size_t table_len;
 	zend_ulong option =  PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;

@@ -3,8 +3,8 @@ Bug #46408 (Locale number format settings can cause pg_query_params to break wit
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-if (false === setlocale(LC_ALL, 'de_DE.utf-8', 'de_DE')) {
-    echo "skip Locale de_DE.utf-8 not present";
+if (false === setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8")) {
+    echo "skip Locale de-DE not present";
 }
 ?>
 --FILE--
@@ -13,7 +13,7 @@ if (false === setlocale(LC_ALL, 'de_DE.utf-8', 'de_DE')) {
 require_once('config.inc');
 
 $dbh = pg_connect($conn_str);
-setlocale(LC_ALL, 'de_DE.utf-8', 'de_DE');
+setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8");
 echo 3.5 , "\n";
 pg_query_params("SELECT $1::numeric", array(3.5));
 pg_close($dbh);

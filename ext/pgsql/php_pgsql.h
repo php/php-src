@@ -148,6 +148,7 @@ typedef struct pgsql_link_handle {
 	zend_string *hash;
 	HashTable *notices;
 	zend_object std;
+	bool persistent;
 } pgsql_link_handle;
 
 typedef struct pgLofp {
