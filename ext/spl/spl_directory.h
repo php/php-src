@@ -68,13 +68,13 @@ struct _spl_filesystem_object {
 	union {
 		struct {
 			php_stream         *dirp;
-			php_stream_dirent  entry;
 			zend_string        *sub_path;
 			int                index;
 			int                is_recursive;
 			zend_function      *func_rewind;
 			zend_function      *func_next;
 			zend_function      *func_valid;
+			php_stream_dirent  entry;
 		} dir;
 		struct {
 			php_stream         *stream;
