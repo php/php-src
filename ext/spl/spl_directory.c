@@ -1478,14 +1478,17 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 			RETURN_THROWS();
 		}
 		php_stat(intern->file_name, FS_LPERMS, return_value);
-		if (S_ISLNK(Z_LVAL_P(return_value))) {
+		if (Z_TYPE_P(return_value) == IS_FALSE) {
+			return;
+		} else if (!S_ISLNK(Z_LVAL_P(return_value))) {
+			RETURN_BOOL(S_ISDIR(Z_LVAL_P(return_value)));
+		} else {
 			if (!allow_links
 			 && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
 				RETURN_FALSE;
 			}
-			php_stat(intern->file_name, FS_PERMS, return_value);
+			php_stat(intern->file_name, FS_IS_DIR, return_value);
 		}
-		RETURN_BOOL(S_ISDIR(Z_LVAL_P(return_value)));
     }
 }
 /* }}} */
