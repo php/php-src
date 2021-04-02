@@ -1474,13 +1474,15 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 		if (spl_filesystem_object_get_file_name(intern) != SUCCESS) {
 			RETURN_THROWS();
 		}
-		if (!allow_links && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
-			php_stat(intern->file_name, FS_IS_LINK, return_value);
-			if (zend_is_true(return_value)) {
+		php_stat(intern->file_name, FS_LPERMS, return_value);
+		if (S_ISLNK(Z_LVAL_P(return_value))) {
+			if (!allow_links
+			 && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
 				RETURN_FALSE;
 			}
+			php_stat(intern->file_name, FS_PERMS, return_value);
 		}
-		php_stat(intern->file_name, FS_IS_DIR, return_value);
+		RETURN_BOOL(S_ISDIR(Z_LVAL_P(return_value)));
     }
 }
 /* }}} */

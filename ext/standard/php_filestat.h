@@ -62,5 +62,6 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value);
 #define FS_EXISTS  15
 #define FS_LSTAT   16
 #define FS_STAT    17
+#define FS_LPERMS  18
 
 #endif /* PHP_FILESTAT_H */
