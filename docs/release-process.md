@@ -1,93 +1,72 @@
 # PHP release process
 
+A release managers role includes making packaged source code from the canonical repository
+available according to their release schedule.
+
+The release schedule for their branch is available on a Wiki page, for example
+  [PHP 8.0 release schedule](https://wiki.php.net/todo/php80)
+
+There are two types of release:
+
+  - non stable (alpha/beta/RC)
+  - stable
+  
+The process of making packaged source available and announcing availability is explained
+in detail below. The process differs slightly for non-stable and stable releases.
+
+Before a release manager can begin their work, there are several things that must happen,
+explained at the end of this document in 
+	[New Release Manager Checklist](#new-release-manager-checklist).
+
 ## General notes and tips
 
- 1. Do not release on Fridays, Saturdays or Sundays because the sysadmins cannot
-    upgrade stuff then.
+ 1. Do not release on Fridays, Saturdays, or Sundays as this gives poor lead time for 
+    downstream consumers adhering to a typical work week.
 
  2. Package two days before a release. So if the release is to be on Thursday,
     package on Tuesday. Think about timezones as well.
 
- 3. Ensure that the tests on Travis CI are green.
+ 3. Ensure that the relevant tests on CI are green.
 
-    See: https://travis-ci.org/php/php-src/builds
+    See:
+      https://ci.appveyor.com/project/php/php-src
+      https://dev.azure.com/phpazuredevops/PHP/
 
     It is recommended to do so a couple of days before the packaging day, to
     have enough time to investigate failures, communicate with the authors and
     commit the fixes.
 
-    The RM for the branch is also responsible for keeping the CI green on
-    ongoing basis between the releases. Check the CI status for your branch
-    periodically and resolve the failures ASAP. See more in
-    https://wiki.php.net/rfc/travis_ci.
+    Check the CI status for your branch periodically and resolve the failures ASAP. 
+    
+    See more in https://wiki.php.net/rfc/travis_ci.
 
- 4. Ensure that Windows builds will work before packaging.
-
- 5. Follow all steps to the letter. When unclear ask previous RM's (David,
-    Julien, Johannes, Stas, Derick, Ilia, Sara, Remi, or Christoph) before
+ 4. Follow all steps to the letter. When unclear ask previous RM's before
     proceeding. Ideally make sure that for the first releases one of the
     previous RM's is around to answer questions. For the steps related to the
-    php/QA/bug websites try to have someone from the webmaster team (Bjori) on
-    hand.
+    php/QA/bug websites try to have someone from the webmaster team on hand.
 
- 6. Verify the tags to be extra sure everything was tagged properly.
+ 5. Verify the tags to be extra sure everything was tagged properly.
 
- 7. Moving extensions from/to PECL requires write access to the destination.
-    Most developers should have this.
-
-    Moving extensions from php-src to PECL:
-
-    * Ask someone with Git admin access to create a new empty repository GitHub.
-
-    * Clone a new copy of the php-src repository (it will rewrite history, keep
-      contributors commits and include only the extension folder):
-
-        ```sh
-        git clone git@github.com:php/php-src.git ext-name
-        cd ext-name
-        git filter-branch --prune-empty --subdirectory-filter ext/ext-name master
-        ```
-
-    * Set remote Git push URL for the PECL extension:
-
-        ```sh
-        git remote set-url origin git@github.com:php/pecl-ext-name.git
-        ```
-
-    * Create branch and tags structure appropriate for the extension and push:
-
-        ```sh
-        git push -u origin master
-        ```
-
-    If the extension is still usable or not dead, in cooperation with the
-    extension maintainers if any:
-
-    * Create the pecl.php.net/foo package and its content, license, maintainer
-    * Create the package.xml, commit
-    * Release the package
-
-    For moving extensions from PECL to php-src the procedure needs to go through
-    the RFC process and a new Git commit without rewriting the php-src Git
-    commit history.
-
- 8. There is a PHP release Docker image https://github.com/sgolemon/php-release
+ 6. There is a PHP release Docker image https://github.com/sgolemon/php-release
     with forks available to help releasing.
 
-## Rolling a non stable release (alpha/beta/RC)
+ 7. Communication with previous release managers should be conducted via
+    release-managers@php.net
+  
+ 8. References to repositories in this document refer to the canonical source 
+    located at https://github.com/php
 
- 1. Check Windows snapshot builder logs https://windows.php.net/downloads/snaps/
-    the last revision.
+## Packaging a non stable release (alpha/beta/RC)
 
- 2. Check the tests at https://travis-ci.org/php/php-src/builds.
+ 1. Check the tests at https://travis-ci.org/php/php-src/builds.
 
- 3. Run the `scripts/dev/credits` script in php-src and commit the changes in
+ 2. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
 
- 4. Checkout the release branch for this release (e.g., PHP-7.4.2) from the main
+ 3. Checkout the release branch for this release (e.g., PHP-7.4.2) from the main
     branch.
 
- 5. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
+ 4. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
     `configure.ac` and possibly `NEWS`. Do not use abbreviations for alpha and
     beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
     not `#define PHP_VERSION "7.4.22-RC1"`.
@@ -99,33 +78,34 @@
     need to be rebuilt with each bump. Do *not* bump the API versions after
     RC1.
 
- 6. Compile and run `make test`, with and without ZTS, using the right Bison and
+ 5. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
 
- 7. Check `./sapi/cli/php -v` output for version matching.
+ 6. Check `./sapi/cli/php -v` output for version matching.
 
- 8. If all is right, commit the changes to the release branch:
+ 7. If all is right, commit the changes to the release branch:
 
     ```sh
     git commit -a
     ```
 
- 9. Tag the repository release branch with the version, e.g.:
+ 8. Tag the repository release branch with the version, e.g.:
 
     ```sh
     git tag -u YOURKEYID php-7.4.2RC2
     ```
 
-10. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
+ 9. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
     `configure.ac` and `NEWS` in the *main* branch (PHP-7.4 for example) to
     prepare for the **next** version. For example, if the RC is "7.4.1RC1" then
     the new one should be `7.4.2-dev` - regardless if we get a new RC or not.
     This is to make sure `version_compare()` can correctly work. Commit the
     changes to the main branch.
 
-11. Push the changes to the main repo, the tag, the main branch and the release
-    branch. Release branches for alpha/beta/.0RCx releases before the GA release
-    don't need to be pushed (a local temporary branch should be used).
+10. Push the changes to the `php-src`. 
+
+    Non stable release branches don't need to be pushed 
+      (a local temporary branch should be used).
 
     ```sh
     git push --tags origin HEAD
@@ -133,32 +113,32 @@
     git push origin {release branch}
     ```
 
-12. Run: `./scripts/dev/makedist php-7.4.0RC2`, this will export the tree,
+11. Run: `./scripts/dev/makedist php-7.4.0RC2`, this will export the tree,
     create `configure` and build three tarballs (gz, bz2 and xz).
 
-13. Run `scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
+12. Run `./scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
     tarballs and output verification information to be included in announcement
     email.
 
-14. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there
+13. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there
     should be a directory `public_html/`. Copy them into there. If you do not
     have this directory, create it.
 
-15. Now the RC can be found on https://downloads.php.net/~yourname,
+14. Now the RC can be found on https://downloads.php.net/~yourname,
     e.g. https://downloads.php.net/~derick/.
 
-16. Once the release has been tagged, contact the release-managers@ distribution
+15. Once the release has been tagged, contact the release-managers@ distribution
     list so that Windows binaries can be created. Once those are made, they can
     be found at https://windows.php.net/download.
 
-## Getting the non stable release (alpha/beta/RC) announced
+## Announcing a non stable release (alpha/beta/RC)
 
- 1. Update `qa.git/include/release-qa.php` with the appropriate information. See
+ 1. Update `web-qa:include/release-qa.php` with the appropriate information. See
     the documentation within release-qa.php for more information, but all
     releases and RCs are configured here. Only `$QA_RELEASES` needs to be
     edited.
 
-    Example: When rolling an RC, set the `rc` with appropriate information for
+    Example: When packaging an RC, set the `rc` with appropriate information for
     the given version.
 
     Note: Remember to update the sha256 checksum information.
@@ -166,11 +146,11 @@
  2. Skip this step for non stable releases after GA of minor or major versions
     (e.g. announce 7.4.0RC1, but not 7.4.1RC1):
 
-    Add a short notice to phpweb stating that there is a new release, and
+    Add a short notice to web-php stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
-    * Call `php bin/createNewsEntry` in your local phpweb checkout. Use category
+    * Call `php bin/createNewsEntry` in your local web-php checkout. Use category
       "frontpage" *and* "releases" for all stable releases. Use category
       "frontpage" for X.Y.0 non-stable releases only (news only).
 
@@ -205,7 +185,7 @@
  6. For RCs, post tweet with release announcement (and link to news article on
     php.net) ([@official_php](https://twitter.com/official_php))
 
-## Rolling a stable release
+## Packaging a stable release
 
  1. Checkout your release branch, you should have created when releasing
     previous RC and bump the version numbers in `main/php_version.h`,
@@ -245,8 +225,8 @@
     email.
 
 11. Commit and push all the tarballs and signature files to
-    `web/php-distributions.git`, then update the git submodule reference in
-    `web/php.git`:
+    `web-php-distributions`, then update the git submodule reference in
+    `web-php`:
 
     ```sh
     git submodule init
@@ -259,16 +239,16 @@
     git push
     ```
 
-    This is to fetch the last commit id from php-distributions.git and commit
-    this last commit id to `web/php.git`, then, website will now sync.
+    This is to fetch the last commit id from `web-php-distributions` and commit
+    this last commit id to `web-php`, then, website will now sync.
 
 12. Once the release has been tagged, contact release managers, Windows
     builders, and package maintainers so that they can build releases. Do not
     send this announcement to any public lists.
 
-## Getting the stable release announced
+## Announcing a stable release
 
- 1. Update `phpweb/include/releases.inc` with the old release info (updates the
+ 1. Update `web-php:include/releases.inc` with the old release info (updates the
     download archives).
 
     * You can run `php bin/bumpRelease 7 4` where the first number is the major
@@ -277,7 +257,7 @@
     * If that fails for any non-trivially fixable reason, you can manually copy
       the old information to `include/releases.inc`.
 
- 2. Update $data['X.Y'] in `phpweb/include/version.inc`
+ 2. Update $data['X.Y'] in `web-php:include/version.inc`
     (X.Y=major.minor release, e.g. '8.0'):
 
     * `version` to the full version number (e.g. '8.0.1')
@@ -287,7 +267,7 @@
 
  3. Create the release file (`releases/x_y_z.php`):
 
-    Optionally use `phpweb/bin/createReleaseEntry -v x.y.z -r` to create
+    Optionally use `bin/createReleaseEntry -v x.y.z -r` to create
     a standard announcement template for this and step 6.
     Add `--security` for a security release.
 
@@ -296,7 +276,7 @@
 
     Edit the generated files to expand on the base message if needed.
 
- 4. Update `php-qa/include/release-qa.php` and add the next version as an
+ 4. Update `web-qa:include/release-qa.php` and add the next version as an
     QARELEASE (prepare for next RC). Keep `active => true` until there will be
     no more QA releases. Setting the release number to 0 is sufficient to
     remove the old QA release from the available QA releases list.
@@ -305,7 +285,7 @@
 
     e.g. `ChangeLog-7.php` from the `NEWS` file
 
-    * You may want to try `php-web/bin/news2html` to automate this task.
+    * You may want to try `web-php:bin/news2html` to automate this task.
 
     * Go over the list and put every element on one line.
     * Check for `&`, `<` and `>` and escape them if necessary.
@@ -322,12 +302,12 @@
 
         V. `s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/`
 
- 6. Add a short notice to phpweb stating that there is a new release, and
+ 6. Add a short notice to `web-php` stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
     * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
-      local phpweb checkout.
+      local web-php checkout.
 
  7. Commit and push all the changes to their respective git repos
 
@@ -352,9 +332,9 @@
 
 ## Re-releasing the same version (or -pl)
 
- 1. Commit the new binaries to `phpweb/distributions/`
+ 1. Commit the new binaries to `web-php-distributions`
 
- 2. Update $data['X.Y'] in `phpweb/include/version.inc`
+ 2. Update $data['X.Y'] in `web-php:/include/version.inc`
     (X.Y=major.minor release, e.g. '8.0'):
 
     * `version` to the full version number (e.g. '8.0.1-pl1')
@@ -362,12 +342,12 @@
     * `tags` array should include `security` if this is a security release
     * `sha256` array and sub-elements for all SHA256 sums
 
- 3. Add a short notice to phpweb stating that there is a new release, and
+ 3. Add a short notice to `web-php` stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
     * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
-      local phpweb checkout.
+      local web-php checkout.
 
  4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
     `archive/entries/YYYY-MM-DD-N.xml`).
@@ -412,7 +392,7 @@
 
     http://news.php.net/php.internals/99903
 
- 4. Update php-web:git.php and https://wiki.php.net/vcs/gitworkflow to reflect
+ 4. Update `web-php:git.php` and https://wiki.php.net/vcs/gitworkflow to reflect
     the new branch. Example:
 
     https://github.com/php/web-php/commit/74bcad4c770d95f21b7fbeeedbd76d943bb83f23
@@ -448,12 +428,14 @@ branch:
 
  3. Help the new release managers with their first steps.
 
-## New Release Manager checklist
+## New Release Manager Checklist
 
- 1. Email systems@ to get setup for access to downloads.php.net and to be added
+ 1. Email systems@php.net to get setup for access to downloads.php.net and to be added
     to the release-managers@ distribution list.
+    
+ 2. Request membership to the Release Managers group on github.
 
- 2. Create a GPG key for your @php.net address and publish it by editing
+ 3. Create a GPG key for your @php.net address and publish it by editing
     `include/gpg-keys.inc` in the `web-php` repository, adding the output of
     `gpg --fingerprint "$USER@php.net"`. Let one or more of the previous RMs
     sign your key. Publish your public key to pgp.mit.edu with:
@@ -461,15 +443,7 @@ branch:
     Add new keys in the php-keyring.gpg in distribution repository using:
     `gpg2 --export --export-options export-minimal --armor <all RM keys>`
 
- 3. Request karma to edit `main/php_version.h` and `Zend/zend.h`. Possibly karma
-    for other restricted parts of php-src might come in question. To edit
-    `main/php_version.h` in a release branch, you need release manager karma in
-    `global_avail`.
-
- 4. Request karma for `web/qa.git` and `web/php.git` for publishing release
-    announcements.
-
- 5. Request moderation access to php-announce@lists.php.net and
+ 4. Request moderation access to php-announce@lists.php.net and
     primary-qa-tester@lists.php.net lists, to be able to moderate your release
     announcements. All the announcements should ideally be sent from the
     @php.net alias. Note, that for sending emails as @php.net alias a custom
