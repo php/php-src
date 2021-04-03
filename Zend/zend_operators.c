@@ -672,6 +672,9 @@ try_again:
 			ZVAL_EMPTY_STRING(op);
 			break;
 		}
+		case IS_INDIRECT:
+			ZVAL_DEINDIRECT(op);
+			goto try_again;
 		case IS_REFERENCE:
 			zend_unwrap_reference(op);
 			goto try_again;
