@@ -880,6 +880,9 @@ try_again:
 					return 1.0;
 				}
 			}
+		case IS_INDIRECT:
+			op = Z_INDIRECT_P(op);
+			goto try_again;
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
