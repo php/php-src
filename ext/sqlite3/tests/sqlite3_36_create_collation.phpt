@@ -1,7 +1,7 @@
 --TEST--
 Test SQLite3::createCollation() by adding strnatcmp() as an SQL COLLATE sequence
---SKIPIF--
-<?php require_once __DIR__ .  '/skipif.inc'; ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

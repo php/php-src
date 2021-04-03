@@ -1,7 +1,7 @@
 --TEST--
 Bug #30928 (When Using WSDL, SoapServer doesn't handle private or protected properties)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled", 0);

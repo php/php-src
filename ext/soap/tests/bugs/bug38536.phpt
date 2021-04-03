@@ -1,7 +1,7 @@
 --TEST--
 Bug #38536 (SOAP returns an array of values instead of an object)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

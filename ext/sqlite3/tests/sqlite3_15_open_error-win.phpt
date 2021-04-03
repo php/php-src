@@ -1,11 +1,12 @@
 --TEST--
 SQLite3::open error test
+--EXTENSIONS--
+sqlite3
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
-require_once(__DIR__ . '/skipif.inc');
 ?>
 --FILE--
 <?php

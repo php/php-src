@@ -1,7 +1,7 @@
 --TEST--
 Tidy::diagnose() NULL pointer dereference
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

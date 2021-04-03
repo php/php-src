@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round4 GroupI XSD 005 (php/wsdl): echoString(empty)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

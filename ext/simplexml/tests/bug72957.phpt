@@ -1,7 +1,7 @@
 --TEST--
 Bug #72957: Null coalescing operator doesn't behave as expected with SimpleXMLElement
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip simplexml extension is not loaded"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

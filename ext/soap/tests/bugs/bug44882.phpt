@@ -1,7 +1,7 @@
 --TEST--
 Bug #44882 (SOAP extension object decoding bug)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

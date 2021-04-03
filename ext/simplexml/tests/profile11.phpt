@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML [profile]: Accessing two elements with the same name, but different namespaces
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);

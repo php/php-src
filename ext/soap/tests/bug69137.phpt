@@ -1,8 +1,9 @@
 --TEST--
 SOAP Bug #69137 - Peer verification fails when using a proxy with SoapClient
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (getenv("SKIP_ONLINE_TESTS")) { die("skip test requiring internet connection"); }
 if (!getenv('http_proxy')) { die("skip test unless an HTTP/HTTPS proxy server is specified in http_proxy environment variable"); }
 ?>

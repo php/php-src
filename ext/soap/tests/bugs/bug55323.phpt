@@ -1,7 +1,7 @@
 --TEST--
 Bug #55323 (SoapClient segmentation fault when XSD_TYPEKIND_EXTENSION contains itself)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled",0);

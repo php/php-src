@@ -1,7 +1,7 @@
 --TEST--
 Bug #36611 (assignment to SimpleXML object attribute changes argument type to string)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 SOAP Bug #70875 - Segmentation fault if wsdl has no targetNamespace attribute
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 Bug #31695 (Cannot redefine endpoint when using WSDL)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled", 0);

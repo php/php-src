@@ -1,7 +1,7 @@
 --TEST--
 Bug #30175 (SOAP results aren't parsed correctly)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

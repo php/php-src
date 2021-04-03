@@ -1,7 +1,7 @@
 --TEST--
 Bug #73237 "Any" data missing when result includes a struct
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
