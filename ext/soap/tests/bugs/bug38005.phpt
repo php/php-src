@@ -1,7 +1,7 @@
 --TEST--
 Bug #38005 (SoapFault faultstring doesn't follow encoding rules)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

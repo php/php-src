@@ -1,7 +1,7 @@
 --TEST--
 SOAP Typemap 11: SoapClient support for typemap's from_xml() (SoapFault)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 tidy_get_body() crash
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

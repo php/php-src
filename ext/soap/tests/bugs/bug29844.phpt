@@ -1,7 +1,7 @@
 --TEST--
 Bug #29844 (SOAP doesn't return the result of a valid SOAP request)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

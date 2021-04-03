@@ -1,7 +1,7 @@
 --TEST--
 Bug #27010 (segfault and node text not displayed when returned from children())
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Verbose  tidy_getopt()
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --INI--
 tidy.default_config=
 --FILE--

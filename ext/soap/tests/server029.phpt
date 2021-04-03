@@ -12,10 +12,11 @@ SOAP Server 29-CGI: new/addfunction/handle
     <ns1:test xmlns:ns1="http://testuri.org" />
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
     if (php_sapi_name()=='cli') echo 'skip';
-    require_once('skipif.inc');
 ?>
 --FILE--
 <?php

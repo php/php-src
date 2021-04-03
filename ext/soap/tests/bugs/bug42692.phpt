@@ -1,7 +1,7 @@
 --TEST--
 Bug #42692 (Procedure 'int1' not present with doc/lit SoapServer)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set('soap.wsdl_cache_enabled','0');

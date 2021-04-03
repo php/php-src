@@ -1,7 +1,7 @@
 --TEST--
 Bug #62328 (implementing __toString and a cast to string fails)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 class UberSimpleXML extends SimpleXMLElement {

@@ -1,7 +1,7 @@
 --TEST--
 SOAP Typemap 8: SoapClient support for typemap's to_xml() (without WSDL, using SoapVar)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

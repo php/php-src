@@ -1,7 +1,7 @@
 --TEST--
 SOAP Transport 1: Local transport using SoapClient::__doRequest
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function Add($x,$y) {

@@ -1,9 +1,7 @@
 --TEST--
 Bug #36999 (xsd:long values clamped to LONG_MAX instead of using double)
---SKIPIF--
-<?php
-  if (!extension_loaded('soap')) die('skip soap extension not available');
-?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

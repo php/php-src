@@ -1,7 +1,7 @@
 --TEST--
 Bug #71711: Soap Server Member variables reference bug
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 SQLite3 - memory leak on SQLite3Result and SQLite3Stmt
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

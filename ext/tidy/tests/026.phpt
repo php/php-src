@@ -1,7 +1,7 @@
 --TEST--
 tidy.clean_output test
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --INI--
 tidy.clean_output=1
 --FILE--

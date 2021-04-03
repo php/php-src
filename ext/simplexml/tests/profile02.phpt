@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML [profile]: Accessing an array of subnodes
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $root = simplexml_load_string('<?xml version="1.0"?>
