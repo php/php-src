@@ -79,6 +79,7 @@
 #include "mbfilter_utf7imap.h"
 
 static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
@@ -99,7 +100,7 @@ const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_utf7imap_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_utf7imap_wchar_flush,
 	NULL,
 };
 
@@ -136,9 +137,11 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			if (c == '-') {
 				if (filter->status == 1) { /* "&-" -> "&" */
 					CK((*filter->output_function)('&', filter->data));
+				} else if (filter->cache) {
+					/* Base64-encoded section ended abruptly, with partially encoded characters,
+					 * or it could be that it ended on the first half of a surrogate pair */
+					CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
 				}
-			} else if (c >= 0 && c < 0x80) { /* ASCII exclude '-' */
-				CK((*filter->output_function)(c, filter->data));
 			} else { /* illegal character */
 				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 			}
@@ -270,6 +273,21 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status) {
+		/* It is illegal for a UTF-7 IMAP string to end in a Base-64 encoded
+		 * section. It should always change back to ASCII before the end. */
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
 
 static const unsigned char mbfl_utf7imap_base64_table[] =
