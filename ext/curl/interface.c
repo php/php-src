@@ -232,6 +232,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("curl.cainfo", "", PHP_INI_SYSTEM, NULL)
+	PHP_INI_ENTRY("curl.user_agent", "", PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 /* }}} */
 
@@ -1802,7 +1803,7 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
    Set default options for a handle */
 static void _php_curl_set_default_options(php_curl *ch)
 {
-	char *cainfo;
+	char *cainfo, *user_agent;
 
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1);
 	curl_easy_setopt(ch->cp, CURLOPT_VERBOSE,           0);
@@ -1825,6 +1826,11 @@ static void _php_curl_set_default_options(php_curl *ch)
 	}
 	if (cainfo && cainfo[0] != '\0') {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
+	}
+
+	user_agent = INI_STR("curl.user_agent");
+	if (user_agent && user_agent[0] != '\0') {
+		curl_easy_setopt(ch->cp, CURLOPT_USERAGENT, user_agent);
 	}
 
 #ifdef ZTS
