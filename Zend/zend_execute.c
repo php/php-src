@@ -982,9 +982,9 @@ static zend_always_inline bool zend_check_type_slow(
 		bool is_return_type, bool is_internal)
 {
 	uint32_t type_mask;
-	if (ZEND_TYPE_HAS_CLASS(*type) && Z_TYPE_P(arg) == IS_OBJECT) {
+	if (ZEND_TYPE_HAS_CLASS(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
-		if (ZEND_TYPE_HAS_LIST(*type)) {
+		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 				if (HAVE_CACHE_SLOT && *cache_slot) {
