@@ -2046,7 +2046,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 		intern->u.file.current_line_len = 0;
 	} else {
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			const char breaks[] = "\r\n";
+			char breaks[] = "\r\n";
 			line_len = php_strcspn(buf, breaks, buf + line_len, breaks + sizeof(breaks)-1);
 			buf[line_len] = '\0';
 		}
