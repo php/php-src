@@ -1350,6 +1350,9 @@ static zend_string* accel_new_interned_key(zend_string *key)
 {
 	zend_string *new_key;
 
+	if (zend_accel_in_shm(key)) {
+		return key;
+	}
 	GC_ADDREF(key);
 	new_key = accel_new_interned_string(key);
 	if (UNEXPECTED(new_key == key)) {

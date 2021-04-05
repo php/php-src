@@ -585,7 +585,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
-	ADD_STRING(new_persistent_script->script.filename);
+	ADD_INTERNED_STRING(new_persistent_script->script.filename);
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align size to 64-byte boundary */
