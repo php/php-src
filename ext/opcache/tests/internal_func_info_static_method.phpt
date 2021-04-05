@@ -2,6 +2,7 @@
 Internal static methods should not be confused with global functions
 --EXTENSIONS--
 opcache
+zend_test
 --FILE--
 <?php
 
