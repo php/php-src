@@ -775,12 +775,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
-	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
-		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
-	        } else {
-		        php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
-			}
+	        php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"" PHP_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 		}
 
 		if (!sapi_module.phpinfo_as_text) {
