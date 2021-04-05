@@ -44,7 +44,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 
     $im = imagecreatefrompng($SOURCE_IMG);
 
-    if (imagefilter($im, IMG_FILTER_COLORIZE, -127.12, -127.98, 127)) {
+    if (imagefilter($im, IMG_FILTER_COLORIZE, -127, -127, 127)) {
         imagepng($im, $SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
         echo "IMG_FILTER_COLORIZE success\n";
         unlink($SAVE_DIR . "/IMG_FILTER_COLORIZE.png");

@@ -31,7 +31,7 @@ $points = array(
   $x,      $top,
   $x+2*$d, $top,
   $x+2*$d, $bot,
-  $x+$d,   ($top+$bot)/2,
+  $x+$d,   (int) (($top+$bot)/2),
   $x,      $bot
 );
 imagefilledpolygon($im, $points, $yellow);

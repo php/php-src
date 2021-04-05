@@ -16,7 +16,11 @@ try {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
 int(2170713600)
+
+Deprecated: Implicit conversion to int from non-compatible float 106751993607888.640625 in %s on line %d
 int(9223372036854720000)
+
+Deprecated: Implicit conversion to int from non-compatible float 106751993607889.640625 in %s on line %d
 jday must be between 2440588 and 106751993607888
