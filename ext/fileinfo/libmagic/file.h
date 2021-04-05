@@ -482,8 +482,7 @@ protected int file_buffer(struct magic_set *, php_stream *, zend_stat_t *, const
     size_t);
 protected int file_fsmagic(struct magic_set *, const char *, zend_stat_t *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
-protected int file_vprintf(struct magic_set *, const char *, va_list)
-    __attribute__((__format__(__printf__, 2, 0)));
+protected int file_vprintf(struct magic_set *, const char *, va_list);
 protected int file_separator(struct magic_set *);
 protected char *file_copystr(char *, size_t, size_t, const char *);
 protected int file_checkfmt(char *, size_t, const char *);
