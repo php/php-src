@@ -1932,8 +1932,9 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 					done = 1;
 					break;
 				case SSL_ERROR_SYSCALL:
-					/* Something went totally wrong; bail out to avoid raising
-					   a spurious warning. */
+					/* most likely the peer closed the connection without
+					   sending a close_notify shutdown alert;
+					   bail out to avoid raising a spurious warning */
 					done = 1;
 					break;
 				default:
