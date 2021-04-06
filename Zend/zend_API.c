@@ -4804,3 +4804,4 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 #endif
 	return get_default_via_ast(default_value_zval, default_value);
 }
+
