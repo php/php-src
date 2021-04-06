@@ -10,9 +10,9 @@ opcache.jit=function
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_opcode_in_user_handler=ZEND_EXIT, ZEND_BEGIN_SILENCE, ZEND_END_SILENCE
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
+--EXTENSIONS--
+opcache
+zend_test
 --FILE--
 <?php
 function test(): int
