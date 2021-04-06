@@ -422,7 +422,7 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 				return NULL;
 			}
 			
-			zend_op_array *op_array = zend_include_or_eval(mf, ZEND_REQUIRE_ONCE);
+			zend_op_array *op_array = zend_include_or_eval(mf, ZEND_REQUIRE);
 			if (op_array != NULL && op_array != ZEND_FAKE_OP_ARRAY) {
 				destroy_op_array(op_array);
 				efree_size(op_array, sizeof(zend_op_array));
