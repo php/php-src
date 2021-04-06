@@ -1,5 +1,7 @@
 --TEST--
-Bug #69806
+Bug #69806 (Incorrect date from timestamp)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
 ini_set('date.timezone', 'America/New_York');
