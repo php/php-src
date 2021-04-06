@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #80024 (Duplication of info about inherited socket after pool
     removing). (Jakub Zelenka)
 
+- FTP:
+  . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
+    Zelenka)
+
 - LibXML:
   . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
 
