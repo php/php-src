@@ -35,6 +35,6 @@ Example
 Foo\NamespacedExample
 Array
 (
-    [example] => /tmp/example.php
+    [example] => %s/example.php
     [foo\namespacedexample] => %s/namespacedexample.php
 )
