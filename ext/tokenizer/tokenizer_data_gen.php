@@ -10,7 +10,8 @@ $infile is missing.
 
 Please, generate the PHP parser files by scripts/dev/genfiles
 or by running the ./configure build step.
-ERROR);
+ERROR
+    );
     exit(1);
 }
 
