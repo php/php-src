@@ -300,7 +300,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2)
 	return ht;
 }
 
-static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
+ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 {
 	HT_ASSERT_RC1(ht);
 	if (ht->nTableSize >= HT_MAX_SIZE) {

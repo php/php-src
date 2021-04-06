@@ -112,6 +112,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed);
+ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht);
 
 /* additions/updates/changes */
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag);
@@ -1160,6 +1161,16 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		Bucket *__fill_bkt = __fill_ht->arData + __fill_ht->nNumUsed; \
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
 		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
+
+#define ZEND_HASH_FILL_GROW() do { \
+		if (UNEXPECTED(__fill_idx >= __fill_ht->nTableSize)) { \
+			__fill_ht->nNumUsed = __fill_idx; \
+			__fill_ht->nNumOfElements = __fill_idx; \
+			__fill_ht->nNextFreeElement = __fill_idx; \
+			zend_hash_packed_grow(__fill_ht); \
+			__fill_bkt = __fill_ht->arData + __fill_idx; \
+		} \
+	} while (0);
 
 #define ZEND_HASH_FILL_SET(_val) \
 		ZVAL_COPY_VALUE(&__fill_bkt->val, _val)
