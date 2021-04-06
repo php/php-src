@@ -10,6 +10,43 @@ PHP                                                                        NEWS
   . Fixed bug #53826 (__callStatic fired in base class through a parent call if
     the method is private). (Nikita)
 
+- Date:
+  . Fixed bug #52480 (Incorrect difference using DateInterval) (Derick)
+  . Fixed bug #62326 (date_diff() function returns false result) (Derick)
+  . Fixed bug #64992 (dst not handled past 2038) (Derick)
+  . Fixed bug #65003 (Wrong date diff) (Derick)
+  . Fixed bug #66545 (DateTime. diff returns negative values) (Derick)
+  . Fixed bug #68503 (date_diff on two dates with timezone set localised
+    returns wrong results) (Derick)
+  . Fixed bug #69806 (Incorrect date from timestamp) (Derick)
+  . Fixed bug #71700 (Extra day on diff between begin and end of march 2016)
+    (Derick)
+  . Fixed bug #71826 (DateTime::diff confuse on timezone 'Asia/Tokyo') (Derick)
+  . Fixed bug #73460 (Datetime add not realising it already applied DST
+    change) (Derick)
+  . Fixed bug #74173 (DateTimeImmutable::getTimestamp() triggers DST switch in
+    incorrect time) (Derick)
+  . Fixed bug #74274 (Handling DST transitions correctly) (Derick)
+  . Fixed bug #74524 (Date diff is bad calculated, in same time zone) (Derick)
+  . Fixed bug #75167 (DateTime::add does only care about backward DST
+    transition, not forward) (Derick)
+  . Fixed bug #76032 (DateTime->diff having issues with leap days for
+    timezones ahead of UTC) (Derick)
+  . Fixed bug #76374 (Date difference varies according day time) (Derick)
+  . Fixed bug #77571 (DateTime's diff DateInterval incorrect in timezones from
+    UTC+01:00 to UTC+12:00 (Derick)
+  . Fixed bug #78452 (diff makes wrong in hour for Asia/Tehran) (Derick)
+  . Fixed bug #79452 (DateTime::diff() generates months differently between
+    time zones) (Derick)
+  . Fixed bug #79698 (timelib mishandles future timestamps (triggered by 'zic
+    -b slim')) (Derick)
+  . Fixed bug #79716 (Invalid date time created (with day "00")) (Derick)
+  . Fixed bug #80610 (DateTime calculate wrong with DateInterval) (Derick)
+  . Fixed bug #80664 (DateTime objects behave incorrectly around DST
+    transition) (Derick)
+  . Fixed bug #80913 (DateTime(Immutable)::sub around DST yield incorrect
+    time) (Derick)
+
 - FPM:
   . Added openmetrics status format. (Cees-Jan Kiewiet)
   . Enable process renaming on macOS. (devnexen)
