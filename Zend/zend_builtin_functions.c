@@ -1865,7 +1865,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_string *function_name;
 	zend_string *filename;
 	zend_string *include_filename = NULL;
-	zval stack_frame, tmp;
+	zval tmp;
+	HashTable *stack_frame;
 
 	array_init(return_value);
 
@@ -1898,7 +1899,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
-		array_init(&stack_frame);
+
+		/* We use _zend_hash_append*() and the array must be preallocated */
+		stack_frame = zend_new_array(8);
+		zend_hash_real_init_mixed(stack_frame);
 
 		ptr = zend_generator_check_placeholder_frame(ptr);
 
@@ -1920,9 +1924,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				lineno = skip->opline->lineno;
 			}
 			ZVAL_STR_COPY(&tmp, filename);
-			zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
 			ZVAL_LONG(&tmp, lineno);
-			zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
@@ -1940,9 +1944,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				}
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
-					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
 					ZVAL_LONG(&tmp, prev->opline->lineno);
-					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
 					break;
 				}
 				prev_call = prev;
@@ -1964,7 +1968,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		if (function_name) {
 			ZVAL_STR_COPY(&tmp, function_name);
-			zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 
 			if (object) {
 				if (func->common.scope) {
@@ -1974,26 +1978,26 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				} else {
 					ZVAL_STR(&tmp, object->handlers->get_class_name(object));
 				}
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_CLASS), &tmp, 1);
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
 					ZVAL_OBJ_COPY(&tmp, object);
-					zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_OBJECT), &tmp);
+					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_OBJECT), &tmp, 1);
 				}
 
 				ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_OBJECT_OPERATOR));
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_TYPE), &tmp, 1);
 			} else if (func->common.scope) {
 				ZVAL_STR_COPY(&tmp, func->common.scope->name);
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_CLASS), &tmp);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_CLASS), &tmp, 1);
 				ZVAL_INTERNED_STR(&tmp, ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM));
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_TYPE), &tmp, 1);
 			}
 
 			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 &&
 				func->type != ZEND_EVAL_CODE) {
 
 				debug_backtrace_get_args(call, &tmp);
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_ARGS), &tmp);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_ARGS), &tmp, 1);
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
@@ -2024,7 +2028,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				default:
 					/* Skip dummy frame unless it is needed to preserve filename/lineno info. */
 					if (!filename) {
-						zval_ptr_dtor(&stack_frame);
+						zend_array_destroy(stack_frame);
 						goto skip_frame;
 					}
 
@@ -2044,14 +2048,15 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 				ZVAL_STR_COPY(&tmp, include_filename);
 				zend_hash_next_index_insert_new(Z_ARRVAL(arg_array), &tmp);
-				zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_ARGS), &arg_array);
+				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_ARGS), &arg_array, 1);
 			}
 
 			ZVAL_INTERNED_STR(&tmp, pseudo_function_name);
-			zend_hash_add_new(Z_ARRVAL(stack_frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 		}
 
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
+		ZVAL_ARR(&tmp, stack_frame);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 
 skip_frame:
 		include_filename = filename;
