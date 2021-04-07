@@ -2046,9 +2046,13 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 		intern->u.file.current_line_len = 0;
 	} else {
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			char breaks[] = "\r\n";
-			line_len = php_strcspn(buf, breaks, buf + line_len, breaks + sizeof(breaks)-1);
-			buf[line_len] = '\0';
+			zend_string *zbuf = zend_string_init(buf, line_len, 0);
+			const char *eol = php_stream_locate_eol(intern->u.file.stream, zbuf);
+			if (eol != NULL) {
+				line_len = eol - ZSTR_VAL(zbuf);
+				buf[line_len] = '\0';
+			}
+			zend_string_release(zbuf);
 		}
 
 		intern->u.file.current_line = buf;
