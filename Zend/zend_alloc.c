@@ -1099,7 +1099,7 @@ static zend_always_inline void zend_mm_free_pages_ex(zend_mm_heap *heap, zend_mm
 		/* this setting may be not accurate */
 		chunk->free_tail = page_num;
 	}
-	if (free_chunk && chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE) {
+	if (free_chunk && chunk != heap->main_chunk && chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE) {
 		zend_mm_delete_chunk(heap, chunk);
 	}
 }
