@@ -1,0 +1,19 @@
+name: Lint
+on: [push, pull_request]
+jobs:
+  php-cs-fixer:
+    name: PHP CS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, intl, xml, dom, json, iconv
+      - uses: actions/checkout@v2
+
+      -   name: Install
+          run: curl -s -L https://cs.symfony.com/download/php-cs-fixer-v2.phar -o php-cs-fixer.phar
+
+      -   name: Run fixer
+          run: php php-cs-fixer.phar fix --config=.github/workflows/lint/.php_cs.dist --dry-run --using-cache=no --diff --diff-format=udiff --verbose --show-progress=dots

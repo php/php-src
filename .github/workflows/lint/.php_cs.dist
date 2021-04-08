@@ -1,0 +1,33 @@
+<?php
+
+$phpRoot = dirname(__DIR__, 3);
+
+$finder = PhpCsFixer\Finder::create()
+    ->name('*.phpt')
+    ->in([
+        // $phpRoot . '/main',
+        // $phpRoot . '/ext',
+        $phpRoot . '/ext/bcmath',
+        $phpRoot . '/build',
+        $phpRoot . '/pear',
+        // $phpRoot . '/sapi',
+        $phpRoot . '/scripts',
+        $phpRoot . '/win32',
+        // $phpRoot . '/Zend',
+    ])
+    ->append([
+        $phpRoot . '/run-tests.php',
+    ])
+    ->notName('*.stub.php');
+
+return PhpCsFixer\Config::create()
+    ->setRules([
+        '@PSR2' => true,
+        'concat_space' => [
+            'spacing' => 'one',
+        ],
+        'binary_operator_spaces' => true,
+        'whitespace_after_comma_in_array' => true,
+    ])
+    ->setFinder($finder)
+    ->setCacheFile(__DIR__ . '/.php_cs.cache');
