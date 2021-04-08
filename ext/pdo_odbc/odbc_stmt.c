@@ -650,13 +650,13 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
  			256, &C->fetched_len);
 		orig_fetched_len = C->fetched_len;
 
-		if (rc == SQL_SUCCESS) {
+		if (rc == SQL_SUCCESS && C->fetched_len < 256) {
 			/* all the data fit into our little buffer;
 			 * jump down to the generic bound data case */
 			goto in_data;
 		}
 
-		if (rc == SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_SUCCESS_WITH_INFO || rc == SQL_SUCCESS) {
 			/* this is a 'long column'
 
 			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
@@ -683,7 +683,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 				}
 
 				/* resize output buffer and reassemble block */
-				if (rc==SQL_SUCCESS_WITH_INFO) {
+				if (rc==SQL_SUCCESS_WITH_INFO || (rc==SQL_SUCCESS && C->fetched_len > 255)) {
 					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
 					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > 255 (greater than buf2's size)
 					 (if a driver fails to follow that and wrote less than 255 bytes to buf2, this will AV or read garbage into buf) */
