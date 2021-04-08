@@ -955,7 +955,7 @@ PHP_FUNCTION(pcntl_exec)
 	int envc = 0, envi = 0;
 	char **argv = NULL, **envp = NULL;
 	char **current_arg, **pair;
-	int pair_length;
+	size_t pair_length;
 	zend_string *key;
 	char *path;
 	size_t path_len;
