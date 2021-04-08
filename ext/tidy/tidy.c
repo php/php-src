@@ -887,11 +887,11 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 	int status;
 	bool value;
 
-	if (ZSTR_LEN(new_value)==2 && strcasecmp("on", ZSTR_VAL(new_value))==0) {
+	if (zend_string_equals_literal_ci(new_value, "on")) {
 		value = (bool) 1;
-	} else if (ZSTR_LEN(new_value)==3 && strcasecmp("yes", ZSTR_VAL(new_value))==0) {
+	} else if (zend_string_equals_literal_ci(new_value, "yes")) {
 		value = (bool) 1;
-	} else if (ZSTR_LEN(new_value)==4 && strcasecmp("true", ZSTR_VAL(new_value))==0) {
+	} else if (zend_string_equals_literal_ci(new_value, "true")) {
 		value = (bool) 1;
 	} else {
 		value = (bool) atoi(ZSTR_VAL(new_value));

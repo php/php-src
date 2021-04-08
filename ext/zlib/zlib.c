@@ -1273,9 +1273,9 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
-	if (!strncasecmp(ZSTR_VAL(new_value), "off", sizeof("off"))) {
+	if (zend_string_equals_literal_ci(new_value, "off")) {
 		int_value = 0;
-	} else if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
+	} else if (zend_string_equals_literal_ci(new_value, "on")) {
 		int_value = 1;
 	} else {
 		int_value = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));

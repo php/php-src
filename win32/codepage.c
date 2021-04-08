@@ -587,16 +587,15 @@ PHP_FUNCTION(sapi_windows_cp_set)
 /* {{{ Get process codepage. */
 PHP_FUNCTION(sapi_windows_cp_get)
 {
-	char *kind;
-	size_t kind_len = 0;
+	zend_string *kind;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &kind, &kind_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &kind) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (kind_len == sizeof("ansi")-1 && !strncasecmp(kind, "ansi", kind_len)) {
+	if (zend_string_equals_literal_ci(kind, "ansi") {
 		RETURN_LONG(GetACP());
-	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
+	} else if (zend_string_equals_literal_ci(kind, "oem") {
 		RETURN_LONG(GetOEMCP());
 	} else {
 		const struct php_win32_cp *cp = php_win32_cp_get_current();

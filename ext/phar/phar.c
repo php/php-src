@@ -55,16 +55,13 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (ZSTR_LEN(new_value) == 2 && !strcasecmp("on", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 3 && !strcasecmp("yes", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 4 && !strcasecmp("true", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else {
+	if (zend_string_equals_literal_ci(new_value, "on")) {
+		ini = true;
+	} else if (zend_string_equals_literal_ci(new_value, "yes")) {
+		ini = true;
+	} else if (zend_string_equals_literal_ci(new_value, "true")) {
+		ini = true;
+	} else {
 		ini = (bool) atoi(ZSTR_VAL(new_value));
 	}
 

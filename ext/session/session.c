@@ -604,7 +604,7 @@ static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
+	if (zend_string_equals_literal_ci(new_value, "on")) {
 		PS(use_trans_sid) = (bool) 1;
 	} else {
 		PS(use_trans_sid) = (bool) atoi(ZSTR_VAL(new_value));
@@ -1732,24 +1732,24 @@ PHP_FUNCTION(session_set_cookie_params)
 		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
-				if(!strcasecmp("lifetime", ZSTR_VAL(key))) {
+				if (zend_string_equals_literal_ci(key, "lifetime")) {
 					lifetime = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("path", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "path")) {
 					path = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("domain", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "domain")) {
 					domain = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("secure", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "secure")) {
 					secure = zval_is_true(value);
 					secure_null = 0;
 					found++;
-				} else if(!strcasecmp("httponly", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "httponly")) {
 					httponly = zval_is_true(value);
 					httponly_null = 0;
 					found++;
-				} else if(!strcasecmp("samesite", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "samesite")) {
 					samesite = zval_get_string(value);
 					found++;
 				} else {

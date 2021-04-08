@@ -4944,7 +4944,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 					case IS_STRING:
 						if (Z_STRLEN_P(val) == 0) {
 							ZVAL_STRINGL(&new_val, "NULL", sizeof("NULL")-1);
-						} else if (!strcasecmp(Z_STRVAL_P(val), "now()")) {
+						} else if (zend_string_equals_literal_ci(Z_STR_P(val), "now()")) {
 							ZVAL_STRINGL(&new_val, "NOW()", sizeof("NOW()")-1);
 						} else {
 #define REGEX0 "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})(([ \\t]+|T)(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}(\\.[0-9]+){0,1}([ \\t]*([+-][0-9]{1,4}(:[0-9]{1,2}){0,1}|[-a-zA-Z_/+]{1,50})){0,1})){0,1}$"
