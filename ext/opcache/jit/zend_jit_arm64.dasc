@@ -4828,7 +4828,12 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			if (opline->op1_type == IS_CV) {
 				zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
 
-				|	brk #0 // TODO: test
+				|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+				|	ZVAL_DEREF FCARG1x, op1_info, TMP1w
+				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, val_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+				|	lsr REG0w, REG0w, #8
+				|	and REG0w, REG0w, #0xff
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
 			} else {
 				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 8);
 
