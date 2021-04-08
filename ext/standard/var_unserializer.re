@@ -618,18 +618,22 @@ declared_property:
 								(*var_hash)->ref_props, (zend_uintptr_t) data);
 						}
 					}
-					var_push_dtor_value(var_hash, data);
+					/* We may override default property value, but they are usually immutable */
+					if (Z_REFCOUNTED_P(data)) {
+						var_push_dtor_value(var_hash, data);
+					}
 					ZVAL_NULL(data);
 				} else {
+					/* Unusual override of dynamic property */
 					int ret = is_property_visibility_changed(obj->ce, &key);
 
-					if (EXPECTED(!ret)) {
+					if (ret > 0) {
+						goto second_try;
+					} else if (!ret) {
 						var_push_dtor_value(var_hash, data);
 						ZVAL_NULL(data);
 					} else if (ret < 0) {
 						goto failure;
-					} else {
-						goto second_try;
 					}
 				}
 			} else {
@@ -644,7 +648,7 @@ second_try:
 					data = zend_hash_lookup(ht, Z_STR(key));
 					if (Z_TYPE_P(data) == IS_INDIRECT) {
 						goto declared_property;
-					} else if (UNEXPECTED(Z_TYPE_P(data) != IS_NULL)) {
+					} else if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
 						var_push_dtor_value(var_hash, data);
 						ZVAL_NULL(data);
 					}
