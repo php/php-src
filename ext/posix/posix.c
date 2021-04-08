@@ -563,13 +563,21 @@ PHP_FUNCTION(posix_setegid)
 #ifdef HAVE_GETGROUPS
 PHP_FUNCTION(posix_getgroups)
 {
-	gid_t  gidlist[NGROUPS_MAX];
+	gid_t *gidlist;
 	int    result;
 	int    i;
 
 	PHP_POSIX_NO_ARGS;
 
-	if ((result = getgroups(NGROUPS_MAX, gidlist)) < 0) {
+	/* MacOS may return more than NGROUPS_MAX groups.
+	 * Fetch the actual number of groups and create an appropriate allocation. */
+	if ((result = getgroups(0, NULL)) < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	gidlist = emalloc(sizeof(gid_t) * result);
+	if ((result = getgroups(result, gidlist)) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
@@ -579,6 +587,7 @@ PHP_FUNCTION(posix_getgroups)
 	for (i=0; i<result; i++) {
 		add_next_index_long(return_value, gidlist[i]);
 	}
+	efree(gidlist);
 }
 #endif
 /* }}} */
