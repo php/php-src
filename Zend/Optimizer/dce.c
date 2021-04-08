@@ -527,6 +527,16 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 	ctx.phi_dead = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
+	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
+	 * of the producing instructions, as it combines producing the result with control flow.
+	 * This can be made more precise if there are any cases where this is not the case. */
+	FOREACH_PHI(phi) {
+		if (phi->var >= op_array->last_var) {
+			zend_bitset_excl(ctx.phi_dead, phi->ssa_var);
+			add_phi_sources_to_worklists(&ctx, phi, 0);
+		}
+	} FOREACH_PHI_END();
+
 	/* Mark reacable instruction without side effects as dead */
 	int b = ssa->cfg.blocks_count;
 	while (b > 0) {

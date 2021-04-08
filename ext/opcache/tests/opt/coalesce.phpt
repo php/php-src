@@ -29,15 +29,17 @@ $_main:
 0000 RETURN int(1)
 
 a:
-     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (lines=3, args=0, vars=1, tmps=1)
      ; (after optimizer)
      ; %s
-0000 T1 = COALESCE CV0($test) 0001
-0001 RETURN bool(true)
+0000 T1 = COALESCE CV0($test) 0002
+0001 T1 = QM_ASSIGN bool(true)
+0002 RETURN bool(true)
 
 b:
-     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (lines=3, args=0, vars=1, tmps=1)
      ; (after optimizer)
      ; %s
-0000 T1 = COALESCE CV0($test) 0001
-0001 RETURN bool(true)
+0000 T1 = COALESCE CV0($test) 0002
+0001 T1 = ASSIGN CV0($test) bool(true)
+0002 RETURN bool(true)
