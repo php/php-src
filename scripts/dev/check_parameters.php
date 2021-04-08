@@ -54,8 +54,8 @@ function error($str, $level = 0)
     global $current_file, $current_function, $line;
 
     if ($level <= REPORT_LEVEL) {
-        if (strpos($current_file,PHPDIR) === 0) {
-            $filename = substr($current_file, strlen(PHPDIR)+1);
+        if (strpos($current_file, PHPDIR) === 0) {
+            $filename = substr($current_file, strlen(PHPDIR) + 1);
         } else {
             $filename = $current_file;
         }
@@ -69,12 +69,12 @@ function update_lineno($offset)
 {
     global $lines_offset, $line;
 
-    $left  = 0;
-    $right = $count = count($lines_offset)-1;
+    $left = 0;
+    $right = $count = count($lines_offset) - 1;
 
     // a nice binary search :)
     do {
-        $mid = intval(($left + $right)/2);
+        $mid = intval(($left + $right) / 2);
         $val = $lines_offset[$mid];
 
         if ($val < $offset) {
@@ -84,15 +84,15 @@ function update_lineno($offset)
             } else {
                 $left = $mid;
             }
-        } else if ($val > $offset) {
+        } elseif ($val > $offset) {
             if ($lines_offset[--$mid] < $offset) {
-                $line = $mid+1;
+                $line = $mid + 1;
                 return;
             } else {
                 $right = $mid;
             }
         } else {
-            $line = $mid+1;
+            $line = $mid + 1;
             return;
         }
     } while (true);
@@ -102,13 +102,14 @@ function update_lineno($offset)
 /** parses the sources and fetches its vars name, type and if they are initialized or not */
 function get_vars($txt)
 {
-    $ret =  array();
+    $ret = array();
     preg_match_all('/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\])?\s*(?:=[^,;]+)?)*)\s*;/S', $txt, $m, PREG_SET_ORDER);
 
     foreach ($m as $x) {
         // the first parameter is special
-        if (!in_array($x[1], array('else', 'endif', 'return'))) // hack to skip reserved words
+        if (!in_array($x[1], array('else', 'endif', 'return'))) { // hack to skip reserved words
             $ret[$x[4]] = array($x[1] . $x[2] . $x[3], $x[5]);
+        }
 
         // are there more vars?
         if ($x[6]) {
@@ -119,7 +120,7 @@ function get_vars($txt)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
+    //	if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
     return $ret;
 }
 
@@ -140,14 +141,14 @@ function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
     }
 
     if ($db[$idx][1] != $exp) {
-        error("{$db[$idx][0]}: expected '$exp' but got '{$db[$idx][1]}' [".($idx+1).']');
+        error("{$db[$idx][0]}: expected '$exp' but got '{$db[$idx][1]}' [" . ($idx + 1) . ']');
     }
 
     if (!$optional && $db[$idx][2]) {
-        error("not optional var is initialized: {$db[$idx][0]} [".($idx+1).']', 2);
+        error("not optional var is initialized: {$db[$idx][0]} [" . ($idx + 1) . ']', 2);
     }
     if (!$allow_uninit && $optional && !$db[$idx][2]) {
-        error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
+        error("optional var not initialized: {$db[$idx][0]} [" . ($idx + 1) . ']', 1);
     }
 }
 
@@ -168,7 +169,6 @@ function get_params($vars, $str)
         if (empty($vars[$name][0])) {
             error("variable not found: '$name'", 3);
             $ret[][] = '**dummy**';
-
         } else {
             $ret[] = array($name, $vars[$name][0] . ($x[1] ? '*' : ''), $vars[$name][1]);
         }
@@ -179,7 +179,7 @@ function get_params($vars, $str)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
+    //	if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
     return $ret;
 }
 
@@ -198,7 +198,6 @@ function check_function($name, $txt, $offset)
         ,\s*([^{;]*)
     /Sx';
     if (preg_match_all($regex, $txt, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
-
         $GLOBALS['current_function'] = $name;
 
         foreach ($matches as $m) {
@@ -222,7 +221,7 @@ function check_function($name, $txt, $offset)
                             error("more than one optional separator at char #$i");
                         } else {
                             $optional = true;
-                            if ($i == $len-1) {
+                            if ($i == $len - 1) {
                                 error("unnecessary optional separator");
                             }
                         }
@@ -256,11 +255,11 @@ function check_function($name, $txt, $offset)
 
                     case 's':
                     case 'p':
-                        check_param($params, ++$j, 'char**', $optional, $allow_uninit=true);
-                        check_param($params, ++$j, 'size_t*', $optional, $allow_uninit=true);
-                        if ($optional && !$params[$j-1][2] && !$params[$j][2]
-                                && $params[$j-1][0] !== '**dummy**' && $params[$j][0] !== '**dummy**') {
-                            error("one of optional vars {$params[$j-1][0]} or {$params[$j][0]} must be initialized", 1);
+                        check_param($params, ++$j, 'char**', $optional, $allow_uninit = true);
+                        check_param($params, ++$j, 'size_t*', $optional, $allow_uninit = true);
+                        if ($optional && !$params[$j - 1][2] && !$params[$j][2]
+                                && $params[$j - 1][0] !== '**dummy**' && $params[$j][0] !== '**dummy**') {
+                            error("one of optional vars {$params[$j - 1][0]} or {$params[$j][0]} must be initialized", 1);
                         }
                     break;
 
@@ -276,7 +275,7 @@ function check_function($name, $txt, $offset)
 
                         // If an is_null flag is in use, only that flag is required to be
                         // initialized
-                        $allow_uninit = $i+1 < $len && $spec[$i+1] === '!'
+                        $allow_uninit = $i + 1 < $len && $spec[$i + 1] === '!'
                                 && in_array($char, array('l', 'L', 'd', 'b'));
 
                         foreach ($API_params[$char] as $exp) {
@@ -295,7 +294,9 @@ function check_function($name, $txt, $offset)
 function recurse($path)
 {
     foreach (scandir($path) as $file) {
-        if ($file == '.' || $file == '..' || $file == 'CVS') continue;
+        if ($file == '.' || $file == '..' || $file == 'CVS') {
+            continue;
+        }
 
         $file = "$path/$file";
         if (is_dir($file)) {
@@ -304,18 +305,22 @@ function recurse($path)
         }
 
         // parse only .c and .cpp files
-        if (substr_compare($file, '.c', -2) && substr_compare($file, '.cpp', -4)) continue;
+        if (substr_compare($file, '.c', -2) && substr_compare($file, '.cpp', -4)) {
+            continue;
+        }
 
         $txt = file_get_contents($file);
         // remove comments (but preserve the number of lines)
         $txt = preg_replace('@//.*@S', '', $txt);
-        $txt = preg_replace_callback('@/\*.*\*/@SsU', function($matches) {
+        $txt = preg_replace_callback('@/\*.*\*/@SsU', function ($matches) {
             return preg_replace("/[^\r\n]+/S", "", $matches[0]);
         }, $txt);
 
         $split = preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', $txt, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE);
 
-        if (count($split) < 2) continue; // no functions defined on this file
+        if (count($split) < 2) {
+            continue;
+        } // no functions defined on this file
         array_shift($split); // the first part isn't relevant
 
 
@@ -333,10 +338,10 @@ function recurse($path)
         $GLOBALS['current_file'] = $file;
 
 
-        for ($i = 0; $i < count($split); $i+=2) {
+        for ($i = 0; $i < count($split); $i += 2) {
             // if the /* }}} */ comment is found use it to reduce false positives
             // TODO: check the other indexes
-            list($f) = preg_split('@/\*\s*}}}\s*\*/@S', $split[$i+1][0]);
+            list($f) = preg_split('@/\*\s*}}}\s*\*/@S', $split[$i + 1][0]);
             check_function(preg_replace('/\s*,\s*/S', '::', $split[$i][0]), $f, $split[$i][1]);
         }
     }
@@ -360,7 +365,7 @@ HELP;
     $dirs[] = PHPDIR;
 }
 
-foreach($dirs as $dir) {
+foreach ($dirs as $dir) {
     if (is_dir($dir)) {
         if (!is_readable($dir)) {
             echo "ERROR: directory '", $dir ,"' is not readable\n";

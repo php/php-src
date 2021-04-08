@@ -1,6 +1,6 @@
 <?php
 
-set_error_handler(function($_, $msg) {
+set_error_handler(function ($_, $msg) {
     throw new Exception($msg);
 });
 
@@ -67,13 +67,13 @@ foreach ($it as $file) {
 
     if ($lang === 'c') {
         $code = stripTrailingWhitespace($code);
-        // TODO: Avoid this for now.
+    // TODO: Avoid this for now.
         // $code = reindentToTabs($code);
-    } else if ($lang === 'php') {
+    } elseif ($lang === 'php') {
         $code = stripTrailingWhitespace($code);
         $code = reindentToSpaces($code);
-    } else if ($lang === 'phpt') {
-        $code = transformTestCode($code, function(string $code) {
+    } elseif ($lang === 'phpt') {
+        $code = transformTestCode($code, function (string $code) {
             $code = stripTrailingWhitespace($code);
             $code = reindentToSpaces($code);
             return $code;
@@ -85,12 +85,14 @@ foreach ($it as $file) {
     }
 }
 
-function stripTrailingWhitespace(string $code): string {
+function stripTrailingWhitespace(string $code): string
+{
     return preg_replace('/\h+$/m', '', $code);
 }
 
-function reindentToTabs(string $code): string {
-    return preg_replace_callback('/^ +/m', function(array $matches) {
+function reindentToTabs(string $code): string
+{
+    return preg_replace_callback('/^ +/m', function (array $matches) {
         $tabSize = 4;
         $spaces = strlen($matches[0]);
         $tabs = intdiv($spaces, $tabSize);
@@ -99,8 +101,9 @@ function reindentToTabs(string $code): string {
     }, $code);
 }
 
-function reindentToSpaces(string $code): string {
-    return preg_replace_callback('/^[ \t]+/m', function(array $matches) {
+function reindentToSpaces(string $code): string
+{
+    return preg_replace_callback('/^[ \t]+/m', function (array $matches) {
         $tabSize = 4;
         $indent = 0;
         foreach (str_split($matches[0]) as $char) {
@@ -119,7 +122,8 @@ function reindentToSpaces(string $code): string {
     }, $code);
 }
 
-function transformTestCode(string $code, callable $transformer): string {
+function transformTestCode(string $code, callable $transformer): string
+{
     // Don't transform whitespace-sensitive tests.
     if (strpos($code, '--WHITESPACE_SENSITIVE--') !== false) {
         return $code;
@@ -127,14 +131,15 @@ function transformTestCode(string $code, callable $transformer): string {
 
     return preg_replace_callback(
         '/(--(?:FILE|SKIPIF|CLEAN)--)(.+?)(?=--[A-Z_]+--)/s',
-        function(array $matches) use($transformer) {
+        function (array $matches) use ($transformer) {
             return $matches[1] . $transformer($matches[2]);
         },
         $code
     );
 }
 
-function getLanguageFromExtension(string $ext): ?string {
+function getLanguageFromExtension(string $ext): ?string
+{
     switch ($ext) {
     case 'c':
     case 'h':

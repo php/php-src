@@ -41,7 +41,7 @@ if ($num_params == 3) {
     $extensions = get_loaded_extensions();
     if (!in_array($extension_name, $extensions)) {
         echo "Error: extension $extension_name is not loaded. Loaded extensions:\n";
-        foreach($extensions as $extension) {
+        foreach ($extensions as $extension) {
             echo "$extension\n";
         }
         die();
@@ -56,7 +56,7 @@ $method_info = populate_method_info();
 if ($extension_name != false) {
     // get only the methods from the extension we are querying
     $extension_method_info = array();
-    foreach($method_info as $method_record) {
+    foreach ($method_info as $method_record) {
         if (strcasecmp($extension_name, $method_record[EXTENSION_NAME]) == 0) {
             $extension_method_info[] = $method_record;
         }
@@ -73,7 +73,7 @@ $extension_method_info = mark_methods_as_tested($extension_method_info, $phpt_fi
  * The loop to output the test coverage info
  * Should output: Extension, Class Name, Method/Function Name, Test Status, Test Files
  */
-foreach($extension_method_info as $record) {
+foreach ($extension_method_info as $record) {
     echo $record[EXTENSION_NAME] . ",";
     echo $record[CLASS_NAME] . ",";
     echo $record[METHOD_NAME] . ",";
@@ -85,15 +85,15 @@ foreach($extension_method_info as $record) {
  * Marks the "tested" status of methods in $method_info according
  * to whether they are tested in $phpt_files
  */
-function mark_methods_as_tested($method_info, $phpt_files) {
-
-    foreach($phpt_files as $phpt_file) {
+function mark_methods_as_tested($method_info, $phpt_files)
+{
+    foreach ($phpt_files as $phpt_file) {
         $tested_functions = extract_tests($phpt_file);
 
-        foreach($tested_functions as $tested_function) {
+        foreach ($tested_functions as $tested_function) {
 
             // go through method info array marking this function as tested
-            foreach($method_info as &$current_method_record) {
+            foreach ($method_info as &$current_method_record) {
                 if (strcasecmp($tested_function, $current_method_record[METHOD_NAME]) == 0) {
                     // matched the method name
                     if ($current_method_record[IS_DUPLICATE] == true) {
@@ -114,8 +114,8 @@ function mark_methods_as_tested($method_info, $phpt_files) {
 /**
  * returns an array containing a record for each defined method.
  */
-function populate_method_info() {
-
+function populate_method_info()
+{
     $method_info = array();
 
     // get functions
@@ -181,12 +181,12 @@ function populate_method_info() {
 
 function get_phpt_files($dir, &$phpt_file_count, &$all_phpt)
 {
-    $thisdir = dir($dir.'/'); //include the trailing slash
-    while(($file = $thisdir->read()) !== false) {
+    $thisdir = dir($dir . '/'); //include the trailing slash
+    while (($file = $thisdir->read()) !== false) {
         if ($file != '.' && $file != '..') {
-            $path = $thisdir->path.$file;
-            if(is_dir($path) == true) {
-                get_phpt_files($path , $phpt_file_count , $all_phpt);
+            $path = $thisdir->path . $file;
+            if (is_dir($path) == true) {
+                get_phpt_files($path, $phpt_file_count, $all_phpt);
             } else {
                 if (preg_match("/\w+\.phpt$/", $file)) {
                     $all_phpt[$phpt_file_count] = $path;
@@ -200,7 +200,8 @@ function get_phpt_files($dir, &$phpt_file_count, &$all_phpt)
 /**
  * Extract tests from a specified file, returns an array of tested function tokens
  */
-function extract_tests($file) {
+function extract_tests($file)
+{
     $code = file_get_contents($file);
 
     if (!preg_match('/--FILE--\s*(.*)\s*--(EXPECTF|EXPECTREGEX|EXPECT)?--/is', $code, $r)) {
@@ -210,17 +211,19 @@ function extract_tests($file) {
 
     $tokens = token_get_all($r[1]);
     $functions = array_filter($tokens, 'filter_functions');
-    $functions = array_map( 'map_token_value',$functions);
+    $functions = array_map('map_token_value', $functions);
     $functions = array_unique($functions);
 
     return $functions;
 }
 
-function filter_functions($x) {
+function filter_functions($x)
+{
     return $x[0] == 307;
 }
 
-function map_token_value($x) {
+function map_token_value($x)
+{
     return $x[1];
 }
 

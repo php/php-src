@@ -862,8 +862,10 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     @unlink($info_file);
 
     // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    save_text(
+        $info_file,
+        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>'
+    );
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -1099,10 +1101,14 @@ function test_sort($a, $b): int
     $a = test_name($a);
     $b = test_name($b);
 
-    $ta = strpos($a, TEST_PHP_SRCDIR . "/tests") === 0 ? 1 + (strpos($a,
-            TEST_PHP_SRCDIR . "/tests/run-test") === 0 ? 1 : 0) : 0;
-    $tb = strpos($b, TEST_PHP_SRCDIR . "/tests") === 0 ? 1 + (strpos($b,
-            TEST_PHP_SRCDIR . "/tests/run-test") === 0 ? 1 : 0) : 0;
+    $ta = strpos($a, TEST_PHP_SRCDIR . "/tests") === 0 ? 1 + (strpos(
+        $a,
+        TEST_PHP_SRCDIR . "/tests/run-test"
+    ) === 0 ? 1 : 0) : 0;
+    $tb = strpos($b, TEST_PHP_SRCDIR . "/tests") === 0 ? 1 + (strpos(
+        $b,
+        TEST_PHP_SRCDIR . "/tests/run-test"
+    ) === 0 ? 1 : 0) : 0;
 
     if ($ta == $tb) {
         return strcmp($a, $b);
@@ -1289,7 +1295,7 @@ function system_with_timeout(
     }
     if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
         $data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
-    } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
+    } elseif (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
         // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
         $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
     }
@@ -1310,7 +1316,7 @@ function run_all_tests(array $test_files, array $env, $redir_tested = null): voi
     if ($file_cache !== null) {
         /* Automatically skip opcache tests in --file-cache mode,
          * because opcache generally doesn't expect those to run under file cache */
-        $test_files = array_filter($test_files, function($test) {
+        $test_files = array_filter($test_files, function ($test) {
             return !is_string($test) || false === strpos($test, 'ext/opcache');
         });
     }
@@ -1528,7 +1534,7 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
     // Tests waiting due to conflicts. Map from conflict key to array.
     $waitingTests = [];
 
-escape:
+    escape:
     while ($test_files || $sequentialTests || $testsInProgress > 0) {
         $toRead = array_values($workerSocks);
         $toWrite = null;
@@ -1798,7 +1804,8 @@ function show_file_block(string $file, string $block, ?string $section = null): 
     }
 }
 
-function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+function skip_test(string $tested, string $tested_file, string $shortname, string $reason)
+{
     global $junit;
 
     show_result('SKIP', $tested, $tested_file, "reason: $reason");
@@ -2092,7 +2099,7 @@ TEST $file
             // even though all the files are re-created.
             $ini_settings['opcache.validate_timestamps'] = '0';
         }
-    } else if ($num_repeats > 1) {
+    } elseif ($num_repeats > 1) {
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
     }
@@ -3305,7 +3312,7 @@ function show_result(
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
         if ($colorize) {
             /* Use ANSI escape codes for coloring test result */
-            switch ( $result ) {
+            switch ($result) {
                 case 'PASS': // Light Green
                     $color = "\e[1;32m{$result}\e[0m"; break;
                 case 'FAIL':
@@ -3325,7 +3332,6 @@ function show_result(
     } elseif (!$SHOW_ONLY_GROUPS) {
         clear_show_test();
     }
-
 }
 
 class BorkageException extends Exception
@@ -3606,11 +3612,11 @@ class JUnit
     private function mergeSuites(array &$dest, array $source): void
     {
         $dest['test_total'] += $source['test_total'];
-        $dest['test_pass']  += $source['test_pass'];
-        $dest['test_fail']  += $source['test_fail'];
+        $dest['test_pass'] += $source['test_pass'];
+        $dest['test_fail'] += $source['test_fail'];
         $dest['test_error'] += $source['test_error'];
-        $dest['test_skip']  += $source['test_skip'];
-        $dest['test_warn']  += $source['test_warn'];
+        $dest['test_skip'] += $source['test_skip'];
+        $dest['test_warn'] += $source['test_warn'];
         $dest['execution_time'] += $source['execution_time'];
         $dest['files'] += $source['files'];
     }
@@ -3719,7 +3725,7 @@ class RuntestsValgrind
         $this->tool = $tool;
         $header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
         if (!$header) {
-            error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
+            error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n" .
                   "Please check if Valgrind is installed and the tool is named correctly.");
         }
         $count = 0;
@@ -3729,7 +3735,10 @@ class RuntestsValgrind
         }
         $this->version = $version;
         $this->header = sprintf(
-            "%s (%s)", trim($header), $this->tool);
+            "%s (%s)",
+            trim($header),
+            $this->tool
+        );
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 

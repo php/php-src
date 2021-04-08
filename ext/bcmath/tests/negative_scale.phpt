@@ -7,27 +7,27 @@ bcmath.scale=0
 --FILE--
 <?php
 try {
-    bcadd('1','2',-1);
+    bcadd('1', '2', -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    bcsub('1','2',-1);
+    bcsub('1', '2', -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    bcmul('1','2',-1);
+    bcmul('1', '2', -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    bcdiv('1','2',-1);
+    bcdiv('1', '2', -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    bcmod('1','2',-1);
+    bcmod('1', '2', -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

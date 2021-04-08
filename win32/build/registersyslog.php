@@ -7,7 +7,9 @@ $PATH = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\PHP-" . php
 $dll = $argv[1];
 $dll = addslashes($dll);
 
-file_put_contents("win32/syslog.reg", <<<REG
+file_put_contents(
+    "win32/syslog.reg",
+    <<<REG
 REGEDIT4
 
 [HKEY_LOCAL_MACHINE\\$PATH]
@@ -16,5 +18,3 @@ REGEDIT4
 
 REG
 );
-
-?>

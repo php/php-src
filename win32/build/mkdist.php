@@ -44,7 +44,7 @@ function get_depends($module)
         'apachecore.dll',
 
         /* apache 2 */
-        'libhttpd.dll', 'libapr.dll', 'libaprutil.dll','libapr-1.dll', 'libaprutil-1.dll',
+        'libhttpd.dll', 'libapr.dll', 'libaprutil.dll', 'libapr-1.dll', 'libaprutil-1.dll',
 
         /* oracle */
         'oci.dll', 'ociw32.dll',
@@ -74,9 +74,11 @@ function get_depends($module)
     $is_pecl = in_array($module, $pecl_targets);
 
     $cmd = "$GLOBALS[build_dir]\\deplister.exe \"$module\" \"$GLOBALS[build_dir]\"";
-    $proc = proc_open($cmd,
-            array(1 => array("pipe", "w")),
-            $pipes);
+    $proc = proc_open(
+        $cmd,
+        array(1 => array("pipe", "w")),
+        $pipes
+    );
 
     $n = 0;
     while (($line = fgetcsv($pipes[1]))) {
@@ -125,7 +127,7 @@ function get_depends($module)
     }
     fclose($pipes[1]);
     proc_close($proc);
-//echo "Module $module [$n lines]\n";
+    //echo "Module $module [$n lines]\n";
 }
 
 function copy_file_list($source_dir, $dest_dir, $list)
@@ -181,15 +183,19 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
     do {
         /* read the header */
         $hdr_data = gzread($fp, 512);
-        if (strlen($hdr_data) == 0)
+        if (strlen($hdr_data) == 0) {
             break;
+        }
         $checksum = 0;
-        for ($i = 0; $i < 148; $i++)
+        for ($i = 0; $i < 148; $i++) {
             $checksum += ord($hdr_data[$i]);
-        for ($i = 148; $i < 156; $i++)
+        }
+        for ($i = 148; $i < 156; $i++) {
             $checksum += 32;
-        for ($i = 156; $i < 512; $i++)
+        }
+        for ($i = 156; $i < 512; $i++) {
             $checksum += ord($hdr_data[$i]);
+        }
 
         $hdr = unpack("a100filename/a8mode/a8uid/a8gid/a12size/a12mtime/a8checksum/a1typeflag/a100link/a6magic/a2version/a32uname/a32gname/a8devmajor/a8devminor", $hdr_data);
 
@@ -217,9 +223,7 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
         $size = 512 * ceil((int)$hdr['size'] / 512);
         echo "Skipping $size bytes\n";
         gzseek($fp, gztell($fp) + $size);
-
     } while (!$done);
-
 } /* }}} */
 
 
@@ -243,7 +247,7 @@ copy_file_list($build_dir, "$dist_dir", $sapi_targets);
 copy_file_list($build_dir, "$dist_dir/ext", $ext_targets);
 
 /* pecl sapi and extensions */
-if(sizeof($pecl_targets)) {
+if (sizeof($pecl_targets)) {
     copy_file_list($build_dir, $pecl_dir, $pecl_targets);
 }
 
@@ -263,7 +267,7 @@ foreach ($text_files as $src => $dest) {
 
 /* general other files */
 $general_files = array(
-    "$GLOBALS[build_dir]\\deplister.exe"	=>	"deplister.exe",
+    "$GLOBALS[build_dir]\\deplister.exe" => "deplister.exe",
 );
 
 foreach ($general_files as $src => $dest) {
@@ -274,7 +278,9 @@ foreach ($general_files as $src => $dest) {
 $branch = "HEAD"; // TODO - determine this from SVN branche name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
-fwrite($fp, <<<EOT
+fwrite(
+    $fp,
+    <<<EOT
 This snapshot was automatically generated on
 $now
 
@@ -296,8 +302,9 @@ fwrite($fp, "\r\n\r\n");
 /* list dependencies */
 fprintf($fp, "Dependency information:\r\n");
 foreach ($per_module_deps as $modulename => $deps) {
-    if (in_array($modulename, $pecl_targets))
+    if (in_array($modulename, $pecl_targets)) {
         continue;
+    }
 
     fprintf($fp, "Module: %s\r\n", $modulename);
     fwrite($fp, "===========================\r\n");
@@ -343,7 +350,7 @@ if (file_exists("$php_build_dir/bin/libenchant2.dll")) {
     $ENCHANT_DLLS[] = array('lib/enchant', 'libenchant_ispell.dll');
 }
 foreach ($ENCHANT_DLLS as $dll) {
-    $dest  = "$dist_dir/$dll[0]";
+    $dest = "$dist_dir/$dll[0]";
     $filename = $dll[1];
 
     if (!file_exists("$dest") || !is_dir("$dest")) {
@@ -353,7 +360,7 @@ foreach ($ENCHANT_DLLS as $dll) {
     }
 
     if (!copy($php_build_dir . '/bin/' . $filename, "$dest/" . basename($filename))) {
-            echo "WARNING: couldn't copy $filename into the dist dir";
+        echo "WARNING: couldn't copy $filename into the dist dir";
     }
 }
 
@@ -419,8 +426,8 @@ function copy_dir($source, $dest)
 
 function copy_test_dir($directory, $dest)
 {
-    if(substr($directory,-1) == '/') {
-        $directory = substr($directory,0,-1);
+    if (substr($directory, -1) == '/') {
+        $directory = substr($directory, 0, -1);
     }
 
     if ($directory == 'tests' || $directory == 'examples') {
@@ -432,19 +439,19 @@ function copy_test_dir($directory, $dest)
         return false;
     }
 
-    if(!file_exists($directory) || !is_dir($directory)) {
+    if (!file_exists($directory) || !is_dir($directory)) {
         echo "failed... $directory\n";
-        return FALSE;
+        return false;
     }
 
     $directory_list = opendir($directory);
 
-    while (FALSE !== ($file = readdir($directory_list))) {
+    while (false !== ($file = readdir($directory_list))) {
         $full_path = $directory . '/' . $file;
-        if($file != '.' && $file != '..' && $file != '.svn' && is_dir($full_path)) {
+        if ($file != '.' && $file != '..' && $file != '.svn' && is_dir($full_path)) {
             if ($file == 'tests' || $file == 'examples') {
                 if (!is_dir($dest . '/' . $full_path)) {
-                    mkdir($dest . '/' . $full_path , 0775, true);
+                    mkdir($dest . '/' . $full_path, 0775, true);
                 }
                 copy_dir($full_path, $dest . '/' . $full_path . '/');
                 continue;
@@ -474,7 +481,7 @@ function make_phar_dot_phar($dist_dir)
         }
 
         echo 'adding ', $file, "\n";
-        $phar[(string) $file] = file_get_contents($path_to_phar.  '/phar/' . $file);
+        $phar[(string) $file] = file_get_contents($path_to_phar . '/phar/' . $file);
     }
 
     $phar->setSignatureAlgorithm(Phar::SHA1);
@@ -524,8 +531,9 @@ if (!$use_pear_template) {
     foreach ($packages as $name => $version) {
         $filename = "$name-$version.tgz";
         $destfilename = "$dist_dir/PEAR/go-pear-bundle/$filename";
-        if (file_exists($destfilename))
+        if (file_exists($destfilename)) {
             continue;
+        }
         $url = "http://pear.php.net/get/$filename";
         echo "Downloading $name from $url\n";
         flush();
@@ -551,7 +559,7 @@ if (file_exists($snapshot_template)) {
         if (is_dir($item)) {
             if ($bi == 'dlls' || $bi == 'symbols') {
                 continue;
-            } else if ($bi == 'PEAR') {
+            } elseif ($bi == 'PEAR') {
                 if ($use_pear_template) {
                     /* copy to top level */
                     copy_dir($item, "$dist_dir/$bi");
@@ -586,4 +594,3 @@ if (file_exists($snapshot_template)) {
 }
 
 make_phar_dot_phar($dist_dir);
-?>

@@ -43,7 +43,8 @@ foreach ($files as $path) {
     file_put_contents($path, $phpt);
 }
 
-function getFiles(array $dirsOrFiles): \Iterator {
+function getFiles(array $dirsOrFiles): \Iterator
+{
     foreach ($dirsOrFiles as $dirOrFile) {
         if (is_dir($dirOrFile)) {
             $it = new RecursiveIteratorIterator(
@@ -53,7 +54,7 @@ function getFiles(array $dirsOrFiles): \Iterator {
             foreach ($it as $file) {
                 yield $file->getPathName();
             }
-        } else if (is_file($dirOrFile)) {
+        } elseif (is_file($dirOrFile)) {
             yield $dirOrFile;
         } else {
             die("$dirOrFile is not a directory or file\n");
@@ -61,7 +62,8 @@ function getFiles(array $dirsOrFiles): \Iterator {
     }
 }
 
-function normalizeOutput(string $out): string {
+function normalizeOutput(string $out): string
+{
     $out = preg_replace('/in (\/|[A-Z]:\\\\).+ on line \d+$/m', 'in %s on line %d', $out);
     $out = preg_replace('/in (\/|[A-Z]:\\\\).+:\d+$/m', 'in %s:%d', $out);
     $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\).+\(\d+\):/m', '#$1 %s(%d):', $out);
@@ -70,12 +72,14 @@ function normalizeOutput(string $out): string {
     $out = preg_replace(
         '/Resource ID#\d+ used as offset, casting to integer \(\d+\)/',
         'Resource ID#%d used as offset, casting to integer (%d)',
-        $out);
+        $out
+    );
     $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
     return $out;
 }
 
-function formatToRegex(string $format): string {
+function formatToRegex(string $format): string
+{
     $result = preg_quote($format, '/');
     $result = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $result);
     $result = str_replace('%s', '[^\r\n]+', $result);
@@ -89,10 +93,11 @@ function formatToRegex(string $format): string {
     return "/^$result$/s";
 }
 
-function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
+function generateMinimallyDifferingOutput(string $out, string $oldExpect)
+{
     $outLines = explode("\n", $out);
     $oldExpectLines = explode("\n", $oldExpect);
-    $differ = new Differ(function($oldExpect, $new) {
+    $differ = new Differ(function ($oldExpect, $new) {
         if (strpos($oldExpect, '%') === false) {
             return $oldExpect === $new;
         }
@@ -104,15 +109,16 @@ function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
     foreach ($diff as $elem) {
         if ($elem->type == DiffElem::TYPE_KEEP) {
             $result[] = $elem->old;
-        } else if ($elem->type == DiffElem::TYPE_ADD) {
+        } elseif ($elem->type == DiffElem::TYPE_ADD) {
             $result[] = normalizeOutput($elem->new);
         }
     }
     return implode("\n", $result);
 }
 
-function insertOutput(string $phpt, string $out): string {
-    return preg_replace_callback('/--EXPECTF?--.*?(--CLEAN--|$)/sD', function($matches) use($out) {
+function insertOutput(string $phpt, string $out): string
+{
+    return preg_replace_callback('/--EXPECTF?--.*?(--CLEAN--|$)/sD', function ($matches) use ($out) {
         $hasWildcard = preg_match('/%[resSaAwidxfc]/', $out);
         $F = $hasWildcard ? 'F' : '';
         return "--EXPECT$F--\n" . $out . "\n" . $matches[1];
@@ -139,7 +145,8 @@ class DiffElem
     /** @var mixed Is null for remove operations */
     public $new;
 
-    public function __construct(int $type, $old, $new) {
+    public function __construct(int $type, $old, $new)
+    {
         $this->type = $type;
         $this->old = $old;
         $this->new = $new;
@@ -155,7 +162,8 @@ class Differ
      *
      * @param callable $isEqual Equality relation with signature function($a, $b) : bool
      */
-    public function __construct(callable $isEqual) {
+    public function __construct(callable $isEqual)
+    {
         $this->isEqual = $isEqual;
     }
 
@@ -167,12 +175,14 @@ class Differ
      *
      * @return DiffElem[] Diff (edit script)
      */
-    public function diff(array $old, array $new) {
+    public function diff(array $old, array $new)
+    {
         list($trace, $x, $y) = $this->calculateTrace($old, $new);
         return $this->extractDiff($trace, $x, $y, $old, $new);
     }
 
-    private function calculateTrace(array $a, array $b) {
+    private function calculateTrace(array $a, array $b)
+    {
         $n = \count($a);
         $m = \count($b);
         $max = $n + $m;
@@ -181,10 +191,10 @@ class Differ
         for ($d = 0; $d <= $max; $d++) {
             $trace[] = $v;
             for ($k = -$d; $k <= $d; $k += 2) {
-                if ($k === -$d || ($k !== $d && $v[$k-1] < $v[$k+1])) {
-                    $x = $v[$k+1];
+                if ($k === -$d || ($k !== $d && $v[$k - 1] < $v[$k + 1])) {
+                    $x = $v[$k + 1];
                 } else {
-                    $x = $v[$k-1] + 1;
+                    $x = $v[$k - 1] + 1;
                 }
 
                 $y = $x - $k;
@@ -202,13 +212,14 @@ class Differ
         throw new \Exception('Should not happen');
     }
 
-    private function extractDiff(array $trace, int $x, int $y, array $a, array $b) {
+    private function extractDiff(array $trace, int $x, int $y, array $a, array $b)
+    {
         $result = [];
         for ($d = \count($trace) - 1; $d >= 0; $d--) {
             $v = $trace[$d];
             $k = $x - $y;
 
-            if ($k === -$d || ($k !== $d && $v[$k-1] < $v[$k+1])) {
+            if ($k === -$d || ($k !== $d && $v[$k - 1] < $v[$k + 1])) {
                 $prevK = $k + 1;
             } else {
                 $prevK = $k - 1;
@@ -218,7 +229,7 @@ class Differ
             $prevY = $prevX - $prevK;
 
             while ($x > $prevX && $y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_KEEP, $a[$x-1], $b[$y-1]);
+                $result[] = new DiffElem(DiffElem::TYPE_KEEP, $a[$x - 1], $b[$y - 1]);
                 $x--;
                 $y--;
             }
@@ -228,12 +239,12 @@ class Differ
             }
 
             while ($x > $prevX) {
-                $result[] = new DiffElem(DiffElem::TYPE_REMOVE, $a[$x-1], null);
+                $result[] = new DiffElem(DiffElem::TYPE_REMOVE, $a[$x - 1], null);
                 $x--;
             }
 
             while ($y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_ADD, null, $b[$y-1]);
+                $result[] = new DiffElem(DiffElem::TYPE_ADD, null, $b[$y - 1]);
                 $y--;
             }
         }
