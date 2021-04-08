@@ -742,6 +742,20 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 	return str;
 }
 
+static void accel_allocate_ce_cache_slots(void)
+{
+	Bucket *p;
+
+	ZEND_HASH_FOREACH_BUCKET(CG(class_table), p) {
+		zend_class_entry *ce;
+
+		ce = (zend_class_entry*)Z_PTR(p->val);
+		if (ce->name) {
+			zend_accel_get_class_name_map_ptr(ce->name, ce);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static void accel_use_shm_interned_strings(void)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -750,6 +764,7 @@ static void accel_use_shm_interned_strings(void)
 
 	if (ZCSG(interned_strings).saved_top == NULL) {
 		accel_copy_permanent_strings(accel_new_interned_string);
+		accel_allocate_ce_cache_slots();
 	} else {
 		ZCG(counted) = 1;
 		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);

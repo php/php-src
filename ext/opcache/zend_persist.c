@@ -292,7 +292,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *scope)
+uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name, zend_class_entry *scope)
 {
 	uint32_t ret;
 
@@ -312,18 +312,22 @@ uint32_t zend_accel_get_type_map_ptr(zend_string *type_name, zend_class_entry *s
 		}
 	}
 
-	ZEND_ASSERT(GC_FLAGS(type_name) & GC_IMMUTABLE);
-	ZEND_ASSERT(GC_FLAGS(type_name) & IS_STR_PERMANENT);
-	ret = GC_REFCOUNT(type_name);
-
 	/* We use type.name.gc.refcount to keep map_ptr of corresponding type */
-	if (ret <= 2) {
+	if (ZSTR_HAS_CE_CACHE(type_name)) {
+		return GC_REFCOUNT(type_name);
+	}
+
+	if ((GC_FLAGS(type_name) & GC_IMMUTABLE)
+	 && (GC_FLAGS(type_name) & IS_STR_PERMANENT)) {
 		do {
 			ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
 		} while (ret <= 2);
+		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 		GC_SET_REFCOUNT(type_name, ret);
+		return ret;
 	}
-	return ret;
+
+	return 0;
 }
 
 static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
@@ -365,12 +369,7 @@ static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
 			zend_accel_store_interned_string(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 			if (!ZCG(current_persistent_script)->corrupted) {
-				uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
-
-				if (ptr) {
-					single_type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-					single_type->ce_cache__ptr = ptr;
-				}
+				zend_accel_get_class_name_map_ptr(type_name, scope);
 			}
 		}
 	} ZEND_TYPE_FOREACH_END();
@@ -882,6 +881,14 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
 			zend_accel_store_interned_string(ce->name);
+			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
+			 && !ZCG(current_persistent_script)->corrupted) {
+				if (ZSTR_HAS_CE_CACHE(ce->name)) {
+					ZSTR_SET_CE_CACHE(ce->name, NULL);
+				} else {
+					zend_accel_get_class_name_map_ptr(ce->name, ce);
+				}
+			}
 			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 				zend_accel_store_interned_string(ce->parent_name);
 			}

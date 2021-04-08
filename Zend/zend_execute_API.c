@@ -1054,6 +1054,13 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_string *lc_name;
 	zend_string *autoload_name;
 
+	if (ZSTR_HAS_CE_CACHE(name)) {
+		ce = ZSTR_GET_CE_CACHE(name);
+		if (ce) {
+			return ce;
+		}
+	}
+
 	if (key) {
 		lc_name = key;
 	} else {
@@ -1091,6 +1098,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 				return ce;
 			}
 			return NULL;
+		}
+		if (ZSTR_HAS_CE_CACHE(name)) {
+			ZSTR_SET_CE_CACHE(name, ce);
 		}
 		return ce;
 	}
@@ -1143,6 +1153,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 	if (!key) {
 		zend_string_release_ex(lc_name, 0);
+	}
+	if (ce) {
+		if (ZSTR_HAS_CE_CACHE(name)) {
+			ZSTR_SET_CE_CACHE(name, ce);
+		}
 	}
 	return ce;
 }

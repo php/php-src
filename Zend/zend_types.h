@@ -130,7 +130,7 @@ typedef struct {
 	 * are only supported since C++20). */
 	void *ptr;
 	uint32_t type_mask;
-	uint32_t ce_cache__ptr; /* map_ptr offset */
+	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
 } zend_type;
 
 typedef struct {
@@ -145,8 +145,7 @@ typedef struct {
 #define _ZEND_TYPE_CE_BIT   (1u << 23)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
-/* CE cached in map_ptr area */
-#define _ZEND_TYPE_CACHE_BIT (1u << 21)
+/* TODO: bit 21 is not used */
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Type mask excluding the flags above. */
@@ -169,9 +168,6 @@ typedef struct {
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
 
-#define ZEND_TYPE_HAS_CE_CACHE(t) \
-	((((t).type_mask) & _ZEND_TYPE_CACHE_BIT) != 0)
-
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
 
@@ -189,13 +185,6 @@ typedef struct {
 
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
-
-#define ZEND_TYPE_CE_CACHE(t) \
-	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR((t).ce_cache))
-
-#define ZEND_TYPE_SET_CE_CACHE(t, ce) do { \
-		*((zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR((t).ce_cache)) = ce; \
-	} while (0)
 
 #define ZEND_TYPE_LIST_SIZE(num_types) \
 	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
@@ -266,10 +255,10 @@ typedef struct {
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
 #define ZEND_TYPE_INIT_NONE(extra_flags) \
-	{ NULL, (extra_flags), 0 }
+	{ NULL, (extra_flags) }
 
 #define ZEND_TYPE_INIT_MASK(_type_mask) \
-	{ NULL, (_type_mask), 0 }
+	{ NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code)))) \
@@ -277,10 +266,10 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
 	{ (void *) (ptr), \
-		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags), 0 }
+		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
-	{ (void *) (ptr), (type_mask), 0 }
+	{ (void *) (ptr), (type_mask) }
 
 #define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(_ce, _ZEND_TYPE_CE_BIT, allow_null, extra_flags)
@@ -707,6 +696,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
+#define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
@@ -722,6 +712,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
+
+/* Fast class cache */
+#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+#define ZSTR_GET_CE_CACHE(s) \
+	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(GC_REFCOUNT(s)))
+#define ZSTR_SET_CE_CACHE(s, ce) do { \
+		*((zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(GC_REFCOUNT(s))) = ce; \
+	} while (0)
 
 /* Recursion protection macros must be used only for arrays and objects */
 #define GC_IS_RECURSIVE(p) \

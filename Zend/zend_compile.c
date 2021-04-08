@@ -1197,9 +1197,11 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			if (ZEND_TYPE_HAS_CE(*list_type)) {
 				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name);
 			} else {
-				if (ZEND_TYPE_HAS_CE_CACHE(*list_type)
-				 && ZEND_TYPE_CE_CACHE(*list_type)) {
-					zend_class_entry *ce = ZEND_TYPE_CE_CACHE(*list_type);
+				zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+				if (ZSTR_HAS_CE_CACHE(name)
+				 && ZSTR_GET_CE_CACHE(name)) {
+					zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 					if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 						zend_string *tmp = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
 						str = add_type_string(str, tmp);
@@ -1207,23 +1209,25 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 						str = add_type_string(str, ce->name);
 					}
 				} else {
-					zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
+					zend_string *resolved = resolve_class_name(name, scope);
 					str = add_type_string(str, resolved);
 					zend_string_release(resolved);
 				}
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		if (ZEND_TYPE_HAS_CE_CACHE(type)
-		 && ZEND_TYPE_CE_CACHE(type)) {
-			zend_class_entry *ce = ZEND_TYPE_CE_CACHE(type);
+		zend_string *name = ZEND_TYPE_NAME(type);
+
+		if (ZSTR_HAS_CE_CACHE(name)
+		 && ZSTR_GET_CE_CACHE(name)) {
+			zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 			if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 				str = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
 			} else {
 				str = zend_string_copy(ce->name);
 			}
 		} else {
-			str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+			str = resolve_class_name(name, scope);
 		}
 	} else if (ZEND_TYPE_HAS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);

@@ -1230,17 +1230,8 @@ static void zend_file_cache_unserialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
-		if (!(script->corrupted)) {
-			uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
-
-			if (ptr) {
-				type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-				type->ce_cache__ptr = ptr;
-			} else {
-				type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
-			}
-		} else {
-			type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
+		if (!script->corrupted) {
+			zend_accel_get_class_name_map_ptr(type_name, scope);
 		}
 	} else if (ZEND_TYPE_HAS_CE(*type)) {
 		zend_class_entry *ce = ZEND_TYPE_CE(*type);
@@ -1504,6 +1495,10 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
+	if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
+	 && !script->corrupted) {
+		zend_accel_get_class_name_map_ptr(ce->name, ce);
+	}
 	if (ce->parent) {
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			UNSERIALIZE_STR(ce->parent_name);

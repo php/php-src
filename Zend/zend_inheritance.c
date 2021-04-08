@@ -2682,6 +2682,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					}
 					zv = zend_hash_find_ex(CG(class_table), key, 1);
 					Z_CE_P(zv) = ret;
+					if (ZSTR_HAS_CE_CACHE(ret->name)) {
+						ZSTR_SET_CE_CACHE(ret->name, ret);
+					}
 					return ret;
 				}
 			} else {
@@ -2803,6 +2806,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		free_alloca(traits_and_interfaces, use_heap);
 	}
 
+	if (ZSTR_HAS_CE_CACHE(ce->name)) {
+		ZSTR_SET_CE_CACHE(ce->name, ce);
+	}
+
 	return ce;
 }
 /* }}} */
@@ -2875,6 +2882,9 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 						return NULL;
 					}
 				}
+				if (ZSTR_HAS_CE_CACHE(ret->name)) {
+					ZSTR_SET_CE_CACHE(ret->name, ret);
+				}
 				return ret;
 			}
 		} else {
@@ -2940,6 +2950,10 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 				zend_hash_destroy(ht);
 				FREE_HASHTABLE(ht);
 			}
+		}
+
+		if (ZSTR_HAS_CE_CACHE(ce->name)) {
+			ZSTR_SET_CE_CACHE(ce->name, ce);
 		}
 
 		return ce;
