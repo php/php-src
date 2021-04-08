@@ -206,8 +206,6 @@ struct _php_stream  {
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	uint8_t fclose_stdiocast:2;
 
-	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
-
 	char mode[16];			/* "rwb" etc. ala stdio */
 
 	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
