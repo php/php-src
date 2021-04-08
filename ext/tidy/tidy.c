@@ -887,15 +887,7 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 	int status;
 	bool value;
 
-	if (zend_string_equals_literal_ci(new_value, "on")) {
-		value = (bool) 1;
-	} else if (zend_string_equals_literal_ci(new_value, "yes")) {
-		value = (bool) 1;
-	} else if (zend_string_equals_literal_ci(new_value, "true")) {
-		value = (bool) 1;
-	} else {
-		value = (bool) atoi(ZSTR_VAL(new_value));
-	}
+	value = zend_ini_parse_bool(new_value);
 
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		status = php_output_get_status();

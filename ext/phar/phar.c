@@ -55,15 +55,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (zend_string_equals_literal_ci(new_value, "on")) {
-		ini = true;
-	} else if (zend_string_equals_literal_ci(new_value, "yes")) {
-		ini = true;
-	} else if (zend_string_equals_literal_ci(new_value, "true")) {
-		ini = true;
-	} else {
-		ini = (bool) atoi(ZSTR_VAL(new_value));
-	}
+	ini = zend_ini_parse_bool(new_value);
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {

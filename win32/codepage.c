@@ -593,9 +593,9 @@ PHP_FUNCTION(sapi_windows_cp_get)
 		RETURN_THROWS();
 	}
 
-	if (zend_string_equals_literal_ci(kind, "ansi") {
+	if (zend_string_equals_literal_ci(kind, "ansi")) {
 		RETURN_LONG(GetACP());
-	} else if (zend_string_equals_literal_ci(kind, "oem") {
+	} else if (zend_string_equals_literal_ci(kind, "oem")) {
 		RETURN_LONG(GetOEMCP());
 	} else {
 		const struct php_win32_cp *cp = php_win32_cp_get_current();

@@ -117,11 +117,7 @@ static ZEND_INI_MH(OnEnable)
 	} else {
 		/* It may be only temporary disabled */
 		bool *p = (bool *) ZEND_INI_GET_ADDR();
-		if (zend_string_equals_literal_ci(new_value, "on")
-			|| zend_string_equals_literal_ci(new_value, "yes")
-			|| zend_string_equals_literal_ci(new_value, "true")
-			|| atoi(ZSTR_VAL(new_value)) != 0
-		) {
+		if (zend_ini_parse_bool(new_value)) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
 		} else {

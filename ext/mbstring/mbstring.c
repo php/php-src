@@ -835,13 +835,13 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	char *endptr = NULL;
 
 	if (new_value != NULL) {
-		if (zend_string_equals_literal_ci(new_value, "none") {
+		if (zend_string_equals_literal_ci(new_value, "none")) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-		} else if (zend_string_equals_literal_ci(new_value, "long") {
+		} else if (zend_string_equals_literal_ci(new_value, "long")) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-		} else if (zend_string_equals_literal_ci(new_value, "entity") {
+		} else if (zend_string_equals_literal_ci(new_value, "entity")) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 		} else {
