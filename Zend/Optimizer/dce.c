@@ -378,11 +378,15 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 	return 0;
 }
 
+static zend_always_inline zend_bool may_be_refcounted(uint32_t type) {
+	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+}
+
 static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_FREE:
 			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
-			if (!(ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			if (!may_be_refcounted(ctx->ssa->var_info[ssa_op->op1_use].type)) {
 				return 0;
 			}
 			ZEND_FALLTHROUGH;
@@ -410,9 +414,8 @@ static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
-				&& opline->opcode != ZEND_CASE
-				&& opline->opcode != ZEND_CASE_STRICT) {
+			if (may_be_refcounted(ssa->var_info[ssa_op->op1_use].type)
+					&& opline->opcode != ZEND_CASE && opline->opcode != ZEND_CASE_STRICT) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}
@@ -420,7 +423,7 @@ static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op2_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op2_use, ssa_op->op2_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op2_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			if (may_be_refcounted(ssa->var_info[ssa_op->op2_use].type)) {
 				if (free_var >= 0) {
 					// TODO: We can't free two vars. Keep instruction alive.
 					zend_bitset_excl(ctx->instr_dead, opline - ctx->op_array->opcodes);
@@ -531,7 +534,8 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 	 * of the producing instructions, as it combines producing the result with control flow.
 	 * This can be made more precise if there are any cases where this is not the case. */
 	FOREACH_PHI(phi) {
-		if (phi->var >= op_array->last_var) {
+		if (phi->var >= op_array->last_var
+				&& may_be_refcounted(ssa->var_info[phi->ssa_var].type)) {
 			zend_bitset_excl(ctx.phi_dead, phi->ssa_var);
 			add_phi_sources_to_worklists(&ctx, phi, 0);
 		}
