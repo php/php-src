@@ -499,6 +499,7 @@ numeric_key:
 			}
 		} else if (Z_TYPE(key) == IS_STRING) {
 			if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
+				zval_ptr_dtor_str(&key);
 				goto numeric_key;
 			}
 			data = zend_hash_lookup(ht, Z_STR(key));
@@ -506,12 +507,11 @@ numeric_key:
 				var_push_dtor_value(var_hash, data);
 				ZVAL_NULL(data);
 			}
+			zval_ptr_dtor_str(&key);
 		} else {
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
-
-		zval_ptr_dtor_str(&key);
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			goto failure;
