@@ -27,7 +27,7 @@ do { \
 	if (Z_TYPE_P(val) == IS_STRING) { \
 		php_mail_build_headers_elem(&s, key, val); \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
-		if (!strncasecmp(target, ZSTR_VAL(key), ZSTR_LEN(key))) { \
+		if (zend_string_equals_literal_ci(key, target)) { \
 			zend_type_error("Header \"%s\" must be of type string, array given", target); \
 			break; \
 		} \

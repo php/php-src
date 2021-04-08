@@ -140,12 +140,12 @@ PHP_FUNCTION(readline)
 /* {{{ Gets/sets various internal readline variables. */
 PHP_FUNCTION(readline_info)
 {
-	char *what = NULL;
+	zend_string *what = NULL;
 	zval *value = NULL;
-	size_t what_len, oldval;
+	size_t oldval;
 	char *oldstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!z!", &what, &what_len, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!z!", &what, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -177,7 +177,7 @@ PHP_FUNCTION(readline_info)
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
-		if (!strcasecmp(what,"line_buffer")) {
+		if (zend_string_equals_literal_ci(what,"line_buffer")) {
 			oldstr = rl_line_buffer;
 			if (value) {
 				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
@@ -187,22 +187,22 @@ PHP_FUNCTION(readline_info)
 				rl_line_buffer = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
-		} else if (!strcasecmp(what, "point")) {
+		} else if (zend_string_equals_literal_ci(what, "point")) {
 			RETVAL_LONG(rl_point);
 #ifndef PHP_WIN32
-		} else if (!strcasecmp(what, "end")) {
+		} else if (zend_string_equals_literal_ci(what, "end")) {
 			RETVAL_LONG(rl_end);
 #endif
 #ifdef HAVE_LIBREADLINE
-		} else if (!strcasecmp(what, "mark")) {
+		} else if (zend_string_equals_literal_ci(what, "mark")) {
 			RETVAL_LONG(rl_mark);
-		} else if (!strcasecmp(what, "done")) {
+		} else if (zend_string_equals_literal_ci(what, "done")) {
 			oldval = rl_done;
 			if (value) {
 				rl_done = zval_get_long(value);
 			}
 			RETVAL_LONG(oldval);
-		} else if (!strcasecmp(what, "pending_input")) {
+		} else if (zend_string_equals_literal_ci(what, "pending_input")) {
 			oldval = rl_pending_input;
 			if (value) {
 				if (!try_convert_to_string(value)) {
@@ -211,17 +211,17 @@ PHP_FUNCTION(readline_info)
 				rl_pending_input = Z_STRVAL_P(value)[0];
 			}
 			RETVAL_LONG(oldval);
-		} else if (!strcasecmp(what, "prompt")) {
+		} else if (zend_string_equals_literal_ci(what, "prompt")) {
 			RETVAL_STRING(SAFE_STRING(rl_prompt));
-		} else if (!strcasecmp(what, "terminal_name")) {
+		} else if (zend_string_equals_literal_ci(what, "terminal_name")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name));
-		} else if (!strcasecmp(what, "completion_suppress_append")) {
+		} else if (zend_string_equals_literal_ci(what, "completion_suppress_append")) {
 			oldval = rl_completion_suppress_append;
 			if (value) {
 				rl_completion_suppress_append = zend_is_true(value);
 			}
 			RETVAL_BOOL(oldval);
-		} else if (!strcasecmp(what, "completion_append_character")) {
+		} else if (zend_string_equals_literal_ci(what, "completion_append_character")) {
 			oldval = rl_completion_append_character;
 			if (value) {
 				if (!try_convert_to_string(value)) {
@@ -233,7 +233,7 @@ PHP_FUNCTION(readline_info)
 				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
-		} else if (!strcasecmp(what, "erase_empty_line")) {
+		} else if (zend_string_equals_literal_ci(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
 				rl_erase_empty_line = zval_get_long(value);
@@ -241,10 +241,10 @@ PHP_FUNCTION(readline_info)
 			RETVAL_LONG(oldval);
 #endif
 #ifndef PHP_WIN32
-		} else if (!strcasecmp(what,"library_version")) {
+		} else if (zend_string_equals_literal_ci(what,"library_version")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
 #endif
-		} else if (!strcasecmp(what, "readline_name")) {
+		} else if (zend_string_equals_literal_ci(what, "readline_name")) {
 			oldstr = (char*)rl_readline_name;
 			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
@@ -254,7 +254,7 @@ PHP_FUNCTION(readline_info)
 				rl_readline_name = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
-		} else if (!strcasecmp(what, "attempted_completion_over")) {
+		} else if (zend_string_equals_literal_ci(what, "attempted_completion_over")) {
 			oldval = rl_attempted_completion_over;
 			if (value) {
 				rl_attempted_completion_over = zval_get_long(value);

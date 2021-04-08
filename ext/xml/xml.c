@@ -1001,15 +1001,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	xml_parser *parser;
 	int auto_detect = 0;
 
-	char *encoding_param = NULL;
-	size_t encoding_param_len = 0;
+	zend_string *encoding_param = NULL;
 
 	char *ns_param = NULL;
 	size_t ns_param_len = 0;
 
 	XML_Char *encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|s!s": "|s!"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|S!s": "|S!"), &encoding_param, &ns_param, &ns_param_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1017,14 +1016,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (encoding_param_len == 0) {
+		if (ZSTR_LEN(encoding_param) == 0) {
 			encoding = XML(default_encoding);
 			auto_detect = 1;
-		} else if (strcasecmp(encoding_param, "ISO-8859-1") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "ISO-8859-1")) {
 			encoding = (XML_Char*)"ISO-8859-1";
-		} else if (strcasecmp(encoding_param, "UTF-8") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "UTF-8")) {
 			encoding = (XML_Char*)"UTF-8";
-		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "US-ASCII")) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
 			zend_argument_value_error(1, "is not a supported source encoding");

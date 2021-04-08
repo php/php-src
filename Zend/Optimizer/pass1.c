@@ -235,8 +235,7 @@ constant_binary_op:
 			        Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 					/* for A::B */
 					if (op_array->scope &&
-						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						ZSTR_VAL(op_array->scope->name), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						zend_string_equals_ci(Z_STR(ZEND_OP1_LITERAL(opline)), op_array->scope->name)) {
 						ce = op_array->scope;
 					} else {
 						if ((ce = zend_hash_find_ptr(EG(class_table),

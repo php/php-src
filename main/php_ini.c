@@ -200,10 +200,10 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				}
 
 				/* PHP and Zend extensions are not added into configuration hash! */
-				if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
+				if (!is_special_section && zend_string_equals_literal_ci(Z_STR_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
 					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					zend_llist_add_element(&extension_lists.functions, &extension_name);
-				} else if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
+				} else if (!is_special_section && zend_string_equals_literal_ci(Z_STR_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
 					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					zend_llist_add_element(&extension_lists.engine, &extension_name);
 
