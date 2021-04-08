@@ -3774,47 +3774,47 @@ PHP_FUNCTION(mb_get_info)
 		} else {
 			add_assoc_string(return_value, "strict_detection", "Off");
 		}
-	} else if (zend_string_equals_literal_ci(type, "internal_encoding") {
+	} else if (zend_string_equals_literal_ci(type, "internal_encoding")) {
 		if (MBSTRG(current_internal_encoding)) {
 			RETVAL_STRING((char *)MBSTRG(current_internal_encoding)->name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "http_input") {
+	} else if (zend_string_equals_literal_ci(type, "http_input")) {
 		if (MBSTRG(http_input_identify)) {
 			RETVAL_STRING((char *)MBSTRG(http_input_identify)->name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "http_output") {
+	} else if (zend_string_equals_literal_ci(type, "http_output")) {
 		if (MBSTRG(current_http_output_encoding)) {
 			RETVAL_STRING((char *)MBSTRG(current_http_output_encoding)->name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "http_output_conv_mimetypes") {
+	} else if (zend_string_equals_literal_ci(type, "http_output_conv_mimetypes")) {
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			RETVAL_STRING(name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "mail_charset") {
+	} else if (zend_string_equals_literal_ci(type, "mail_charset")) {
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
 			RETVAL_STRING(name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "mail_header_encoding") {
+	} else if (zend_string_equals_literal_ci(type, "mail_header_encoding")) {
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding)) != NULL) {
 			RETVAL_STRING(name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "mail_body_encoding") {
+	} else if (zend_string_equals_literal_ci(type, "mail_body_encoding")) {
 		if (lang != NULL && (name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
 			RETVAL_STRING(name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "illegal_chars") {
+	} else if (zend_string_equals_literal_ci(type, "illegal_chars")) {
 		RETVAL_LONG(MBSTRG(illegalchars));
-	} else if (zend_string_equals_literal_ci(type, "encoding_translation") {
+	} else if (zend_string_equals_literal_ci(type, "encoding_translation")) {
 		if (MBSTRG(encoding_translation)) {
 			RETVAL_STRING("On");
 		} else {
 			RETVAL_STRING("Off");
 		}
-	} else if (zend_string_equals_literal_ci(type, "language") {
+	} else if (zend_string_equals_literal_ci(type, "language")) {
 		if ((name = (char *)mbfl_no_language2name(MBSTRG(language))) != NULL) {
 			RETVAL_STRING(name);
 		}
-	} else if (zend_string_equals_literal_ci(type, "detect_order") {
+	} else if (zend_string_equals_literal_ci(type, "detect_order")) {
 		n = MBSTRG(current_detect_order_list_size);
 		entry = MBSTRG(current_detect_order_list);
 		if (n > 0) {
@@ -3825,7 +3825,7 @@ PHP_FUNCTION(mb_get_info)
 				entry++;
 			}
 		}
-	} else if (zend_string_equals_literal_ci(type, "substitute_character") {
+	} else if (zend_string_equals_literal_ci(type, "substitute_character")) {
 		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			RETVAL_STRING("none");
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
@@ -3835,7 +3835,7 @@ PHP_FUNCTION(mb_get_info)
 		} else {
 			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
 		}
-	} else if (zend_string_equals_literal_ci(type, "strict_detection") {
+	} else if (zend_string_equals_literal_ci(type, "strict_detection")) {
 		if (MBSTRG(strict_detection)) {
 			RETVAL_STRING("On");
 		} else {
