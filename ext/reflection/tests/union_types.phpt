@@ -88,10 +88,10 @@ Allows null: false
   Name: int
   String: int
   Allows Null: false
-Type X|Y|int:
+Type x|Y|int:
 Allows null: false
-  Name: X
-  String: X
+  Name: x
+  String: x
   Allows Null: false
   Name: Y
   String: Y
@@ -99,13 +99,13 @@ Allows null: false
   Name: int
   String: int
   Allows Null: false
-Type X|Y|int:
+Type x|y|int:
 Allows null: false
-  Name: X
-  String: X
+  Name: x
+  String: x
   Allows Null: false
-  Name: Y
-  String: Y
+  Name: y
+  String: y
   Allows Null: false
   Name: int
   String: int
