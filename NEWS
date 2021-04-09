@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
 
+- Pcntl:
+  . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
+
 - PDO_ODBC:
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
     (cmb)
