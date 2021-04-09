@@ -424,27 +424,22 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].php_type = IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].php_type = IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BLOB].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_MEDIUM_BLOB].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG_BLOB].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].func		= ps_fetch_bit;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].pack_len	= 8;
@@ -453,17 +448,14 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VAR_STRING].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VAR_STRING].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VAR_STRING].php_type = IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VAR_STRING].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VARCHAR].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].func			= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].pack_len		= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].php_type	= IS_STRING;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_STRING].is_possibly_blob = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].func		= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_DECIMAL].pack_len	= MYSQLND_PS_SKIP_RESULT_STR;
