@@ -1229,6 +1229,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
 						if (str == ZCG(include_path)) {
+							zend_string_release(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
