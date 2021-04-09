@@ -1,9 +1,9 @@
 --TEST--
-noreturn return type: noreturn cannot return from finally
+never return type: never cannot return from finally
 --FILE--
 <?php
 
-function foo() : noreturn {
+function foo() : never {
     try {
         throw new Exception('bad');
     } finally {
@@ -14,4 +14,4 @@ function foo() : noreturn {
 // Note the lack of function call: function validated at compile-time
 ?>
 --EXPECTF--
-Fatal error: A noreturn function must not return in %s on line %d
+Fatal error: A never function must not return in %s on line %d

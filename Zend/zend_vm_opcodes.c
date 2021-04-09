@@ -224,7 +224,7 @@ static const char *zend_vm_opcodes_names[202] = {
 	"ZEND_JMP_NULL",
 	"ZEND_CHECK_UNDEF_ARGS",
 	"ZEND_FETCH_GLOBALS",
-	"ZEND_VERIFY_NORETURN_TYPE",
+	"ZEND_VERIFY_NEVER_TYPE",
 };
 
 static uint32_t zend_vm_opcodes_flags[202] = {

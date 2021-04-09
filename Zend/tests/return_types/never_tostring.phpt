@@ -1,5 +1,5 @@
 --TEST--
-noreturn type of __toString method
+never type of __toString method
 --FILE--
 <?php
 
@@ -10,7 +10,7 @@ class A implements Stringable {
 }
 
 class B extends A {
-    public function __toString(): noreturn {
+    public function __toString(): never {
         throw new \Exception('not supported');
     }
 }

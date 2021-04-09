@@ -1,9 +1,9 @@
 --TEST--
-noreturn return type: acceptable cases
+never return type: acceptable cases
 --FILE--
 <?php
 
-function foo(): noreturn {
+function foo(): never {
     throw new Exception('bad');
 }
 
@@ -13,7 +13,7 @@ try {
     // do nothing
 }
 
-function calls_foo(): noreturn {
+function calls_foo(): never {
     foo();
 }
 

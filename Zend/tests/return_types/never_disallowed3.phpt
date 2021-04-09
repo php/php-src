@@ -1,9 +1,9 @@
 --TEST--
-noreturn return type: unacceptable cases: implicit return
+never return type: unacceptable cases: implicit return
 --FILE--
 <?php
 
-function foo(): noreturn {
+function foo(): never {
     if (false) {
         throw new Exception('bad');
     }

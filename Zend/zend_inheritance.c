@@ -484,7 +484,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			added_types &= ~MAY_BE_STATIC;
 		}
 
-		if (added_types == MAY_BE_NORETURN) {
+		if (added_types == MAY_BE_NEVER) {
 			/* noreturn is the bottom type */
 			return INHERITANCE_SUCCESS;
 		}

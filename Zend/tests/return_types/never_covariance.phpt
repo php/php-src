@@ -1,5 +1,5 @@
 --TEST--
-noreturn return type: acceptable covariance cases
+never return type: acceptable covariance cases
 --FILE--
 <?php
 
@@ -10,7 +10,7 @@ class A
         return "hello";
     }
 
-    public function bar(): noreturn
+    public function bar(): never
     {
         throw new UnexpectedValueException('parent');
     }
@@ -26,22 +26,22 @@ class A
 
 class B extends A
 {
-    public function foo(): noreturn
+    public function foo(): never
     {
         throw new UnexpectedValueException('bad');
     }
 
-    public function bar(): noreturn
+    public function bar(): never
     {
         throw new UnexpectedValueException('child');
     }
 
-    public function &baz(): noreturn
+    public function &baz(): never
     {
         throw new UnexpectedValueException('child');
     }
 
-    public function someReturningStaticMethod(): noreturn
+    public function someReturningStaticMethod(): never
     {
         throw new UnexpectedValueException('child');
     }

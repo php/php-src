@@ -550,7 +550,7 @@ struct _zend_ast_ref {
 #define IS_VOID						14
 #define IS_STATIC					15
 #define IS_MIXED					16
-#define IS_NORETURN					17
+#define IS_NEVER					17
 
 /* internal types */
 #define IS_INDIRECT             	12

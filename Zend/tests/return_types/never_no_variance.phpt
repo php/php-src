@@ -1,11 +1,11 @@
 --TEST--
-noreturn return type: prevent unacceptable cases
+never return type: prevent unacceptable cases
 --FILE--
 <?php
 
 class A
 {
-    public function bar(): noreturn
+    public function bar(): never
     {
         throw new \Exception('parent');
     }
@@ -23,4 +23,4 @@ class B extends A
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::bar(): string must be compatible with A::bar(): noreturn in %s on line %d
+Fatal error: Declaration of B::bar(): string must be compatible with A::bar(): never in %s on line %d
