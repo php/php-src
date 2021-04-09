@@ -53,3 +53,11 @@ jobs:
           -d zend_extension=opcache.so
           --file-cache-use
           -d opcache.file_cache_only=1
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'Without interned strings'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          -d opcache.interned_strings_buffer=0
