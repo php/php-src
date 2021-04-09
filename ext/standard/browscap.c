@@ -710,7 +710,7 @@ PHP_FUNCTION(get_browser)
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY
-				|| zend_is_auto_global_str(ZEND_STRL("_SERVER"))) {
+				|| zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) {
 			http_user_agent = zend_hash_str_find(
 				Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]),
 				"HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1);

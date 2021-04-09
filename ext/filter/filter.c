@@ -476,13 +476,13 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			break;
 		case PARSE_SERVER:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_SERVER"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 			}
 			array_ptr = &IF_G(server_array);
 			break;
 		case PARSE_ENV:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_ENV"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 			}
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;

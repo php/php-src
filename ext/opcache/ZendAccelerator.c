@@ -1653,56 +1653,37 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	return new_persistent_script;
 }
 
-static const struct jit_auto_global_info
-{
-    const char *name;
-    size_t len;
-} jit_auto_globals_info[] = {
-    { "_SERVER",  sizeof("_SERVER")-1},
-    { "_ENV",     sizeof("_ENV")-1},
-    { "_REQUEST", sizeof("_REQUEST")-1},
-};
-
-static zend_string *jit_auto_globals_str[4];
+#define ZEND_AUTOGLOBAL_MASK_SERVER  (1 << 0)
+#define ZEND_AUTOGLOBAL_MASK_ENV     (1 << 1)
+#define ZEND_AUTOGLOBAL_MASK_REQUEST (1 << 2)
 
 static int zend_accel_get_auto_globals(void)
 {
-	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
-	int n = 1;
 	int mask = 0;
-
-	for (i = 0; i < ag_size ; i++) {
-		if (zend_hash_exists(&EG(symbol_table), jit_auto_globals_str[i])) {
-			mask |= n;
-		}
-		n += n;
+	if (zend_hash_exists(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) {
+		mask |= ZEND_AUTOGLOBAL_MASK_SERVER;
+	}
+	if (zend_hash_exists(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV))) {
+		mask |= ZEND_AUTOGLOBAL_MASK_ENV;
+	}
+	if (zend_hash_exists(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST))) {
+		mask |= ZEND_AUTOGLOBAL_MASK_REQUEST;
 	}
 	return mask;
 }
 
 static void zend_accel_set_auto_globals(int mask)
 {
-	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
-	int n = 1;
-
-	for (i = 0; i < ag_size ; i++) {
-		if (mask & n) {
-			ZCG(auto_globals_mask) |= n;
-			zend_is_auto_global(jit_auto_globals_str[i]);
-		}
-		n += n;
+	if (mask & ZEND_AUTOGLOBAL_MASK_SERVER) {
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 	}
-}
-
-static void zend_accel_init_auto_globals(void)
-{
-	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
-
-	for (i = 0; i < ag_size ; i++) {
-		jit_auto_globals_str[i] = zend_string_init(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
-		zend_string_hash_val(jit_auto_globals_str[i]);
-		jit_auto_globals_str[i] = accel_new_interned_string(jit_auto_globals_str[i]);
+	if (mask & ZEND_AUTOGLOBAL_MASK_ENV) {
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 	}
+	if (mask & ZEND_AUTOGLOBAL_MASK_REQUEST) {
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST));
+	}
+	ZCG(auto_globals_mask) |= mask;
 }
 
 static void persistent_error_cb(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) {
@@ -3266,7 +3247,6 @@ static zend_result accel_post_startup(void)
 				zend_shared_alloc_lock();
 				file_cache_only = 1;
 				fallback_process = 1;
-				zend_accel_init_auto_globals();
 				zend_shared_alloc_unlock();
 				goto file_cache_fallback;
 				break;
@@ -3277,9 +3257,6 @@ static zend_result accel_post_startup(void)
 
 		/* remember the last restart time in the process memory */
 		ZCG(last_restart_time) = ZCSG(last_restart_time);
-
-		/* Init auto-global strings */
-		zend_accel_init_auto_globals();
 
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
@@ -3306,9 +3283,6 @@ static zend_result accel_post_startup(void)
 		JIT_G(on) = 0;
 #endif
 		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
-
-		/* Init auto-global strings */
-		zend_accel_init_auto_globals();
 	}
 #if ENABLE_FILE_CACHE_FALLBACK
 file_cache_fallback:

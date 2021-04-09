@@ -956,7 +956,7 @@ do_repeat:
 			}
 		}
 
-		zend_is_auto_global_str(ZEND_STRL("_SERVER"));
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {
