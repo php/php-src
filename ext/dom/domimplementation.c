@@ -35,18 +35,13 @@ Since:
 */
 PHP_METHOD(DOMImplementation, hasFeature)
 {
-	size_t feature_len, version_len;
-	char *feature, *version;
+	zend_string *feature, *version;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &feature, &version) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (dom_has_feature(feature, version)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(dom_has_feature(feature, version));
 }
 /* }}} end dom_domimplementation_has_feature */
 
