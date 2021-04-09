@@ -98,9 +98,9 @@ jobs:
         configurationName: COVERAGE_DEBUG_ZTS
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
-    - template: azure/file_cache_job.yml
+    - template: azure/opcache_variation_job.yml
       parameters:
-        configurationName: DEBUG_NTS_FILE_CACHE
+        configurationName: DEBUG_NTS_OPCACHE
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
     - template: azure/job.yml
