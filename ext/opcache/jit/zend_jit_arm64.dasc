@@ -580,10 +580,10 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro LONG_CMP, reg, addr, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		brk #0  // TODO: test
 ||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= MAX_IMM12) {
 |			cmp Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
 ||		} else {
+|			brk #0	// TODO
 |			LOAD_64BIT_VAL tmp_reg1, Z_LVAL_P(Z_ZV(addr))
 |			cmp Rx(reg), tmp_reg1
 ||		}
