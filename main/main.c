@@ -99,130 +99,131 @@ PHPAPI size_t core_globals_offset;
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
-	const char *facility = ZSTR_VAL(new_value);
+	const zend_string *facility = new_value;
 
 #ifdef LOG_AUTH
-	if (!strcmp(facility, "LOG_AUTH") || !strcmp(facility, "auth") || !strcmp(facility, "security")) {
+	if (zend_string_equals_literal(facility, "LOG_AUTH") || zend_string_equals_literal(facility, "auth")
+			|| zend_string_equals_literal(facility, "security")) {
 		PG(syslog_facility) = LOG_AUTH;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_AUTHPRIV
-	if (!strcmp(facility, "LOG_AUTHPRIV") || !strcmp(facility, "authpriv")) {
+	if (zend_string_equals_literal(facility, "LOG_AUTHPRIV") || zend_string_equals_literal(facility, "authpriv")) {
 		PG(syslog_facility) = LOG_AUTHPRIV;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_CRON
-	if (!strcmp(facility, "LOG_CRON") || !strcmp(facility, "cron")) {
+	if (zend_string_equals_literal(facility, "LOG_CRON") || zend_string_equals_literal(facility, "cron")) {
 		PG(syslog_facility) = LOG_CRON;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_DAEMON
-	if (!strcmp(facility, "LOG_DAEMON") || !strcmp(facility, "daemon")) {
+	if (zend_string_equals_literal(facility, "LOG_DAEMON") || zend_string_equals_literal(facility, "daemon")) {
 		PG(syslog_facility) = LOG_DAEMON;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_FTP
-	if (!strcmp(facility, "LOG_FTP") || !strcmp(facility, "ftp")) {
+	if (zend_string_equals_literal(facility, "LOG_FTP") || zend_string_equals_literal(facility, "ftp")) {
 		PG(syslog_facility) = LOG_FTP;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_KERN
-	if (!strcmp(facility, "LOG_KERN") || !strcmp(facility, "kern")) {
+	if (zend_string_equals_literal(facility, "LOG_KERN") || zend_string_equals_literal(facility, "kern")) {
 		PG(syslog_facility) = LOG_KERN;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LPR
-	if (!strcmp(facility, "LOG_LPR") || !strcmp(facility, "lpr")) {
+	if (zend_string_equals_literal(facility, "LOG_LPR") || zend_string_equals_literal(facility, "lpr")) {
 		PG(syslog_facility) = LOG_LPR;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_MAIL
-	if (!strcmp(facility, "LOG_MAIL") || !strcmp(facility, "mail")) {
+	if (zend_string_equals_literal(facility, "LOG_MAIL") || zend_string_equals_literal(facility, "mail")) {
 		PG(syslog_facility) = LOG_MAIL;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_INTERNAL_MARK
-	if (!strcmp(facility, "LOG_INTERNAL_MARK") || !strcmp(facility, "mark")) {
+	if (zend_string_equals_literal(facility, "LOG_INTERNAL_MARK") || zend_string_equals_literal(facility, "mark")) {
 		PG(syslog_facility) = LOG_INTERNAL_MARK;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_NEWS
-	if (!strcmp(facility, "LOG_NEWS") || !strcmp(facility, "news")) {
+	if (zend_string_equals_literal(facility, "LOG_NEWS") || zend_string_equals_literal(facility, "news")) {
 		PG(syslog_facility) = LOG_NEWS;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_SYSLOG
-	if (!strcmp(facility, "LOG_SYSLOG") || !strcmp(facility, "syslog")) {
+	if (zend_string_equals_literal(facility, "LOG_SYSLOG") || zend_string_equals_literal(facility, "syslog")) {
 		PG(syslog_facility) = LOG_SYSLOG;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_USER
-	if (!strcmp(facility, "LOG_USER") || !strcmp(facility, "user")) {
+	if (zend_string_equals_literal(facility, "LOG_USER") || zend_string_equals_literal(facility, "user")) {
 		PG(syslog_facility) = LOG_USER;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_UUCP
-	if (!strcmp(facility, "LOG_UUCP") || !strcmp(facility, "uucp")) {
+	if (zend_string_equals_literal(facility, "LOG_UUCP") || zend_string_equals_literal(facility, "uucp")) {
 		PG(syslog_facility) = LOG_UUCP;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL0
-	if (!strcmp(facility, "LOG_LOCAL0") || !strcmp(facility, "local0")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL0") || zend_string_equals_literal(facility, "local0")) {
 		PG(syslog_facility) = LOG_LOCAL0;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL1
-	if (!strcmp(facility, "LOG_LOCAL1") || !strcmp(facility, "local1")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL1") || zend_string_equals_literal(facility, "local1")) {
 		PG(syslog_facility) = LOG_LOCAL1;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL2
-	if (!strcmp(facility, "LOG_LOCAL2") || !strcmp(facility, "local2")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL2") || zend_string_equals_literal(facility, "local2")) {
 		PG(syslog_facility) = LOG_LOCAL2;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL3
-	if (!strcmp(facility, "LOG_LOCAL3") || !strcmp(facility, "local3")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL3") || zend_string_equals_literal(facility, "local3")) {
 		PG(syslog_facility) = LOG_LOCAL3;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL4
-	if (!strcmp(facility, "LOG_LOCAL4") || !strcmp(facility, "local4")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL4") || zend_string_equals_literal(facility, "local4")) {
 		PG(syslog_facility) = LOG_LOCAL4;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL5
-	if (!strcmp(facility, "LOG_LOCAL5") || !strcmp(facility, "local5")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL5") || zend_string_equals_literal(facility, "local5")) {
 		PG(syslog_facility) = LOG_LOCAL5;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL6
-	if (!strcmp(facility, "LOG_LOCAL6") || !strcmp(facility, "local6")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL6") || zend_string_equals_literal(facility, "local6")) {
 		PG(syslog_facility) = LOG_LOCAL6;
 		return SUCCESS;
 	}
 #endif
 #ifdef LOG_LOCAL7
-	if (!strcmp(facility, "LOG_LOCAL7") || !strcmp(facility, "local7")) {
+	if (zend_string_equals_literal(facility, "LOG_LOCAL7") || zend_string_equals_literal(facility, "local7")) {
 		PG(syslog_facility) = LOG_LOCAL7;
 		return SUCCESS;
 	}
@@ -278,21 +279,21 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
 {
-	const char *filter = ZSTR_VAL(new_value);
+	const zend_string *filter = new_value;
 
-	if (!strcmp(filter, "all")) {
+	if (zend_string_equals_literal(filter, "all")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_ALL;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "no-ctrl")) {
+	if (zend_string_equals_literal(filter, "no-ctrl")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_NO_CTRL;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "ascii")) {
+	if (zend_string_equals_literal(filter, "ascii")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
 		return SUCCESS;
 	}
-	if (!strcmp(filter, "raw")) {
+	if (zend_string_equals_literal(filter, "raw")) {
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_RAW;
 		return SUCCESS;
 	}
@@ -401,7 +402,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* }}} */
 
 /* {{{ php_get_display_errors_mode() helper function */
-static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
+static zend_uchar php_get_display_errors_mode(zend_string *value)
 {
 	zend_uchar mode;
 
@@ -409,21 +410,26 @@ static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
-	if (value_length == 2 && !strcasecmp("on", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 3 && !strcasecmp("yes", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 4 && !strcasecmp("true", value)) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else if (value_length == 6 && !strcasecmp(value, "stderr")) {
-		mode = PHP_DISPLAY_ERRORS_STDERR;
-	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
-		mode = PHP_DISPLAY_ERRORS_STDOUT;
-	} else {
-		ZEND_ATOL(mode, value);
-		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
-			mode = PHP_DISPLAY_ERRORS_STDOUT;
-		}
+	if (zend_string_equals_literal_ci(value, "on")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+	if (zend_string_equals_literal_ci(value, "yes")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+
+	if (zend_string_equals_literal_ci(value, "true")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+	if (zend_string_equals_literal_ci(value, "stderr")) {
+		return PHP_DISPLAY_ERRORS_STDERR;
+	}
+	if (zend_string_equals_literal_ci(value, "stdout")) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
+	}
+
+	ZEND_ATOL(mode, ZSTR_VAL(value));
+	if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
+		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
 	return mode;
@@ -433,7 +439,7 @@ static zend_uchar php_get_display_errors_mode(char *value, size_t value_length)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = php_get_display_errors_mode(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	PG(display_errors) = php_get_display_errors_mode(new_value);
 
 	return SUCCESS;
 }
@@ -444,21 +450,17 @@ static PHP_INI_DISP(display_errors_mode)
 {
 	zend_uchar mode;
 	bool cgi_or_cli;
-	size_t tmp_value_length;
-	char *tmp_value;
+	zend_string *temporary_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		tmp_value = (ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL );
-		tmp_value_length = (ini_entry->orig_value? ZSTR_LEN(ini_entry->orig_value) : 0);
+		temporary_value = (ini_entry->orig_value ? ini_entry->orig_value : NULL );
 	} else if (ini_entry->value) {
-		tmp_value = ZSTR_VAL(ini_entry->value);
-		tmp_value_length = ZSTR_LEN(ini_entry->value);
+		temporary_value = ini_entry->value;
 	} else {
-		tmp_value = NULL;
-		tmp_value_length = 0;
+		temporary_value = NULL;
 	}
 
-	mode = php_get_display_errors_mode(tmp_value, tmp_value_length);
+	mode = php_get_display_errors_mode(temporary_value);
 
 	/* Display 'On' for other SAPIs instead of STDOUT or STDERR */
 	cgi_or_cli = (!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg"));
@@ -584,7 +586,8 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && strcmp(ZSTR_VAL(new_value), "syslog")) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
+			new_value && zend_string_equals_literal(new_value, "syslog")) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
@@ -1315,7 +1318,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 				/* bad error in module startup - no way we can live with this */
 				exit(-2);
 			}
-		/* no break - intentionally */
+		ZEND_FALLTHROUGH;
 		case E_ERROR:
 		case E_RECOVERABLE_ERROR:
 		case E_PARSE:
@@ -1441,9 +1444,10 @@ PHP_FUNCTION(set_time_limit)
 /* }}} */
 
 /* {{{ php_fopen_wrapper_for_zend */
-static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
+static FILE *php_fopen_wrapper_for_zend(zend_string *filename, zend_string **opened_path)
 {
-	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
+	*opened_path = filename;
+	return php_stream_open_wrapper_as_file(ZSTR_VAL(filename), "rb", USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE|STREAM_OPEN_FOR_ZEND_STREAM, opened_path);
 }
 /* }}} */
 
@@ -1471,20 +1475,25 @@ static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static zend_result php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
+static zend_result php_stream_open_for_zend(zend_file_handle *handle) /* {{{ */
 {
-	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
+	return php_stream_open_for_zend_ex(handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
 }
 /* }}} */
 
-PHPAPI zend_result php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
+PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mode) /* {{{ */
 {
 	zend_string *opened_path;
-	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);
+	zend_string *filename;
+	php_stream *stream;
+
+	ZEND_ASSERT(handle->type == ZEND_HANDLE_FILENAME);
+	opened_path = filename = handle->filename;
+	stream = php_stream_open_wrapper((char *)ZSTR_VAL(filename), "rb", mode | STREAM_OPEN_FOR_ZEND_STREAM, &opened_path);
 	if (stream) {
 		memset(handle, 0, sizeof(zend_file_handle));
 		handle->type = ZEND_HANDLE_STREAM;
-		handle->filename = (char*)filename;
+		handle->filename = filename;
 		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
@@ -1502,9 +1511,9 @@ PHPAPI zend_result php_stream_open_for_zend_ex(const char *filename, zend_file_h
 }
 /* }}} */
 
-static zend_string *php_resolve_path_for_zend(const char *filename, size_t filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(zend_string *filename) /* {{{ */
 {
-	return php_resolve_path(filename, filename_len, PG(include_path));
+	return php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), PG(include_path));
 }
 /* }}} */
 
@@ -2141,9 +2150,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions
 	   to be loaded later */
+	zend_stream_init();
 	if (php_init_config() == FAILURE) {
 		return FAILURE;
 	}
+	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
 	REGISTER_INI_ENTRIES();
@@ -2415,7 +2426,7 @@ void php_module_shutdown(void)
 /* {{{ php_execute_script */
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
-	zend_file_handle *prepend_file_p, *append_file_p;
+	zend_file_handle *prepend_file_p = NULL, *append_file_p = NULL;
 	zend_file_handle prepend_file, append_file;
 #ifdef HAVE_BROKEN_GETCWD
 	volatile int old_cwd_fd = -1;
@@ -2449,18 +2460,18 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #else
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 #endif
-			VCWD_CHDIR_FILE(primary_file->filename);
+			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
 		}
 
  		/* Only lookup the real file path and add it to the included_files list if already opened
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
- 		if (primary_file->filename &&
- 		    strcmp("Standard input code", primary_file->filename) &&
+		if (primary_file->filename &&
+			!zend_string_equals_literal(primary_file->filename, "Standard input code") &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
-			if (expand_filepath(primary_file->filename, realfile)) {
+			if (expand_filepath(ZSTR_VAL(primary_file->filename), realfile)) {
 				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);
 				zend_hash_add_empty_element(&EG(included_files), primary_file->opened_path);
 			}
@@ -2469,15 +2480,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 			zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
 			prepend_file_p = &prepend_file;
-		} else {
-			prepend_file_p = NULL;
 		}
 
 		if (PG(auto_append_file) && PG(auto_append_file)[0]) {
 			zend_stream_init_filename(&append_file, PG(auto_append_file));
 			append_file_p = &append_file;
-		} else {
-			append_file_p = NULL;
 		}
 		if (PG(max_input_time) != -1) {
 #ifdef PHP_WIN32
@@ -2488,6 +2495,14 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 
 		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
+
+	if (prepend_file_p) {
+		zend_destroy_file_handle(prepend_file_p);
+	}
+
+	if (append_file_p) {
+		zend_destroy_file_handle(append_file_p);
+	}
 
 	if (EG(exception)) {
 		zend_try {
@@ -2532,7 +2547,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 
 		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
-			VCWD_CHDIR_FILE(primary_file->filename);
+			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
 		}
 		zend_execute_scripts(ZEND_REQUIRE, ret, 1, primary_file);
 	} zend_end_try();
@@ -2608,7 +2623,6 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 
 	zend_try {
 		op_array = zend_compile_file(file, ZEND_INCLUDE);
-		zend_destroy_file_handle(file);
 
 		if (op_array) {
 			destroy_op_array(op_array);

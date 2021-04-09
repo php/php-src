@@ -238,8 +238,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 				break;
 			}
 
-
-			/* fall through */
+			ZEND_FALLTHROUGH;
 		default:
 			/* some other error */
 			ecode = ERR_get_error();
@@ -540,6 +539,7 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 					break;
 				}
 				/* not allowed, so fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				php_error_docref(NULL, E_WARNING,
 						"Could not verify peer: code:%d %s",

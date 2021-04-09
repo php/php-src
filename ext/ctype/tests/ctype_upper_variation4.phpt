@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_upper() function : usage variations - octal and hexadecimal values
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

@@ -1,7 +1,7 @@
 --TEST--
 Bug #71996: Using references in arrays doesn't work like expected
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

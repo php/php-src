@@ -1,7 +1,7 @@
 --TEST--
 Bug #36629 (SoapServer::handle() exits on SOAP faults)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test1() {

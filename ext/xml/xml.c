@@ -813,7 +813,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 					ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
 						if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
-							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
+							if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
 									int newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);

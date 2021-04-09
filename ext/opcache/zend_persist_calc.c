@@ -203,6 +203,12 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	if (op_array->scope
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
+		return;
+	}
+
 	if (op_array->static_variables && !zend_accel_in_shm(op_array->static_variables)) {
 		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
 			Bucket *p;
@@ -216,12 +222,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				zend_persist_zval_calc(&p->val);
 			} ZEND_HASH_FOREACH_END();
 		}
-	}
-
-	if (op_array->scope
-	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
-	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
-		return;
 	}
 
 	if (op_array->literals) {
@@ -534,6 +534,18 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
 		}
+
+		if (ce->backed_enum_table) {
+			Bucket *p;
+			ADD_SIZE(sizeof(HashTable));
+			zend_hash_persist_calc(ce->backed_enum_table);
+			ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
+				if (p->key != NULL) {
+					ADD_INTERNED_STRING(p->key);
+				}
+				zend_persist_zval_calc(&p->val);
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 
@@ -558,7 +570,7 @@ static void zend_persist_warnings_calc(zend_persistent_script *script) {
 	}
 }
 
-uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, const char *key, unsigned int key_length, int for_shm)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
 {
 	Bucket *p;
 
@@ -573,11 +585,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
-	if (key) {
-		ADD_SIZE(key_length + 1);
-		zend_shared_alloc_register_xlat_entry(key, key);
-	}
-	ADD_STRING(new_persistent_script->script.filename);
+	ADD_INTERNED_STRING(new_persistent_script->script.filename);
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align size to 64-byte boundary */

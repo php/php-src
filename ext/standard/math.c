@@ -300,7 +300,7 @@ PHP_FUNCTION(round)
 			if (places >= 0) {
 				RETURN_DOUBLE((double) Z_LVAL_P(value));
 			}
-			/* break omitted intentionally */
+			ZEND_FALLTHROUGH;
 
 		case IS_DOUBLE:
 			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
@@ -773,7 +773,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				fnum = (double)num;
 				mode = 1;
 			}
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		case 1: /* Float */
 			fnum = fnum * base + c;
 		}

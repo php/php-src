@@ -1,7 +1,7 @@
 --TEST--
 Bug #30106 (SOAP cannot not parse 'ref' element. Causes Uncaught SoapFault exception)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled", 0);

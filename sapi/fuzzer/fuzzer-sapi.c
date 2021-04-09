@@ -250,6 +250,7 @@ int fuzzer_do_request_from_buffer(
 	zend_first_try {
 		zend_file_handle file_handle;
 		zend_stream_init_filename(&file_handle, filename);
+		file_handle.primary_script = 1;
 		file_handle.buf = estrndup(data, data_len);
 		file_handle.len = data_len;
 
@@ -258,9 +259,11 @@ int fuzzer_do_request_from_buffer(
 			if (execute) {
 				zend_execute(op_array, NULL);
 			}
+			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
+		zend_destroy_file_handle(&file_handle);
 	} zend_end_try();
 
 	CG(compiled_filename) = NULL; /* ??? */

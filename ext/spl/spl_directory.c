@@ -155,7 +155,10 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
 {
 	spl_filesystem_object *intern;
 
-	intern = zend_object_alloc(sizeof(spl_filesystem_object), class_type);
+	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
+	memset(intern, 0,
+		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
+			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -202,25 +205,25 @@ PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_
 
 static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
 {
-	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
+	if (intern->file_name) {
+		/* already known */
+		return SUCCESS;
+	}
 
 	switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			if (!intern->file_name) {
-				zend_throw_error(NULL, "Object not initialized");
-				return FAILURE;
-			}
+			zend_throw_error(NULL, "Object not initialized");
+			return FAILURE;
 			break;
 		case SPL_FS_DIR:
 			{
 				size_t name_len;
 				size_t path_len = 0;
-				char *path = spl_filesystem_object_get_path(intern, &path_len);
+				char *path;
+				char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-				if (intern->file_name) {
-					zend_string_release(intern->file_name);
-				}
+				path = spl_filesystem_object_get_path(intern, &path_len);
 				/* if there is parent path, amend it, otherwise just use the given path as is */
 				name_len = strlen(intern->u.dir.entry.d_name);
 				if (path_len == 0) {
@@ -241,6 +244,11 @@ static inline int spl_filesystem_object_get_file_name(spl_filesystem_object *int
 
 static int spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
 {
+	if (intern->file_name) {
+		/* invalidate */
+		zend_string_release(intern->file_name);
+		intern->file_name = NULL;
+	}
 	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
 		intern->u.dir.entry.d_name[0] = '\0';
 		return 0;
@@ -1469,13 +1477,18 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 		if (spl_filesystem_object_get_file_name(intern) != SUCCESS) {
 			RETURN_THROWS();
 		}
-		if (!allow_links && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
-			php_stat(intern->file_name, FS_IS_LINK, return_value);
-			if (zend_is_true(return_value)) {
+		php_stat(intern->file_name, FS_LPERMS, return_value);
+		if (Z_TYPE_P(return_value) == IS_FALSE) {
+			return;
+		} else if (!S_ISLNK(Z_LVAL_P(return_value))) {
+			RETURN_BOOL(S_ISDIR(Z_LVAL_P(return_value)));
+		} else {
+			if (!allow_links
+			 && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
 				RETURN_FALSE;
 			}
+			php_stat(intern->file_name, FS_IS_DIR, return_value);
 		}
-		php_stat(intern->file_name, FS_IS_DIR, return_value);
     }
 }
 /* }}} */
@@ -2322,21 +2335,21 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			} else {
 				escape = (unsigned char) esc[0];
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (e_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 			if (d_len != 1) {
 				zend_argument_value_error(1, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			break;
 		}
@@ -2355,11 +2368,13 @@ PHP_METHOD(SplFileObject, fputcsv)
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 	zend_long ret;
 	zval *fields = NULL;
+	zend_string *eol = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sss", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sssS", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len, &eol) == SUCCESS) {
 
 		switch(ZEND_NUM_ARGS())
 		{
+		case 5:
 		case 4:
 			switch (esc_len) {
 				case 0:
@@ -2372,26 +2387,27 @@ PHP_METHOD(SplFileObject, fputcsv)
 					zend_argument_value_error(4, "must be empty or a single character");
 					RETURN_THROWS();
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 3:
 			if (e_len != 1) {
 				zend_argument_value_error(3, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (d_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 		case 0:
 			break;
 		}
-		ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape);
+
+		ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape, eol);
 		if (ret < 0) {
 			RETURN_FALSE;
 		}
@@ -2424,21 +2440,21 @@ PHP_METHOD(SplFileObject, setCsvControl)
 					zend_argument_value_error(3, "must be empty or a single character");
 					RETURN_THROWS();
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 2:
 			if (e_len != 1) {
 				zend_argument_value_error(2, "must be a single character");
 				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 1:
 			if (d_len != 1) {
 				zend_argument_value_error(1, "must be a single character");
 				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			break;
 		}

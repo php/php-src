@@ -1,7 +1,7 @@
 --TEST--
 Bug #50675 SoapClient can't handle object references correctly.
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Test 1: Accessing single node
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");

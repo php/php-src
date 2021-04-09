@@ -178,9 +178,9 @@ function imagefill(GdImage $image, int $x, int $y, int $color): bool {}
 
 function imagecolorstotal(GdImage $image): int {}
 
-function imagecolortransparent(GdImage $image, ?int $color = null): ?int {}
+function imagecolortransparent(GdImage $image, ?int $color = null): int {}
 
-function imageinterlace(GdImage $image, ?bool $enable = null): ?int {}
+function imageinterlace(GdImage $image, ?bool $enable = null): bool {}
 
 function imagepolygon(GdImage $image, array $points, int $num_points_or_color, ?int $color = null): bool {}
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #79358: JIT miscompile in composer
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

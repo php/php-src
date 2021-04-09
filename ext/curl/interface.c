@@ -2277,6 +2277,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				error = curl_easy_setopt(ch->cp, option, 2);
 				break;
 			}
+			ZEND_FALLTHROUGH;
 		case CURLOPT_AUTOREFERER:
 		case CURLOPT_BUFFERSIZE:
 		case CURLOPT_CONNECTTIMEOUT:
@@ -2667,7 +2668,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
 						return FAILURE;
 					}
-					/* break omitted intentionally */
+					ZEND_FALLTHROUGH;
 				default:
 					error = curl_easy_setopt(ch->cp, option, fp);
 					break;

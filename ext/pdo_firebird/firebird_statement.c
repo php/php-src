@@ -135,6 +135,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 					}
 					stmt->row_count = affected_rows;
 				}
+			/* TODO Dead code or assert one of the previous cases are hit? */
 			default:
 				;
 		}
@@ -243,6 +244,7 @@ static int firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval
 		}
 	}
 
+	array_init(return_value);
 	add_assoc_long(return_value, "pdo_type", param_type);
 	return 1;
 }
@@ -684,6 +686,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						var->sqllen = Z_STRLEN_P(parameter);
 						break;
 					}
+					ZEND_FALLTHROUGH;
 				case IS_NULL:
 					/* complain if this field doesn't allow NULL values */
 					if (~var->sqltype & 1) {

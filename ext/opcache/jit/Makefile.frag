@@ -8,7 +8,7 @@ $(builddir)/jit/zend_jit_x86.c: $(srcdir)/jit/zend_jit_x86.dasc $(srcdir)/jit/dy
 $(builddir)/jit/zend_jit.lo: \
 	$(builddir)/jit/zend_jit_x86.c \
 	$(srcdir)/jit/zend_jit_helpers.c \
-	$(srcdir)/jit/zend_jit_disasm_x86.c \
+	$(srcdir)/jit/zend_jit_disasm.c \
 	$(srcdir)/jit/zend_jit_gdb.c \
 	$(srcdir)/jit/zend_jit_perf_dump.c \
 	$(srcdir)/jit/zend_jit_oprofile.c \

@@ -195,7 +195,7 @@ add_op1_def:
 			if (!zend_bitset_in(def, var_num)) {
 				zend_bitset_incl(use, var_num);
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_INIT_ARRAY:
 			if (((build_flags & ZEND_SSA_RC_INFERENCE)
 						|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))

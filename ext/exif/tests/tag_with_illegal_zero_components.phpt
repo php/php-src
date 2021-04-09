@@ -1,11 +1,7 @@
 --TEST--
 OSS-Fuzz #17163: Out-of-bounds read due to tag with zero components
---SKIPIF--
-<?php
-if (!extension_loaded('exif')) {
-    die('skip exif extension not available');
-}
-?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 

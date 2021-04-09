@@ -1,9 +1,10 @@
 --TEST--
 Check for exif_read_data, Unicode user comment
+--EXTENSIONS--
+exif
+mbstring
 --SKIPIF--
 <?php
-    if (!extension_loaded('exif')) die('skip exif extension not available');
-    if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
     if (!defined("EXIF_USE_MBSTRING") || !EXIF_USE_MBSTRING) die ('skip mbstring loaded by dl');
 ?>
 --INI--

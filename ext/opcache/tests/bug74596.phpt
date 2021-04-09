@@ -7,8 +7,8 @@ opcache.file_update_protection=0
 opcache.validate_timestamps=0
 opcache.file_cache_only=0
 opcache.revalidate_path=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

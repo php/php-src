@@ -54,11 +54,11 @@
 #  define ZEND_VM_FP_GLOBAL_REG "%r14"
 #  define ZEND_VM_IP_GLOBAL_REG "%r15"
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
-#  define ZEND_VM_FP_GLOBAL_REG "r28"
-#  define ZEND_VM_IP_GLOBAL_REG "r29"
+#  define ZEND_VM_FP_GLOBAL_REG "r14"
+#  define ZEND_VM_IP_GLOBAL_REG "r15"
 # elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
-#  define ZEND_VM_FP_GLOBAL_REG "r28"
-#  define ZEND_VM_IP_GLOBAL_REG "r29"
+#  define ZEND_VM_FP_GLOBAL_REG "r14"
+#  define ZEND_VM_IP_GLOBAL_REG "r15"
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
 #  define ZEND_VM_FP_GLOBAL_REG "x27"
 #  define ZEND_VM_IP_GLOBAL_REG "x28"
@@ -298,7 +298,7 @@ static zend_never_inline ZEND_COLD zval *_get_zval_cv_lookup(zval *ptr, uint32_t
 			break;
 		case BP_VAR_RW:
 			zval_undefined_cv(var EXECUTE_DATA_CC);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case BP_VAR_W:
 			ZVAL_NULL(ptr);
 			break;
@@ -685,18 +685,12 @@ static ZEND_COLD void zend_verify_type_error_common(
 }
 
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value)
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
 	zend_string *need_msg;
 	const char *given_msg;
-
-	if (EG(exception)) {
-		/* The type verification itself might have already thrown an exception
-		 * through a promoted warning. */
-		return;
-	}
 
 	zend_verify_type_error_common(
 		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
@@ -988,9 +982,9 @@ static zend_always_inline bool zend_check_type_slow(
 		bool is_return_type, bool is_internal)
 {
 	uint32_t type_mask;
-	if (ZEND_TYPE_HAS_CLASS(*type) && Z_TYPE_P(arg) == IS_OBJECT) {
+	if (ZEND_TYPE_HAS_CLASS(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
-		if (ZEND_TYPE_HAS_LIST(*type)) {
+		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 				if (HAVE_CACHE_SLOT && *cache_slot) {
@@ -1002,7 +996,7 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 				} else {
 					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
-						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+						ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 					if (!ce) {
 						if (HAVE_CACHE_SLOT) {
 							cache_slot++;
@@ -1032,7 +1026,8 @@ static zend_always_inline bool zend_check_type_slow(
 					*cache_slot = ce;
 				}
 			} else {
-				ce = zend_fetch_class(ZEND_TYPE_NAME(*type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+				ce = zend_fetch_class(ZEND_TYPE_NAME(*type),
+					ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 				if (UNEXPECTED(!ce)) {
 					goto builtin_types;
 				}
@@ -1188,6 +1183,15 @@ static ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 		fbc->common.scope ? "::" : "",
 		ZSTR_VAL(fbc->common.function_name));
+}
+
+static void zend_verify_internal_read_property_type(zend_object *obj, zend_string *name, zval *val)
+{
+	zend_property_info *prop_info =
+		zend_get_property_info(obj->ce, name, /* silent */ true);
+	if (prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO && ZEND_TYPE_IS_SET(prop_info->type)) {
+		zend_verify_property_type(prop_info, val, /* strict */ true);
+	}
 }
 #endif
 
@@ -1430,6 +1434,7 @@ try_again:
 			}
 			case IS_UNDEF:
 				ZVAL_UNDEFINED_OP2();
+				ZEND_FALLTHROUGH;
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_FALSE:
@@ -2093,7 +2098,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			if (EG(exception)) {
 				return IS_NULL;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
 			value->str = ZSTR_EMPTY_ALLOC();
@@ -2127,25 +2132,27 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
-		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-		return retval;
+		if (type != BP_VAR_W) {
+			ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
+			return retval;
 num_undef:
-		switch (type) {
-			case BP_VAR_R:
-				zend_undefined_offset(hval);
-				/* break missing intentionally */
-			case BP_VAR_UNSET:
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
-					return NULL;
+			switch (type) {
+				case BP_VAR_R:
+					zend_undefined_offset(hval);
+					ZEND_FALLTHROUGH;
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_RW:
+					if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
+						return NULL;
+					}
+					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
+					break;
 				}
-				/* break missing intentionally */
-			case BP_VAR_W:
-				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-				break;
+		} else {
+			ZEND_HASH_INDEX_LOOKUP(ht, hval, retval);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
@@ -2155,30 +2162,31 @@ num_undef:
 			}
 		}
 str_index:
-		retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
-		if (!retval) {
-			switch (type) {
-				case BP_VAR_R:
-					zend_undefined_index(offset_key);
-					/* break missing intentionally */
-				case BP_VAR_UNSET:
-				case BP_VAR_IS:
-					retval = &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					/* Key may be released while throwing the undefined index warning. */
-					zend_string_addref(offset_key);
-					if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+		if (type != BP_VAR_W) {
+			retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
+			if (!retval) {
+				switch (type) {
+					case BP_VAR_R:
+						zend_undefined_index(offset_key);
+						ZEND_FALLTHROUGH;
+					case BP_VAR_UNSET:
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_RW:
+						/* Key may be released while throwing the undefined index warning. */
+						zend_string_addref(offset_key);
+						if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+							zend_string_release(offset_key);
+							return NULL;
+						}
+						retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 						zend_string_release(offset_key);
-						return NULL;
-					}
-					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-					zend_string_release(offset_key);
-					break;
-				case BP_VAR_W:
-					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-					break;
+						break;
+				}
 			}
+		} else {
+			retval = zend_hash_lookup(ht, offset_key);
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_REFERENCE)) {
 		dim = Z_REFVAL_P(dim);
@@ -2398,6 +2406,7 @@ try_string_offset:
 				}
 				case IS_UNDEF:
 					ZVAL_UNDEFINED_OP2();
+					ZEND_FALLTHROUGH;
 				case IS_DOUBLE:
 				case IS_NULL:
 				case IS_FALSE:
@@ -4229,10 +4238,12 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 				zend_file_handle file_handle;
 				zend_string *resolved_path;
 
-				resolved_path = zend_resolve_path(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
+				resolved_path = zend_resolve_path(Z_STR_P(inc_filename));
 				if (EXPECTED(resolved_path)) {
 					if (zend_hash_exists(&EG(included_files), resolved_path)) {
-						goto already_compiled;
+						new_op_array = ZEND_FAKE_OP_ARRAY;
+						zend_string_release_ex(resolved_path, 0);
+						break;
 					}
 				} else if (UNEXPECTED(EG(exception))) {
 					break;
@@ -4246,7 +4257,8 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					resolved_path = zend_string_copy(Z_STR_P(inc_filename));
 				}
 
-				if (SUCCESS == zend_stream_open(ZSTR_VAL(resolved_path), &file_handle)) {
+				zend_stream_init_filename_ex(&file_handle, resolved_path);
+				if (SUCCESS == zend_stream_open(&file_handle)) {
 
 					if (!file_handle.opened_path) {
 						file_handle.opened_path = zend_string_copy(resolved_path);
@@ -4261,8 +4273,6 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 						}
 						return op_array;
 					} else {
-						zend_file_handle_dtor(&file_handle);
-already_compiled:
 						new_op_array = ZEND_FAKE_OP_ARRAY;
 					}
 				} else if (!EG(exception)) {
@@ -4271,6 +4281,7 @@ already_compiled:
 							ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,
 							Z_STRVAL_P(inc_filename));
 				}
+				zend_destroy_file_handle(&file_handle);
 				zend_string_release_ex(resolved_path, 0);
 			}
 			break;

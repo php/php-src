@@ -425,12 +425,17 @@ static bool oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 
 static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
-	zend_long lval = zval_get_long(val);
+	zend_long lval;
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 		{
+			bool bval;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+
 			if (dbh->in_txn) {
 				/* Assume they want to commit whatever is outstanding */
 				H->last_err = OCITransCommit(H->svc, H->err, 0);
@@ -442,11 +447,15 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 				dbh->in_txn = false;
 			}
 
-			dbh->auto_commit = (unsigned int)lval? 1 : 0;
+			dbh->auto_commit = (unsigned int) bval;
 			return true;
 		}
 		case PDO_ATTR_PREFETCH:
 		{
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+
 			H->prefetch = pdo_oci_sanitize_prefetch(lval);
 			return true;
 		}
@@ -537,6 +546,9 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 		case PDO_OCI_ATTR_CALL_TIMEOUT:
 		{
 #if (OCI_MAJOR_VERSION >= 18)
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
 			ub4 timeout = (ub4) lval;
 
 			H->last_err = OCIAttrSet(H->svc, OCI_HTYPE_SVCCTX,

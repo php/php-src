@@ -187,6 +187,8 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 			return "The decoded property name is invalid";
 		case PHP_JSON_ERROR_UTF16:
 			return "Single unpaired UTF-16 surrogate in unicode escape";
+		case PHP_JSON_ERROR_NON_BACKED_ENUM:
+			return "Non-backed enums have no default serialization";
 		default:
 			return "Unknown error";
 	}

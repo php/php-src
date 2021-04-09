@@ -26,54 +26,35 @@
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
 
-#define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, bool quiet) \
-{ \
-	ZVAL_BOOL(retval, MyG(value)); \
-	return SUCCESS; \
-} \
 
-#define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value) \
-{ \
-	MyG(value) = Z_LVAL_P(value) > 0; \
-	return SUCCESS; \
-} \
+/* {{{ property driver_report_read */
+static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
+{
+	ZVAL_BOOL(retval, MyG(reconnect));
+	return SUCCESS;
+}
+/* }}} */
 
-#define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, bool quiet) \
-{ \
-	ZVAL_LONG(retval, MyG(value)); \
-	return SUCCESS; \
-} \
+/* {{{ property driver_report_write */
+static int driver_reconnect_write(mysqli_object *obj, zval *value)
+{
+	MyG(reconnect) = Z_LVAL_P(value) > 0;
+	return SUCCESS;
+}
+/* }}} */
 
-#define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value) \
-{ \
-	MyG(value) = Z_LVAL_P(value); \
-	return SUCCESS; \
-} \
-
-#define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static int name(mysqli_object *obj, zval *retval, bool quiet) \
-{ \
-	ZVAL_STRING(retval, MyG(value)); \
-	return SUCCESS; \
-} \
-
-#define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value) \
-{ \
-	MyG(value) = Z_STRVAL_P(value); \
-	return SUCCESS; \
-} \
+/* {{{ property driver_report_read */
+static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
+{
+	ZVAL_LONG(retval, MyG(report_mode));
+	return SUCCESS;
+}
+/* }}} */
 
 /* {{{ property driver_report_write */
 static int driver_report_write(mysqli_object *obj, zval *value)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
-	/*FIXME*/
-	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL); */
 	return SUCCESS;
 }
 /* }}} */
@@ -82,7 +63,6 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 static int driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, mysql_get_client_version());
-
 	return SUCCESS;
 }
 /* }}} */
@@ -91,7 +71,6 @@ static int driver_client_version_read(mysqli_object *obj, zval *retval, bool qui
 static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
-
 	return SUCCESS;
 }
 /* }}} */
@@ -99,27 +78,11 @@ static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 /* {{{ property driver_driver_version_read */
 static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
+	zend_error(E_DEPRECATED, "The driver_version property is deprecated");
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
-
 	return SUCCESS;
 }
 /* }}} */
-
-MAP_PROPERTY_MYG_BOOL_READ(driver_reconnect_read, reconnect)
-MAP_PROPERTY_MYG_BOOL_WRITE(driver_reconnect_write, reconnect)
-MAP_PROPERTY_MYG_LONG_READ(driver_report_read, report_mode)
-
-ZEND_FUNCTION(mysqli_driver_construct)
-{
-#ifdef G0
-	MYSQLI_RESOURCE 	*mysqli_resource;
-
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = 1;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
-	(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
-#endif
-}
 
 const mysqli_property_entry mysqli_driver_property_entries[] = {
 	{"client_info", sizeof("client_info") - 1, driver_client_info_read, NULL},

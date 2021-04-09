@@ -1,7 +1,7 @@
 --TEST--
 Bug #38004 (Parameters in SoapServer are decoded twice)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

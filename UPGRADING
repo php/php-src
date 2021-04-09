@@ -68,6 +68,17 @@ PHP 8.1 UPGRADE NOTES
   . The IMAP functions now accept and return, respectively, IMAPConnection objects
     instead of resources.
 
+- LDAP:
+  . The LDAP functions now accept and return, respectively, LDAP objects
+    instead of "ldap link" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The LDAP functions now accept and return, respectively, LDAPResult objects
+    instead of "ldap result" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The LDAP functions now accept and return, respectively, LDAPResultEntry
+    objects instead of "ldap result entry" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+
 - MySQLi:
   . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
     zero for max_length. You can compute this information by iterating over the
@@ -75,6 +86,11 @@ PHP 8.1 UPGRADE NOTES
     internally previously.
   . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
   . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
+  . The default error handling mode has been changed from "silent" to
+    "exceptions". See https://www.php.net/manual/en/mysqli-driver.report-mode.php
+    for details of behavior changes and how to explicitly set this attribute. To
+    keep the old behavior, use mysqli_report(MYSQLI_REPORT_OFF);
+    RFC: https://wiki.php.net/rfc/mysqli_default_errmode
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
@@ -112,6 +128,12 @@ PHP 8.1 UPGRADE NOTES
     reference representation since PHP 7.0.
   . debug_zval_dump() will not print "interned" instead of a dummy refcount of
     one for interned strings and immutable arrays.
+  . fputcsv() now accepts a new "eol" argument which allow to define a custom
+    eol sequence, the default remains the same and is "\n".
+
+- SPL:
+  . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
+    define a custom eol sequence, the default remains the same and is "\n".
 
 ========================================
 2. New Features
@@ -124,6 +146,8 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
   . Added support for array unpacking with strings keys.
     RFC: https://wiki.php.net/rfc/array_unpacking_string_keys
+  . Added support for enumerations.
+    RFC: https://wiki.php.net/rfc/enumerations
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
@@ -132,6 +156,14 @@ PHP 8.1 UPGRADE NOTES
 
         $file = new CURLStringFile($data, 'filename.txt', 'text/plain');
         curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => $file]);
+
+- FPM:
+  . Added openmetrics status format. It can be used by Prometheus to fetch FPM
+    metrics.
+  . Added new pool option for the dynamic process manager called
+    pm.max_spawn_rate. It allows to start number of children in a faster rate
+    when dynamic pm is selected. The default value is 32 which was the previous
+    hard coded value.
 
 - hash:
   . The following functions have changed signatures:
@@ -211,6 +243,15 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- MySQLi:
+  . The mysqli_driver::$driver_version property has been deprecated. The driver
+    version is meaningless as it hasn't been updated in more than a decade. Use
+    PHP_VERSION_ID instead.
+  . Calling mysqli::get_client_info in OO style or passing $mysqli argument to
+    mysqli_get_client_info() function has been deprecated. Use
+    mysqli_get_client_info() without any arguments to obtain the client
+    library version information.
 
 ========================================
 5. Changed Functions

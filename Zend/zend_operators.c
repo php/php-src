@@ -104,11 +104,11 @@ ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len) /* {{{ */
 			case 'g':
 			case 'G':
 				retval *= 1024;
-				/* break intentionally missing */
+				ZEND_FALLTHROUGH;
 			case 'm':
 			case 'M':
 				retval *= 1024;
-				/* break intentionally missing */
+				ZEND_FALLTHROUGH;
 			case 'k':
 			case 'K':
 				retval *= 1024;
@@ -132,11 +132,11 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 			case 'g':
 			case 'G':
 				retval *= 1024;
-				/* break intentionally missing */
+				ZEND_FALLTHROUGH;
 			case 'm':
 			case 'M':
 				retval *= 1024;
-				/* break intentionally missing */
+				ZEND_FALLTHROUGH;
 			case 'k':
 			case 'K':
 				retval *= 1024;
@@ -2461,7 +2461,7 @@ try_again:
 					return SUCCESS;
 				}
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot increment %s", zend_zval_type_name(op1));
@@ -2523,7 +2523,7 @@ try_again:
 					return SUCCESS;
 				}
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot decrement %s", zend_zval_type_name(op1));

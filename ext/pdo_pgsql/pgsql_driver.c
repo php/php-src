@@ -1154,14 +1154,20 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
-	bool bval = zval_get_long(val)? 1 : 0;
+	bool bval;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			H->emulate_prepares = bval;
 			return true;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			H->disable_prepares = bval;
 			return true;
 		default:

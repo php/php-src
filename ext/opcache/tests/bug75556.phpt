@@ -4,8 +4,8 @@ Bug #75556 (Invalid opcode 138/1/1)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
  function createFromFormat($format, $date, ?\DateTimeZone $tz = null): ?\DateTimeInterface

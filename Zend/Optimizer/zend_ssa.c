@@ -713,7 +713,7 @@ add_op1_def:
 			break;
 		case ZEND_ADD_ARRAY_ELEMENT:
 			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_INIT_ARRAY:
 			if (((build_flags & ZEND_SSA_RC_INFERENCE)
 						|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))

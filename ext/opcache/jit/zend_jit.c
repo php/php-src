@@ -206,7 +206,7 @@ static bool zend_long_is_power_of_two(zend_long x)
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_helpers.c"
-#include "jit/zend_jit_disasm_x86.c"
+#include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
 #include "jit/zend_jit_gdb.c"
 #include "jit/zend_jit_perf_dump.c"
@@ -678,6 +678,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, c
 					ssa->var_info[res].range.underflow ||
 					ssa->var_info[res].range.overflow);
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			return 1;
 	}
@@ -1510,7 +1511,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 				if (!ZEND_REGSET_IN(*hints, it->reg) &&
 				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
 				    (!current->used_as_hint ||
-				     (it->reg != ZREG_R0 && it->reg != ZREG_R1 && it->reg != ZREG_XMM0 && it->reg != ZREG_XMM1))) {
+				     !ZEND_REGSET_IN(ZEND_REGSET_LOW_PRIORITY, it->reg))) {
 					hint = it->reg;
 				}
 			} else {
@@ -1640,10 +1641,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 	low_priority_regs = *hints;
 	if (current->used_as_hint) {
 		/* TODO: Avoid most often scratch registers. Find a better way ??? */
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R1);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM1);
+		low_priority_regs = ZEND_REGSET_UNION(low_priority_regs, ZEND_REGSET_LOW_PRIORITY);
 	}
 
 	ZEND_REGSET_FOREACH(available, i) {
@@ -2830,7 +2828,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
@@ -3019,7 +3017,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 							goto done;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
@@ -3424,7 +3422,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
@@ -4237,11 +4235,19 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	}
 
 	for (i = 0; i <= 256; i++) {
-		if (zend_get_user_opcode_handler(i) != NULL) {
-			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
-			JIT_G(enabled) = 0;
-			JIT_G(on) = 0;
-			return FAILURE;
+		switch (i) {
+			/* JIT has no effect on these opcodes */
+			case ZEND_BEGIN_SILENCE:
+			case ZEND_END_SILENCE:
+			case ZEND_EXIT:
+				break;
+			default:
+				if (zend_get_user_opcode_handler(i) != NULL) {
+					zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
+					JIT_G(enabled) = 0;
+					JIT_G(on) = 0;
+					return FAILURE;
+				}
 		}
 	}
 

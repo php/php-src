@@ -1,7 +1,7 @@
 --TEST--
 FFI 003: Forward tag/typedef declarations
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 Bug #28969 (Wrong data encoding of special characters)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test() {

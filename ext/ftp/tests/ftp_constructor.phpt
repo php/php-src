@@ -1,8 +1,8 @@
 --TEST--
 Attempt to instantiate an FTPConnection directly
---SKIPIF--
-<?php
-require 'skipif.inc';
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 

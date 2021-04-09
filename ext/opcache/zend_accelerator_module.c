@@ -310,17 +310,21 @@ ZEND_INI_END()
 
 static int filename_is_in_cache(zend_string *filename)
 {
-	char *key;
-	int key_length;
+	zend_string *key;
 
-	key = accel_make_persistent_key(ZSTR_VAL(filename), ZSTR_LEN(filename), &key_length);
+	key = accel_make_persistent_key(filename);
 	if (key != NULL) {
-		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
+		zend_persistent_script *persistent_script = zend_accel_hash_find(&ZCSG(hash), key);
 		if (persistent_script && !persistent_script->corrupted) {
 			if (ZCG(accel_directives).validate_timestamps) {
 				zend_file_handle handle;
-				zend_stream_init_filename(&handle, ZSTR_VAL(filename));
-				return validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
+				int ret;
+
+				zend_stream_init_filename_ex(&handle, filename);
+				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS
+					? 1 : 0;
+				zend_destroy_file_handle(&handle);
+				return ret;
 			}
 
 			return 1;
@@ -558,7 +562,7 @@ static int accelerator_get_scripts(zval *return_value)
 			timerclear(&exec_time);
 			timerclear(&fetch_time);
 
-			zend_hash_str_update(Z_ARRVAL_P(return_value), cache_entry->key, cache_entry->key_length, &persistent_script_report);
+			zend_hash_update(Z_ARRVAL_P(return_value), cache_entry->key, &persistent_script_report);
 		}
 	}
 	accelerator_shm_read_unlock();
@@ -836,11 +840,10 @@ ZEND_FUNCTION(opcache_reset)
 /* {{{ Invalidates cached script (in necessary or forced) */
 ZEND_FUNCTION(opcache_invalidate)
 {
-	char *script_name;
-	size_t script_name_len;
+	zend_string *script_name;
 	bool force = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &script_name, &script_name_len, &force) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &script_name, &force) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -848,7 +851,7 @@ ZEND_FUNCTION(opcache_invalidate)
 		RETURN_FALSE;
 	}
 
-	if (zend_accel_invalidate(script_name, script_name_len, force) == SUCCESS) {
+	if (zend_accel_invalidate(script_name, force) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -857,14 +860,13 @@ ZEND_FUNCTION(opcache_invalidate)
 
 ZEND_FUNCTION(opcache_compile_file)
 {
-	char *script_name;
-	size_t script_name_len;
+	zend_string *script_name;
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
 	uint32_t orig_compiler_options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -873,7 +875,7 @@ ZEND_FUNCTION(opcache_compile_file)
 		RETURN_FALSE;
 	}
 
-	zend_stream_init_filename(&handle, script_name);
+	zend_stream_init_filename_ex(&handle, script_name);
 
 	orig_execute_data = EG(current_execute_data);
 	orig_compiler_options = CG(compiler_options);
@@ -889,7 +891,7 @@ ZEND_FUNCTION(opcache_compile_file)
 			op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
 		} zend_catch {
 			EG(current_execute_data) = orig_execute_data;
-			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
+			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", ZSTR_VAL(handle.filename));
 		} zend_end_try();
 	}
 

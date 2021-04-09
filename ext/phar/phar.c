@@ -26,7 +26,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len);
+static zend_string *(*phar_save_resolve_path)(zend_string *filename);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -3292,41 +3292,41 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 } /* }}} */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
-#define phar_orig_zend_open zend_stream_open_function
 
-static zend_string *phar_resolve_path(const char *filename, size_t filename_len)
+static zend_string *phar_resolve_path(zend_string *filename)
 {
-	return phar_find_in_include_path((char *) filename, filename_len, NULL);
+	zend_string *ret = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL);
+	if (!ret) {
+		ret = phar_save_resolve_path(filename);
+	}
+	return ret;
 }
 
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type) /* {{{ */
 {
 	zend_op_array *res;
-	char *name = NULL;
+	zend_string *name = NULL;
 	int failed;
 	phar_archive_data *phar;
 
 	if (!file_handle || !file_handle->filename) {
 		return phar_orig_compile_file(file_handle, type);
 	}
-	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
-		if (SUCCESS == phar_open_from_filename((char*)file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
+	if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
+		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
 			if (phar->is_zip || phar->is_tar) {
-				zend_file_handle f = *file_handle;
+				zend_file_handle f;
 
 				/* zip or tar-based phar */
-				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-				if (SUCCESS == phar_orig_zend_open((const char *)name, &f)) {
-
-					efree(name);
-					name = NULL;
-
+				name = zend_strpprintf(4096, "phar://%s/%s", ZSTR_VAL(file_handle->filename), ".phar/stub.php");
+				zend_stream_init_filename_ex(&f, name);
+				if (SUCCESS == zend_stream_open_function(&f)) {
+					zend_string_release(f.filename);
 					f.filename = file_handle->filename;
 					if (f.opened_path) {
-						efree(f.opened_path);
+						zend_string_release(f.opened_path);
 					}
 					f.opened_path = file_handle->opened_path;
-					f.free_filename = file_handle->free_filename;
 
 					switch (file_handle->type) {
 						case ZEND_HANDLE_STREAM:
@@ -3341,7 +3341,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 					*file_handle = f;
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
-				zend_file_handle_dtor(file_handle);
 				/* compressed phar */
 				file_handle->type = ZEND_HANDLE_STREAM;
 				/* we do our own reading directly from the phar, don't change the next line */
@@ -3367,7 +3366,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 	} zend_end_try();
 
 	if (name) {
-		efree(name);
+		zend_string_release(name);
 	}
 
 	if (failed) {

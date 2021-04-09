@@ -17,4 +17,4 @@ try {
 }
 ?>
 --EXPECT--
-ldap_first_attribute(): supplied resource is not a valid ldap result entry resource
+ldap_first_attribute(): Argument #2 ($entry) must be of type LDAPResultEntry, LDAP given

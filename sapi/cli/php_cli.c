@@ -587,6 +587,7 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 	}
 
 	zend_stream_init_fp(file_handle, fp, script_file);
+	file_handle->primary_script = 1;
 	return SUCCESS;
 }
 /* }}} */
@@ -619,6 +620,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	int hide_argv = 0;
 	int num_repeats = 1;
 	pid_t pid = getpid();
+
+	file_handle.filename = NULL;
 
 	zend_try {
 
@@ -907,28 +910,32 @@ do_repeat:
 					translated_path = strdup(real_path);
 				}
 				script_filename = script_file;
+				php_self = script_file;
 			}
 		} else {
 			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
 			/* here but this would make things only more complicated. And it */
 			/* is consistent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
-			zend_stream_init_fp(&file_handle, stdin, "Standard input code");
+			php_self = "Standard input code";
+			if (behavior < PHP_MODE_CLI_DIRECT
+			 && (!interactive || PHP_MODE_STANDARD != PHP_MODE_STANDARD)) {
+				zend_stream_init_fp(&file_handle, stdin, php_self);
+				file_handle.primary_script = 1;
+			}
 		}
-		php_self = (char*)file_handle.filename;
 
 		/* before registering argv to module exchange the *new* argv[0] */
 		/* we can achieve this without allocating more memory */
 		SG(request_info).argc=argc-php_optind+1;
 		arg_excp = argv+php_optind-1;
 		arg_free = argv[php_optind-1];
-		SG(request_info).path_translated = translated_path? translated_path: (char*)file_handle.filename;
-		argv[php_optind-1] = (char*)file_handle.filename;
+		SG(request_info).path_translated = translated_path ? translated_path : php_self;
+		argv[php_optind-1] = php_self;
 		SG(request_info).argv=argv+php_optind-1;
 
 		if (php_request_startup()==FAILURE) {
 			*arg_excp = arg_free;
-			fclose(file_handle.handle.fp);
 			PUTS("Could not startup.\n");
 			goto err;
 		}
@@ -954,7 +961,7 @@ do_repeat:
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (strcmp(file_handle.filename, "Standard input code")) {
+			if (script_file) {
 				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			}
 
@@ -967,9 +974,9 @@ do_repeat:
 		case PHP_MODE_LINT:
 			EG(exit_status) = php_lint_script(&file_handle);
 			if (EG(exit_status) == SUCCESS) {
-				zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+				zend_printf("No syntax errors detected in %s\n", php_self);
 			} else {
-				zend_printf("Errors parsing %s\n", file_handle.filename);
+				zend_printf("Errors parsing %s\n", php_self);
 			}
 			break;
 		case PHP_MODE_STRIP:
@@ -999,6 +1006,11 @@ do_repeat:
 				char *input;
 				size_t len, index = 0;
 				zval argn, argi;
+
+				if (!exec_run && script_file) {
+					zend_string_release_ex(file_handle.filename, 0);
+					file_handle.filename = NULL;
+				}
 
 				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 
@@ -1121,6 +1133,9 @@ do_repeat:
 	} zend_end_try();
 
 out:
+	if (file_handle.filename) {
+		zend_destroy_file_handle(&file_handle);
+	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
 	}

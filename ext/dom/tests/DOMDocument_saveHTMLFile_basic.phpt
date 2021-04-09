@@ -3,10 +3,8 @@ DOMDocument::saveHTMLFile() should dump the internal document into a file using 
 --CREDITS--
 Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php
-require_once __DIR__ .'/skipif.inc';
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $filename = __DIR__."/DOMDocument_saveHTMLFile_basic.html";

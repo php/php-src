@@ -1911,7 +1911,7 @@ gethex( CONST char **sp, U *rvp, int rounding, int sign)
 		switch(*++s) {
 		  case '-':
 			esign = 1;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		  case '+':
 			s++;
 		  }
@@ -2578,11 +2578,11 @@ zend_strtod
 	for(s = s00;;s++) switch(*s) {
 		case '-':
 			sign = 1;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case '+':
 			if (*++s)
 				goto break2;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			goto ret0;
 		case '\t':
@@ -2698,6 +2698,7 @@ zend_strtod
 		switch(c = *++s) {
 			case '-':
 				esign = 1;
+				ZEND_FALLTHROUGH;
 			case '+':
 				c = *++s;
 			}
@@ -3952,7 +3953,7 @@ zend_dtoa
 			break;
 		case 2:
 			leftright = 0;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 4:
 			if (ndigits <= 0)
 				ndigits = 1;
@@ -3960,7 +3961,7 @@ zend_dtoa
 			break;
 		case 3:
 			leftright = 0;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 5:
 			i = ndigits + k + 1;
 			ilim = i;

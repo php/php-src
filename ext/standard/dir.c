@@ -407,6 +407,7 @@ PHP_FUNCTION(glob)
 	size_t n;
 	int ret;
 	bool basedir_limit = 0;
+	zval tmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(pattern, pattern_len)
@@ -510,7 +511,8 @@ no_results:
 				continue;
 			}
 		}
-		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip);
+		ZVAL_STRING(&tmp, globbuf.gl_pathv[n]+cwd_skip);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	}
 
 	globfree(&globbuf);

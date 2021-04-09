@@ -1,7 +1,7 @@
 --TEST--
 Bug #77410: Segmentation Fault when executing method with an empty parameter
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

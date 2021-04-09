@@ -1,8 +1,8 @@
 --TEST--
 Attempt to use a closed FTPConnection
---SKIPIF--
-<?php
-require 'skipif.inc';
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

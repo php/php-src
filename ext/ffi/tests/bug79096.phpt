@@ -1,10 +1,8 @@
 --TEST--
 Bug #79096 (FFI Struct Segfault)
---SKIPIF--
-<?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
-if (!extension_loaded('zend_test')) die('skip zend_test extension not available');
-?>
+--EXTENSIONS--
+ffi
+zend_test
 --FILE--
 <?php
 require_once('utils.inc');

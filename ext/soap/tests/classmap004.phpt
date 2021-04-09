@@ -1,7 +1,7 @@
 --TEST--
 SOAP Classmap 4: encoding of objects with __get()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled",0);

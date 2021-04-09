@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 30: Handling classes which extend the SPL ArrayObject or ArrayIterator as arrays in wsdl mode
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -27,6 +27,7 @@
 #include "php_json.h"
 #include "php_json_encoder.h"
 #include <zend_exceptions.h>
+#include "zend_enum.h"
 
 static const char digits[] = "0123456789abcdef";
 
@@ -118,7 +119,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 	} else if (Z_OBJ_P(val)->properties == NULL
 	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
 	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties) {
-		/* Optimized version without rebulding properties HashTable */
+		/* Optimized version without rebuilding properties HashTable */
 		zend_object *obj = Z_OBJ_P(val);
 		zend_class_entry *ce = obj->ce;
 		zend_property_info *prop_info;
@@ -132,7 +133,11 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		}
 
 		PHP_JSON_HASH_PROTECT_RECURSION(obj);
+
 		smart_str_appendc(buf, '{');
+
+		++encoder->depth;
+
 		for (i = 0; i < ce->default_properties_count; i++) {
 			prop_info = ce->properties_info_table[i];
 			if (!prop_info) {
@@ -172,6 +177,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 				PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 				return FAILURE;
 			}
+		}
+
+		--encoder->depth;
+
+		if (need_comma) {
+			php_json_pretty_print_char(buf, options, '\n');
+			php_json_pretty_print_indent(buf, options, encoder);
 		}
 		smart_str_appendc(buf, '}');
 		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
@@ -570,6 +582,19 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 }
 /* }}} */
 
+static int php_json_encode_serializable_enum(smart_str *buf, zval *val, int options, php_json_encoder *encoder)
+{
+	zend_class_entry *ce = Z_OBJCE_P(val);
+	if (ce->enum_backing_type == IS_UNDEF) {
+		encoder->error_code = PHP_JSON_ERROR_NON_BACKED_ENUM;
+		smart_str_appendc(buf, '0');
+		return FAILURE;
+	}
+
+	zval *value_zv = zend_enum_fetch_case_value(Z_OBJ_P(val));
+	return php_json_encode_zval(buf, value_zv, options, encoder);
+}
+
 int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 again:
@@ -606,7 +631,11 @@ again:
 			if (instanceof_function(Z_OBJCE_P(val), php_json_serializable_ce)) {
 				return php_json_encode_serializable_object(buf, val, options, encoder);
 			}
+			if (Z_OBJCE_P(val)->ce_flags & ZEND_ACC_ENUM) {
+				return php_json_encode_serializable_enum(buf, val, options, encoder);
+			}
 			/* fallthrough -- Non-serializable object */
+			ZEND_FALLTHROUGH;
 		case IS_ARRAY: {
 			/* Avoid modifications (and potential freeing) of the array through a reference when a
 			 * jsonSerialize() method is invoked. */

@@ -20,7 +20,6 @@ ldap_modify_batch($ldap, '', array(    [
         "test@example.com",
         "test-2@example.com", ]]));
 
-
 ldap_close($ldap);
 
 ?>

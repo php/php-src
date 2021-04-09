@@ -1,7 +1,7 @@
 --TEST--
 Bug #32941 (Sending structured exception kills a php)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {

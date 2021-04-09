@@ -1,5 +1,7 @@
 --TEST--
 Bug #79193: Incorrect type inference for self::$field =& $field
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

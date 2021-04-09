@@ -1,7 +1,7 @@
 --TEST--
 ctype on strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 

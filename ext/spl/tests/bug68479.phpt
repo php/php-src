@@ -9,7 +9,7 @@ var_dump($params);
 
 ?>
 --EXPECT--
-array(4) {
+array(5) {
   [0]=>
   object(ReflectionParameter)#2 (1) {
     ["name"]=>
@@ -29,5 +29,10 @@ array(4) {
   object(ReflectionParameter)#5 (1) {
     ["name"]=>
     string(6) "escape"
+  }
+  [4]=>
+  object(ReflectionParameter)#6 (1) {
+    ["name"]=>
+    string(3) "eol"
   }
 }

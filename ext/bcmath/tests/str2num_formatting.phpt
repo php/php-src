@@ -4,8 +4,8 @@ bcmath lib arguments formatting
 1 and 2 argument of bcadd/bcsub/bcmul/bcdiv/bcmod/bcpowmod/bcpow/bccomp (last one works different then others internally);
 1 argument of bcsqrt
 All of the name above must be well-formed
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 echo bcadd("1", "2"),"\n";

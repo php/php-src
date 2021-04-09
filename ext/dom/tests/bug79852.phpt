@@ -1,5 +1,7 @@
 --TEST--
 Bug #79852: count(DOMNodeList) doesn't match count(IteratorIterator(DOMNodeList))
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

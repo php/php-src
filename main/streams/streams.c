@@ -1539,7 +1539,6 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	size_t haveread = 0;
 	size_t towrite;
 	size_t dummy;
-	php_stream_statbuf ssbuf;
 
 	if (!len) {
 		len = &dummy;
@@ -1552,17 +1551,6 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
-	}
-
-	if (php_stream_stat(src, &ssbuf) == 0) {
-		if (ssbuf.sb.st_size == 0
-#ifdef S_ISREG
-			&& S_ISREG(ssbuf.sb.st_mode)
-#endif
-		) {
-			*len = 0;
-			return SUCCESS;
-		}
 	}
 
 	if (php_stream_mmap_possible(src)) {
@@ -1641,20 +1629,13 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 			writeptr += didwrite;
 		}
 
-		if (maxlen - haveread == 0) {
+		if (maxlen && maxlen == haveread) {
 			break;
 		}
 	}
 
 	*len = haveread;
-
-	/* we've got at least 1 byte to read.
-	 * less than 1 is an error */
-
-	if (haveread > 0 || src->eof) {
-		return SUCCESS;
-	}
-	return FAILURE;
+	return SUCCESS;
 }
 
 /* Returns the number of bytes moved.
@@ -2043,10 +2024,14 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	php_stream_wrapper *wrapper = NULL;
 	const char *path_to_open;
 	int persistent = options & STREAM_OPEN_PERSISTENT;
+	zend_string *path_str = NULL;
 	zend_string *resolved_path = NULL;
 	char *copy_of_path = NULL;
 
 	if (opened_path) {
+		if (options & STREAM_OPEN_FOR_ZEND_STREAM) {
+			path_str = *opened_path;
+		}
 		*opened_path = NULL;
 	}
 
@@ -2056,7 +2041,11 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (options & USE_PATH) {
-		resolved_path = zend_resolve_path(path, strlen(path));
+		if (path_str) {
+			resolved_path = zend_resolve_path(path_str);
+		} else {
+			resolved_path = php_resolve_path(path, strlen(path), PG(include_path));
+		}
 		if (resolved_path) {
 			path = ZSTR_VAL(resolved_path);
 			/* we've found this file, don't re-check include_path or run realpath */

@@ -33,7 +33,7 @@ int dom_documenttype_name_read(dom_object *obj, zval *retval)
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
 	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -56,7 +56,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval *retval)
 	dom_object *intern;
 
 	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -84,7 +84,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval *retval)
 	dom_object *intern;
 
 	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -110,7 +110,7 @@ int dom_documenttype_public_id_read(dom_object *obj, zval *retval)
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
 	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -135,7 +135,7 @@ int dom_documenttype_system_id_read(dom_object *obj, zval *retval)
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
 	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -160,7 +160,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 	xmlDtdPtr intsubset;
 
 	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 

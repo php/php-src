@@ -4,77 +4,56 @@
 
 final class mysqli_driver
 {
-    /** @var string|null */
-    public $client_info;
+    public string $client_info;
 
-    /** @var int|null */
-    public $client_version;
+    public int $client_version;
 
-    /** @var int|null */
-    public $driver_version;
+    public int $driver_version;
 
-    /** @var bool|null */
-    public $reconnect;
+    /** @var bool */
+    public $reconnect = false;
 
-    /** @var int|null */
-    public $report_mode;
+    /** @var int */
+    public $report_mode = 0;
 }
 
 class mysqli
 {
-    /** @var int|string|null */
-    public $affected_rows;
+    public int|string $affected_rows;
 
-    /** @var string|null */
-    public $client_info;
+    public string $client_info;
 
-    /** @var string|null */
-    public $client_version;
+    public int $client_version;
 
-    /** @var int|null */
-    public $connect_errno;
+    public int $connect_errno;
 
-    /** @var string|null */
-    public $connect_error;
+    public ?string $connect_error;
 
-    /** @var int|string|null */
-    public $errno;
+    public int $errno;
 
-    /** @var string|null */
-    public $error;
+    public string $error;
 
-    /** @var array|null */
-    public $error_list;
+    public array $error_list;
 
-    /** @var int|null */
-    public $field_count;
+    public int $field_count;
 
-    /** @var string|null */
-    public $host_info;
+    public string $host_info;
 
-    /** @var string|null */
-    public $info;
+    public ?string $info;
 
-    /** @var int|string|null */
-    public $insert_id;
+    public int|string $insert_id;
 
-    /** @var string|null */
-    public $server_info;
+    public string $server_info;
 
-    /** @var int|string|null */
-    public $server_version;
+    public int $server_version;
 
-    /** @var string|null */
-    public $sqlstate;
+    public string $sqlstate;
 
-    /** @var int|string|null */
-    public $protocol_version;
+    public int $protocol_version;
 
-    /** @var int|string|null */
-    public $thread_id;
+    public int $thread_id;
 
-    /** @var int|string|null */
-    public $warning_count;
+    public int $warning_count;
 
     public function __construct(
         ?string $hostname = null,
@@ -157,6 +136,7 @@ class mysqli
     /**
      * @return string|null
      * @alias mysqli_get_client_info
+     * @deprecated 8.1.0
      */
     public function get_client_info() {}
 
@@ -370,20 +350,15 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    /** @var int|string|null */
-    public $current_field;
+    public int $current_field;
 
-    /** @var int|string|null */
-    public $field_count;
+    public int $field_count;
 
-    /** @var array|null */
-    public $lengths;
+    public ?array $lengths;
 
-    /** @var int|string|null */
-    public $num_rows;
+    public int|string $num_rows;
 
-    /** @var int|null */
-    public $type;
+    public int $type;
 
     public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
 
@@ -470,35 +445,25 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    /** @var int|string|null */
-    public $affected_rows;
+    public int|string $affected_rows;
 
-    /** @var int|string|null */
-    public $insert_id;
+    public int|string $insert_id;
 
-    /** @var int|string|null */
-    public $num_rows;
+    public int|string $num_rows;
 
-    /** @var int|string|null */
-    public $param_count;
+    public int $param_count;
 
-    /** @var int|string|null */
-    public $field_count;
+    public int $field_count;
 
-    /** @var int|string|null */
-    public $errno;
+    public int $errno;
 
-    /** @var string|null */
-    public $error;
+    public string $error;
 
-    /** @var array|null */
-    public $error_list;
+    public array $error_list;
 
-    /** @var string|null */
-    public $sqlstate;
+    public string $sqlstate;
 
-    /** @var int|null */
-    public $id;
+    public int $id;
 
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
@@ -623,14 +588,11 @@ class mysqli_stmt
 
 final class mysqli_warning
 {
-    /** @var string|null */
-    public $message;
+    public string $message;
 
-    /** @var string|null */
-    public $sqlstate;
+    public string $sqlstate;
 
-    /** @var int|null */
-    public $errno;
+    public int $errno;
 
     private function __construct() {}
 

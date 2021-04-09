@@ -77,7 +77,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 #ifdef AF_INET6
 		case AF_INET6:
 			addrlen = sizeof(struct sockaddr_in6);
-			/* fallthrough */
+			ZEND_FALLTHROUGH;
 #endif
 		case AF_INET: {
 			zend_string *ret = zend_string_alloc(NI_MAXHOST, 0);

@@ -551,12 +551,14 @@ TODO:
 				if (retval) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
 				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
 				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
@@ -598,8 +600,10 @@ static int readline_shell_run(void) /* {{{ */
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle prepend_file;
+
 		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
 		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
+		zend_destroy_file_handle(&prepend_file);
 	}
 
 #ifndef PHP_WIN32

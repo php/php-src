@@ -1245,7 +1245,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 			  Do nothing, the connection will be brutally closed
 			  and the server will catch it and free close from its side.
 			*/
-			/* Fall-through */
+			ZEND_FALLTHROUGH;
 		case CONN_ALLOCED:
 			/*
 			  Allocated but not connected or there was failure when trying
@@ -1254,7 +1254,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 			  Fall-through
 			*/
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-			/* Fall-through */
+			ZEND_FALLTHROUGH;
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
 			vio->data->m.close_stream(vio, conn->stats, conn->error_info);

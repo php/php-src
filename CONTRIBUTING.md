@@ -398,9 +398,6 @@ Example:
 When you change the NEWS file for a bug fix, then please keep the bugs sorted in
 decreasing order under the fixed version.
 
-You can use [gitweb](https://git.php.net/) to look at PHP Git repository in
-various ways.
-
 ## Copyright and license headers
 
 New source code files should include the following header block:

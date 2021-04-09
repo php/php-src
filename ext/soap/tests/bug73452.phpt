@@ -1,7 +1,7 @@
 --TEST--
 Bug #73452 Segfault (Regression for #69152)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

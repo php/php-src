@@ -1,7 +1,7 @@
 --TEST--
 Bug #46419 (Elements of associative arrays with NULL value are lost)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function bar() {

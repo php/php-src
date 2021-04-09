@@ -1876,6 +1876,30 @@ AC_DEFUN([PHP_PROG_RE2C],[
   PHP_SUBST(RE2C)
 ])
 
+AC_DEFUN([PHP_PROG_PHP],[
+  AC_CHECK_PROG(PHP, php, php)
+
+  if test -n "$PHP"; then
+    AC_MSG_CHECKING([for php version])
+    php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2)
+    if test -z "$php_version"; then
+      php_version=0.0.0
+    fi
+    ac_IFS=$IFS; IFS="."
+    set $php_version
+    IFS=$ac_IFS
+    php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+    dnl Minimum supported version for gen_stubs.php is PHP 7.1.
+    if test "$php_version_num" -lt 70100; then
+      AC_MSG_RESULT([$php_version (too old)])
+      unset PHP
+    else
+      AC_MSG_RESULT([$php_version (ok)])
+    fi
+  fi
+  PHP_SUBST(PHP)
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Common setup macros: PHP_SETUP_<what>
 dnl ----------------------------------------------------------------------------

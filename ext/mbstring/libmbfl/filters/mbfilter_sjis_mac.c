@@ -373,6 +373,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			break;
 		}
 		s1 = s2 = 0;
+		ZEND_FALLTHROUGH;
 
 	case 0:
 

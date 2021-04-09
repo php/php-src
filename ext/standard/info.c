@@ -173,7 +173,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find_deref(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");

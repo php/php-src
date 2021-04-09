@@ -45,6 +45,6 @@ object(PDOStatement)#%d (1) {
 string(23) "select 1 as queryString"
 object(PDORow)#%d (1) {
   ["queryString"]=>
-  int(1)
+  string(23) "select 1 as queryString"
 }
-int(1)
+string(23) "select 1 as queryString"

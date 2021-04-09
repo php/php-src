@@ -1,5 +1,7 @@
 --TEST--
 dom: DOMChildNode::remove does not work on character data
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

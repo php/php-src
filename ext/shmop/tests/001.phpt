@@ -1,11 +1,7 @@
 --TEST--
 shmop extension test
---SKIPIF--
-<?php
-    if (!extension_loaded("shmop")) {
-        die("skip shmop() extension not available");
-    }
-?>
+--EXTENSIONS--
+shmop
 --FILE--
 <?php
     $hex_shm_id = 0xff3;

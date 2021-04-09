@@ -2,10 +2,8 @@
 DOMDocument::relaxNGValidate()
 --CREDITS--
 Knut Urdalen <knut@php.net>
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $rng = __DIR__.'/DOMDocument_relaxNGValidate_basic.rng';

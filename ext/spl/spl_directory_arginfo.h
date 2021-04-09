@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: de510a0512057bfaecbac8228107600ed14e2ba5 */
+ * Stub hash: 00139cce188b3950e5a7606c70c5848c6280851d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -181,6 +181,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fputcsv, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escape, IS_STRING, 0, "\"\\\\\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, eol, IS_STRING, 0, "\"\\n\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileObject_setCsvControl arginfo_class_SplFileObject_fgetcsv

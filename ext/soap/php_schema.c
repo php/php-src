@@ -2207,6 +2207,7 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 				model->max_occurs = 1;
 			}
 		}
+		ZEND_FALLTHROUGH;
 		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL: {
 			sdlContentModelPtr tmp;

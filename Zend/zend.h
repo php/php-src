@@ -197,6 +197,9 @@ struct _zend_class_entry {
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
 
+	uint32_t enum_backing_type;
+	HashTable *backed_enum_table;
+
 	union {
 		struct {
 			zend_string *filename;
@@ -215,16 +218,16 @@ typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	size_t (*write_function)(const char *str, size_t str_length);
-	FILE *(*fopen_function)(const char *filename, zend_string **opened_path);
+	FILE *(*fopen_function)(zend_string *filename, zend_string **opened_path);
 	void (*message_handler)(zend_long message, const void *data);
 	zval *(*get_configuration_directive)(zend_string *name);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds);
-	zend_result (*stream_open_function)(const char *filename, zend_file_handle *handle);
+	zend_result (*stream_open_function)(zend_file_handle *handle);
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(const char *name, size_t name_len);
-	zend_string *(*resolve_path_function)(const char *filename, size_t filename_len);
+	zend_string *(*resolve_path_function)(zend_string *filename);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -303,16 +306,16 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
-extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
+extern ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
-extern ZEND_API zend_result (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
+extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
-extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);

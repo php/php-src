@@ -496,7 +496,7 @@ long_dim:
 					value_str = Z_STR(zval_copy);
 					break;
 				}
-				/* break is missing intentionally */
+				ZEND_FALLTHROUGH;
 			default:
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);

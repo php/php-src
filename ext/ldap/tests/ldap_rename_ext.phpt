@@ -42,7 +42,8 @@ ldap_rename($link, "cn=userZ,$base", "cn=userA", "$base", true);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""

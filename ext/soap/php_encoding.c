@@ -1766,6 +1766,8 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 				return model_array_element(tmp);
 			} ZEND_HASH_FOREACH_END();
 		}
+		/* TODO Check this is correct */
+		ZEND_FALLTHROUGH;
 		case XSD_CONTENT_GROUP: {
 			return model_array_element(model->u.group->model);
 		}
@@ -3379,6 +3381,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 		} else {
 			smart_str prefix = {0};
 			int num = ++SOAP_GLOBAL(cur_uniq_ns);
+			xmlChar *enc_ns;
 
 			while (1) {
 				smart_str_appendl(&prefix, "ns", 2);
@@ -3392,7 +3395,9 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 				num = ++SOAP_GLOBAL(cur_uniq_ns);
 			}
 
-			xmlns = xmlNewNs(node->doc->children, BAD_CAST(ns), BAD_CAST(prefix.s ? ZSTR_VAL(prefix.s) : ""));
+			enc_ns = xmlEncodeSpecialChars(node->doc, BAD_CAST(ns));
+			xmlns = xmlNewNs(node->doc->children, enc_ns, BAD_CAST(prefix.s ? ZSTR_VAL(prefix.s) : ""));
+			xmlFree(enc_ns);
 			smart_str_free(&prefix);
 		}
 	}

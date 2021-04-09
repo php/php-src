@@ -159,6 +159,10 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
+	ZEND_AST_ENUM_CASE,
+
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,

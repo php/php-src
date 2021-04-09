@@ -1,9 +1,7 @@
 --TEST--
 Bug #77141 (Signedness issue in SOAP when precision=-1)
---SKIPIF--
-<?php
-if (!extension_loaded('soap')) die('skip soap extension not available');
-?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $soap = new \SoapClient(

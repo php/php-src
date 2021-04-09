@@ -65,8 +65,7 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, &is_prototype);
-				/* TODO: Support prototypes? */
-				if (func && !is_prototype) {
+				if (func) {
 					call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
 					call_info->caller_op_array = op_array;
 					call_info->caller_init_opline = opline;
@@ -74,6 +73,7 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 					call_info->callee_func = func;
 					call_info->num_args = opline->extended_value;
 					call_info->next_callee = func_info->callee_info;
+					call_info->is_prototype = is_prototype;
 					func_info->callee_info = call_info;
 
 					if (build_flags & ZEND_CALL_TREE) {
@@ -194,7 +194,11 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 		op_array = call_graph->op_arrays[i];
 		func_info = call_graph->func_infos + i;
 		call_info = func_info->caller_info;
-		while (call_info) {
+		for (; call_info; call_info = call_info->next_caller) {
+			if (call_info->is_prototype) {
+				/* Might be calling an overridden child method and not actually recursive. */
+				continue;
+			}
 			if (call_info->caller_op_array == op_array) {
 				call_info->recursive = 1;
 				func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_DIRECTLY;
@@ -205,7 +209,6 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 					func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_INDIRECTLY;
 				}
 			}
-			call_info = call_info->next_caller;
 		}
 	}
 

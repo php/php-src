@@ -1,9 +1,7 @@
 --TEST--
 bcsub() requires well-formed values
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 

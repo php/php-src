@@ -236,7 +236,9 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_string_release_ex(name, 0);
 		}
 
-		zend_map_ptr_extend(ZCSG(map_ptr_last));
+		if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
+			zend_map_ptr_extend(ZCSG(map_ptr_last));
+		}
 	}
 
 	if (persistent_script->script.first_early_binding_opline != (uint32_t)-1) {

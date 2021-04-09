@@ -515,6 +515,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 			case 'O':
 			case 'A':
 				self->flags |= MYSQLND_DEBUG_FLUSH;
+				ZEND_FALLTHROUGH;
 			case 'a':
 			case 'o':
 				if (mode[i] == 'a' || mode[i] == 'A') {

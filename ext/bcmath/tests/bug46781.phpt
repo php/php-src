@@ -1,9 +1,7 @@
 --TEST--
 Bug #46781 (BC math handles minus zero incorrectly)
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 var_dump(bcadd('-0.0', '-0.0', 1));

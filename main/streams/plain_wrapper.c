@@ -1075,7 +1075,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 					//TODO: avoid reallocation???
 					*opened_path = zend_string_init(realpath, strlen(realpath), 0);
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
 				efree(persistent_id);

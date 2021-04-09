@@ -71,6 +71,13 @@ while ($row = $result->fetch_assoc()) {
 $stmt->next_result();
 
 ?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS testPs');
+$link->close();
+?>
 --EXPECT--
 use_result:
 int(1)

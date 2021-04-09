@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d25ba8b84022d6c6208dd45412772d72196c934f */
+ * Stub hash: 3bde9f58b85bc33ff6e4414b7802f42e10e4eab0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 0, 2)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "PDO::PARAM_STR")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxLength, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, driverOptions, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
@@ -144,9 +144,9 @@ static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_ent
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_queryString_default_value;
-	ZVAL_NULL(&property_queryString_default_value);
+	ZVAL_UNDEF(&property_queryString_default_value);
 	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
-	zend_declare_property_ex(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_queryString_name);
 
 	return class_entry;
@@ -159,6 +159,12 @@ static zend_class_entry *register_class_PDORow(void)
 	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_queryString_default_value;
+	ZVAL_UNDEF(&property_queryString_default_value);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_queryString_name);
 
 	return class_entry;
 }

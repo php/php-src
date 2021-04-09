@@ -2316,10 +2316,6 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	}
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 		uint32_t type = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
-
-		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			type |= MAY_BE_RC1 | MAY_BE_RCN;
-		}
 		if (ZEND_TYPE_HAS_CLASS(prop_info->type)) {
 			type |= MAY_BE_OBJECT;
 			if (pce) {
@@ -2331,6 +2327,9 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 					zend_string_release(lcname);
 				}
 			}
+		}
+		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			type |= MAY_BE_RC1 | MAY_BE_RCN;
 		}
 		return type;
 	}
@@ -3211,12 +3210,18 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-			tmp = t2 & MAY_BE_REF;
+			tmp = 0;
+			if (opline->op2_type == IS_CV) {
+				tmp = t2 & MAY_BE_REF;
+			}
 			if (t1 & MAY_BE_OBJECT) {
 				if (opline->opcode == ZEND_FE_FETCH_RW) {
 					tmp |= MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= MAY_BE_REF | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					tmp |= MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					if (opline->op2_type != IS_CV) {
+						tmp |= MAY_BE_REF;
+					}
 				}
 			}
 			if (t1 & MAY_BE_ARRAY) {
@@ -3229,6 +3234,9 @@ static zend_always_inline int _zend_update_type_info(
 					}
 					if (t1 & MAY_BE_ARRAY_OF_REF) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+						if (opline->op2_type != IS_CV) {
+							tmp |= MAY_BE_REF;
+						}
 					} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					}
@@ -3486,7 +3494,7 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_FETCH_CONSTANT:
 		case ZEND_FETCH_CLASS_CONSTANT:
-			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
 		case ZEND_STRLEN:
 			tmp = MAY_BE_LONG;
@@ -3520,6 +3528,12 @@ static zend_always_inline int _zend_update_type_info(
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
 				tmp = zend_fetch_arg_info_type(script, ret_info, &ce);
+
+				// TODO: We could model more precisely how illegal types are converted.
+				uint32_t extra_types = t1 & ~tmp;
+				if (!extra_types) {
+					tmp &= t1;
+				}
 			}
 			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
@@ -3974,18 +3988,38 @@ static int is_recursive_tail_call(const zend_op_array *op_array,
 	return 0;
 }
 
+uint32_t zend_get_return_info_from_signature_only(
+		const zend_function *func, const zend_script *script,
+		zend_class_entry **ce, bool *ce_is_instanceof) {
+	uint32_t type;
+	if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_arg_info *ret_info = func->common.arg_info - 1;
+		type = zend_fetch_arg_info_type(script, ret_info, ce);
+		*ce_is_instanceof = ce != NULL;
+	} else {
+		type = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+			| MAY_BE_RC1 | MAY_BE_RCN;
+		*ce = NULL;
+		*ce_is_instanceof = false;
+	}
+
+	/* For generators RETURN_REFERENCE refers to the yielded values. */
+	if ((func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			&& !(func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+		type |= MAY_BE_REF;
+	}
+	return type;
+}
+
 ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret)
 {
 	if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_arg_info *ret_info = op_array->arg_info - 1;
 		zend_ssa_range tmp_range = {0, 0, 0, 0};
-
-		ret->type = zend_fetch_arg_info_type(script, ret_info, &ret->ce);
-		if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret->type |= MAY_BE_REF;
-		}
-		ret->is_instanceof = (ret->ce) ? 1 : 0;
+		bool is_instanceof = false;
+		ret->type = zend_get_return_info_from_signature_only(
+			(zend_function *) op_array, script, &ret->ce, &is_instanceof);
+		ret->is_instanceof = is_instanceof;
 		ret->range = tmp_range;
 		ret->has_range = 0;
 	}
@@ -4018,6 +4052,12 @@ void zend_func_return_info(const zend_op_array   *op_array,
 		ret->range = tmp_range;
 		ret->has_range = 0;
 		return;
+	}
+
+	if (!ret->type) {
+		/* We will intersect the type later. */
+		ret->type = MAY_BE_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_KEY_ANY
+			| MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF;
 	}
 
 	for (j = 0; j < blocks_count; j++) {
@@ -4179,10 +4219,10 @@ void zend_func_return_info(const zend_op_array   *op_array,
 		if (tmp_has_range < 0) {
 			tmp_has_range = 0;
 		}
-		ret->type = tmp;
 		ret->ce = tmp_ce;
 		ret->is_instanceof = tmp_is_instanceof;
 	}
+	ret->type &= tmp;
 	ret->range = tmp_range;
 	ret->has_range = tmp_has_range;
 }
@@ -4434,7 +4474,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 				/* Division by zero */
 				return 1;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_POW:
@@ -4534,6 +4574,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			if (t1 & MAY_BE_REF) {
 				return 1;
 			}
+			ZEND_FALLTHROUGH;
 		case ZEND_BIND_STATIC:
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
@@ -4630,6 +4671,9 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 					return 0;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
+			/* GCC is getting confused here for the Wimplicit-fallthrough warning with
+			 * EMPTY_SWITCH_DEFAULT_CASE() macro */
+			return 0;
 		case ZEND_ARRAY_KEY_EXISTS:
 			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {
 				return 1;

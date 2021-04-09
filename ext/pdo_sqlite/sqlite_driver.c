@@ -294,13 +294,20 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	zend_long lval;
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
-			sqlite3_busy_timeout(H->db, zval_get_long(val) * 1000);
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			sqlite3_busy_timeout(H->db, lval * 1000);
 			return true;
 		case PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES:
-			sqlite3_extended_result_codes(H->db, zval_get_long(val));
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			sqlite3_extended_result_codes(H->db, lval);
 			return true;
 	}
 	return false;

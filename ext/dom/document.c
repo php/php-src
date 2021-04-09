@@ -55,7 +55,7 @@ int dom_document_doctype_read(dom_object *obj, zval *retval)
 	xmlDtdPtr dtdptr;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -95,7 +95,7 @@ int dom_document_document_element_read(dom_object *obj, zval *retval)
 	xmlNode *root;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -121,7 +121,7 @@ int dom_document_encoding_read(dom_object *obj, zval *retval)
 	char *encoding;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -143,7 +143,7 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 	xmlCharEncodingHandlerPtr handler;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -183,7 +183,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -197,7 +197,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval)
 	zend_long standalone;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -220,7 +220,7 @@ int dom_document_version_read(dom_object *obj, zval *retval)
 	char *version;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -241,7 +241,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -452,7 +452,7 @@ int dom_document_document_uri_read(dom_object *obj, zval *retval)
 	char *url;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -472,7 +472,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 

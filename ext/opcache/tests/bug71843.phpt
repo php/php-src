@@ -4,8 +4,8 @@ Bug #71843 (null ptr deref ZEND_RETURN_SPEC_CONST_HANDLER (zend_vm_execute.h:347
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=0xFFFFBFFF
---SKIPIF--
-<?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 define('E', 'E');

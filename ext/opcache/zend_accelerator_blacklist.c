@@ -153,7 +153,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 					case '}':
 					case '\\':
 						*p++ = '\\';
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					default:
 						*p++ = *c++;
 				}

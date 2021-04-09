@@ -264,7 +264,7 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 	zend_try {
-		zend_llist_destroy(&CG(open_files));
+		zend_stream_shutdown();
 	} zend_end_try();
 
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
@@ -277,6 +277,24 @@ void shutdown_executor(void) /* {{{ */
 
 	if (!fast_shutdown) {
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+
+		/* Constants may contain objects, destroy them before the object store. */
+		if (EG(full_tables_cleanup)) {
+			zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant_full);
+		} else {
+			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
+				zend_constant *c = Z_PTR_P(zv);
+				if (_idx == EG(persistent_constants_count)) {
+					break;
+				}
+				zval_ptr_dtor_nogc(&c->value);
+				if (c->name) {
+					zend_string_release_ex(c->name, 0);
+				}
+				efree(c);
+				zend_string_release_ex(key, 0);
+			} ZEND_HASH_FOREACH_END_DEL();
+		}
 
 		/* Release static properties and static variables prior to the final GC run,
 		 * as they may hold GC roots. */
@@ -302,6 +320,15 @@ void shutdown_executor(void) /* {{{ */
 
 			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
 				zend_cleanup_mutable_class_data(ce);
+			} else if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+				/* Constants may contain objects, destroy the values before the object store. */
+				zend_class_constant *c;
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					if (c->ce == ce) {
+						zval_ptr_dtor_nogc(&c->value);
+						ZVAL_UNDEF(&c->value);
+					}
+				} ZEND_HASH_FOREACH_END();
 			}
 
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
@@ -340,6 +367,8 @@ void shutdown_executor(void) /* {{{ */
 			gc_collect_cycles();
 		}
 #endif
+	} else {
+		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
 	}
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
@@ -356,7 +385,6 @@ void shutdown_executor(void) /* {{{ */
 		 * Zend Memory Manager frees memory by its own. We don't have to free
 		 * each allocated block separately.
 		 */
-		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
 		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
@@ -364,23 +392,9 @@ void shutdown_executor(void) /* {{{ */
 		zend_vm_stack_destroy();
 
 		if (EG(full_tables_cleanup)) {
-			zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant_full);
 			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full);
 			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class_full);
 		} else {
-			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
-				zend_constant *c = Z_PTR_P(zv);
-				if (_idx == EG(persistent_constants_count)) {
-					break;
-				}
-				zval_ptr_dtor_nogc(&c->value);
-				if (c->name) {
-					zend_string_release_ex(c->name, 0);
-				}
-				efree(c);
-				zend_string_release_ex(key, 0);
-			} ZEND_HASH_FOREACH_END_DEL();
-
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
 				zend_function *func = Z_PTR_P(zv);
 				if (_idx == EG(persistent_functions_count)) {
@@ -1509,9 +1523,8 @@ check_fetch_type:
 			break;
 	}
 
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, NULL, fetch_type);
-	} else if ((ce = zend_lookup_class_ex(class_name, NULL, fetch_type)) == NULL) {
+	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	if (!ce) {
 		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
 			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
@@ -1529,11 +1542,8 @@ check_fetch_type:
 
 zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, int fetch_type) /* {{{ */
 {
-	zend_class_entry *ce;
-
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, key, fetch_type);
-	} else if ((ce = zend_lookup_class_ex(class_name, key, fetch_type)) == NULL) {
+	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);
+	if (!ce) {
 		if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 			return NULL;
 		}

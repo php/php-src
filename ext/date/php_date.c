@@ -713,8 +713,8 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
 					break;
 				}
-				/* break intentionally missing */
-			case 'P': rfc_colon = 1; /* break intentionally missing */
+				ZEND_FALLTHROUGH;
+			case 'P': rfc_colon = 1; ZEND_FALLTHROUGH;
 			case 'O': length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
@@ -765,7 +765,7 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 					  break;
 			case 'U': length = slprintf(buffer, sizeof(buffer), "%lld", (timelib_sll) t->sse); break;
 
-			case '\\': if (i < format_len) i++; /* break intentionally missing */
+			case '\\': if (i < format_len) i++; ZEND_FALLTHROUGH;
 
 			default: buffer[0] = format[i]; buffer[1] = '\0'; length = 1; break;
 		}
@@ -2904,7 +2904,11 @@ static void php_date_add(zval *object, zval *interval, zval *return_value) /* {{
 	intobj = Z_PHPINTERVAL_P(interval);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
-	new_time = timelib_add(dateobj->time, intobj->diff);
+	if (intobj->civil_or_wall == PHP_DATE_WALL) {
+		new_time = timelib_add_wall(dateobj->time, intobj->diff);
+	} else {
+		new_time = timelib_add(dateobj->time, intobj->diff);
+	}
 	timelib_time_dtor(dateobj->time);
 	dateobj->time = new_time;
 } /* }}} */
@@ -2957,7 +2961,11 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 		return;
 	}
 
-	new_time = timelib_sub(dateobj->time, intobj->diff);
+	if (intobj->civil_or_wall == PHP_DATE_WALL) {
+		new_time = timelib_sub_wall(dateobj->time, intobj->diff);
+	} else {
+		new_time = timelib_sub(dateobj->time, intobj->diff);
+	}
 	timelib_time_dtor(dateobj->time);
 	dateobj->time = new_time;
 } /* }}} */
@@ -2996,21 +3004,22 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time *t)
 {
-       tzobj->initialized = 1;
-       tzobj->type = t->zone_type;
-       switch (t->zone_type) {
-               case TIMELIB_ZONETYPE_ID:
-                       tzobj->tzi.tz = t->tz_info;
-                       break;
-               case TIMELIB_ZONETYPE_OFFSET:
-                       tzobj->tzi.utc_offset = t->z;
-                       break;
-               case TIMELIB_ZONETYPE_ABBR:
-                       tzobj->tzi.z.utc_offset = t->z;
-                       tzobj->tzi.z.dst = t->dst;
-                       tzobj->tzi.z.abbr = timelib_strdup(t->tz_abbr);
-                       break;
-       }
+	tzobj->initialized = 1;
+	tzobj->type = t->zone_type;
+
+	switch (t->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+			tzobj->tzi.tz = t->tz_info;
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			tzobj->tzi.utc_offset = t->z;
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			tzobj->tzi.z.utc_offset = t->z;
+			tzobj->tzi.z.dst = t->dst;
+			tzobj->tzi.z.abbr = timelib_strdup(t->tz_abbr);
+			break;
+	}
 }
 
 
@@ -3359,8 +3368,6 @@ PHP_FUNCTION(date_diff)
 	dateobj2 = Z_PHPDATE_P(object2);
 	DATE_CHECK_INITIALIZED(dateobj1->time, DateTimeInterface);
 	DATE_CHECK_INITIALIZED(dateobj2->time, DateTimeInterface);
-	timelib_update_ts(dateobj1->time, NULL);
-	timelib_update_ts(dateobj2->time, NULL);
 
 	php_date_instantiate(date_ce_interval, return_value);
 	interval = Z_PHPINTERVAL_P(return_value);
@@ -3369,6 +3376,7 @@ PHP_FUNCTION(date_diff)
 		interval->diff->invert = 0;
 	}
 	interval->initialized = 1;
+	interval->civil_or_wall = PHP_DATE_CIVIL;
 }
 /* }}} */
 
@@ -3733,7 +3741,7 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 	}
 
 #define GET_VALUE_FROM_STRUCT(n,m)            \
-	if (strcmp(ZSTR_VAL(name), m) == 0) { \
+	if (zend_string_equals_literal(name, m)) { \
 		value = obj->diff->n; \
 		break; \
 	}
@@ -3744,7 +3752,7 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 		GET_VALUE_FROM_STRUCT(h, "h");
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
-		if (strcmp(ZSTR_VAL(name), "f") == 0) {
+		if (zend_string_equals_literal(name, "f")) {
 			fvalue = obj->diff->us / 1000000.0;
 			break;
 		}
@@ -3782,7 +3790,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 	}
 
 #define SET_VALUE_FROM_STRUCT(n,m) \
-	if (strcmp(ZSTR_VAL(name), m) == 0) { \
+	if (zend_string_equals_literal(name, m)) { \
 		obj->diff->n = zval_get_long(value); \
 		break; \
 	}
@@ -3794,7 +3802,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 		SET_VALUE_FROM_STRUCT(h, "h");
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
-		if (strcmp(ZSTR_VAL(name), "f") == 0) {
+		if (zend_string_equals_literal(name, "f")) {
 			obj->diff->us = zval_get_double(value) * 1000000;
 			break;
 		}
@@ -3812,15 +3820,16 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 {
 	zval *ret;
 
-	if(zend_binary_strcmp("y", sizeof("y") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("m", sizeof("m") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("d", sizeof("d") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("h", sizeof("h") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("i", sizeof("i") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("s", sizeof("s") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("f", sizeof("f") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("days", sizeof("days") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
-		zend_binary_strcmp("invert", sizeof("invert") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+	if (
+		zend_string_equals_literal(name, "y") ||
+		zend_string_equals_literal(name, "m") ||
+		zend_string_equals_literal(name, "d") ||
+		zend_string_equals_literal(name, "h") ||
+		zend_string_equals_literal(name, "i") ||
+		zend_string_equals_literal(name, "s") ||
+		zend_string_equals_literal(name, "f") ||
+		zend_string_equals_literal(name, "days") ||
+		zend_string_equals_literal(name, "invert") ) {
 		/* Fallback to read_property. */
 		ret = NULL;
 	} else {
@@ -3847,6 +3856,7 @@ PHP_METHOD(DateInterval, __construct)
 		php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
 		diobj->diff = reltime;
 		diobj->initialized = 1;
+		diobj->civil_or_wall = PHP_DATE_WALL;
 	}
 	zend_restore_error_handling(&error_handling);
 }
@@ -3929,6 +3939,14 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	PHP_DATE_INTERVAL_READ_PROPERTY_I64("special_amount", special.amount);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_weekday_relative", have_weekday_relative, unsigned int, 0);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_special_relative", have_special_relative, unsigned int, 0);
+	{
+		zval *z_arg = zend_hash_str_find(myht, "civil_or_wall", sizeof("civil_or_wall") - 1);
+		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
+		if (z_arg) {
+			zend_long val = zval_get_long(z_arg);
+			(*intobj)->civil_or_wall = val;
+		}
+	}
 	(*intobj)->initialized = 1;
 
 	return 0;
@@ -3995,6 +4013,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
+	diobj->civil_or_wall = PHP_DATE_CIVIL;
 
 cleanup:
 	timelib_time_dtor(time);

@@ -101,7 +101,7 @@ static void zend_dump_class_fetch_type(uint32_t fetch_type)
 			break;
 	}
 	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-			fprintf(stderr, " (no-autolod)");
+			fprintf(stderr, " (no-autoload)");
 	}
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 			fprintf(stderr, " (silent)");

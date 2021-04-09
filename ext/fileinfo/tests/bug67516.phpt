@@ -1,9 +1,7 @@
 --TEST--
 Bug #67516 wrong mimetypes with finfo_file(filename, FILEINFO_MIME_TYPE)
---SKIPIF--
-<?php
-if (!class_exists('finfo'))
-    die('skip no fileinfo extension');
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 

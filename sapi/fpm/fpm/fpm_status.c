@@ -140,7 +140,7 @@ int fpm_status_handle_request(void) /* {{{ */
 	struct fpm_scoreboard_proc_s proc;
 	char *buffer, *time_format, time_buffer[64];
 	time_t now_epoch;
-	int full, encode;
+	int full, encode, is_start_time_str;
 	char *short_syntax, *short_post;
 	char *full_pre, *full_syntax, *full_post, *full_separator;
 	zend_string *_GET_str;
@@ -223,6 +223,7 @@ int fpm_status_handle_request(void) /* {{{ */
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
+		is_start_time_str = 1;
 
 		/* HTML */
 		if (fpm_php_get_string_from_table(_GET_str, "html")) {
@@ -388,6 +389,62 @@ int fpm_status_handle_request(void) /* {{{ */
 				full_post = "]}";
 			}
 
+			/* OpenMetrics */
+		} else if (fpm_php_get_string_from_table(_GET_str, "openmetrics")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: application/openmetrics-text; version=1.0.0; charset=utf-8"), 1, 1);
+			time_format = "%s";
+
+			short_syntax =
+				"# HELP phpfpm_up Could pool %s using a %s PM on PHP-FPM be reached?\n"
+				"# TYPE phpfpm_up gauge\n"
+				"phpfpm_up 1\n"
+				"# HELP phpfpm_start_time When FPM has started.\n"
+				"# TYPE phpfpm_start_time gauge\n"
+				"phpfpm_start_time %lld\n"
+				"# HELP phpfpm_start_since_total The number of seconds since FPM has started.\n"
+				"# TYPE phpfpm_start_since_total counter\n"
+				"phpfpm_start_since_total %lu\n"
+				"# HELP phpfpm_accepted_connections_total The number of requests accepted by the pool.\n"
+				"# TYPE phpfpm_accepted_connections_total counter\n"
+				"phpfpm_accepted_connections_total %lu\n"
+				"# HELP phpfpm_listen_queue The number of requests in the queue of pending connections.\n"
+				"# TYPE phpfpm_listen_queue gauge\n"
+				"phpfpm_listen_queue %d\n"
+				"# HELP phpfpm_max_listen_queue_total The maximum number of requests in the queue of pending connections since FPM has started.\n"
+				"# TYPE phpfpm_max_listen_queue_total counter\n"
+				"phpfpm_max_listen_queue_total %d\n"
+				"# TYPE phpfpm_listen_queue_length gauge\n"
+				"# HELP phpfpm_listen_queue_length The size of the socket queue of pending connections.\n"
+				"phpfpm_listen_queue_length %u\n"
+				"# HELP phpfpm_idle_processes The number of idle processes.\n"
+				"# TYPE phpfpm_idle_processes gauge\n"
+				"phpfpm_idle_processes %d\n"
+				"# HELP phpfpm_active_processes The number of active processes.\n"
+				"# TYPE phpfpm_active_processes gauge\n"
+				"phpfpm_active_processes %d\n"
+				"# HELP phpfpm_total_processes The number of idle + active processes.\n"
+				"# TYPE phpfpm_total_processes gauge\n"
+				"phpfpm_total_processes %d\n"
+				"# HELP phpfpm_max_active_processes_total The maximum number of active processes since FPM has started.\n"
+				"# TYPE phpfpm_max_active_processes_total counter\n"
+				"phpfpm_max_active_processes_total %d\n"
+				"# HELP phpfpm_max_children_reached_total The number of times, the process limit has been reached, when pm tries to start more children (works only for pm 'dynamic' and 'ondemand').\n"
+				"# TYPE phpfpm_max_children_reached_total counter\n"
+				"phpfpm_max_children_reached_total %u\n"
+				"# HELP phpfpm_slow_requests_total The number of requests that exceeded your 'request_slowlog_timeout' value.\n"
+				"# TYPE phpfpm_slow_requests_total counter\n"
+				"phpfpm_slow_requests_total %lu\n";
+
+			is_start_time_str = 0;
+			if (!full) {
+				short_post = "";
+			} else {
+				full_separator = "";
+				full_pre = "";
+				full_syntax = "";
+				full_post = "";
+			}
+
 		/* TEXT */
 		} else {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
@@ -429,23 +486,41 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 		}
 
-		strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
 		now_epoch = time(NULL);
-		spprintf(&buffer, 0, short_syntax,
-				scoreboard.pool,
-				PM2STR(scoreboard.pm),
-				time_buffer,
-				(unsigned long) (now_epoch - scoreboard.start_epoch),
-				scoreboard.requests,
-				scoreboard.lq,
-				scoreboard.lq_max,
-				scoreboard.lq_len,
-				scoreboard.idle,
-				scoreboard.active,
-				scoreboard.idle + scoreboard.active,
-				scoreboard.active_max,
-				scoreboard.max_children_reached,
-				scoreboard.slow_rq);
+		if (is_start_time_str) {
+			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
+			spprintf(&buffer, 0, short_syntax,
+					scoreboard.pool,
+					PM2STR(scoreboard.pm),
+					time_buffer,
+					(unsigned long) (now_epoch - scoreboard.start_epoch),
+					scoreboard.requests,
+					scoreboard.lq,
+					scoreboard.lq_max,
+					scoreboard.lq_len,
+					scoreboard.idle,
+					scoreboard.active,
+					scoreboard.idle + scoreboard.active,
+					scoreboard.active_max,
+					scoreboard.max_children_reached,
+					scoreboard.slow_rq);
+		} else {
+			spprintf(&buffer, 0, short_syntax,
+					scoreboard.pool,
+					PM2STR(scoreboard.pm),
+					(unsigned long long) scoreboard.start_epoch,
+					(unsigned long) (now_epoch - scoreboard.start_epoch),
+					scoreboard.requests,
+					scoreboard.lq,
+					scoreboard.lq_max,
+					scoreboard.lq_len,
+					scoreboard.idle,
+					scoreboard.active,
+					scoreboard.idle + scoreboard.active,
+					scoreboard.active_max,
+					scoreboard.max_children_reached,
+					scoreboard.slow_rq);
+		}
 
 		PUTS(buffer);
 		efree(buffer);

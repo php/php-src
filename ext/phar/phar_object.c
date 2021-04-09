@@ -247,13 +247,12 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				if (!new_op_array) {
 					zend_hash_str_del(&EG(included_files), name, name_len);
 				}
-
-				zend_destroy_file_handle(&file_handle);
-
 			} else {
 				efree(name);
 				new_op_array = NULL;
 			}
+
+			zend_destroy_file_handle(&file_handle);
 #ifdef PHP_WIN32
 			efree(arch);
 #endif
@@ -1486,7 +1485,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 						goto phar_spl_fileinfo;
 				}
 			}
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;

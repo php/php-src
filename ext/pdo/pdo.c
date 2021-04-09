@@ -62,14 +62,6 @@ PDO_API zend_class_entry *php_pdo_get_exception(void) /* {{{ */
 }
 /* }}} */
 
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
-{
-	char *dest = emalloc(len + 1);
-	zend_str_tolower_copy(dest, src, len);
-	return dest;
-}
-/* }}} */
-
 /* {{{ Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
@@ -292,9 +284,7 @@ PDO_API zend_string *php_pdo_int64_to_str(int64_t i64) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)
 {
-	if (FAILURE == pdo_sqlstate_init_error_table()) {
-		return FAILURE;
-	}
+	pdo_sqlstate_init_error_table();
 
 	zend_hash_init(&pdo_driver_hash, 0, NULL, NULL, 1);
 

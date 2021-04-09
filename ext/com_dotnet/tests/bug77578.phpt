@@ -1,9 +1,7 @@
 --TEST--
 Bug #77578 (Crash when php unload)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 // To actually be able to verify the crash during shutdown on Windows, we have

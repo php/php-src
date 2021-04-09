@@ -475,10 +475,6 @@ union _phar_entry_object {
 	phar_entry_info          *entry;
 };
 
-#ifndef PHAR_MAIN
-extern zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len);
-#endif
-
 BEGIN_EXTERN_C()
 
 #ifdef PHP_WIN32

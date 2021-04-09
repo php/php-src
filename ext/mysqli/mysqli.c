@@ -510,9 +510,9 @@ static PHP_GINIT_FUNCTION(mysqli)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	mysqli_globals->num_links = 0;
+	mysqli_globals->max_links = -1;
 	mysqli_globals->num_active_persistent = 0;
 	mysqli_globals->num_inactive_persistent = 0;
-	mysqli_globals->max_links = -1;
 	mysqli_globals->max_persistent = -1;
 	mysqli_globals->allow_persistent = 1;
 	mysqli_globals->default_port = 0;
@@ -521,8 +521,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
 	mysqli_globals->reconnect = 0;
-	mysqli_globals->report_mode = 0;
-	mysqli_globals->report_ht = 0;
+	mysqli_globals->report_mode = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;;
 	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->local_infile_directory = NULL;
 	mysqli_globals->rollback_on_cached_plink = FALSE;
@@ -827,7 +826,7 @@ PHP_RINIT_FUNCTION(mysqli)
 #endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
-	MyG(report_mode) = 0;
+	MyG(report_mode) = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;
 
 	return SUCCESS;
 }

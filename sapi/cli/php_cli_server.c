@@ -1627,7 +1627,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 	switch (client->last_header_element) {
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_NONE:
 		client->current_header_name = (char *)at;
 		client->current_header_name_len = length;
@@ -1692,7 +1692,7 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		client->current_header_value = pemalloc(1, 1);
 		*client->current_header_value = '\0';
 		client->current_header_value_len = 0;
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
 		break;
@@ -2015,9 +2015,11 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	{
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
+		zfd.primary_script = 1;
 		zend_try {
 			php_execute_script(&zfd);
 		} zend_end_try();
+		zend_destroy_file_handle(&zfd);
 	}
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
@@ -2136,6 +2138,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 	zend_stream_init_filename(&zfd, server->router);
+	zfd.primary_script = 1;
 
 	zend_try {
 		zval retval;
@@ -2148,6 +2151,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			}
 		}
 	} zend_end_try();
+
+	zend_destroy_file_handle(&zfd);
 
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));

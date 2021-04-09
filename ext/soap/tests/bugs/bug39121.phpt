@@ -1,7 +1,7 @@
 --TEST--
 Bug #39121 (Incorrect return array handling in non-wsdl soap client)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

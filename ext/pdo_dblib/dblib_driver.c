@@ -273,22 +273,39 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	zend_long lval;
+	bool bval;
 
 	switch(attr) {
 		case PDO_ATTR_DEFAULT_STR_PARAM:
-			H->assume_national_character_set_strings = zval_get_long(val) == PDO_PARAM_STR_NATL ? 1 : 0;
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			H->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL ? 1 : 0;
 			return true;
 		case PDO_ATTR_TIMEOUT:
 		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
-			return SUCCEED == dbsettime(zval_get_long(val));
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			H->stringify_uniqueidentifier = zval_get_long(val);
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			H->stringify_uniqueidentifier = lval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
-			H->skip_empty_rowsets = zval_is_true(val);
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			H->datetime_convert = zval_get_long(val);
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			H->datetime_convert = lval;
 			return true;
 		default:
 			return false;

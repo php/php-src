@@ -63,6 +63,7 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 
 		case SQLITE_ERROR:
 			sqlite3_reset(S->stmt);
+			ZEND_FALLTHROUGH;
 		case SQLITE_MISUSE:
 		case SQLITE_BUSY:
 		default:
@@ -225,6 +226,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 
 		case SQLITE_ERROR:
 			sqlite3_reset(S->stmt);
+			ZEND_FALLTHROUGH;
 		default:
 			pdo_sqlite_error_stmt(stmt);
 			return 0;
@@ -328,6 +330,8 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
+			/* TODO Check this is correct */
+			ZEND_FALLTHROUGH;
 		case SQLITE_TEXT:
 			add_assoc_string(return_value, "native_type", "string");
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);

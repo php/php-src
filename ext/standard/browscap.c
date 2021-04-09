@@ -406,16 +406,18 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 {
 	zend_file_handle fh;
 	browscap_parser_ctx ctx = {0};
+	FILE *fp;
 
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
 	}
 
-	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
-	if (!fh.handle.fp) {
+	fp = VCWD_FOPEN(filename, "r");
+	if (!fp) {
 		zend_error(E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
 		return FAILURE;
 	}
+	zend_stream_init_fp(&fh, fp, filename);
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
 	zend_hash_init(browdata->htab, 0, NULL,
@@ -439,6 +441,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		zend_string_release(ctx.current_section_name);
 	}
 	zend_hash_destroy(&ctx.str_interned);
+	zend_destroy_file_handle(&fh);
 
 	return SUCCESS;
 }

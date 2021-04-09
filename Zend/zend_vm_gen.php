@@ -2374,7 +2374,8 @@ function gen_vm_opcodes_header(
     $str .= "\n";
     $str .= "BEGIN_EXTERN_C()\n\n";
     $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n";
-    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n";
+    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n";
+    $str .= "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
     $code_len = strlen((string) $max_opcode);
@@ -2670,6 +2671,16 @@ function gen_vm($def, $skel) {
     fputs($f, "\t\topcode = ZEND_NOP;\n");
     fputs($f, "\t}\n");
     fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
+    fputs($f, "}\n");
+
+    fputs($f, "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length) {\n");
+    fputs($f, "\tzend_uchar opcode;\n");
+    fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
+    fputs($f, "\t\tif (strncmp(zend_vm_opcodes_names[opcode], name, length) == 0) {\n");
+    fputs($f, "\t\t\treturn opcode;\n");
+    fputs($f, "\t\t}\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
     fputs($f, "}\n");
 
     fclose($f);

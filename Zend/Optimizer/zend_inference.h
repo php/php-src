@@ -269,6 +269,9 @@ ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
 ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret);
+uint32_t zend_get_return_info_from_signature_only(
+		const zend_function *func, const zend_script *script,
+		zend_class_entry **ce, bool *ce_is_instanceof);
 void zend_func_return_info(const zend_op_array   *op_array,
                            const zend_script     *script,
                            int                    recursive,

@@ -2643,7 +2643,7 @@ PHP_FUNCTION(imageinterlace)
 		gdImageInterlace(im, INT);
 	}
 
-	RETURN_LONG(gdImageGetInterlaced(im));
+	RETURN_BOOL(gdImageGetInterlaced(im));
 }
 /* }}} */
 
@@ -3182,7 +3182,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			if (key == NULL) {
 				continue;
 			}
-			if (strcmp("linespacing", ZSTR_VAL(key)) == 0) {
+			if (zend_string_equals_literal(key, "linespacing")) {
 				strex.flags |= gdFTEX_LINESPACE;
 				strex.linespacing = zval_get_double(item);
 			}

@@ -1,10 +1,8 @@
 --TEST--
 Bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests)
---SKIPIF--
-<?php
-  if (!extension_loaded('soap')) die('skip soap extension not available');
-  if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
-?>
+--EXTENSIONS--
+soap
+simplexml
 --INI--
 soap.wsdl_cache_enabled=1
 --FILE--

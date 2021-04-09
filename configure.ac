@@ -155,6 +155,7 @@ dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([0.13.4])
+PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto gcc extension with re2c],
@@ -1473,7 +1474,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c \
+    zend_observer.c zend_system_id.c zend_enum.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

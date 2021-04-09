@@ -1,8 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2019 Derick Rethans
- * Copyright (c) 2018 MongoDB, Inc.
+ * Copyright (c) 2015-2021 Derick Rethans
+ * Copyright (c) 2018,2021 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -144,6 +144,38 @@ typedef struct _tlocinfo
 	char *comments;
 } tlocinfo;
 
+#define TIMELIB_POSIX_TRANS_TYPE_JULIAN_NO_FEB29   1
+#define TIMELIB_POSIX_TRANS_TYPE_JULIAN_FEB29      2
+#define TIMELIB_POSIX_TRANS_TYPE_MWD               3
+
+typedef struct _timelib_posix_trans_info
+{
+	int type; // 1=Jn, 2=n, 3=Mm.w.d
+	union {
+		int days;
+		struct {
+			int month;
+			int week;
+			int dow;
+		} mwd;
+	};
+	int hour;
+} timelib_posix_trans_info;
+
+typedef struct _timelib_posix_str
+{
+	char        *std;
+	timelib_sll  std_offset;
+	char        *dst;
+	timelib_sll  dst_offset;
+
+	timelib_posix_trans_info *dst_begin;
+	timelib_posix_trans_info *dst_end;
+
+	int type_index_std_type;  // index into tz->type
+	int type_index_dst_type;  // index into tz->type
+} timelib_posix_str;
+
 typedef struct _timelib_tzinfo
 {
 	char    *name;
@@ -173,6 +205,9 @@ typedef struct _timelib_tzinfo
 	tlinfo  *leap_times;
 	unsigned char bc;
 	tlocinfo location;
+
+	char              *posix_string;
+	timelib_posix_str *posix_info;
 } timelib_tzinfo;
 
 typedef struct _timelib_rel_time {
@@ -277,6 +312,7 @@ typedef struct _timelib_abbr_info {
 #define TIMELIB_ERR_FORMAT_LITERAL_MISMATCH    0x224
 #define TIMELIB_ERR_MIX_ISO_WITH_NATURAL       0x225
 
+#define TIMELIB_ZONETYPE_NONE   0
 #define TIMELIB_ZONETYPE_OFFSET 1
 #define TIMELIB_ZONETYPE_ABBR   2
 #define TIMELIB_ZONETYPE_ID     3
@@ -319,12 +355,13 @@ typedef struct _timelib_tzdb {
 # define timelib_realloc realloc
 # define timelib_calloc  calloc
 # define timelib_strdup  strdup
+# define timelib_strndup strndup
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 202002
-#define TIMELIB_EXTENDED_VERSION 20202001
-#define TIMELIB_ASCII_VERSION "2020.02"
+#define TIMELIB_VERSION 202103
+#define TIMELIB_EXTENDED_VERSION 20210301
+#define TIMELIB_ASCII_VERSION "2021.03"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -341,6 +378,8 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_ERROR_CORRUPT_NO_ABBREVIATION             0x04
 #define TIMELIB_ERROR_UNSUPPORTED_VERSION                 0x05
 #define TIMELIB_ERROR_NO_SUCH_TIMEZONE                    0x06
+#define TIMELIB_ERROR_SLIM_FILE                           0x07
+#define TIMELIB_ERROR_POSIX_MISSING_TTINFO                0x08
 
 #ifdef __cplusplus
 extern "C" {
@@ -589,6 +628,12 @@ void timelib_strtointerval(const char *s, size_t len,
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 
 /**
+ * Returns the number of days from the y/m/d fields of 'time' since the Unix
+ * Epoch.
+ */
+timelib_sll timelib_epoch_days_from_time(timelib_time *time);
+
+/**
  * Takes the information from the y/m/d/h/i/s fields and makes sure their
  * values are in the right range.
  *
@@ -609,6 +654,14 @@ void timelib_do_normalize(timelib_time *base);
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt);
 
 /* From unixtime2tm.c */
+
+/**
+ * Takes the unix timestamp in seconds from 'ts', and calculates y, m, and d,
+ * in the proleptic Gregorian calendar.
+ *
+ * It uses the algorithm from howardhinnant.github.io/date_algorithms.html
+ */
+void timelib_unixtime2date(timelib_sll ts, timelib_sll *y, timelib_sll *m, timelib_sll *d);
 
 /**
  * Takes the unix timestamp in seconds from 'ts' and populates the y/m/d/h/i/s
@@ -669,14 +722,26 @@ int timelib_timezone_id_is_valid(const char *timezone, const timelib_tzdb *tzdb)
 
 /**
  * Converts the binary stored time zone information from 'tzdb' for the time
- * zone 'timeozne' into a structure the library can use for calculations.
+ * zone 'timezone' into a structure the library can use for calculations.
  *
  * The function can be used on both timelib_builtin_db as well as a time zone
  * db as opened by timelib_zoneinfo.
+ *
+ * 'error_code' must not be a null pointer, and will always be written to. If
+ * the value is TIMELIB_ERROR_NO_ERROR then the file was parsed without
+ * problems.
+ *
  * The function will return null upon failure, and also set an error code
- * through 'error_code'. 'error_code' must not be a null pointer. The error
- * code is one of the TIMELIB_ERROR_* constants as listed above. These error
- * constants can be converted into a string by timelib_get_error_message.
+ * through 'error_code'.
+ *
+ * The error code is one of the TIMELIB_ERROR_* constants as listed above.
+ * These error constants can be converted into a string by
+ * timelib_get_error_message.
+ *
+ * If the function returns not-null, the 'error_code' might have a non-null
+ * value that can be used to detect incompatibilities. The only one that is
+ * currently detected is whether the file is a 'slim' file, in which case
+ * 'error_code' will be set to TIMELIB_ERROR_SLIM_FILE.
  *
  * This function allocates memory for the new time zone structure, which must
  * be freed after use. Although it is recommended that a cache of each used
@@ -883,6 +948,12 @@ void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
  */
 void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h);
 
+/**
+ * Converts hour/min/sec values into seconds
+ */
+timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s);
+
+
 /* from astro.c */
 
 /**
@@ -950,6 +1021,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
  * complex statements such as "next workday".
  */
 timelib_time *timelib_add(timelib_time *t, timelib_rel_time *interval);
+timelib_time *timelib_add_wall(timelib_time *t, timelib_rel_time *interval);
 
 /**
  * Subtracts the relative time information 'interval' to the base time 't'.
@@ -959,6 +1031,13 @@ timelib_time *timelib_add(timelib_time *t, timelib_rel_time *interval);
  * workday".
  */
 timelib_time *timelib_sub(timelib_time *t, timelib_rel_time *interval);
+timelib_time *timelib_sub_wall(timelib_time *t, timelib_rel_time *interval);
+
+/* from parse_posix.c */
+
+void timelib_posix_str_dtor(timelib_posix_str *ps);
+
+timelib_posix_str* timelib_parse_posix_str(const char *posix);
 
 #ifdef __cplusplus
 } /* extern "C" */

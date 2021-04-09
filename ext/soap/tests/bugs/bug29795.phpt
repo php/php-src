@@ -1,7 +1,7 @@
 --TEST--
 Bug #29795 (SegFault with Soap and Amazon's Web Services)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=1
 --FILE--

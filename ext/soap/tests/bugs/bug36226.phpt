@@ -1,7 +1,7 @@
 --TEST--
 Bug #36226 (SOAP Inconsistent handling when passing potential arrays)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

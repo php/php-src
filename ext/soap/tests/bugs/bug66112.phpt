@@ -1,7 +1,7 @@
 --TEST--
 Bug #66112 (Use after free condition in SOAP extension)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

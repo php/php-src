@@ -62,7 +62,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
@@ -133,7 +134,8 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-resource(%d) of type (ldap result)
+object(LDAPResult)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""

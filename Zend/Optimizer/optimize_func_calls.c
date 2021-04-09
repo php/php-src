@@ -59,7 +59,7 @@ static void zend_delete_call_instructions(zend_op *opline)
 					MAKE_NOP(opline);
 					return;
 				}
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
@@ -178,7 +178,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					ctx->script, op_array, opline, &call_stack[call].is_prototype);
 				call_stack[call].try_inline =
 					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
