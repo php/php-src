@@ -64,11 +64,7 @@
 #define ZEND_REGSET_DIFFERENCE(set1, set2) \
 	((set1) & ~(set2))
 
-#if defined (__aarch64__)
-# define ZEND_REGSET_FIRST(set)  ((zend_reg)__builtin_ctzll(set))
-# define ZEND_REGSET_SECOND(set) ((zend_reg)__builtin_ctzll(set ^ (1ull << ZEND_REGSET_FIRST(set))))
-# define ZEND_REGSET_LAST(set)   ((zend_reg)(__builtin_clzll(set)^63))
-#elif !defined(_WIN32)
+#if !defined(_WIN32)
 # if (ZREG_NUM <= 32)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
@@ -76,7 +72,7 @@
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctzll(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63))
 # else
-#  errir "Too many registers"
+#  error "Too many registers"
 # endif
 #else
 # include <intrin.h>
@@ -95,7 +91,7 @@ uint32_t __inline __zend_jit_clz(uint32_t value) {
 	return 32;
 }
 # define ZEND_REGSET_FIRST(set) ((zend_reg)__zend_jit_ctz(set))
-# define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31)))
+# define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31))
 #endif
 
 #define ZEND_REGSET_FOREACH(set, reg) \

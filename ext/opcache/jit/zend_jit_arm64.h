@@ -105,28 +105,40 @@ typedef enum _zend_reg {
 } zend_reg;
 
 typedef struct _zend_jit_registers_buf {
-	uint64_t gpr[32]; /* general purpose integer register */
-	double fpr[32];   /* floating point registers */
+	uint64_t gpr[32];   /* general purpose integer register */
+	double   fpr[32];   /* floating point registers */
 } zend_jit_registers_buf;
 
+#define ZREG_RSP   ZREG_X31
+#define ZREG_RLR   ZREG_X30
+#define ZREG_RFP   ZREG_X29
+#define ZREG_RPR   ZREG_X18
+
+#define ZREG_FP    ZREG_X27
+#define ZREG_IP    ZREG_X28
+#define ZREG_RX    ZREG_IP
+
+#define ZREG_REG0  ZREG_X8
+#define ZREG_REG1  ZREG_X9
+#define ZREG_REG2  ZREG_X10
+
+#define ZREG_FPR0  ZREG_V0
+#define ZREG_FPR1  ZREG_V1
+
+#define ZREG_TMP1  ZREG_X11
+#define ZREG_TMP2  ZREG_X12
+#define ZREG_TMP3  ZREG_X13
+#define ZREG_TMP4  ZREG_X14
+
+#define ZREG_COPY      ZREG_REG0
 #define ZREG_FIRST_FPR ZREG_V0
-
-#define ZREG_RSP ZREG_X31
-#define ZREG_RLR ZREG_X30
-#define ZREG_RFP ZREG_X29
-#define ZREG_RPR ZREG_X18
-
-# define ZREG_FP      ZREG_X27
-# define ZREG_IP      ZREG_X28
-# define ZREG_RX      ZREG_IP
 
 typedef uint64_t zend_regset;
 
 # define ZEND_REGSET_FIXED \
 	(ZEND_REGSET(ZREG_RSP) | ZEND_REGSET(ZREG_RLR) | ZEND_REGSET(ZREG_RFP) | \
 	ZEND_REGSET(ZREG_RPR) | ZEND_REGSET(ZREG_FP) | ZEND_REGSET(ZREG_IP) | \
-	ZEND_REGSET_INTERVAL(ZREG_X8, ZREG_X11) | \
-	ZEND_REGSET_INTERVAL(ZREG_V16, ZREG_V17))
+	ZEND_REGSET_INTERVAL(ZREG_TMP1, ZREG_TMP4))
 # define ZEND_REGSET_GP \
 	ZEND_REGSET_DIFFERENCE(ZEND_REGSET_INTERVAL(ZREG_X0, ZREG_X30), ZEND_REGSET_FIXED)
 # define ZEND_REGSET_FP \
@@ -137,6 +149,7 @@ typedef uint64_t zend_regset;
 # define ZEND_REGSET_PRESERVED \
 	(ZEND_REGSET_INTERVAL(ZREG_X19, ZREG_X28) | ZEND_REGSET_INTERVAL(ZREG_V8, ZREG_V15))
 
-#define ZEND_REGSET_LOW_PRIORITY ZEND_REGSET_EMPTY
+#define ZEND_REGSET_LOW_PRIORITY \
+	(ZEND_REGSET(ZREG_REG0) | ZEND_REGSET(ZREG_REG1) | ZEND_REGSET(ZREG_FPR0) | ZEND_REGSET(ZREG_FPR1))
 
 #endif /* ZEND_JIT_ARM64_H */
