@@ -24,8 +24,8 @@ typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field
 struct st_mysqlnd_perm_bind {
 	ps_field_fetch_func func;
 	/* should be signed int */
-	int					        pack_len;
-	unsigned int		    php_type;
+	int pack_len;
+	unsigned int php_type;
 };
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
