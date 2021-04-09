@@ -1947,6 +1947,18 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 				if (op->op2_def >= 0) {
 					zend_bitset_incl(worklist, op->op2_def);
 				}
+			} else if (use + 1 < op_array->last
+			 && op_array->opcodes[use + 1].opcode == ZEND_OP_DATA) {
+				op++;
+				if (op->result_def >= 0) {
+					zend_bitset_incl(worklist, op->result_def);
+				}
+				if (op->op1_def >= 0) {
+					zend_bitset_incl(worklist, op->op1_def);
+				}
+				if (op->op2_def >= 0) {
+					zend_bitset_incl(worklist, op->op2_def);
+				}
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
 		} while (use >= 0);
