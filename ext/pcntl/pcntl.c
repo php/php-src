@@ -1016,7 +1016,7 @@ PHP_FUNCTION(pcntl_exec)
 
 			/* Length of element + equal sign + length of key + null */
 			ZEND_ASSERT(Z_STRLEN_P(element) < SIZE_MAX && ZSTR_LEN(key) < SIZE_MAX);
-			*pair = safe_emalloc(Z_STRLEN_P(element) + 1, sizeof(char) + ZSTR_LEN(key) + 1);
+			*pair = safe_emalloc(Z_STRLEN_P(element) + 1, sizeof(char), ZSTR_LEN(key) + 1);
 			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
 			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
 			strlcat(*pair, "=", pair_length);
