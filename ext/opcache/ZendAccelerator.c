@@ -4707,8 +4707,6 @@ static int accel_preload(const char *config, bool in_child)
 		zend_persistent_script *script;
 		int ping_auto_globals_mask;
 		int i;
-		zend_class_entry *ce;
-		zend_op_array *op_array;
 
 		if (PG(auto_globals_jit)) {
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
@@ -4877,19 +4875,6 @@ static int accel_preload(const char *config, bool in_child)
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
-
-		/* Store method names first, because they may be shared between preloaded and non-preloaded classes */
-		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-				zend_string *new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
-
-				if (!new_name) {
-					new_name = accel_new_interned_string(op_array->function_name);
-					zend_shared_alloc_register_xlat_entry(op_array->function_name, new_name);
-				}
-				op_array->function_name = new_name;
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FOREACH_END();
 
 		ZCSG(preload_script) = preload_script_in_shared_memory(script);
 
