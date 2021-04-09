@@ -292,7 +292,8 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name, zend_class_entry *scope)
+uint32_t zend_accel_get_class_name_map_ptr(
+		zend_string *type_name, zend_class_entry *scope, bool have_xlat)
 {
 	uint32_t ret;
 
@@ -308,8 +309,8 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name, zend_class_en
 		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			/* This runs before zend_update_parent_ce(), so manually fetch the persisted parent
 			 * class, as the original may be no longer valid. */
-			zend_class_entry *new_parent = zend_shared_alloc_get_xlat_entry(scope->parent);
-			if (new_parent) {
+			zend_class_entry *new_parent;
+			if (have_xlat && (new_parent = zend_shared_alloc_get_xlat_entry(scope->parent))) {
 				type_name = new_parent->name;
 			} else {
 				type_name = scope->parent->name;
@@ -376,7 +377,7 @@ static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
 			zend_accel_store_interned_string(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 			if (!ZCG(current_persistent_script)->corrupted) {
-				zend_accel_get_class_name_map_ptr(type_name, scope);
+				zend_accel_get_class_name_map_ptr(type_name, scope, /* have_xlat */ true);
 			}
 		}
 	} ZEND_TYPE_FOREACH_END();
@@ -893,7 +894,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 				if (ZSTR_HAS_CE_CACHE(ce->name)) {
 					ZSTR_SET_CE_CACHE(ce->name, NULL);
 				} else {
-					zend_accel_get_class_name_map_ptr(ce->name, ce);
+					zend_accel_get_class_name_map_ptr(ce->name, ce, /* have_xlat */ true);
 				}
 			}
 			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
