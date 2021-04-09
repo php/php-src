@@ -30,7 +30,6 @@ struct st_mysqlnd_perm_bind {
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
-enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, zval **row_data, const unsigned int flags, bool * fetched_anything);
 enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_data, const unsigned int flags, bool * fetched_anything);
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
