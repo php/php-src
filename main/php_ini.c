@@ -404,8 +404,6 @@ int php_init_config(void)
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_string *opened_path = NULL;
-	FILE *fp;
-	const char *filename;
 
 	zend_hash_init(&configuration_hash, 8, NULL, config_zval_dtor, 1);
 
@@ -557,8 +555,9 @@ int php_init_config(void)
 	 * Find and open actual ini file
 	 */
 
-	fp = NULL;
-	filename = NULL;
+	FILE *fp = NULL;
+	char *filename = NULL;
+	bool free_filename = false;
 
 	/* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
 	 * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
@@ -574,6 +573,7 @@ int php_init_config(void)
 					fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fp) {
 						filename = expand_filepath(php_ini_file_name, NULL);
+						free_filename = true;
 					}
 				}
 			}
@@ -624,6 +624,10 @@ int php_init_config(void)
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
 		zend_destroy_file_handle(&fh);
+
+		if (free_filename) {
+			efree(filename);
+		}
 	}
 
 	/* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
