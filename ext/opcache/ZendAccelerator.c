@@ -1372,6 +1372,7 @@ static zend_string* accel_new_interned_key(zend_string *key)
 	GC_ADDREF(key);
 	new_key = accel_new_interned_string(key);
 	if (UNEXPECTED(new_key == key)) {
+		GC_DELREF(key);
 		new_key = zend_shared_alloc(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(ZSTR_LEN(key)), 8));
 		if (EXPECTED(new_key)) {
 			GC_SET_REFCOUNT(new_key, 2);
