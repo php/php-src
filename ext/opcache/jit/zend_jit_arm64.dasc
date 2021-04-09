@@ -3129,7 +3129,40 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 		}
 	} else {
 		if (val_info & MAY_BE_UNDEF) {
-			|	brk #0
+			if (in_cold) {
+				|	brk #0	// TODO
+				|	IF_NOT_ZVAL_TYPE val_addr, IS_UNDEF, >2, TMP1w, TMP2
+			} else {
+				|	IF_ZVAL_TYPE val_addr, IS_UNDEF, >1, TMP1w, TMP2
+				|.cold_code
+				|1:
+			}
+			|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			if (save_r1) {
+				|	brk #0	// TODO
+				|	str FCARG1x, T1	// save
+			}
+			|	SET_ZVAL_TYPE_INFO var_addr, IS_NULL, TMP1w, TMP2
+			if (res_addr) {
+				|	brk #0	// TODO
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL, TMP1w, TMP2
+			}
+			if (opline) {
+				|	SET_EX_OPLINE opline, Rx(tmp_reg)
+			}
+			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL && Z_REG(val_addr) == ZREG_FP);
+			|	LOAD_32BIT_VAL FCARG1w, Z_OFFSET(val_addr)
+			|	EXT_CALL zend_jit_undefined_op_helper, REG0
+			if (save_r1) {
+				|	brk #0	// TODO
+				|	ldr FCARG1x, T1	// restore
+			}
+			|	b >3
+			if (in_cold) {
+				|2:
+			} else {
+				|.code
+			}
 		}
 		if (val_info & MAY_BE_REF) {
 			if (val_type == IS_CV) {
