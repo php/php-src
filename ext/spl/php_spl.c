@@ -413,6 +413,36 @@ static bool autoload_func_info_equals(
 }
 
 static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_string *lc_name) {
+	/*  classmap provides for classname => path resolution without needing to invoke a user function */
+	if (SPL_G(autoload_classmap)) {
+		zval *mf = zend_hash_find_deref(SPL_G(autoload_classmap), lc_name);
+		if (mf) {
+			if (Z_TYPE_P(mf) != IS_STRING) {
+				zend_type_error("Error during autoloading from classmap. Entry \"%s\" expected a string value, %s given",  ZSTR_VAL(lc_name), zend_zval_type_name(mf));
+				return NULL;
+			}
+			
+			zend_op_array *op_array = zend_include_or_eval(mf, ZEND_REQUIRE);
+			if (op_array != NULL && op_array != ZEND_FAKE_OP_ARRAY) {
+				destroy_op_array(op_array);
+				efree_size(op_array, sizeof(zend_op_array));
+			}
+			
+			if (EG(exception)) {
+				return NULL;
+			}
+			
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
+			if (ce) {
+				return ce;
+			}
+			
+			/* if the item is in the classmap it must be valid after including the file */
+			zend_throw_error(NULL, "Error during autoloading from classmap. Entry \"%s\" failed to load the class from \"%s\" (Class undefined after file included)", ZSTR_VAL(lc_name), Z_STRVAL_P(mf));
+			return NULL;
+		}
+	}
+	
 	if (!SPL_G(autoload_functions)) {
 		return NULL;
 	}
@@ -625,6 +655,38 @@ PHP_FUNCTION(spl_autoload_functions)
 	}
 } /* }}} */
 
+
+/* {{{ Assign an array of name => path mappings to the autoloader */
+PHP_FUNCTION(autoload_set_classmap)
+{
+	HashTable *ht;
+	
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(ht)
+	ZEND_PARSE_PARAMETERS_END();
+	
+	if (SPL_G(autoload_classmap)) {
+		zend_throw_error(NULL, "Classmap Autoloader can only be initialized once per request.");
+		RETURN_THROWS();
+	}
+	
+	GC_TRY_ADDREF(ht);
+	SPL_G(autoload_classmap) = ht;
+} /* }}} */
+
+/* {{{ Assign an array of name => path mappings to the autoloader */
+PHP_FUNCTION(autoload_get_classmap)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	
+	if (SPL_G(autoload_classmap)) {
+		GC_TRY_ADDREF(SPL_G(autoload_classmap));
+		RETURN_ARR(SPL_G(autoload_classmap));
+	}
+	
+	RETURN_EMPTY_ARRAY();
+} /* }}} */
+
 /* {{{ Return hash id for given object */
 PHP_FUNCTION(spl_object_hash)
 {
@@ -732,6 +794,7 @@ PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	SPL_G(autoload_extensions) = NULL;
 	SPL_G(autoload_functions) = NULL;
+	SPL_G(autoload_classmap) = NULL;
 	SPL_G(hash_mask_init) = 0;
 	return SUCCESS;
 } /* }}} */
@@ -741,6 +804,10 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	if (SPL_G(autoload_extensions)) {
 		zend_string_release_ex(SPL_G(autoload_extensions), 0);
 		SPL_G(autoload_extensions) = NULL;
+	}
+	if (SPL_G(autoload_classmap)) {
+		zend_array_release(SPL_G(autoload_classmap));
+		SPL_G(autoload_classmap) = NULL;
 	}
 	if (SPL_G(autoload_functions)) {
 		zend_hash_destroy(SPL_G(autoload_functions));
