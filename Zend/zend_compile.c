@@ -9462,10 +9462,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
-	zend_ast *const_ast = ast->child[1];
 	zend_string *class_name;
-	zend_string *const_name = zend_ast_get_str(const_ast);
-	zend_string *name;
 	int fetch_type;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
@@ -9482,17 +9479,17 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
-		class_name = zend_resolve_class_name_ast(class_ast);
-	} else {
-		zend_string_addref(class_name);
+		zend_string *tmp = zend_resolve_class_name_ast(class_ast);
+
+		zend_string_release_ex(class_name, 0);
+		if (tmp != class_name) {
+			zval *zv = zend_ast_get_zval(class_ast);
+
+			ZVAL_STR(zv, tmp);
+		}
 	}
 
-	name = zend_create_member_string(class_name, const_name);
-
-	zend_ast_destroy(ast);
-	zend_string_release_ex(class_name, 0);
-
-	*ast_ptr = zend_ast_create_constant(name, fetch_type | ZEND_FETCH_CLASS_EXCEPTION);
+	ast->attr |= ZEND_FETCH_CLASS_EXCEPTION;
 }
 /* }}} */
 

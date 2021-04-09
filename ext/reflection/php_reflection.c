@@ -2820,7 +2820,9 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueConstant)
 
 	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
 		zend_ast *ast = Z_ASTVAL(default_value);
-		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS);
+		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT
+			|| ast->kind == ZEND_AST_CONSTANT_CLASS
+			|| ast->kind == ZEND_AST_CLASS_CONST);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2858,6 +2860,13 @@ ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName)
 		RETVAL_STR_COPY(zend_ast_get_constant_name(ast));
 	} else if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
 		RETVAL_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
+	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+		zend_string *class_name = zend_ast_get_str(ast->child[0]);
+		zend_string *const_name = zend_ast_get_str(ast->child[1]);
+		RETVAL_NEW_STR(zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", sizeof("::")-1,
+			ZSTR_VAL(const_name), ZSTR_LEN(const_name)));
 	} else {
 		RETVAL_NULL();
 	}

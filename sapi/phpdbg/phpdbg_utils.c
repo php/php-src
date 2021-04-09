@@ -844,7 +844,8 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			zend_ast *ast = Z_ASTVAL_P(zv);
 
 			if (ast->kind == ZEND_AST_CONSTANT
-			 || ast->kind == ZEND_AST_CONSTANT_CLASS) {
+			 || ast->kind == ZEND_AST_CONSTANT_CLASS
+			 || ast->kind == ZEND_AST_CLASS_CONST) {
 				decode = estrdup("<constant>");
 			} else {
 				decode = estrdup("<ast>");

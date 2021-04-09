@@ -786,6 +786,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 							zend_ast *ast = Z_ASTVAL_P(zv);
 							if (ast->kind == ZEND_AST_CONSTANT) {
 								smart_str_append(&str, zend_ast_get_constant_name(ast));
+							} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+								smart_str_append(&str, zend_ast_get_str(ast->child[0]));
+								smart_str_appends(&str, "::");
+								smart_str_append(&str, zend_ast_get_str(ast->child[1]));
 							} else {
 								smart_str_appends(&str, "<expression>");
 							}

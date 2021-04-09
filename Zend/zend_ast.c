@@ -784,6 +784,19 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			zend_enum_new(result, ce, case_name, case_value_zv);
 			break;
 		}
+		case ZEND_AST_CLASS_CONST:
+		{
+			zend_string *class_name = zend_ast_get_str(ast->child[0]);
+			zend_string *const_name = zend_ast_get_str(ast->child[1]);
+			zval *zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
+
+			if (UNEXPECTED(zv == NULL)) {
+				ZVAL_UNDEF(result);
+				return FAILURE;
+			}
+			ZVAL_COPY_OR_DUP(result, zv);
+			break;
+		}
 		default:
 			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;
