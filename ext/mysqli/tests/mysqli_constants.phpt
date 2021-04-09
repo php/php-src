@@ -50,8 +50,6 @@ mysqli.allow_local_infile=1
         "MYSQLI_BINARY_FLAG"				=> true,
         "MYSQLI_PART_KEY_FLAG"				=> true,
         "MYSQLI_GROUP_FLAG"					=> true,
-        "MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED"=> true,
-        "MYSQLI_SERVER_QUERY_NO_INDEX_USED"	=> true,
 
         "MYSQLI_TYPE_DECIMAL"				=> true,
         "MYSQLI_TYPE_TINY"					=> true,
@@ -79,7 +77,6 @@ mysqli.allow_local_infile=1
         "MYSQLI_TYPE_CHAR"					=> true,
         "MYSQLI_TYPE_INTERVAL"				=> true,
         "MYSQLI_TYPE_GEOMETRY"				=> true,
-        "MYSQLI_NO_DATA"					=> true,
         "MYSQLI_REPORT_INDEX"				=> true,
         "MYSQLI_REPORT_STRICT"				=> true,
         "MYSQLI_REPORT_ALL"					=> true,
@@ -107,15 +104,15 @@ mysqli.allow_local_infile=1
     );
 
     /* depends on the build - experimental */
-    if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
+    if ($IS_MYSQLND) {
         $expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
     }
 
-    if ($IS_MYSQLND && defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
+    if ($IS_MYSQLND) {
         $expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
     }
 
-    if ($IS_MYSQLND || defined('MYSQLI_REFRESH_BACKUP_LOG')) {
+    if ($IS_MYSQLND) {
         $expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
     }
 
@@ -124,19 +121,12 @@ mysqli.allow_local_infile=1
         $expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
         $expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
         $expected_constants['MYSQLI_ASYNC'] = true;
-
-        $expected_constants['MYSQLI_SERVER_PS_OUT_PARAMS'] = true;
     } else {
         $version = mysqli_get_client_version();
     }
 
     if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
         $expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
-    }
-
-    /* First introduced in MySQL 6.0, backported to MySQL 5.5 */
-    if ($version >= 50500 || $IS_MYSQLND) {
-        $expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
     }
 
     $expected_constants['MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT'] = true;
@@ -170,26 +160,6 @@ mysqli.allow_local_infile=1
 
     if ($version < 80000 || $version >= 100000 || $IS_MYSQLND) {
         $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
-    }
-
-    /* pretty dump test, but that is the best way to mimic mysql.c */
-    if (defined('MYSQLI_DATA_TRUNCATED'))
-        $expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
-
-    if (defined('MYSQLI_SERVER_PS_OUT_PARAMS'))
-        $expected_constants["MYSQLI_SERVER_PS_OUT_PARAMS"] = true;
-
-    if (!$IS_MYSQLND) {
-        /* libmysql only */
-
-        /* are they available in all versions of ext/mysqli ?
-        ... no we must have removed them at some point - for BC, weakening the test
-        */
-        if (defined("MYSQLI_RPL_MASTER")) {
-            $expected_constants["MYSQLI_RPL_MASTER"]	= true;
-            $expected_constants["MYSQLI_RPL_SLAVE"]		= true;
-            $expected_constants["MYSQLI_RPL_ADMIN"]		= true;
-        }
     }
 
     if ($IS_MYSQLND || (!$IS_MYSQLND && ($version > 50610))) {
