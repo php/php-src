@@ -27,7 +27,6 @@ struct st_mysqlnd_perm_bind {
 	int					pack_len;
 	unsigned int		php_type;
 	bool			is_possibly_blob;
-	bool			can_ret_as_str_in_uni;
 };
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
