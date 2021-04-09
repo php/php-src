@@ -306,7 +306,14 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name, zend_class_en
 			return 0;
 		}
 		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
-			type_name = scope->parent->name;
+			/* This runs before zend_update_parent_ce(), so manually fetch the persisted parent
+			 * class, as the original may be no longer valid. */
+			zend_class_entry *new_parent = zend_shared_alloc_get_xlat_entry(scope->parent);
+			if (new_parent) {
+				type_name = new_parent->name;
+			} else {
+				type_name = scope->parent->name;
+			}
 		} else {
 			type_name = scope->parent_name;
 		}
