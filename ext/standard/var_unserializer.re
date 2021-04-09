@@ -1151,11 +1151,19 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
+	class_name = zend_string_init_interned(str, len, 0);
 
 	do {
-		zend_string *lc_name = zend_string_tolower(class_name);
+		zend_string *lc_name;
 
+		if (!(*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				break;
+			}
+		}
+
+		lc_name = zend_string_tolower(class_name);
 		if(!unserialize_allowed_class(lc_name, var_hash)) {
 			zend_string_release_ex(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
@@ -1167,6 +1175,14 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
+		if ((*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				zend_string_release_ex(lc_name, 0);
+				break;
+			}
+		}
+
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		if (ce
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
@@ -1175,7 +1191,7 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
-		if (!zend_is_valid_class_name(class_name)) {
+		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
 			zend_string_release_ex(lc_name, 0);
 			zend_string_release_ex(class_name, 0);
 			return 0;
@@ -1247,8 +1263,7 @@ object ":" uiv ":" ["]	{
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&args[0]);
-		break;
-	} while (1);
+	} while (0);
 
 	*p = YYCURSOR;
 
