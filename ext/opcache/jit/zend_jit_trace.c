@@ -6928,7 +6928,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 			} else if (STACK_REG(stack, j) == ZREG_ZVAL_COPY_GPR0) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
-				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name[0]);
+				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name[ZREG_COPY]);
 			}
 		}
 		fprintf(stderr, "\n");
@@ -7459,7 +7459,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			} else if (STACK_REG(stack, i) == ZREG_ZVAL_TRY_ADDREF) {
 				Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 			} else if (STACK_REG(stack, i) == ZREG_ZVAL_COPY_GPR0) {
-				zval *val = (zval*)regs->gpr[0];
+				zval *val = (zval*)regs->gpr[ZREG_COPY];
 
 				if (UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
 					/* Undefined array index or property */
