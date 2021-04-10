@@ -1705,7 +1705,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_persistent_script *script;
 	zend_file_cache_metainfo info;
 	zend_accel_hash_entry *bucket;
-	void *mem, *buf;
+	void *mem, *checkpoint, *buf;
 	int cache_it = 1;
 	unsigned int actual_checksum;
 	int ok;
@@ -1766,12 +1766,13 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 
+	checkpoint = zend_arena_checkpoint(CG(arena));
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
-	mem = emalloc(info.mem_size + info.str_size + 64);
+	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size + 64);
 	mem = (void*)(((zend_uintptr_t)mem + 63L) & ~63L);
 #else
-	mem = emalloc(info.mem_size + info.str_size);
+	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size);
 #endif
 
 	if (read(fd, mem, info.mem_size + info.str_size) != (ssize_t)(info.mem_size + info.str_size)) {
@@ -1779,7 +1780,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
 		zend_file_cache_unlink(filename);
-		efree(mem);
+		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
 	}
@@ -1793,7 +1794,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
 		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
 		zend_file_cache_unlink(filename);
-		efree(mem);
+		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
 	}
@@ -1813,7 +1814,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			script = (zend_persistent_script *)bucket->data;
 			if (!script->corrupted) {
 				zend_shared_alloc_unlock();
-				efree(mem);
+				zend_arena_release(&CG(arena), checkpoint);
 				efree(filename);
 				return script;
 			}
@@ -1863,7 +1864,7 @@ use_process_mem:
 			zend_shared_alloc_unlock();
 			goto use_process_mem;
 		} else {
-			efree(mem);
+			zend_arena_release(&CG(arena), checkpoint);
 			efree(filename);
 			return NULL;
 		}
@@ -1881,7 +1882,7 @@ use_process_mem:
 		zend_shared_alloc_unlock();
 		zend_accel_error(ACCEL_LOG_INFO, "File cached script loaded into memory '%s'", ZSTR_VAL(script->script.filename));
 
-		efree(mem);
+		zend_arena_release(&CG(arena), checkpoint);
 	}
 	efree(filename);
 
