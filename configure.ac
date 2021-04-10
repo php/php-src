@@ -568,7 +568,7 @@ dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
 dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
 dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*], [true], [
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*|*openbsd*], [true], [
   AX_GCC_FUNC_ATTRIBUTE([ifunc])
   AX_GCC_FUNC_ATTRIBUTE([target])
 ])
