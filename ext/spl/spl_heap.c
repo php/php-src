@@ -590,9 +590,9 @@ PHP_METHOD(SplHeap, insert)
 	zval *value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value);
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -638,9 +638,10 @@ PHP_METHOD(SplPriorityQueue, insert)
 	spl_heap_object *intern;
 	spl_pqueue_elem elem;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(data);
+		Z_PARAM_ZVAL(priority);
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
