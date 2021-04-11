@@ -175,7 +175,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	}
 
 	/* little mini hack so that we can use this code from the dbh ctor */
-	if (!dbh->methods) {
+	if (!dbh->methods && status != OCI_SUCCESS_WITH_INFO) {
 		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
 	}
 
@@ -831,7 +831,12 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	H->last_err = OCISessionBegin(H->svc, H->err, H->session, OCI_CRED_RDBMS, OCI_DEFAULT);
 	if (H->last_err) {
 		oci_drv_error("OCISessionBegin");
-		goto cleanup;
+		/* OCISessionBegin returns OCI_SUCCESS_WITH_INFO when
+		 * user's password has expired, but is still usable.
+		 */
+		if (H->last_err != OCI_SUCCESS_WITH_INFO) {
+			goto cleanup;
+		}
 	}
 
 	/* set the server handle into service handle */
