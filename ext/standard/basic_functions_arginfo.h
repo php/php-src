@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39cd1ddd82efd6b62605218faff8b720d8b97170 */
+ * Stub hash: b1d68b2f2dcc7a078257c65569f2eec284dcd804 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1094,12 +1094,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_getdir, 0, 1, Directory, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dir, 0, 1, Directory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
-
-#define arginfo_dir arginfo_getdir
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closedir, 0, 0, IS_VOID, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, dir_handle, "null")
@@ -2512,7 +2510,7 @@ ZEND_FUNCTION(substr_compare);
 ZEND_FUNCTION(utf8_encode);
 ZEND_FUNCTION(utf8_decode);
 ZEND_FUNCTION(opendir);
-ZEND_FUNCTION(getdir);
+ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
@@ -3147,8 +3145,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(utf8_encode, arginfo_utf8_encode)
 	ZEND_FE(utf8_decode, arginfo_utf8_decode)
 	ZEND_FE(opendir, arginfo_opendir)
-	ZEND_FE(getdir, arginfo_getdir)
-	ZEND_FALIAS(dir, getdir, arginfo_dir)
+	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC

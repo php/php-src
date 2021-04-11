@@ -695,13 +695,7 @@ function utf8_decode(string $string): string {}
  */
 function opendir(string $directory, $context = null) {}
 
-/** @param resource $context */
-function getdir(string $directory, $context = null): Directory|false {}
-
-/**
- * @param resource|null $context
- * @alias getdir
- */
+/** @param resource|null $context */
 function dir(string $directory, $context = null): Directory|false {}
 
 /** @param resource|null $dir_handle */

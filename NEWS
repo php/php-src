@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #80915 (Taking a reference to $_SERVER hides its values from
     phpinfo()). (Rowan Tommins)
+  . Fixed bug #80914 ('getdir' accidentally defined as an alias of 'dir').
+    (Rowan Tommins)
 
 01 Apr 2021, PHP 8.0.4
 
