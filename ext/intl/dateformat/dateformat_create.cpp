@@ -52,7 +52,9 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	size_t		locale_len	= 0;
 	Locale		locale;
 	zend_long	date_type	= 0;
+	zend_bool	date_type_is_null = 1;
 	zend_long	time_type	= 0;
+	zend_bool	time_type_is_null = 1;
 	zval		*calendar_zv	= NULL;
 	Calendar	*calendar	= NULL;
 	zend_long	calendar_type;
@@ -70,8 +72,8 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-	if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "s!ll|zzs",
-			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
+	if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "s!l!l!|zzs",
+			&locale_str, &locale_len, &date_type, &date_type_is_null, &time_type, &time_type_is_null, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
 				"unable to parse input parameters", 0);
