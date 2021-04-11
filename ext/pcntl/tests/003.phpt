@@ -9,6 +9,9 @@ pcntl: SIG_BLOCK, SIG_UNBLOCK, SIG_SETMASK
 --FILE--
 <?php
 
+// Clear mask
+pcntl_sigprocmask(SIG_SETMASK, array(), $prev);
+
 pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,SIGTERM), $old);
 var_dump(count($old));
 pcntl_sigprocmask(SIG_BLOCK, array(SIGINT), $old);
@@ -19,7 +22,9 @@ pcntl_sigprocmask(SIG_SETMASK, array(SIGINT), $old);
 var_dump(count($old));
 pcntl_sigprocmask(SIG_SETMASK, array(), $old);
 var_dump(count($old));
-pcntl_sigprocmask(SIG_SETMASK, array(), $old);
+
+// Restore previous mask
+pcntl_sigprocmask(SIG_SETMASK, $prev, $old);
 var_dump(count($old));
 
 ?>
