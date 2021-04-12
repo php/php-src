@@ -31,14 +31,13 @@ int main(int argc, char **argv)
 }
 ```
 
-To compile this, we must point the compiler to the PHP header files. The paths to the header files are listed from `php-config --includes`, but the path to the SAPI header files are not included in that list by default so we must explicitly include `$(php-config --include-dir)/sapi`.
+To compile this, we must point the compiler to the PHP header files. The paths to the header files are listed from `php-config --includes`.
 
 We must also point the linker and the runtime loader to the `libphp.so` shared lib for linking PHP (`-lphp`) which is located at `$(php-config --prefix)/lib`. So the complete command to compile ends up being:
 
 ```bash
 $  gcc \
 	$(php-config --includes) \
-	-I$(php-config --include-dir)/sapi \
 	-L$(php-config --prefix)/lib \
 	embed_sapi_basic_example.c \
 	-lphp \
