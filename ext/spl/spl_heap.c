@@ -97,7 +97,16 @@ static zend_always_inline void *spl_heap_elem(spl_ptr_heap *heap, size_t i) {
 
 static zend_always_inline void spl_heap_elem_copy(spl_ptr_heap *heap, void *to, void *from) {
 	assert(to != from);
-	memcpy(to, from, heap->elem_size);
+
+	/* Specialized for cases of heap and priority queue. With the size being
+	 * constant known at compile time the compiler can fully inline calls to memcpy. */
+	if (heap->elem_size == sizeof(spl_pqueue_elem)) {
+		memcpy(to, from, sizeof(spl_pqueue_elem));
+	} else if (heap->elem_size == sizeof(zval)) {
+		memcpy(to, from, sizeof(zval));
+	} else {
+		memcpy(to, from, heap->elem_size);
+	}
 }
 
 static void spl_ptr_heap_zval_dtor(void *elem) { /* {{{ */
@@ -232,6 +241,7 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 			return ZEND_NORMALIZE_BOOL(lval);
 		}
 	}
+
 
 	return zend_compare(a_priority_p, b_priority_p);
 }
