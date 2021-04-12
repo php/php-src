@@ -1040,7 +1040,7 @@ static const func_info_t func_infos[] = {
 	F1("curl_version",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F0("curl_setopt",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("curl_setopt_array",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	FN("curl_exec",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	FN("curl_exec",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("curl_getinfo",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("curl_error",                            MAY_BE_NULL | MAY_BE_STRING),
 	F0("curl_errno",                            MAY_BE_NULL | MAY_BE_LONG),

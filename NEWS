@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
 
+- Opcache:
+  . Fixed bug #80950 (Variables become null in if statements). (Nikita)
+
 - Pcntl:
   . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
 
