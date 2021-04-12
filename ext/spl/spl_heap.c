@@ -241,7 +241,6 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 		}
 	}
 
-
 	return zend_compare(a_priority_p, b_priority_p);
 }
 /* }}} */
@@ -279,7 +278,7 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 }
 /* }}} */
 
-static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, zval *object) { /* {{{ */
+static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
 	int i;
 
 	if (heap->count+1 > heap->max_size) {
@@ -291,7 +290,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, zval *object) { 
 	}
 
 	/* sifting up */
-	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, object) < 0; i = (i-1)/2) {
+	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, cmp_userdata) < 0; i = (i-1)/2) {
 		spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, (i-1)/2));
 	}
 	heap->count++;
