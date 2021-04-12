@@ -442,9 +442,13 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 			break;
 		}
 
-		zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		if (ce) {
-			return ce;
+		if (ZSTR_HAS_CE_CACHE(class_name) &&  ZSTR_GET_CE_CACHE(class_name)) {
+			return (zend_class_entry*)ZSTR_GET_CE_CACHE(class_name);
+		} else {
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
+			if (ce) {
+				return ce;
+			}
 		}
 
 		zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
