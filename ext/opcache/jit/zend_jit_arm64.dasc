@@ -908,7 +908,6 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro GC_ADDREF, zv, tmp_reg
-|	brk #0	// TODO: test
 |	ldr tmp_reg, [zv]
 |	add tmp_reg, tmp_reg, #1
 |	str tmp_reg, [zv]
@@ -949,7 +948,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (val_info & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 |			IF_NOT_REFCOUNTED type_flags_reg, >1
 ||		}
-|		// brk #0	// TODO: test
 |		GC_ADDREF value_ptr_reg, tmp_reg
 |1:
 ||	}
