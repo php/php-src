@@ -422,8 +422,14 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro CMP_IP, addr
-|	brk #0	// TODO
+|.macro CMP_IP, addr, tmp_reg1, tmp_reg2
+|	LOAD_ADDR tmp_reg1, addr
+||	if (GCC_GLOBAL_REGS) {
+|		cmp IP, tmp_reg1
+||	} else {
+|		ldr tmp_reg2, EX->opline
+|		cmp tmp_reg2, tmp_reg1
+||	}
 |.endmacro
 
 |.macro LOAD_ZVAL_ADDR, reg, addr
@@ -1128,8 +1134,24 @@ static void* dasm_labels[zend_lb_MAX];
 |	brk #0	// TODO
 |.endmacro
 
-|.macro OBJ_RELEASE, reg, exit_label
+|.macro OBJ_RELEASE, reg, exit_label, tmp_reg1, tmp_reg2
+|	GC_DELREF Rx(reg), Rw(tmp_reg1)
+|	bne >1
 |	brk #0	// TODO
+|	// zend_objects_store_del(obj);
+||	if (reg != ZREG_FCARG1x) {
+|		mov FCARG1x, Rx(reg)
+||	}
+|	EXT_CALL zend_objects_store_del, Rx(tmp_reg1)
+|	b exit_label
+|1:
+|	IF_GC_MAY_NOT_LEAK Rx(reg), >1, Rw(tmp_reg1), Rw(tmp_reg2)
+|	// gc_possible_root(obj)
+||	if (reg != ZREG_FCARG1x) {
+|		mov FCARG1x, Rx(reg)
+||	}
+|	EXT_CALL gc_possible_root, Rx(tmp_reg1)
+|1:
 |.endmacro
 
 |.macro UNDEFINED_OFFSET, opline
@@ -2068,7 +2090,6 @@ static int zend_jit_save_call_chain(dasm_State **Dst, uint32_t call_level)
 	if (call_level == 1) {
 		|	str xzr, EX:RX->prev_execute_data
 	} else {
-		|	brk #0	// TODO: test
 		|	ldr REG0, EX->call
 		|	str REG0, EX:RX->prev_execute_data
 	}
@@ -2430,7 +2451,8 @@ static int zend_jit_jmp(dasm_State **Dst, unsigned int target_label)
 
 static int zend_jit_cond_jmp(dasm_State **Dst, const zend_op *next_opline, unsigned int target_label)
 {
-	|	brk #0	// TODO
+	|	CMP_IP next_opline, TMP1, TMP2
+	|	bne =>target_label
 
 	zend_jit_set_last_valid_opline(next_opline);
 
@@ -4799,7 +4821,17 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	|	SET_EX_OPLINE opline, REG0
 
 	if (opline->opcode == ZEND_DO_FCALL) {
-		|	brk #0	// TODO
+		if (!func) {
+			if (trace) {
+				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				|	brk #0	// TODO
+			}
+		}
 	}
 
 	if (!delayed_call_chain) {
@@ -4807,7 +4839,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	str xzr, EX->call
 		} else {
 			|	//EX(call) = call->prev_execute_data;
-			|	brk #0 // TODO: test
+			|	ldr REG0, EX:RX->prev_execute_data
+			|	str REG0, EX->call
 		}
 	}
 	delayed_call_chain = 0;
@@ -4820,13 +4853,38 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	if (opline->opcode == ZEND_DO_FCALL) {
-		|	brk #0	// TODO
+		if (!func) {
+			if (!trace) {
+				|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
+				||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= MAX_IMM12);
+				|	tst TMP1w, #ZEND_ACC_DEPRECATED
+				|	bne >1
+				|.cold_code
+				|1:
+				|	brk #0	// TODO
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1x, RX
+				}
+				|	EXT_CALL zend_jit_deprecated_helper, REG0
+				|	and RETVALw, RETVALw, #0xff
+				|	cmp RETVALw, #0       // Result is 0 on exception
+				|	ldr REG0, EX:RX->func // reload
+				|	bne >1
+				|	b ->exception_handler
+				|.code
+				|1:
+			}
+		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
+			|	brk #0
+		}
 	}
 
 	if (!func
 	 && opline->opcode != ZEND_DO_UCALL
 	 && opline->opcode != ZEND_DO_ICALL) {
-		|	brk #0 // TODO
+		|	ldrb TMP1w, [REG0, #offsetof(zend_function, type)]
+		|	cmp TMP1w, #ZEND_USER_FUNCTION
+		|	bne >8
 	}
 
 	if ((!func || func->type == ZEND_USER_FUNCTION)
@@ -5022,7 +5080,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|8:
 		if (opline->opcode == ZEND_DO_FCALL) {
 			// TODO: optimize ???
-			|	brk #0 // TODO
+			|	// if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS))
+			|	ldrb TMP1w, [RX, #(offsetof(zend_execute_data, This.u1.type_info) + 2)]
+			|	tst TMP1w, #(ZEND_CALL_RELEASE_THIS >> 16)
+			|	bne >1
+			|.cold_code
+			|1:
+			|	add TMP1, RX, #offsetof(zend_execute_data, This)
+			|	GET_Z_PTR FCARG1x, TMP1
+			|	// OBJ_RELEASE(object);
+			|	OBJ_RELEASE ZREG_FCARG1x, >2, ZREG_TMP1, ZREG_TMP2
+			|	b >2
+			|.code
+			|2:
 		}
 
 		if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
@@ -5084,7 +5154,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if ((!trace || !func) && opline->opcode != ZEND_DO_ICALL) {
-			|	brk #0 // TODO
+			|	LOAD_IP_ADDR (opline + 1)
 		} else if (trace
 		 && trace->op == ZEND_JIT_TRACE_END
 		 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
