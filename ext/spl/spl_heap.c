@@ -237,6 +237,24 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 }
 /* }}} */
 
+/* Specialized comparator used when we are absolutely sure an instance of the
+ * not inherited SplPriorityQueue class contains only priorities as longs. This
+ * fact is tracked during insertion into the queue. */
+static int spl_ptr_pqueue_elem_cmp_long(void *x, void *y, zval *object) { /* {{{ */
+	zend_long a = Z_LVAL(((spl_pqueue_elem*) x)->priority);
+	zend_long b = Z_LVAL(((spl_pqueue_elem*) y)->priority);
+	return a>b ? 1 : (a<b ? -1 : 0);
+}
+/* }}} */
+
+/* same as spl_ptr_pqueue_elem_cmp_long */
+static int spl_ptr_pqueue_elem_cmp_double(void *x, void *y, zval *object) { /* {{{ */
+	double a = Z_DVAL(((spl_pqueue_elem*) x)->priority);
+	double b = Z_DVAL(((spl_pqueue_elem*) y)->priority);
+	return ZEND_NORMALIZE_BOOL(a - b);
+}
+/* }}} */
+
 static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_ctor_func ctor, spl_ptr_heap_dtor_func dtor, size_t elem_size) /* {{{ */
 {
 	spl_ptr_heap *heap = emalloc(sizeof(spl_ptr_heap));
@@ -254,7 +272,7 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 }
 /* }}} */
 
-static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
+static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, zval *object, bool pqueue) { /* {{{ */
 	int i;
 
 	if (heap->count+1 > heap->max_size) {
@@ -265,8 +283,23 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 		heap->max_size *= 2;
 	}
 
+	/* If we know this call came from non inherited SplPriorityQueue it's
+	 * possible to do specialization on the type of the priority parameter. */
+	if (pqueue && !Z_SPLHEAP_P(object)->fptr_cmp) {
+		int type = Z_TYPE(((spl_pqueue_elem*) elem)->priority);
+		spl_ptr_heap_cmp_func new_cmp =
+			(type == IS_LONG) ? spl_ptr_pqueue_elem_cmp_long :
+			((type == IS_DOUBLE) ? spl_ptr_pqueue_elem_cmp_double : spl_ptr_pqueue_elem_cmp);
+
+		if (heap->count == 0) { /* Specialize empty queue */
+			heap->cmp = new_cmp;
+		} else if (new_cmp != heap->cmp) { /* Despecialize on type conflict. */
+			heap->cmp = spl_ptr_pqueue_elem_cmp;
+		}
+	}
+
 	/* sifting up */
-	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, cmp_userdata) < 0; i = (i-1)/2) {
+	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, object) < 0; i = (i-1)/2) {
 		spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, (i-1)/2));
 	}
 	heap->count++;
@@ -653,7 +686,7 @@ PHP_METHOD(SplPriorityQueue, insert)
 	ZVAL_COPY(&elem.data, data);
 	ZVAL_COPY(&elem.priority, priority);
 
-	spl_ptr_heap_insert(intern->heap, &elem, ZEND_THIS);
+	spl_ptr_heap_insert(intern->heap, &elem, ZEND_THIS, 1);
 
 	RETURN_TRUE;
 }
