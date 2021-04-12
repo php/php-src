@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
     (Dmitry)
 
+- Pcntl:
+  . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
+
 - PDO_ODBC:
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
     (cmb)
