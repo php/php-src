@@ -1462,7 +1462,7 @@ static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 static void pdo_dbh_free_storage(zend_object *std)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(std);
-	if (dbh->in_txn && dbh->methods && dbh->methods->rollback) {
+	if (dbh->driver_data && dbh->methods && dbh->methods->rollback && pdo_is_in_transaction(dbh)) {
 		dbh->methods->rollback(dbh);
 		dbh->in_txn = 0;
 	}
