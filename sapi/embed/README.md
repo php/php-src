@@ -1,6 +1,6 @@
 # The embed SAPI
 
-A server application programming interface (SAPI), is the entry point into the Zend Engine. The embed SAPI is a lightweight SAPI for calling into the Zend Engine from C or other languages that have C bindings.
+A server application programming interface (SAPI) is the entry point into the Zend Engine. The embed SAPI is a lightweight SAPI for calling into the Zend Engine from C or other languages that have C bindings.
 
 ## Basic Example
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 }
 ```
 
-To compile this, we must point the compiler to the PHP header files. The paths to the header files are listed from (`php-config --includes`) but the path to the SAPI header files are not included in that list by default so we must explicitly include `$(php-config --include-dir)/sapi`.
+To compile this, we must point the compiler to the PHP header files. The paths to the header files are listed from `php-config --includes`, but the path to the SAPI header files are not included in that list by default so we must explicitly include `$(php-config --include-dir)/sapi`.
 
 We must also point the linker and the runtime loader to the `libphp.so` shared lib for linking PHP (`-lphp`) which is located at `$(php-config --prefix)/lib`. So the complete command to compile ends up being:
 
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 		php_var_dump(&retval, 1);
 	}
 
-	zend_string_free(func_name);
+	zend_string_release(func_name);
 
 	PHP_EMBED_END_BLOCK()
 }
