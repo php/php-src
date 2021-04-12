@@ -1463,7 +1463,7 @@ ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_
 				}
 
 				call_info = func_info->call_map[opline - op_array->opcodes];
-				if (!call_info) {
+				if (!call_info || call_info->is_prototype) {
 					break;
 				}
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
