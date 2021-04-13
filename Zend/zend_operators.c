@@ -473,7 +473,7 @@ try_again:
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
-				ZVAL_LONG(op, zval_get_long_ex(op, /* is lax */ true));
+				ZVAL_LONG(op, zval_get_long(op));
 				zend_string_release_ex(str, 0);
 			}
 			break;
