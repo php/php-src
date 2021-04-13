@@ -64,10 +64,7 @@
 #if ZEND_LONG_MAX < UINT_MAX
 #define PGSQL_RETURN_OID(oid) do { \
 	if (oid > ZEND_LONG_MAX) { \
-		smart_str s = {0}; \
-		smart_str_append_unsigned(&s, oid); \
-		smart_str_0(&s); \
-		RETURN_NEW_STR(s.s); \
+		RETURN_STR(zend_ulong_to_str(oid)); \
 	} \
 	RETURN_LONG((zend_long)oid); \
 } while(0)
