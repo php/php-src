@@ -277,8 +277,7 @@ ZEND_API void zend_ini_refresh_caches(int stage) /* {{{ */
 
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage) /* {{{ */
 {
-
-	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0, 0);
 }
 /* }}} */
 
@@ -288,7 +287,7 @@ ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *v
     zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
-	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0, 0);
 	zend_string_release(new_value);
 	return ret;
 }
@@ -300,13 +299,13 @@ ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char
     zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
-	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change);
+	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change, 0);
 	zend_string_release(new_value);
 	return ret;
 }
 /* }}} */
 
-ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change) /* {{{ */
+ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change, bool skip_on_update) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
@@ -344,7 +343,7 @@ ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new
 	duplicate = zend_string_copy(new_value);
 
 	if (!ini_entry->on_modify
-		|| ini_entry->on_modify(ini_entry, duplicate, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
+		|| skip_on_update || ini_entry->on_modify(ini_entry, duplicate, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
 		if (modified && ini_entry->orig_value != ini_entry->value) { /* we already changed the value, free the changed value */
 			zend_string_release(ini_entry->value);
 		}

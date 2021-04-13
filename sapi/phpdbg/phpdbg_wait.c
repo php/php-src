@@ -318,7 +318,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zvp), key, ini_entry) {
 			if (key && Z_TYPE_P(ini_entry) == IS_STRING) {
-				zend_alter_ini_entry_ex(key, Z_STR_P(ini_entry), ZEND_INI_PERDIR, ZEND_INI_STAGE_HTACCESS, 1);
+				zend_alter_ini_entry_ex(key, Z_STR_P(ini_entry), ZEND_INI_PERDIR, ZEND_INI_STAGE_HTACCESS, 1, 0);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
