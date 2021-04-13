@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.5
+15 Apr 2021, PHP 8.0.5RC1
 
 - Core:
   . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
