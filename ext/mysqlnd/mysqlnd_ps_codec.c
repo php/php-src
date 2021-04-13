@@ -55,8 +55,6 @@ void
 ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len,
 						   const zend_uchar ** row, unsigned int byte_count)
 {
-	char tmp[22];
-	size_t tmp_len = 0;
 	bool is_bit = field->type == MYSQL_TYPE_BIT;
 	DBG_ENTER("ps_fetch_from_1_to_8_bytes");
 	DBG_INF_FMT("zv=%p byte_count=%u", zv, byte_count);
@@ -76,13 +74,12 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 
 		if (field->flags & ZEROFILL_FLAG) {
 			DBG_INF("stringify due to zerofill");
-			tmp_len = sprintf((char *)&tmp, "%0*" PRIu64, (int) field->length, uval);
-			DBG_INF_FMT("value=%s", tmp);
+			ZVAL_STR(zv, zend_strpprintf(0, "%0*" PRIu64, (int) field->length, uval));
 		} else
 #if SIZEOF_ZEND_LONG==4
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");
-			tmp_len = sprintf((char *)&tmp, "%" PRIu64, uval);
+			ZVAL_STR(zv, zend_u64_to_str(uval));
 		} else
 #endif /* #if SIZEOF_LONG==4 */
 		{
@@ -90,8 +87,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 				ZVAL_LONG(zv, (zend_long) uval); /* the cast is safe, we are in the range */
 			} else {
 				DBG_INF("stringify");
-				tmp_len = sprintf((char *)&tmp, "%" PRIu64, uval);
-				DBG_INF_FMT("value=%s", tmp);
+				ZVAL_STR(zv, zend_u64_to_str(uval));
 			}
 		}
 	} else {
@@ -112,7 +108,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 #if SIZEOF_ZEND_LONG==4
 		if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
 			DBG_INF("stringify");
-			tmp_len = sprintf((char *)&tmp, "%" PRIi64, lval);
+			ZVAL_STR(zv, zend_i64_to_str(lval));
 		} else
 #endif /* SIZEOF */
 		{
@@ -120,9 +116,6 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 		}
 	}
 
-	if (tmp_len) {
-		ZVAL_STRINGL(zv, tmp, tmp_len);
-	}
 	(*row)+= byte_count;
 	DBG_VOID_RETURN;
 }
