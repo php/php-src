@@ -2046,7 +2046,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 		intern->u.file.current_line_len = 0;
 	} else {
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			char breaks[] = "\r\n";
 			const char *eol = memchr(buf, '\n', line_len);
 			if (eol != NULL) {
 				line_len = (eol > buf && *(eol - 1) == '\r') ? eol - buf - 1 : eol - buf;
