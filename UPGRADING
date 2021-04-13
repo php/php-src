@@ -91,6 +91,9 @@ PHP 8.1 UPGRADE NOTES
     for details of behavior changes and how to explicitly set this attribute. To
     keep the old behavior, use mysqli_report(MYSQLI_REPORT_OFF);
     RFC: https://wiki.php.net/rfc/mysqli_default_errmode
+  . Classes extending mysqli_stmt::execute() will be required to specify the
+    additional parameter now.
+    RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
@@ -218,6 +221,9 @@ PHP 8.1 UPGRADE NOTES
     used to specify a directory from which files are allowed to be loaded. It
     is only meaningful if mysqli.allow_local_infile is not enabled, as all
     directories are allowed in that case.
+  . Binding in execute has been added to mysqli prepared statements.
+    Parameters can now be passed to mysqli_stmt::execute as an array.
+    RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
 
 - PDO MySQL:
   . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
