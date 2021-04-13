@@ -843,10 +843,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		}
 
 		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
-		if (!params) {
-			// can we safely return here?
-			RETVAL_FALSE;
-		}
+		ZEND_ASSERT(params);
 
 		index = 0;
 		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
