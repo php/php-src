@@ -1709,7 +1709,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 		call_type = NULL;
 		ZVAL_UNDEF(&arg_array);
 
-		ptr = zend_generator_check_placeholder_frame(ptr);
+		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
+			ptr = zend_generator_check_placeholder_frame(ptr);
+		}
 
 		skip = ptr;
 		/* skip internal handler */
@@ -1911,7 +1913,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		stack_frame = zend_new_array(8);
 		zend_hash_real_init_mixed(stack_frame);
 
-		ptr = zend_generator_check_placeholder_frame(ptr);
+		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
+			ptr = zend_generator_check_placeholder_frame(ptr);
+		}
 
 		skip = ptr;
 		/* skip internal handler */
