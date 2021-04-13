@@ -3,9 +3,17 @@ PHP                                                                        NEWS
 ?? ??? 2021, PHP 8.0.5
 
 - Core:
+  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
+  . Fixed bug #80811 (Function exec without $output but with $restult_code
+    parameter crashes). (Nikita)
+  . Fixed bug #80814 (threaded mod_php won't load on FreeBSD: No space
+    available for static Thread Local Storage). (Dmitry)
   . Changed PowerPC CPU registers used by Zend VM to work around GCC bug.
     Old registers (r28/r29) might be clobbered by _restgpr routine used for
     return from C function compiled with -Os. (Dmitry)
+
+- Dba:
+  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
 
 - DOM:
   . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
@@ -22,16 +30,35 @@ PHP                                                                        NEWS
   . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
     Zelenka)
 
+- IMAP:
+  . Fixed bug #80800 (imap_open() fails when the flags parameter includes
+    CL_EXPUNGE). (girgias)
+
+- Intl:
+  . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
+    (cmb)
+
 - LibXML:
   . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
+  . Fixed bug #51903 (simplexml_load_file() doesn't use HTTP headers). (cmb)
+
+- MySQLnd:
+  . Fixed bug #80837 (Calling stmt_store_result after fetch doesn't throw an
+    error). (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug #80839 (PHP problem with JIT). (Dmitry)
   . Fixed bug #80861 (erronous array key overflow in 2D array with JIT).
     (Dmitry)
+  . Fixed bug #80786 (PHP crash using JIT). (Nikita)
+  . Fixed bug #80782 (DASM_S_RANGE_VREG on PHP_INT_MIN-1). (Dmitry)
 
 - Pcntl:
   . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
+
+- PCRE:
+  . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
+    0-width fullstring match). (Kamil Tekiela)
 
 - PDO_ODBC:
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
@@ -44,6 +71,7 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
     (cmb)
+  . Fixed bug #80774 (session_name() problem with backslash). (cmb)
 
 - SOAP:
   . Fixed bug #69668 (SOAP special XML characters in namespace URIs not
@@ -54,46 +82,6 @@ PHP                                                                        NEWS
     phpinfo()). (Rowan Tommins)
   . Fixed bug #80914 ('getdir' accidentally defined as an alias of 'dir').
     (Rowan Tommins)
-
-01 Apr 2021, PHP 8.0.4
-
-- Core:
-  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
-  . Fixed bug #80811 (Function exec without $output but with $restult_code
-    parameter crashes). (Nikita)
-  . Fixed bug #80814 (threaded mod_php won't load on FreeBSD: No space
-    available for static Thread Local Storage). (Dmitry)
-
-- Dba:
-  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
-
-- IMAP:
-  . Fixed bug #80800 (imap_open() fails when the flags parameter includes
-    CL_EXPUNGE). (girgias)
-
-- Intl:
-  . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
-    (cmb)
-
-- Libxml:
-  . Fixed bug #51903 (simplexml_load_file() doesn't use HTTP headers). (cmb)
-
-- MySQLnd:
-  . Fixed bug #80837 (Calling stmt_store_result after fetch doesn't throw an
-    error). (Kamil Tekiela)
-
-- Opcache:
-  . Fixed bug #80786 (PHP crash using JIT). (Nikita)
-  . Fixed bug #80782 (DASM_S_RANGE_VREG on PHP_INT_MIN-1). (Dmitry)
-
-- PCRE:
-  . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
-    0-width fullstring match). (Kamil Tekiela)
-
-- Session:
-  . Fixed bug #80774 (session_name() problem with backslash). (cmb)
-
-- Standard:
   . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
   . Fixed bug #78719 (http wrapper silently ignores long Location headers).
     (cmb)
@@ -702,4 +690,3 @@ PHP                                                                        NEWS
   . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
   . Fixed bug #78792 (zlib.output_compression disabled by Content-Type: image/).
     (cmb)
-
