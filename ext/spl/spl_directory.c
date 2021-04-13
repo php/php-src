@@ -1896,8 +1896,13 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 		intern->u.file.current_line_len = 0;
 	} else {
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			line_len = strcspn(buf, "\r\n");
-			buf[line_len] = '\0';
+			if (line_len > 0 && buf[line_len - 1] == '\n') {
+				line_len--;
+				if (line_len > 0 && buf[line_len - 1] == '\r') {
+					line_len--;
+				}
+				buf[line_len] = '\0';
+			}
 		}
 
 		intern->u.file.current_line = buf;
