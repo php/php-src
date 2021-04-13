@@ -12,7 +12,7 @@ foreach ($lines as $line) {
 
     $temp->rewind();
     $read = $temp->fgets();
-    var_dump($line === $read); 
+    var_dump($line === $read);
 
     $temp->rewind();
     $temp->setFlags(SplFileObject::DROP_NEW_LINE);
