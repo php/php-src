@@ -1942,7 +1942,7 @@ static void sccp_mark_feasible_successors(
 				scdf_mark_edge_feasible(scdf, block_num, target);
 				return;
 			}
-			s = 0;
+			s = block->successors_count - 1;
 			break;
 		}
 		default:
