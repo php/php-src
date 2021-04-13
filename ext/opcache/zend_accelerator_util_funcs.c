@@ -200,7 +200,13 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 				continue;
 			}
 		} else {
+			zend_class_entry *ce = Z_PTR(p->val);
 			t = _zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			if ((ce->ce_flags & ZEND_ACC_LINKED)
+			 && ZSTR_HAS_CE_CACHE(ce->name)
+			 && ZSTR_VAL(p->key)[0]) {
+				ZSTR_SET_CE_CACHE(ce->name, ce);
+			}
 		}
 	}
 	target->nInternalPointer = 0;
