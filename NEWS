@@ -3,9 +3,12 @@ PHP                                                                        NEWS
 ?? ??? 2021, PHP 7.4.18
 
 - Core:
-  . Changed PowerPC CPU registers used by Zend VM to work around GCC bug.
-    Old registers (r28/r29) might be clobbered by _restgpr routine used for
-    return from C function compiled with -Os. (Dmitry)
+  . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
+    (Nikita)
+  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
+
+- Dba:
+  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
 
 - DOM:
   . Fixed bug #66783 (UAF when appending DOMDocument to element). (cmb)
@@ -14,55 +17,13 @@ PHP                                                                        NEWS
   . Fixed bug #80024 (Duplication of info about inherited socket after pool
     removing). (Jakub Zelenka)
 
-- FTP:
-  . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
-    Zelenka)
-
-- LibXML:
-  . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
-
-- Opcache:
-  . Fixed bug #80950 (Variables become null in if statements). (Nikita)
-
-- Pcntl:
-  . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
-
-- PDO_ODBC:
-  . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
-    (cmb)
-
-- PDO_pgsql:
-  . Fixed bug #80892 (PDO::PARAM_INT is treated the same as PDO::PARAM_STR).
-    (Matteo)
-
-- Session:
-  . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
-    (cmb)
-
-- SOAP:
-  . Fixed bug #69668 (SOAP special XML characters in namespace URIs not
-    encoded). (cmb)
-
-- Standard:
-  . Fixed bug #80915 (Taking a reference to $_SERVER hides its values from
-    phpinfo()). (Rowan Tommins)
-
-01 Apr 2021, PHP 7.4.17
-
-- Core:
-  . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
-    (Nikita)
-  . Fixed bug #75776 (Flushing streams with compression filter is broken). (cmb)
-
-- Dba:
-  . Fixed bug #80817 (dba_popen() may cause segfault during RSHUTDOWN). (cmb)
-
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
 
-- Libxml:
+- LibXML:
   . Fixed bug #51903 (simplexml_load_file() doesn't use HTTP headers). (cmb)
+  . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
 
 - MySQLnd:
   . Fixed bug #80713 (SegFault when disabling ATTR_EMULATE_PREPARES and
@@ -77,11 +38,17 @@ PHP                                                                        NEWS
   . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
     0-width fullstring match). (Kamil Tekiela)
 
+- PDO_ODBC:
+  . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
+    (cmb)
+
 - phpdbg:
   . Fixed bug #80757 (Exit code is 0 when could not open file). (Felipe)
 
 - Session:
   . Fixed bug #80774 (session_name() problem with backslash). (cmb)
+  . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
+    (cmb)
 
 - Standard:
   . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
