@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
 
+- Opcache:
+  . Fixed bug #80900 (switch statement behavior inside function). (twosee)
+
 29 Apr 2021, PHP 7.4.18
 
 - Core:
