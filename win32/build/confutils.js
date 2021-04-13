@@ -1238,10 +1238,8 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-" + CMD_MOD2 + "$(_VC_MANIFEST_EMBED_EXE)";
 	}
 
-	if (PHP_SANITIZER == "yes") {
-		if (CLANG_TOOLSET) {
-			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
-		}
+	if (PHP_SANITIZER != "no" && (VS_TOOLSET || CLANG_TOOLSET)) {
+		add_sanitizer_libs("LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
 	}
 
 	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
@@ -2593,10 +2591,8 @@ function generate_makefile()
 			}
 		}
 	}
-	if (PHP_SANITIZER == "yes") {
-		if (CLANG_TOOLSET) {
-			extra_path = extra_path + ";" + get_clang_lib_dir() + "\\windows";
-		}
+	if (PHP_SANITIZER != "no" && CLANG_TOOLSET) {
+		extra_path = extra_path + ";" + get_clang_lib_dir() + "\\windows";
 	}
 	MF.WriteLine("set-tmp-env:");
 	MF.WriteLine("	" + CMD_MOD2 + "set PATH=" + extra_path + ";$(PATH)");
@@ -3305,6 +3301,43 @@ function toolset_setup_common_cflags()
 	}
 }
 
+function toolset_setup_sanitizer_cflags()
+{
+	if (PHP_SANITIZER == "no" || !(VS_TOOLSET || CLANG_TOOLSET)) {
+		return false;
+	}
+	MESSAGE("Enabling Sanitizers");
+	if (VS_TOOLSET) {
+		if(!search_paths('vswhere.exe', null, 'PATH')){
+			ERROR("Failed to find vswhere.exe");
+		}
+		var ver = execute('vswhere.exe -nologo -requires Microsoft.VisualStudio.Component.VC.ASAN -version [16.9,) -property installationVersion -utf8');
+		if(!ver.match(/\d+\.\d+\.\d+\.\d+/)){
+			ERROR('Sanitizers is not supported with your VS installation (VS version is too old or ASan workload not installed)');
+		}
+	} else {
+		if (!COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
+			ERROR("Failed to determine clang lib path");
+		}
+	}
+	var sanitizers = PHP_SANITIZER.replace(/^yes,/,'').split(',');
+	var sanitizer_cflags;
+	if (VS_TOOLSET) {
+		sanitizer_cflags = "/fsanitize=";
+		if (PHP_SANITIZER == "yes") {
+			sanitizers = [ "address" ]; // MSVC not yet implemented ub at this time
+		}
+	} else {
+		sanitizer_cflags = "-fsanitize=";
+		if (PHP_SANITIZER == "yes") {
+			sanitizers = [ "address", "undefined" ];
+		}
+	}
+	sanitizer_cflags = sanitizer_cflags + sanitizers.join(',');
+	ADD_FLAG("CFLAGS", sanitizer_cflags);
+	
+}
+
 function toolset_setup_intrinsic_cflags()
 {
 	var default_enabled = "sse2";
@@ -3435,7 +3468,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
 		ADD_FLAG("CFLAGS", "/LD /MD");
-		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
+		if (PHP_SANITIZER != "no"  && (VS_TOOLSET || CLANG_TOOLSET)) {
 			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
@@ -3703,19 +3736,11 @@ function get_clang_lib_dir()
 	return ret;
 }
 
-function add_asan_opts(cflags_name, libs_name, ldflags_name)
+function add_sanitizer_libs(libs_name, ldflags_name)
 {
-
-	var ver = null;
-
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
-		ver = RegExp.$1;
-	} else {
-		ERROR("Failed to determine clang lib path");
-	}
-
-	if (!!cflags_name) {
-		ADD_FLAG(cflags_name, "-fsanitize=address,undefined");
+	if(VS_TOOLSET){
+		// VS 2019 16.9 release donot need this
+		return ;
 	}
 	if (!!libs_name) {
 		if (X64) {

@@ -62,6 +62,8 @@ DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
 
+toolset_setup_sanitizer_cflags();
+
 if (VS_TOOLSET) {
 	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 	var PHP_MP_DISABLED = true;

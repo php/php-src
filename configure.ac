@@ -982,6 +982,11 @@ PHP_ARG_ENABLE([memory-sanitizer],,
     [Enable memory sanitizer (clang only)])],
   [no],
   [no])
+PHP_ARG_ENABLE([sanitizer],,
+  [AS_HELP_STRING([--enable-sanitizer],
+    [Enable sanitizers, like --enable-sanitizer=address,undefined for ASan and UBSan, Asan and UBSan is enabled in default."])],
+  [no],
+  [no])
 
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
@@ -1374,8 +1379,38 @@ fi
 
 dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
 if test "$PHP_MEMORY_SANITIZER" = "yes"; then
-  CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
-  CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  AX_CHECK_COMPILE_FLAG([-fsanitize=memory -fsanitize-memory-track-origins], [
+    CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+    CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  ], [AC_MSG_ERROR([MemorySanitizer is not available])])
+fi
+
+dnl --enable-sanitizer=[[yes,]a,b,c,...]
+if test "$PHP_SANITIZER" != "no"; then
+  sanitizers="$PHP_SANITIZER"
+  if test "$PHP_SANITIZER" = "yes"; then
+    dnl same as windows' default
+    sanitizers="address,undefined"
+  fi
+  sanitizer_cflags="-fsanitize="
+  _IFS=$IFS
+  IFS=','
+  for sanitizer in "$sanitizers"; do
+    if test x"$sanitizer" = x"yes" || test x"$sanitizer" = x"" ; then
+      continue
+    fi
+    if test x"$sanitizer" = x"memory" || test x"$memory-track-origins" = x"" ; then
+      if test "$PHP_MEMORY_SANITIZER" = "yes"; then
+        continue
+      fi
+    fi
+    sanitizer_cflags=",${sanitizer}"
+  done
+  IFS=$_IFS
+  AX_CHECK_COMPILE_FLAG([-fsanitize=${sanitizer}], [
+    CFLAGS="$CFLAGS -fsanitize=${sanitizer}"
+    CXXFLAGS="$CXXFLAGS -fsanitize=${sanitizer}"
+  ], [AC_MSG_ERROR([Sanitizer "${sanitizer}" is not available])])
 fi
 
 dnl
