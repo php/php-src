@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 7.4.18
+?? ??? ????, PHP 7.4.19
+
+
+
+29 Apr 2021, PHP 7.4.18
 
 - Core:
   . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
