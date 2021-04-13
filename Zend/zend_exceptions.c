@@ -550,20 +550,17 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
-			zend_error(E_WARNING, "Function name is not a string");
-			smart_str_appends(str, "[unknown function]");
+			zend_error(E_WARNING, "File name is not a string");
+			smart_str_appends(str, "[unknown file]: ");
 		} else{
-			zend_long line;
+			zend_long line = 0;
 			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
 				} else {
 					zend_error(E_WARNING, "Line is not an int");
-					line = 0;
 				}
-			} else {
-				line = 0;
 			}
 			smart_str_append(str, Z_STR_P(file));
 			smart_str_appendc(str, '(');
