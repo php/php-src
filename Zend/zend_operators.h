@@ -875,7 +875,40 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 	}
 }
 
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_u64_to_buf(char *buf, uint64_t num64) {
+#if SIZEOF_ZEND_LONG == 8
+	return zend_print_ulong_to_buf(buf, num64);
+#else
+	*buf = '\0';
+	while (num64 > ZEND_ULONG_MAX) {
+		*--buf = (char) (num64 % 10) + '0';
+		num64 /= 10;
+	}
+
+	zend_ulong num = (zend_ulong) num64;
+	do {
+		*--buf = (char) (num % 10) + '0';
+		num /= 10;
+	} while (num > 0);
+	return buf;
+#endif
+}
+
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_i64_to_buf(char *buf, int64_t num) {
+	if (num < 0) {
+	    char *result = zend_print_u64_to_buf(buf, ~((uint64_t) num) + 1);
+	    *--result = '-';
+		return result;
+	} else {
+	    return zend_print_u64_to_buf(buf, num);
+	}
+}
+
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
+ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num);
+ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num);
 
 static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 {
