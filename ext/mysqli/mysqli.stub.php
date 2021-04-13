@@ -10,11 +10,9 @@ final class mysqli_driver
 
     public int $driver_version;
 
-    /** @var bool */
-    public $reconnect = false;
+    public bool $reconnect = false;
 
-    /** @var int */
-    public $report_mode = 0;
+    public int $report_mode = 0;
 }
 
 class mysqli

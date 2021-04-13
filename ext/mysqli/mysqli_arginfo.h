@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b9583854314bc54295c1e1a4ec7f6b8c0ce6187c */
+ * Stub hash: 1c01e60c65f87e4f59435c3712296137d265dfdc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -1069,13 +1069,13 @@ static zend_class_entry *register_class_mysqli_driver(void)
 	zval property_reconnect_default_value;
 	ZVAL_BOOL(&property_reconnect_default_value, 0);
 	zend_string *property_reconnect_name = zend_string_init("reconnect", sizeof("reconnect") - 1, 1);
-	zend_declare_property_ex(class_entry, property_reconnect_name, &property_reconnect_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_reconnect_name, &property_reconnect_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_reconnect_name);
 
 	zval property_report_mode_default_value;
 	ZVAL_LONG(&property_report_mode_default_value, 0);
 	zend_string *property_report_mode_name = zend_string_init("report_mode", sizeof("report_mode") - 1, 1);
-	zend_declare_property_ex(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_report_mode_name);
 
 	return class_entry;
