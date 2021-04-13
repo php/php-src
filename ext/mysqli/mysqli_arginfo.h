@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35c309740ea0ee7328ec5dfdbbad057097ca24e7 */
+ * Stub hash: 3f3d19da5a2b7c8edc6dba0fde6215b93d10bb32 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -71,7 +71,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_execute, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_execute arginfo_mysqli_stmt_execute
@@ -644,7 +644,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_mysqli_stmt_data_seek arginfo_class_mysqli_result_data_seek
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_execute, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stmt_fetch arginfo_class_mysqli_character_set_name
