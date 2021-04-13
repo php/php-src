@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #80024 (Duplication of info about inherited socket after pool
     removing). (Jakub Zelenka)
 
+- FTP:
+  . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
+    Zelenka)
+
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
     (cmb)
@@ -35,8 +39,12 @@ PHP                                                                        NEWS
   . Fixed bug #80837 (Calling stmt_store_result after fetch doesn't throw an
     error). (Kamil Tekiela)
 
-- opcache:
+- Opcache:
   . Fixed bug #80805 (create simple class and get error in opcache.so). (Nikita)
+  . Fixed bug #80950 (Variables become null in if statements). (Nikita)
+
+- Pcntl:
+  . Fixed bug #79812 (Potential integer overflow in pcntl_exec()). (cmb)
 
 - PCRE:
   . Fixed bug #80866 (preg_split ignores limit flag when pattern with \K has
@@ -46,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed bug #80783 (PDO ODBC truncates BLOB records at every 256th byte).
     (cmb)
 
+- PDO_pgsql:
+  . Fixed bug #80892 (PDO::PARAM_INT is treated the same as PDO::PARAM_STR).
+    (Matteo)
+
 - phpdbg:
   . Fixed bug #80757 (Exit code is 0 when could not open file). (Felipe)
 
@@ -54,12 +66,18 @@ PHP                                                                        NEWS
   . Fixed bug #80889 (Cannot set save handler when save_handler is invalid).
     (cmb)
 
+- SOAP:
+  . Fixed bug #69668 (SOAP special XML characters in namespace URIs not
+    encoded). (cmb)
+
 - Standard:
-  . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
   . Fixed bug #78719 (http wrapper silently ignores long Location headers).
     (cmb)
+  . Fixed bug #80771 (phpinfo(INFO_CREDITS) displays nothing in CLI). (cmb)
   . Fixed bug #80838 (HTTP wrapper waits for HTTP 1 response after HTTP 101).
     (manuelm)
+  . Fixed bug #80915 (Taking a reference to $_SERVER hides its values from
+    phpinfo()). (Rowan Tommins)
 
 04 Mar 2021, php 7.4.16
 
