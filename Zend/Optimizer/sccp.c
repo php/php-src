@@ -425,12 +425,14 @@ static inline int fetch_array_elem(zval **result, zval *op1, zval *op2) {
 		case IS_LONG:
 			*result = zend_hash_index_find(Z_ARR_P(op1), Z_LVAL_P(op2));
 			return SUCCESS;
-		case IS_DOUBLE:
-			if (!is_long_compatible(Z_DVAL_P(op2))) {
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op2));
+			if (!zend_is_long_compatible(Z_DVAL_P(op2), lval)) {
 				return FAILURE;
 			}
-			*result = zend_hash_index_find(Z_ARR_P(op1), zend_dval_to_lval(Z_DVAL_P(op2)));
+			*result = zend_hash_index_find(Z_ARR_P(op1), lval);
 			return SUCCESS;
+		}
 		case IS_STRING:
 			*result = zend_symtable_find(Z_ARR_P(op1), Z_STR_P(op2));
 			return SUCCESS;
@@ -511,12 +513,14 @@ static inline int ct_eval_del_array_elem(zval *result, zval *key) {
 		case IS_LONG:
 			zend_hash_index_del(Z_ARR_P(result), Z_LVAL_P(key));
 			break;
-		case IS_DOUBLE:
-			if (!is_long_compatible(Z_DVAL_P(key))) {
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
-			zend_hash_index_del(Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)));
+			zend_hash_index_del(Z_ARR_P(result), lval);
 			break;
+		}
 		case IS_STRING:
 			zend_symtable_del(Z_ARR_P(result), Z_STR_P(key));
 			break;
@@ -554,14 +558,16 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), Z_LVAL_P(key), value);
 			break;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
 			SEPARATE_ARRAY(result);
-			if (!is_long_compatible(Z_DVAL_P(key))) {
+			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
 			value = zend_hash_index_update(
-				Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)), value);
+				Z_ARR_P(result), lval, value);
 			break;
+		}
 		case IS_STRING:
 			SEPARATE_ARRAY(result);
 			value = zend_symtable_update(Z_ARR_P(result), Z_STR_P(key), value);

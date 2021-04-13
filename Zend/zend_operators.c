@@ -305,13 +305,14 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 			return 1;
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
-			if (!is_long_compatible(dval)) {
+			zend_long lval = zend_dval_to_lval(dval);
+			if (!zend_is_long_compatible(dval, lval)) {
 				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", dval);
 				if (UNEXPECTED(EG(exception))) {
 					*failed = 1;
 				}
 			}
-			return zend_dval_to_lval(dval);
+			return lval;
 		}
 		case IS_STRING:
 			{
@@ -341,14 +342,15 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					if (!is_long_compatible(dval)) {
+					 lval = zend_dval_to_lval_cap(dval);
+					if (!zend_is_long_compatible(dval, lval)) {
 						zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
 							Z_STRVAL_P(op));
 						if (UNEXPECTED(EG(exception))) {
 							*failed = 1;
 						}
 					}
-					return zend_dval_to_lval_cap(dval);
+					return lval;
 				}
 			}
 		case IS_OBJECT:
@@ -824,14 +826,15 @@ try_again:
 			return Z_LVAL_P(op);
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
+			zend_long lval = zend_dval_to_lval(dval);
 			if (EXPECTED(!is_lax)) {
-				if (!is_long_compatible(dval)) {
+				if (!zend_is_long_compatible(dval, lval)) {
 					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", dval);
 					// TODO Need to handle this here?
 					//if (UNEXPECTED(EG(exception))) {}
 				}
 			}
-			return zend_dval_to_lval(dval);
+			return lval;
 		}
 		case IS_STRING:
 			{
@@ -849,15 +852,16 @@ try_again:
 					 * behaviour.
 					 */
 					 /* Most usages are expected to not be (int) casts */
+					lval = zend_dval_to_lval_cap(dval);
 					if (EXPECTED(!is_lax)) {
-						if (!is_long_compatible(dval)) {
+						if (!zend_is_long_compatible(dval, lval)) {
 							zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
 								Z_STRVAL_P(op));
 							// TODO Need to handle this here?
 							//if (UNEXPECTED(EG(exception))) {}
 						}
 					}
-					return zend_dval_to_lval_cap(dval);
+					return lval;
 				}
 			}
 		case IS_ARRAY:

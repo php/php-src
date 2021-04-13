@@ -503,15 +503,16 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			return 0;
 		} else {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(arg));
 			/* Manually check arg_num is not (uint32_t)-1, as otherwise its called by
 			 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
-			if (UNEXPECTED(!is_long_compatible(Z_DVAL_P(arg)) && arg_num != (uint32_t)-1)) {
+			if (UNEXPECTED(!zend_is_long_compatible(Z_DVAL_P(arg), lval) && arg_num != (uint32_t)-1)) {
 				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", Z_DVAL_P(arg));
 				if (UNEXPECTED(EG(exception))) {
 					return 0;
 				}
 			}
-			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
+			*dest = lval;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
@@ -519,6 +520,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
+				zend_long lval;
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
@@ -526,18 +528,19 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 					return 0;
 				}
 
+				lval = zend_dval_to_lval(d);
 				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError
 				 * Manually check to get correct warning text mentioning string origin
 				 * Check arg_num is not (uint32_t)-1, as otherwise its called by
 				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
-				if (UNEXPECTED(!is_long_compatible(d) && arg_num != (uint32_t)-1)) {
+				if (UNEXPECTED(!zend_is_long_compatible(d, lval) && arg_num != (uint32_t)-1)) {
 					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
 						Z_STRVAL_P(arg));
 					if (UNEXPECTED(EG(exception))) {
 						return 0;
 					}
 				}
-				*dest = zend_dval_to_lval(d);
+				*dest = lval;
 			} else {
 				return 0;
 			}

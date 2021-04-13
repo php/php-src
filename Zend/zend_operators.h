@@ -134,16 +134,17 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 }
 /* }}} */
 
-static zend_always_inline bool is_long_compatible(double d) {
-	return ((double)(zend_long) d == d);
+static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
+	return ((double)l == d);
 }
 
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
-	if (!is_long_compatible(d)) {
+	zend_long l = zend_dval_to_lval(d);
+	if (!zend_is_long_compatible(d, l)) {
 		zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", d);
 	}
-	return zend_dval_to_lval(d);
+	return l;
 }
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
