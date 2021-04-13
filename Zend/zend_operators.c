@@ -3044,6 +3044,59 @@ ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 }
 /* }}} */
 
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_u64_to_buf(char *buf, uint64_t num64) {
+#if SIZEOF_ZEND_LONG == 8
+	return zend_print_ulong_to_buf(buf, num64);
+#else
+	*buf = '\0';
+	while (num64 > ZEND_ULONG_MAX) {
+		*--buf = (char) (num64 % 10) + '0';
+		num64 /= 10;
+	}
+
+	zend_ulong num = (zend_ulong) num64;
+	do {
+		*--buf = (char) (num % 10) + '0';
+		num /= 10;
+	} while (num > 0);
+	return buf;
+#endif
+}
+
+/* buf points to the END of the buffer */
+static zend_always_inline char *zend_print_i64_to_buf(char *buf, int64_t num) {
+	if (num < 0) {
+	    char *result = zend_print_u64_to_buf(buf, ~((uint64_t) num) + 1);
+	    *--result = '-';
+		return result;
+	} else {
+	    return zend_print_u64_to_buf(buf, num);
+	}
+}
+
+ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num)
+{
+	if (num <= 9) {
+		return ZSTR_CHAR((zend_uchar)'0' + (zend_uchar)num);
+	} else {
+		char buf[20 + 1];
+		char *res = zend_print_u64_to_buf(buf + sizeof(buf) - 1, num);
+		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+	}
+}
+
+ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num)
+{
+	if ((uint64_t)num <= 9) {
+		return ZSTR_CHAR((zend_uchar)'0' + (zend_uchar)num);
+	} else {
+		char buf[20 + 1];
+		char *res = zend_print_i64_to_buf(buf + sizeof(buf) - 1, num);
+		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+	}
+}
+
 ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
     return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
 }
