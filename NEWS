@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.5
+?? ??? 2021, PHP 8.0.6
+
+29 Apr 2021, PHP 8.0.5
 
 - Core:
   . Changed PowerPC CPU registers used by Zend VM to work around GCC bug.
@@ -702,4 +704,3 @@ PHP                                                                        NEWS
   . Fixed bug #71417 (fread() does not report zlib.inflate errors). (cmb)
   . Fixed bug #78792 (zlib.output_compression disabled by Content-Type: image/).
     (cmb)
-
