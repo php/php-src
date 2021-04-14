@@ -386,15 +386,15 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		encodePtr enc = NULL;
 		zval rv;
 
-		ztype = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_type", sizeof("enc_type")-1, 1, &rv);
-		if (ztype == NULL || Z_TYPE_P(ztype) != IS_LONG) {
+		ztype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_type", sizeof("enc_type")-1, 1, &rv);
+		if (Z_TYPE_P(ztype) != IS_LONG) {
 			soap_error0(E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
 		}
 
-		zstype = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
-		if (zstype != NULL && Z_TYPE_P(zstype) == IS_STRING) {
-			zns = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
-			if (zns != NULL && Z_TYPE_P(zns) == IS_STRING) {
+		zstype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
+		if (Z_TYPE_P(zstype) == IS_STRING) {
+			zns = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
+			if (Z_TYPE_P(zns) == IS_STRING) {
 				enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 			} else {
 				zns = NULL;
@@ -420,14 +420,14 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			enc = encode;
 		}
 
-		zdata = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_value", sizeof("enc_value")-1, 1, &rv);
+		zdata = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_value", sizeof("enc_value")-1, 1, &rv);
 		node = master_to_xml(enc, zdata, style, parent);
 
 		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
-			zstype = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
-			if (zstype != NULL && Z_TYPE_P(zstype) == IS_STRING) {
-				zns = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
-				if (zns != NULL && Z_TYPE_P(zns) == IS_STRING) {
+			zstype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
+			if (Z_TYPE_P(zstype) == IS_STRING) {
+				zns = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
+				if (Z_TYPE_P(zns) == IS_STRING) {
 					set_ns_and_type_ex(node, Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 				} else {
 					set_ns_and_type_ex(node, NULL, Z_STRVAL_P(zstype));
@@ -435,12 +435,12 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			}
 		}
 
-		zname = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_name", sizeof("enc_name")-1, 1, &rv);
-		if (zname != NULL && Z_TYPE_P(zname) == IS_STRING) {
+		zname = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_name", sizeof("enc_name")-1, 1, &rv);
+		if (Z_TYPE_P(zname) == IS_STRING) {
 			xmlNodeSetName(node, BAD_CAST(Z_STRVAL_P(zname)));
 		}
-		znamens = zend_read_property(soap_var_class_entry, Z_OBJ_P(data), "enc_namens", sizeof("enc_namens")-1, 1, &rv);
-		if (znamens != NULL && Z_TYPE_P(znamens) == IS_STRING) {
+		znamens = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(data), "enc_namens", sizeof("enc_namens")-1, 1, &rv);
+		if (Z_TYPE_P(znamens) == IS_STRING) {
 			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_P(znamens));
 			xmlSetNs(node, nsp);
 		}
@@ -1170,11 +1170,10 @@ static void set_zval_property(zval* object, char* name, zval* val)
 static zval* get_zval_property(zval* object, char* name, zval *rv)
 {
 	if (Z_TYPE_P(object) == IS_OBJECT) {
-		zval *data = zend_read_property(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name), 1, rv);
+		zval *data = zend_read_property_deref(Z_OBJCE_P(object), Z_OBJ_P(object), name, strlen(name), 1, rv);
 		if (data == &EG(uninitialized_zval)) {
 			return NULL;
 		}
-		ZVAL_DEREF(data);
 		return data;
 	} else if (Z_TYPE_P(object) == IS_ARRAY) {
 		return zend_hash_str_find_deref(Z_ARRVAL_P(object), name, strlen(name));
@@ -3496,21 +3495,21 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 		    Z_OBJCE_P(tmp) == soap_var_class_entry) {
 			zval *ztype;
 
-			ztype = zend_read_property(soap_var_class_entry, Z_OBJ_P(tmp), "enc_type", sizeof("enc_type")-1, 1, &rv);
-			if (ztype == NULL || Z_TYPE_P(ztype) != IS_LONG) {
+			ztype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(tmp), "enc_type", sizeof("enc_type")-1, 1, &rv);
+			if (Z_TYPE_P(ztype) != IS_LONG) {
 				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_P(ztype);
 
-			ztype = zend_read_property(soap_var_class_entry, Z_OBJ_P(tmp), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
-			if (ztype != NULL && Z_TYPE_P(ztype) == IS_STRING) {
+			ztype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(tmp), "enc_stype", sizeof("enc_stype")-1, 1, &rv);
+			if (Z_TYPE_P(ztype) == IS_STRING) {
 				cur_stype = Z_STRVAL_P(ztype);
 			} else {
 				cur_stype = NULL;
 			}
 
-			ztype = zend_read_property(soap_var_class_entry, Z_OBJ_P(tmp), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
-			if (ztype != NULL && Z_TYPE_P(ztype) == IS_STRING) {
+			ztype = zend_read_property_deref(soap_var_class_entry, Z_OBJ_P(tmp), "enc_ns", sizeof("enc_ns")-1, 1, &rv);
+			if (Z_TYPE_P(ztype) == IS_STRING) {
 				cur_ns = Z_STRVAL_P(ztype);
 			} else {
 				cur_ns = NULL;

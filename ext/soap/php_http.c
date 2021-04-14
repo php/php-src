@@ -34,15 +34,15 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 {
 	zval *login, *password, rv;
 
-	login = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_login", sizeof("_proxy_login")-1, 1, &rv);
-	if (login != NULL && Z_TYPE_P(login) == IS_STRING) {
+	login = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_login", sizeof("_proxy_login")-1, 1, &rv);
+	if (Z_TYPE_P(login) == IS_STRING) {
 		zend_string *buf;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
 		smart_str_appendc(&auth, ':');
-		password = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_password", sizeof("_proxy_password")-1, 1, &rv);
-		if (password != NULL && Z_TYPE_P(password) == IS_STRING) {
+		password = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_password", sizeof("_proxy_password")-1, 1, &rv);
+		if (Z_TYPE_P(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
 		}
 		smart_str_0(&auth);
@@ -62,11 +62,11 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 {
 	zval *login, *password, *digest, rv;
 
-	login = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv);
+	login = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv);
 
-	if (login != NULL && Z_TYPE_P(login) == IS_STRING &&
+	if (Z_TYPE_P(login) == IS_STRING &&
 	    (
-	    	(digest = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv)) == NULL ||
+	    	(digest = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv)) == NULL ||
 	    	Z_TYPE_P(digest) == IS_NULL
 	    )) {
 		zend_string* buf;
@@ -74,8 +74,8 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 
 		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
 		smart_str_appendc(&auth, ':');
-		password = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
-		if (password != NULL && Z_TYPE_P(password) == IS_STRING) {
+		password = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
+		if (Z_TYPE_P(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
 		}
 		smart_str_0(&auth);
@@ -173,9 +173,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	struct timeval tv;
 	struct timeval *timeout = NULL;
 
-	proxy_host = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1, 1, &rv);
-	if (proxy_host != NULL && Z_TYPE_P(proxy_host) == IS_STRING &&
-	    (proxy_port = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1, 1, &rv)) != NULL &&
+	proxy_host = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1, 1, &rv);
+	if (Z_TYPE_P(proxy_host) == IS_STRING &&
+	    (proxy_port = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1, 1, &rv)) != NULL &&
 	    Z_TYPE_P(proxy_port) == IS_LONG) {
 		host = Z_STRVAL_P(proxy_host);
 		port = Z_LVAL_P(proxy_port);
@@ -184,8 +184,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		host = ZSTR_VAL(phpurl->host);
 		port = phpurl->port;
 	}
-	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_connection_timeout", sizeof("_connection_timeout")-1, 1, &rv);
-	if (tmp != NULL && Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
+	tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_connection_timeout", sizeof("_connection_timeout")-1, 1, &rv);
+	if (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
 	  tv.tv_sec = Z_LVAL_P(tmp);
 	  tv.tv_usec = 0;
 		timeout = &tv;
@@ -196,8 +196,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 
 	/* Changed ternary operator to an if/else so that additional comparisons can be done on the ssl_method property */
 	if (use_ssl && !*use_proxy) {
-		tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1, 1, &rv);
-		if (tmp != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+		tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1, 1, &rv);
+		if (Z_TYPE_P(tmp) == IS_LONG) {
 			/* uses constants declared in soap.c to determine ssl uri protocol */
 			switch (Z_LVAL_P(tmp)) {
 				case SOAP_SSL_METHOD_TLS:
@@ -284,8 +284,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 			/* if a stream is created without encryption, check to see if SSL method parameter is specified and use
 			   proper encrypyion method based on constants defined in soap.c */
 			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
-			tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1, 1, &rv);
-			if (tmp != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+			tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1, 1, &rv);
+			if (Z_TYPE_P(tmp) == IS_LONG) {
 				switch (Z_LVAL_P(tmp)) {
 					case SOAP_SSL_METHOD_TLS:
 						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
@@ -375,8 +375,8 @@ int make_http_soap_request(zval        *this_ptr,
 
 	request = buf;
 	/* Compress request */
-	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "compression", sizeof("compression")-1, 1, &rv);
-	if (tmp != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+	tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "compression", sizeof("compression")-1, 1, &rv);
+	if (Z_TYPE_P(tmp) == IS_LONG) {
 		int level = Z_LVAL_P(tmp) & 0x0f;
 		int kind  = Z_LVAL_P(tmp) & SOAP_COMPRESSION_DEFLATE;
 
@@ -420,11 +420,11 @@ int make_http_soap_request(zval        *this_ptr,
 	  }
 	}
 
-	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "httpsocket", sizeof("httpsocket")-1, 1, &rv);
-	if (tmp != NULL && Z_TYPE_P(tmp) != IS_NULL) {
+	tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "httpsocket", sizeof("httpsocket")-1, 1, &rv);
+	if (Z_TYPE_P(tmp) != IS_NULL) {
 		php_stream_from_zval_no_verify(stream,tmp);
-		tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1, 1, &rv);
-		if (tmp != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+		tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1, 1, &rv);
+		if (Z_TYPE_P(tmp) == IS_LONG) {
 			use_proxy = Z_LVAL_P(tmp);
 		}
 	} else {
@@ -435,8 +435,8 @@ int make_http_soap_request(zval        *this_ptr,
 		phpurl = php_url_parse(location);
 	}
 
-	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_stream_context", sizeof("_stream_context")-1, 1, &rv);
-	if (tmp != NULL && Z_TYPE_P(tmp) != IS_NULL) {
+	tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_stream_context", sizeof("_stream_context")-1, 1, &rv);
+	if (Z_TYPE_P(tmp) != IS_NULL) {
 		context = php_stream_context_from_zval(tmp, 0);
 	}
 
@@ -492,9 +492,8 @@ try_again:
 	/* Check if request to the same host */
 	if (stream != NULL) {
 	  php_url *orig;
-	  	tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "httpurl", sizeof("httpurl")-1, 1, &rv);
-		if (tmp != NULL &&
-		    (orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
+	  	tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "httpurl", sizeof("httpurl")-1, 1, &rv);
+		if ((orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
 		    ((use_proxy && !use_ssl) ||
 		     (((use_ssl && orig->scheme != NULL && zend_string_equals_literal(orig->scheme, "https")) ||
 		      (!use_ssl && orig->scheme == NULL) ||
@@ -591,7 +590,7 @@ try_again:
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
 		if (!http_1_1 ||
-			((tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_keep_alive", sizeof("_keep_alive")-1, 1, &rv)) != NULL &&
+			((tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_keep_alive", sizeof("_keep_alive")-1, 1, &rv)) != NULL &&
 			 (Z_TYPE_P(tmp) == IS_FALSE || (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 0)))) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
@@ -599,8 +598,8 @@ try_again:
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: Keep-Alive\r\n");
 		}
-		tmp = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_user_agent", sizeof("_user_agent")-1, 1, &rv);
-		if (tmp != NULL && Z_TYPE_P(tmp) == IS_STRING) {
+		tmp = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_user_agent", sizeof("_user_agent")-1, 1, &rv);
+		if (Z_TYPE_P(tmp) == IS_STRING) {
 			if (Z_STRLEN_P(tmp) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
 				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
@@ -664,13 +663,13 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
-		login = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv);
-		if (login != NULL && Z_TYPE_P(login) == IS_STRING) {
+		login = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv);
+		if (Z_TYPE_P(login) == IS_STRING) {
 			zval *digest;
 
 			has_authorization = 1;
-			digest = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv);
-			if (digest != NULL && Z_TYPE_P(digest) != IS_NULL) {
+			digest = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv);
+			if (Z_TYPE_P(digest) != IS_NULL) {
 				if (Z_TYPE_P(digest) == IS_ARRAY) {
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
 					zend_long     nonce;
@@ -703,8 +702,8 @@ try_again:
 						PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 					}
 					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
-					password = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
-					if (password != NULL && Z_TYPE_P(password) == IS_STRING) {
+					password = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
+					if (Z_TYPE_P(password) == IS_STRING) {
 						PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_P(password), Z_STRLEN_P(password));
 					}
 					PHP_MD5Final(hash, &md5ctx);
@@ -818,8 +817,8 @@ try_again:
 				smart_str auth = {0};
 				smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
 				smart_str_appendc(&auth, ':');
-				password = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
-				if (password != NULL && Z_TYPE_P(password) == IS_STRING) {
+				password = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv);
+				if (Z_TYPE_P(password) == IS_STRING) {
 					smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
 				}
 				smart_str_0(&auth);
@@ -838,8 +837,8 @@ try_again:
 		}
 
 		/* Send cookies along with request */
-		cookies = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_cookies", sizeof("_cookies")-1, 1, &rv);
-		if (cookies != NULL && Z_TYPE_P(cookies) == IS_ARRAY) {
+		cookies = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_cookies", sizeof("_cookies")-1, 1, &rv);
+		if (Z_TYPE_P(cookies) == IS_ARRAY) {
 			zval *data;
 			zend_string *key;
 			uint32_t n = zend_hash_num_elements(Z_ARRVAL_P(cookies));
@@ -876,8 +875,8 @@ try_again:
 
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
-		trace = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "trace", sizeof("trace")-1, 1, &rv);
-		if (trace != NULL && (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		trace = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "trace", sizeof("trace")-1, 1, &rv);
+		if ((Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
 			add_property_stringl(this_ptr, "__last_request_headers", ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
 		}
 		smart_str_appendl(&soap_headers, request->val, request->len);
@@ -925,8 +924,8 @@ try_again:
 			return FALSE;
 		}
 
-		trace = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "trace", sizeof("trace")-1, 1, &rv);
-		if (trace != NULL && (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		trace = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "trace", sizeof("trace")-1, 1, &rv);
+		if ((Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
 			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
 		}
 
@@ -976,8 +975,8 @@ try_again:
 		char *eqpos, *sempos;
 		zval *cookies;
 
-		cookies = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_cookies", sizeof("_cookies")-1, 1, &rv);
-		if (cookies == NULL || Z_TYPE_P(cookies) != IS_ARRAY) {
+		cookies = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_cookies", sizeof("_cookies")-1, 1, &rv);
+		if (Z_TYPE_P(cookies) != IS_ARRAY) {
 			zval tmp_cookies;
 			array_init(&tmp_cookies);
 			zend_update_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
@@ -1173,12 +1172,12 @@ try_again:
 
 		if (auth && strstr(auth, "Digest") == auth &&
 			(
-	    		(digest = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv)) == NULL ||
+	    		(digest = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_digest", sizeof("_digest")-1, 1, &rv)) == NULL ||
 	    		Z_TYPE_P(digest) != IS_ARRAY
 	    	) &&
-		    (login = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv)) != NULL &&
+		    (login = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_login", sizeof("_login")-1, 1, &rv)) != NULL &&
 		    Z_TYPE_P(login) == IS_STRING &&
-		    (password = zend_read_property(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv)) != NULL &&
+		    (password = zend_read_property_deref(Z_OBJCE_P(this_ptr), Z_OBJ_P(this_ptr), "_password", sizeof("_password")-1, 1, &rv)) != NULL &&
 		    Z_TYPE_P(password) == IS_STRING) {
 			char *s;
 			zval digest;
