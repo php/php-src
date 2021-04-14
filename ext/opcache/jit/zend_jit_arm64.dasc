@@ -1011,7 +1011,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||				if (opline) {
 |					brk #0	// TODO
 ||				}
-|				brk #0	// TODO
+|				EXT_CALL zend_objects_store_del, REG0
 ||				break;
 ||			}
 ||		}
@@ -1833,7 +1833,7 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_tmp:
-	|	brk #0	// TODO
+	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -1841,6 +1841,7 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
+	|	add sp, sp, #16
 	|	ret
 	return 1;
 }
@@ -3673,7 +3674,36 @@ static int zend_jit_assign_to_variable_call(dasm_State    **Dst,
                                             zend_jit_addr   __res_addr,
                                             bool            __check_exception)
 {
-	|	brk #0	// TODO
+	if (Z_MODE(var_addr) != IS_MEM_ZVAL || Z_REG(var_addr) != ZREG_FCARG1x || Z_OFFSET(var_addr) != 0) {
+		|	LOAD_ZVAL_ADDR FCARG1x, var_addr
+	}
+	if (Z_MODE(val_addr) != IS_MEM_ZVAL || Z_REG(val_addr) != ZREG_FCARG2x || Z_OFFSET(val_addr) != 0) {
+		|	LOAD_ZVAL_ADDR FCARG2x, val_addr
+	}
+	if (opline) {
+		|	SET_EX_OPLINE opline, REG0
+	}
+	if (!(val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+		|	bl ->assign_tmp
+	} else if (val_type == IS_CONST) {
+		|	brk #0	// TODO
+	} else if (val_type == IS_TMP_VAR) {
+		|	brk #0	// TODO
+	} else if (val_type == IS_VAR) {
+		if (!(val_info & MAY_BE_REF)) {
+			|	brk #0	// TODO
+		} else {
+			|	brk #0	// TODO
+		}
+	} else if (val_type == IS_CV) {
+		if (!(val_info & MAY_BE_REF)) {
+			|	brk #0	// TODO
+		} else {
+			|	brk #0	// TODO
+		}
+	} else {
+		ZEND_UNREACHABLE();
+	}
 
 	return 1;
 }
@@ -7151,7 +7181,27 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, prop_info->offset);
-		|	brk #0	// TODO
+		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
+			// Undefined property with magic __get()/__set()
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				if (!exit_addr) {
+					return 0;
+				}
+				|	brk #0	// TODO
+			} else {
+				|	brk #0	// TODO
+				needs_slow_path = 1;
+			}
+		}
+		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+			uint32_t info = val_info;
+
+			|	// value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+			|	brk #0	// TODO
+		}
 	}
 
 	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
