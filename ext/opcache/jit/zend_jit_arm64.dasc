@@ -7127,7 +7127,136 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
 
-	|	brk #0	// TODO
+	member = RT_CONSTANT(opline, opline->op2);
+	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
+	name = Z_STR_P(member);
+	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+
+	if (opline->op1_type == IS_UNUSED || use_this) {
+		|	brk #0	// TODO
+		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
+	} else {
+		if (opline->op1_type == IS_VAR
+		 && (op1_info & MAY_BE_INDIRECT)
+		 && Z_REG(op1_addr) == ZREG_FP) {
+			|	brk #0	// TODO
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+		}
+		if (op1_info & MAY_BE_REF) {
+			|	brk #0	// TODO
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+		}
+		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				if (!exit_addr) {
+					return 0;
+				}
+				|	brk #0	// TODO
+			} else {
+				|	brk #0	// TODO
+			}
+		}
+		|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+	}
+
+	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		if (prop_info) {
+			ce = trace_ce;
+			ce_is_instanceof = 0;
+			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
+				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+					return 0;
+				}
+				if (ssa->var_info && ssa_op->op1_use >= 0) {
+					ssa->var_info[ssa_op->op1_use].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_use].ce = ce;
+					ssa->var_info[ssa_op->op1_use].is_instanceof = ce_is_instanceof;
+				}
+				if (ssa->var_info && ssa_op->op1_def >= 0) {
+					ssa->var_info[ssa_op->op1_def].type |= MAY_BE_CLASS_GUARD;
+					ssa->var_info[ssa_op->op1_def].ce = ce;
+					ssa->var_info[ssa_op->op1_def].is_instanceof = ce_is_instanceof;
+				}
+			}
+		}
+	}
+
+	if (!prop_info) {
+		needs_slow_path = 1;
+
+		|	brk #0	// TODO
+		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+	} else {
+		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, prop_info->offset);
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+			|	brk #0	// TODO
+		} else {
+			|	LOAD_32BIT_VAL TMP1w, (prop_info->offset + 8)
+			|	ldrb TMP2w, [FCARG1x, TMP1]
+			|	IF_TYPE TMP2w, IS_UNDEF, >7
+			needs_slow_path = 1;
+		}
+		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+			uint32_t info = val_info;
+
+			|	brk #0	// TODO
+		}
+	}
+
+	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
+		zend_jit_addr var_addr = prop_addr;
+		uint32_t var_info = MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+		uint32_t var_def_info = MAY_BE_ANY|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
+
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+		|	brk #0
+	}
+
+	if (needs_slow_path) {
+		|.cold_code
+		|7:
+		|	SET_EX_OPLINE opline, REG0
+		|	// value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
+		|	LOAD_ADDR FCARG2x, name
+		|	LOAD_ZVAL_ADDR CARG3, val_addr
+		|	ldr CARG4, EX->run_time_cache
+		|	LOAD_32BIT_VAL TMP1w, (opline+1)->extended_value
+		|	add CARG4, CARG4, TMP1
+		|	LOAD_ADDR CARG5, binary_op
+		|	EXT_CALL zend_jit_assign_obj_op_helper, REG0
+
+		if (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			val_info |= MAY_BE_RC1|MAY_BE_RCN;
+		}
+
+		|8:
+		|	// FREE_OP_DATA();
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline
+		|	b >9
+		|.code
+	}
+
+	|9:
+	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
+	}
+
+	if (may_throw) {
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
