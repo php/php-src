@@ -276,7 +276,7 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 
 static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{{ */
 {
-	return zend_default_exception_new_ex(class_type, 2);
+	return zend_default_exception_new_ex(class_type, 0);
 }
 /* }}} */
 
