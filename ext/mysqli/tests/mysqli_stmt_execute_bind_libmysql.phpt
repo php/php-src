@@ -1,52 +1,44 @@
 --TEST--
-mysqli_stmt_execute() - bind in execute
+mysqli_stmt_execute() - bind in execute - not supported with libmysql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
-}
-if (mysqli_get_server_version($link) <= 40100) {
-    die(sprintf('skip Needs MySQL 4.1+, found version %d.', mysqli_get_server_version($link)));
-}
+require_once 'skipif.inc';
+require_once 'skipifconnectfailure.inc';
 if (stristr(mysqli_get_client_info(), 'mysqlnd')) {
     die("skip: only applicable for libmysqlclient");
 }
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+require_once "connect.inc";
 
-    require('table.inc');
+require 'table.inc';
 
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-    // first, control case
-    $id = 1;
-    $abc = 'abc';
-    $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
-    $stmt->bind_param('sss', ...[&$abc, 42, $id]);
-    $stmt->execute();
-    assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
-    $stmt = null;
+// first, control case
+$id = 1;
+$abc = 'abc';
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+$stmt->bind_param('sss', ...[&$abc, 42, $id]);
+$stmt->execute();
+assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
+$stmt = null;
 
-    // 1. same as the control case, but skipping the middle-man (bind_param)
-    $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
-    try {
-        $stmt->execute([&$abc, 42, $id]);
-    } catch (ArgumentCountError $e) {
-        echo '[001] '.$e->getMessage()."\n";
-    }
-    $stmt = null;
+// 1. same as the control case, but skipping the middle-man (bind_param)
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute([&$abc, 42, $id]);
+} catch (ArgumentCountError $e) {
+    echo '[001] '.$e->getMessage()."\n";
+}
+$stmt = null;
 
-    mysqli_close($link);
-    print "done!";
+mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 [001] Binding parameters in execute is not supported with libmysqlclient
-done!
