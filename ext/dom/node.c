@@ -603,11 +603,11 @@ int dom_node_prefix_read(dom_object *obj, zval *retval)
 
 int dom_node_prefix_write(dom_object *obj, zval *newval)
 {
-	zend_string *str;
+	zend_string *prefix;
 	xmlNode *nodep, *nsnode = NULL;
 	xmlNsPtr ns = NULL, curns;
 	char *strURI;
-	char *prefix;
+	char *prefix_char;
 
 	nodep = dom_object_get_node(obj);
 
@@ -627,43 +627,43 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			str = zval_try_get_string(newval);
-			if (UNEXPECTED(!str)) {
+			prefix = zval_try_get_string(newval);
+			if (UNEXPECTED(!prefix)) {
 				return FAILURE;
 			}
 
-			prefix = ZSTR_VAL(str);
-			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
+			prefix_char = ZSTR_VAL(prefix);
+			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix_char)) {
 				strURI = (char *) nodep->ns->href;
 				if (strURI == NULL ||
-					(!strcmp(prefix, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
-					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp(prefix, "xmlns") &&
+					(zend_string_equals_literal(prefix, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
+					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix, "xmlns") &&
 					 strcmp(strURI, (char *) DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp((char *) nodep->name, "xmlns"))) {
 					ns = NULL;
 				} else {
 					curns = nsnode->nsDef;
 					while (curns != NULL) {
-						if (xmlStrEqual((xmlChar *)prefix, curns->prefix) && xmlStrEqual(nodep->ns->href, curns->href)) {
+						if (xmlStrEqual((xmlChar *)prefix_char, curns->prefix) && xmlStrEqual(nodep->ns->href, curns->href)) {
 							ns = curns;
 							break;
 						}
 						curns = curns->next;
 					}
 					if (ns == NULL) {
-						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix_char);
 					}
 				}
 
 				if (ns == NULL) {
-					zend_string_release_ex(str, 0);
+					zend_string_release_ex(prefix, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release_ex(str, 0);
+			zend_string_release_ex(prefix, 0);
 			break;
 		default:
 			break;

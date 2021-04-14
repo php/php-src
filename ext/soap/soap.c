@@ -731,23 +731,19 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
 			if (name) {
-				if (ZSTR_LEN(name) == sizeof("type_name")-1 &&
-				    strncmp(ZSTR_VAL(name), "type_name", sizeof("type_name")-1) == 0) {
+				if (zend_string_equals_literal(name, "type_name")) {
 					if (Z_TYPE_P(tmp) == IS_STRING) {
 						type_name = Z_STRVAL_P(tmp);
 					} else if (Z_TYPE_P(tmp) != IS_NULL) {
 					}
-				} else if (ZSTR_LEN(name) == sizeof("type_ns")-1 &&
-				    strncmp(ZSTR_VAL(name), "type_ns", sizeof("type_ns")-1) == 0) {
+				} else if (zend_string_equals_literal(name, "type_ns")) {
 					if (Z_TYPE_P(tmp) == IS_STRING) {
 						type_ns = Z_STRVAL_P(tmp);
 					} else if (Z_TYPE_P(tmp) != IS_NULL) {
 					}
-				} else if (ZSTR_LEN(name) == sizeof("to_xml")-1 &&
-				    strncmp(ZSTR_VAL(name), "to_xml", sizeof("to_xml")-1) == 0) {
+				} else if (zend_string_equals_literal(name, "to_xml")) {
 					to_xml = tmp;
-				} else if (ZSTR_LEN(name) == sizeof("from_xml")-1 &&
-				    strncmp(ZSTR_VAL(name), "from_xml", sizeof("from_xml")-1) == 0) {
+				} else if (zend_string_equals_literal(name, "from_xml")) {
 					to_zval = tmp;
 				}
 			}
@@ -1756,7 +1752,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 		(agent_name = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) != NULL &&
 		Z_TYPE_P(agent_name) == IS_STRING) {
-		if (strncmp(Z_STRVAL_P(agent_name), "Shockwave Flash", sizeof("Shockwave Flash")-1) == 0) {
+		if (zend_string_equals_literal(Z_STR_P(agent_name), "Shockwave Flash")) {
 			use_http_error_status = 0;
 		}
 	}

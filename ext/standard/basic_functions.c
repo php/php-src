@@ -2246,12 +2246,13 @@ PHP_FUNCTION(ignore_user_abort)
 /* {{{ Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
-	char *name, *proto;
-	size_t name_len, proto_len;
+	zend_string *name;
+	char *proto;
+	size_t proto_len;
 	struct servent *serv;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STR(name)
 		Z_PARAM_STRING(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2264,14 +2265,14 @@ PHP_FUNCTION(getservbyname)
 	}
 #endif
 
-	serv = getservbyname(name, proto);
+	serv = getservbyname(ZSTR_VAL(name), proto);
 
 #if defined(_AIX)
 	/*
         On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
         If a request for imap gives no result, we try again with imap2.
         */
-	if (serv == NULL && strcmp(name,  "imap") == 0) {
+	if (serv == NULL && zend_string_equals_literal(name, "imap")) {
 		serv = getservbyname("imap2", proto);
 	}
 #endif
