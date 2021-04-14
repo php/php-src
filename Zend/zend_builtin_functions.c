@@ -1739,12 +1739,12 @@ ZEND_FUNCTION(debug_print_backtrace)
 			lineno = 0;
 		}
 
+		/* $this may be passed into regular internal functions */
+		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
 		func = call->func;
 		if (!fake_frame && func->common.function_name) {
 			function_name = ZSTR_VAL(func->common.function_name);
-			if (Z_TYPE(call->This) == IS_OBJECT) {
-				object = Z_OBJ(call->This);
-				/* $this may be passed into regular internal functions */
+			if (object) {
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
 				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
