@@ -27,7 +27,7 @@
 #include "zend_exceptions.h"
 
 
-/* {{{ property driver_report_read */
+/* {{{ property driver_reconnect_read */
 static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_BOOL(retval, MyG(reconnect));
@@ -35,7 +35,7 @@ static int driver_reconnect_read(mysqli_object *obj, zval *retval, bool quiet)
 }
 /* }}} */
 
-/* {{{ property driver_report_write */
+/* {{{ property driver_reconnect_write */
 static int driver_reconnect_write(mysqli_object *obj, zval *value)
 {
 	ZEND_ASSERT(Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
@@ -80,6 +80,9 @@ static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 /* {{{ property driver_driver_version_read */
 static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
+	if (quiet) {
+		return FAILURE;
+	}
 	zend_error(E_DEPRECATED, "The driver_version property is deprecated");
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 	return SUCCESS;
