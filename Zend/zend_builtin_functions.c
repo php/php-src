@@ -1661,25 +1661,12 @@ void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 }
 /* }}} */
 
-static inline bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
-{
-	return !(skip->func && ZEND_USER_CODE(skip->func->common.type))
-			&& skip->prev_execute_data
-			&& skip->prev_execute_data->func
-			&& ZEND_USER_CODE(skip->prev_execute_data->func->common.type)
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME
-			&& skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL;
-}
-/* {{{ */
-
 /* {{{ */
 ZEND_FUNCTION(debug_print_backtrace)
 {
-	zend_execute_data *call, *ptr, *skip;
+	zend_execute_data *call;
 	zend_object *object;
+	bool fake_frame = 0;
 	int lineno, frameno = 0;
 	zend_function *func;
 	const char *function_name;
@@ -1696,61 +1683,67 @@ ZEND_FUNCTION(debug_print_backtrace)
 		RETURN_THROWS();
 	}
 
-	ZVAL_UNDEF(&arg_array);
-	ptr = EX(prev_execute_data);
-
 	/* skip debug_backtrace() */
-	call = ptr;
-	ptr = ptr->prev_execute_data;
+	call = EX(prev_execute_data);
 
-	while (ptr && (limit == 0 || frameno < limit)) {
+	while (call && (limit == 0 || frameno < limit)) {
+		zend_execute_data *prev = call->prev_execute_data;
+
+		if (!prev) {
+			/* add frame for a handler call without {main} code */
+			if (EXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) == 0)) {
+				break;
+			}
+		} else if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
+			prev = zend_generator_check_placeholder_frame(prev);
+		}
+
 		frameno++;
 		class_name = NULL;
 		call_type = NULL;
 		ZVAL_UNDEF(&arg_array);
 
-		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
-			ptr = zend_generator_check_placeholder_frame(ptr);
-		}
-
-		skip = ptr;
-		/* skip internal handler */
-		if (skip_internal_handler(skip)) {
-			skip = skip->prev_execute_data;
-		}
-
-		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
-			filename = ZSTR_VAL(skip->func->op_array.filename);
-			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+		if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+			filename = ZSTR_VAL(prev->func->op_array.filename);
+			if (prev->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
 					lineno = EG(opline_before_exception)->lineno;
 				} else {
-					lineno = skip->func->op_array.line_end;
+					lineno = prev->func->op_array.line_end;
 				}
 			} else {
-				lineno = skip->opline->lineno;
+				lineno = prev->opline->lineno;
 			}
 		} else {
+			zend_execute_data *prev_call = prev;
+
 			filename = NULL;
 			lineno = 0;
+			while (prev_call) {
+				zend_execute_data *prev;
+
+				if (prev_call &&
+					prev_call->func &&
+					!ZEND_USER_CODE(prev_call->func->common.type) &&
+					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+					break;
+				}
+
+				prev = prev_call->prev_execute_data;
+				if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+					filename = ZSTR_VAL(prev->func->op_array.filename);
+					lineno = prev->opline->lineno;
+					break;
+				}
+				prev_call = prev;
+			}
 		}
 
 		/* $this may be passed into regular internal functions */
 		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
-
-		if (call->func) {
-			func = call->func;
-			if (func->common.function_name) {
-				function_name = ZSTR_VAL(func->common.function_name);
-			} else {
-				function_name = NULL;
-			}
-		} else {
-			func = NULL;
-			function_name = NULL;
-		}
-
-		if (function_name) {
+		func = call->func;
+		if (!fake_frame && func->common.function_name) {
+			function_name = ZSTR_VAL(func->common.function_name);
 			if (object) {
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
@@ -1777,8 +1770,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			bool build_filename_arg = 1;
 			uint32_t include_kind = 0;
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-				include_kind = ptr->opline->extended_value;
+			if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type) && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = prev->opline->extended_value;
 			}
 
 			switch (include_kind) {
@@ -1833,33 +1826,22 @@ ZEND_FUNCTION(debug_print_backtrace)
 		if (filename) {
 			zend_printf(") called at [%s:%d]\n", filename, lineno);
 		} else {
-			zend_execute_data *prev_call = skip;
-			zend_execute_data *prev = skip->prev_execute_data;
-
-			while (prev) {
-				if (prev_call &&
-					prev_call->func &&
-					!ZEND_USER_CODE(prev_call->func->common.type)) {
-					prev = NULL;
-					break;
-				}
-				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
-					zend_printf(") called at [%s:%d]\n", ZSTR_VAL(prev->func->op_array.filename), prev->opline->lineno);
-					break;
-				}
-				prev_call = prev;
-				prev = prev->prev_execute_data;
-			}
-			if (!prev) {
-				ZEND_PUTS(")\n");
-			}
+			ZEND_PUTS(")\n");
 		}
 		++indent;
 
 skip_frame:
-		include_filename = filename;
-		call = skip;
-		ptr = skip->prev_execute_data;
+		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) != 0)
+		 && !fake_frame
+		 && prev
+		 && prev->func
+		 && ZEND_USER_CODE(prev->func->common.type)
+		 && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			fake_frame = 1;
+		} else {
+			include_filename = filename;
+			call = prev;
+		}
 	}
 }
 
@@ -1867,11 +1849,11 @@ skip_frame:
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *ptr, *skip, *call = NULL;
+	zend_execute_data *call;
 	zend_object *object;
+	bool fake_frame = 0;
 	int lineno, frameno = 0;
 	zend_function *func;
-	zend_string *function_name;
 	zend_string *filename;
 	zend_string *include_filename = NULL;
 	zval tmp;
@@ -1879,60 +1861,44 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	array_init(return_value);
 
-	if (!(ptr = EG(current_execute_data))) {
+	call = EG(current_execute_data);
+	if (!call) {
 		return;
 	}
 
-	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
+	if (skip_last) {
+		/* skip debug_backtrace() */
+		call = call->prev_execute_data;
 	}
 
-	if (ptr) {
-		if (skip_last) {
-			/* skip debug_backtrace() */
-			call = ptr;
-			ptr = ptr->prev_execute_data;
-		} else {
-			/* skip "new Exception()" */
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && (ptr->opline->opcode == ZEND_NEW)) {
-				call = ptr;
-				ptr = ptr->prev_execute_data;
+	while (call && (limit == 0 || frameno < limit)) {
+		zend_execute_data *prev = call->prev_execute_data;
+
+		if (!prev) {
+			/* add frame for a handler call without {main} code */
+			if (EXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) == 0)) {
+				break;
 			}
+		} else if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
+			prev = zend_generator_check_placeholder_frame(prev);
 		}
-		if (!call) {
-			call = ptr;
-			ptr = ptr->prev_execute_data;
-		}
-	}
 
-	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
 
 		/* We use _zend_hash_append*() and the array must be preallocated */
 		stack_frame = zend_new_array(8);
 		zend_hash_real_init_mixed(stack_frame);
 
-		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
-			ptr = zend_generator_check_placeholder_frame(ptr);
-		}
-
-		skip = ptr;
-		/* skip internal handler */
-		if (skip_internal_handler(skip)) {
-			skip = skip->prev_execute_data;
-		}
-
-		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
-			filename = skip->func->op_array.filename;
-			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+		if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+			filename = prev->func->op_array.filename;
+			if (prev->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
 					lineno = EG(opline_before_exception)->lineno;
 				} else {
-					lineno = skip->func->op_array.line_end;
+					lineno = prev->func->op_array.line_end;
 				}
 			} else {
-				lineno = skip->opline->lineno;
+				lineno = prev->opline->lineno;
 			}
 			ZVAL_STR_COPY(&tmp, filename);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
@@ -1943,17 +1909,20 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			 * and debug_backtrace() might have been called by the error_handler. in this case we don't
 			 * want to pop anything of the argument-stack */
 		} else {
-			zend_execute_data *prev_call = skip;
-			zend_execute_data *prev = skip->prev_execute_data;
+			zend_execute_data *prev_call = prev;
 
-			while (prev) {
+			while (prev_call) {
+				zend_execute_data *prev;
+
 				if (prev_call &&
 					prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type) &&
 					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					break;
 				}
-				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+
+				prev = prev_call->prev_execute_data;
+				if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
 					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
 					ZVAL_LONG(&tmp, prev->opline->lineno);
@@ -1961,27 +1930,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}
 				prev_call = prev;
-				prev = prev->prev_execute_data;
 			}
 			filename = NULL;
 		}
 
-		/* $this may be passed into regular internal functions */
-		object = (call && (Z_TYPE(call->This) == IS_OBJECT)) ? Z_OBJ(call->This) : NULL;
-
-		if (call && call->func) {
-			func = call->func;
-			function_name = func->common.function_name;
-		} else {
-			func = NULL;
-			function_name = NULL;
-		}
-
-		if (function_name) {
-			ZVAL_STR_COPY(&tmp, function_name);
+		func = call->func;
+		if (!fake_frame && func->common.function_name) {
+			ZVAL_STR_COPY(&tmp, func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 
-			if (object) {
+			if (Z_TYPE(call->This) == IS_OBJECT) {
+				object = Z_OBJ(call->This);
+				/* $this may be passed into regular internal functions */
 				if (func->common.scope) {
 					ZVAL_STR_COPY(&tmp, func->common.scope->name);
 				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
@@ -2015,8 +1975,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			bool build_filename_arg = 1;
 			zend_string *pseudo_function_name;
 			uint32_t include_kind = 0;
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-				include_kind = ptr->opline->extended_value;
+			if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type) && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = prev->opline->extended_value;
 			}
 
 			switch (include_kind) {
@@ -2070,9 +2030,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 
 skip_frame:
-		include_filename = filename;
-		call = skip;
-		ptr = skip->prev_execute_data;
+		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) != 0)
+		 && !fake_frame
+		 && prev
+		 && prev->func
+		 && ZEND_USER_CODE(prev->func->common.type)
+		 && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			fake_frame = 1;
+		} else {
+			fake_frame = 0;
+			include_filename = filename;
+			call = prev;
+		}
 	}
 }
 /* }}} */
