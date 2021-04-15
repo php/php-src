@@ -1246,7 +1246,7 @@ ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 	zend_verify_type_error_common(
 		zf, arg_info, NULL, &fname, &fsep, &fclass, &need_msg, &given_msg);
 
-	zend_type_error("%s%s%s(): Nothing was expected to be returned",
+	zend_type_error("%s%s%s(): never-returning function must not implicitly return",
 		fclass, fsep, fname);
 
 	zend_string_release(need_msg);

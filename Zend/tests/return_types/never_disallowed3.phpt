@@ -12,7 +12,7 @@ function foo(): never {
 foo();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: foo(): Nothing was expected to be returned in %s:%d
+Fatal error: Uncaught TypeError: foo(): never-returning function must not implicitly return in %s:%d
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}
