@@ -348,6 +348,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_stream_xor arginfo_sodium_crypto_secretbox
 
+#ifdef crypto_stream_xchacha20_KEYBYTES
+#define arginfo_sodium_crypto_stream_xchacha20_xor arginfo_sodium_crypto_stream_xor
+#define arginfo_sodium_crypto_stream_xchacha20 arginfo_sodium_crypto_stream
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(1, string1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
@@ -514,6 +519,11 @@ ZEND_FUNCTION(sodium_crypto_sign_verify_detached);
 ZEND_FUNCTION(sodium_crypto_stream);
 ZEND_FUNCTION(sodium_crypto_stream_keygen);
 ZEND_FUNCTION(sodium_crypto_stream_xor);
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_stream_xchacha20);
+ZEND_FUNCTION(sodium_crypto_stream_xchacha20_keygen);
+ZEND_FUNCTION(sodium_crypto_stream_xchacha20_xor);
+#endif
 ZEND_FUNCTION(sodium_add);
 ZEND_FUNCTION(sodium_compare);
 ZEND_FUNCTION(sodium_increment);
@@ -643,6 +653,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sodium_crypto_stream, arginfo_sodium_crypto_stream)
 	ZEND_FE(sodium_crypto_stream_keygen, arginfo_sodium_crypto_stream_keygen)
 	ZEND_FE(sodium_crypto_stream_xor, arginfo_sodium_crypto_stream_xor)
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+	ZEND_FE(sodium_crypto_stream_xchacha20, arginfo_sodium_crypto_xchacha20_stream)
+	ZEND_FE(sodium_crypto_stream_xchacha20_keygen, arginfo_sodium_crypto_xchacha20_stream_keygen)
+	ZEND_FE(sodium_crypto_stream_xchacha20_xor, arginfo_sodium_crypto_xchacha20_stream_xor)
+#endif
 	ZEND_FE(sodium_add, arginfo_sodium_add)
 	ZEND_FE(sodium_compare, arginfo_sodium_compare)
 	ZEND_FE(sodium_increment, arginfo_sodium_increment)

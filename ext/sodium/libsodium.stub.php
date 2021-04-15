@@ -160,6 +160,12 @@ function sodium_crypto_stream_keygen(): string {}
 
 function sodium_crypto_stream_xor(string $message, string $nonce, string $key): string {}
 
+function sodium_crypto_stream_xchacha20(int $length, string $nonce, string $key) : string {}
+
+function sodium_crypto_stream_xchacha20_keygen() : string {}
+
+function sodium_crypto_stream_xchacha20_xor(string $message, string $nonce, string $key) : string {}
+
 function sodium_add(string &$string1, string $string2): void {}
 
 function sodium_compare(string $string1, string $string2): int {}
