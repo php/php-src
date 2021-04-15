@@ -79,11 +79,13 @@
 |.define TMP3w,   w13
 |.define TMP4,    x14
 |.define TMP4w,   w14
+|.define FPTMP,   v16
 
 |.define ZREG_TMP1,   ZREG_X11
 |.define ZREG_TMP2,   ZREG_X12
 |.define ZREG_TMP3,   ZREG_X13
 |.define ZREG_TMP4,   ZREG_X14
+|.define ZREG_FPTMP,  ZREG_V16
 
 |.define HYBRID_SPAD, #16     // padding for stack alignment
 
@@ -531,6 +533,42 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro UNDEF_OPLINE_RESULT
 |	brk #0	// TODO
+|.endmacro
+
+// Define DOUBLE_CMP and DOUBLE_CMP to replace SSE_AVX_OP and SSE_OP in x86 implementation.
+// Conduct floating point operation 'ins'. Operand1 is from 'reg', and operands2 is from 'addr'.
+// Use DOUBLE_CMP for comparisons and use DOUBLE_OP for arithmetic operations.
+|.macro DOUBLE_CMP, ins, reg, addr, tmp_reg, fp_tmp_reg
+||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
+|		brk #0	// TODO
+|		LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
+|		ldr Rd(fp_tmp_reg-ZREG_V0), [Rx(tmp_reg)]
+|		ins Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(fp_tmp_reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
+|		ins Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+||	} else if (Z_MODE(addr) == IS_REG) {
+|		brk #0	// TODO
+|		ins Rd(reg-ZREG_V0), Rd(Z_REG(addr)-ZREG_V0)
+||	} else {
+||		ZEND_UNREACHABLE();
+||	}
+|.endmacro
+
+|.macro DOUBLE_OP, ins, reg, addr, tmp_reg, fp_tmp_reg
+|	brk #0	// TODO
+||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
+|		LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
+|		ldr Rd(fp_tmp_reg-ZREG_V0), [Rx(tmp_reg)]
+|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(fp_tmp_reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
+|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+||	} else if (Z_MODE(addr) == IS_REG) {
+|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(Z_REG(addr)-ZREG_V0)
+||	} else {
+||		ZEND_UNREACHABLE();
+||	}
 |.endmacro
 
 // Define DOUBLE_GET_LONG to replace SSE_GET_LONG in x86 implementation.
@@ -4281,7 +4319,49 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 
 static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, zend_jit_addr res_addr, bool swap, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	|	brk #0	// TODO
+	if (smart_branch_opcode) {
+		|	brk #0	// TODO
+	} else {
+		switch (opline->opcode) {
+			case ZEND_IS_EQUAL:
+			case ZEND_IS_IDENTICAL:
+			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
+				|	brk #0	// TODO
+				break;
+			case ZEND_IS_NOT_EQUAL:
+			case ZEND_IS_NOT_IDENTICAL:
+				|	brk #0	// TODO
+				break;
+			case ZEND_IS_SMALLER:
+				|	bvs >1
+				|	mov REG0, #IS_TRUE
+				||	if (swap) {
+				|		bhi >2	// TODO: why the NaN check is missing in x86?
+				||	} else {
+				|		blo >2
+				||	}
+				|1:
+				|	mov REG0, #IS_FALSE
+				|2:
+				break;
+			case ZEND_IS_SMALLER_OR_EQUAL:
+				|	bvs >1
+				|	mov REG0, #IS_TRUE
+				||	if (swap) {
+				|		bhs >2	// TODO: why the NaN check is missing in x86?
+				||	} else {
+				|		bls >2
+				||	}
+				|1:
+				|	mov REG0, #IS_FALSE
+				|2:
+				break;
+			default:
+				ZEND_UNREACHABLE();
+		}
+		|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+	}
 
 	return 1;
 }
@@ -4290,7 +4370,8 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, zen
 {
 	zend_reg tmp_reg = ZREG_FPR0;
 
-	|	brk #0	// TODO
+	|	DOUBLE_GET_ZVAL_LVAL tmp_reg, op1_addr, ZREG_REG0, ZREG_TMP1
+	|	DOUBLE_CMP fcmp, tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, 0, smart_branch_opcode, target_label, target_label2, exit_addr);
 }
@@ -4299,7 +4380,8 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, zen
 {
 	zend_reg tmp_reg = ZREG_FPR0;
 
-	|	brk #0	// TODO
+	|	DOUBLE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_REG0, ZREG_TMP1
+	|	DOUBLE_CMP fcmp, tmp_reg, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, /* swap */ 1, smart_branch_opcode, target_label, target_label2, exit_addr);
 }
@@ -4358,7 +4440,13 @@ static int zend_jit_cmp(dasm_State    **Dst,
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >3, TMP1w, TMP2
 				|.cold_code
 				|3:
-				|	brk #0	// TODO
+				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+					|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9, TMP1w, TMP2
+				}
+				if (!zend_jit_cmp_long_double(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+					return 0;
+				}
+				|	b >6
 				|.code
 			} else {
 				|	brk #0	// TODO
@@ -4370,7 +4458,34 @@ static int zend_jit_cmp(dasm_State    **Dst,
 		if (op1_info & MAY_BE_DOUBLE) {
 			|.cold_code
 			|4:
-			|	brk #0	// TODO
+			if (op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_DOUBLE, >9, TMP1w, TMP2
+			}
+			if (op2_info & MAY_BE_DOUBLE) {
+				if (!same_ops && (op2_info & (MAY_BE_ANY-MAY_BE_DOUBLE))) {
+					if (!same_ops) {
+						|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >5, TMP1w, TMP2
+					} else {
+						|	brk #0	// TODO
+						|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9, TMP1w, TMP2
+					}
+				}
+				|	brk #0	// TODO
+				if (!zend_jit_cmp_double_double(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+					return 0;
+				}
+				|	b >6
+			}
+			if (!same_ops) {
+				|5:
+				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
+					|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >9, TMP1w, TMP2
+				}
+				if (!zend_jit_cmp_double_long(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+					return 0;
+				}
+				|	b >6
+			}
 			|.code
 		}
 	} else if ((op1_info & MAY_BE_DOUBLE) &&
@@ -6469,7 +6584,7 @@ static int zend_jit_zval_copy_deref(dasm_State **Dst, zend_jit_addr res_addr, ze
 	|	GC_ADDREF REG1, TMP1w
 	|2:
 	|	SET_ZVAL_PTR res_addr, REG1, TMP1
-	|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG2, TMP1
+	|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG2w, TMP1
 
 	return 1;
 }
