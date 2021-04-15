@@ -472,7 +472,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				fprintf(stderr, " (void)");
 				break;
 			case IS_NEVER:
-				fprintf(stderr, " (noreturn)");
+				fprintf(stderr, " (never)");
 				break;
 			default:
 				fprintf(stderr, " (\?\?\?)");

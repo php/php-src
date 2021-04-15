@@ -1236,7 +1236,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *
 	zend_string_release(need_msg);
 }
 
-ZEND_API ZEND_COLD void zend_verify_noreturn_error(const zend_function *zf)
+ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
