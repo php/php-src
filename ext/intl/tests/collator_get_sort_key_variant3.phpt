@@ -34,7 +34,7 @@ function ut_main()
     $test_params = array(
         'abc', 'abd', 'aaa',
         'аа', 'а', 'z',
-        '', null , '3',
+        '', '3',
         'y'  , 'i'  , 'k'
     );
 
@@ -69,8 +69,6 @@ source: а
 key: 5e0901050105
 source: z
 key: 5b01050105
-source: 
-key: 0101
 source: 
 key: 0101
 source: 3
