@@ -1244,15 +1244,17 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
 {
-	if (!(script->corrupted)
-	 && op_array != &script->script.main_op_array) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+	if (!script->corrupted) {
+		if (op_array != &script->script.main_op_array) {
+			op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		} else {
+			ZEND_ASSERT(!(op_array->fn_flags & ZEND_ACC_IMMUTABLE));
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		}
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 		if (op_array->static_variables) {
