@@ -5877,6 +5877,9 @@ PHP_FUNCTION(array_reduce)
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			ZVAL_COPY_VALUE(return_value, &retval);
+			if (UNEXPECTED(Z_ISREF_P(return_value))) {
+				zend_unwrap_reference(return_value);
+			}
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
