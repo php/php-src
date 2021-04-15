@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.19
 
+- Core:
+  . Fixed bug #80929 (Method name corruption related to repeated calls to call_user_func_array).
+    (twosee)
+
 - SPL:
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
