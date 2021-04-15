@@ -725,12 +725,10 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 
 	func = fci_cache->function_handler;
 	if ((func->common.fn_flags & ZEND_ACC_STATIC) || !fci_cache->object) {
-		fci->object = NULL;
 		object_or_called_scope = fci_cache->called_scope;
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC;
 	} else {
-		fci->object = fci_cache->object;
-		object_or_called_scope = fci->object;
+		object_or_called_scope = fci_cache->object;
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS;
 	}
 
