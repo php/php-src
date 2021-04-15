@@ -1717,6 +1717,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 		} else {
 			zend_execute_data *prev_call = prev;
 
+			filename = NULL;
+			lineno = 0;
 			while (prev_call) {
 				zend_execute_data *prev;
 
@@ -1735,8 +1737,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 				}
 				prev_call = prev;
 			}
-			filename = NULL;
-			lineno = 0;
 		}
 
 		/* $this may be passed into regular internal functions */
