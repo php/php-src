@@ -68,12 +68,6 @@ env:
 
 jobs:
     include:
-        - env: ENABLE_ZTS=0 ENABLE_DEBUG=0
-          arch: amd64
-          if: type = cron
-        - env: ENABLE_ZTS=1 ENABLE_DEBUG=1
-          arch: amd64
-          if: type = cron
         - env: ENABLE_ZTS=1 ENABLE_DEBUG=1 SKIP_IO_CAPTURE_TESTS=1 ARM64=1
           arch: arm64
           if: type = cron
