@@ -342,8 +342,6 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 }
 /* }}} */
 
-static void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr);
-
 static void print_flat_hash(smart_str *buf, HashTable *ht) /* {{{ */
 {
 	zval *tmp;
@@ -393,7 +391,7 @@ ZEND_API size_t zend_print_zval(zval *expr, int indent) /* {{{ */
 }
 /* }}} */
 
-static void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr) /* {{{ */
+void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr) /* {{{ */
 {
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
