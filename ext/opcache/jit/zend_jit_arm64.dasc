@@ -4320,7 +4320,66 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, zend_jit_addr res_addr, bool swap, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	if (smart_branch_opcode) {
-		|	brk #0	// TODO
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
+					|	brk #0	// TODO
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					|	brk #0	// TODO
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					|	brk #0	// TODO
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+							|	bls => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bhs => target_label
+						}
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+							|	blo => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bhi => target_label
+						}
+					}
+					break;
+				default:
+					ZEND_UNREACHABLE();
+			}
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			|	brk #0	// TODO
+		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+			|	brk #0	// TODO
+		} else if (smart_branch_opcode == ZEND_JMPZ_EX) {
+			|	brk #0	// TODO
+		} else if (smart_branch_opcode == ZEND_JMPNZ_EX) {
+			|	brk #0	// TODO
+		} else {
+			ZEND_UNREACHABLE();
+		}
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
