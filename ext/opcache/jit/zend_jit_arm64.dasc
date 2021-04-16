@@ -3313,7 +3313,20 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
 			zend_long op2_lval = Z_LVAL_P(Z_ZV(op2_addr));
 
-			|	brk #0	// TODO
+			if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
+				if (EXPECTED(op2_lval > 0)) {
+					|	mov Rx(result_reg), xzr
+				} else {
+					|	SET_EX_OPLINE opline, REG0
+					|	b ->negative_shift
+				}
+			} else if (Z_MODE(op1_addr) == IS_REG && op2_lval == 1) {
+				|	add Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
+			} else {
+				|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+				|	mov TMP1w, #op2_lval
+				|	lsl Rx(result_reg), Rx(result_reg), TMP1
+			}
 		} else {
 			if (Z_MODE(op2_addr) != IS_REG || Z_REG(op2_addr) != ZREG_REG1) {
 				|	GET_ZVAL_LVAL ZREG_REG1, op2_addr, TMP1
