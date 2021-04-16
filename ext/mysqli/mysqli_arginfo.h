@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b9583854314bc54295c1e1a4ec7f6b8c0ce6187c */
+ * Stub hash: 3f3d19da5a2b7c8edc6dba0fde6215b93d10bb32 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -71,6 +71,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_execute, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_execute arginfo_mysqli_stmt_execute
@@ -300,7 +301,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 1, _
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_close arginfo_mysqli_stmt_execute
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_close, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_data_seek, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
@@ -351,7 +354,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_more_results, 0, 1, 
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_execute
+#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_close
 
 #define arginfo_mysqli_stmt_num_rows arginfo_mysqli_stmt_affected_rows
 
@@ -362,7 +365,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_prepare, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_reset arginfo_mysqli_stmt_execute
+#define arginfo_mysqli_stmt_reset arginfo_mysqli_stmt_close
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_stmt_result_metadata, 0, 1, mysqli_result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
@@ -374,7 +377,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_send_long_data, 0, 3
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_store_result arginfo_mysqli_stmt_execute
+#define arginfo_mysqli_stmt_store_result arginfo_mysqli_stmt_close
 
 #define arginfo_mysqli_stmt_sqlstate arginfo_mysqli_stmt_error
 
@@ -640,7 +643,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stmt_data_seek arginfo_class_mysqli_result_data_seek
 
-#define arginfo_class_mysqli_stmt_execute arginfo_class_mysqli_character_set_name
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_execute, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stmt_fetch arginfo_class_mysqli_character_set_name
 
@@ -1069,13 +1074,13 @@ static zend_class_entry *register_class_mysqli_driver(void)
 	zval property_reconnect_default_value;
 	ZVAL_BOOL(&property_reconnect_default_value, 0);
 	zend_string *property_reconnect_name = zend_string_init("reconnect", sizeof("reconnect") - 1, 1);
-	zend_declare_property_ex(class_entry, property_reconnect_name, &property_reconnect_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_reconnect_name, &property_reconnect_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_reconnect_name);
 
 	zval property_report_mode_default_value;
 	ZVAL_LONG(&property_report_mode_default_value, 0);
 	zend_string *property_report_mode_name = zend_string_init("report_mode", sizeof("report_mode") - 1, 1);
-	zend_declare_property_ex(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_report_mode_name);
 
 	return class_entry;

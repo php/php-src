@@ -250,8 +250,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <ast> variable_class_name dereferencable_scalar constant class_constant
-%type <ast> fully_dereferencable array_object_dereferencable
+%type <ast> variable_class_name dereferenceable_scalar constant class_constant
+%type <ast> fully_dereferenceable array_object_dereferenceable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
@@ -1262,7 +1262,7 @@ ctor_arguments:
 ;
 
 
-dereferencable_scalar:
+dereferenceable_scalar:
 		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LONG; }
 	|	'[' array_pair_list ']'			{ $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$ = $1; }
@@ -1276,7 +1276,7 @@ scalar:
 	|	T_START_HEREDOC T_END_HEREDOC
 			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
+	|	dereferenceable_scalar	{ $$ = $1; }
 	|	constant				{ $$ = $1; }
 	|	class_constant			{ $$ = $1; }
 ;
@@ -1306,37 +1306,37 @@ optional_expr:
 ;
 
 variable_class_name:
-		fully_dereferencable { $$ = $1; }
+		fully_dereferenceable { $$ = $1; }
 ;
 
-fully_dereferencable:
+fully_dereferenceable:
 		variable				{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
+	|	dereferenceable_scalar	{ $$ = $1; }
 	|	class_constant			{ $$ = $1; }
 ;
 
-array_object_dereferencable:
-		fully_dereferencable	{ $$ = $1; }
+array_object_dereferenceable:
+		fully_dereferenceable	{ $$ = $1; }
 	|	constant				{ $$ = $1; }
 ;
 
 callable_expr:
 		callable_variable		{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
+	|	dereferenceable_scalar	{ $$ = $1; }
 ;
 
 callable_variable:
 		simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	array_object_dereferencable '[' optional_expr ']'
+	|	array_object_dereferenceable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	array_object_dereferencable '{' expr '}'
+	|	array_object_dereferenceable '{' expr '}'
 			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
-	|	array_object_dereferencable T_OBJECT_OPERATOR property_name argument_list
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
-	|	array_object_dereferencable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
+	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
 ;
@@ -1346,9 +1346,9 @@ variable:
 			{ $$ = $1; }
 	|	static_member
 			{ $$ = $1; }
-	|	array_object_dereferencable T_OBJECT_OPERATOR property_name
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
-	|	array_object_dereferencable T_NULLSAFE_OBJECT_OPERATOR property_name
+	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP, $1, $3); }
 ;
 

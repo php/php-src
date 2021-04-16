@@ -28,6 +28,7 @@
 #include "zend_closures.h"
 #include "zend_generators.h"
 #include "zend_builtin_functions_arginfo.h"
+#include "zend_smart_str.h"
 
 /* }}} */
 
@@ -995,6 +996,13 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (ZSTR_HAS_CE_CACHE(name)) {
+		ce = ZSTR_GET_CE_CACHE(name);
+		if (ce) {
+			RETURN_BOOL(((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
+		}
+	}
+
 	if (!autoload) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Ignore leading "\" */
@@ -1635,7 +1643,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 }
 /* }}} */
 
-void debug_print_backtrace_args(zval *arg_array) /* {{{ */
+void debug_print_backtrace_args(smart_str *str, zval *arg_array) /* {{{ */
 {
 	zend_string *name;
 	zval *tmp;
@@ -1643,226 +1651,83 @@ void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(arg_array), name, tmp) {
 		if (i++) {
-			ZEND_PUTS(", ");
+			smart_str_appends(str, ", ");
 		}
 		if (name) {
-			ZEND_PUTS(ZSTR_VAL(name));
-			ZEND_PUTS(": ");
+			smart_str_append(str, name);
+			smart_str_appends(str, ": ");
 		}
-		zend_print_flat_zval_r(tmp);
+		zend_print_flat_zval_r_to_buf(str, tmp);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
-static inline bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
-{
-	return !(skip->func && ZEND_USER_CODE(skip->func->common.type))
-			&& skip->prev_execute_data
-			&& skip->prev_execute_data->func
-			&& ZEND_USER_CODE(skip->prev_execute_data->func->common.type)
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL
-			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME
-			&& skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL;
-}
-/* {{{ */
-
 /* {{{ */
 ZEND_FUNCTION(debug_print_backtrace)
 {
-	zend_execute_data *call, *ptr, *skip;
-	zend_object *object;
-	int lineno, frameno = 0;
-	zend_function *func;
-	const char *function_name;
-	const char *filename;
-	zend_string *class_name = NULL;
-	char *call_type;
-	const char *include_filename = NULL;
-	zval arg_array;
-	int indent = 0;
 	zend_long options = 0;
 	zend_long limit = 0;
+	zval backtrace, *frame;
+	zend_long frame_no;
+	smart_str str = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ZVAL_UNDEF(&arg_array);
-	ptr = EX(prev_execute_data);
+	zend_fetch_debug_backtrace(&backtrace, 1, options, limit);
+	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARR(backtrace), frame_no, frame) {
+		ZEND_ASSERT(Z_TYPE_P(frame) == IS_ARRAY);
+		zval *function = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), 1);
+		zval *class = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_CLASS), 1);
+		zval *type = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_TYPE), 1);
+		zval *file = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FILE), 1);
+		zval *line = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_LINE), 1);
+		zval *args = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 
-	/* skip debug_backtrace() */
-	call = ptr;
-	ptr = ptr->prev_execute_data;
-
-	while (ptr && (limit == 0 || frameno < limit)) {
-		frameno++;
-		class_name = NULL;
-		call_type = NULL;
-		ZVAL_UNDEF(&arg_array);
-
-		ptr = zend_generator_check_placeholder_frame(ptr);
-
-		skip = ptr;
-		/* skip internal handler */
-		if (skip_internal_handler(skip)) {
-			skip = skip->prev_execute_data;
+		smart_str_append_printf(&str, "#%-2d ", (int) frame_no);
+		if (class) {
+			ZEND_ASSERT(Z_TYPE_P(class) == IS_STRING);
+			ZEND_ASSERT(type && Z_TYPE_P(type) == IS_STRING);
+			/* Cut off anonymous class names at null byte. */
+			smart_str_appends(&str, Z_STRVAL_P(class));
+			smart_str_append(&str, Z_STR_P(type));
 		}
-
-		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
-			filename = ZSTR_VAL(skip->func->op_array.filename);
-			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
-				if (EG(opline_before_exception)) {
-					lineno = EG(opline_before_exception)->lineno;
-				} else {
-					lineno = skip->func->op_array.line_end;
-				}
-			} else {
-				lineno = skip->opline->lineno;
-			}
-		} else {
-			filename = NULL;
-			lineno = 0;
+		smart_str_append(&str, Z_STR_P(function));
+		smart_str_appendc(&str, '(');
+		if (args) {
+			ZEND_ASSERT(Z_TYPE_P(args) == IS_ARRAY);
+			debug_print_backtrace_args(&str, args);
 		}
-
-		/* $this may be passed into regular internal functions */
-		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
-
-		if (call->func) {
-			func = call->func;
-			if (func->common.function_name) {
-				function_name = ZSTR_VAL(func->common.function_name);
-			} else {
-				function_name = NULL;
-			}
-		} else {
-			func = NULL;
-			function_name = NULL;
+		smart_str_appendc(&str, ')');
+		if (file) {
+			ZEND_ASSERT(Z_TYPE_P(file) == IS_STRING);
+			ZEND_ASSERT(line && Z_TYPE_P(line) == IS_LONG);
+			smart_str_appends(&str, " called at [");
+			smart_str_append(&str, Z_STR_P(file));
+			smart_str_appendc(&str, ':');
+			smart_str_append_long(&str, Z_LVAL_P(line));
+			smart_str_appendc(&str, ']');
 		}
+		smart_str_appendc(&str, '\n');
+	} ZEND_HASH_FOREACH_END();
+	zval_ptr_dtor(&backtrace);
 
-		if (function_name) {
-			if (object) {
-				if (func->common.scope) {
-					class_name = func->common.scope->name;
-				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
-					class_name = object->ce->name;
-				} else {
-					class_name = object->handlers->get_class_name(object);
-				}
-
-				call_type = "->";
-			} else if (func->common.scope) {
-				class_name = func->common.scope->name;
-				call_type = "::";
-			} else {
-				class_name = NULL;
-				call_type = NULL;
-			}
-			if (func->type != ZEND_EVAL_CODE) {
-				if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0) {
-					debug_backtrace_get_args(call, &arg_array);
-				}
-			}
-		} else {
-			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			bool build_filename_arg = 1;
-			uint32_t include_kind = 0;
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-				include_kind = ptr->opline->extended_value;
-			}
-
-			switch (include_kind) {
-				case ZEND_EVAL:
-					function_name = "eval";
-					build_filename_arg = 0;
-					break;
-				case ZEND_INCLUDE:
-					function_name = "include";
-					break;
-				case ZEND_REQUIRE:
-					function_name = "require";
-					break;
-				case ZEND_INCLUDE_ONCE:
-					function_name = "include_once";
-					break;
-				case ZEND_REQUIRE_ONCE:
-					function_name = "require_once";
-					break;
-				default:
-					/* Skip dummy frame unless it is needed to preserve filename/lineno info. */
-					if (!filename) {
-						goto skip_frame;
-					}
-
-					function_name = "unknown";
-					build_filename_arg = 0;
-					break;
-			}
-
-			if (build_filename_arg && include_filename) {
-				array_init(&arg_array);
-				add_next_index_string(&arg_array, (char*)include_filename);
-			}
-			call_type = NULL;
-		}
-		zend_printf("#%-2d ", indent);
-		if (class_name) {
-			ZEND_PUTS(ZSTR_VAL(class_name));
-			ZEND_PUTS(call_type);
-			if (object
-			  && !func->common.scope
-			  && object->handlers->get_class_name != zend_std_get_class_name) {
-				zend_string_release_ex(class_name, 0);
-			}
-		}
-		zend_printf("%s(", function_name);
-		if (Z_TYPE(arg_array) != IS_UNDEF) {
-			debug_print_backtrace_args(&arg_array);
-			zval_ptr_dtor(&arg_array);
-		}
-		if (filename) {
-			zend_printf(") called at [%s:%d]\n", filename, lineno);
-		} else {
-			zend_execute_data *prev_call = skip;
-			zend_execute_data *prev = skip->prev_execute_data;
-
-			while (prev) {
-				if (prev_call &&
-					prev_call->func &&
-					!ZEND_USER_CODE(prev_call->func->common.type)) {
-					prev = NULL;
-					break;
-				}
-				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
-					zend_printf(") called at [%s:%d]\n", ZSTR_VAL(prev->func->op_array.filename), prev->opline->lineno);
-					break;
-				}
-				prev_call = prev;
-				prev = prev->prev_execute_data;
-			}
-			if (!prev) {
-				ZEND_PUTS(")\n");
-			}
-		}
-		++indent;
-
-skip_frame:
-		include_filename = filename;
-		call = skip;
-		ptr = skip->prev_execute_data;
-	}
+	smart_str_0(&str);
+	ZEND_WRITE(ZSTR_VAL(str.s), ZSTR_LEN(str.s));
+	smart_str_free(&str);
 }
 
 /* }}} */
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *ptr, *skip, *call = NULL;
+	zend_execute_data *call;
 	zend_object *object;
+	bool fake_frame = 0;
 	int lineno, frameno = 0;
 	zend_function *func;
-	zend_string *function_name;
 	zend_string *filename;
 	zend_string *include_filename = NULL;
 	zval tmp;
@@ -1870,58 +1735,44 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	array_init(return_value);
 
-	if (!(ptr = EG(current_execute_data))) {
+	call = EG(current_execute_data);
+	if (!call) {
 		return;
 	}
 
-	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
+	if (skip_last) {
+		/* skip debug_backtrace() */
+		call = call->prev_execute_data;
 	}
 
-	if (ptr) {
-		if (skip_last) {
-			/* skip debug_backtrace() */
-			call = ptr;
-			ptr = ptr->prev_execute_data;
-		} else {
-			/* skip "new Exception()" */
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && (ptr->opline->opcode == ZEND_NEW)) {
-				call = ptr;
-				ptr = ptr->prev_execute_data;
+	while (call && (limit == 0 || frameno < limit)) {
+		zend_execute_data *prev = call->prev_execute_data;
+
+		if (!prev) {
+			/* add frame for a handler call without {main} code */
+			if (EXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) == 0)) {
+				break;
 			}
+		} else if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) != 0)) {
+			prev = zend_generator_check_placeholder_frame(prev);
 		}
-		if (!call) {
-			call = ptr;
-			ptr = ptr->prev_execute_data;
-		}
-	}
 
-	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
 
 		/* We use _zend_hash_append*() and the array must be preallocated */
 		stack_frame = zend_new_array(8);
 		zend_hash_real_init_mixed(stack_frame);
 
-		ptr = zend_generator_check_placeholder_frame(ptr);
-
-		skip = ptr;
-		/* skip internal handler */
-		if (skip_internal_handler(skip)) {
-			skip = skip->prev_execute_data;
-		}
-
-		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
-			filename = skip->func->op_array.filename;
-			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
+		if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+			filename = prev->func->op_array.filename;
+			if (prev->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
 					lineno = EG(opline_before_exception)->lineno;
 				} else {
-					lineno = skip->func->op_array.line_end;
+					lineno = prev->func->op_array.line_end;
 				}
 			} else {
-				lineno = skip->opline->lineno;
+				lineno = prev->opline->lineno;
 			}
 			ZVAL_STR_COPY(&tmp, filename);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
@@ -1929,20 +1780,23 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
-			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
+			 * and debug_backtrace() might have been called by the error_handler. in this case we don't
 			 * want to pop anything of the argument-stack */
 		} else {
-			zend_execute_data *prev_call = skip;
-			zend_execute_data *prev = skip->prev_execute_data;
+			zend_execute_data *prev_call = prev;
 
-			while (prev) {
+			while (prev_call) {
+				zend_execute_data *prev;
+
 				if (prev_call &&
 					prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type) &&
 					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					break;
 				}
-				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+
+				prev = prev_call->prev_execute_data;
+				if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					ZVAL_STR_COPY(&tmp, prev->func->op_array.filename);
 					_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
 					ZVAL_LONG(&tmp, prev->opline->lineno);
@@ -1950,27 +1804,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}
 				prev_call = prev;
-				prev = prev->prev_execute_data;
 			}
 			filename = NULL;
 		}
 
-		/* $this may be passed into regular internal functions */
-		object = (call && (Z_TYPE(call->This) == IS_OBJECT)) ? Z_OBJ(call->This) : NULL;
-
-		if (call && call->func) {
-			func = call->func;
-			function_name = func->common.function_name;
-		} else {
-			func = NULL;
-			function_name = NULL;
-		}
-
-		if (function_name) {
-			ZVAL_STR_COPY(&tmp, function_name);
+		func = call->func;
+		if (!fake_frame && func->common.function_name) {
+			ZVAL_STR_COPY(&tmp, func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 
-			if (object) {
+			if (Z_TYPE(call->This) == IS_OBJECT) {
+				object = Z_OBJ(call->This);
+				/* $this may be passed into regular internal functions */
 				if (func->common.scope) {
 					ZVAL_STR_COPY(&tmp, func->common.scope->name);
 				} else if (object->handlers->get_class_name == zend_std_get_class_name) {
@@ -2004,8 +1849,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			bool build_filename_arg = 1;
 			zend_string *pseudo_function_name;
 			uint32_t include_kind = 0;
-			if (ptr->func && ZEND_USER_CODE(ptr->func->common.type) && ptr->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-				include_kind = ptr->opline->extended_value;
+			if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type) && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+				include_kind = prev->opline->extended_value;
 			}
 
 			switch (include_kind) {
@@ -2059,9 +1904,18 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 
 skip_frame:
-		include_filename = filename;
-		call = skip;
-		ptr = skip->prev_execute_data;
+		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) != 0)
+		 && !fake_frame
+		 && prev
+		 && prev->func
+		 && ZEND_USER_CODE(prev->func->common.type)
+		 && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			fake_frame = 1;
+		} else {
+			fake_frame = 0;
+			include_filename = filename;
+			call = prev;
+		}
 	}
 }
 /* }}} */

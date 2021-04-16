@@ -370,10 +370,6 @@ typedef enum mysqlnd_server_option
 #define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
 
 
-/* see mysqlnd_charset.c for more information */
-#define MYSQLND_BINARY_CHARSET_NR	63
-
-
 /*
 		/-----> CONN_CLOSE  <---------------\
 		|           ^                         \

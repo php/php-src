@@ -1464,6 +1464,44 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
+PHP_FUNCTION(fsync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
+}
+
+PHP_FUNCTION(fdatasync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
+}
+
 /* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
 {

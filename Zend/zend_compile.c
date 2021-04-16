@@ -588,7 +588,7 @@ static int zend_add_ns_func_name_literal(zend_string *name) /* {{{ */
 	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(&lc_name);
 
-	/* Lowercased unqualfied name */
+	/* Lowercased unqualified name */
 	if (zend_get_unqualified_name(name, &unqualified_name, &unqualified_name_len)) {
 		lc_name = zend_string_alloc(unqualified_name_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), unqualified_name, unqualified_name_len);
@@ -717,7 +717,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			switch (opline->opcode) {
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
-					/* boolean resuls don't have to be freed */
+					/* boolean results don't have to be freed */
 					return;
 				case ZEND_POST_INC_STATIC_PROP:
 				case ZEND_POST_DEC_STATIC_PROP:
@@ -1199,9 +1199,11 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			if (ZEND_TYPE_HAS_CE(*list_type)) {
 				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name);
 			} else {
-				if (ZEND_TYPE_HAS_CE_CACHE(*list_type)
-				 && ZEND_TYPE_CE_CACHE(*list_type)) {
-					zend_class_entry *ce = ZEND_TYPE_CE_CACHE(*list_type);
+				zend_string *name = ZEND_TYPE_NAME(*list_type);
+
+				if (ZSTR_HAS_CE_CACHE(name)
+				 && ZSTR_GET_CE_CACHE(name)) {
+					zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 					if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 						zend_string *tmp = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
 						str = add_type_string(str, tmp);
@@ -1209,23 +1211,25 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 						str = add_type_string(str, ce->name);
 					}
 				} else {
-					zend_string *resolved = resolve_class_name(ZEND_TYPE_NAME(*list_type), scope);
+					zend_string *resolved = resolve_class_name(name, scope);
 					str = add_type_string(str, resolved);
 					zend_string_release(resolved);
 				}
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		if (ZEND_TYPE_HAS_CE_CACHE(type)
-		 && ZEND_TYPE_CE_CACHE(type)) {
-			zend_class_entry *ce = ZEND_TYPE_CE_CACHE(type);
+		zend_string *name = ZEND_TYPE_NAME(type);
+
+		if (ZSTR_HAS_CE_CACHE(name)
+		 && ZSTR_GET_CE_CACHE(name)) {
+			zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 			if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 				str = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
 			} else {
 				str = zend_string_copy(ce->name);
 			}
 		} else {
-			str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+			str = resolve_class_name(name, scope);
 		}
 	} else if (ZEND_TYPE_HAS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
@@ -3253,7 +3257,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			if (zend_propagate_list_refs(var_ast)) {
 				if (!zend_is_variable_or_call(expr_ast)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot assign reference to non referencable value");
+						"Cannot assign reference to non referenceable value");
 				}
 
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
@@ -9489,10 +9493,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
-	zend_ast *const_ast = ast->child[1];
 	zend_string *class_name;
-	zend_string *const_name = zend_ast_get_str(const_ast);
-	zend_string *name;
 	int fetch_type;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
@@ -9509,17 +9510,17 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
-		class_name = zend_resolve_class_name_ast(class_ast);
-	} else {
-		zend_string_addref(class_name);
+		zend_string *tmp = zend_resolve_class_name_ast(class_ast);
+
+		zend_string_release_ex(class_name, 0);
+		if (tmp != class_name) {
+			zval *zv = zend_ast_get_zval(class_ast);
+
+			ZVAL_STR(zv, tmp);
+		}
 	}
 
-	name = zend_create_member_string(class_name, const_name);
-
-	zend_ast_destroy(ast);
-	zend_string_release_ex(class_name, 0);
-
-	*ast_ptr = zend_ast_create_constant(name, fetch_type | ZEND_FETCH_CLASS_EXCEPTION);
+	ast->attr |= ZEND_FETCH_CLASS_EXCEPTION;
 }
 /* }}} */
 

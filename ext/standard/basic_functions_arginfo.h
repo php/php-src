@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 23c263defa042155631bec5fcb5282e4cd1e88a7 */
+ * Stub hash: 2d92e992837a61a052eea6d0257837aaccc54be6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1101,12 +1101,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_getdir, 0, 1, Directory, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dir, 0, 1, Directory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
-
-#define arginfo_dir arginfo_getdir
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closedir, 0, 0, IS_VOID, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, dir_handle, "null")
@@ -1271,6 +1269,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftell, 0, 1, MAY_BE_LONG|MAY_BE_
 ZEND_END_ARG_INFO()
 
 #define arginfo_fflush arginfo_rewind
+
+#define arginfo_fsync arginfo_rewind
+
+#define arginfo_fdatasync arginfo_rewind
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fwrite, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream)
@@ -2521,7 +2523,7 @@ ZEND_FUNCTION(substr_compare);
 ZEND_FUNCTION(utf8_encode);
 ZEND_FUNCTION(utf8_decode);
 ZEND_FUNCTION(opendir);
-ZEND_FUNCTION(getdir);
+ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
@@ -2564,6 +2566,8 @@ ZEND_FUNCTION(fstat);
 ZEND_FUNCTION(fseek);
 ZEND_FUNCTION(ftell);
 ZEND_FUNCTION(fflush);
+ZEND_FUNCTION(fsync);
+ZEND_FUNCTION(fdatasync);
 ZEND_FUNCTION(fwrite);
 ZEND_FUNCTION(mkdir);
 ZEND_FUNCTION(rename);
@@ -3157,8 +3161,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(utf8_encode, arginfo_utf8_encode)
 	ZEND_FE(utf8_decode, arginfo_utf8_decode)
 	ZEND_FE(opendir, arginfo_opendir)
-	ZEND_FE(getdir, arginfo_getdir)
-	ZEND_FALIAS(dir, getdir, arginfo_dir)
+	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
@@ -3201,6 +3204,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fseek, arginfo_fseek)
 	ZEND_FE(ftell, arginfo_ftell)
 	ZEND_FE(fflush, arginfo_fflush)
+	ZEND_FE(fsync, arginfo_fsync)
+	ZEND_FE(fdatasync, arginfo_fdatasync)
 	ZEND_FE(fwrite, arginfo_fwrite)
 	ZEND_FALIAS(fputs, fwrite, arginfo_fputs)
 	ZEND_FE(mkdir, arginfo_mkdir)

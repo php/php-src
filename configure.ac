@@ -133,6 +133,14 @@ AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
 
+if test "$cross_compiling" = yes ; then
+  AC_MSG_CHECKING(for native build C compiler)
+  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
+  AC_MSG_RESULT($BUILD_CC)
+else
+  BUILD_CC=$CC
+fi
+
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
@@ -519,7 +527,7 @@ dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
 dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
 dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*], [true], [
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*|*openbsd*], [true], [
   AX_GCC_FUNC_ATTRIBUTE([ifunc])
   AX_GCC_FUNC_ATTRIBUTE([target])
 ])
@@ -645,7 +653,17 @@ int main(void) {
   freeaddrinfo(ai);
   return 0;
 }
-  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [ac_cv_func_getaddrinfo=no])],
+  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
+    dnl Cross compilation.
+    case $host_alias in
+      *linux*)
+        ac_cv_func_getaddrinfo=yes
+        ;;
+      *)
+        ac_cv_func_getaddrinfo=no
+        ;;
+    esac
+  ])],
 [ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
@@ -674,7 +692,19 @@ int main(void) {
 end:
     return 0;
 }
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [ac_cv__asm_goto=no])])
+  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(__x86_64__) || defined(__i386__)
+    __asm__ goto("jmp %l0\n" :::: end);
+#elif defined(__aarch64__)
+    __asm__ goto("b %l0\n" :::: end);
+#endif
+end:
+    return 0;
+}
+  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])
+])])
 
 if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
@@ -980,6 +1010,16 @@ PHP_ARG_ENABLE([werror],,
 PHP_ARG_ENABLE([memory-sanitizer],,
   [AS_HELP_STRING([--enable-memory-sanitizer],
     [Enable memory sanitizer (clang only)])],
+  [no],
+  [no])
+PHP_ARG_ENABLE([address-sanitizer],,
+  [AS_HELP_STRING([--enable-address-sanitizer],
+    [Enable address sanitizer])],
+  [no],
+  [no])
+PHP_ARG_ENABLE([undefined-sanitizer],,
+  [AS_HELP_STRING([--enable-undefined-sanitizer],
+    [Enable undefined sanitizer])],
   [no],
   [no])
 
@@ -1324,6 +1364,7 @@ PHP_SUBST(sysconfdir)
 
 PHP_SUBST(EXEEXT)
 PHP_SUBST(CC)
+PHP_SUBST(BUILD_CC)
 PHP_SUBST(CFLAGS)
 PHP_SUBST(CFLAGS_CLEAN)
 PHP_SUBST(CPP)
@@ -1372,10 +1413,38 @@ if test "$PHP_WERROR" = "yes"; then
   CXXFLAGS="$CXXFLAGS -Werror"
 fi
 
+if test "$PHP_MEMORY_SANITIZER" = "yes" &&
+   test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+   AC_MSG_ERROR([MemorySanitizer and AddressSanitizer are mutually exclusive])
+fi
+
 dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
 if test "$PHP_MEMORY_SANITIZER" = "yes"; then
-  CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
-  CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  AX_CHECK_COMPILE_FLAG([-fsanitize=memory -fsanitize-memory-track-origins], [
+    CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+    CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+  ], [AC_MSG_ERROR([MemorySanitizer is not available])])
+fi
+
+if test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+  AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
+    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+  ], [AC_MSG_ERROR([AddressSanitizer is not available])])
+fi
+
+if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
+  AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
+    CFLAGS="$CFLAGS -fsanitize=undefined"
+    CXXFLAGS="$CXXFLAGS -fsanitize=undefined"
+  ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
+fi
+
+if test "$PHP_MEMORY_SANITIZER" = "yes" ||
+   test "$PHP_ADDRESS_SANITIZER" = "yes" ||
+   test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
+    CFLAGS="$CFLAGS -fno-omit-frame-pointer"
+    CXXFLAGS="$CXXFLAGS -fno-omit-frame-pointer"
 fi
 
 dnl

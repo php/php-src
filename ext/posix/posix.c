@@ -306,6 +306,7 @@ PHP_FUNCTION(posix_getgroups)
 	gidlist = emalloc(sizeof(gid_t) * result);
 	if ((result = getgroups(result, gidlist)) < 0) {
 		POSIX_G(last_error) = errno;
+		efree(gidlist);
 		RETURN_FALSE;
 	}
 

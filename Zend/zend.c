@@ -342,7 +342,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 }
 /* }}} */
 
-static void print_flat_hash(HashTable *ht) /* {{{ */
+static void print_flat_hash(smart_str *buf, HashTable *ht) /* {{{ */
 {
 	zval *tmp;
 	zend_string *string_key;
@@ -351,16 +351,16 @@ static void print_flat_hash(HashTable *ht) /* {{{ */
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
 		if (i++ > 0) {
-			ZEND_PUTS(",");
+			smart_str_appendc(buf, ',');
 		}
-		ZEND_PUTS("[");
+		smart_str_appendc(buf, '[');
 		if (string_key) {
-			ZEND_WRITE(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
+			smart_str_append(buf, string_key);
 		} else {
-			zend_printf(ZEND_ULONG_FMT, num_key);
+			smart_str_append_unsigned(buf, num_key);
 		}
-		ZEND_PUTS("] => ");
-		zend_print_flat_zval_r(tmp);
+		smart_str_appends(buf, "] => ");
+		zend_print_flat_zval_r_to_buf(buf, tmp);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -391,52 +391,69 @@ ZEND_API size_t zend_print_zval(zval *expr, int indent) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
+void zend_print_flat_zval_r_to_buf(smart_str *buf, zval *expr) /* {{{ */
 {
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
-			ZEND_PUTS("Array (");
+			smart_str_appends(buf, "Array (");
 			if (!(GC_FLAGS(Z_ARRVAL_P(expr)) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(Z_ARRVAL_P(expr))) {
-					ZEND_PUTS(" *RECURSION*");
+					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
-			print_flat_hash(Z_ARRVAL_P(expr));
-			ZEND_PUTS(")");
+			print_flat_hash(buf, Z_ARRVAL_P(expr));
+			smart_str_appendc(buf, ')');
 			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
 		{
 			HashTable *properties;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
-			zend_printf("%s Object (", ZSTR_VAL(class_name));
+			smart_str_append(buf, class_name);
+			smart_str_appends(buf, " Object (");
 			zend_string_release_ex(class_name, 0);
 
 			if (GC_IS_RECURSIVE(Z_COUNTED_P(expr))) {
-				ZEND_PUTS(" *RECURSION*");
+				smart_str_appends(buf, " *RECURSION*");
 				return;
 			}
 
 			properties = Z_OBJPROP_P(expr);
 			if (properties) {
 				GC_PROTECT_RECURSION(Z_OBJ_P(expr));
-				print_flat_hash(properties);
+				print_flat_hash(buf, properties);
 				GC_UNPROTECT_RECURSION(Z_OBJ_P(expr));
 			}
-			ZEND_PUTS(")");
+			smart_str_appendc(buf, ')');
 			break;
 		}
 		case IS_REFERENCE:
-			zend_print_flat_zval_r(Z_REFVAL_P(expr));
+			zend_print_flat_zval_r_to_buf(buf, Z_REFVAL_P(expr));
+			break;
+		case IS_STRING:
+			smart_str_append(buf, Z_STR_P(expr));
 			break;
 		default:
-			zend_print_zval(expr, 0);
+		{
+			zend_string *str = zval_get_string_func(expr);
+			smart_str_append(buf, str);
+			zend_string_release_ex(str, 0);
 			break;
+		}
 	}
 }
 /* }}} */
+
+ZEND_API void zend_print_flat_zval_r(zval *expr)
+{
+	smart_str buf = {0};
+	zend_print_flat_zval_r_to_buf(&buf, expr);
+	smart_str_0(&buf);
+	zend_write(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+	smart_str_free(&buf);
+}
 
 static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* {{{ */
 {
@@ -931,7 +948,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 # if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 		/* Create a map region, used for indirect pointers from shared to
-		 * process memory. It's allocatred once and never resized.
+		 * process memory. It's allocated once and never resized.
 		 * All processes must map it into the same address space.
 		 */
 		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
@@ -1374,8 +1391,8 @@ static ZEND_COLD void zend_error_impl(
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 			ZVAL_UNDEF(&EG(user_error_handler));
 
-			/* User error handler may include() additinal PHP files.
-			 * If an error was generated during comilation PHP will compile
+			/* User error handler may include() additional PHP files.
+			 * If an error was generated during compilation PHP will compile
 			 * such scripts recursively, but some CG() variables may be
 			 * inconsistent. */
 

@@ -1230,17 +1230,8 @@ static void zend_file_cache_unserialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
-		if (!(script->corrupted)) {
-			uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
-
-			if (ptr) {
-				type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-				type->ce_cache__ptr = ptr;
-			} else {
-				type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
-			}
-		} else {
-			type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
+		if (!script->corrupted) {
+			zend_accel_get_class_name_map_ptr(type_name, scope, /* have_xlat */ false);
 		}
 	} else if (ZEND_TYPE_HAS_CE(*type)) {
 		zend_class_entry *ce = ZEND_TYPE_CE(*type);
@@ -1253,15 +1244,17 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
 {
-	if (!(script->corrupted)
-	 && op_array != &script->script.main_op_array) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+	if (!script->corrupted) {
+		if (op_array != &script->script.main_op_array) {
+			op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		} else {
+			ZEND_ASSERT(!(op_array->fn_flags & ZEND_ACC_IMMUTABLE));
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		}
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 		if (op_array->static_variables) {
@@ -1504,6 +1497,10 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
+	if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
+	 && !script->corrupted) {
+		zend_accel_get_class_name_map_ptr(ce->name, ce, /* have_xlat */ false);
+	}
 	if (ce->parent) {
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			UNSERIALIZE_STR(ce->parent_name);

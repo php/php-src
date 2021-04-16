@@ -97,7 +97,15 @@ static zend_always_inline void *spl_heap_elem(spl_ptr_heap *heap, size_t i) {
 
 static zend_always_inline void spl_heap_elem_copy(spl_ptr_heap *heap, void *to, void *from) {
 	assert(to != from);
-	memcpy(to, from, heap->elem_size);
+
+	/* Specialized for cases of heap and priority queue. With the size being
+	 * constant known at compile time the compiler can fully inline calls to memcpy. */
+	if (heap->elem_size == sizeof(spl_pqueue_elem)) {
+		memcpy(to, from, sizeof(spl_pqueue_elem));
+	} else {
+		ZEND_ASSERT(heap->elem_size == sizeof(zval));
+		memcpy(to, from, sizeof(zval));
+	}
 }
 
 static void spl_ptr_heap_zval_dtor(void *elem) { /* {{{ */
@@ -236,6 +244,22 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 	return zend_compare(a_priority_p, b_priority_p);
 }
 /* }}} */
+
+/* Specialized comparator used when we are absolutely sure an instance of the
+ * not inherited SplPriorityQueue class contains only priorities as longs. This
+ * fact is tracked during insertion into the queue. */
+static int spl_ptr_pqueue_elem_cmp_long(void *x, void *y, zval *object) {
+	zend_long a = Z_LVAL(((spl_pqueue_elem*) x)->priority);
+	zend_long b = Z_LVAL(((spl_pqueue_elem*) y)->priority);
+	return a>b ? 1 : (a<b ? -1 : 0);
+}
+
+/* same as spl_ptr_pqueue_elem_cmp_long */
+static int spl_ptr_pqueue_elem_cmp_double(void *x, void *y, zval *object) {
+	double a = Z_DVAL(((spl_pqueue_elem*) x)->priority);
+	double b = Z_DVAL(((spl_pqueue_elem*) y)->priority);
+	return ZEND_NORMALIZE_BOOL(a - b);
+}
 
 static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_ctor_func ctor, spl_ptr_heap_dtor_func dtor, size_t elem_size) /* {{{ */
 {
@@ -590,9 +614,9 @@ PHP_METHOD(SplHeap, insert)
 	zval *value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value);
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -638,9 +662,10 @@ PHP_METHOD(SplPriorityQueue, insert)
 	spl_heap_object *intern;
 	spl_pqueue_elem elem;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(data);
+		Z_PARAM_ZVAL(priority);
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
@@ -651,6 +676,21 @@ PHP_METHOD(SplPriorityQueue, insert)
 
 	ZVAL_COPY(&elem.data, data);
 	ZVAL_COPY(&elem.priority, priority);
+
+	/* If we know this call came from non inherited SplPriorityQueue it's
+	 * possible to do specialization on the type of the priority parameter. */
+	if (!intern->fptr_cmp) {
+		int type = Z_TYPE(elem.priority);
+		spl_ptr_heap_cmp_func new_cmp =
+			(type == IS_LONG) ? spl_ptr_pqueue_elem_cmp_long :
+			((type == IS_DOUBLE) ? spl_ptr_pqueue_elem_cmp_double : spl_ptr_pqueue_elem_cmp);
+
+		if (intern->heap->count == 0) { /* Specialize empty queue */
+			intern->heap->cmp = new_cmp;
+		} else if (new_cmp != intern->heap->cmp) { /* Despecialize on type conflict. */
+			intern->heap->cmp = spl_ptr_pqueue_elem_cmp;
+		}
+	}
 
 	spl_ptr_heap_insert(intern->heap, &elem, ZEND_THIS);
 

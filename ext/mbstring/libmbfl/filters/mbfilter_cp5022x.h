@@ -44,7 +44,6 @@ extern const struct mbfl_convert_vtbl vtbl_cp50222_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp50222;
 
 int mbfl_filt_conv_cp5022x_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter);

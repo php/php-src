@@ -2820,7 +2820,9 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueConstant)
 
 	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
 		zend_ast *ast = Z_ASTVAL(default_value);
-		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS);
+		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT
+			|| ast->kind == ZEND_AST_CONSTANT_CLASS
+			|| ast->kind == ZEND_AST_CLASS_CONST);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2858,6 +2860,13 @@ ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName)
 		RETVAL_STR_COPY(zend_ast_get_constant_name(ast));
 	} else if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
 		RETVAL_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
+	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+		zend_string *class_name = zend_ast_get_str(ast->child[0]);
+		zend_string *const_name = zend_ast_get_str(ast->child[1]);
+		RETVAL_NEW_STR(zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", sizeof("::")-1,
+			ZSTR_VAL(const_name), ZSTR_LEN(const_name)));
 	} else {
 		RETVAL_NULL();
 	}
@@ -2993,13 +3002,14 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
-		if (ZEND_TYPE_HAS_CE_CACHE(param->type)
-		 && ZEND_TYPE_CE_CACHE(param->type)) {
-			append_type(return_value,
-				(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_CE_CACHE(param->type), 0, 0));
-		} else {
-			append_type(return_value,
-				(zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_NAME(param->type), 0, 0));
+		zend_string *name = ZEND_TYPE_NAME(param->type);
+
+		if (ZSTR_HAS_CE_CACHE(name) && ZSTR_GET_CE_CACHE(name)) {
+ 			append_type(return_value,
+				(zend_type) ZEND_TYPE_INIT_CE(ZSTR_GET_CE_CACHE(name), 0, 0));
+ 		} else {
+ 			append_type(return_value,
+				(zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
 		}
 	} else if (ZEND_TYPE_HAS_CE(param->type)) {
 		append_type(return_value,

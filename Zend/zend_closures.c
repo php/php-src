@@ -290,7 +290,6 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 
 	zend_call_function(&fci, &fcc);
 
-	zval_ptr_dtor(&fci.params[0]);
 	zval_ptr_dtor(&fci.params[1]);
 }
 /* }}} */
@@ -491,6 +490,8 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 			zend_destroy_static_vars(&closure->func.op_array);
 		}
 		destroy_op_array(&closure->func.op_array);
+	} else if (closure->orig_internal_handler == zend_closure_call_magic) {
+		zend_string_release(closure->func.common.function_name);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {

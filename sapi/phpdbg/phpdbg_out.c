@@ -37,7 +37,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
  * XXX: this is a magic number; do not decrease it
  * Emax = 1023
  * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
+ * NUM_BUF_SIZE >= strlen("-") + Emax + strlen(".") + NDIG + strlen("E+1023") + 1;
  */
 #define NUM_BUF_SIZE        2048
 

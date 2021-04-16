@@ -5,6 +5,7 @@ open_basedir=.
 opcache.enabled=1
 opcache.enable_cli=1
 opcache.log_verbosity_level=2
+opcache.interned_strings_buffer=8
 --EXTENSIONS--
 opcache
 --FILE--

@@ -10,11 +10,9 @@ final class mysqli_driver
 
     public int $driver_version;
 
-    /** @var bool */
-    public $reconnect = false;
+    public bool $reconnect = false;
 
-    /** @var int */
-    public $report_mode = 0;
+    public int $report_mode = 0;
 }
 
 class mysqli
@@ -507,7 +505,7 @@ class mysqli_stmt
      * @return bool
      * @alias mysqli_stmt_execute
      */
-    public function execute() {}
+    public function execute(?array $params = null) {}
 
     /**
      * @return bool|null
@@ -644,10 +642,10 @@ function mysqli_error(mysqli $mysql): string {}
 
 function mysqli_error_list(mysqli $mysql): array {}
 
-function mysqli_stmt_execute(mysqli_stmt $statement): bool {}
+function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 /** @alias mysqli_stmt_execute */
-function mysqli_execute(mysqli_stmt $statement): bool {}
+function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 function mysqli_fetch_field(mysqli_result $result): object|false {}
 

@@ -4700,9 +4700,13 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 }
 
 static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
-	zend_string *loc_str = zval_try_get_string(loc_zv);
+	zend_string *tmp_loc_str;
+	zend_string *loc_str = zval_try_get_tmp_string(loc_zv, &tmp_loc_str);
+	if (UNEXPECTED(loc_str == NULL)) {
+		return NULL;
+	}
 	zend_string *result = try_setlocale_str(cat, loc_str);
-	zend_string_release_ex(loc_str, 0);
+	zend_tmp_string_release(tmp_loc_str);
 	return result;
 }
 

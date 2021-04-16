@@ -125,7 +125,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (!php_var_unserialize(&zv, (const unsigned char **) &msg, (unsigned char *) msg + len, &var_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, arborting");
+		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, aborting");
 		return;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -136,7 +136,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("GLOBALS"))) && Z_TYPE_P(zvp) == IS_ARRAY) {
 		{
 			zval *srv;
-			if ((srv = zend_hash_str_find(Z_ARRVAL_P(zvp), ZEND_STRL("_SERVER"))) && Z_TYPE_P(srv) == IS_ARRAY) {
+			if ((srv = zend_hash_find(Z_ARRVAL_P(zvp), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) && Z_TYPE_P(srv) == IS_ARRAY) {
 				zval *script;
 				if ((script = zend_hash_str_find(Z_ARRVAL_P(srv), ZEND_STRL("SCRIPT_FILENAME"))) && Z_TYPE_P(script) == IS_STRING) {
 					phpdbg_param_t param;

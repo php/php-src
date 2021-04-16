@@ -87,7 +87,7 @@ void pretty_print(char *text)
 	 * $P substitutes the prompt sequence
 	 * Lines are wrapped by replacing the last blank with a CR before <term width>
 	 * characters.  (This defaults to 100 if the width can't be detected).  In the
-	 * pathelogical case where no blanks are found, then the wrap occurs at the
+	 * pathological case where no blanks are found, then the wrap occurs at the
 	 * first blank.
 	 */
 	for (p = text, q = new; *p; p++) {
@@ -154,7 +154,7 @@ static char *get_help(const char * const key)
 	phpdbg_help_text_t *p;
 
 	/* Note that phpdbg_help_text is not assumed to be collated in key order.  This is an
-	   inconvience that means that help can't be logically grouped Not worth
+	   inconvenience that means that help can't be logically grouped Not worth
 	   the savings */
 
 	for (p = phpdbg_help_text; p->key; p++) {
@@ -383,10 +383,10 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "(and list out options if not unique), so **help exp** will give help on the **export** command, "
 "but **help ex** will list the summary for **exec** and **export**." CR CR
 
-"Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
+"Type **help aliases** to show a full alias list, including any registered phpdbginit functions" CR
 "Type **help syntax** for a general introduction to the command syntax." CR
 "Type **help options** for a list of phpdbg command line options." CR
-"Type **help phpdbginit** to show how to customise the debugger environment."
+"Type **help phpdbginit** to show how to customize the debugger environment."
 },
 {"options", CR
 "Below are the command line options supported by phpdbg" CR CR
@@ -444,7 +444,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"phpdbginit", CR
-"Phpdgb uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
+"Phpdbg uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
 "for the file named **.phpdbginit** in the current working directory.  This location can be "
 "overridden on the command line using the **-i** switch (see **help options** for a more "
 "details)." CR CR
@@ -514,7 +514,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 /******************************** Help Codicils ********************************/
 {"aliases!", CR
 "Note that aliases can be used for either command or sub-command keywords or both, so **info b** "
-"is a synomyn for **info break** and **l func** for **list func**, etc." CR CR
+"is a synonym for **info break** and **l func** for **list func**, etc." CR CR
 
 "Note that help will also accept any alias as a parameter and provide help on that command, for example **h p** will provide help on the print command."
 },
@@ -760,7 +760,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"list",
-"The list command displays source code for the given argument.  The target type is specficied by "
+"The list command displays source code for the given argument.  The target type is specified by "
 "a second subcommand keyword:" CR CR
 
 "  **Type**     **Alias**  **Purpose**" CR

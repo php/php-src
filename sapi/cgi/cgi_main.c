@@ -663,7 +663,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
-			zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
+			zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 		}
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
@@ -2011,7 +2011,7 @@ consult the installation file that came with this distribution, or visit \n\
 			int running = 0;
 			pid_t pid;
 
-			/* Create a process group for ourself & children */
+			/* Create a process group for us & children */
 			setsid();
 			pgroup = getpgrp();
 #ifdef DEBUG_FASTCGI

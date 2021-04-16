@@ -944,7 +944,7 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            //lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
+            //lsapi_log("enter LVE (%d) : result: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
@@ -4181,7 +4181,7 @@ void lsapi_MD5Update(struct lsapi_MD5Context *ctx, unsigned char const *buf, uns
 
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern
+ * Final wrap-up - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void lsapi_MD5Final(unsigned char digest[16], struct lsapi_MD5Context *ctx)

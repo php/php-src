@@ -206,8 +206,6 @@ struct _php_stream  {
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	uint8_t fclose_stdiocast:2;
 
-	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
-
 	char mode[16];			/* "rwb" etc. ala stdio */
 
 	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
@@ -336,6 +334,9 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0)
 
+PHPAPI int _php_stream_sync(php_stream *stream, bool data_only);
+#define php_stream_sync(stream, d)	    _php_stream_sync((stream), (d))
+
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL)
 
@@ -443,6 +444,15 @@ END_EXTERN_C()
 
 /* Enable/disable blocking reads on anonymous pipes on Windows. */
 #define PHP_STREAM_OPTION_PIPE_BLOCKING 13
+
+/* Stream can support fsync operation */
+#define PHP_STREAM_OPTION_SYNC_API		14
+#define PHP_STREAM_SYNC_SUPPORTED	0
+#define PHP_STREAM_SYNC_FSYNC 1
+#define PHP_STREAM_SYNC_FDSYNC 2
+
+#define php_stream_sync_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */

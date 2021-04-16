@@ -87,7 +87,7 @@ static void normalize_protected_variable(char *varname) /* {{{ */
 {
 	char *s = varname, *index = NULL, *indexend = NULL, *p;
 
-	/* overjump leading space */
+	/* skip leading space */
 	while (*s == ' ') {
 		s++;
 	}
@@ -678,7 +678,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0;
 	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
-	int skip_upload = 0, anonindex = 0, is_anonymous;
+	int skip_upload = 0, anonymous_index = 0, is_anonymous;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
@@ -923,7 +923,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			if (!param) {
 				is_anonymous = 1;
 				param = emalloc(MAX_SIZE_ANONNAME);
-				snprintf(param, MAX_SIZE_ANONNAME, "%u", anonindex++);
+				snprintf(param, MAX_SIZE_ANONNAME, "%u", anonymous_index++);
 			} else {
 				is_anonymous = 0;
 			}

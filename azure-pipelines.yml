@@ -74,10 +74,7 @@ jobs:
     - template: azure/job.yml
       parameters:
         configurationName: DEBUG_ZTS_ASAN_UBSAN
-        configurationParameters: >-
-            --enable-debug --enable-zts
-            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
-            LDFLAGS='-fsanitize=undefined,address'
+        configurationParameters: '--enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer'
         runTestsParameters: --asan
         timeoutInMinutes: 360
     - template: azure/msan_job.yml
@@ -90,17 +87,16 @@ jobs:
       parameters:
         configurationName: COMMUNITY
         configurationParameters: >-
-            --enable-debug --enable-zts
-            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
-            LDFLAGS='-fsanitize=undefined,address'
+            --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
+            CFLAGS='-fno-sanitize-recover'
     - template: azure/coverage_job.yml
       parameters:
         configurationName: COVERAGE_DEBUG_ZTS
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
-    - template: azure/file_cache_job.yml
+    - template: azure/opcache_variation_job.yml
       parameters:
-        configurationName: DEBUG_NTS_FILE_CACHE
+        configurationName: DEBUG_NTS_OPCACHE
         configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
     - template: azure/job.yml

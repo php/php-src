@@ -23,8 +23,6 @@
 #define MYSQLI_CLOSE_EXPLICIT 0
 #define MYSQLI_CLOSE_IMPLICIT 1
 #define MYSQLI_CLOSE_DISCONNECTED 2
-#define MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE	200
-#define MYSQLND_OPT_INT_AND_YEAR_AS_INT				201
 
 /* r->data should be always NULL, at least in recent libmysql versions, the status changes once data is read*/
 #define mysqli_result_is_unbuffered(r)		((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT && (r)->data == NULL)

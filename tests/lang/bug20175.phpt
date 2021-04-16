@@ -10,7 +10,7 @@ print zend_version()."\n";
  * Storing the result of a function in a static variable.
  * foo_global() increments global variable $foo_count whenever it is executed.
  * When foo_static() is called it checks for the static variable $foo_value
- * being initialised. In case initialisation is necessary foo_global() will be
+ * being initialized. In case initialisation is necessary foo_global() will be
  * called. Since that must happen only once the return value should be equal.
  */
 $foo_count = 0;
@@ -58,8 +58,8 @@ function bar_static() {
  *
  * Storing a reference to the result of a function in a static variable.
  * Same as Part 2 but wow_global() returns a reference so $wow_value
- * should store a reference to $wow_global. Therefor $wow_value is already
- * initialised in second call to wow_static() and hence shouldn't call
+ * should store a reference to $wow_global. Therefore $wow_value is already
+ * initialized in second call to wow_static() and hence shouldn't call
  * wow_global() again.
  */ /*
 $wow_count = 0;
@@ -89,7 +89,7 @@ function wow_static() {
  * The class oop_test uses a static reference to a oop_class instance.
  * When another oop_test instance is created it must reuse the statically
  * stored reference oop_value. This way oop_class gets some singleton behavior
- * since it will be created only once for all insatnces of oop_test.
+ * since it will be created only once for all instances of oop_test.
  */
 $oop_global = 0;
 class oop_class {

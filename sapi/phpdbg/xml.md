@@ -133,7 +133,7 @@ inactive
 
 - by type
  - op_array: nothing was yet compiled (probably because no execution context set)
- - symbol_table: no symbol table present (not yet initiailized or already destructed)
+ - symbol_table: no symbol table present (not yet initialized or already destructed)
  - noexec: not in execution
  - memory_manager: using the native memory manager (malloc, free, realloc) instead of e.g. the Zend MM
  - notfound: file not found
@@ -166,7 +166,7 @@ break / info break
 
 - id: the breakpoint id (if the leave command was executed, the id has the value "leave")
 - num: the nth opline of a function/method/file
-- add: has value "success"/"fail": a brekpoint was successfully/not added
+- add: has value "success"/"fail": a breakpoint was successfully/not added
 - pending: the breakpoint is waiting for resolving (e.g. a file opline on a not yet loaded file)
 - deleted: has value "success"/"fail": a breakpoint was successfully/not deleted
 - eval: the condition on conditional breakpoints
@@ -366,7 +366,7 @@ print
 - if the type is "User"
  - it has these attributes
    - startline: the first line of code where the method or function is defined
-   - endline: the lastt line of code where the method or function is defined
+   - endline: the last line of code where the method or function is defined
    - file: the file of code where the method or function is defined
  - is followed by the oplines of that method or function (&lt;print> elements)
 - &lt;print line="%u" opline="%p" opcode="%s" op="%s" />
@@ -516,7 +516,7 @@ set
 
 ### prompt ###
 
-- without other args, a &lt;setpromt str="" /> tag is emitted where the value of the str attribute is the value of the prompt
+- without other args, a &lt;setprompt str="" /> tag is emitted where the value of the str attribute is the value of the prompt
 - when there is another arg, the prompt is changed to that arg, no further xml answer
 
 ### break ###
@@ -558,7 +558,7 @@ set
 - generally enables / disables quietness silently with no further xml answer
 - if the boolean switch is omitted, it emits current state in a &lt;setquiet active="" /> where active is on or off
 
-### setpping ###
+### stepping ###
 
 - sets stepping to either opcode or line (so a step command will either advance one op or one line)
 - if no further argument is passed, it emits current state in a &lt;setoplog type="" /> where active is opcode or line

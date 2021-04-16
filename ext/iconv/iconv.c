@@ -2233,12 +2233,12 @@ PHP_FUNCTION(iconv)
 /* {{{ Sets internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_set_encoding)
 {
-	char *type;
+	zend_string *type;
 	zend_string *charset;
-	size_t type_len, retval;
+	zend_result retval;
 	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &type, &charset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2247,11 +2247,11 @@ PHP_FUNCTION(iconv_set_encoding)
 		RETURN_FALSE;
 	}
 
-	if(!strcasecmp("input_encoding", type)) {
+	if(zend_string_equals_literal_ci(type, "input_encoding")) {
 		name = zend_string_init("iconv.input_encoding", sizeof("iconv.input_encoding") - 1, 0);
-	} else if(!strcasecmp("output_encoding", type)) {
+	} else if(zend_string_equals_literal_ci(type, "output_encoding")) {
 		name = zend_string_init("iconv.output_encoding", sizeof("iconv.output_encoding") - 1, 0);
-	} else if(!strcasecmp("internal_encoding", type)) {
+	} else if(zend_string_equals_literal_ci(type, "internal_encoding")) {
 		name = zend_string_init("iconv.internal_encoding", sizeof("iconv.internal_encoding") - 1, 0);
 	} else {
 		RETURN_FALSE;
@@ -2271,25 +2271,25 @@ PHP_FUNCTION(iconv_set_encoding)
 /* {{{ Get internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_get_encoding)
 {
-	char *type = "all";
-	size_t type_len = sizeof("all")-1;
+	zend_string *type = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &type) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!strcasecmp("all", type)) {
+	if (!type || zend_string_equals_literal_ci(type, "all")) {
 		array_init(return_value);
 		add_assoc_string(return_value, "input_encoding",    get_input_encoding());
 		add_assoc_string(return_value, "output_encoding",   get_output_encoding());
 		add_assoc_string(return_value, "internal_encoding", get_internal_encoding());
-	} else if (!strcasecmp("input_encoding", type)) {
+	} else if (zend_string_equals_literal_ci(type, "input_encoding")) {
 		RETVAL_STRING(get_input_encoding());
-	} else if (!strcasecmp("output_encoding", type)) {
+	} else if (zend_string_equals_literal_ci(type, "output_encoding")) {
 		RETVAL_STRING(get_output_encoding());
-	} else if (!strcasecmp("internal_encoding", type)) {
+	} else if (zend_string_equals_literal_ci(type, "internal_encoding")) {
 		RETVAL_STRING(get_internal_encoding());
 	} else {
+		/* TODO Warning/ValueError? */
 		RETURN_FALSE;
 	}
 

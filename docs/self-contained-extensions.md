@@ -8,7 +8,7 @@ To create such an extension, two things are required:
 
 We will describe now how to create these and how to put things together.
 
-## Prepairing your system
+## Preparing your system
 
 While the result will run on any system, a developer's setup needs these tools:
 

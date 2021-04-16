@@ -255,6 +255,7 @@ int fuzzer_do_request_from_buffer(
 		file_handle.len = data_len;
 
 		zend_op_array *op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
+		zend_destroy_file_handle(&file_handle);
 		if (op_array) {
 			if (execute) {
 				zend_execute(op_array, NULL);
@@ -263,7 +264,6 @@ int fuzzer_do_request_from_buffer(
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
-		zend_destroy_file_handle(&file_handle);
 	} zend_end_try();
 
 	CG(compiled_filename) = NULL; /* ??? */

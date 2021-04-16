@@ -696,23 +696,18 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 	return ast;
 }
 
-zend_op_array *compile_filename(int type, zval *filename)
+zend_op_array *compile_filename(int type, zend_string *filename)
 {
 	zend_file_handle file_handle;
-	zval tmp;
 	zend_op_array *retval;
 	zend_string *opened_path = NULL;
 
-	if (Z_TYPE_P(filename) != IS_STRING) {
-		ZVAL_STR(&tmp, zval_get_string(filename));
-		filename = &tmp;
-	}
-	zend_stream_init_filename_ex(&file_handle, Z_STR_P(filename));
+	zend_stream_init_filename_ex(&file_handle, filename);
 
 	retval = zend_compile_file(&file_handle, type);
 	if (retval && file_handle.handle.stream.handle) {
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = zend_string_copy(Z_STR_P(filename));
+			file_handle.opened_path = opened_path = zend_string_copy(filename);
 		}
 
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
@@ -723,9 +718,6 @@ zend_op_array *compile_filename(int type, zval *filename)
 	}
 	zend_destroy_file_handle(&file_handle);
 
-	if (UNEXPECTED(filename == &tmp)) {
-		zval_ptr_dtor(&tmp);
-	}
 	return retval;
 }
 

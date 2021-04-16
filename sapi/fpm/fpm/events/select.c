@@ -93,7 +93,7 @@ static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long 
 	t.tv_sec = timeout / 1000;
 	t.tv_usec = (timeout % 1000) * 1000;
 
-	/* wait for inconming event or timeout */
+	/* wait for incoming event or timeout */
 	ret = select(FD_SETSIZE, &current_fds, NULL, NULL, &t);
 	if (ret == -1) {
 

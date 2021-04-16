@@ -55,7 +55,7 @@ extern "C" {
 // return 1 if CRIU is available, return 0 if CRIU is not available
 int LSCRIU_Init(void);
 
-void LSCRIU_inc_req_procssed(void);
+void LSCRIU_inc_req_processed(void);
 
 
 #if defined (c_plusplus) || defined (__cplusplus)

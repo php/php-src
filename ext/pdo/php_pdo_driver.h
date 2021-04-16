@@ -26,8 +26,6 @@ typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
 struct pdo_bound_param_data;
 
-PDO_API zend_string *php_pdo_int64_to_str(int64_t i64);
-
 #ifndef TRUE
 # define TRUE 1
 #endif

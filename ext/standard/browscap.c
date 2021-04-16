@@ -313,26 +313,25 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_string *new_key, *new_value;
 
 				/* Set proper value for true/false settings */
-				if ((Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
+				if (zend_string_equals_literal_ci(Z_STR_P(arg2), "on")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "yes")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "true")
 				) {
 					new_value = ZSTR_CHAR('1');
-				} else if (
-					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
-					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
+				} else if (zend_string_equals_literal_ci(Z_STR_P(arg2), "no")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "off")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "none")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "false")
 				) {
 					new_value = ZSTR_EMPTY_ALLOC();
 				} else { /* Other than true/false setting */
 					new_value = browscap_intern_str(ctx, Z_STR_P(arg2), persistent);
 				}
 
-				if (!strcasecmp(Z_STRVAL_P(arg1), "parent")) {
+				if (zend_string_equals_literal_ci(Z_STR_P(arg1), "parent")) {
 					/* parent entry can not be same as current section -> causes infinite loop! */
 					if (ctx->current_section_name != NULL &&
-						!strcasecmp(ZSTR_VAL(ctx->current_section_name), Z_STRVAL_P(arg2))
+						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))
 					) {
 						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
 							"'Parent' value cannot be same as the section name: %s "
@@ -711,7 +710,7 @@ PHP_FUNCTION(get_browser)
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY
-				|| zend_is_auto_global_str(ZEND_STRL("_SERVER"))) {
+				|| zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) {
 			http_user_agent = zend_hash_str_find(
 				Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]),
 				"HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1);

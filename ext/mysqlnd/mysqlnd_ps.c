@@ -1173,6 +1173,8 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 			}
 		}
 		stmt->send_types_to_server = 1;
+	} else if (param_bind && param_bind != stmt->param_bind) {
+		s->m->free_parameter_bind(s, param_bind);
 	}
 	DBG_INF("PASS");
 	DBG_RETURN(PASS);

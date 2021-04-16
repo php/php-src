@@ -1463,7 +1463,7 @@ ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_
 				}
 
 				call_info = func_info->call_map[opline - op_array->opcodes];
-				if (!call_info) {
+				if (!call_info || call_info->is_prototype) {
 					break;
 				}
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
@@ -1932,6 +1932,18 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 			}
 			if (op_array->opcodes[use].opcode == ZEND_OP_DATA) {
 				op--;
+				if (op->result_def >= 0) {
+					zend_bitset_incl(worklist, op->result_def);
+				}
+				if (op->op1_def >= 0) {
+					zend_bitset_incl(worklist, op->op1_def);
+				}
+				if (op->op2_def >= 0) {
+					zend_bitset_incl(worklist, op->op2_def);
+				}
+			} else if (use + 1 < op_array->last
+			 && op_array->opcodes[use + 1].opcode == ZEND_OP_DATA) {
+				op++;
 				if (op->result_def >= 0) {
 					zend_bitset_incl(worklist, op->result_def);
 				}
@@ -3778,7 +3790,7 @@ static bool is_effective_op2_double_cast(zend_op *opline, zval *op1) {
  *    E.g. 0+$i and 0.0+$i only differ by that cast. If then the consuming instruction of this
  *    result will perform a double cast anyway, the conversion is safe.
  *
- * The checks happens recursively, while keeping track of which variables are already visisted to
+ * The checks happens recursively, while keeping track of which variables are already visited to
  * avoid infinite loops. An iterative, worklist driven approach would be possible, but the state
  * management more cumbersome to implement, so we don't bother for now.
  */

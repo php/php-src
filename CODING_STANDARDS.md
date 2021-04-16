@@ -3,7 +3,7 @@
 This file lists several standards that any programmer adding or changing code in
 PHP should follow. Since this file was added at a very late stage of the
 development of PHP v3.0, the code base does not fully follow it, but new
-features are going in that general direction. Many sections have been recoded to
+features are going in that general direction. Many sections have been rewritten to
 use these rules.
 
 ## Code implementation

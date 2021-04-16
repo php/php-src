@@ -947,7 +947,7 @@ do_repeat:
 			is_ps_title_available() == PS_TITLE_SUCCESS,
 			CONST_CS, 0);
 
-		*arg_excp = arg_free; /* reconstuct argv */
+		*arg_excp = arg_free; /* reconstruct argv */
 
 		if (hide_argv) {
 			int i;
@@ -956,7 +956,7 @@ do_repeat:
 			}
 		}
 
-		zend_is_auto_global_str(ZEND_STRL("_SERVER"));
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {
@@ -1338,7 +1338,7 @@ exit_loop:
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
-		 * since we cannot check if EG(ini_directives) has been initialised
+		 * since we cannot check if EG(ini_directives) has been initialized
 		 * because the executor's constructor does not set initialize it.
 		 * Apart from that there seems no need for zend_ini_deactivate() yet.
 		 * So we goto out_err.*/

@@ -499,6 +499,7 @@ numeric_key:
 			}
 		} else if (Z_TYPE(key) == IS_STRING) {
 			if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
+				zval_ptr_dtor_str(&key);
 				goto numeric_key;
 			}
 			data = zend_hash_lookup(ht, Z_STR(key));
@@ -506,12 +507,11 @@ numeric_key:
 				var_push_dtor_value(var_hash, data);
 				ZVAL_NULL(data);
 			}
+			zval_ptr_dtor_str(&key);
 		} else {
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
-
-		zval_ptr_dtor_str(&key);
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			goto failure;
@@ -618,18 +618,22 @@ declared_property:
 								(*var_hash)->ref_props, (zend_uintptr_t) data);
 						}
 					}
-					var_push_dtor_value(var_hash, data);
+					/* We may override default property value, but they are usually immutable */
+					if (Z_REFCOUNTED_P(data)) {
+						var_push_dtor_value(var_hash, data);
+					}
 					ZVAL_NULL(data);
 				} else {
+					/* Unusual override of dynamic property */
 					int ret = is_property_visibility_changed(obj->ce, &key);
 
-					if (EXPECTED(!ret)) {
+					if (ret > 0) {
+						goto second_try;
+					} else if (!ret) {
 						var_push_dtor_value(var_hash, data);
 						ZVAL_NULL(data);
 					} else if (ret < 0) {
 						goto failure;
-					} else {
-						goto second_try;
 					}
 				}
 			} else {
@@ -644,7 +648,7 @@ second_try:
 					data = zend_hash_lookup(ht, Z_STR(key));
 					if (Z_TYPE_P(data) == IS_INDIRECT) {
 						goto declared_property;
-					} else if (UNEXPECTED(Z_TYPE_P(data) != IS_NULL)) {
+					} else if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
 						var_push_dtor_value(var_hash, data);
 						ZVAL_NULL(data);
 					}
@@ -1147,11 +1151,19 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
+	class_name = zend_string_init_interned(str, len, 0);
 
 	do {
-		zend_string *lc_name = zend_string_tolower(class_name);
+		zend_string *lc_name;
 
+		if (!(*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				break;
+			}
+		}
+
+		lc_name = zend_string_tolower(class_name);
 		if(!unserialize_allowed_class(lc_name, var_hash)) {
 			zend_string_release_ex(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
@@ -1163,6 +1175,14 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
+		if ((*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				zend_string_release_ex(lc_name, 0);
+				break;
+			}
+		}
+
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		if (ce
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
@@ -1171,7 +1191,7 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
-		if (!zend_is_valid_class_name(class_name)) {
+		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
 			zend_string_release_ex(lc_name, 0);
 			zend_string_release_ex(class_name, 0);
 			return 0;
@@ -1243,8 +1263,7 @@ object ":" uiv ":" ["]	{
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&args[0]);
-		break;
-	} while (1);
+	} while (0);
 
 	*p = YYCURSOR;
 

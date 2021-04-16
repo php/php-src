@@ -289,7 +289,7 @@ static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("pdo_mysql_last_insert_id");
-	PDO_DBG_RETURN(php_pdo_int64_to_str(mysql_insert_id(H->server)));
+	PDO_DBG_RETURN(zend_i64_to_str(mysql_insert_id(H->server)));
 }
 /* }}} */
 

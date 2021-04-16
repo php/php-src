@@ -811,14 +811,56 @@ PHP_FUNCTION(mysqli_stmt_execute)
 {
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
+	HashTable	*input_params = NULL;
 #ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
 #endif
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|h!", &mysql_stmt, mysqli_stmt_class_entry, &input_params) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	// bind-in-execute
+	if (input_params) {
+#if defined(MYSQLI_USE_MYSQLND)
+		zval *tmp;
+		unsigned int index;
+		unsigned int hash_num_elements;
+		unsigned int param_count;
+		MYSQLND_PARAM_BIND	*params;
+
+		if (!zend_array_is_list(input_params)) {
+			zend_argument_value_error(ERROR_ARG_POS(2), "must be a list array");
+			RETURN_THROWS();
+		}
+
+		hash_num_elements = zend_hash_num_elements(input_params);
+		param_count = mysql_stmt_param_count(stmt->stmt);
+		if (hash_num_elements != param_count) {
+			zend_argument_value_error(ERROR_ARG_POS(2), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
+			RETURN_THROWS();
+		}
+
+		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
+		ZEND_ASSERT(params);
+
+		index = 0;
+		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
+			ZVAL_COPY_VALUE(&params[index].zv, tmp);
+			params[index].type = MYSQL_TYPE_VAR_STRING;
+			index++;
+		} ZEND_HASH_FOREACH_END();
+
+		if (mysqlnd_stmt_bind_param(stmt->stmt, params)) {
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETVAL_FALSE;
+		}
+#else
+		zend_argument_count_error("Binding parameters in execute is not supported with libmysqlclient");
+		RETURN_THROWS();
+#endif
+	}
 
 #ifndef MYSQLI_USE_MYSQLND
 	if (stmt->param.var_cnt) {

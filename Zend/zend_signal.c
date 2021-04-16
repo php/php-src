@@ -63,7 +63,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context);
 static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
 
 #if defined(__CYGWIN__) || defined(__PASE__)
-/* Matches zend_excute_API.c; these platforms don't support ITIMER_PROF. */
+/* Matches zend_execute_API.c; these platforms don't support ITIMER_PROF. */
 #define TIMEOUT_SIG SIGALRM
 #else
 #define TIMEOUT_SIG SIGPROF
@@ -118,7 +118,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		} else { /* delay signal handling */
 			SIGG(blocked) = 1; /* signal is blocked */
 
-			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotton */
+			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotten */
 				SIGG(pavail) = queue->next;
 				queue->zend_signal.signo = signo;
 				queue->zend_signal.siginfo = siginfo;

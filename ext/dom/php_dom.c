@@ -1262,17 +1262,21 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 }
 /* }}} end dom_hierarchy */
 
-/* {{{ dom_has_feature(char *feature, char *version) */
-int dom_has_feature(char *feature, char *version)
+/* {{{ */
+bool dom_has_feature(zend_string *feature, zend_string *version)
 {
-	int retval = 0;
-
-	if (!(strcmp (version, "1.0") && strcmp (version,"2.0") && strcmp(version, ""))) {
-		if ((!strcasecmp(feature, "Core") && !strcmp (version, "1.0")) || !strcasecmp(feature, "XML"))
-			retval = 1;
+	if (zend_string_equals_literal(version, "1.0")
+		|| zend_string_equals_literal(version, "2.0")
+		|| zend_string_equals_literal(version, "")
+	) {
+		if (zend_string_equals_literal_ci(feature, "XML")
+			|| (zend_string_equals_literal_ci(feature, "Core") && zend_string_equals_literal(version, "1.0"))
+		) {
+			return true;
+		}
 	}
 
-	return retval;
+	return false;
 }
 /* }}} end dom_has_feature */
 

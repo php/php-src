@@ -355,8 +355,9 @@ PHP_FUNCTION(dns_check_record)
 {
 	HEADER *hp;
 	querybuf answer;
-	char *hostname, *rectype = NULL;
-	size_t hostname_len, rectype_len = 0;
+	char *hostname;
+	size_t hostname_len;
+	zend_string *rectype = NULL;
 	int type = DNS_T_MX, i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -370,7 +371,7 @@ PHP_FUNCTION(dns_check_record)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(rectype, rectype_len)
+		Z_PARAM_STR(rectype)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
@@ -379,19 +380,19 @@ PHP_FUNCTION(dns_check_record)
 	}
 
 	if (rectype) {
-		if (!strcasecmp("A",     rectype)) type = DNS_T_A;
-		else if (!strcasecmp("NS",    rectype)) type = DNS_T_NS;
-		else if (!strcasecmp("MX",    rectype)) type = DNS_T_MX;
-		else if (!strcasecmp("PTR",   rectype)) type = DNS_T_PTR;
-		else if (!strcasecmp("ANY",   rectype)) type = DNS_T_ANY;
-		else if (!strcasecmp("SOA",   rectype)) type = DNS_T_SOA;
-		else if (!strcasecmp("CAA",   rectype)) type = DNS_T_CAA;
-		else if (!strcasecmp("TXT",   rectype)) type = DNS_T_TXT;
-		else if (!strcasecmp("CNAME", rectype)) type = DNS_T_CNAME;
-		else if (!strcasecmp("AAAA",  rectype)) type = DNS_T_AAAA;
-		else if (!strcasecmp("SRV",   rectype)) type = DNS_T_SRV;
-		else if (!strcasecmp("NAPTR", rectype)) type = DNS_T_NAPTR;
-		else if (!strcasecmp("A6",    rectype)) type = DNS_T_A6;
+		if (zend_string_equals_literal_ci(rectype, "A")) type = DNS_T_A;
+		else if (zend_string_equals_literal_ci(rectype, "NS")) type = DNS_T_NS;
+		else if (zend_string_equals_literal_ci(rectype, "MX")) type = DNS_T_MX;
+		else if (zend_string_equals_literal_ci(rectype, "PTR")) type = DNS_T_PTR;
+		else if (zend_string_equals_literal_ci(rectype, "ANY")) type = DNS_T_ANY;
+		else if (zend_string_equals_literal_ci(rectype, "SOA")) type = DNS_T_SOA;
+		else if (zend_string_equals_literal_ci(rectype, "CAA")) type = DNS_T_CAA;
+		else if (zend_string_equals_literal_ci(rectype, "TXT")) type = DNS_T_TXT;
+		else if (zend_string_equals_literal_ci(rectype, "CNAME")) type = DNS_T_CNAME;
+		else if (zend_string_equals_literal_ci(rectype, "AAAA")) type = DNS_T_AAAA;
+		else if (zend_string_equals_literal_ci(rectype, "SRV")) type = DNS_T_SRV;
+		else if (zend_string_equals_literal_ci(rectype, "NAPTR")) type = DNS_T_NAPTR;
+		else if (zend_string_equals_literal_ci(rectype, "A6")) type = DNS_T_A6;
 		else {
 			zend_argument_value_error(2, "must be a valid DNS record type");
 			RETURN_THROWS();

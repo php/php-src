@@ -876,6 +876,9 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 }
 
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
+ZEND_API zend_string* ZEND_FASTCALL zend_ulong_to_str(zend_ulong num);
+ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num);
+ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num);
 
 static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 {

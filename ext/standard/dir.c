@@ -235,7 +235,7 @@ PHP_FUNCTION(opendir)
 /* }}} */
 
 /* {{{ Directory class with properties, handle and class and methods read, rewind and close */
-PHP_FUNCTION(getdir)
+PHP_FUNCTION(dir)
 {
 	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
