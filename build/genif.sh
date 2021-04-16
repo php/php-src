@@ -32,7 +32,7 @@ header_list=
 olddir=$(pwd)
 
 # Go to project root.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)
+cd "$(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)"
 
 module_ptrs="$(echo $extensions | $AWK -f ./build/order_by_dep.awk)"
 
@@ -43,7 +43,7 @@ done
 
 includes=$($AWK -f ./build/print_include.awk $header_list)
 
-cd $olddir
+cd "$olddir"
 
 cat $template | \
   sed \
