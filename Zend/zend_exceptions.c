@@ -46,6 +46,9 @@ ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
 /* Internal pseudo-exception that is not exposed to userland. */
 static zend_class_entry zend_ce_unwind_exit;
 
+/* Internal pseudo-exception used in destroyed fibers that is not exposed to userland. */
+static zend_class_entry zend_ce_fiber_exit;
+
 ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 static zend_object_handlers default_exception_handlers;
@@ -94,7 +97,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		return;
 	}
 
-	if (exception == add_previous || zend_is_unwind_exit(add_previous)) {
+	if (exception == add_previous || zend_is_unwind_exit(add_previous) || zend_is_fiber_exit(add_previous)) {
 		OBJ_RELEASE(add_previous);
 		return;
 	}
@@ -791,6 +794,8 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_unhandled_match_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
+
+	INIT_CLASS_ENTRY(zend_ce_fiber_exit, "FiberExit", NULL);
 }
 /* }}} */
 
@@ -987,7 +992,20 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 	EG(current_execute_data)->opline = EG(exception_op);
 }
 
-ZEND_API bool zend_is_unwind_exit(zend_object *ex)
+ZEND_API ZEND_COLD void zend_throw_fiber_exit(void)
+{
+	ZEND_ASSERT(!EG(exception));
+	EG(exception) = zend_objects_new(&zend_ce_fiber_exit);
+	EG(opline_before_exception) = EG(current_execute_data)->opline;
+	EG(current_execute_data)->opline = EG(exception_op);
+}
+
+ZEND_API bool zend_is_unwind_exit(const zend_object *ex)
 {
 	return ex->ce == &zend_ce_unwind_exit;
+}
+
+ZEND_API bool zend_is_fiber_exit(const zend_object *ex)
+{
+	return ex->ce == &zend_ce_fiber_exit;
 }

@@ -73,6 +73,7 @@
 #include "zend_dtrace.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "zend_fibers.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -299,6 +300,35 @@ static PHP_INI_MH(OnSetLogFilter)
 	}
 
 	return FAILURE;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateFiberStackSize)
+{
+	zend_long tmp;
+
+	if (OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (EG(fiber_stack_size) == 0) {
+		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_STACK_SIZE;
+		return SUCCESS;
+	}
+
+	EG(fiber_stack_size) += ZEND_FIBER_GUARD_PAGES;
+
+	tmp = ZEND_FIBER_PAGESIZE * EG(fiber_stack_size);
+
+	if (tmp / ZEND_FIBER_PAGESIZE != EG(fiber_stack_size)) {
+		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_STACK_SIZE;
+		return FAILURE;
+	}
+
+	EG(fiber_stack_size) = tmp;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -737,6 +767,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
+
+	STD_PHP_INI_ENTRY("fiber.stack_size",		"0",			PHP_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1772,12 +1804,17 @@ void php_request_shutdown(void *dummy)
 		php_call_shutdown_functions();
 	}
 
-	/* 2. Call all possible __destruct() functions */
+	/* 2. Cleanup all active fibers. */
+	zend_try {
+		zend_fiber_cleanup();
+	} zend_end_try();
+
+	/* 3. Call all possible __destruct() functions */
 	zend_try {
 		zend_call_destructors();
 	} zend_end_try();
 
-	/* 3. Flush all output buffers */
+	/* 4. Flush all output buffers */
 	zend_try {
 		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
 
@@ -1794,27 +1831,27 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
+	/* 5. Reset max_execution_time (no longer executing php code after response sent) */
 	zend_try {
 		zend_unset_timeout();
 	} zend_end_try();
 
-	/* 5. Call all extensions RSHUTDOWN functions */
+	/* 6. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
 	}
 
-	/* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
+	/* 7. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
 	zend_try {
 		php_output_deactivate();
 	} zend_end_try();
 
-	/* 7. Free shutdown functions */
+	/* 8. Free shutdown functions */
 	if (PG(modules_activated)) {
 		php_free_shutdown_functions();
 	}
 
-	/* 8. Destroy super-globals */
+	/* 9. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1823,38 +1860,38 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
 
-	/* 10. free request-bound globals */
+	/* 11. free request-bound globals */
 	php_free_request_globals();
 
-	/* 11. Call all extensions post-RSHUTDOWN functions */
+	/* 12. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 12. SAPI related shutdown (free stuff) */
+	/* 13. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate();
 	} zend_end_try();
 
-	/* 13. free virtual CWD memory */
+	/* 14. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 14. Destroy stream hashes */
+	/* 15. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 15. Free Willy (here be crashes) */
+	/* 16. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
-	/* 16. Deactivate Zend signals */
+	/* 17. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();
 #endif

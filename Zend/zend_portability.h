@@ -281,6 +281,12 @@ char *alloca();
 # define ZEND_NORETURN
 #endif
 
+#if __has_attribute(force_align_arg_pointer)
+# define ZEND_STACK_ALIGNED __attribute__((force_align_arg_pointer))
+#else
+# define ZEND_STACK_ALIGNED
+#endif
+
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
