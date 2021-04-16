@@ -29,7 +29,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
-      x86*)
+      i[34567]86*|x86*)
         ;;
       *)
         AC_MSG_WARN([JIT not supported by host architecture])
@@ -43,28 +43,26 @@ if test "$PHP_OPCACHE" != "no"; then
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c"
 
     dnl Find out which ABI we are using.
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
-      int main(void) {
-        return sizeof(void*) == 4;
-      }
-    ]])],[
-      ac_cv_32bit_build=no
-    ],[
-      ac_cv_32bit_build=yes
-    ],[
-      ac_cv_32bit_build=no
-    ])
-
-    if test "$ac_cv_32bit_build" = "no"; then
-      case $host_alias in
-        *x86_64-*-darwin*)
-          DASM_FLAGS="-D X64APPLE=1 -D X64=1"
+    case $host_alias in
+      x86_64-*-darwin*)
+        DASM_FLAGS="-D X64APPLE=1 -D X64=1"
+        DASM_ARCH="x86"
         ;;
-        *x86_64*)
-          DASM_FLAGS="-D X64=1"
+      x86_64*)
+        DASM_FLAGS="-D X64=1"
+        DASM_ARCH="x86"
         ;;
-      esac
-    fi
+      i[34567]86*)
+        DASM_ARCH="x86"
+        ;;
+      x86*)
+        DASM_ARCH="x86"
+        ;;
+      aarch64*)
+        DASM_FLAGS="-D ARM64=1"
+        DASM_ARCH="arm64"
+        ;;
+    esac
 
     if test "$PHP_THREAD_SAFETY" = "yes"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
@@ -173,9 +171,10 @@ int main() {
   }
   return 0;
 }
-]])],[dnl
+]])],[have_shm_ipc=yes],[have_shm_ipc=no],[have_shm_ipc=no])
+  if test "$have_shm_ipc" = "yes"; then
     AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-    have_shm_ipc=yes],[have_shm_ipc=no],[have_shm_ipc=no])
+  fi
   AC_MSG_RESULT([$have_shm_ipc])
 
   AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
@@ -225,9 +224,19 @@ int main() {
   }
   return 0;
 }
-]])],[dnl
+]])],[have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[
+  case $host_alias in
+    *linux*)
+      have_shm_mmap_anon=yes
+      ;;
+    *)
+      have_shm_mmap_anon=no
+      ;;
+  esac
+])
+  if test "$have_shm_mmap_anon" = "yes"; then
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-    have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[have_shm_mmap_anon=no])
+  fi
   AC_MSG_RESULT([$have_shm_mmap_anon])
 
   PHP_CHECK_FUNC_LIB(shm_open, rt, root)
@@ -295,16 +304,12 @@ int main() {
   }
   return 0;
 }
-]])],[dnl
+]])],[have_shm_mmap_posix=yes],[have_shm_mmap_posix=no],[have_shm_mmap_posix=no])
+  if test "$have_shm_mmap_posix" = "yes"; then
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    AC_MSG_RESULT([yes])
-    have_shm_mmap_posix=yes
     PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
-  ],[
-    AC_MSG_RESULT([no])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
+  fi
+  AC_MSG_RESULT([$have_shm_mmap_posix])
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \

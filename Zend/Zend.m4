@@ -276,6 +276,8 @@ int main()
 ], [], [
   dnl Cross compilation needs something here.
   LIBZEND_MM_ALIGN=8
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, 8, [ ])
+  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, 3, [ ])
 ])
 
 AC_MSG_RESULT(done)

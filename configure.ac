@@ -133,6 +133,14 @@ AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
 
+if test "$cross_compiling" = yes ; then
+  AC_MSG_CHECKING(for native build C compiler)
+  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
+  AC_MSG_RESULT($BUILD_CC)
+else
+  BUILD_CC=$CC
+fi
+
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
@@ -645,7 +653,17 @@ int main(void) {
   freeaddrinfo(ai);
   return 0;
 }
-  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [ac_cv_func_getaddrinfo=no])],
+  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
+    dnl Cross compilation.
+    case $host_alias in
+      *linux*)
+        ac_cv_func_getaddrinfo=yes
+        ;;
+      *)
+        ac_cv_func_getaddrinfo=no
+        ;;
+    esac
+  ])],
 [ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
@@ -674,7 +692,19 @@ int main(void) {
 end:
     return 0;
 }
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [ac_cv__asm_goto=no])])
+  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(__x86_64__) || defined(__i386__)
+    __asm__ goto("jmp %l0\n" :::: end);
+#elif defined(__aarch64__)
+    __asm__ goto("b %l0\n" :::: end);
+#endif
+end:
+    return 0;
+}
+  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])
+])])
 
 if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
@@ -1334,6 +1364,7 @@ PHP_SUBST(sysconfdir)
 
 PHP_SUBST(EXEEXT)
 PHP_SUBST(CC)
+PHP_SUBST(BUILD_CC)
 PHP_SUBST(CFLAGS)
 PHP_SUBST(CFLAGS_CLEAN)
 PHP_SUBST(CPP)
