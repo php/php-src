@@ -1,7 +1,7 @@
 --TEST--
 Appending to an array via unpack may fail
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip 64bit only"); ?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
 

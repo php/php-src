@@ -1,10 +1,7 @@
 --TEST--
 zend_dval_to_lval preserves low bits  (64 bit long)
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8)
-     die("skip for machines with 64-bit longs");
-?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
     /* test doubles around -4e21 */

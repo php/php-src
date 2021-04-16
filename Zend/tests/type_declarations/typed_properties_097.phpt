@@ -1,7 +1,7 @@
 --TEST--
 Incrementing/decrementing past max/min value (additional cases)
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die('skip 64 bit test'); ?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
 

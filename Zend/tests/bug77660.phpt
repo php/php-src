@@ -1,7 +1,7 @@
 --TEST--
 Bug #77660 (Segmentation fault on break 2147483648)
---SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
 for(;;) break 2147483648;

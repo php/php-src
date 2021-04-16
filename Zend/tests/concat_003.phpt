@@ -1,8 +1,10 @@
 --TEST--
 Concatenating many small strings should not slowdown allocations
+--PLATFORM--
+# debug version is slow
+debug: false
 --SKIPIF--
 <?php
-if (PHP_DEBUG) { die ("skip debug version is slow"); }
 if (getenv('SKIP_PERF_SENSITIVE')) die("skip performance sensitive test");
 ?>
 --FILE--

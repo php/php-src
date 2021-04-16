@@ -1864,9 +1864,9 @@ function run_test(string $php, $file, array $env): string
     /** @var JUnit */
     global $junit;
 
-    static $skipCache;
-    if (!$skipCache) {
-        $skipCache = new SkipCache($cfg['keep']['skip']);
+    static $skipChecker;
+    if (!$skipChecker) {
+        $skipChecker = new SkipChecker($cfg['keep']['skip']);
     }
 
     $temp_filenames = null;
@@ -2079,14 +2079,14 @@ TEST $file
 
     // Default ini settings
     $ini_settings = $workerID ? ['opcache.cache_id' => "worker$workerID"] : [];
+    $ext_params = [];
+    settings2array($ini_overwrites, $ext_params);
+    $ext_params = settings2params($ext_params);
 
     // Additional required extensions
     if ($test->hasSection('EXTENSIONS')) {
-        $ext_params = [];
-        settings2array($ini_overwrites, $ext_params);
-        $ext_params = settings2params($ext_params);
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipChecker->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -2168,7 +2168,7 @@ TEST $file
 
         $startTime = microtime(true);
         $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
-        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
+        $output = $skipChecker->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
 
         $time = microtime(true) - $startTime;
         $junit->stopTimer($shortname);
@@ -2219,6 +2219,32 @@ TEST $file
             ];
 
             $junit->markTestAs('BORK', $shortname, $tested, null, $output);
+            return 'BORKED';
+        }
+    }
+
+    if ($test->sectionNotEmpty('PLATFORM')) {
+        try {
+            $status = $skipChecker->checkPlatform(
+                "$orig_php $pass_options $extra_options $ext_params $no_file_cache",
+                $test->getSection('PLATFORM')
+            );
+            if ($status !== null) {
+                show_result('SKIP', $tested, $tested_file, $status, $temp_filenames);
+                $junit->markTestAs('SKIP', $shortname, $tested, null, $status);
+                return 'SKIPPED';
+            }
+        } catch (Throwable $ex) {
+            show_result("BORK", $ex->getMessage(), $tested_file, 'reason: error parsing PLATFORM', $temp_filenames);
+            $PHP_FAILED_TESTS['BORKED'][] = [
+                'name' => $file,
+                'test_name' => '',
+                'output' => '',
+                'diff' => '',
+                'info' => "{$ex->getMessage()} [$file]",
+            ];
+
+            $junit->markTestAs('BORK', $shortname, $tested, null, $ex->getMessage());
             return 'BORKED';
         }
     }
@@ -3524,6 +3550,8 @@ class JUnit
 
     private function record(string $suite, string $param, $value = 1): void
     {
+        $this->initSuite($suite);
+
         $this->rootSuite[$param] += $value;
         $this->suites[$suite][$param] += $value;
     }
@@ -3657,17 +3685,17 @@ class JUnit
     }
 }
 
-class SkipCache
+class SkipChecker
 {
     private bool $keepFile;
 
     private array $skips = [];
-    private array $extensions = [];
+    private array $info = [];
 
     private int $hits = 0;
     private int $misses = 0;
-    private int $extHits = 0;
-    private int $extMisses = 0;
+    private int $infoHits = 0;
+    private int $infoMisses = 0;
 
     public function __construct(bool $keepFile)
     {
@@ -3707,23 +3735,113 @@ class SkipCache
 
     public function getExtensions(string $php): array
     {
-        if (isset($this->extensions[$php])) {
-            $this->extHits++;
-            return $this->extensions[$php];
+        $info = $this->getPhpInfo($php);
+
+        return [$info['dir'], $info['ext']];
+    }
+
+    public function checkPlatform(string $php, string $reqs): ?string
+    {
+        $info = $this->getPhpInfo($php);
+
+        $failed = [];
+        foreach(preg_split('/\r?\n/', $reqs) as $line) {
+            $line = trim($line);
+
+            // Ignore empty lines and #comments
+            if ($line === '' || $line[0] === '#') {
+                continue;
+            }
+
+            if (!preg_match('/^(\w*?)\s*:\s*(\S.+)$/', $line, $matches)) {
+                throw new Exception("Invalid platform requirement: $line");
+            }
+            list( , $req, $value) = $matches;
+            switch ($req) {
+                case 'bits':
+                    if ($value !== '32' && $value !== '64') {
+                        throw new Exception("Invalid bits requirement: $value");
+                    }
+                    if ($value != $info['bits']) {
+                        $failed[] = "$value bits build required";
+                    }
+                    break;
+                case 'debug':
+                    $value = $this->parseBool($req, $value);
+                    if ($value !== $info['debug']) {
+                        $failed[] = ($value ? '' : 'non-') . 'debug build required';
+                    }
+                    break;
+                case 'zts':
+                    $value = $this->parseBool($req, $value);
+                    if ($value !== $info['zts']) {
+                        $failed[] = ($value ? '' : 'non-') . 'ZTS build required';
+                    }
+                    break;
+                case 'os':
+                    $os = ltrim($value, '! ');
+                    $inverse = $os !== $value;
+                    $match = strcasecmp($os, PHP_OS_FAMILY) === 0;
+                    if ($inverse) {
+                        $match = !$match;
+                    }
+                    if (!$match) {
+                        $failed[] = $inverse
+                            ? 'this test is incompatible with ' . PHP_OS_FAMILY
+                            : "this test is for $os only";
+                    }
+                    break;
+                default:
+                    throw new Exception("Invalid platform requirement: $line");
+            }
         }
 
-        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
-        $extensions = array_map('strtolower', $extensions);
-        if (in_array('zend opcache', $extensions)) {
-            $extensions[] = 'opcache';
+        return $failed ? implode(', ', $failed) : null;
+    }
+
+    private function parseBool(string $param, string $value): bool
+    {
+        return match ($value) {
+            'true' => true,
+            'false' => false,
+            default => throw new Exception("Invalid boolean value for platform requirement $param: '$value'")
+        };
+    }
+
+    /**
+     * Returns system information for the given PHP executable. It's not always the same as the one running this code
+     */
+    private function getPhpInfo(string $php): array
+    {
+        if (isset($this->info[$php])) {
+            $this->infoHits++;
+            return $this->info[$php];
         }
 
-        $result = [$extDir, $extensions];
-        $this->extensions[$php] = $result;
-        $this->extMisses++;
+        $code = "echo json_encode(["
+            . "'ext' => get_loaded_extensions(),"
+            . "'dir' => ini_get('extension_dir'),"
+            . "'bits' => PHP_INT_SIZE * 8,"
+            . "'debug' => (bool)PHP_DEBUG,"
+            . "'zts' => (bool)PHP_ZTS,"
+            . "]);";
+        $code = escapeshellarg($code);
+        $data = `$php -d display_errors=0 -r $code`;
+        $info = json_decode($data, true);
 
-        return $result;
+        if (!is_array($info) || array_keys($info) !== ['ext', 'dir', 'bits', 'debug', 'zts']) {
+            throw new Exception("Unexpected information returned for PHP '$php':\n\n$data");
+        }
+
+        $info['ext'] = array_map('strtolower', $info['ext']);
+        if (in_array('zend opcache', $info['ext'])) {
+            $info['ext'][] = 'opcache';
+        }
+
+        $this->info[$php] = $info;
+        $this->infoMisses++;
+
+        return $info;
     }
 
 //    public function __destruct()
@@ -3802,7 +3920,7 @@ class TestFile
         'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
         'INI', 'ENV', 'EXTENSIONS',
         'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
-        'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+        'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE', 'PLATFORM'
     ];
 
     public function __construct(string $fileName, bool $inRedirect)

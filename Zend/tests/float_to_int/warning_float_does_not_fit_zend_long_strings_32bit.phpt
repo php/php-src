@@ -1,9 +1,7 @@
 --TEST--
 Implicit float to int conversions when float too large should warn, string offset variant, 32bit variant
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+--PLATFORM--
+bits: 32
 --FILE--
 <?php
 

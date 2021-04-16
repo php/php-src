@@ -1,7 +1,7 @@
 --TEST--
 Typed property on overloaded by-ref property
---SKIPIF--
-<?php if (PHP_INT_SIZE == 4) die("SKIP: 64 bit test"); ?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
 

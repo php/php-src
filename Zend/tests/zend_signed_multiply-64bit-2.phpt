@@ -1,7 +1,7 @@
 --TEST--
 Zend signed multiply 64-bit, variation 2
---SKIPIF--
-<?php if ((1 << 31) < 0) print "skip Running on 32-bit target"; ?>
+--PLATFORM--
+bits: 64
 --FILE--
 <?php
 for($c = -16; $c < 0; $c++) {

@@ -1,11 +1,9 @@
 --TEST--
 Bug #55509 (segfault on x86_64 using more than 2G memory)
+--PLATFORM--
+bits: 64
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE == 4) {
-  die('skip Not for 32-bits OS');
-}
-
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
 if ($zend_mm_enabled === "0") {
     die("skip Zend MM disabled");

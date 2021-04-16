@@ -2,8 +2,8 @@
 double to string conversion tests
 --INI--
 precision=14
---SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+--PLATFORM--
+bits: 32
 --FILE--
 <?php
 

@@ -2,11 +2,9 @@
 Return type for internal functions
 --EXTENSIONS--
 zend_test
---SKIPIF--
-<?php
-// Internal function return types are only checked in debug builds
-if (!PHP_DEBUG) die('skip requires debug build');
-?>
+--PLATFORM--
+# Internal function return types are only checked in debug builds
+debug: true
 --INI--
 opcache.jit=0
 --FILE--
