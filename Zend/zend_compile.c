@@ -2448,11 +2448,10 @@ static void zend_emit_return_type_check(
 			return;
 		}
 
-		/* `return` is illegal in a noreturn function */
+		/* `return` is illegal in a never-returning function */
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NEVER)) {
-			if (!implicit) {
-				zend_error_noreturn(E_COMPILE_ERROR, "A never function must not return");
-			}
+			ZEND_ASSERT(!implicit);
+			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning function must not return");
 
 			/* implicit case is already handled */
 			return;
@@ -2502,7 +2501,7 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 
 		zend_type type = return_info->type;
 
-		if (ZEND_TYPE_IS_SET(type) && ZEND_TYPE_CONTAINS_CODE(type, IS_NEVER)) {
+		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NEVER)) {
 			zend_emit_op(NULL, ZEND_VERIFY_NEVER_TYPE, NULL, NULL);
 			return;
 		}

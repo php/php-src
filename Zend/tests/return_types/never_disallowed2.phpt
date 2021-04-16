@@ -10,4 +10,4 @@ function foo(): never {
 // Note the lack of function call: function validated at compile-time
 ?>
 --EXPECTF--
-Fatal error: A never function must not return in %s on line %d
+Fatal error: A never-returning function must not return in %s on line %d
