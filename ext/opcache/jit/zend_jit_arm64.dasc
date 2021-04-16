@@ -3351,7 +3351,42 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			|1:
 		}
 	} else if (opcode == ZEND_SR) {
-		|	brk #0	// TODO
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+			zend_long op2_lval = Z_LVAL_P(Z_ZV(op2_addr));
+
+			if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
+				if (EXPECTED(op2_lval > 0)) {
+					|	asr Rx(result_reg), Rx(result_reg), #((SIZEOF_ZEND_LONG * 8) - 1)
+				} else {
+					|	SET_EX_OPLINE opline, REG0
+					|	b ->negative_shift
+				}
+			} else {
+				|	mov TMP1w, #op2_lval
+				|	asr Rx(result_reg), Rx(result_reg), TMP1
+			}
+		} else {
+			if (Z_MODE(op2_addr) != IS_REG || Z_REG(op2_addr) != ZREG_REG1) {
+				|	GET_ZVAL_LVAL ZREG_REG1, op2_addr, TMP1
+			}
+			if (!op2_range ||
+			     op2_range->min < 0 ||
+			     op2_range->max >= SIZEOF_ZEND_LONG * 8) {
+				|	cmp REG1, #(SIZEOF_ZEND_LONG*8)
+				|	bhs >1
+				|.cold_code
+				|1:
+				|	cmp REG1, xzr
+				|	mov REG1w, #((SIZEOF_ZEND_LONG * 8) - 1)
+				|	bgt >1
+				|	SET_EX_OPLINE opline, REG0
+				|	b ->negative_shift
+				|.code
+			}
+			|1:
+			|	asr Rx(result_reg), Rx(result_reg), REG1
+		}
 	} else if (opcode == ZEND_MOD) {
 		|	brk #0	// TODO
 	} else if (same_ops) {
