@@ -778,14 +778,12 @@ static void* dasm_labels[zend_lb_MAX];
 
 // Define GET_ZVAL_DVAL to replace SSE_GET_ZVAL_DVAL in x86 implementation.
 |.macro GET_ZVAL_DVAL, reg, addr, tmp_reg
-|	brk #0	// TODO: test
 ||	if (Z_MODE(addr) != IS_REG || reg != Z_REG(addr)) {
 ||		if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |			brk #0	// TODO: test
 |			LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
 |			ldr Rd(reg-ZREG_V0), [Rx(tmp_reg)]
 ||		} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-|			brk #0	// TODO: test
 |			SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
 ||		} else if (Z_MODE(addr) == IS_REG) {
 |			brk #0	// TODO: test
@@ -4377,10 +4375,20 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_IDENTICAL:
 				case ZEND_CASE:
 				case ZEND_CASE_STRICT:
-					|	brk #0	// TODO
+					if (exit_addr) {
+						|	brk #0	// TODO
+					} else {
+						|	bne => target_label
+					}
 					break;
 				case ZEND_IS_NOT_EQUAL:
-					|	brk #0	// TODO
+					|	bvs >1
+					if (exit_addr) {
+						|	brk #0	// TODO
+					} else {
+						|	beq => target_label
+					}
+					|1:
 					break;
 				case ZEND_IS_NOT_IDENTICAL:
 					|	brk #0	// TODO
@@ -4421,13 +4429,171 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					ZEND_UNREACHABLE();
 			}
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
-			|	brk #0	// TODO
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
+					|	bvs >1
+					if (exit_addr) {
+						|	brk #0	// TODO
+					} else {
+						|	beq => target_label
+					}
+					|1:
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					if (exit_addr) {
+						|	brk #0	// TODO
+					} else {
+						|	bne => target_label
+					}
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					|	brk #0	// TODO
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bvs >1  // Always False if involving NaN
+							|	bhi => target_label
+							|1:
+						}
+					} else {
+						|	bvs >1
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	blo => target_label
+						}
+						|1:
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bvs >1  // Always False if involving NaN
+							|	bhs => target_label
+							|1:
+						}
+					} else {
+						|	bvs >1
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bls => target_label
+						}
+						|1:
+					}
+					break;
+				default:
+					ZEND_UNREACHABLE();
+			}
 		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
 			|	brk #0	// TODO
 		} else if (smart_branch_opcode == ZEND_JMPZ_EX) {
-			|	brk #0	// TODO
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					|	bne => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					|	bvs >1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					|	beq => target_label
+					|1:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+						|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+						|	bls => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+						|	bhs => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+						|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+						|	blo => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+						|	bhi => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					}
+					break;
+				default:
+					ZEND_UNREACHABLE();
+			}
 		} else if (smart_branch_opcode == ZEND_JMPNZ_EX) {
-			|	brk #0	// TODO
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
+					|	bvs >1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					|	beq => target_label
+					|1:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					|	bvs => target_label
+					|	bne => target_label
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						|	cset REG0w, hi
+						|	add REG0w, REG0w, #2
+						|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+						|	bvs >1  // Always False if involving NaN
+						|	bhi => target_label
+						|1:
+					} else {
+						|	bvs >1
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+						|	blo => target_label
+						|1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	cset REG0w, hs
+						|	add REG0w, REG0w, #2
+						|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+						|	bvs >1  // Always False if involving NaN
+						|	bhs => target_label
+						|1:
+					} else {
+						|	bvs >1
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+						|	bls => target_label
+						|1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					}
+					break;
+				default:
+					ZEND_UNREACHABLE();
+			}
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -4437,11 +4603,22 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
 			case ZEND_CASE_STRICT:
-				|	brk #0	// TODO
+				|	bvs >1
+				|	mov REG0, #IS_TRUE
+				|	beq >2
+				|1:
+				|	mov REG0, #IS_FALSE
+				|2:
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
-				|	brk #0	// TODO
+				|	bvs >1
+				|	mov REG0, #IS_FALSE
+				|	beq >2
+				|1:
+				|	mov REG0, #IS_TRUE
+				|2:
+				break;
 				break;
 			case ZEND_IS_SMALLER:
 				|	bvs >1
@@ -4500,7 +4677,19 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, z
 {
 	bool swap = 0;
 
-	|	brk #0	// TODO
+	if (Z_MODE(op1_addr) == IS_REG) {
+		|	brk #0	// TODO
+		|	DOUBLE_CMP fcmp, Z_REG(op1_addr), op2_addr, ZREG_TMP1, ZREG_FPTMP
+	} else if (Z_MODE(op2_addr) == IS_REG) {
+		|	brk #0	// TODO: construct test cases to verify whether the missing NaN check in x86 is buggy or not.
+		|	DOUBLE_CMP fcmp, Z_REG(op2_addr), op1_addr, ZREG_TMP1, ZREG_FPTMP
+		swap = 1;
+	} else {
+		zend_reg tmp_reg = ZREG_FPR0;
+
+		|	GET_ZVAL_DVAL tmp_reg, op1_addr, ZREG_TMP1
+		|	DOUBLE_CMP fcmp, tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
+	}
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, swap, smart_branch_opcode, target_label, target_label2, exit_addr);
 }
@@ -4580,7 +4769,6 @@ static int zend_jit_cmp(dasm_State    **Dst,
 						|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9, TMP1w, TMP2
 					}
 				}
-				|	brk #0	// TODO
 				if (!zend_jit_cmp_double_double(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 					return 0;
 				}
@@ -4693,7 +4881,8 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if (op1_info & MAY_BE_REF) {
-		|	brk #0	// TODO
+		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		|	ZVAL_DEREF FCARG1x, op1_info, TMP1w
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
 	}
 
@@ -4710,7 +4899,20 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			} else {
 				|	CMP_ZVAL_TYPE op1_addr, IS_TRUE, TMP1w, TMP2
 				if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE))) {
-				    |	brk #0	// TODO
+				    if ((op1_info & MAY_BE_LONG) &&
+				        !(op1_info & MAY_BE_UNDEF) &&
+				        !set_bool) {
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else if (false_label != (uint32_t)-1) {
+							|	brk #0	// TODO
+						} else {
+							|	brk #0	// TODO
+						}
+						jmp_done = 1;
+					} else {
+						|	bgt >2
+					}
 				}
 				if (!(op1_info & MAY_BE_TRUE)) {
 					/* It's FALSE */
@@ -4732,23 +4934,82 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 							}
 						}
 					} else if (set_bool) {
-						|	brk #0	// TODO
+						|	cset REG0w, eq
+						if (set_bool_not) {
+							|	brk #0	// TODO
+							|	neg REG0w, REG0w
+							|	add REG0w, REG0w, #3
+						} else {
+							|	add REG0w, REG0w, #2
+						}
+						if ((op1_info & MAY_BE_UNDEF) && (op1_info & MAY_BE_ANY)) {
+							set_delayed = 1;
+						} else {
+							|	brk #0	// TODO
+							|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+						}
 					}
 				}
 			}
 
 			/* It's FALSE, but may be UNDEF */
 			if (op1_info & MAY_BE_UNDEF) {
+				if (op1_info & MAY_BE_ANY) {
+					if (set_delayed) {
+						|	CMP_ZVAL_TYPE op1_addr, IS_UNDEF, TMP1w, TMP2
+						|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+						|	beq >1
+					} else {
+						|	brk #0	// TODO
+						|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1, TMP1w, TMP2
+					}
+					|.cold_code
+					|1:
+				}
 				|	brk #0	// TODO
+				|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
+				|	SET_EX_OPLINE opline, REG0
+				|	EXT_CALL zend_jit_undefined_op_helper, REG0
+
+				if (may_throw) {
+					if (!zend_jit_check_exception_undef_result(Dst, opline)) {
+						return 0;
+					}
+				}
+
+				if (exit_addr) {
+					if (branch_opcode == ZEND_JMPZ || branch_opcode == ZEND_JMPZ_EX) {
+						|	brk #0	// TODO
+					}
+				} else if (false_label != (uint32_t)-1) {
+					|	brk #0	// TODO
+				}
+				if (op1_info & MAY_BE_ANY) {
+					if (exit_addr) {
+						if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+							|	brk #0	// TODO
+						}
+					} else if (false_label == (uint32_t)-1) {
+						|	brk #0	// TODO
+					}
+					|.code
+				}
 			}
 
 			if (!jmp_done) {
-				|	brk #0	// TODO
+				if (exit_addr) {
+					|	brk #0	// TODO
+				} else if (false_label != (uint32_t)-1) {
+					|	brk #0	// TODO
+				} else if (op1_info & MAY_BE_LONG) {
+					|	b >9
+				}
 			}
 		}
 	}
 
 	if (op1_info & MAY_BE_LONG) {
+		|2:
 		|	brk #0	// TODO
 	}
 
