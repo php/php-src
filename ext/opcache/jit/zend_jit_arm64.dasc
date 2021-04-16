@@ -1564,7 +1564,11 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
-	|	brk #0	// TODO
+	|	UNDEF_OPLINE_RESULT TMP1w
+	|	LOAD_ADDR CARG1, zend_ce_division_by_zero_error
+	|	LOAD_ADDR CARG2, "Modulo by zero"
+	|	EXT_CALL zend_throw_error, REG0
+	|	b ->exception_handler
 	return 1;
 }
 
@@ -3291,7 +3295,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	}
 
 	if (opcode == ZEND_MOD) {
-		|	brk #0	// TODO
+		result_reg = ZREG_REG0;
 	} else if (Z_MODE(res_addr) == IS_REG) {
 		if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR)
 		 && opline->op2_type != IS_CONST) {
@@ -3387,7 +3391,70 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			|	asr Rx(result_reg), Rx(result_reg), REG1
 		}
 	} else if (opcode == ZEND_MOD) {
-		|	brk #0	// TODO
+		// REG0 -> result_reg
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+			zend_long op2_lval = Z_LVAL_P(Z_ZV(op2_addr));
+
+			if (op2_lval == 0) {
+				|	SET_EX_OPLINE opline, REG0
+				|	b ->mod_by_zero
+			} else if (op2_lval == -1) {
+				|	mov REG0, xzr
+			} else {
+				|	GET_ZVAL_LVAL ZREG_REG1, op1_addr, TMP1
+				|	GET_ZVAL_LVAL ZREG_REG2, op2_addr, TMP1
+				|	sdiv REG0, REG1, REG2
+				|	msub REG0, REG0, REG2, REG1
+			}
+		} else {
+			if (!op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
+				if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
+					|	SAFE_MEM_ACC_WITH_UOFFSET ldr, TMP1, Rx(Z_REG(op2_addr)), Z_OFFSET(op2_addr), TMP2
+					|	cmp TMP1, #0
+				} else if (Z_MODE(op2_addr) == IS_REG) {
+					|	tst Rx(Z_REG(op2_addr)), Rx(Z_REG(op2_addr))
+				}
+				|	beq >1
+				|.cold_code
+				|1:
+				|	SET_EX_OPLINE opline, REG0
+				|	b ->mod_by_zero
+				|.code
+			}
+
+			/* Prevent overflow error/crash if op1 == LONG_MIN and op2 == -1 */
+			if (!op2_range || (op2_range->min <= -1 && op2_range->max >= -1)) {
+				if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
+					|	SAFE_MEM_ACC_WITH_UOFFSET ldr, TMP1, Rx(Z_REG(op2_addr)), Z_OFFSET(op2_addr), TMP2
+					|	cmn TMP1, #1
+				} else if (Z_MODE(op2_addr) == IS_REG) {
+					|	cmn Rx(Z_REG(op2_addr)), #1
+				}
+				|	beq >1
+				|.cold_code
+				|1:
+				|	SET_ZVAL_LVAL_FROM_REG res_addr, xzr, TMP1
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+					if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
+						if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+						}
+					}
+				}
+				|	b >5
+				|.code
+			}
+
+			|	GET_ZVAL_LVAL ZREG_REG1, op1_addr, TMP1
+			if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
+				|	ldr TMP1, [Rx(Z_REG(op2_addr)), #Z_OFFSET(op2_addr)]
+				|	sdiv REG0, REG1, TMP1
+				|	msub REG0, REG0, TMP1, REG1
+			} else if (Z_MODE(op2_addr) == IS_REG) {
+				|	sdiv REG0, REG1, Rx(Z_REG(op2_addr))
+				|	msub REG0, REG0, Rx(Z_REG(op2_addr)), REG1
+			}
+		}
 	} else if (same_ops) {
 		|	brk #0	// TODO
 	} else {
