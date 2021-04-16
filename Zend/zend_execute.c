@@ -1250,18 +1250,10 @@ ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *
 
 ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 {
-	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
-	const char *fname, *fsep, *fclass;
-	zend_string *need_msg;
-	const char *given_msg;
+	zend_string *func_name = get_function_or_method_name(zf);
 
-	zend_verify_type_error_common(
-		zf, arg_info, NULL, &fname, &fsep, &fclass, &need_msg, &given_msg);
-
-	zend_type_error("%s%s%s(): never-returning function must not implicitly return",
-		fclass, fsep, fname);
-
-	zend_string_release(need_msg);
+	zend_type_error("%s(): never-returning function must not implicitly return",
+		ZSTR_VAL(func_name));
 }
 
 #if ZEND_DEBUG
