@@ -37,6 +37,19 @@ static zend_class_entry *sodium_exception_ce;
 # define HAVE_AESGCM 1
 #endif
 
+static zend_always_inline zend_string *zend_string_checked_alloc(size_t len, int persistent)
+{
+	zend_string *zs;
+
+	if (ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)) < len) {
+		zend_error_noreturn(E_ERROR, "Memory allocation too large (%zu bytes)", len);
+	}
+	zs = zend_string_alloc(len, persistent);
+	ZSTR_VAL(zs)[len] = 0;
+
+	return zs;
+}
+
 #include "libsodium_arginfo.h"
 
 #ifndef crypto_aead_chacha20poly1305_IETF_KEYBYTES
