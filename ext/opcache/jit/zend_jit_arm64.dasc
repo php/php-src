@@ -728,13 +728,14 @@ static void* dasm_labels[zend_lb_MAX];
 |			brk #0	// LONG_OP imul, reg, addr
 ||			break;
 ||		case ZEND_BW_OR:
-|			brk #0	// LONG_OP or, reg, addr
+|			LONG_OP orr, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_BW_AND:
-|			brk #0	// LONG_OP and, reg, addr
+|			LONG_OP and, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_BW_XOR:
-|			brk #0	// LONG_OP xor, reg, addr
+|			brk #0	// TODO
+|			LONG_OP eor, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		default:
 ||			ZEND_UNREACHABLE();
@@ -1062,7 +1063,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
-|				brk #0	// TODO
+|				EXT_CALL _efree, tmp_reg
 ||				break;
 ||			} else if (type == IS_ARRAY) {
 ||				if ((var_info) & (MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_REF)) {
@@ -1109,7 +1110,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||				if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 |					bne >3
 ||				} else {
-|					brk #0	// TODO: test
 |					bne >4
 ||				}
 ||			}
@@ -3274,7 +3274,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >6, TMP1w, TMP2
 	}
 	if (!same_ops && (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))) {
-		|	brk #0	// TODO
 		|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >6, TMP1w, TMP2
 	}
 
@@ -3392,7 +3391,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	} else if (same_ops) {
 		|	brk #0	// TODO
 	} else {
-		|	brk #0	// TODO
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		|	LONG_MATH opcode, result_reg, op2_addr, TMP1, TMP2
 	}
 
 	if (Z_MODE(res_addr) != IS_REG || Z_REG(res_addr) != result_reg) {
@@ -3401,7 +3401,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != Z_REG(res_addr) || Z_OFFSET(op1_addr) != Z_OFFSET(res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
-				|	brk #0	// TODO
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
 			}
 		}
@@ -3465,7 +3464,50 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
                                   zend_jit_addr   res_addr,
                                   int             may_throw)
 {
-	|	brk #0	// TODO
+	if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
+			|	brk #0	// TODO
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >6, TMP1w, TMP2
+		}
+		if (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
+			|	IF_NOT_ZVAL_TYPE op2_addr, IS_STRING, >6, TMP1w, TMP2
+		}
+		if (Z_MODE(op1_addr) == IS_MEM_ZVAL && Z_REG(op1_addr) == Z_REG(res_addr) && Z_OFFSET(op1_addr) == Z_OFFSET(res_addr)) {
+			if (Z_REG(res_addr) != ZREG_FCARG1x || Z_OFFSET(res_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG1x, res_addr
+			}
+			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
+			|	EXT_CALL zend_jit_fast_assign_concat_helper, REG0
+		} else {
+			if (Z_REG(res_addr) != ZREG_FCARG1x || Z_OFFSET(res_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG1x, res_addr
+			}
+			|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+			|	LOAD_ZVAL_ADDR CARG3, op2_addr
+			|	EXT_CALL zend_jit_fast_concat_helper, REG0
+		}
+		/* concatination with empty string may increase refcount */
+		op1_info |= MAY_BE_RCN;
+		op2_info |= MAY_BE_RCN;
+		|	FREE_OP op1_type, op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	FREE_OP op2_type, op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|5:
+	}
+	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) ||
+	    (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING))) {
+		if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+			|.cold_code
+			|6:
+		}
+		|	brk #0	// TODO
+		if (may_throw) {
+			zend_jit_check_exception(Dst);
+		}
+		if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
+			|	b <5
+			|.code
+		}
+	}
 
 	return 1;
 }
@@ -4273,7 +4315,41 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 	ZEND_ASSERT(opline->op1_type == IS_CV && opline->result_type == IS_UNUSED);
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 
-	|	brk #0	// TODO
+	op1_addr = OP1_ADDR();
+	op2_addr = OP2_ADDR();
+
+	if (op1_info & MAY_BE_REF) {
+		binary_op_type binary_op = get_binary_op(opline->extended_value);
+		|	brk #0	// TODO
+		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+	}
+
+	int result;
+	switch (opline->extended_value) {
+		case ZEND_ADD:
+		case ZEND_SUB:
+		case ZEND_MUL:
+		case ZEND_DIV:
+			result = zend_jit_math_helper(Dst, opline, opline->extended_value, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->op1.var, op1_addr, op1_def_info, op1_info, may_overflow, may_throw);
+			break;
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+		case ZEND_SL:
+		case ZEND_SR:
+		case ZEND_MOD:
+			result = zend_jit_long_math_helper(Dst, opline, opline->extended_value,
+				opline->op1_type, opline->op1, op1_addr, op1_info, op1_range,
+				opline->op2_type, opline->op2, op2_addr, op2_info, op2_range,
+				opline->op1.var, op1_addr, op1_def_info, op1_info, may_throw);
+			break;
+		case ZEND_CONCAT:
+			result = zend_jit_concat_helper(Dst, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, op1_addr, may_throw);
+			break;
+		default:
+			ZEND_UNREACHABLE();
+	}
+	|9:
 	return 1;
 }
 
@@ -4476,7 +4552,11 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
-						|	brk #0	// TODO
+						if (exit_addr) {
+							|	brk #0	// TODO
+						} else {
+							|	bgt => target_label
+						}
 					} else {
 						if (exit_addr) {
 							|	brk #0	// TODO
