@@ -72,7 +72,7 @@ var_dump($array_arg);
 --EXPECTF--
 *** Testing usort() : usage variation ***
 
-Deprecated: Implicit conversion to int from non-compatible float 8.900000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 8.9 to int in %s on line %d
 bool(true)
 
 -- Sorted array after usort() function call --

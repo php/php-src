@@ -13,10 +13,10 @@ $test = sprintf("% 13u", $a);
 var_dump($test, bin2hex($test));
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion to int from non-compatible float -12.345600 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -12.3456 to int in %s on line %d
 string(4) "-012"
 string(8) "2d303132"
 
-Deprecated: Implicit conversion to int from non-compatible float -12.345600 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -12.3456 to int in %s on line %d
 string(20) "18446744073709551604"
 string(40) "3138343436373434303733373039353531363034"

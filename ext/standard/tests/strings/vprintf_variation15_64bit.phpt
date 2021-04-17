@@ -57,7 +57,7 @@ int(22)
 
 -- Iteration 3 --
 
-Deprecated: Implicit conversion to int from non-compatible float 1000000000000000000000.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.0E+21 to int in %s on line %d
    1234000 3875820019684212736 120
 int(34)
 

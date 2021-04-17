@@ -26,9 +26,9 @@ var_dump($array[$string_float]);
 int(0)
 int(9223372036854775807)
 
-Deprecated: Implicit conversion to int from non-compatible float 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
 array(2) {
   [0]=>
   string(11) "Large float"
@@ -42,13 +42,13 @@ array(2) {
   string(18) "String large float"
 }
 
-Deprecated: Implicit conversion to int from non-compatible float 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d
 NULL
 
-Deprecated: Implicit conversion to int from non-compatible float 10000000000000000373409337471459889719393275754491820381027730410378005080671497101378613371421126415052399029342192009216.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d

@@ -69,25 +69,25 @@ var_dump($instance->a);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 6.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 6.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 Bitwise ops:
 int(-2)
 int(3)
@@ -103,10 +103,10 @@ int(1)
 Offset access:
 Arrays:
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 string(1) "b"
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(3) {
   [0]=>
   string(1) "a"

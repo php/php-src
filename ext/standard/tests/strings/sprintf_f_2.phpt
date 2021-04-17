@@ -62,28 +62,28 @@ var_dump(sprintf("%.3e", $number)); // outputs 3.63e+8
 string(7) "100.426"
 string(6) "100.43"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.426000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.426 to int in %s on line %d
 string(3) "100"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.900000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.9 to int in %s on line %d
 string(3) "100"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.426000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.426 to int in %s on line %d
 string(3) "144"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.900000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.9 to int in %s on line %d
 string(3) "144"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.100000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.1 to int in %s on line %d
 string(34) "There are 100 monkeys in the world"
 string(28) "The 100.1 contains 0 monkeys"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.100000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.1 to int in %s on line %d
 string(30) "The world contains 100 monkeys"
 
-Deprecated: Implicit conversion to int from non-compatible float 100.100000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.1 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 100.100000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 100.1 to int in %s on line %d
 string(76) "The world contains 100 monkeys.
     That's a nice world full of 100 monkeys."
 string(8) "[monkey]"

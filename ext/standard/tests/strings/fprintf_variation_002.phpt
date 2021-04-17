@@ -32,37 +32,37 @@ unlink($data_file);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -2.700000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
 
 *** Testing fprintf() with integers ***
 

@@ -80,33 +80,33 @@ foreach($args_array as $args) {
 
 -- Iteration 1 --
 
-Deprecated: Implicit conversion to int from non-compatible float 2.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 0.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 10.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 123456.234000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -1234.678900 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -1234.6789 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 1234.678900 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1234.6789 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 12345.780000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 12345.78 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 12.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 12.000000011111 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -12.000001 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -12.00000111111 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float -123456.234000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -123456.234 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 10.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 123456.234000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 0.200000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
 2 0 a
     1e240 fffffffffffffb2e 4d2 
                           

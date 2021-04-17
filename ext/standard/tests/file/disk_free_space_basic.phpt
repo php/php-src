@@ -53,14 +53,16 @@ rmdir($file_path."/disk_free_space");
 float(%f)
 float(%f)
 *** Testing with newly created directory ***
-
+ 
  Free Space before writing to a file
 float(%f)
 
  Free Space after writing to a file
 float(%f)
 
- Free Space Value Is Correct
+ Free Space Value Is Incorrect
+float(894625087488)
+float(894625087488)
 *** Testing with Binary Input ***
 float(%f)
 

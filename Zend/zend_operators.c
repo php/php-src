@@ -811,7 +811,7 @@ try_again:
 
 void zend_incompatible_double_to_long_error(double d)
 {
-	zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", d);
+	zend_error(E_DEPRECATED, "Implicit conversion from non-compatible float %.*H to int", -1, d);
 }
 
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */

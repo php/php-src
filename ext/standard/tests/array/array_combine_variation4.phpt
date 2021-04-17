@@ -82,7 +82,7 @@ Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 444.432000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 444.432 to int in %s on line %d
 -- Iteration 1 --
 array(0) {
 }
