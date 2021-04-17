@@ -307,7 +307,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval(dval);
 			if (!zend_is_long_compatible(dval, lval)) {
-				zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", dval);
+				zend_incompatible_double_to_long_error(dval);
 				if (UNEXPECTED(EG(exception))) {
 					*failed = 1;
 				}
@@ -809,6 +809,11 @@ try_again:
 }
 /* }}} */
 
+void zend_incompatible_double_to_long_error(double d)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", d);
+}
+
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
 {
 try_again:
@@ -828,7 +833,7 @@ try_again:
 			zend_long lval = zend_dval_to_lval(dval);
 			if (UNEXPECTED(is_strict)) {
 				if (!zend_is_long_compatible(dval, lval)) {
-					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", dval);
+					zend_incompatible_double_to_long_error(dval);
 					// TODO Need to handle this here?
 					//if (UNEXPECTED(EG(exception))) {}
 				}

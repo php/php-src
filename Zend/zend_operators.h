@@ -138,11 +138,13 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return ((double)l == d);
 }
 
+void zend_incompatible_double_to_long_error(double d);
+
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
 	zend_long l = zend_dval_to_lval(d);
 	if (!zend_is_long_compatible(d, l)) {
-		zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", d);
+		zend_incompatible_double_to_long_error(d);
 	}
 	return l;
 }
