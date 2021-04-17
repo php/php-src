@@ -736,7 +736,7 @@ try_again:
 			break;
 	}
 
-	return zval_get_long_func(dim, /* is_lax */ true);
+	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
 static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
@@ -803,7 +803,7 @@ try_string_offset:
 				break;
 		}
 
-		offset = zval_get_long_func(dim, /* is_lax */ true);
+		offset = zval_get_long_func(dim, /* is_strict */ false);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}

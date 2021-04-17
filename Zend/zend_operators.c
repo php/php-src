@@ -342,7 +342,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					 lval = zend_dval_to_lval_cap(dval);
+					lval = zend_dval_to_lval_cap(dval);
 					if (!zend_is_long_compatible(dval, lval)) {
 						zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
 							Z_STRVAL_P(op));
@@ -448,7 +448,6 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 		}																\
 	} while (0);
 
-/* TODO Should this warn? */
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op) /* {{{ */
 {
 	zend_long tmp;
@@ -810,7 +809,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_lax) /* {{{ */
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -827,7 +826,7 @@ try_again:
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval(dval);
-			if (EXPECTED(!is_lax)) {
+			if (UNEXPECTED(is_strict)) {
 				if (!zend_is_long_compatible(dval, lval)) {
 					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float %f", dval);
 					// TODO Need to handle this here?
@@ -853,7 +852,7 @@ try_again:
 					 */
 					 /* Most usages are expected to not be (int) casts */
 					lval = zend_dval_to_lval_cap(dval);
-					if (EXPECTED(!is_lax)) {
+					if (UNEXPECTED(is_strict)) {
 						if (!zend_is_long_compatible(dval, lval)) {
 							zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
 								Z_STRVAL_P(op));
