@@ -6853,7 +6853,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			|	bne >1
 			|.cold_code
 			|1:
-			|	brk #0	// TODO
 			if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 1)) {
 				return 0;
 			}
@@ -6954,7 +6953,6 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 		|	bne >1
 		|.cold_code
 		|1:
-		|	brk #0	// TODO
 		|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 		|	ldr TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
 		|	LOAD_32BIT_VAL TMP2w, ZEND_CALL_SEND_ARG_BY_REF
@@ -8907,7 +8905,59 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	zend_jit_addr const_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
 	uint32_t res_info = RES_INFO();
 
-	|	brk	#0	// TODO
+	|	// c = CACHED_PTR(opline->extended_value);
+	|	ldr FCARG1x, EX->run_time_cache
+	|	LOAD_32BIT_VAL TMP1w, opline->extended_value
+	|	ldr REG0, [FCARG1x, TMP1]
+	|	// if (c != NULL)
+	|	cbz REG0, >9
+	|	brk #0	// TODO
+	|	// if (!IS_SPECIAL_CACHE_VAL(c))
+	|	tst REG0, #CACHE_SPECIAL
+	|	bne >9
+	|8:
+
+	if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame)) {
+		zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+		uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+		int32_t exit_point;
+		const void *exit_addr = NULL;
+
+		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
+		SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_GPR0);
+		exit_point = zend_jit_trace_get_exit_point(opline+1, 0);
+		SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
+		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		if (!exit_addr) {
+			return 0;
+		}
+		res_info &= ~MAY_BE_GUARD;
+		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+
+		zend_uchar type = concrete_type(res_info);
+
+		|	brk #0	// TODO
+	} else {
+		|	ZVAL_COPY_VALUE res_addr, MAY_BE_ANY, const_addr, MAY_BE_ANY, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+		|	lsr REG0w, REG0w, #8
+		|	and REG0w, REG0w, #0xff
+		|	TRY_ADDREF MAY_BE_ANY, REG0w, REG1, TMP1
+	}
+
+	|.cold_code
+	|9:
+	|	// SAVE_OPLINE();
+	|	SET_EX_OPLINE opline, REG0
+	|	// zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
+	|	LOAD_ADDR FCARG1x, zv
+	|	LOAD_32BIT_VAL FCARG2x, opline->op1.num
+	|	EXT_CALL zend_jit_get_constant, REG0
+	|	mov REG0, RETVALx
+	|	// ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	|	cbnz REG0, <8
+	|	brk #0	// TODO
+	|	b ->exception_handler
+	|.code
 	return 1;
 }
 
