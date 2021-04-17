@@ -11,6 +11,7 @@ trigger:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
+      - README.md
 
 schedules:
   - cron: "0 1 * * *"
