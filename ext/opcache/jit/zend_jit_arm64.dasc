@@ -6784,7 +6784,6 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		|	// ZVAL_NEW_REF(arg, varptr);
 		if (opline->op1_type == IS_VAR) {
 			if (Z_REG(op1_addr) != ZREG_REG0 || Z_OFFSET(op1_addr) != 0) {
-				|	brk #0	// TODO
 				|	LOAD_ZVAL_ADDR REG0, op1_addr
 			}
 			|	str REG0, T1  // save
@@ -8707,13 +8706,39 @@ static int zend_jit_load_this(dasm_State **Dst, uint32_t var)
 {
 	zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 
-	|	brk #0	// TODO
+	|	ldr FCARG1x, EX->This.value.ptr
+	|	SET_ZVAL_PTR var_addr, FCARG1x, TMP1
+	|	SET_ZVAL_TYPE_INFO var_addr, IS_OBJECT_EX, TMP1w, TMP2
+	|	GC_ADDREF FCARG1x, TMP1w
 	return 1;
 }
 
 static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, bool check_only)
 {
-	|	brk #0	// TODO
+	if (!op_array->scope || (op_array->fn_flags & ZEND_ACC_STATIC)) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			if (!JIT_G(current_frame) ||
+			    !TRACE_FRAME_IS_THIS_CHECKED(JIT_G(current_frame))) {
+
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				|	brk #0	// TODO
+
+				if (JIT_G(current_frame)) {
+					TRACE_FRAME_SET_THIS_CHECKED(JIT_G(current_frame));
+				}
+			}
+		} else {
+			|	brk #0	// TODO
+		}
+	}
+
+	if (!check_only) {
+		if (!zend_jit_load_this(Dst, opline->result.var)) {
+			return 0;
+		}
+	}
 	return 1;
 }
 
