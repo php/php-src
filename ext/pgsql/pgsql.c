@@ -2489,9 +2489,13 @@ PHP_FUNCTION(pg_lo_open)
 	} else if (zend_string_equals_literal(mode, "w")) {
 		pgsql_mode |= INV_WRITE;
 		create = true;
-	} else if (zend_string_equals_literal(mode, "r+") || zend_string_equals_literal(mode, "w+")) {
+	} else if (zend_string_equals_literal(mode, "r+")) {
 		pgsql_mode |= INV_READ;
 		pgsql_mode |= INV_WRITE;
+	} else if (zend_string_equals_literal(mode, "w+")) {
+		pgsql_mode |= INV_READ;
+		pgsql_mode |= INV_WRITE;
+		create = true;
 	} else {
 		zend_value_error("Mode must be one of 'r', 'r+', 'w', or 'w+'");
 		RETURN_THROWS();
