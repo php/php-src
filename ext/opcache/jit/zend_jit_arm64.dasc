@@ -3533,7 +3533,6 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 {
 	if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
 		if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
-			|	brk #0	// TODO
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >6, TMP1w, TMP2
 		}
 		if (op2_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF) - MAY_BE_STRING)) {
@@ -7009,7 +7008,87 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 	// TODO: support for is_resource() ???
 	ZEND_ASSERT(opline->extended_value != MAY_BE_RESOURCE);
 
-	|	brk #0	// TODO
+	if (op1_info & MAY_BE_UNDEF) {
+		|	brk #0	// TODO
+	}
+
+	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+		mask = opline->extended_value;
+		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
+			|	brk #0	// TODO
+	    } else if (!(op1_info & MAY_BE_GUARD) && !(op1_info & mask)) {
+			|	brk #0	// TODO
+		} else {
+			bool invert = 0;
+			zend_uchar type;
+
+			switch (mask) {
+				case MAY_BE_NULL:   type = IS_NULL;   break;
+				case MAY_BE_FALSE:  type = IS_FALSE;  break;
+				case MAY_BE_TRUE:   type = IS_TRUE;   break;
+				case MAY_BE_LONG:   type = IS_LONG;   break;
+				case MAY_BE_DOUBLE: type = IS_DOUBLE; break;
+				case MAY_BE_STRING: type = IS_STRING; break;
+				case MAY_BE_ARRAY:  type = IS_ARRAY;  break;
+				case MAY_BE_OBJECT: type = IS_OBJECT; break;
+				case MAY_BE_ANY - MAY_BE_NULL:     type = IS_NULL;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_FALSE:    type = IS_FALSE;  invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_TRUE:     type = IS_TRUE;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_LONG:     type = IS_LONG;   invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_DOUBLE:   type = IS_DOUBLE; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_STRING:   type = IS_STRING; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_ARRAY:    type = IS_ARRAY;  invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_OBJECT:   type = IS_OBJECT; invert = 1; break;
+				case MAY_BE_ANY - MAY_BE_RESOURCE: type = IS_OBJECT; invert = 1; break;
+				default:
+					type = 0;
+			}
+
+			if (op1_info & MAY_BE_REF) {
+				|	brk #0	// TODO
+			}
+			if (type == 0) {
+				|	brk #0	// TODO
+			} else {
+				if (smart_branch_opcode &&
+				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					|	brk #0	// TODO
+				} else {
+					if (op1_info & MAY_BE_REF) {
+						|	brk #0	// TODO
+					} else {
+						|	LOAD_32BIT_VAL TMP1w, (opline->op1.var + 8)
+						|	ldrb TMP2w, [FP, TMP1]
+						|	cmp TMP2w, #type
+					}
+				}
+				if (exit_addr) {
+					|	brk #0	// TODO
+				} else if (smart_branch_opcode) {
+					if (invert) {
+						|	brk #0	// TODO
+					} else {
+						if (smart_branch_opcode == ZEND_JMPZ) {
+							|	bne =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	brk #0	// TODO
+						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+							|	brk #0	// TODO
+						} else {
+							ZEND_UNREACHABLE();
+						}
+					}
+				} else {
+					zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+					|	brk #0	// TODO
+				}
+			}
+	    }
+	}
+
+	|7:
 
 	return 1;
 }
@@ -7338,7 +7417,17 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 		if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			|	brk #0	// TODO
+			if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+			    (op1_info & (MAY_BE_REF|MAY_BE_OBJECT)) ||
+			    !op_array->function_name) {
+				|	lsr REG0w, REG0w, #8
+				|	and REG0w, REG0w, #0xff
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
+			} else if (return_value_used != 1) {
+				|	// if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
+				|	brk #0	// TODO
+				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
+			}
 		}
 	} else {
 		|	brk #0	// TODO
