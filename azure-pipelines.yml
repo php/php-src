@@ -12,6 +12,7 @@ trigger:
       - UPGRADING
       - UPGRADING.INTERNALS
       - *.md
+      - ext/*
 
 schedules:
   - cron: "0 1 * * *"
