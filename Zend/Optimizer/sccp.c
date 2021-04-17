@@ -560,10 +560,10 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 			break;
 		case IS_DOUBLE: {
 			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
-			SEPARATE_ARRAY(result);
 			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(
 				Z_ARR_P(result), lval, value);
 			break;
