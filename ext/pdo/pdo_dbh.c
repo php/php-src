@@ -690,7 +690,7 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
 			if (IS_LONG == is_numeric_str_function(Z_STR_P(value), lval, NULL)) {
 				return true;
 			}
-			/* fallthrough */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value));
 			return false;
