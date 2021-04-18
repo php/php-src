@@ -244,7 +244,7 @@ PHP_FUNCTION(clamp)
 	is_smaller_function(&check, zmax, zmin);
 
 	if (Z_TYPE(check) == IS_TRUE) {
-		zend_argument_value_error(2, "$min must be lesser than $max");
+		zend_argument_value_error(2, "cannot be greater than ($max)");
 		RETURN_THROWS();
 	}
 
