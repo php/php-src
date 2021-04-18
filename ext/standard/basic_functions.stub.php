@@ -1044,6 +1044,8 @@ function mail(string $to, string $subject, string $message, array|string $additi
 
 function abs(int|float $num): int|float {}
 
+function clamp(int|float $num, int|float $min, int|float $max): int|float {}
+
 function ceil(int|float $num): float {}
 
 function floor(int|float $num): float {}

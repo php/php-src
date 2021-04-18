@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2d92e992837a61a052eea6d0257837aaccc54be6 */
+ * Stub hash: 7d3042ef54f0fb871bf9b391cae21675567f9e0d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1603,6 +1603,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_abs, 0, 1, MAY_BE_LONG|MAY_BE_DO
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_clamp, 0, 3, MAY_BE_LONG|MAY_BE_DOUBLE)
+	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_TYPE_MASK(0, min, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+	ZEND_ARG_TYPE_MASK(0, max, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ceil, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
@@ -2657,6 +2663,7 @@ ZEND_FUNCTION(link);
 #endif
 ZEND_FUNCTION(mail);
 ZEND_FUNCTION(abs);
+ZEND_FUNCTION(clamp);
 ZEND_FUNCTION(ceil);
 ZEND_FUNCTION(floor);
 ZEND_FUNCTION(round);
@@ -3298,6 +3305,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(mail, arginfo_mail)
 	ZEND_FE(abs, arginfo_abs)
+	ZEND_FE(clamp, arginfo_clamp)
 	ZEND_FE(ceil, arginfo_ceil)
 	ZEND_FE(floor, arginfo_floor)
 	ZEND_FE(round, arginfo_round)
