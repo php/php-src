@@ -745,6 +745,7 @@ PHP_FUNCTION(stream_select)
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
 	bool secnull;
+	bool usecnull = 1;
 	int set_count, max_set_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
@@ -753,7 +754,7 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
 		Z_PARAM_LONG_OR_NULL(sec, secnull)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(usec)
+		Z_PARAM_LONG_OR_NULL(usec, usecnull)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FD_ZERO(&rfds);
@@ -787,6 +788,11 @@ PHP_FUNCTION(stream_select)
 	}
 
 	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+
+	if (secnull && !usecnull) {
+		zend_argument_value_error(4, "must not be null if argument #5 ($microseconds) is specified and non-null");
+		RETURN_THROWS();
+	}
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
