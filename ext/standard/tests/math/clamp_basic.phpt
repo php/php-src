@@ -12,7 +12,7 @@ var_dump(clamp(5, 1, 5));
 
 ?>
 --EXPECTF--
-*** Testing abs() : basic functionality ***
+*** Testing clamp() : basic functionality ***
 int(1)
 int(2)
 int(3)
