@@ -3831,6 +3831,12 @@ ZEND_METHOD(ReflectionClassConstant, isProtected)
 }
 /* }}} */
 
+/* Returns whether this constant is final */
+ZEND_METHOD(ReflectionClassConstant, isFinal)
+{
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+
 /* {{{ Returns a bitfield of the access modifiers for this constant */
 ZEND_METHOD(ReflectionClassConstant, getModifiers)
 {

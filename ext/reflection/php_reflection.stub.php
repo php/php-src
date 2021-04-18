@@ -475,6 +475,8 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isFinal(): bool {}
+
     /** @tentative-return-type */
     public function getModifiers(): int {}
 
