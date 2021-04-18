@@ -1079,7 +1079,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||				if (opline) {
 |					brk #0	// TODO
 ||				}
-|				EXT_CALL zend_objects_store_del, REG0
+|				EXT_CALL zend_objects_store_del, tmp_reg
 ||				break;
 ||			}
 ||		}
@@ -5267,7 +5267,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 						if ((op1_info & MAY_BE_UNDEF) && (op1_info & MAY_BE_ANY)) {
 							set_delayed = 1;
 						} else {
-							|	brk #0	// TODO
 							|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
 						}
 					}
@@ -5332,13 +5331,83 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 	if (op1_info & MAY_BE_LONG) {
 		|2:
-		|	brk #0	// TODO
+		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >2, TMP1w, TMP2
+		}
+		|	brk #0
 	}
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		|	brk #0	// TODO
 	} else if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
-		|	brk #0	// TODO
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+			|.cold_code
+			|2:
+		}
+		if (Z_REG(op1_addr) != ZREG_FCARG1x || Z_OFFSET(op1_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		}
+		|	SET_EX_OPLINE opline, REG0
+		|	EXT_CALL zend_is_true, REG0
+		|	mov REG0, RETVALx
+
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+			(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >3, TMP1w, TMP2
+			}
+			|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+			|	GC_DELREF FCARG1x, TMP1w
+			|	bne >3
+			|	brk #0	// TODO: currently jump to label 3.
+			// In x86, r0 is used in macro ZVAL_DTOR_FUNC as temporary register, hence, r0 should be saved/restored
+			// before/after this macro. In AArch64, TMP1 is used. As a result, we needn't save/resotre REG0.
+			|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+			|3:
+		}
+		if (may_throw) {
+			|	MEM_LOAD_CMP_ZTS ldr, xzr, executor_globals, exception, REG1, TMP1
+			|	bne ->exception_handler_undef
+		}
+
+		if (set_bool) {
+			if (set_bool_not) {
+				|	brk #0	// TODO
+				|	neg REG0w, REG0w
+				|	add REG0w, REG0w, #3
+			} else {
+				|	add REG0w, REG0w, #2
+			}
+			|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+			if (exit_addr) {
+				|	brk #0	// TODO
+			} else if (true_label != (uint32_t)-1 || false_label != (uint32_t)-1) {
+				|	CMP_ZVAL_TYPE res_addr, IS_FALSE, TMP1w, TMP2
+				if (true_label != (uint32_t)-1) {
+					|	brk #0	// TODO
+					|	bne =>true_label
+					if (false_label != (uint32_t)-1) {
+						|	b =>false_label
+					} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+						|	b >9
+					}
+				} else {
+					|	beq =>false_label
+				}
+			}
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|	b >9
+				|.code
+			}
+		} else {
+			|	brk #0	// TODO
+
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|.code
+			}
+		}
 	}
 
 	|9:
@@ -6012,7 +6081,6 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|	mov CARG3, sp
 		|	SET_EX_OPLINE opline, REG0
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
-			|	brk #0	// TODO
 			|	EXT_CALL zend_jit_find_method_tmp_helper, REG0
 		} else {
 			|	EXT_CALL zend_jit_find_method_helper, REG0
@@ -7496,9 +7564,9 @@ static int zend_jit_zval_copy_deref(dasm_State **Dst, zend_jit_addr res_addr, ze
 	|	lsr TMP1w, REG2w, #8
 	|	and TMP1w, TMP1w, #0xff  // TMP1w -> 8-15 bits of REG2w
 	|	IF_NOT_REFCOUNTED TMP1w, >2
-	|	brk #0	// TODO: currently jump to label 2 directly.
 	|	and TMP2w, REG2w, #0xff  // TMP2w -> low 8 bits of REG2w
 	|	IF_NOT_TYPE TMP2w, IS_REFERENCE, >1
+	|	brk #0	// TODO
 	|	add TMP3, REG1, #offsetof(zend_reference, val)
 	|	GET_Z_TYPE_INFO REG2w, TMP3
 	|	GET_Z_PTR REG1, TMP3
@@ -8128,7 +8196,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED || use_this) {
-		|	brk #0	// TODO
 		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
 	} else {
 		if (opline->op1_type == IS_VAR
