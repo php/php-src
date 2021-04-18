@@ -249,14 +249,11 @@ PHP_FUNCTION(clamp)
 	}
 
 	is_smaller_or_equal_function(&max_lte, zmax, zvalue);
+	is_smaller_function(&min_lte, zmin, zvalue);
 
 	if (Z_TYPE(max_lte) == IS_TRUE) {
 		result = zmax;
-	}
-
-	is_smaller_function(&min_lte, zmin, zvalue);
-
-	if (Z_TYPE(min_lte) == IS_TRUE) {
+	} else if (Z_TYPE(min_lte) == IS_TRUE) {
 		result = zvalue;
 	} else {
 		result = zmin;
