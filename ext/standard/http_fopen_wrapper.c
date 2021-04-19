@@ -965,7 +965,7 @@ out:
 			if (chunked_encoding) {
 				ZVAL_FALSE(&param);
 				body_filter = php_stream_filter_create("dechunk", &param, php_stream_is_persistent(stream));
-			} else {
+			} else if (file_size > 0) {
 				ZVAL_LONG(&param, file_size);
 				body_filter = php_stream_filter_create("consumed", &param, php_stream_is_persistent(stream));
 			}
