@@ -796,13 +796,13 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 		/* finally, delete the element */
 		llist->count--;
 
-		zval_ptr_dtor(&element->data);
-		ZVAL_UNDEF(&element->data);
-
 		if (intern->traverse_pointer == element) {
 			SPL_LLIST_DELREF(element);
 			intern->traverse_pointer = NULL;
 		}
+
+		zval_ptr_dtor(&element->data);
+		ZVAL_UNDEF(&element->data);
 
 		SPL_LLIST_DELREF(element);
 	} else {
