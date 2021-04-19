@@ -10,8 +10,8 @@ opcache.jit_hot_func=2
 opcache.jit_hot_loop=2
 opcache.jit_hot_side_exit=0
 ;opcache.jit_debug=257
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo($n) {
