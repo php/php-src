@@ -550,6 +550,10 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
+/* used for place holders */
+#define _IS_PLACEHOLDER_ARG         20
+#define _IS_PLACEHOLDER_VARIADIC    21
+
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }

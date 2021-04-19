@@ -840,6 +840,10 @@ argument:
 		expr				{ $$ = $1; }
 	|	identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
+	|	'?' { $$ = zend_ast_create(ZEND_AST_PLACEHOLDER_ARG);
+	                 $$->attr = _IS_PLACEHOLDER_ARG; }
+	|	T_ELLIPSIS { $$ = zend_ast_create(ZEND_AST_PLACEHOLDER_ARG);
+	                 $$->attr = _IS_PLACEHOLDER_VARIADIC; }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 

@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 29...)                            |     |     |     */
+/* Class Flags (unused: 30...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -356,6 +356,12 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke() (int only)     |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 << 26) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* flag used by partial application (int only)            |     |     |     */
+#define ZEND_ACC_PARTIAL                 (1 << 27) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* trampoline is permanent                                |     |     |     */
+#define ZEND_ACC_TRAMPOLINE_PERMANENT    (1 << 29)  /*    |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
@@ -555,6 +561,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_OBSERVED           (1 << 28) /* "fcall_begin" observer handler may set this flag */
                                                /* to prevent optimization in RETURN handler and    */
                                                /* keep all local variables for "fcall_end" handler */
+#define ZEND_CALL_VARIADIC_PLACEHOLDER (1<<29)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)

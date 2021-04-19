@@ -200,6 +200,7 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 		zend_function *copy_fptr;
 		copy_fptr = emalloc(sizeof(zend_function));
 		memcpy(copy_fptr, fptr, sizeof(zend_function));
+		copy_fptr->internal_function.fn_flags &= ~ZEND_ACC_TRAMPOLINE_PERMANENT;
 		copy_fptr->internal_function.function_name = zend_string_copy(fptr->internal_function.function_name);
 		return copy_fptr;
 	} else {
@@ -588,6 +589,10 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 
 static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
 {
+    if (op_array->fn_flags & ZEND_ACC_PARTIAL) {
+        op_array = (zend_op_array*) op_array->prototype;
+    }
+    
 	zend_op *op = op_array->opcodes;
 	zend_op *end = op + op_array->last;
 
@@ -600,14 +605,20 @@ static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
 		}
 		++op;
 	}
-	ZEND_ASSERT(0 && "Failed to find op");
+
 	return NULL;
 }
 
 static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
+
 	zend_op *recv = get_recv_op(op_array, offset);
-	if (!recv || recv->opcode != ZEND_RECV_INIT) {
+
+	if (!recv) {
 		return NULL;
+	}
+	
+	if (recv->opcode != ZEND_RECV_INIT) {
+	    return NULL;
 	}
 
 	return RT_CONSTANT(recv, recv->op2);
@@ -802,6 +813,9 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		smart_str_appends(str, "abstract ");
+	}
+	if (fptr->common.fn_flags & ZEND_ACC_PARTIAL) {
+		smart_str_appends(str, "partial ");
 	}
 	if (fptr->common.fn_flags & ZEND_ACC_FINAL) {
 		smart_str_appends(str, "final ");
@@ -1289,6 +1303,31 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 }
 /* }}} */
 
+static zend_always_inline uint32_t reflection_parameter_partial_offset(zend_function *fptr, zend_arg_info *info) {
+	zend_arg_info *arg = fptr->common.prototype->common.arg_info,
+				  *end = arg + fptr->common.prototype->common.num_args;
+	uint32_t offset = 0;
+
+	if (fptr->type == ZEND_USER_FUNCTION &&
+		fptr->op_array.opcodes == &EG(call_trampoline_op)) {
+		return 0;
+	}
+
+	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+		end++;
+	}
+
+	while (arg < end) {
+		if (zend_string_equals_ci(info->name, arg->name)) {
+			return offset;
+		}
+		offset++;
+		arg++;
+    }
+    ZEND_ASSERT(0);
+    return -1;
+}
+
 /* {{{ reflection_parameter_factory */
 static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
 {
@@ -1300,7 +1339,11 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	intern = Z_REFLECTION_P(object);
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
-	reference->offset = offset;
+	if (fptr->common.fn_flags & ZEND_ACC_PARTIAL) {
+	    reference->offset = reflection_parameter_partial_offset(fptr, arg_info);
+	} else {
+	    reference->offset = offset;
+	}
 	reference->required = required;
 	reference->fptr = fptr;
 	intern->ptr = reference;
@@ -1569,7 +1612,9 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		zval_ptr_dtor(reflection_prop_name(object));
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), fptr->common.function_name);
+    if (fptr->common.function_name) {
+	    ZVAL_STR_COPY(reflection_prop_name(object), fptr->common.function_name);
+    }
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	if (closure_obj) {
@@ -1622,7 +1667,21 @@ ZEND_METHOD(ReflectionFunctionAbstract, isClosure)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	RETURN_BOOL(fptr->common.fn_flags & ZEND_ACC_CLOSURE);
+	RETURN_BOOL(fptr->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_PARTIAL));
+}
+/* }}} */
+
+/* {{{ Returns whether this is a partial closure */
+ZEND_METHOD(ReflectionFunctionAbstract, isPartial)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(fptr->common.fn_flags & ZEND_ACC_PARTIAL);
 }
 /* }}} */
 
@@ -1638,7 +1697,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj);
-		if (!Z_ISUNDEF_P(closure_this)) {
+		if (closure_this && Z_TYPE_P(closure_this) == IS_OBJECT) {
 			RETURN_OBJ_COPY(Z_OBJ_P(closure_this));
 		}
 	}
@@ -1657,6 +1716,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
 		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+
 		if (closure_func && closure_func->common.scope) {
 			zend_reflection_class_factory(closure_func->common.scope, return_value);
 		}

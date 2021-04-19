@@ -285,7 +285,10 @@ END_EXTERN_C()
 #define ZEND_CHECK_UNDEF_ARGS           199
 #define ZEND_FETCH_GLOBALS              200
 #define ZEND_VERIFY_NEVER_TYPE          201
+#define ZEND_SEND_PLACEHOLDER           202
+#define ZEND_DO_FCALL_PARTIAL           203
+#define ZEND_CHECK_PARTIAL_ARGS         204
 
-#define ZEND_VM_LAST_OPCODE             201
+#define ZEND_VM_LAST_OPCODE             204
 
 #endif

@@ -5702,7 +5702,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
 			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
-			opline->extended_value, NULL);
+			opline->extended_value, Z_OBJ_P(result));
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
 			init_func_run_time_cache(&constructor->op_array);
@@ -8768,6 +8768,89 @@ ZEND_VM_HANDLER(200, ZEND_FETCH_GLOBALS, UNUSED, UNUSED)
 	ZVAL_ARR(EX_VAR(opline->result.var),
 		zend_proptable_to_symtable(&EG(symbol_table), /* always_duplicate */ 1));
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(202, ZEND_SEND_PLACEHOLDER, UNUSED, UNUSED)
+{
+	USE_OPLINE
+	zval *arg;
+	zend_execute_data *call = EX(call);
+
+	arg = ZEND_CALL_ARG(call, opline->op2.num);
+
+	Z_TYPE_INFO_P(arg) = opline->op1.num;
+
+	if (Z_TYPE_INFO_P(arg) == _IS_PLACEHOLDER_VARIADIC) {
+		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	zval *result = NULL;
+	uint32_t info = ZEND_APPLY_NORMAL;
+
+	if (opline->op1_type != IS_UNUSED) {
+		result = EX_VAR(opline->op1.var);
+
+		if (!(call->func->common.fn_flags & ZEND_ACC_CTOR)) {
+			ZEND_ADD_CALL_FLAG_EX(info, ZEND_APPLY_PASS);
+		}
+
+		ZEND_ADD_CALL_FLAG_EX(info, ZEND_APPLY_FACTORY);
+	} else if (opline->result_type != IS_UNUSED) {
+		result = EX_VAR(opline->result.var);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_VARIADIC_PLACEHOLDER) {
+		ZEND_ADD_CALL_FLAG_EX(info, ZEND_APPLY_VARIADIC);
+	}
+
+	if (result) {
+		zend_partial_create(result, info, &call->This, call->func,
+			ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+			ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ? 
+				call->extra_named_params : NULL);
+
+		if (info & ZEND_APPLY_FACTORY) {
+			GC_ADD_FLAGS(Z_OBJ(call->This), IS_OBJ_DESTRUCTOR_CALLED);
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
+	}
+	
+	if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+	    zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(204, ZEND_CHECK_PARTIAL_ARGS, UNUSED, UNUSED)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+
+	SAVE_OPLINE();
+	zend_partial_args_check(call);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(186, ZEND_ISSET_ISEMPTY_THIS, UNUSED, UNUSED)

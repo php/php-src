@@ -40,6 +40,8 @@ typedef struct _zend_closure {
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
+static zval zend_closure_no_this;
+
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
@@ -55,9 +57,11 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 		RETVAL_FALSE;
 	}
 
-	/* destruct the function also, then - we have allocated it in get_method */
-	zend_string_release_ex(func->internal_function.function_name, 0);
-	efree(func);
+	if (!(func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
+		/* destruct the function also, then - we have allocated it in get_method */
+	    zend_string_release_ex(func->internal_function.function_name, 0);
+	    efree(func);
+	}
 #if ZEND_DEBUG
 	execute_data->func = NULL;
 #endif
@@ -69,6 +73,12 @@ static bool zend_valid_closure_binding(
 {
 	zend_function *func = &closure->func;
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
+	
+	if (func->common.fn_flags & ZEND_ACC_PARTIAL) {
+	    zend_error(E_WARNING, "Cannot bind an instance to a partial Closure");
+	    return 0;
+	}
+	
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
@@ -423,6 +433,12 @@ ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj) /* {
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+
+	if (UNEXPECTED(Z_TYPE(closure->this_ptr) != IS_OBJECT)) {
+		/* zend_partial This may refer to a type */
+		return &zend_closure_no_this;
+	}
+
 	return &closure->this_ptr;
 }
 /* }}} */
@@ -501,7 +517,7 @@ int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_f
 /* }}} */
 
 /* *is_temp is int due to Object Handler API */
-static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;
 	zval val;
@@ -542,7 +558,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 		}
 	}
 
-	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
+	if (Z_TYPE(closure->this_ptr) == IS_OBJECT) {
 		Z_ADDREF(closure->this_ptr);
 		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_THIS), &closure->this_ptr);
 	}
@@ -624,6 +640,8 @@ void zend_register_closure_ce(void) /* {{{ */
 	closure_handlers.get_debug_info = zend_closure_get_debug_info;
 	closure_handlers.get_closure = zend_closure_get_closure;
 	closure_handlers.get_gc = zend_closure_get_gc;
+
+	ZVAL_UNDEF(&zend_closure_no_this);
 }
 /* }}} */
 

@@ -1728,6 +1728,13 @@ simple_list:
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
+		case ZEND_AST_PLACEHOLDER_ARG:
+			if (ast->attr == _IS_PLACEHOLDER_ARG) {
+				APPEND_STR("?");
+			} else if (ast->attr == _IS_PLACEHOLDER_VARIADIC) {
+				APPEND_STR("...");
+			}
+			break;
 
 		/* 1 child node */
 		case ZEND_AST_VAR:

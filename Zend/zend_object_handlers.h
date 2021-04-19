@@ -256,7 +256,7 @@ ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
 			EG(trampoline).common.function_name = NULL; \
-		} else { \
+		} else if (!(func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) { \
 			efree(func); \
 		} \
 	} while (0)
