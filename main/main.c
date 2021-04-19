@@ -307,22 +307,23 @@ static PHP_INI_MH(OnSetLogFilter)
 static PHP_INI_MH(OnUpdateFiberStackSize)
 {
 	zend_long tmp;
+	const size_t page_size = zend_fiber_page_size();
 
 	if (OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
 		return FAILURE;
 	}
 
 	if (EG(fiber_stack_size) == 0) {
-		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_STACK_SIZE;
+		EG(fiber_stack_size) = page_size * ZEND_FIBER_DEFAULT_PAGE_COUNT;
 		return SUCCESS;
 	}
 
 	EG(fiber_stack_size) += ZEND_FIBER_GUARD_PAGES;
 
-	tmp = ZEND_FIBER_PAGESIZE * EG(fiber_stack_size);
+	tmp = page_size * EG(fiber_stack_size);
 
-	if (tmp / ZEND_FIBER_PAGESIZE != EG(fiber_stack_size)) {
-		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_STACK_SIZE;
+	if (tmp / page_size != EG(fiber_stack_size)) {
+		EG(fiber_stack_size) = page_size * ZEND_FIBER_DEFAULT_PAGE_COUNT;
 		return FAILURE;
 	}
 
