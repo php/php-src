@@ -66,14 +66,9 @@ typedef struct _spl_ptr_llist_element {
 	zval                           data;
 } spl_ptr_llist_element;
 
-typedef void (*spl_ptr_llist_dtor_func)(spl_ptr_llist_element *);
-typedef void (*spl_ptr_llist_ctor_func)(spl_ptr_llist_element *);
-
 typedef struct _spl_ptr_llist {
-	spl_ptr_llist_element   *head;
-	spl_ptr_llist_element   *tail;
-	spl_ptr_llist_dtor_func  dtor;
-	spl_ptr_llist_ctor_func  ctor;
+	spl_ptr_llist_element *head;
+	spl_ptr_llist_element *tail;
 	int count;
 } spl_ptr_llist;
 
@@ -109,31 +104,13 @@ static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */
 
 #define Z_SPLDLLIST_P(zv)  spl_dllist_from_obj(Z_OBJ_P((zv)))
 
-/* {{{  spl_ptr_llist */
-static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem) { /* {{{ */
-	if (!Z_ISUNDEF(elem->data)) {
-		zval_ptr_dtor(&elem->data);
-		ZVAL_UNDEF(&elem->data);
-	}
-}
-/* }}} */
-
-static void spl_ptr_llist_zval_ctor(spl_ptr_llist_element *elem) { /* {{{ */
-	if (Z_REFCOUNTED(elem->data)) {
-		Z_ADDREF(elem->data);
-	}
-}
-/* }}} */
-
-static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_llist_dtor_func dtor) /* {{{ */
+static spl_ptr_llist *spl_ptr_llist_init() /* {{{ */
 {
 	spl_ptr_llist *llist = emalloc(sizeof(spl_ptr_llist));
 
 	llist->head  = NULL;
 	llist->tail  = NULL;
 	llist->count = 0;
-	llist->dtor  = dtor;
-	llist->ctor  = ctor;
 
 	return llist;
 }
@@ -147,14 +124,11 @@ static zend_long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
 
 static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 {
-	spl_ptr_llist_element   *current = llist->head, *next;
-	spl_ptr_llist_dtor_func  dtor    = llist->dtor;
+	spl_ptr_llist_element *current = llist->head, *next;
 
 	while (current) {
 		next = current->next;
-		if (dtor) {
-			dtor(current);
-		}
+		zval_ptr_dtor(&current->data);
 		SPL_LLIST_DELREF(current);
 		current = next;
 	}
@@ -206,9 +180,7 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 	llist->head = elem;
 	llist->count++;
 
-	if (llist->ctor) {
-		llist->ctor(elem);
-	}
+	Z_TRY_ADDREF(elem->data);
 }
 /* }}} */
 
@@ -230,9 +202,7 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 	llist->tail = elem;
 	llist->count++;
 
-	if (llist->ctor) {
-		llist->ctor(elem);
-	}
+	Z_TRY_ADDREF(elem->data);
 }
 /* }}} */
 
@@ -253,14 +223,10 @@ static void spl_ptr_llist_pop(spl_ptr_llist *llist, zval *ret) /* {{{ */
 
 	llist->tail = tail->prev;
 	llist->count--;
-	ZVAL_COPY(ret, &tail->data);
+	ZVAL_COPY_VALUE(ret, &tail->data);
+	ZVAL_UNDEF(&tail->data);
 
 	tail->prev = NULL;
-	if (llist->dtor) {
-		llist->dtor(tail);
-	}
-
-	ZVAL_UNDEF(&tail->data);
 
 	SPL_LLIST_DELREF(tail);
 }
@@ -307,13 +273,10 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret) /* {{{ */
 
 	llist->head = head->next;
 	llist->count--;
-	ZVAL_COPY(ret, &head->data);
+	ZVAL_COPY_VALUE(ret, &head->data);
+	ZVAL_UNDEF(&head->data);
 
 	head->next = NULL;
-	if (llist->dtor) {
-		llist->dtor(head);
-	}
-	ZVAL_UNDEF(&head->data);
 
 	SPL_LLIST_DELREF(head);
 }
@@ -322,17 +285,9 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret) /* {{{ */
 static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to) /* {{{ */
 {
 	spl_ptr_llist_element *current = from->head, *next;
-//???	spl_ptr_llist_ctor_func ctor = from->ctor;
 
 	while (current) {
 		next = current->next;
-
-		/*??? FIXME
-		if (ctor) {
-			ctor(current);
-		}
-		*/
-
 		spl_ptr_llist_push(to, &current->data);
 		current = next;
 	}
@@ -378,7 +333,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
-			intern->llist = (spl_ptr_llist *)spl_ptr_llist_init(other->llist->ctor, other->llist->dtor);
+			intern->llist = spl_ptr_llist_init();
 			spl_ptr_llist_copy(other->llist, intern->llist);
 			intern->traverse_pointer  = intern->llist->head;
 			SPL_LLIST_CHECK_ADDREF(intern->traverse_pointer);
@@ -390,7 +345,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 
 		intern->flags = other->flags;
 	} else {
-		intern->llist = (spl_ptr_llist *)spl_ptr_llist_init(spl_ptr_llist_zval_ctor, spl_ptr_llist_zval_dtor);
+		intern->llist = spl_ptr_llist_init();
 		intern->traverse_pointer  = intern->llist->head;
 		SPL_LLIST_CHECK_ADDREF(intern->traverse_pointer);
 	}
@@ -789,20 +744,10 @@ PHP_METHOD(SplDoublyLinkedList, offsetSet)
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 		if (element != NULL) {
-			/* call dtor on the old element as in spl_ptr_llist_pop */
-			if (intern->llist->dtor) {
-				intern->llist->dtor(element);
-			}
-
 			/* the element is replaced, delref the old one as in
 			 * SplDoublyLinkedList::pop() */
 			zval_ptr_dtor(&element->data);
-			ZVAL_COPY_VALUE(&element->data, value);
-
-			/* new element, call ctor as in spl_ptr_llist_push */
-			if (intern->llist->ctor) {
-				intern->llist->ctor(element);
-			}
+			ZVAL_COPY(&element->data, value);
 		} else {
 			zval_ptr_dtor(value);
 			zend_argument_error(spl_ce_OutOfRangeException, 1, "is an invalid offset");
@@ -855,16 +800,13 @@ PHP_METHOD(SplDoublyLinkedList, offsetUnset)
 		/* finally, delete the element */
 		llist->count--;
 
-		if(llist->dtor) {
-			llist->dtor(element);
-		}
+		zval_ptr_dtor(&element->data);
+		ZVAL_UNDEF(&element->data);
 
 		if (intern->traverse_pointer == element) {
 			SPL_LLIST_DELREF(element);
 			intern->traverse_pointer = NULL;
 		}
-		zval_ptr_dtor(&element->data);
-		ZVAL_UNDEF(&element->data);
 
 		SPL_LLIST_DELREF(element);
 	} else {
@@ -1274,9 +1216,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 
 		intern->llist->count++;
 
-		if (intern->llist->ctor) {
-			intern->llist->ctor(elem);
-		}
+		Z_TRY_ADDREF(elem->data);
 	}
 } /* }}} */
 
