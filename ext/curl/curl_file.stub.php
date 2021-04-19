@@ -4,12 +4,9 @@
 
 class CURLFile
 {
-    /** @var string */
-    public $name = "";
-    /** @var string */
-    public $mime = "";
-    /** @var string */
-    public $postname = "";
+    public string $name = "";
+    public string $mime = "";
+    public string $postname = "";
 
     public function __construct(string $filename, ?string $mime_type = null, ?string $posted_filename = null) {}
 
