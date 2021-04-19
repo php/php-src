@@ -327,6 +327,8 @@ extern ZEND_API zend_result (*zend_preload_autoload)(zend_string *filename);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+/* For custom format specifiers like H */
+ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
 /* If filename is NULL the default filename is used. */
 ZEND_API ZEND_COLD void zend_error_at(int type, const char *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(int type, const char *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);

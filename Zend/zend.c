@@ -489,7 +489,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					}
 					smart_str_appendc(buf, '\n');
 				}
-				
+
 				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
@@ -1519,6 +1519,17 @@ ZEND_API ZEND_COLD void zend_error_at(
 }
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+}
+
+ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
 	const char *filename;
 	uint32_t lineno;
 	va_list args;
