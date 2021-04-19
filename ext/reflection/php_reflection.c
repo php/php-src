@@ -6759,7 +6759,7 @@ ZEND_METHOD(ReflectionFiber, __construct)
 	intern = Z_REFLECTION_P(object);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS_EX(fiber, zend_ce_fiber, 0, 0)
+		Z_PARAM_OBJECT_OF_CLASS(fiber, zend_ce_fiber)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (intern->ce) {

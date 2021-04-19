@@ -611,7 +611,7 @@ ZEND_METHOD(Fiber, throw)
 	zval *exception;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS_EX(exception, zend_ce_throwable, 0, 0)
+		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
