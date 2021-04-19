@@ -8,8 +8,8 @@ opcache.jit_buffer_size=32M
 opcache.jit=tracing
 opcache.jit_hot_func=2
 ;opcache.jit_debug=257
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo() {
