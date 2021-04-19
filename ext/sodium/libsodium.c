@@ -1503,15 +1503,15 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20)
 		RETURN_THROWS();
 	}
 	if (ciphertext_len <= 0 || ciphertext_len >= SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 1, "length must be greater than 0");
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	if (nonce_len != crypto_stream_xchacha20_NONCEBYTES) {
-		zend_argument_error(sodium_exception_ce, 2, "nonce must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long");
+		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long");
 		RETURN_THROWS();
 	}
 	if (key_len != crypto_stream_xchacha20_KEYBYTES) {
-		zend_argument_error(sodium_exception_ce, 3, "key must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
 	ciphertext = zend_string_checked_alloc((size_t) ciphertext_len, 0);
@@ -1545,11 +1545,11 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor)
 		RETURN_THROWS();
 	}
 	if (nonce_len != crypto_stream_xchacha20_NONCEBYTES) {
-		zend_argument_error(sodium_exception_ce, 2, "nonce must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long");
+		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long");
 		RETURN_THROWS();
 	}
 	if (key_len != crypto_stream_xchacha20_KEYBYTES) {
-		zend_argument_error(sodium_exception_ce, 3, "key must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
 	ciphertext_len = msg_len;
