@@ -4,10 +4,8 @@
 
 class php_user_filter
 {
-    /** @var string */
-    public $filtername = "";
-    /** @var string */
-    public $params = "";
+    public string $filtername = "";
+    public mixed $params = "";
 
     /**
      * @param resource $in
