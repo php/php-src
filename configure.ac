@@ -548,6 +548,7 @@ asctime_r \
 chroot \
 ctime_r \
 explicit_memset \
+fdatasync \
 flock \
 ftok \
 funopen \
