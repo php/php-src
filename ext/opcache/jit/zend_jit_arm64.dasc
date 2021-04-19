@@ -933,7 +933,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_GC_MAY_NOT_LEAK, ptr, label, tmp_reg1, tmp_reg2
-|	ldrh tmp_reg1, [ptr, #4]
+|	ldr tmp_reg1, [ptr, #4]
 |	LOAD_32BIT_VAL tmp_reg2, (GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 |	tst tmp_reg1, tmp_reg2
 |	bne label
