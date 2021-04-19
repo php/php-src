@@ -539,6 +539,7 @@ struct _zend_ast_ref {
 #define IS_VOID						14
 #define IS_STATIC					15
 #define IS_MIXED					16
+#define IS_NEVER					17
 
 /* internal types */
 #define IS_INDIRECT             	12
@@ -547,8 +548,8 @@ struct _zend_ast_ref {
 #define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					17
-#define _IS_NUMBER					18
+#define _IS_BOOL					18
+#define _IS_NUMBER					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;

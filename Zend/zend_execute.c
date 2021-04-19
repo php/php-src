@@ -1248,6 +1248,16 @@ ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, zval *
 	zend_string_release(need_msg);
 }
 
+ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
+{
+	zend_string *func_name = get_function_or_method_name(zf);
+
+	zend_type_error("%s(): never-returning function must not implicitly return",
+		ZSTR_VAL(func_name));
+
+	zend_string_release(func_name);
+}
+
 #if ZEND_DEBUG
 static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, zval *value)
 {

@@ -301,6 +301,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
@@ -515,6 +516,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_EXIT:
 			case ZEND_THROW:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				break;
 			case ZEND_JMP:
 				block->successors_count = 1;

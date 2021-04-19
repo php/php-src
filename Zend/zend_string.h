@@ -548,6 +548,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_CALLABLE,               "callable") \
 	_(ZEND_STR_ITERABLE,               "iterable") \
 	_(ZEND_STR_VOID,                   "void") \
+	_(ZEND_STR_NEVER,                  "never") \
 	_(ZEND_STR_FALSE,                  "false") \
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
