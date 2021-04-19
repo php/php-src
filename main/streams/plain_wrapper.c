@@ -918,6 +918,8 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				case PHP_STREAM_SYNC_FDSYNC:
 					return php_stdiop_sync(stream, 1) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 			}
+			/* Invalid option passed */
+			return PHP_STREAM_OPTION_RETURN_ERR;
 
 		case PHP_STREAM_OPTION_TRUNCATE_API:
 			switch (value) {
