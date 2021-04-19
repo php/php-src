@@ -31,6 +31,12 @@
 |.define CARG4,   x3
 |.define CARG5,   x4
 |.define CARG6,   x5
+|.define CARG1w,  w0
+|.define CARG2w,  w1
+|.define CARG3w,  w2
+|.define CARG4w,  w3
+|.define CARG5w,  w4
+|.define CARG6w,  w5
 |.define RETVALx, x0
 |.define RETVALw, w0
 |.define FCARG1x, x0
@@ -1447,7 +1453,16 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 static int zend_jit_undefined_function_stub(dasm_State **Dst)
 {
 	|->undefined_function:
-	|	brk #0	// TODO
+	|	ldr REG0, EX->opline
+	|	movz CARG1, #0
+	|	LOAD_ADDR CARG2, "Call to undefined function %s()"
+	|	ldr CARG3w, [REG0, #offsetof(zend_op, op2.constant)]
+	|	sxtw CARG3, CARG3w
+	|	add REG0, REG0, CARG3
+	|	ldr CARG3, [REG0]
+	|	add CARG3, CARG3, #offsetof(zend_string, val)
+	|	EXT_CALL zend_throw_error, REG0
+	|	b ->exception_handler
 	return 1;
 }
 
@@ -4836,7 +4851,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 	if (!func
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL) {
-		|	brk #0	// TODO: Tracing mode. ASLR?
+		func = (zend_function*)trace->func;
 	}
 
 	if (opline->opcode == ZEND_INIT_FCALL
@@ -4845,7 +4860,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
 		/* recursive call */
-		|	brk #0	// TODO
+		|	ldr REG0, EX->func
 	} else {
 		|	// if (CACHED_PTR(opline->result.num))
 		|	ldr REG0, EX->run_time_cache
@@ -4857,7 +4872,12 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		 && func
 		 && func->type == ZEND_USER_FUNCTION
 		 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
-			|	brk #0	// TODO
+			|	LOAD_ADDR FCARG1x, func
+			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
+			|	ldr REG1, EX->run_time_cache
+			|	mov REG0, RETVALx
+			|	str REG0, [REG1, #opline->result.num]
+			|	b >3
 		} else {
 			zval *zv = RT_CONSTANT(opline, opline->op2);
 
@@ -4865,7 +4885,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv);
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
-				|	brk #0	// TODO
+				|	LOAD_ADDR FCARG1x, Z_STR_P(zv + 1);
+				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, zv;
 				|	EXT_CALL zend_jit_find_ns_func_helper, REG0
@@ -4882,7 +4903,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			} else {
 				|	cbnz REG0, >3
 				|	// SAVE_OPLINE();
-				|	brk #0 // TODO: invalid func address.
+				|	SET_EX_OPLINE opline, REG0
+				|	b ->undefined_function
 			}
 		}
 		|.code
@@ -5175,12 +5197,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 	prev_opline = opline - 1;
 	while (prev_opline->opcode == ZEND_EXT_FCALL_BEGIN || prev_opline->opcode == ZEND_TICKS) {
-		|	brk #0	// TODO
 		prev_opline--;
 	}
 	if (prev_opline->opcode == ZEND_SEND_UNPACK || prev_opline->opcode == ZEND_SEND_ARRAY ||
 			prev_opline->opcode == ZEND_CHECK_UNDEF_ARGS) {
-		|	brk #0	// TODO
 		unknown_num_args = 1;
 	}
 
@@ -5196,7 +5216,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	if (!func) {
 		/* resolve function at run time */
 	} else if (func->type == ZEND_USER_FUNCTION) {
-		|	brk #0	// TODO
 		ZEND_ASSERT(opline->opcode != ZEND_DO_ICALL);
 		call_num_args = call_info->num_args;
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
@@ -5312,11 +5331,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			if (func && op_array == &func->op_array) {
 				/* recursive call */
 				if (trace || func->op_array.cache_size > sizeof(void*)) {
-					|	brk #0	// TODO
+					|	ldr REG2, EX->run_time_cache
+					|	str REG2, EX:RX->run_time_cache
 				}
 			} else {
 				if (func) {
-					|	brk #0	// TODO
+					|	ldr REG0, EX:RX->func
 				}
 				|	ldr REG2, [REG0, #offsetof(zend_op_array, run_time_cache__ptr)]
 // Always defined as ZEND_MAP_PTR_KIND_PTR_OR_OFFSET. See Zend/zend_map_ptr.h.
@@ -5324,7 +5344,19 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	ldr REG2, [REG2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 				if (func && !(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
-					|	brk #0	// TODO
+					if (ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
+						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
+					} else if ((func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+					        && (!func->op_array.scope || (func->op_array.scope->ce_flags & ZEND_ACC_LINKED))) {
+						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
+					} else {
+						/* the called op_array may be not persisted yet */
+						|	tst REG2, #1
+						|	beq >1
+						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
+						|1:
+						|	ldr REG2, [REG2]
+					}
 				} else {
 					|	tst REG2, #1
 					|	beq >1
@@ -5345,11 +5377,82 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// opline = op_array->opcodes;
 		if (func && !unknown_num_args) {
-			|	brk #0	// TODO
+			for (i = call_num_args; i < func->op_array.last_var; i++) {
+				uint32_t n = EX_NUM_TO_VAR(i);
+				|	// ZVAL_UNDEF(EX_VAR(n))
+				|	str wzr, [RX, #(n + offsetof(zval,u1.type_info))]
+			}
+
+			if (call_num_args <= func->op_array.num_args) {
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END
+				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+					uint32_t num_args;
+
+					if ((func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0) {
+						if (trace) {
+							num_args = 0;
+						} else if (call_info) {
+							num_args = skip_valid_arguments(op_array, ssa, call_info);
+						} else {
+							num_args = call_num_args;
+						}
+					} else {
+						num_args = call_num_args;
+					}
+					if (zend_accel_in_shm(func->op_array.opcodes)) {
+						|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
+					} else {
+						|	ldr REG0, EX->func
+						if (GCC_GLOBAL_REGS) {
+							|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
+							if (num_args) {
+								|	add IP, IP, #(num_args * sizeof(zend_op))
+							}
+						} else {
+							|	ldr REG1, [REG0, #offsetof(zend_op_array, opcodes)]
+							if (num_args) {
+								|	add REG1, REG1, #(num_args * sizeof(zend_op))
+							}
+							|	str REG1, EX->opline
+						}
+					}
+
+					if (!trace && op_array == &func->op_array) {
+						/* recursive call */
+						if (ZEND_OBSERVER_ENABLED) {
+							|	SAVE_IP
+							|	mov CARG1, FP
+							|	EXT_CALL zend_observer_fcall_begin, REG0
+						}
+#ifdef CONTEXT_THREADED_JIT
+						|	brk #0	// TODO
+#else
+						|	b =>num_args
+#endif
+						return 1;
+					}
+				}
+			} else {
+				if (!trace || (trace->op == ZEND_JIT_TRACE_END
+				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+					if (func && zend_accel_in_shm(func->op_array.opcodes)) {
+						|	LOAD_IP_ADDR (func->op_array.opcodes)
+					} else if (GCC_GLOBAL_REGS) {
+						|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
+					} else {
+						|	ldr CARG1, [REG0, #offsetof(zend_op_array, opcodes)]
+						|	str CARG1, EX->opline
+					}
+				}
+				if (!GCC_GLOBAL_REGS) {
+					|	mov CARG1, FP
+				}
+				|	EXT_CALL zend_jit_copy_extra_args_helper, REG0
+			}
 		} else {
 			|	// opline = op_array->opcodes
 			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
-				|	brk #0	// TODO
+				|	LOAD_IP_ADDR (func->op_array.opcodes)
 			} else if (GCC_GLOBAL_REGS) {
 				|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
 			} else {
@@ -5358,6 +5461,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 			if (func) {
 				|	brk #0	// TODO
+				|	// num_args = EX_NUM_ARGS();
+				|	ldr REG1w, [FP, #offsetof(zend_execute_data, This.u2.num_args)]
+				|	// if (UNEXPECTED(num_args > first_extra_arg))
+				|	cmp REG1w, #(func->op_array.num_args)
 			} else {
 				|	// first_extra_arg = op_array->num_args;
 				|	ldr REG2w, [REG0, #offsetof(zend_op_array, num_args)]
@@ -5387,7 +5494,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|1:
 			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
 			if (func) {
-				|	brk #0	// TODO
+				|	movz REG2w, #(func->op_array.last_var)
 			} else {
 				|	ldr REG2w, [REG0, #offsetof(zend_op_array, last_var)]
 			}
