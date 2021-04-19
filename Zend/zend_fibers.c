@@ -416,8 +416,11 @@ static void zend_fiber_object_destroy(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&fiber->fci.function_name);
 	} else {
 		if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
+			zend_object *exception = EG(exception);
+			EG(exception) = NULL;
 			fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
 			zend_fiber_switch_to(fiber);
+			EG(exception) = exception;
 		}
 
 		zval_ptr_dtor(&fiber->value);
@@ -434,6 +437,8 @@ static void zend_fiber_object_destroy(zend_object *object) /* {{{ */
 void zend_fiber_cleanup(void) /* {{{ */
 {
 	zend_fiber *fiber;
+	zend_object *exception = EG(exception);
+	EG(exception) = NULL;
 
 	ZEND_HASH_REVERSE_FOREACH_PTR(&EG(fibers), fiber) {
 		if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
@@ -442,6 +447,8 @@ void zend_fiber_cleanup(void) /* {{{ */
 			zend_fiber_switch_to(fiber);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	EG(exception) = exception;
 }
 /* }}} */
 
