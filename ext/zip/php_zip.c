@@ -859,10 +859,6 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 				ZVAL_EMPTY_STRING(rv);
 			}
 			break;
-		/* case IS_TRUE */
-		case IS_FALSE:
-			ZVAL_BOOL(rv, retint);
-			break;
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
