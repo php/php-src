@@ -168,7 +168,7 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 
 	elem->prev = NULL;
 	elem->next = llist->head;
-	ZVAL_COPY_VALUE(&elem->data, data);
+	ZVAL_COPY(&elem->data, data);
 	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->head) {
@@ -179,8 +179,6 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 
 	llist->head = elem;
 	llist->count++;
-
-	Z_TRY_ADDREF(elem->data);
 }
 /* }}} */
 
@@ -190,7 +188,7 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 
 	elem->prev = llist->tail;
 	elem->next = NULL;
-	ZVAL_COPY_VALUE(&elem->data, data);
+	ZVAL_COPY(&elem->data, data);
 	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->tail) {
@@ -201,8 +199,6 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 
 	llist->tail = elem;
 	llist->count++;
-
-	Z_TRY_ADDREF(elem->data);
 }
 /* }}} */
 
@@ -1189,7 +1185,6 @@ PHP_METHOD(SplDoublyLinkedList, add)
 		RETURN_THROWS();
 	}
 
-	Z_TRY_ADDREF_P(value);
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value);
@@ -1200,7 +1195,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 		/* Get the element we want to insert before */
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
-		ZVAL_COPY_VALUE(&elem->data, value);
+		ZVAL_COPY(&elem->data, value);
 		SPL_LLIST_RC(elem) = 1;
 		/* connect to the neighbours */
 		elem->next = element;

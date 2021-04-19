@@ -33,8 +33,9 @@ echo $dll->pop()."\n";
 // Test refcounted value
 $str = "foo";
 $str .= "bar";
-$dll->add(0, null);
 $dll->add(0, $str);
+$dll->add(0, $str);
+var_dump($dll->shift());
 var_dump($dll->shift());
 
 ?>
@@ -48,4 +49,5 @@ Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
 3
 2
 1
+string(6) "foobar"
 string(6) "foobar"
