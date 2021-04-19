@@ -288,14 +288,13 @@ static void zend_fiber_switch_to(zend_fiber *fiber) /* {{{ */
 
 	zend_observer_fiber_switch_notify(fiber, previous);
 
-	if (UNEXPECTED(EG(fiber_error))) {
+	if (UNEXPECTED(EG(fiber_error)) && fiber->status != ZEND_FIBER_STATUS_SHUTDOWN) {
 		if (previous) {
 			zend_fiber_suspend(previous); // Still in fiber, suspend again until in {main}.
 			abort(); // This fiber should never be resumed.
 		}
 
 		zend_fiber_error *error = EG(fiber_error);
-		EG(fiber_error) = NULL; // Null error reference so suspended fibers do not issue error again during shutdown.
 		zend_error_at_noreturn(error->type, error->filename, error->lineno, "%s", ZSTR_VAL(error->message));
 	}
 }
@@ -540,7 +539,11 @@ ZEND_METHOD(Fiber, suspend)
 
 	if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
 		// This occurs when the fiber is GC'ed while suspended, do not add a ref.
-		zend_throw_fiber_exit();
+		if (EG(fiber_error)) {
+			zend_throw_unwind_exit();
+		} else {
+			zend_throw_fiber_exit();
+		}
 		return;
 	}
 

@@ -3,7 +3,13 @@ Fatal error in a fiber with other active fibers
 --FILE--
 <?php
 
-$fiber1 = new Fiber(fn() => Fiber::suspend(1));
+$fiber1 = new Fiber(function (): void {
+    try {
+        \Fiber::suspend(1);
+    } finally {
+        echo "not executed";
+    }
+});
 
 $fiber2 = new Fiber(function (): void {
     \Fiber::suspend(2);
