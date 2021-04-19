@@ -1062,7 +1062,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef PHP_WIN32
 	if (!dir) {
-		php_win32_docref2_from_error(GetLastError(), path, path);
+		php_win32_docref1_from_error(GetLastError(), path);
 	}
 
 	if (dir && dir->finished) {

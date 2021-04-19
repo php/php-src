@@ -1111,6 +1111,19 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 /* }}} */
 
 #ifdef PHP_WIN32
+PHPAPI ZEND_COLD void php_win32_docref1_from_error(DWORD error, const char *param1) {
+	char *buf = php_win32_error_to_msg(error);
+	size_t buf_len;
+
+	buf_len = strlen(buf);
+	if (buf_len >= 2) {
+		buf[buf_len - 1] = '\0';
+		buf[buf_len - 2] = '\0';
+	}
+	php_error_docref1(NULL, param1, E_WARNING, "%s (code: %lu)", buf, error);
+	php_win32_error_msg_free(buf);
+}
+
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	char *buf = php_win32_error_to_msg(error);
 	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
