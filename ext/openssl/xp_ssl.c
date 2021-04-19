@@ -938,6 +938,8 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 	if (certfile) {
 		char resolved_path_buff[MAXPATHLEN];
 		const char *private_key = NULL;
+		X509 *cert = NULL;
+		int ctx_set = 0;
 
 		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
 			/* a certificate to use for authentication */
@@ -948,13 +950,32 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 					certfile);
 				return FAILURE;
 			}
+			ctx_set = 1;
+		/* val is still local_cert/certfile since GET_VER_OPT_STRING("local_cert", certfile) */
+		} else if ((cert = php_openssl_x509_from_str(Z_STR_P(val))) != NULL) {
+			if (SSL_CTX_use_certificate(ctx, cert) != 1) {
+				X509_free(cert);
+				php_error_docref(NULL, E_WARNING,
+					"Invalid local cert `%s'; Check your device",
+					certfile);
+				return FAILURE;
+			}
+			ctx_set = 1;
+		}
+		if (ctx_set) {
 			GET_VER_OPT_STRING("local_pk", private_key);
-
 			if (private_key) {
 				char resolved_path_buff_pk[MAXPATHLEN];
 				if (VCWD_REALPATH(private_key, resolved_path_buff_pk)) {
 					if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff_pk, SSL_FILETYPE_PEM) != 1) {
 						php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff_pk);
+						return FAILURE;
+					}
+				} else if (GET_VER_OPT("local_pk")) /* fill val with local_pk if any */ {
+					EVP_PKEY *pkey = php_openssl_pkey_from_zval(val /* local_pk */, 0 /* not public */, NULL, 0);
+					if (SSL_CTX_use_PrivateKey(ctx, pkey) != 1) {
+						EVP_PKEY_free(pkey);
+						php_error_docref(NULL, E_WARNING, "Unable to set private key `%s'", private_key);
 						return FAILURE;
 					}
 				}

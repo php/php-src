@@ -56,6 +56,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
+#include <openssl/engine.h>
 
 /* Common */
 #include <time.h>
@@ -515,7 +516,6 @@ struct php_x509_request { /* {{{ */
 static X509 *php_openssl_x509_from_param(zend_object *cert_obj, zend_string *cert_str);
 static X509 *php_openssl_x509_from_zval(zval *val, bool *free_cert);
 static X509_REQ *php_openssl_csr_from_param(zend_object *csr_obj, zend_string *csr_str);
-static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *passphrase, size_t passphrase_len);
 
 static int php_openssl_is_private_key(EVP_PKEY* pkey);
 static X509_STORE * php_openssl_setup_verify(zval * calist);
@@ -930,6 +930,46 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 		CONF_free(req->req_config);
 		req->req_config = NULL;
 	}
+}
+/* }}} */
+
+static ENGINE *php_openssl_make_pkcs11_engine(const bool warn) /* {{{ */
+{
+	char *verbose = NULL;
+	ENGINE *engine;
+
+	engine = ENGINE_by_id("pkcs11");
+	if (engine == NULL) {
+		if (warn) {
+			php_error_docref(NULL, E_WARNING, "Cannot load PKCS11 engine");
+		}
+		php_openssl_store_errors();
+		return NULL;
+	}
+	verbose = getenv("OPENSSL_ENGINE_VERBOSE");
+	if (verbose) {
+		if (!ENGINE_ctrl_cmd_string(engine, "VERBOSE", NULL, 0)) {
+			ENGINE_free(engine);
+			php_openssl_store_errors();
+			return NULL;
+		}
+	} else {
+		if (!ENGINE_ctrl_cmd_string(engine, "QUIET", NULL, 0)) {
+			ENGINE_free(engine);
+			php_openssl_store_errors();
+			return NULL;
+		}
+	}
+	if (!ENGINE_init(engine)) {
+		if (warn) {
+			php_error_docref(NULL, E_WARNING, "Cannot init PKCS11 engine");
+		}
+		php_openssl_store_errors();
+		return NULL;
+	}
+	ENGINE_free(engine);
+
+	return engine;
 }
 /* }}} */
 
@@ -1384,9 +1424,9 @@ PHP_FUNCTION(openssl_get_cert_locations)
 }
 /* }}} */
 
-static X509 *php_openssl_x509_from_str(zend_string *cert_str) {
+X509 *php_openssl_x509_from_str(zend_string *cert_str) {
 	X509 *cert = NULL;
-	BIO *in;
+	BIO *in = NULL;
 
 	if (ZSTR_LEN(cert_str) > 7 && memcmp(ZSTR_VAL(cert_str), "file://", sizeof("file://") - 1) == 0) {
 		if (php_openssl_open_base_dir_chk(ZSTR_VAL(cert_str) + (sizeof("file://") - 1))) {
@@ -1399,6 +1439,32 @@ static X509 *php_openssl_x509_from_str(zend_string *cert_str) {
 			return NULL;
 		}
 		cert = PEM_read_bio_X509(in, NULL, NULL, NULL);
+	} else if (ZSTR_LEN(cert_str) > 7 && memcmp(ZSTR_VAL(cert_str), "pkcs11:", sizeof("pkcs11:") - 1) == 0) {
+		ENGINE *engine = php_openssl_make_pkcs11_engine(true);
+		struct {
+			const char *s_slot_cert_id;
+			X509 *cert;
+		} parms = {
+			.s_slot_cert_id = ZSTR_VAL(cert_str),
+			.cert = NULL,
+		};
+		int force_login = 0;
+
+		if (!engine) {
+			return NULL;
+		}
+
+		if (!ENGINE_ctrl_cmd(engine, "LOAD_CERT_CTRL", 0, &parms, NULL, force_login)) {
+			ENGINE_finish(engine);
+			php_openssl_store_errors();
+			return NULL;
+		}
+		ENGINE_finish(engine);
+		if (parms.cert == NULL) {
+			php_openssl_store_errors();
+			return NULL;
+		}
+		cert = parms.cert;
 	} else {
 		in = BIO_new_mem_buf(ZSTR_VAL(cert_str), (int) ZSTR_LEN(cert_str));
 		if (in == NULL) {
@@ -3477,7 +3543,7 @@ static int php_openssl_pem_password_cb(char *buf, int size, int rwflag, void *us
 }
 /* }}} */
 
-static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *passphrase, size_t passphrase_len)
+EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *passphrase, size_t passphrase_len)
 {
 	EVP_PKEY *key = NULL;
 	X509 *cert = NULL;
@@ -3549,6 +3615,8 @@ static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *pas
 	} else if (Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_certificate_ce) {
 		cert = php_openssl_certificate_from_obj(Z_OBJ_P(val))->x509;
 	} else {
+		ENGINE *engine = NULL;
+
 		/* force it to be a string and check if it refers to a file */
 		/* passing non string values leaks, object uses toString, it returns NULL
 		 * See bug38255.phpt
@@ -3566,13 +3634,27 @@ static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *pas
 				TMP_CLEAN;
 			}
 		}
+		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "pkcs11:", sizeof("pkcs11:") - 1) == 0) {
+			engine = php_openssl_make_pkcs11_engine(true);
+			if (engine == NULL) {
+				TMP_CLEAN;
+			}
+		}
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
-			cert = php_openssl_x509_from_str(Z_STR_P(val));
+			if (engine) {
+				key = ENGINE_load_public_key(engine, Z_STRVAL_P(val), NULL, NULL);
+				ENGINE_finish(engine);
+				engine = NULL;
+			}
+			/* val could be a certificate (file, pkcs11:, etc., let's try to extract the key) */
+			if (!key) {
+				cert = php_openssl_x509_from_str(Z_STR_P(val));
+			}
 
 			if (cert) {
 				free_cert = 1;
-			} else {
+			} else if (!key) {
 				/* not a X509 certificate, try to retrieve public key */
 				BIO* in;
 				if (filename) {
@@ -3589,26 +3671,32 @@ static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *pas
 			}
 		} else {
 			/* we want the private key */
-			BIO *in;
-
-			if (filename) {
-				in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+			if (engine) {
+				key = ENGINE_load_private_key(engine, Z_STRVAL_P(val), NULL, NULL);
+				ENGINE_finish(engine);
+				engine = NULL;
 			} else {
-				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
-			}
+				BIO *in;
 
-			if (in == NULL) {
-				TMP_CLEAN;
+				if (filename) {
+					in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+				} else {
+					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
+				}
+
+				if (in == NULL) {
+					TMP_CLEAN;
+				}
+				if (passphrase == NULL) {
+					key = PEM_read_bio_PrivateKey(in, NULL, NULL, NULL);
+				} else {
+					struct php_openssl_pem_password password;
+					password.key = passphrase;
+					password.len = passphrase_len;
+					key = PEM_read_bio_PrivateKey(in, NULL, php_openssl_pem_password_cb, &password);
+				}
+				BIO_free(in);
 			}
-			if (passphrase == NULL) {
-				key = PEM_read_bio_PrivateKey(in, NULL, NULL, NULL);
-			} else {
-				struct php_openssl_pem_password password;
-				password.key = passphrase;
-				password.len = passphrase_len;
-				key = PEM_read_bio_PrivateKey(in, NULL, php_openssl_pem_password_cb, &password);
-			}
-			BIO_free(in);
 		}
 	}
 
