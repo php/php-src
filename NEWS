@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.6
 
+- Core:
+  . Fixed bug #80960 (opendir() warning wrong info when failed on Windows).
+    (cmb)
+
 - SPL:
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)

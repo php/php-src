@@ -1061,6 +1061,11 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 #endif
 			if (path_length + state_cwd_length + 1 >= MAXPATHLEN-1) {
+#ifdef ZEND_WIN32
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_BUFFER_OVERFLOW);
+#else
+				errno = ENAMETOOLONG;
+#endif
 				return 1;
 			}
 			memcpy(resolved_path, state->cwd, state_cwd_length);
@@ -1089,6 +1094,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #ifdef ZEND_WIN32
 	if (memchr(resolved_path, '*', path_length) ||
 		memchr(resolved_path, '?', path_length)) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_NAME);
 		return 1;
 	}
 #endif
