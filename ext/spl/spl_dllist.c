@@ -1215,8 +1215,6 @@ PHP_METHOD(SplDoublyLinkedList, add)
 		element->prev = elem;
 
 		intern->llist->count++;
-
-		Z_TRY_ADDREF(elem->data);
 	}
 } /* }}} */
 
