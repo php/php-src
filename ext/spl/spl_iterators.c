@@ -1884,8 +1884,9 @@ PHP_METHOD(RegexIterator, accept)
 		case REGIT_MODE_REPLACE: {
 			zval *replacement = zend_read_property(intern->std.ce, Z_OBJ_P(ZEND_THIS), "replacement", sizeof("replacement")-1, 1, &rv);
 			zend_string *replacement_str = zval_try_get_string(replacement);
+
 			if (UNEXPECTED(!replacement_str)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count);

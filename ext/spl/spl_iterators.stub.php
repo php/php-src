@@ -320,8 +320,7 @@ class InfiniteIterator extends IteratorIterator
 
 class RegexIterator extends FilterIterator
 {
-    /** @var string|null */
-    public $replacement;
+    public ?string $replacement = null;
 
     public function __construct(Iterator $iterator, string $pattern, int $mode = self::MATCH, int $flags = 0, int $pregFlags = 0) {}
 
