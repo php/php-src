@@ -58,6 +58,10 @@ if test "$PHP_OPCACHE" != "no"; then
       x86*)
         DASM_ARCH="x86"
         ;;
+      arm*-*-darwin*)
+        DASM_FLAGS="-D ARM64APPLE=1 -D ARM64=1"
+        DASM_ARCH="arm64"
+        ;;
       aarch64*)
         DASM_FLAGS="-D ARM64=1"
         DASM_ARCH="arm64"
