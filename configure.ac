@@ -1615,7 +1615,6 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/zend_dump.c \
     , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend Zend/Optimizer)

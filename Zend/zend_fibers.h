@@ -17,11 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_API.h"
-#include "zend_types.h"
-
 #ifndef ZEND_FIBERS_H
 #define ZEND_FIBERS_H
+
+#include "zend_API.h"
+#include "zend_types.h"
 
 BEGIN_EXTERN_C()
 
