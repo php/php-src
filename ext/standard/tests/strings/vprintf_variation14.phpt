@@ -24,14 +24,6 @@ $formats =
 // Arrays of non hexa values for the format defined in $format.
 // Each sub array contains non hexa values which correspond to each format in $format
 $args_array = array(
-
-  // array of float values
-  array(2.2, .2, 10.2,
-        123456.234, -1234.6789, +1234.6789,
-        2e10, +2e12, 22e+12,
-        12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
-
   // array of int values
   array(2, -2, +2,
         123456, -12346789, +12346789,
@@ -79,41 +71,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-2 0 a
-   1e240 x fffffb2e 4d2 
-                         
-   3039 c fffffff4 fffe1dc0
-   a 1e240 2 0
-int(99)
-
--- Iteration 2 --
 2 fffffffe 2
    1e240 x ff439a5b bc65a5
-                         
+
    bc61b4 127ae7 ff4732f9 ff439ede
    2 1e240 2 fffffffe
 int(122)
 
--- Iteration 3 --
+-- Iteration 2 --
 0 0 0
-   7b x ffffff85 7b  
-                         
+   7b x ffffff85 7b
+
    4d2 0 $0 _0
    0 7b 0 0
 int(80)
 
--- Iteration 4 --
+-- Iteration 3 --
 1 1 1
-   1 x    1 1   
-                         
+   1 x    1 1
+
    #1 1 $1 _1
    1 1 1 1
 int(73)
 
--- Iteration 5 --
+-- Iteration 4 --
 1 1 0
-   1 x    0 1   
-                         
+   1 x    0 1
+
    #0 1 $1 _0
    0 1 1 1
 int(73)

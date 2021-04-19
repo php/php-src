@@ -118,11 +118,11 @@ bool(true)
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) is not a valid codepoint
 --float 10.5--
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 10.5 to int in %s on line %d
 bool(true)
 --float -10.5--
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -10.5 to int in %s on line %d
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) is not a valid codepoint
 --float 10.0e19--
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint
@@ -130,7 +130,7 @@ ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must 
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint
 --float .5--
 
-Deprecated: Implicit conversion to int from non-compatible float in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 0.5 to int in %s on line %d
 bool(true)
 --empty array--
 TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, array given

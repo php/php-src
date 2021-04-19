@@ -10,73 +10,42 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 <?php
 echo "*** Testing dechex() : usage variations ***\n";
 
-// heredoc string
-$heredoc = <<<EOT
-abc
-xyz
-EOT;
-
-// get a class
-class classA
-{
-}
-
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
-$inputs = array(
+$inputs = [
        // int data
 /*1*/  0,
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal
-       18446744073709551616,
+       4294967295,  // largest decimal
+       4294967296,
 
        // float data
-/*7*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
+/* 7*/ 12.3456789000e10,
 
        // boolean data
-/*14*/ true,
+/* 8*/ true,
        false,
        TRUE,
        FALSE,
 
        // empty data
-/*18*/ "",
+/*12*/ "",
        '',
-       array(),
-
-       // string data
-/*21*/ "abcxyz",
-       'abcxyz',
-       $heredoc,
-
-       // object data
-/*24*/ new classA(),
-
-       // resource variable
-/*27*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of dechex()
-foreach($inputs as $i => $input) {
+foreach ($inputs as $i => $input) {
     $iterator = $i + 1;
     echo "\n-- Iteration $iterator --\n";
     try {
-       var_dump(dechex($input));
+        var_dump(dechex($input));
     } catch (TypeError $exception) {
         echo $exception->getMessage() . "\n";
     }
 }
-fclose($fp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing dechex() : usage variations ***
 
 -- Iteration 1 --
@@ -92,66 +61,28 @@ string(4) "3039"
 string(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-dechex(): Argument #1 ($num) must be of type int, float given
+string(8) "ffffffff"
 
 -- Iteration 6 --
-dechex(): Argument #1 ($num) must be of type int, float given
+string(9) "100000000"
 
 -- Iteration 7 --
-
-Deprecated: Implicit conversion from non-compatible float 10.5 to int in %s on line %d
-string(1) "a"
-
--- Iteration 8 --
-
-Deprecated: Implicit conversion from non-compatible float -10.5 to int in %s on line %d
-string(16) "fffffffffffffff6"
-
--- Iteration 9 --
 string(10) "1cbe991a08"
 
--- Iteration 10 --
+-- Iteration 8 --
+string(1) "1"
 
-Deprecated: Implicit conversion from non-compatible float 1.23456789E-9 to int in %s on line %d
+-- Iteration 9 --
 string(1) "0"
 
--- Iteration 11 --
+-- Iteration 10 --
+string(1) "1"
 
-Deprecated: Implicit conversion from non-compatible float 0.5 to int in %s on line %d
+-- Iteration 11 --
 string(1) "0"
 
 -- Iteration 12 --
-string(1) "1"
+dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 13 --
-string(1) "0"
-
--- Iteration 14 --
-string(1) "1"
-
--- Iteration 15 --
-string(1) "0"
-
--- Iteration 16 --
 dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 17 --
-dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 18 --
-dechex(): Argument #1 ($num) must be of type int, array given
-
--- Iteration 19 --
-dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 20 --
-dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 21 --
-dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 22 --
-dechex(): Argument #1 ($num) must be of type int, classA given
-
--- Iteration 23 --
-dechex(): Argument #1 ($num) must be of type int, resource given

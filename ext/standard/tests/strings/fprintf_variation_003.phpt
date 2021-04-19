@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 
-$int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
+$int_numbers = array( 0, 1, -1, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
 $data_file = __DIR__ . '/fprintf_variation_003.txt';
@@ -35,8 +35,6 @@ unlink($data_file);
 0
 1
 11111111111111111111111111111111
-10
-11111111111111111111111111111110
 1011001000000100111010101
 11111110100110111111011000101011
 10011010010

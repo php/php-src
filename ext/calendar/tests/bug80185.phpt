@@ -9,18 +9,14 @@ if (PHP_INT_SIZE != 8) die("skip for 64bit platforms only");
 --FILE--
 <?php
 var_dump(jdtounix(2465712));
-var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440588));
+var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440588)));
 try {
-    var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440589));
+    var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440589)));
 } catch (ValueError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
 int(2170713600)
-
-Deprecated: Implicit conversion to int from non-compatible float 106751993607888.640625 in %s on line %d
 int(9223372036854720000)
-
-Deprecated: Implicit conversion to int from non-compatible float 106751993607889.640625 in %s on line %d
 jday must be between 2440588 and 106751993607888

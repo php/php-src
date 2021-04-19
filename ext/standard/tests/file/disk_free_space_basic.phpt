@@ -60,9 +60,7 @@ float(%f)
  Free Space after writing to a file
 float(%f)
 
- Free Space Value Is Incorrect
-float(892086792192)
-float(892086792192)
+ Free Space Value Is Correct
 *** Testing with Binary Input ***
 float(%f)
 

@@ -24,14 +24,6 @@ $formats =
 // Arrays of non octal values for the format defined in $format.
 // Each sub array contains non octal values which correspond to each format in $format
 $args_array = array(
-
-  // array of float values
-  array(2.2, .2, 10.2,
-        123456.234, -1234.6789, +1234.6789,
-        2e10, +2e12, 22e+12,
-        12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
-
   // array of int values
   array(2, -2, +2,
         123456, -12346789, +12346789,
@@ -78,41 +70,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-2 0 12
-   361100 37777775456 2322
-                         
-   30071 14 37777777764 37777416700
-   12 361100 2 0
-int(112)
-
--- Iteration 2 --
 2 37777777776 2
    361100 37720715133 57062645
-                         
+
    57060664 4475347 37721631371 37720717336
    2 361100 2 37777777776
 int(142)
 
--- Iteration 3 --
+-- Iteration 2 --
 0 0 0
-   173 37777777605 173 
-                         
+   173 37777777605 173
+
    2322 0 $0 _0
    0 173 0 0
 int(84)
 
--- Iteration 4 --
+-- Iteration 3 --
 1 1 1
-   1    1 1   
-                         
+   1    1 1
+
    #1 1 $1 _1
    1 1 1 1
 int(71)
 
--- Iteration 5 --
+-- Iteration 4 --
 1 1 0
-   1    0 1   
-                         
+   1    0 1
+
    #0 1 $1 _0
    0 1 1 1
 int(71)
