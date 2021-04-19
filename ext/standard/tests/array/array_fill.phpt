@@ -82,7 +82,7 @@ start: 0 num: 1 value: array(1) {
 ===========================
 bool(true)
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   bool(true)
@@ -92,7 +92,7 @@ array(2) {
 ===========================
 bool(false)
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   bool(false)
@@ -102,7 +102,7 @@ array(2) {
 ===========================
 NULL
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   NULL
@@ -112,7 +112,7 @@ array(2) {
 ===========================
 string(1) "d"
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   string(1) "d"
@@ -122,7 +122,7 @@ array(2) {
 ===========================
 string(1) "e"
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   string(1) "e"
@@ -132,7 +132,7 @@ array(2) {
 ===========================
 string(1) "f"
 start: 0 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [0]=>
   string(1) "f"
@@ -202,7 +202,7 @@ start: 1 num: 1 value: array(1) {
 ===========================
 bool(true)
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   bool(true)
@@ -212,7 +212,7 @@ array(2) {
 ===========================
 bool(false)
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   bool(false)
@@ -222,7 +222,7 @@ array(2) {
 ===========================
 NULL
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   NULL
@@ -232,7 +232,7 @@ array(2) {
 ===========================
 string(1) "d"
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   string(1) "d"
@@ -242,7 +242,7 @@ array(2) {
 ===========================
 string(1) "e"
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   string(1) "e"
@@ -252,7 +252,7 @@ array(2) {
 ===========================
 string(1) "f"
 start: 1 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [1]=>
   string(1) "f"
@@ -262,43 +262,43 @@ array(2) {
 ===========================
 bool(true)
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 bool(false)
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 NULL
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 string(1) "d"
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 string(1) "e"
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 string(1) "f"
 start: 2.5 num: 0 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(0) {
 }
 ===========================
 bool(true)
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   bool(true)
@@ -306,7 +306,7 @@ array(1) {
 ===========================
 bool(false)
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   bool(false)
@@ -314,7 +314,7 @@ array(1) {
 ===========================
 NULL
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   NULL
@@ -322,7 +322,7 @@ array(1) {
 ===========================
 string(1) "d"
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   string(1) "d"
@@ -330,7 +330,7 @@ array(1) {
 ===========================
 string(1) "e"
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   string(1) "e"
@@ -338,7 +338,7 @@ array(1) {
 ===========================
 string(1) "f"
 start: 2.5 num: 1 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(1) {
   [2]=>
   string(1) "f"
@@ -346,9 +346,9 @@ array(1) {
 ===========================
 bool(true)
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   bool(true)
@@ -358,9 +358,9 @@ array(2) {
 ===========================
 bool(false)
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   bool(false)
@@ -370,9 +370,9 @@ array(2) {
 ===========================
 NULL
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   NULL
@@ -382,9 +382,9 @@ array(2) {
 ===========================
 string(1) "d"
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   string(1) "d"
@@ -394,9 +394,9 @@ array(2) {
 ===========================
 string(1) "e"
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   string(1) "e"
@@ -406,9 +406,9 @@ array(2) {
 ===========================
 string(1) "f"
 start: 2.5 num: 2.5 value: 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 
-Deprecated: Implicit conversion to int from non-compatible float 2.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 array(2) {
   [2]=>
   string(1) "f"

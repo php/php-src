@@ -124,16 +124,16 @@ Warning: String offset cast occurred in %s on line %d
 string(3) "phz"
 Function calls:
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(1)
 
-Deprecated: Implicit conversion to int from non-compatible float 60.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 60.5 to int in %s on line %d
 string(1) "<"
 Function returns:
 
-Deprecated: Implicit conversion to int from non-compatible float 3.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 3.5 to int in %s on line %d
 int(3)
 Typed property assignment:
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(1)

@@ -99,12 +99,12 @@ dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 
-Deprecated: Implicit conversion to int from non-compatible float 10.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 10.5 to int in %s on line %d
 string(1) "a"
 
 -- Iteration 8 --
 
-Deprecated: Implicit conversion to int from non-compatible float -10.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float -10.5 to int in %s on line %d
 string(16) "fffffffffffffff6"
 
 -- Iteration 9 --
@@ -112,12 +112,12 @@ string(10) "1cbe991a08"
 
 -- Iteration 10 --
 
-Deprecated: Implicit conversion to int from non-compatible float 0.000000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.23456789E-9 to int in %s on line %d
 string(1) "0"
 
 -- Iteration 11 --
 
-Deprecated: Implicit conversion to int from non-compatible float 0.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 0.5 to int in %s on line %d
 string(1) "0"
 
 -- Iteration 12 --

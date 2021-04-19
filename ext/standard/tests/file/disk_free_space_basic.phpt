@@ -61,8 +61,8 @@ float(%f)
 float(%f)
 
  Free Space Value Is Incorrect
-float(894625087488)
-float(894625087488)
+float(892086792192)
+float(892086792192)
 *** Testing with Binary Input ***
 float(%f)
 

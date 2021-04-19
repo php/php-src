@@ -28,10 +28,10 @@ foreach ($values as $value) {
 --EXPECTF--
 string(1) "a"
 
-Deprecated: Implicit conversion to int from non-compatible float 3950.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 3950.5 to int in %s on line %d
 string(3) "f6e"
 
-Deprecated: Implicit conversion to int from non-compatible float 3950.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 3950.5 to int in %s on line %d
 string(3) "f6e"
 string(1) "3"
 string(2) "5f"

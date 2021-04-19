@@ -21,7 +21,7 @@ foo(10e500); // Infinity
 --EXPECTF--
 int(1)
 
-Deprecated: Implicit conversion to int from non-compatible float 1.500000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(1)
 string(3) "NAN"
 string(8) "1.0E+121"

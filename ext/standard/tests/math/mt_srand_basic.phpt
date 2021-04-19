@@ -16,7 +16,7 @@ var_dump(mt_srand(false));
 NULL
 NULL
 
-Deprecated: Implicit conversion to int from non-compatible float 500.100000 in %s on line %d
+Deprecated: Implicit conversion from non-compatible float 500.1 to int in %s on line %d
 NULL
 NULL
 NULL
