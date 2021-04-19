@@ -56,7 +56,7 @@ typedef struct _zend_fiber_context {
 # include <sys/mman.h>
 # include <limits.h>
 
-ZEND_API static zend_always_inline size_t zend_fiber_page_size()
+static zend_always_inline size_t zend_fiber_page_size()
 {
 	static size_t page_size;
 
