@@ -5,6 +5,7 @@ Suspend outside fiber
 
 $value = Fiber::suspend(1);
 
+?>
 --EXPECTF--
 Fatal error: Uncaught FiberError: Cannot suspend outside of a fiber in %ssuspend-outside-fiber.php:%d
 Stack trace:

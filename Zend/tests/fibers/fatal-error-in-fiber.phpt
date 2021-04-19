@@ -9,5 +9,6 @@ $fiber = new Fiber(function (): void {
 
 $fiber->start();
 
+?>
 --EXPECTF--
 Fatal error: Fatal error in fiber in %sfatal-error-in-fiber.php on line %d

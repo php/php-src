@@ -17,6 +17,7 @@ $fiber = new Fiber(function (int $x): int {
 
 $fiber->start('test');
 
+?>
 --EXPECTF--
 int(1)
 

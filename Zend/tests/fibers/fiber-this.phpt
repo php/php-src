@@ -11,6 +11,7 @@ $fiber = new Fiber(function (): void {
 
 $fiber->start();
 
+?>
 --EXPECTF--
 NULL
 object(Fiber)#%d (0) {

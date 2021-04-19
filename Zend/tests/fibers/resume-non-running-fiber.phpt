@@ -7,6 +7,7 @@ $fiber = new Fiber(fn() => null);
 
 $fiber->resume();
 
+?>
 --EXPECTF--
 Fatal error: Uncaught FiberError: Cannot resume a fiber that is not suspended in %sresume-non-running-fiber.php:%d
 Stack trace:

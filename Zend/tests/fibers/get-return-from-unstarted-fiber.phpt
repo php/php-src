@@ -7,6 +7,7 @@ $fiber = new Fiber(fn() => Fiber::suspend(1));
 
 $fiber->getReturn();
 
+?>
 --EXPECTF--
 Fatal error: Uncaught FiberError: Cannot get fiber return value: The fiber has not been started in %sget-return-from-unstarted-fiber.php:%d
 Stack trace:

@@ -16,6 +16,7 @@ register_shutdown_function(function (): void {
     var_dump($fiber->getReturn());
 });
 
+?>
 --EXPECT--
 int(1)
 int(2)

@@ -9,5 +9,6 @@ try {
     echo $exception->getMessage(), "\n";
 }
 
+?>
 --EXPECT--
 The "FiberError" class is reserved for internal use and cannot be manually instantiated

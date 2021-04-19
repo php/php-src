@@ -15,5 +15,6 @@ $fiber->resume();
 
 echo "unreachable\n";
 
+?>
 --EXPECT--
 resumed

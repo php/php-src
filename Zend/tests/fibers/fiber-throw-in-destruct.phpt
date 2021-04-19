@@ -16,6 +16,7 @@ $object = new class() {
     }
 };
 
+?>
 --EXPECTF--
 int(1)
 

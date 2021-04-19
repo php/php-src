@@ -16,6 +16,7 @@ var_dump($value);
 
 $fiber->throw(new Exception('test'));
 
+?>
 --EXPECT--
 string(4) "test"
 string(4) "test"

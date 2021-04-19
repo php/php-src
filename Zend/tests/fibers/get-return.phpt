@@ -13,6 +13,7 @@ var_dump($value);
 var_dump($fiber->resume($value + 1));
 var_dump($fiber->getReturn());
 
+?>
 --EXPECT--
 int(1)
 NULL

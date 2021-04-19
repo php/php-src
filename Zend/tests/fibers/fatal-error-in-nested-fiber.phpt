@@ -20,6 +20,7 @@ var_dump($fiber->start());
 
 $fiber->resume();
 
+?>
 --EXPECTF--
 int(2)
 int(1)

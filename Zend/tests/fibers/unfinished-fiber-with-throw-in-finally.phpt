@@ -38,6 +38,7 @@ unset($fiber); // Destroy fiber object, executing finally block.
 
 echo "done\n";
 
+?>
 --EXPECT--
 fiber
 inner finally

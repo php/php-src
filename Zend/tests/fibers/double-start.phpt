@@ -11,6 +11,7 @@ $fiber->start();
 
 $fiber->start();
 
+?>
 --EXPECTF--
 Fatal error: Uncaught FiberError: Cannot start a fiber that has already been started in %sdouble-start.php:%d
 Stack trace:

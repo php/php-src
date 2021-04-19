@@ -52,6 +52,7 @@ try {
     echo $error->getMessage(), "\n";
 }
 
+?>
 --EXPECTF--
 Cannot fetch information from a fiber that has not been started or is terminated
 Cannot fetch information from a fiber that has not been started or is terminated

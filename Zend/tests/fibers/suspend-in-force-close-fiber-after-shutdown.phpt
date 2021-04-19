@@ -15,6 +15,7 @@ $fiber->start();
 
 echo "done\n";
 
+?>
 --EXPECTF--
 done
 

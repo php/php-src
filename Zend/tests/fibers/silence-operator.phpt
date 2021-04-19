@@ -21,6 +21,7 @@ $fiber->resume();
 
 trigger_error("Warning D", E_USER_WARNING);
 
+?>
 --EXPECTF--
 Warning: Warning C in %ssilence-operator.php on line %d
 

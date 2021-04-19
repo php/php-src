@@ -9,6 +9,7 @@ var_dump($fiber->start());
 
 $fiber->getReturn();
 
+?>
 --EXPECTF--
 int(1)
 

@@ -14,6 +14,7 @@ var_dump($fiber1->start());
 var_dump($fiber2->start());
 $fiber2->resume();
 
+?>
 --EXPECTF--
 int(1)
 int(2)

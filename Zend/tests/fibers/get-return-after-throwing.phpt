@@ -13,6 +13,7 @@ try {
 
 $fiber->getReturn();
 
+?>
 --EXPECTF--
 test
 

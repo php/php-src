@@ -13,6 +13,7 @@ new class() {
     }
 };
 
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception in %sthrow-from-destruct-with-fiber.php:%d
 Stack trace:

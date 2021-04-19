@@ -9,6 +9,7 @@ var_dump($fiber->start());
 var_dump($fiber->getReturn());
 var_dump($fiber->isTerminated());
 
+?>
 --EXPECTF--
 bool(false)
 NULL

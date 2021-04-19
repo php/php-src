@@ -12,6 +12,7 @@ var_dump($value);
 
 $fiber->throw(new Exception('test'));
 
+?>
 --EXPECTF--
 string(4) "test"
 

@@ -19,6 +19,7 @@ $fiber->start();
 
 echo "done\n";
 
+?>
 --EXPECT--
 fiber
 done

@@ -15,6 +15,7 @@ $fiber->start();
 
 unset($fiber);
 
+?>
 --EXPECTF--
 Fatal error: Uncaught FiberError: Cannot suspend in a force closed fiber in %ssuspend-in-force-close-fiber.php:%d
 Stack trace:

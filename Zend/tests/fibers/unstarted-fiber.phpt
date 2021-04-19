@@ -7,5 +7,6 @@ $fiber = new Fiber(fn() => null);
 
 echo "done";
 
+?>
 --EXPECT--
 done

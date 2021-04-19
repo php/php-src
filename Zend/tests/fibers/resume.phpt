@@ -12,6 +12,7 @@ $value = $fiber->start();
 var_dump($value);
 $fiber->resume($value + 1);
 
+?>
 --EXPECT--
 int(1)
 int(2)

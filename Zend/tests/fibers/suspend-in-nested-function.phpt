@@ -20,6 +20,7 @@ var_dump($fiber->getReturn());
 
 echo "done\n";
 
+?>
 --EXPECT--
 int(1)
 int(2)

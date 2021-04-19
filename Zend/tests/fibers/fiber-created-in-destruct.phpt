@@ -17,6 +17,7 @@ $object = new class() {
     }
 };
 
+?>
 --EXPECT--
 int(1)
 NULL

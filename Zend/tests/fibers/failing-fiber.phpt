@@ -1,5 +1,5 @@
 --TEST--
-Test throwing into fiber
+Test throwing from fiber
 --FILE--
 <?php
 
@@ -13,6 +13,7 @@ var_dump($value);
 
 $fiber->resume($value);
 
+?>
 --EXPECTF--
 string(4) "test"
 
