@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a2f4e91b58d1af4954a2665a8fac10a4e0d9e31d */
+ * Stub hash: faf45a8d4e731dccfc161514f233a78d98b716e9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -784,7 +784,7 @@ static zend_class_entry *register_class_RegexIterator(zend_class_entry *class_en
 	zval property_replacement_default_value;
 	ZVAL_NULL(&property_replacement_default_value);
 	zend_string *property_replacement_name = zend_string_init("replacement", sizeof("replacement") - 1, 1);
-	zend_declare_property_ex(class_entry, property_replacement_name, &property_replacement_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_replacement_name, &property_replacement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_replacement_name);
 
 	return class_entry;
