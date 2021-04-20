@@ -809,7 +809,7 @@ try_again:
 }
 /* }}} */
 
-void zend_incompatible_double_to_long_error(double d)
+ZEND_API void zend_incompatible_double_to_long_error(double d)
 {
 	zend_error_unchecked(E_DEPRECATED, "Implicit conversion from non-compatible float %.*H to int", -1, d);
 }

@@ -138,7 +138,7 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return ((double)l == d);
 }
 
-void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_double_to_long_error(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
