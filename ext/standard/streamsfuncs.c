@@ -793,7 +793,7 @@ PHP_FUNCTION(stream_select)
 		if (usec == 0) {
 			php_error_docref(NULL, E_DEPRECATED, "Argument #5 ($microseconds) should be null instead of 0 when argument #4 ($seconds) is null");
 		} else {
-			zend_argument_value_error(4, "cannot be null when argument #5 ($microseconds) is specified and non-null");
+			zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
 			RETURN_THROWS();
 		}
 	}
