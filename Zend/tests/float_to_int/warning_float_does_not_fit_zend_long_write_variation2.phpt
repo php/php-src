@@ -1,5 +1,5 @@
 --TEST--
-Implicit float to int conversions when float too large should warn, array variant
+Implicit float to int conversions when float too large should warn, string offset variant
 --FILE--
 <?php
 
