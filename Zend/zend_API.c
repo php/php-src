@@ -534,8 +534,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 				 * Check arg_num is not (uint32_t)-1, as otherwise its called by
 				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
 				if (UNEXPECTED(!zend_is_long_compatible(d, lval) && arg_num != (uint32_t)-1)) {
-					zend_error(E_DEPRECATED, "Implicit conversion to int from non-compatible float-string %s",
-						Z_STRVAL_P(arg));
+					zend_incompatible_string_to_long_error(Z_STR_P(arg));
 					if (UNEXPECTED(EG(exception))) {
 						return 0;
 					}
