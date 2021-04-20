@@ -35,7 +35,7 @@ class Exception implements Throwable
     private array $trace = [];
     private ?Throwable $previous = null;
 
-    final private function __clone(): void {}
+    private function __clone(): void {}
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
@@ -93,7 +93,7 @@ class Error implements Throwable
     private ?Throwable $previous = null;
 
     /** @implementation-alias Exception::__clone */
-    final private function __clone(): void {}
+    private function __clone(): void {}
 
     /** @implementation-alias Exception::__construct */
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}

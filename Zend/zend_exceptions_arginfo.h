@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f322ba2ed3e636b6e99400edfbff98102b7e3d06 */
+ * Stub hash: ef8c275a543d67fd96a775b0b18098ccdb428285 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -109,7 +109,7 @@ static const zend_function_entry class_Throwable_methods[] = {
 
 
 static const zend_function_entry class_Exception_methods[] = {
-	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE)
 	ZEND_ME(Exception, __construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Exception, __wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(Exception, getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -132,7 +132,7 @@ static const zend_function_entry class_ErrorException_methods[] = {
 
 
 static const zend_function_entry class_Error_methods[] = {
-	ZEND_MALIAS(Exception, __clone, __clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_MALIAS(Exception, __clone, __clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE)
 	ZEND_MALIAS(Exception, __construct, __construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(Exception, __wakeup, __wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(Exception, getMessage, getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
