@@ -1469,8 +1469,6 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
 ])
 AC_PROG_LIBTOOL
 
-PHP_SET_LIBTOOL_VARIABLE([--silent])
-
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
