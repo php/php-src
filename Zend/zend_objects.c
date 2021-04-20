@@ -156,6 +156,11 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			if (EG(exception) == object) {
 				zend_error_noreturn(E_CORE_ERROR, "Attempt to destruct pending exception");
 			} else {
+				if (EG(current_execute_data)
+				 && EG(current_execute_data)->func
+				 && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+					zend_rethrow_exception(EG(current_execute_data));
+				}
 				old_exception = EG(exception);
 				old_opline_before_exception = EG(opline_before_exception);
 				EG(exception) = NULL;

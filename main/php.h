@@ -345,6 +345,7 @@ PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, 
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 #ifdef PHP_WIN32
+PHPAPI ZEND_COLD void php_win32_docref1_from_error(DWORD error, const char *param1);
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()

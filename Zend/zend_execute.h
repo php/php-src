@@ -73,6 +73,8 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, zval *value);
+ZEND_API ZEND_COLD void zend_verify_never_error(
+		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_value_instanceof_static(zval *zv);
 

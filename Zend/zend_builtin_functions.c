@@ -1715,7 +1715,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 	zval_ptr_dtor(&backtrace);
 
 	smart_str_0(&str);
-	ZEND_WRITE(ZSTR_VAL(str.s), ZSTR_LEN(str.s));
+	if (str.s) {
+		ZEND_WRITE(ZSTR_VAL(str.s), ZSTR_LEN(str.s));
+	}
 	smart_str_free(&str);
 }
 

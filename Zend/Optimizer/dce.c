@@ -155,6 +155,7 @@ static inline bool may_have_side_effects(
 		case ZEND_TICKS:
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
+		case ZEND_VERIFY_NEVER_TYPE:
 			/* Intrinsic side effects */
 			return 1;
 		case ZEND_DO_FCALL:

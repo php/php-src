@@ -3018,6 +3018,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 
 	type_mask = ZEND_TYPE_PURE_MASK(param->type);
 	ZEND_ASSERT(!(type_mask & MAY_BE_VOID));
+	ZEND_ASSERT(!(type_mask & MAY_BE_NEVER));
 	if (type_mask & MAY_BE_STATIC) {
 		append_type_mask(return_value, MAY_BE_STATIC);
 	}
