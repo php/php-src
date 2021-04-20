@@ -958,12 +958,12 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_REFCOUNTED, type_flags, label
-|	IF_FLAGS type_flags, IS_TYPE_REFCOUNTED, label
+|	tst type_flags, #(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)
+|	bne label
 |.endmacro
 
 |.macro IF_NOT_REFCOUNTED, type_flags, label
-|	//IF_NOT_FLAGS type_flags, IS_TYPE_REFCOUNTED, label
-|	tst type_flags, type_flags
+|	tst type_flags, #(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)
 |	beq label
 |.endmacro
 
@@ -4013,8 +4013,6 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 
 		if (val_type == IS_CV) {
 			if (!res_addr) {
-				|	lsr REG2w, REG2w, #8
-				|	and REG2w, REG2w, #0xff
 				|	TRY_ADDREF val_info, REG2w, Rx(tmp_reg), TMP1
 			} else {
 				|	NIY	// TODO
@@ -7120,8 +7118,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 				|	ZVAL_DEREF FCARG1x, op1_info, TMP1w
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, val_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-				|	lsr REG0w, REG0w, #8
-				|	and REG0w, REG0w, #0xff
 				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
 			} else {
 				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 8);
@@ -7140,12 +7136,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			}
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 			if (opline->op1_type == IS_CV) {
-				|	// In x86 implementation, type flags and value pointer would be stored into eax and r2 respectively,
-				|	// and then ah (bits 8 to 15) and r2 are used inside TRY_ADDREF.
-				|	// In AArch64, we use REG0w and REG2 accordingly.
-				|	// Note that, bits 8 to 15 should be extacted, i.e., (REG0w >> 8) & 0xff.
-				|	lsr REG0w, REG0w, #8
-				|	and REG0w, REG0w, #0xff
 				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
 			}
 		}
@@ -7644,8 +7634,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 			if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
 			    (op1_info & (MAY_BE_REF|MAY_BE_OBJECT)) ||
 			    !op_array->function_name) {
-				|	lsr REG0w, REG0w, #8
-				|	and REG0w, REG0w, #0xff
 				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
 			} else if (return_value_used != 1) {
 				|	// if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
@@ -7666,16 +7654,14 @@ static int zend_jit_zval_copy_deref(dasm_State **Dst, zend_jit_addr res_addr, ze
 	ZEND_ASSERT(type_reg == ZREG_REG2);
 
 	|	GET_ZVAL_PTR REG1, val_addr, TMP1
-	|	lsr TMP1w, REG2w, #8
-	|	and TMP1w, TMP1w, #0xff  // TMP1w -> 8-15 bits of REG2w
-	|	IF_NOT_REFCOUNTED TMP1w, >2
+	|	IF_NOT_REFCOUNTED REG2w, >2
 	|	and TMP2w, REG2w, #0xff  // TMP2w -> low 8 bits of REG2w
 	|	IF_NOT_TYPE TMP2w, IS_REFERENCE, >1
 	|	NIY	// TODO
 	|	add TMP3, REG1, #offsetof(zend_reference, val)
 	|	GET_Z_TYPE_INFO REG2w, TMP3
 	|	GET_Z_PTR REG1, TMP3
-	|	IF_NOT_REFCOUNTED TMP1w, >2
+	|	IF_NOT_REFCOUNTED REG2w, >2
 	|1:
 	|	GC_ADDREF REG1, TMP1w
 	|2:
@@ -7862,8 +7848,6 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		} else  {
 			|	// ZVAL_COPY
 			|	ZVAL_COPY_VALUE res_addr, -1, val_addr, res_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-			|	lsr REG1w, REG1w, #8
-			|	and REG1w, REG1w, #0xff
 			|	TRY_ADDREF res_info, REG1w, REG2, TMP1
 		}
 	}
@@ -9251,8 +9235,6 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 		|	NIY	// TODO
 	} else {
 		|	ZVAL_COPY_VALUE res_addr, MAY_BE_ANY, const_addr, MAY_BE_ANY, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-		|	lsr REG0w, REG0w, #8
-		|	and REG0w, REG0w, #0xff
 		|	TRY_ADDREF MAY_BE_ANY, REG0w, REG1, TMP1
 	}
 
