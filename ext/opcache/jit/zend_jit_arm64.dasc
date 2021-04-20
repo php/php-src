@@ -734,7 +734,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			LONG_OP adds, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_SUB:
-|			NIY	// LONG_OP sub, reg, addr
+|			LONG_OP subs, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_MUL:
 |			NIY	// LONG_OP imul, reg, addr
@@ -746,7 +746,6 @@ static void* dasm_labels[zend_lb_MAX];
 |			LONG_OP and, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_BW_XOR:
-|			NIY	// TODO
 |			LONG_OP eor, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		default:
