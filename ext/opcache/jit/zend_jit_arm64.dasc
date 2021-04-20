@@ -3647,7 +3647,46 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			|.cold_code
 		}
 		|6:
-		|	NIY	// TODO
+		if (Z_MODE(res_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, res_var);
+			|	LOAD_ZVAL_ADDR FCARG1x, real_addr
+		} else if (Z_REG(res_addr) != ZREG_FCARG1x || Z_OFFSET(res_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1x, res_addr
+		}
+		if (Z_MODE(op1_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, op1.var);
+			if (!zend_jit_spill_store(Dst, op1_addr, real_addr, op1_info, 1)) {
+				return 0;
+			}
+			op1_addr = real_addr;
+		}
+		|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+		if (Z_MODE(op2_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, op2.var);
+			if (!zend_jit_spill_store(Dst, op2_addr, real_addr, op2_info, 1)) {
+				return 0;
+			}
+			op2_addr = real_addr;
+		}
+		|	LOAD_ZVAL_ADDR CARG3, op2_addr
+		|	SET_EX_OPLINE opline, REG0
+		if (opcode == ZEND_BW_OR) {
+			|	EXT_CALL bitwise_or_function, REG0
+		} else if (opcode == ZEND_BW_AND) {
+			|	EXT_CALL bitwise_and_function, REG0
+		} else if (opcode == ZEND_BW_XOR) {
+			|	EXT_CALL bitwise_xor_function, REG0
+		} else if (opcode == ZEND_SL) {
+			|	EXT_CALL shift_left_function, REG0
+		} else if (opcode == ZEND_SR) {
+			|	EXT_CALL shift_right_function, REG0
+		} else if (opcode == ZEND_MOD) {
+			|	EXT_CALL mod_function, REG0
+		} else {
+			ZEND_UNREACHABLE();
+		}
+		|	FREE_OP op1_type, op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	FREE_OP op2_type, op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
 			zend_jit_check_exception(Dst);
 		}
