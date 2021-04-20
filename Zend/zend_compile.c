@@ -8207,6 +8207,18 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op
 		return 1;
 	}
 
+	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
+	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
+			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR || opcode == ZEND_MOD) {
+		if (Z_TYPE_P(op1) == IS_DOUBLE || Z_TYPE_P(op2) == IS_DOUBLE) {
+			return true;
+		}
+		if ((Z_TYPE_P(op1) == IS_STRING && is_numeric_str_function(Z_STR_P(op1), NULL, NULL) != IS_LONG)
+			|| (Z_TYPE_P(op2) == IS_STRING && is_numeric_str_function(Z_STR_P(op2), NULL, NULL) != IS_LONG)) {
+			return true;
+		}
+	}
+
 	return 0;
 }
 /* }}} */
@@ -8226,7 +8238,8 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY;
+		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || Z_TYPE_P(op) == IS_DOUBLE
+		|| (Z_TYPE_P(op) == IS_STRING && is_numeric_str_function(Z_STR_P(op), NULL, NULL) != IS_LONG));
 	}
 
 	return 0;

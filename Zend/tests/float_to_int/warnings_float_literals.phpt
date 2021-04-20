@@ -69,36 +69,37 @@ var_dump($instance->a);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 6.5 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 Bitwise ops:
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(-2)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(3)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(1)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(2)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(8)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(0)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(6)
+
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 int(1)
 Modulo:
+
+Deprecated: Implicit conversion from non-compatible float 6.5 to int in %s on line %d
 int(0)
+
+Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
 int(1)
 Offset access:
 Arrays:

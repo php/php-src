@@ -52,33 +52,34 @@ var_dump($instance->a);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 6.5 in %s on line %d
-
-Deprecated: Implicit conversion to int from non-compatible float-string 2.5 in %s on line %d
 Bitwise ops:
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(3)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(1)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(2)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(8)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(0)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(6)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 1.5 in %s on line %d
 int(1)
 Modulo:
+
+Deprecated: Implicit conversion to int from non-compatible float-string 6.5 in %s on line %d
 int(0)
+
+Deprecated: Implicit conversion to int from non-compatible float-string 2.5 in %s on line %d
 int(1)
 Function calls:
 
