@@ -4138,16 +4138,17 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 	switch (cast_as)	{
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 		case PHP_STREAM_AS_FD:
-		case PHP_STREAM_AS_SOCKETD:
-			if (ret) {
+		case PHP_STREAM_AS_SOCKETD: {
 				int fd_number = PQsocket(pgsql);
 				if (fd_number == -1) {
 					return FAILURE;
 				}
 
+				if (ret) {
 				*(php_socket_t *)ret = fd_number;
-				return SUCCESS;
+				}
 			}
+				return SUCCESS;
 			ZEND_FALLTHROUGH;
 		default:
 			return FAILURE;
