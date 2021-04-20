@@ -24,14 +24,11 @@ class Exception implements Throwable
 {
     /** @var string */
     protected $message = "";
-    /** @var string */
-    private $string = "";
+    private string $string = "";
     /** @var int */
     protected $code = 0;
-    /** @var string|null */
-    protected $file = null;
-    /** @var int|null */
-    protected $line = null;
+    protected string $file = "";
+    protected int $line = 0;
     private array $trace = [];
     private ?Throwable $previous = null;
 
@@ -62,8 +59,7 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    /** @var int */
-    protected $severity = E_ERROR;
+    protected int $severity = E_ERROR;
 
     public function __construct(
         string $message = "",
@@ -81,14 +77,11 @@ class Error implements Throwable
 {
     /** @var string */
     protected $message = "";
-    /** @var string */
-    private $string = "";
+    private string $string = "";
     /** @var int */
     protected $code = 0;
-    /** @var string|null */
-    protected $file = null;
-    /** @var int|null */
-    protected $line = null;
+    protected string $file = "";
+    protected int $line;
     private array $trace = [];
     private ?Throwable $previous = null;
 
