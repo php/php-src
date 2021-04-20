@@ -3240,6 +3240,9 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 		return FAILURE;
 	}
 
+	/* Will be reset by INIT_CLASS_ENTRY. */
+	free(disabled_class->interfaces);
+
 	INIT_CLASS_ENTRY_INIT_METHODS((*disabled_class), disabled_class_new);
 	disabled_class->create_object = display_disabled_class;
 
@@ -3250,6 +3253,7 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 		}
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&disabled_class->function_table);
+	zend_hash_clean(&disabled_class->properties_info);
 	return SUCCESS;
 }
 /* }}} */
