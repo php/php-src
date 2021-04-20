@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 14c5c4960e70f5b38fc6c4f4403804cc28147b0b */
+ * Stub hash: b0232d18f570208d673ad7535ca60997e038acb8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -1356,7 +1356,7 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", sizeof("00000") - 1, 1);
 	ZVAL_STR(&property_sqlstate_default_value, property_sqlstate_default_value_str);
 	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
-	zend_declare_property_ex(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_sqlstate_name);
 
 	return class_entry;

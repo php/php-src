@@ -7,7 +7,7 @@ session.serialize_handler=php_serialize
 --FILE--
 <?php
 session_start();
-$sess = 'O:9:"Exception":2:{s:7:"'."\0".'*'."\0".'file";R:1;}';
+$sess = 'O:9:"Exception":2:{s:7:"'."\0".'*'."\0".'file";s:0:"";}';
 session_decode($sess);
 var_dump($_SESSION);
 ?>

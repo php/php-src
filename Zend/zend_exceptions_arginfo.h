@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef8c275a543d67fd96a775b0b18098ccdb428285 */
+ * Stub hash: 9a9ce2975a7449a621d364beca646525fc56b294 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -214,7 +214,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zval property_string_default_value;
 	ZVAL_EMPTY_STRING(&property_string_default_value);
 	zend_string *property_string_name = zend_string_init("string", sizeof("string") - 1, 1);
-	zend_declare_property_ex(class_entry, property_string_name, &property_string_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_string_name, &property_string_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_string_name);
 
 	zval property_code_default_value;
@@ -224,15 +224,15 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zend_string_release(property_code_name);
 
 	zval property_file_default_value;
-	ZVAL_NULL(&property_file_default_value);
+	ZVAL_EMPTY_STRING(&property_file_default_value);
 	zend_string *property_file_name = zend_string_init("file", sizeof("file") - 1, 1);
-	zend_declare_property_ex(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_file_name);
 
 	zval property_line_default_value;
-	ZVAL_NULL(&property_line_default_value);
+	ZVAL_LONG(&property_line_default_value, 0);
 	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_property_ex(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_line_name);
 
 	zval property_trace_default_value;
@@ -278,7 +278,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zval property_string_default_value;
 	ZVAL_EMPTY_STRING(&property_string_default_value);
 	zend_string *property_string_name = zend_string_init("string", sizeof("string") - 1, 1);
-	zend_declare_property_ex(class_entry, property_string_name, &property_string_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_string_name, &property_string_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_string_name);
 
 	zval property_code_default_value;
@@ -288,15 +288,15 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zend_string_release(property_code_name);
 
 	zval property_file_default_value;
-	ZVAL_NULL(&property_file_default_value);
+	ZVAL_EMPTY_STRING(&property_file_default_value);
 	zend_string *property_file_name = zend_string_init("file", sizeof("file") - 1, 1);
-	zend_declare_property_ex(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_file_name);
 
 	zval property_line_default_value;
-	ZVAL_NULL(&property_line_default_value);
+	ZVAL_UNDEF(&property_line_default_value);
 	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
-	zend_declare_property_ex(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_line_name);
 
 	zval property_trace_default_value;

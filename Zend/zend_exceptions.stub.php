@@ -22,16 +22,13 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    /** @var string */
+    /** @var string Intentionally left untyped for BC reasons */
     protected $message = "";
-    /** @var string */
-    private $string = "";
-    /** @var int */
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
     protected $code = 0;
-    /** @var string|null */
-    protected $file = null;
-    /** @var int|null */
-    protected $line = null;
+    protected string $file = "";
+    protected int $line = 0;
     private array $trace = [];
     private ?Throwable $previous = null;
 
@@ -62,8 +59,7 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    /** @var int */
-    protected $severity = E_ERROR;
+    protected int $severity = E_ERROR;
 
     public function __construct(
         string $message = "",
@@ -79,16 +75,13 @@ class ErrorException extends Exception
 
 class Error implements Throwable
 {
-    /** @var string */
+    /** @var string Intentionally left untyped for BC reasons */
     protected $message = "";
-    /** @var string */
-    private $string = "";
-    /** @var int */
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
     protected $code = 0;
-    /** @var string|null */
-    protected $file = null;
-    /** @var int|null */
-    protected $line = null;
+    protected string $file = "";
+    protected int $line;
     private array $trace = [];
     private ?Throwable $previous = null;
 
