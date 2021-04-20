@@ -458,7 +458,7 @@ int fpm_unix_init_main() /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) fpm_global_config.rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
+			zlog(ZLOG_SYSERROR, "failed to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
 			return -1;
 		}
 	}
