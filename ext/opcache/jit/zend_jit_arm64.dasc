@@ -2689,7 +2689,9 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 		} else {
 			const void *handler = zend_get_opcode_handler_func(opline);
 
-			|	NIY	// TODO: test
+			|	EXT_CALL handler, REG0
+			|	ADD_HYBRID_SPAD
+			|	JMP_IP TMP1
 		}
 	} else {
 		const void *handler = opline->handler;
