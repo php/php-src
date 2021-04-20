@@ -553,7 +553,7 @@ static int php_stdiop_sync(php_stream *stream, bool dataonly)
 	if (php_stdiop_flush(stream) == 0) {
 		PHP_STDIOP_GET_FD(fd, data);
 		if (dataonly) {
-			return fdatasync(fd);
+			return fdatasync2(fd);
 		} else {
 			return fsync(fd);
 		}
