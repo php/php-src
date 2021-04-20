@@ -8368,11 +8368,12 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					break;
 				case IS_DOUBLE: {
 					zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
-					/* TODO Should bailout on incompatible float?
+					/* Incompatible float will generate an error, leave this to run-time */
 					if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
-						// Notice?
+						zval_ptr_dtor_nogc(value);
+						zval_ptr_dtor(result);
+						return 0;
 					}
-					*/
 					zend_hash_index_update(Z_ARRVAL_P(result), lval, value);
 					break;
 				}
