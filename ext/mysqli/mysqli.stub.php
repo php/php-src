@@ -599,8 +599,7 @@ final class mysqli_warning
 
 final class mysqli_sql_exception extends RuntimeException
 {
-    /** @var string */
-    protected $sqlstate = "00000";
+    protected string $sqlstate = "00000";
 }
 
 function mysqli_affected_rows(mysqli $mysql): int|string {}
