@@ -21,7 +21,6 @@
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"

@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
 #include "Optimizer/zend_optimizer.h"
