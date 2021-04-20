@@ -164,6 +164,11 @@ static void* dasm_labels[zend_lb_MAX];
 |	brk #0
 |.endmacro
 
+|.macro NIY_STUB
+||	//ZEND_ASSERT(0);
+|	brk #0
+|.endmacro
+
 /* In x86/64, HYBRID_SPAD bytes are reserved on the stack only if flag ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
  * is not defined, because the 16-byte redzone, allocated on the stack when the flag is defined, can be
  * reused. In AArch64, it's safe that these bytes are always reserved because the stack layout might
@@ -1390,7 +1395,7 @@ static inline bool is_signed(double d)
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	|->interrupt_handler:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1411,7 +1416,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 			|	add sp, sp, SPAD        // stack alignment
 			|	EXT_JMP handler, REG0
 		} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			|	NIY	// TODO: test
+			|	NIY_STUB	// TODO: test
 		} else {
 			|	mov FCARG1x, FP
 			|	ldp FP, RX, T2          // retore FP and IP
@@ -1427,7 +1432,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 {
 	|->exception_handler_undef:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1439,7 +1444,7 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_TOP
 		|	tst FCARG1w, TMP1w
 		|	bne >1
-		|	NIY	// TODO: currently jump to label 1.
+		|	NIY_STUB	// TODO: currently jump to label 1.
 		|	EXT_CALL zend_jit_leave_nested_func_helper, REG0
 		|	ADD_HYBRID_SPAD
 		|	JMP_IP TMP1
@@ -1459,7 +1464,7 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_TOP
 		|	tst FCARG1w, TMP1w
 		|	bne >1
-		|	NIY	// TODO: currently jump to label 1.
+		|	NIY_STUB	// TODO: currently jump to label 1.
 		|	EXT_JMP zend_jit_leave_nested_func_helper, REG0
 		|1:
 		|	EXT_JMP zend_jit_leave_top_func_helper, REG0
@@ -1471,7 +1476,7 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 static int zend_jit_leave_throw_stub(dasm_State **Dst)
 {
 	|->leave_throw_handler:
-	|	NIY	// TODO: test
+	|	NIY_STUB	// TODO: test
 
 	return 1;
 }
@@ -1479,7 +1484,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 static int zend_jit_icall_throw_stub(dasm_State **Dst)
 {
 	|->icall_throw_handler:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1487,7 +1492,7 @@ static int zend_jit_icall_throw_stub(dasm_State **Dst)
 static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 {
 	|->throw_cannot_pass_by_ref:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1495,7 +1500,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 {
 	|->undefined_offset_ex:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1503,7 +1508,7 @@ static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 {
 	|->undefined_offset:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1520,7 +1525,7 @@ static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_index_stub(dasm_State **Dst)
 {
 	|->undefined_index:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1528,7 +1533,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 static int zend_jit_cannot_add_element_ex_stub(dasm_State **Dst)
 {
 	|->cannot_add_element_ex:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1536,7 +1541,7 @@ static int zend_jit_cannot_add_element_ex_stub(dasm_State **Dst)
 static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 {
 	|->cannot_add_element:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1581,14 +1586,14 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 static int zend_jit_invalid_this_stub(dasm_State **Dst)
 {
 	|->invalid_this:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
 static int zend_jit_double_one_stub(dasm_State **Dst)
 {
 	|->one:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
@@ -1611,7 +1616,7 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_profile_jit:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
@@ -1622,7 +1627,7 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_hot_code:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
@@ -1652,7 +1657,7 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
  */
 static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 {
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
@@ -1764,7 +1769,7 @@ static int zend_jit_hybrid_loop_trace_counter_stub(dasm_State **Dst)
 static int zend_jit_trace_halt_stub(dasm_State **Dst)
 {
 	|->trace_halt:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 
@@ -1842,7 +1847,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	}
 
 	|1:
-	|	NIY  // TODO: test
+	|	NIY_STUB  // TODO: test
 	|	blt ->trace_halt
 
 	|	// execute_data = EG(current_execute_data)
@@ -1897,7 +1902,7 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 {
 	|->trace_escape:
 	|
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 
 	return 1;
 }
@@ -1931,7 +1936,7 @@ static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 static int zend_jit_context_threaded_call_stub(dasm_State **Dst)
 {
 	|->context_threaded_call:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	return 1;
 }
 #endif
@@ -1955,7 +1960,7 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_const:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -1994,7 +1999,7 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF;
 
 	|->assign_var:
-	|	NIY	// TODOa
+	|	NIY_STUB	// TODOa
 	|	ret
 	return 1;
 }
@@ -2006,7 +2011,7 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv_noref:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	|	ret
 	return 1;
 }
@@ -2018,7 +2023,7 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv:
-	|	NIY	// TODO
+	|	NIY_STUB	// TODO
 	|	ret
 	return 1;
 }
