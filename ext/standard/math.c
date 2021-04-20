@@ -259,7 +259,13 @@ PHP_FUNCTION(clamp)
 		result = zmin;
 	}
 
-	ZVAL_COPY(return_value, result);
+	if (Z_TYPE_P(result) == IS_DOUBLE) {
+		RETURN_DOUBLE(Z_DVAL_P(result));
+	} else if (Z_TYPE_P(result) == IS_LONG) {
+		RETURN_LONG(Z_LVAL_P(result));
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
+	}
 }
 /* }}} */
 
