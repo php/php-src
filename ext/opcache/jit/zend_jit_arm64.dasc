@@ -5512,18 +5512,26 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			/* Always TRUE */
 			if (set_bool) {
 				if (set_bool_not) {
-					|	NIY	// TODO
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
 				}
 			}
 			if (true_label != (uint32_t)-1) {
-				|	b =>true_label;
+				|	b =>true_label
 			}
 		} else {
 			/* Always FALSE */
-			|	NIY	// TODO
+			if (set_bool) {
+				if (set_bool_not) {
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+				} else {
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+				}
+			}
+			if (false_label != (uint32_t)-1) {
+				|	b =>false_label
+			}
 		}
 		return 1;
 	}
@@ -5537,12 +5545,25 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE)) {
 		if (!(op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)-MAY_BE_TRUE))) {
 			/* Always TRUE */
-			|	NIY	// TODO
+			if (set_bool) {
+				if (set_bool_not) {
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+				} else {
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+				}
+			}
+			if (true_label != (uint32_t)-1) {
+				|	b =>true_label
+			}
 		} else {
 			if (!(op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE)))) {
 				/* Always FALSE */
 				if (set_bool) {
-					|	NIY	// TODO
+					if (set_bool_not) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					}
 				}
 			} else {
 				|	CMP_ZVAL_TYPE op1_addr, IS_TRUE, TMP1w, TMP2
@@ -5551,9 +5572,13 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 				        !(op1_info & MAY_BE_UNDEF) &&
 				        !set_bool) {
 						if (exit_addr) {
-							|	NIY	// TODO
+							if (branch_opcode == ZEND_JMPNZ) {
+								|	blt >9
+							} else {
+								|	NIY // blt &exit_addr
+							}
 						} else if (false_label != (uint32_t)-1) {
-							|	NIY	// TODO
+							|	blt =>false_label
 						} else {
 							|	blt >9
 						}
@@ -5564,13 +5589,50 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 				}
 				if (!(op1_info & MAY_BE_TRUE)) {
 					/* It's FALSE */
-					|	NIY	// TODO
+					if (set_bool) {
+						if (set_bool_not) {
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+						} else {
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+						}
+					}
 				} else {
 					if (exit_addr) {
-						|	NIY	// TODO
+						if (set_bool) {
+							|	bne >1
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+							if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+								|	NIY // b &exit_addr
+							} else {
+								|	b >9
+							}
+							|1:
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+							if (branch_opcode == ZEND_JMPZ || branch_opcode == ZEND_JMPZ_EX) {
+								if (!(op1_info & (MAY_BE_UNDEF|MAY_BE_LONG))) {
+									|	NIY // bne &exit_addr
+								}
+							}
+						} else {
+							if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+								|	NIY // beq &exit_addr
+							} else if (!(op1_info & (MAY_BE_UNDEF|MAY_BE_LONG))) {
+								|	NIY // bne &exit_addr
+							} else {
+								|	beq >9
+							}
+						}
 					} else if (true_label != (uint32_t)-1 || false_label != (uint32_t)-1) {
 						if (set_bool) {
-							|	NIY	// TODO
+							|	bne >1
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+							if (true_label != (uint32_t)-1) {
+								|	b =>true_label
+							} else {
+								|	b >9
+							}
+							|1:
+							|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 						} else {
 							if (true_label != (uint32_t)-1) {
 								|	beq =>true_label
@@ -5578,13 +5640,12 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 								|	bne =>false_label
 								jmp_done = 1;
 							} else {
-								|	NIY	// TODO
+								|	beq >9
 							}
 						}
 					} else if (set_bool) {
 						|	cset REG0w, eq
 						if (set_bool_not) {
-							|	NIY	// TODO
 							|	neg REG0w, REG0w
 							|	add REG0w, REG0w, #3
 						} else {
@@ -5607,13 +5668,11 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 						|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
 						|	beq >1
 					} else {
-						|	NIY	// TODO
 						|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1, TMP1w, TMP2
 					}
 					|.cold_code
 					|1:
 				}
-				|	NIY	// TODO
 				|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
 				|	SET_EX_OPLINE opline, REG0
 				|	EXT_CALL zend_jit_undefined_op_helper, REG0
@@ -5626,18 +5685,18 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 				if (exit_addr) {
 					if (branch_opcode == ZEND_JMPZ || branch_opcode == ZEND_JMPZ_EX) {
-						|	NIY	// TODO
+						|	NIY // b &exit_addr
 					}
 				} else if (false_label != (uint32_t)-1) {
-					|	NIY	// TODO
+					|	b =>false_label
 				}
 				if (op1_info & MAY_BE_ANY) {
 					if (exit_addr) {
 						if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
-							|	NIY	// TODO
+							|	b >9
 						}
 					} else if (false_label == (uint32_t)-1) {
-						|	NIY	// TODO
+						|	b >9
 					}
 					|.code
 				}
@@ -5645,9 +5704,15 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 			if (!jmp_done) {
 				if (exit_addr) {
-					|	NIY	// TODO
+					if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+						if (op1_info & MAY_BE_LONG) {
+							|	b >9
+						}
+					} else if (op1_info & MAY_BE_LONG) {
+						|	NIY // b &exit_addr
+					}
 				} else if (false_label != (uint32_t)-1) {
-					|	NIY	// TODO
+					|	b =>false_label
 				} else if (op1_info & MAY_BE_LONG) {
 					|	b >9
 				}
@@ -5661,7 +5726,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >2, TMP1w, TMP2
 		}
 		if (Z_MODE(op1_addr) == IS_REG) {
-			|	NIY	// TODO
 			|	tst Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
 		} else {
 			|	LONG_CMP_WITH_CONST cmp, op1_addr, Z_L(0), TMP1, TMP2
@@ -5672,15 +5736,25 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 				|	neg REG0w, REG0w
 				|	add REG0w, REG0w, #3
 			} else {
-				|	NIY	// TODO
 				|	add REG0w, REG0w, #2
 			}
 			|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
 		}
 		if (exit_addr) {
-			|	NIY	// TODO
+			if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+				|	NIY // bne &exit_addr
+			} else {
+				|	NIY // beq &exit_addr
+			}
 		} else if (true_label != (uint32_t)-1 || false_label != (uint32_t)-1) {
-			|	NIY	// TODO
+			if (true_label != (uint32_t)-1) {
+				|	bne =>true_label
+				if (false_label != (uint32_t)-1) {
+					|	b =>false_label
+				}
+			} else {
+				|	beq =>false_label
+			}
 		}
 	}
 
@@ -5708,10 +5782,12 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
 			|	GC_DELREF FCARG1x, TMP1w
 			|	bne >3
-			|	NIY	// TODO: currently jump to label 3.
 			// In x86, r0 is used in macro ZVAL_DTOR_FUNC as temporary register, hence, r0 should be saved/restored
-			// before/after this macro. In AArch64, TMP1 is used. As a result, we needn't save/resotre REG0.
+			// before/after this macro. In AArch64, TMP1 is used, but we still have to store REG0,
+			// because it's clobbered by function call.
+			|	str REG0, T1 // save
 			|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+			|	ldr REG0, T1 // restore
 			|3:
 		}
 		if (may_throw) {
@@ -5721,7 +5797,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 		if (set_bool) {
 			if (set_bool_not) {
-				|	NIY	// TODO
 				|	neg REG0w, REG0w
 				|	add REG0w, REG0w, #3
 			} else {
@@ -5729,11 +5804,15 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			}
 			|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
 			if (exit_addr) {
-				|	NIY	// TODO
+				|	CMP_ZVAL_TYPE res_addr, IS_FALSE, TMP1w, TMP2
+				if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+					|	NIY // bne &exit_addr
+				} else {
+					|	NIY // beq &exit_addr
+				}
 			} else if (true_label != (uint32_t)-1 || false_label != (uint32_t)-1) {
 				|	CMP_ZVAL_TYPE res_addr, IS_FALSE, TMP1w, TMP2
 				if (true_label != (uint32_t)-1) {
-					|	NIY	// TODO
 					|	bne =>true_label
 					if (false_label != (uint32_t)-1) {
 						|	b =>false_label
@@ -5749,7 +5828,32 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 				|.code
 			}
 		} else {
-			|	NIY	// TODO
+			|	tst REG0w, REG0w
+			if (exit_addr) {
+				if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
+					|	NIY // bne &exit_addr
+					if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+						|	b >9
+					}
+				} else {
+					|	NIY // beq &exit_addr
+					if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+						|	b >9
+					}
+				}
+			} else if (true_label != (uint32_t)-1) {
+				|	bne =>true_label
+				if (false_label != (uint32_t)-1) {
+					|	b =>false_label
+				} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+					|	b >9
+				}
+			} else {
+				|	beq =>false_label
+				if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+					|	b >9
+				}
+			}
 
 			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
 				|.code
