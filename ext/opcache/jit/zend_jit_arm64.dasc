@@ -753,8 +753,29 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro LONG_MATH_REG, opcode, dst_reg, src_reg
-|	NIY	// TODO
+|.macro LONG_MATH_REG, opcode, dst_reg, src_reg1, src_reg2
+||	switch (opcode) {
+||		case ZEND_ADD:
+|			adds dst_reg, src_reg1, src_reg2
+||			break;
+||		case ZEND_SUB:
+|			subs dst_reg, src_reg1, src_reg2
+||			break;
+||		case ZEND_MUL:
+|			NIY	// LONG_OP imul, reg, addr
+||			break;
+||		case ZEND_BW_OR:
+|			orr dst_reg, src_reg1, src_reg2
+||			break;
+||		case ZEND_BW_AND:
+|			and dst_reg, src_reg1, src_reg2
+||			break;
+||		case ZEND_BW_XOR:
+|			eor dst_reg, src_reg1, src_reg2
+||			break;
+||		default:
+||			ZEND_UNREACHABLE();
+||	}
 |.endmacro
 
 // In x86 implementation, argument 'lval' of SET_ZVAL_LVAL can be either a LONG constant
@@ -3601,7 +3622,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			}
 		}
 	} else if (same_ops) {
-		|	NIY	// TODO
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		|	LONG_MATH_REG opcode, Rx(result_reg), Rx(result_reg), Rx(result_reg)
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
 		|	LONG_MATH opcode, result_reg, op2_addr, TMP1, TMP2
