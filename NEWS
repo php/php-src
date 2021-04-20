@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #80960 (opendir() warning wrong info when failed on Windows).
     (cmb)
 
+- pgsql:
+  . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
+
 - SPL:
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
