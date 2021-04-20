@@ -89,7 +89,8 @@
 
 #define TMP_ZVAL_OFFSET 0
 #define DASM_ALIGNMENT  16
-#define MAX_IMM12 0xfff       // maximum value for imm12
+#define MAX_IMM12    0xfff            // maximum value for imm12
+#define LDR_STR_IMM  (MAX_IMM12 * 8)  // maximum value for imm12 * 8
 
 #include "Zend/zend_cpuinfo.h"
 
@@ -1458,8 +1459,7 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 	|	LOAD_ADDR CARG2, "Call to undefined function %s()"
 	|	ldr CARG3w, [REG0, #offsetof(zend_op, op2.constant)]
 	|	sxtw CARG3, CARG3w
-	|	add REG0, REG0, CARG3
-	|	ldr CARG3, [REG0]
+	|	ldr CARG3, [REG0, CARG3]
 	|	add CARG3, CARG3, #offsetof(zend_string, val)
 	|	EXT_CALL zend_throw_error, REG0
 	|	b ->exception_handler
@@ -4876,6 +4876,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
 			|	ldr REG1, EX->run_time_cache
 			|	mov REG0, RETVALx
+			||	ZEND_ASSERT(opline->result.num <= LDR_STR_IMM);
 			|	str REG0, [REG1, #opline->result.num]
 			|	b >3
 		} else {
@@ -5380,7 +5381,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			for (i = call_num_args; i < func->op_array.last_var; i++) {
 				uint32_t n = EX_NUM_TO_VAR(i);
 				|	// ZVAL_UNDEF(EX_VAR(n))
-				|	str wzr, [RX, #(n + offsetof(zval,u1.type_info))]
+				||	ZEND_ASSERT(n <= MAX_IMM12);
+				|	add TMP1, RX, #n
+				|	SET_Z_TYPE_INFO TMP1, IS_UNDEF, TMP2w
 			}
 
 			if (call_num_args <= func->op_array.num_args) {
@@ -5403,17 +5406,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
 					} else {
 						|	ldr REG0, EX->func
+						||	ZEND_ASSERT((num_args * sizeof(zend_op)) <= MAX_IMM12);
 						if (GCC_GLOBAL_REGS) {
 							|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
 							if (num_args) {
 								|	add IP, IP, #(num_args * sizeof(zend_op))
 							}
 						} else {
-							|	ldr REG1, [REG0, #offsetof(zend_op_array, opcodes)]
+							|	ldr FCARG1x, [REG0, #offsetof(zend_op_array, opcodes)]
 							if (num_args) {
-								|	add REG1, REG1, #(num_args * sizeof(zend_op))
+								|	add FCARG1x, FCARG1x, #(num_args * sizeof(zend_op))
 							}
-							|	str REG1, EX->opline
+							|	str FCARG1x, EX->opline
 						}
 					}
 
@@ -5421,7 +5425,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						/* recursive call */
 						if (ZEND_OBSERVER_ENABLED) {
 							|	SAVE_IP
-							|	mov CARG1, FP
+							|	mov FCARG1x, FP
 							|	EXT_CALL zend_observer_fcall_begin, REG0
 						}
 #ifdef CONTEXT_THREADED_JIT
@@ -5440,12 +5444,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					} else if (GCC_GLOBAL_REGS) {
 						|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
 					} else {
-						|	ldr CARG1, [REG0, #offsetof(zend_op_array, opcodes)]
-						|	str CARG1, EX->opline
+						|	ldr FCARG1x, [REG0, #offsetof(zend_op_array, opcodes)]
+						|	str FCARG1x, EX->opline
 					}
 				}
 				if (!GCC_GLOBAL_REGS) {
-					|	mov CARG1, FP
+					|	mov FCARG1x, FP
 				}
 				|	EXT_CALL zend_jit_copy_extra_args_helper, REG0
 			}
@@ -5460,10 +5464,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	str FCARG1x, EX->opline
 			}
 			if (func) {
-				|	brk #0	// TODO
 				|	// num_args = EX_NUM_ARGS();
 				|	ldr REG1w, [FP, #offsetof(zend_execute_data, This.u2.num_args)]
 				|	// if (UNEXPECTED(num_args > first_extra_arg))
+				||	ZEND_ASSERT(func->op_array.num_args <= MAX_IMM12);
 				|	cmp REG1w, #(func->op_array.num_args)
 			} else {
 				|	// first_extra_arg = op_array->num_args;
@@ -5494,7 +5498,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|1:
 			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
 			if (func) {
-				|	movz REG2w, #(func->op_array.last_var)
+				|	LOAD_32BIT_VAL REG2w, func->op_array.last_var
 			} else {
 				|	ldr REG2w, [REG0, #offsetof(zend_op_array, last_var)]
 			}
