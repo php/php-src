@@ -790,8 +790,12 @@ PHP_FUNCTION(stream_select)
 	PHP_SAFE_MAX_FD(max_fd, max_set_count);
 
 	if (secnull && !usecnull) {
-		zend_argument_value_error(4, "must not be null if argument #5 ($microseconds) is specified and non-null");
-		RETURN_THROWS();
+		if (usec == 0) {
+			php_error_docref(NULL, E_DEPRECATED, "Argument #5 ($microseconds) should be null instead of 0 when argument #4 ($seconds) is null");
+		} else {
+			zend_argument_value_error(4, "cannot be null when argument #5 ($microseconds) is specified and non-null");
+			RETURN_THROWS();
+		}
 	}
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */

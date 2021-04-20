@@ -9,13 +9,17 @@ $except = null;
 
 error_reporting(-1);
 set_error_handler(function ($errno, $errstr) {
-    throw new \Exception($errstr);
+    print $errno . " " . $errstr . "\n";
 });
 
 stream_select($read, $write, $except, null, null);
 var_dump($read);
 
+print "\n";
+
 stream_select($read, $write, $except, null, 0);
+
+stream_select($read, $write, $except, null, 1);
 ?>
 --EXPECTF--
 array(1) {
@@ -23,8 +27,10 @@ array(1) {
   resource(%d) of type (stream)
 }
 
-Fatal error: Uncaught ValueError: stream_select(): Argument #4 ($seconds) must not be null if argument #5 ($microseconds) is specified and non-null in %s
+8192 stream_select(): Argument #5 ($microseconds) should be null instead of 0 when argument #4 ($seconds) is null
+
+Fatal error: Uncaught ValueError: stream_select(): Argument #4 ($seconds) cannot be null when argument #5 ($microseconds) is specified and non-null in %s
 Stack trace:
-#0 %s stream_select(Array, NULL, NULL, NULL, 0)
+#0 %s stream_select(Array, NULL, NULL, NULL, 1)
 #1 {main}
 %s
