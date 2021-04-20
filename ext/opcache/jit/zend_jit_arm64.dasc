@@ -5923,19 +5923,22 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			|.cold_code
 			|1:
 			if (func) {
-				|	NIY	// TODO
+				|	LOAD_32BIT_VAL FCARG1w, used_stack
 			}
 			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
-				|	NIY	// TODO
+				|	SET_EX_OPLINE opline, REG0
+				|	EXT_CALL zend_jit_int_extend_stack_helper, REG0
 			} else {
 				if (!is_closure) {
-					|	NIY	// TODO
+					|	mov FCARG2x, REG0
 				} else {
-					|	NIY	// TODO
+					|	add FCARG2x, REG0, #offsetof(zend_closure, func)
 				}
-				|	NIY	// TODO
+				|	SET_EX_OPLINE opline, REG0
+				|	EXT_CALL zend_jit_extend_stack_helper, REG0
 			}
-			|	NIY	// TODO
+			|	mov RX, RETVALx
+			|	b >1
 			|.code
 		}
 	}
@@ -6857,7 +6860,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	bgt >1
 			|.cold_code
 			|1:
-			|	NIY	// TODO: test
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1x, FP
+			}
+			|	EXT_CALL zend_jit_copy_extra_args_helper, REG0
+			if (!func) {
+				|	ldr REG0, EX->func // reload
+			}
+			|	ldr REG1, [FP, #offsetof(zend_execute_data, This.u2.num_args)] // reload
+			|	b >1
 			|.code
 			if (!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0) {
 				if (!func) {
