@@ -67,7 +67,8 @@ jobs:
             --enable-dba \
             --enable-werror \
             --with-config-file-path=/etc \
-            --with-config-file-scan-dir=/etc/php.d
+            --with-config-file-scan-dir=/etc/php.d \
+            CFLAGS='-Werror=implicit-function-declaration'
       displayName: 'Configure Build'
     - script: |
         export PATH="/usr/local/opt/bison/bin:$PATH"
