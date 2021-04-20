@@ -2,7 +2,6 @@
 Test binary operands exposing the same behavior at compile as at run time
 --INI--
 memory_limit=256M
-error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 
