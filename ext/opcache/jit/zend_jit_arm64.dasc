@@ -8279,7 +8279,14 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	zend_reg tmp_reg = (type_mask == 0 || is_power_of_two(type_mask)) ? ZREG_FCARG1x : ZREG_REG0;
 
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
-		|	NIY	// TODO
+		if (opline->opcode == ZEND_RECV_INIT) {
+			|	LOAD_ZVAL_ADDR Rx(tmp_reg), res_addr
+			|	ZVAL_DEREF Rx(tmp_reg), MAY_BE_REF, TMP1w
+			res_addr = ZEND_ADDR_MEM_ZVAL(tmp_reg, 0);
+		} else {
+			|	GET_ZVAL_PTR Rx(tmp_reg), res_addr, TMP1
+			res_addr = ZEND_ADDR_MEM_ZVAL(tmp_reg, offsetof(zend_reference, val));
+		}
 	}
 
 	if (type_mask != 0) {
@@ -8302,13 +8309,10 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 		in_cold = 1;
 	}
 
-	|	NIY	// TODO: currently in cold code
 	if (Z_REG(res_addr) != ZREG_FCARG1x || Z_OFFSET(res_addr) != 0) {
-		|	NIY	// TODO
 		|	LOAD_ZVAL_ADDR FCARG1x, res_addr
 	}
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-		|	NIY	// TODO
 		|	SET_EX_OPLINE opline, REG0
 	} else {
 		|	ADDR_STORE EX->opline, opline, REG0
@@ -8318,7 +8322,6 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	|	mov REG0w, RETVALw
 
 	if (check_exception) {
-		|	NIY	// TODO
 		|	and REG0w, REG0w, #0xff
 		|	tst REG0w, REG0w
 		if (in_cold) {
@@ -8330,7 +8333,6 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 			|	beq ->exception_handler
 		}
 	} else if (in_cold) {
-		|	NIY	// TODO
 		|	b >1
 		|.code
 		|1:
@@ -8371,7 +8373,14 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 			|	blt >1
 			|.cold_code
 			|1:
-			|	NIY	// TODO
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				|	SET_EX_OPLINE opline, REG0
+			} else {
+				|	ADDR_STORE EX->opline, opline, REG0
+			}
+			|	mov FCARG1x, FP
+			|	EXT_CALL zend_missing_arg_error, REG0
+			|	b ->exception_handler
 			|.code
 		}
 	}
@@ -8398,7 +8407,66 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	zval *zv = RT_CONSTANT(opline, opline->op2);
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
-	|	NIY	// TODO
+	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+	    (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		|	ldr TMP1w, EX->This.u2.num_args
+		|	LOAD_32BIT_VAL TMP2w, arg_num
+		|	cmp TMP1w, TMP2w
+		|	bhs >5
+	}
+	|	ZVAL_COPY_CONST res_addr, -1, -1, zv, ZREG_REG0, ZREG_TMP1, ZREG_FPR0
+	if (Z_REFCOUNTED_P(zv)) {
+		|	ADDREF_CONST zv, REG0, TMP1
+	}
+
+	if (Z_CONSTANT_P(zv)) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			|	SET_EX_OPLINE opline, REG0
+		} else {
+			|	ADDR_STORE EX->opline, opline, REG0
+		}
+		|	LOAD_ZVAL_ADDR FCARG1x, res_addr
+		|	ldr REG0, EX->func
+		|	ldr FCARG2x, [REG0, #offsetof(zend_op_array, scope)]
+		|	EXT_CALL zval_update_constant_ex, REG0
+		|	tst RETVALw, RETVALw
+		|	bne >1
+		|.cold_code
+		|1:
+		|	ZVAL_PTR_DTOR res_addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 1, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_UNDEF, TMP1, TMP2
+		|	b ->exception_handler
+		|.code
+	}
+
+	|5:
+
+	if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		do {
+			zend_arg_info *arg_info;
+
+			if (arg_num <= op_array->num_args) {
+				arg_info = &op_array->arg_info[arg_num-1];
+			} else if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+				arg_info = &op_array->arg_info[op_array->num_args];
+			} else {
+				break;
+			}
+			if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+				break;
+			}
+			if (!zend_jit_verify_arg_type(Dst, opline, arg_info, may_throw)) {
+				return 0;
+			}
+		} while (0);
+	}
+
+	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+		if (is_last) {
+			|	LOAD_IP_ADDR (opline + 1)
+			zend_jit_set_last_valid_opline(opline + 1);
+		}
+	}
 	return 1;
 }
 
