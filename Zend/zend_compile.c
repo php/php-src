@@ -6461,7 +6461,8 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 /* }}} */
 
 static void zend_compile_accessors(
-		zend_property_info *prop_info, zend_ast *prop_type_ast, zend_ast_list *accessors);
+		zend_property_info *prop_info, zend_string *prop_name,
+		zend_ast *prop_type_ast, zend_ast_list *accessors);
 
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fallback_return_type) /* {{{ */
 {
@@ -6675,7 +6676,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 							"Cannot declare complex accessors for a promoted property");
 					}
 				}
-				zend_compile_accessors(prop, type_ast, accessors);
+				zend_compile_accessors(prop, name, type_ast, accessors);
 			}
 			if (attributes_ast) {
 				zend_compile_attributes(
@@ -7186,10 +7187,10 @@ static bool is_valid_set_param(zend_ast *param) {
 }
 
 static void zend_compile_accessors(
-		zend_property_info *prop_info, zend_ast *prop_type_ast, zend_ast_list *accessors)
+		zend_property_info *prop_info, zend_string *prop_name,
+		zend_ast *prop_type_ast, zend_ast_list *accessors)
 {
 	zend_class_entry *ce = CG(active_class_entry);
-	zend_string *prop_name = prop_info->name;
 
 	if (accessors->children == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Accessor list cannot be empty");
@@ -7332,10 +7333,7 @@ static void zend_compile_accessors(
 				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
 		}
 
-		zend_string *prefixed_name = zend_strpprintf(0, "$%s::%s",
-			zend_get_unmangled_property_name(prop_name), ZSTR_VAL(name));
-		accessor->name = prefixed_name;
-
+		accessor->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
 		zend_function *func = (zend_function *) zend_compile_func_decl(
 			NULL, (zend_ast *) accessor, /* toplevel */ false);
 		if (auto_prop) {
@@ -7452,7 +7450,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (accessors_ast) {
-			zend_compile_accessors(info, type_ast, zend_ast_get_list(accessors_ast));
+			zend_compile_accessors(info, name, type_ast, zend_ast_get_list(accessors_ast));
 		}
 
 		if (attr_ast) {
