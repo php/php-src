@@ -101,7 +101,7 @@ const char *zend_fiber_backend_info(void);
 ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 
-ZEND_COLD ZEND_NORETURN void zend_error_suspend_fiber(
+ZEND_COLD void zend_error_suspend_fiber(
 		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message);
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);

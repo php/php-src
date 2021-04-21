@@ -315,25 +315,25 @@ static void zend_fiber_switch_to(zend_fiber *fiber) /* {{{ */
 		}
 
 		zend_fiber_error *error = EG(fiber_error);
-		zend_error_at_noreturn(error->type, error->filename, error->lineno, "%s", ZSTR_VAL(error->message));
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
 	}
 }
 /* }}} */
 
 /* {{{ */
-ZEND_COLD ZEND_NORETURN void zend_error_suspend_fiber(
+ZEND_COLD void zend_error_suspend_fiber(
 		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	ZEND_ASSERT(EG(current_fiber) && "Must be within an active fiber!");
 
-	zend_fiber_error error;
+	zend_fiber_error *error = emalloc(sizeof(zend_fiber_error));
 
-	error.type = orig_type;
-	error.filename = error_filename;
-	error.lineno = error_lineno;
-	error.message = message;
+	error->type = orig_type;
+	error->filename = error_filename;
+	error->lineno = error_lineno;
+	error->message = message;
 
-	EG(fiber_error) = &error;
+	EG(fiber_error) = error;
 
 	zend_fiber_suspend(EG(current_fiber));
 
