@@ -497,7 +497,7 @@ ZEND_METHOD(Fiber, start)
 
 	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
-		return;
+		RETURN_THROWS();
 	}
 
 	fiber->fci.params = params;
@@ -506,7 +506,7 @@ ZEND_METHOD(Fiber, start)
 
 	if (!zend_fiber_init_context(&fiber->context, zend_fiber_execute, EG(fiber_stack_size))) {
 		zend_throw_error(NULL, "Could not create fiber context");
-		return;
+		RETURN_THROWS();
 	}
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
@@ -537,16 +537,12 @@ ZEND_METHOD(Fiber, suspend)
 
 	if (UNEXPECTED(!fiber)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend outside of a fiber");
-		return;
+		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_RUNNING)) {
-		if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-			zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force closed fiber");
-		} else {
-			zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a fiber that is not running");
-		}
-		return;
+	if (UNEXPECTED(fiber->status == ZEND_FIBER_STATUS_SHUTDOWN)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force closed fiber");
+		RETURN_THROWS();
 	}
 
 	if (value) {
@@ -570,7 +566,7 @@ ZEND_METHOD(Fiber, suspend)
 		} else {
 			zend_throw_fiber_exit();
 		}
-		return;
+		RETURN_THROWS();
 	}
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
@@ -607,7 +603,7 @@ ZEND_METHOD(Fiber, resume)
 
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (value) {
@@ -643,7 +639,7 @@ ZEND_METHOD(Fiber, throw)
 
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
-		return;
+		RETURN_THROWS();
 	}
 
 	Z_ADDREF_P(exception);
@@ -735,7 +731,7 @@ ZEND_METHOD(Fiber, getReturn)
 		}
 
 		zend_throw_error(zend_ce_fiber_error, "Cannot get fiber return value: %s", message);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_COPY(&fiber->value);
