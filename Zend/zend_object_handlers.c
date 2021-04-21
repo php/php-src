@@ -414,13 +414,13 @@ static zend_always_inline zend_function *check_accessor_visibility(
 		if (scope != ce && scope && is_derived_class(ce, scope)) {
 			zend_property_info *scope_prop = zend_hash_find_ptr(&scope->properties_info, name);
 			if (scope_prop && scope_prop->accessors) {
-				// TODO: Make accessors an array so index comparison is possible?
+				// TODO: Pass accessor kind?
 				zend_function *scope_accessor;
-				if ((*prop)->accessors->get == accessor) {
-					scope_accessor = scope_prop->accessors->get;
+				if ((*prop)->accessors[ZEND_ACCESSOR_GET] == accessor) {
+					scope_accessor = scope_prop->accessors[ZEND_ACCESSOR_GET];
 				} else {
-					ZEND_ASSERT((*prop)->accessors->set == accessor);
-					scope_accessor = scope_prop->accessors->set;
+					ZEND_ASSERT((*prop)->accessors[ZEND_ACCESSOR_SET] == accessor);
+					scope_accessor = scope_prop->accessors[ZEND_ACCESSOR_SET];
 				}
 				if ((scope_accessor->common.fn_flags & ZEND_ACC_PRIVATE)
 						&& scope_accessor->common.scope == scope) {
@@ -451,7 +451,8 @@ static ZEND_COLD void zend_wrong_offset(zend_object *zobj, zend_string *member, 
 	zend_property_info *prop_info = NULL;
 	uint32_t offset = zend_get_property_offset(zobj->ce, member, 0, NULL, &prop_info);
 	if (IS_ACCESSOR_PROPERTY_OFFSET(offset)) {
-		zend_function *accessor = read ? prop_info->accessors->get : prop_info->accessors->set;
+		zend_function *accessor = read
+			? prop_info->accessors[ZEND_ACCESSOR_GET] : prop_info->accessors[ZEND_ACCESSOR_SET];
 		check_accessor_visibility(&prop_info, zobj->ce, member, accessor, /* silent */ false);
 	}
 }
@@ -683,7 +684,7 @@ try_again:
 			}
 		}
 	} else if (IS_ACCESSOR_PROPERTY_OFFSET(property_offset)) {
-		zend_function *get = prop_info->accessors->get;
+		zend_function *get = prop_info->accessors[ZEND_ACCESSOR_GET];
 		if (!get) {
 			zend_throw_error(NULL, "Property %s::$%s is write-only",
 				ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
@@ -876,7 +877,7 @@ found:
 			}
 		}
 	} else if (IS_ACCESSOR_PROPERTY_OFFSET(property_offset)) {
-		zend_function *set = prop_info->accessors->set;
+		zend_function *set = prop_info->accessors[ZEND_ACCESSOR_SET];
 		if (!set) {
 			zend_throw_error(NULL, "Property %s::$%s is read-only",
 				ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
@@ -1857,7 +1858,7 @@ found:
 			}
 		}
 	} else if (IS_ACCESSOR_PROPERTY_OFFSET(property_offset)) {
-		zend_function *get = prop_info->accessors->get;
+		zend_function *get = prop_info->accessors[ZEND_ACCESSOR_GET];
 		if (!get) {
 			zend_throw_error(NULL, "Property %s::$%s is write-only",
 				ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));

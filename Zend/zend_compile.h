@@ -378,10 +378,10 @@ typedef struct _zend_oparray_context {
 
 char *zend_visibility_string(uint32_t fn_flags);
 
-typedef struct _zend_property_accessors {
-	zend_function *get;
-	zend_function *set;
-} zend_property_accessors;
+#define ZEND_ACCESSOR_GET 0
+#define ZEND_ACCESSOR_SET 1
+#define ZEND_ACCESSOR_COUNT 2
+#define ZEND_ACCESSOR_STRUCT_SIZE (sizeof(zend_function) * ZEND_ACCESSOR_COUNT)
 
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
@@ -392,7 +392,7 @@ typedef struct _zend_property_info {
 	HashTable *attributes;
 	zend_class_entry *ce;
 	zend_type type;
-	zend_property_accessors *accessors;
+	zend_function **accessors;
 } zend_property_info;
 
 #define OBJ_PROP(obj, offset) \

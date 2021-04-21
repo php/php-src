@@ -415,11 +415,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 					}
 					zend_type_release(prop_info->type, /* persistent */ 0);
 					if (prop_info->accessors) {
-						if (prop_info->accessors->get) {
-							destroy_op_array(&prop_info->accessors->get->op_array);
-						}
-						if (prop_info->accessors->set) {
-							destroy_op_array(&prop_info->accessors->set->op_array);
+						for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+							if (prop_info->accessors[i]) {
+								destroy_op_array(&prop_info->accessors[i]->op_array);
+							}
 						}
 						efree(prop_info->accessors);
 					}

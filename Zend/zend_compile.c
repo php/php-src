@@ -7204,6 +7204,7 @@ static void zend_compile_accessors(
 		zend_ast **return_ast_ptr = &accessor->child[3];
 		CG(zend_lineno) = accessor->start_lineno;
 		bool reset_return_ast = false, reset_param_type_ast = false;
+		uint32_t accessor_kind;
 
 		if (*return_ast_ptr) {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -7213,6 +7214,7 @@ static void zend_compile_accessors(
 		}
 
 		if (zend_string_equals_literal_ci(name, "get")) {
+			accessor_kind = ZEND_ACCESSOR_GET;
 			if (param_list) {
 				if (param_list->children != 0) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -7225,6 +7227,7 @@ static void zend_compile_accessors(
 			reset_return_ast = true;
 			*return_ast_ptr = prop_type_ast;
 		} else if (zend_string_equals_literal_ci(name, "set")) {
+			accessor_kind = ZEND_ACCESSOR_SET;
 			if (param_list) {
 				if (param_list->children != 1 || !is_valid_set_param(param_list->child[0])) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -7322,22 +7325,14 @@ static void zend_compile_accessors(
 		}
 
 		if (!prop_info->accessors) {
-			prop_info->accessors = ecalloc(1, sizeof(zend_property_accessors));
+			prop_info->accessors = ecalloc(1, ZEND_ACCESSOR_STRUCT_SIZE);
 		}
 
-		if (zend_string_equals_literal_ci(name, "get")) {
-			if (prop_info->accessors->get) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare accessor \"get\"");
-			}
-			prop_info->accessors->get = func;
-		} else if (zend_string_equals_literal_ci(name, "set")) {
-			if (prop_info->accessors->set) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare accessor \"set\"");
-			}
-			prop_info->accessors->set = func;
-		} else {
-			ZEND_UNREACHABLE();
+		if (prop_info->accessors[accessor_kind]) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare accessor \"%s\"", ZSTR_VAL(name));
 		}
+		prop_info->accessors[accessor_kind] = func;
 
 		zend_string_release(name);
 		/* Un-share type ASTs. Alternatively we could duplicate them. */

@@ -365,12 +365,11 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 		zend_persist_attributes_calc(prop->attributes);
 	}
 	if (prop->accessors) {
-		ADD_SIZE(sizeof(zend_property_accessors));
-		if (prop->accessors->get) {
-			zend_persist_class_method_calc((zend_op_array *) prop->accessors->get);
-		}
-		if (prop->accessors->set) {
-			zend_persist_class_method_calc((zend_op_array *) prop->accessors->set);
+		ADD_SIZE(ZEND_ACCESSOR_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+			if (prop->accessors[i]) {
+				zend_persist_class_method_calc((zend_op_array *) prop->accessors[i]);
+			}
 		}
 	}
 }

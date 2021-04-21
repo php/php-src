@@ -827,14 +827,12 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	}
 	if (prop->accessors) {
 		prop->accessors =
-			zend_shared_memdup_put_free(prop->accessors, sizeof(zend_property_accessors));
-		if (prop->accessors->get) {
-			prop->accessors->get = (zend_function *) zend_persist_class_method(
-				(zend_op_array *) prop->accessors->get, ce);
-		}
-		if (prop->accessors->set) {
-			prop->accessors->set = (zend_function *) zend_persist_class_method(
-				(zend_op_array *) prop->accessors->set, ce);
+			zend_shared_memdup_put_free(prop->accessors, ZEND_ACCESSOR_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+			if (prop->accessors[i]) {
+				prop->accessors[i] = (zend_function *) zend_persist_class_method(
+					(zend_op_array *) prop->accessors[i], ce);
+			}
 		}
 	}
 	zend_persist_type(&prop->type, ce);

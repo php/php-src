@@ -5727,7 +5727,7 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 }
 /* }}} */
 
-ZEND_METHOD(ReflectionProperty, getGet)
+static void get_accessor(INTERNAL_FUNCTION_PARAMETERS, uint32_t accessor)
 {
 	reflection_object *intern;
 	property_reference *ref;
@@ -5736,29 +5736,22 @@ ZEND_METHOD(ReflectionProperty, getGet)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!ref->prop->accessors || !ref->prop->accessors->get) {
+	if (!ref->prop->accessors || !ref->prop->accessors[accessor]) {
 		RETURN_NULL();
 	}
 
-	reflection_method_factory(
-		ref->prop->accessors->get->common.scope, ref->prop->accessors->get, NULL, return_value);
+	zend_function *fn = ref->prop->accessors[accessor];
+	reflection_method_factory(fn->common.scope, fn, NULL, return_value);
+}
+
+ZEND_METHOD(ReflectionProperty, getGet)
+{
+	get_accessor(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_GET);
 }
 
 ZEND_METHOD(ReflectionProperty, getSet)
 {
-	reflection_object *intern;
-	property_reference *ref;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	GET_REFLECTION_OBJECT_PTR(ref);
-
-	if (!ref->prop->accessors || !ref->prop->accessors->set) {
-		RETURN_NULL();
-	}
-
-	reflection_method_factory(
-		ref->prop->accessors->set->common.scope, ref->prop->accessors->set, NULL, return_value);
+	get_accessor(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_SET);
 }
 
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */

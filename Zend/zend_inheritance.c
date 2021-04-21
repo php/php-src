@@ -1107,10 +1107,10 @@ static void inherit_accessor(
 
 static prop_variance prop_get_variance(zend_property_info *prop_info) {
 	if (prop_info->accessors) {
-		if (!prop_info->accessors->set) {
+		if (!prop_info->accessors[ZEND_ACCESSOR_SET]) {
 			return PROP_COVARIANT;
 		}
-		if (!prop_info->accessors->get) {
+		if (!prop_info->accessors[ZEND_ACCESSOR_GET]) {
 			return PROP_CONTRAVARIANT;
 		}
 	}
@@ -1151,8 +1151,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info->offset = parent_info->offset;
 			}
 
-			zend_property_accessors *parent_accessors = parent_info->accessors;
-			zend_property_accessors *child_accessors = child_info->accessors;
+			zend_function **parent_accessors = parent_info->accessors;
+			zend_function **child_accessors = child_info->accessors;
 			if (child_accessors) {
 				if (!parent_accessors) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -1160,8 +1160,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key), ZSTR_VAL(ce->name));
 				}
 
-				inherit_accessor(ce, &parent_accessors->get, &child_accessors->get);
-				inherit_accessor(ce, &parent_accessors->set, &child_accessors->set);
+				for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+					inherit_accessor(ce, &parent_accessors[i], &child_accessors[i]);
+				}
 			}
 
 			prop_variance variance = prop_get_variance(parent_info);
@@ -1183,12 +1184,12 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		zend_property_accessors *accessors = parent_info->accessors;
+		zend_function **accessors = parent_info->accessors;
 		if (accessors) {
-			if ((accessors->get && (accessors->get->common.fn_flags & ZEND_ACC_ABSTRACT)) ||
-				(accessors->set && (accessors->set->common.fn_flags & ZEND_ACC_ABSTRACT))
-			) {
-				ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+			for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+				if (accessors[i] && (accessors[i]->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+					ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+				}
 			}
 		}
 
@@ -2207,19 +2208,15 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				}
 			}
 			if (property_info->accessors) {
-				zend_property_accessors *accessors = new_prop->accessors =
-					emalloc(sizeof(zend_property_accessors));
-				memcpy(accessors, property_info->accessors, sizeof(zend_property_accessors));
-				if (accessors->get) {
-					accessors->get = zend_duplicate_function(accessors->get, ce, false);
-					if (accessors->get->common.fn_flags & ZEND_ACC_ABSTRACT) {
-						ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-					}
-				}
-				if (accessors->set) {
-					accessors->set = zend_duplicate_function(accessors->set, ce, false);
-					if (accessors->set->common.fn_flags & ZEND_ACC_ABSTRACT) {
-						ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+				zend_function **accessors = new_prop->accessors =
+					emalloc(ZEND_ACCESSOR_STRUCT_SIZE);
+				memcpy(accessors, property_info->accessors, ZEND_ACCESSOR_STRUCT_SIZE);
+				for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+					if (accessors[i]) {
+						accessors[i] = zend_duplicate_function(accessors[i], ce, false);
+						if (accessors[i]->common.fn_flags & ZEND_ACC_ABSTRACT) {
+							ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+						}
 					}
 				}
 				ce->ce_flags |= traits[i]->ce_flags & ZEND_ACC_USE_GUARDS;
@@ -2287,12 +2284,6 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 }
 /* }}} */
 
-static void zend_verify_accessor(zend_function *fn, zend_abstract_info *ai) {
-	if (fn && (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-		zend_verify_abstract_class_function(fn, ai);
-	}
-}
-
 void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 {
 	zend_function *func;
@@ -2314,8 +2305,12 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 		zend_property_info *prop_info;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 			if (prop_info->accessors) {
-				zend_verify_accessor(prop_info->accessors->get, &ai);
-				zend_verify_accessor(prop_info->accessors->set, &ai);
+				for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+					zend_function *fn = prop_info->accessors[i];
+					if (fn && (fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+						zend_verify_abstract_class_function(fn, &ai);
+					}
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
