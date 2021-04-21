@@ -907,17 +907,17 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
 ||		if (dst_def_info == MAY_BE_DOUBLE) {
 ||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
-|				SET_ZVAL_TYPE_INFO dst_addr, IS_DOUBLE, Rx(tmp_reg1), Rx(tmp_reg2)
+|				SET_ZVAL_TYPE_INFO dst_addr, IS_DOUBLE, Rw(tmp_reg1), Rx(tmp_reg2)
 ||			}
 ||		} else if (((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
-|			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv), Rx(tmp_reg1), Rx(tmp_reg2)
+|			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv), Rw(tmp_reg1), Rx(tmp_reg2)
 ||		}
 ||	}
 ||	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 ||		if (dst_def_info == MAY_BE_DOUBLE) {
-|			SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, Rx(tmp_reg1), Rx(tmp_reg2)
+|			SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, Rw(tmp_reg1), Rx(tmp_reg2)
 ||		} else {
-|			SET_ZVAL_TYPE_INFO res_addr, Z_TYPE_INFO_P(zv), Rx(tmp_reg1), Rx(tmp_reg2)
+|			SET_ZVAL_TYPE_INFO res_addr, Z_TYPE_INFO_P(zv), Rw(tmp_reg1), Rx(tmp_reg2)
 ||		}
 ||	}
 |.endmacro
@@ -2111,6 +2111,7 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_const:
+	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2118,6 +2119,7 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
+	|	add sp, sp, #16
 	|	ret
 	return 1;
 }
@@ -7105,7 +7107,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			if (!func) {
 				|	ldr REG0, EX->func // reload
 			}
-			|	ldr REG1, [FP, #offsetof(zend_execute_data, This.u2.num_args)] // reload
+			|	ldr REG1w, [FP, #offsetof(zend_execute_data, This.u2.num_args)] // reload
 			|	b >1
 			|.code
 			if (!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0) {
@@ -8678,12 +8680,11 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 		|	ldr REG0, EX->func
 		|	ldr FCARG2x, [REG0, #offsetof(zend_op_array, scope)]
 		|	EXT_CALL zval_update_constant_ex, REG0
-		|	tst RETVALw, RETVALw
-		|	bne >1
+		|	cbnz RETVALw, >1
 		|.cold_code
 		|1:
 		|	ZVAL_PTR_DTOR res_addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 1, 0, opline, ZREG_TMP1, ZREG_TMP2
-		|	SET_ZVAL_TYPE_INFO res_addr, IS_UNDEF, TMP1, TMP2
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_UNDEF, TMP1w, TMP2
 		|	b ->exception_handler
 		|.code
 	}
