@@ -175,6 +175,17 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
+{
+	if (new_value) {
+		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	} else {
+		EG(fiber_stack_size) = zend_fiber_page_size() * ZEND_FIBER_DEFAULT_PAGE_COUNT;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 #if ZEND_DEBUG
 # define SIGNAL_CHECK_DEFAULT "1"
 #else
@@ -193,6 +204,8 @@ ZEND_INI_BEGIN()
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
+
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */

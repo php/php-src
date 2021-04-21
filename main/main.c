@@ -303,36 +303,6 @@ static PHP_INI_MH(OnSetLogFilter)
 }
 /* }}} */
 
-/* {{{ PHP_INI_MH */
-static PHP_INI_MH(OnUpdateFiberStackSize)
-{
-	zend_long tmp;
-	const size_t page_size = zend_fiber_page_size();
-
-	if (OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
-		return FAILURE;
-	}
-
-	if (EG(fiber_stack_size) == 0) {
-		EG(fiber_stack_size) = page_size * ZEND_FIBER_DEFAULT_PAGE_COUNT;
-		return SUCCESS;
-	}
-
-	EG(fiber_stack_size) += ZEND_FIBER_GUARD_PAGES;
-
-	tmp = page_size * EG(fiber_stack_size);
-
-	if (tmp / page_size != EG(fiber_stack_size)) {
-		EG(fiber_stack_size) = page_size * ZEND_FIBER_DEFAULT_PAGE_COUNT;
-		return FAILURE;
-	}
-
-	EG(fiber_stack_size) = tmp;
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ php_disable_classes */
 static void php_disable_classes(void)
 {
@@ -768,8 +738,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
-
-	STD_PHP_INI_ENTRY("fiber.stack_size",		"0",			PHP_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
 PHP_INI_END()
 /* }}} */
 
