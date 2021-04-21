@@ -270,7 +270,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
-%type <ast> accessor accessor_list accessor_property optional_parameter_list
+%type <ast> accessor accessor_list accessor_property optional_parameter_list optional_accessor_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
@@ -765,15 +765,20 @@ optional_visibility_modifier:
 	|	T_PRIVATE				{ $$ = ZEND_ACC_PRIVATE; }
 ;
 
+optional_accessor_list:
+		%empty					{ $$ = NULL; }
+	|	'{' accessor_list '}'	{ $$ = $2; }
+;
+
 parameter:
 		optional_visibility_modifier optional_type_without_static
-		is_reference is_variadic T_VARIABLE backup_doc_comment
+		is_reference is_variadic T_VARIABLE backup_doc_comment optional_accessor_list
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
-					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $7); }
 	|	optional_visibility_modifier optional_type_without_static
-		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
+		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr optional_accessor_list
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
-					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $9); }
 ;
 
 
