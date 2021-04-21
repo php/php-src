@@ -88,13 +88,12 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 
 
 
-ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler) /* {{{ */
+ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler)
 {
 	zend_llist_add_element(&zend_fiber_observers_list, &handler);
 }
-/* }}} */
 
-static zend_always_inline void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to) /* {{{ */
+static zend_always_inline void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to)
 {
 	zend_llist_element *element;
 	zend_observer_fiber_switch_handler callback;
@@ -104,7 +103,6 @@ static zend_always_inline void zend_observer_fiber_switch_notify(zend_fiber *fro
 		callback(from, to);
 	}
 }
-/* }}} */
 
 static size_t zend_fiber_page_size()
 {
@@ -121,7 +119,7 @@ static size_t zend_fiber_page_size()
 #endif
 }
 
-static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size) /* {{{ */
+static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_page_size();
@@ -170,9 +168,8 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size) /* {
 
 	return true;
 }
-/* }}} */
 
-void zend_fiber_stack_free(zend_fiber_stack *stack) /* {{{ */
+void zend_fiber_stack_free(zend_fiber_stack *stack)
 {
 	if (!stack->pointer) {
 		return;
@@ -194,9 +191,8 @@ void zend_fiber_stack_free(zend_fiber_stack *stack) /* {{{ */
 
 	stack->pointer = NULL;
 }
-/* }}} */
 
-static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer) /* {{{ */
+static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 {
 	zend_fiber_context *context = transfer.data;
 
@@ -210,9 +206,8 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer) /* {{{ */
 
 	abort();
 }
-/* }}} */
 
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size) /* {{{ */
+ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	if (UNEXPECTED(!zend_fiber_stack_allocate(&context->stack, stack_size))) {
 		return false;
@@ -233,15 +228,13 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_co
 
 	return true;
 }
-/* }}} */
 
-ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context) /* {{{ */
+ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_fiber_stack_free(&context->stack);
 }
-/* }}} */
 
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *to) /* {{{ */
+ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 {
 	ZEND_ASSERT(to && to->self && to->stack.pointer && "Invalid fiber context");
 
@@ -249,9 +242,8 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to) /* {{{ */
 
 	to->self = transfer.context;
 }
-/* }}} */
 
-ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current) /* {{{ */
+ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current)
 {
 	ZEND_ASSERT(current && current->caller && current->stack.pointer && "Invalid fiber context");
 
@@ -259,9 +251,8 @@ ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current) /* {{{ */
 
 	current->caller = transfer.context;
 }
-/* }}} */
 
-static void zend_fiber_suspend(zend_fiber *fiber) /* {{{ */
+static void zend_fiber_suspend(zend_fiber *fiber)
 {
 	zend_vm_stack stack;
 	size_t stack_page_size;
@@ -275,9 +266,8 @@ static void zend_fiber_suspend(zend_fiber *fiber) /* {{{ */
 
 	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num);
 }
-/* }}} */
 
-static void zend_fiber_switch_to(zend_fiber *fiber) /* {{{ */
+static void zend_fiber_switch_to(zend_fiber *fiber)
 {
 	zend_fiber *previous;
 	zend_vm_stack stack;
@@ -312,9 +302,7 @@ static void zend_fiber_switch_to(zend_fiber *fiber) /* {{{ */
 		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
 	}
 }
-/* }}} */
 
-/* {{{ */
 ZEND_COLD void zend_error_suspend_fiber(
 		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message)
 {
@@ -333,9 +321,8 @@ ZEND_COLD void zend_error_suspend_fiber(
 
 	abort(); // This fiber should never be resumed.
 }
-/* }}} */
 
-static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size) /* {{{ */
+static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size)
 {
 	zend_vm_stack page = emalloc(size);
 
@@ -345,9 +332,8 @@ static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size) /
 
 	return page;
 }
-/* }}} */
 
-static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context) /* {{{ */
+static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 {
 	zend_fiber *fiber = EG(current_fiber);
 	ZEND_ASSERT(fiber);
@@ -398,9 +384,8 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context) /
 	// Remove reference added at last resume.
 	GC_DELREF(&fiber->std);
 }
-/* }}} */
 
-static zend_object *zend_fiber_object_create(zend_class_entry *ce) /* {{{ */
+static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 {
 	zend_fiber *fiber;
 
@@ -414,9 +399,8 @@ static zend_object *zend_fiber_object_create(zend_class_entry *ce) /* {{{ */
 
 	return &fiber->std;
 }
-/* }}} */
 
-static void zend_fiber_object_destroy(zend_object *object) /* {{{ */
+static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
@@ -441,9 +425,8 @@ static void zend_fiber_object_destroy(zend_object *object) /* {{{ */
 
 	zend_object_std_dtor(&fiber->std);
 }
-/* }}} */
 
-void zend_fiber_cleanup(void) /* {{{ */
+void zend_fiber_cleanup(void)
 {
 	zend_fiber *fiber;
 	zend_object *exception = EG(exception);
@@ -459,9 +442,7 @@ void zend_fiber_cleanup(void) /* {{{ */
 
 	EG(exception) = exception;
 }
-/* }}} */
 
-/* {{{ proto Fiber::__construct(callable $callback) */
 ZEND_METHOD(Fiber, __construct)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(getThis());
@@ -473,9 +454,7 @@ ZEND_METHOD(Fiber, __construct)
 	// Keep a reference to closures or callable objects until the fiber is started.
 	Z_TRY_ADDREF(fiber->fci.function_name);
 }
-/* }}} */
 
-/* {{{ proto mixed Fiber::start(mixed ...$args) */
 ZEND_METHOD(Fiber, start)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(getThis());
@@ -514,9 +493,7 @@ ZEND_METHOD(Fiber, start)
 	RETVAL_COPY_VALUE(&fiber->value);
 	ZVAL_UNDEF(&fiber->value);
 }
-/* }}} */
 
-/* {{{ proto mixed Fiber::suspend(mixed $value) */
 ZEND_METHOD(Fiber, suspend)
 {
 	zend_fiber *fiber = EG(current_fiber);
@@ -576,9 +553,7 @@ ZEND_METHOD(Fiber, suspend)
 	RETVAL_COPY_VALUE(&fiber->value);
 	ZVAL_UNDEF(&fiber->value);
 }
-/* }}} */
 
-/* {{{ proto mixed Fiber::resume(mixed $value = null) */
 ZEND_METHOD(Fiber, resume)
 {
 	zend_fiber *fiber;
@@ -613,9 +588,7 @@ ZEND_METHOD(Fiber, resume)
 	RETVAL_COPY_VALUE(&fiber->value);
 	ZVAL_UNDEF(&fiber->value);
 }
-/* }}} */
 
-/* {{{ proto mixed Fiber::throw(Throwable $exception) */
 ZEND_METHOD(Fiber, throw)
 {
 	zend_fiber *fiber;
@@ -646,9 +619,7 @@ ZEND_METHOD(Fiber, throw)
 	RETVAL_COPY_VALUE(&fiber->value);
 	ZVAL_UNDEF(&fiber->value);
 }
-/* }}} */
 
-/* {{{ proto bool Fiber::isStarted() */
 ZEND_METHOD(Fiber, isStarted)
 {
 	zend_fiber *fiber;
@@ -659,9 +630,7 @@ ZEND_METHOD(Fiber, isStarted)
 
 	RETURN_BOOL(fiber->status != ZEND_FIBER_STATUS_INIT);
 }
-/* }}} */
 
-/* {{{ proto bool Fiber::isSuspended() */
 ZEND_METHOD(Fiber, isSuspended)
 {
 	zend_fiber *fiber;
@@ -672,9 +641,7 @@ ZEND_METHOD(Fiber, isSuspended)
 
 	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
 }
-/* }}} */
 
-/* {{{ proto bool Fiber::isRunning() */
 ZEND_METHOD(Fiber, isRunning)
 {
 	zend_fiber *fiber;
@@ -685,9 +652,7 @@ ZEND_METHOD(Fiber, isRunning)
 
 	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_RUNNING);
 }
-/* }}} */
 
-/* {{{ proto bool Fiber::isTerminated() */
 ZEND_METHOD(Fiber, isTerminated)
 {
 	zend_fiber *fiber;
@@ -698,9 +663,7 @@ ZEND_METHOD(Fiber, isTerminated)
 
 	RETURN_BOOL(fiber->status & ZEND_FIBER_STATUS_FINISHED);
 }
-/* }}} */
 
-/* {{{ proto mixed Fiber::getReturn() */
 ZEND_METHOD(Fiber, getReturn)
 {
 	zend_fiber *fiber;
@@ -726,9 +689,7 @@ ZEND_METHOD(Fiber, getReturn)
 
 	RETURN_COPY(&fiber->value);
 }
-/* }}} */
 
-/* {{{ proto Fiber|null Fiber::this() */
 ZEND_METHOD(Fiber, this)
 {
 	zend_fiber *fiber;
@@ -743,9 +704,7 @@ ZEND_METHOD(Fiber, this)
 
 	RETURN_OBJ_COPY(&fiber->std);
 }
-/* }}} */
 
-/* {{{ proto FiberError::__construct(string $message) */
 ZEND_METHOD(FiberError, __construct)
 {
 	zend_throw_error(
@@ -754,7 +713,6 @@ ZEND_METHOD(FiberError, __construct)
 		ZSTR_VAL(Z_OBJCE_P(getThis())->name)
 	);
 }
-/* }}} */
 
 
 void zend_register_fiber_ce(void)
