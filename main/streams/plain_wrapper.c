@@ -58,6 +58,9 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #define fdatasync fsync
 #else
 # define PLAIN_WRAP_BUF_SIZE(st) (st)
+# if !defined(HAVE_FDATASYNC)
+#  define fdatasync fsync
+# endif
 #endif
 
 /* parse standard "fopen" modes into open() flags */
