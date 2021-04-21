@@ -448,7 +448,7 @@ static zend_always_inline zend_function *check_accessor_visibility(
 static ZEND_COLD void zend_wrong_offset(zend_object *zobj, zend_string *member, bool read) /* {{{ */
 {
 	/* Trigger the correct error */
-	zend_property_info *prop_info;
+	zend_property_info *prop_info = NULL;
 	uint32_t offset = zend_get_property_offset(zobj->ce, member, 0, NULL, &prop_info);
 	if (IS_ACCESSOR_PROPERTY_OFFSET(offset)) {
 		zend_function *accessor = read ? prop_info->accessors->get : prop_info->accessors->set;
