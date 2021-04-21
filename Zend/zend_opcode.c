@@ -420,7 +420,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 								destroy_op_array(&prop_info->accessors[i]->op_array);
 							}
 						}
-						efree(prop_info->accessors);
 					}
 				}
 			} ZEND_HASH_FOREACH_END();

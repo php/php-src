@@ -7294,7 +7294,7 @@ static void zend_compile_accessors(
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
-					zend_ast_create_zval_from_str(prop_name));
+					zend_ast_create_zval_from_str(zend_string_copy(prop_name)));
 				zend_ast *return_stmt = zend_ast_create(ZEND_AST_RETURN, prop_fetch);
 				*stmt_ast_ptr = zend_ast_create_list(1, ZEND_AST_STMT_LIST, return_stmt);
 			}
@@ -7325,7 +7325,7 @@ static void zend_compile_accessors(
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
-					zend_ast_create_zval_from_str(prop_name));
+					zend_ast_create_zval_from_str(zend_string_copy(prop_name)));
 				zend_ast *assign_stmt = zend_ast_create(ZEND_AST_ASSIGN, prop_fetch,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VALUE))));
@@ -7350,7 +7350,8 @@ static void zend_compile_accessors(
 		}
 
 		if (!prop_info->accessors) {
-			prop_info->accessors = ecalloc(1, ZEND_ACCESSOR_STRUCT_SIZE);
+			prop_info->accessors = zend_arena_alloc(&CG(arena), ZEND_ACCESSOR_STRUCT_SIZE);
+			memset(prop_info->accessors, 0, ZEND_ACCESSOR_STRUCT_SIZE);
 		}
 
 		if (prop_info->accessors[accessor_kind]) {

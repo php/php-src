@@ -826,8 +826,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
 	if (prop->accessors) {
-		prop->accessors =
-			zend_shared_memdup_put_free(prop->accessors, ZEND_ACCESSOR_STRUCT_SIZE);
+		prop->accessors = zend_shared_memdup_put(prop->accessors, ZEND_ACCESSOR_STRUCT_SIZE);
 		for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
 			if (prop->accessors[i]) {
 				prop->accessors[i] = (zend_function *) zend_persist_class_method(
