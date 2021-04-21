@@ -77,7 +77,7 @@ typedef struct _zend_fiber {
 	zend_execute_data *execute_data;
 
 	/* Exception to be thrown from Fiber::suspend(). */
-	zval *error;
+	zval *exception;
 
 	/* Storage for temporaries and fiber return value. */
 	zval value;

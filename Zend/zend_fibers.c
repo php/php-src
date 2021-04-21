@@ -528,7 +528,7 @@ ZEND_METHOD(Fiber, start)
 ZEND_METHOD(Fiber, suspend)
 {
 	zend_fiber *fiber = EG(current_fiber);
-	zval *error, *value = NULL;
+	zval *exception, *value = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 			Z_PARAM_OPTIONAL
@@ -573,18 +573,16 @@ ZEND_METHOD(Fiber, suspend)
 	// Add reference while fiber is running.
 	GC_ADDREF(&fiber->std);
 
-	if (!fiber->error) {
-		RETVAL_COPY_VALUE(&fiber->value);
-		ZVAL_UNDEF(&fiber->value);
-		return;
+	if (fiber->exception) {
+		exception = fiber->exception;
+		fiber->exception = NULL;
+
+		zend_throw_exception_object(exception);
+		RETURN_THROWS();
 	}
 
-	error = fiber->error;
-	fiber->error = NULL;
-
-	execute_data->opline--;
-	zend_throw_exception_object(error);
-	execute_data->opline++;
+	RETVAL_COPY_VALUE(&fiber->value);
+	ZVAL_UNDEF(&fiber->value);
 }
 /* }}} */
 
@@ -643,7 +641,7 @@ ZEND_METHOD(Fiber, throw)
 	}
 
 	Z_ADDREF_P(exception);
-	fiber->error = exception;
+	fiber->exception = exception;
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
 
