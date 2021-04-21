@@ -788,9 +788,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||		case ZEND_SUB:
 |			LONG_ADD_SUB  subs, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
-||		case ZEND_MUL:
-|			NIY	// LONG_MUL  imul, reg, addr
-||			break;
 ||		case ZEND_BW_OR:
 |			LONG_BW_OP  orr, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
@@ -812,9 +809,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||			break;
 ||		case ZEND_SUB:
 |			subs dst_reg, src_reg1, src_reg2
-||			break;
-||		case ZEND_MUL:
-|			NIY	// LONG_OP imul, reg, addr
 ||			break;
 ||		case ZEND_BW_OR:
 |			orr dst_reg, src_reg1, src_reg2
@@ -3075,11 +3069,42 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		(Z_MODE(op1_addr) == IS_CONST_ZVAL &&
 		IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op1_addr))) &&
 		is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))))) {
-		|	NIY	// TODO: test
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+			if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
+				if (Z_MODE(op1_addr) == IS_REG) {
+					|	adds Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
+				} else {
+					|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+					|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
+				}
+			} else {
+				|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+				|	mov TMP1, #floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+				|	lsl Rx(result_reg), Rx(result_reg), TMP1
+				|	// TODO: overflow may be missed
+			}
+		} else {
+			if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
+				if (Z_MODE(op2_addr) == IS_REG) {
+					|	adds Rx(result_reg), Rx(Z_REG(op2_addr)), Rx(Z_REG(op2_addr))
+				} else {
+					|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
+					|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
+				}
+			} else {
+				|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
+				|	mov TMP1, #floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+				|	lsl Rx(result_reg), Rx(result_reg), TMP1
+				|	// TODO: overflow may be missed
+			}
+		}
 	} else if (opcode == ZEND_DIV &&
 			(Z_MODE(op2_addr) == IS_CONST_ZVAL &&
 			is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr))))) {
-		|	NIY	// TODO: test
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		|	asr Rx(result_reg), Rx(result_reg), #floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+#if 0
+	/* x86 specific optimizations through LEA instraction are not supported on ARM */
 	} else if (opcode == ZEND_ADD &&
 			!may_overflow &&
 			Z_MODE(op1_addr) == IS_REG &&
@@ -3095,6 +3120,12 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			Z_MODE(op1_addr) == IS_REG &&
 			Z_MODE(op2_addr) == IS_CONST_ZVAL) {
 		|	NIY	// TODO: test
+#endif
+	} else if (opcode == ZEND_MUL) {
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_TMP2, op2_addr, TMP2
+		|	mul Rx(result_reg), Rx(result_reg), TMP2
+		|	// TODO: overflow detection
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
 		if ((opcode == ZEND_ADD || opcode == ZEND_SUB)
@@ -3103,7 +3134,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			/* +/- 0 */
 			may_overflow = 0;
 		} else if (same_ops && opcode != ZEND_DIV) {
-			|	NIY	// TODO: test
+			|	LONG_MATH_REG opcode, Rx(result_reg), Rx(result_reg), Rx(result_reg)
 		} else {
 			|	LONG_MATH opcode, result_reg, op2_addr, TMP1, TMP2
 		}
@@ -3122,7 +3153,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 					|	mov Rx(Z_REG(res_addr)), Rx(result_reg)
 				}
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				|	NIY	// TODO
+				|	bvc >3
+				|.cold_code
+				|3:
+				|	EXT_JMP exit_addr, TMP1
+				|.code
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -3130,7 +3165,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			if (res_info & MAY_BE_LONG) {
 				|	bvs >1
 			} else {
-				|	NIY	// TODO: test
+				|	bvc >1
 			}
 		}
 	}
@@ -3157,15 +3192,22 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			if ((Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 1) ||
 			    (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1)) {
 				if (opcode == ZEND_ADD) {
+					uint64_t val = 0x43e0000000000000;
 					if (Z_MODE(res_addr) == IS_REG) {
-						|	NIY	// TODO: test
+						|	LOAD_64BIT_VAL TMP1, val
+						|	fmov Rd(Z_REG(res_addr)-ZREG_V0), TMP1
 					} else {
-						uint64_t val = 0x43e0000000000000;
 						|	SET_ZVAL_LVAL res_addr, val, REG0, TMP1
 					}
 					break;
 				} else if (opcode == ZEND_SUB) {
-					|	NIY	// TODO: test
+					uint64_t val = 0xc3e0000000000000;
+					if (Z_MODE(res_addr) == IS_REG) {
+						|	LOAD_64BIT_VAL TMP1, val
+						|	fmov Rd(Z_REG(res_addr)-ZREG_V0), TMP1
+					} else {
+						|	SET_ZVAL_LVAL res_addr, val, REG0, TMP1
+					}
 					break;
 				}
 			}
