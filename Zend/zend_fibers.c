@@ -196,12 +196,6 @@ void zend_fiber_stack_free(zend_fiber_stack *stack) /* {{{ */
 }
 /* }}} */
 
-const char *zend_fiber_backend_info(void) /* {{{ */
-{
-	return "assembler (boost.context v1.76.0)";
-}
-/* }}} */
-
 static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer) /* {{{ */
 {
 	zend_fiber_context *context = transfer.data;

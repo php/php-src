@@ -96,8 +96,6 @@ static const zend_uchar ZEND_FIBER_STATUS_SHUTDOWN  = 0x10;
 
 static const zend_uchar ZEND_FIBER_STATUS_FINISHED  = 0x1c;
 
-const char *zend_fiber_backend_info(void);
-
 ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 
