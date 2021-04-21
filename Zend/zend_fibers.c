@@ -24,6 +24,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
+#include "zend_observer.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -45,8 +46,6 @@ static zend_object_handlers zend_fiber_handlers;
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce);
 static void zend_fiber_object_destroy(zend_object *object);
-
-static zend_llist zend_fiber_observers_list;
 
 typedef void *fcontext_t;
 
@@ -87,22 +86,6 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 #endif
 
 
-
-ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler)
-{
-	zend_llist_add_element(&zend_fiber_observers_list, &handler);
-}
-
-static zend_always_inline void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to)
-{
-	zend_llist_element *element;
-	zend_observer_fiber_switch_handler callback;
-
-	for (element = zend_fiber_observers_list.head; element; element = element->next) {
-		callback = *(zend_observer_fiber_switch_handler *) element->data;
-		callback(from, to);
-	}
-}
 
 static size_t zend_fiber_page_size()
 {
@@ -362,6 +345,8 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 	// Reference added while running, removed when suspended, and added again once resumed.
 	GC_ADDREF(&fiber->std);
 
+	fiber->status = ZEND_FIBER_STATUS_RUNNING;
+
 	zend_call_function(&fiber->fci, &fiber->fci_cache);
 
 	if (EG(exception)) {
@@ -479,8 +464,6 @@ ZEND_METHOD(Fiber, start)
 		zend_throw_error(NULL, "Could not create fiber context");
 		RETURN_THROWS();
 	}
-
-	fiber->status = ZEND_FIBER_STATUS_RUNNING;
 
 	zend_fiber_switch_to(fiber);
 
@@ -736,11 +719,9 @@ void zend_fiber_init(void)
 	EG(fiber_error) = NULL;
 
 	zend_hash_init(&EG(fibers), 0, NULL, NULL, 0);
-	zend_llist_init(&zend_fiber_observers_list, sizeof(zend_observer_fiber_switch_handler), NULL, 0);
 }
 
 void zend_fiber_shutdown(void)
 {
 	zend_hash_destroy(&EG(fibers));
-	zend_llist_destroy(&zend_fiber_observers_list);
 }

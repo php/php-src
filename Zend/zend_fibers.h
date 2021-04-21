@@ -83,10 +83,6 @@ typedef struct _zend_fiber_error {
 	zend_string *message;
 } zend_fiber_error;
 
-typedef void (*zend_observer_fiber_switch_handler)(zend_fiber *from, zend_fiber *to);
-
-ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler);
-
 static const zend_uchar ZEND_FIBER_STATUS_INIT      = 0x0;
 static const zend_uchar ZEND_FIBER_STATUS_SUSPENDED = 0x1;
 static const zend_uchar ZEND_FIBER_STATUS_RUNNING   = 0x2;
