@@ -401,7 +401,7 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 static void fiber_address_observer(zend_fiber *from, zend_fiber *to)
 {
 	if (ZT_G(observer_fiber_switch)) {
-		php_printf("<!-- switching from fiber %lx to %lx -->\n", (uintptr_t) from, (uintptr_t) to);
+		php_printf("<!-- switching from fiber %p to %p -->\n", from, to);
 	}
 }
 
@@ -410,11 +410,11 @@ static void fiber_enter_observer(zend_fiber *from, zend_fiber *to)
 	if (ZT_G(observer_fiber_switch)) {
 		if (to) {
 			if (to->status == ZEND_FIBER_STATUS_INIT) {
-				php_printf("<init '%lx'>\n", (uintptr_t) to);
+				php_printf("<init '%p'>\n", to);
 			} else if (to->status == ZEND_FIBER_STATUS_RUNNING && (!from || from->status == ZEND_FIBER_STATUS_RUNNING)) {
-				php_printf("<resume '%lx'>\n", (uintptr_t) to);
+				php_printf("<resume '%p'>\n", to);
 			} else if (to->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-				php_printf("<destroying '%lx'>\n", (uintptr_t) to);
+				php_printf("<destroying '%p'>\n", to);
 			}
 		}
 	}
@@ -425,13 +425,13 @@ static void fiber_suspend_observer(zend_fiber *from, zend_fiber *to)
 	if (ZT_G(observer_fiber_switch)) {
 		if (from) {
 			if (from->status == ZEND_FIBER_STATUS_SUSPENDED) {
-				php_printf("<suspend '%lx'>\n", (uintptr_t) from);
+				php_printf("<suspend '%p'>\n", from);
 			} else if (from->status == ZEND_FIBER_STATUS_RETURNED) {
-				php_printf("<returned '%lx'>\n", (uintptr_t) from);
+				php_printf("<returned '%p'>\n", from);
 			} else if (from->status == ZEND_FIBER_STATUS_THREW) {
-				php_printf("<threw '%lx'>\n", (uintptr_t) from);
+				php_printf("<threw '%p'>\n", from);
 			} else if (from->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-				php_printf("<destroyed '%lx'>\n", (uintptr_t)  from);
+				php_printf("<destroyed '%p'>\n", from);
 			}
 		}
 	}

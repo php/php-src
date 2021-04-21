@@ -40,38 +40,38 @@ $fiber->resume();
 ?>
 --EXPECTF--
 <!-- init '%sobserver_fiber_03.php' -->
-<!-- switching from fiber 0 to %x -->
-<init '%x'>
+<!-- switching from fiber 0 to %s -->
+<init '%s'>
 <!-- init {closure}() -->
-<!-- switching from fiber %x to 0 -->
-<suspend '%x'>
-<!-- switching from fiber 0 to %x -->
-<resume '%x'>
+<!-- switching from fiber %s to 0 -->
+<suspend '%s'>
+<!-- switching from fiber 0 to %s -->
+<resume '%s'>
 int(1)
-<!-- switching from fiber %x to %x -->
-<init '%x'>
+<!-- switching from fiber %s to %s -->
+<init '%s'>
 <!-- init {closure}() -->
-<!-- switching from fiber %x to %x -->
-<suspend '%x'>
-<!-- switching from fiber %x to 0 -->
-<suspend '%x'>
-<!-- switching from fiber 0 to %x -->
-<resume '%x'>
+<!-- switching from fiber %s to %s -->
+<suspend '%s'>
+<!-- switching from fiber %s to 0 -->
+<suspend '%s'>
+<!-- switching from fiber 0 to %s -->
+<resume '%s'>
 int(2)
-<!-- switching from fiber %x to %x -->
-<resume '%x'>
+<!-- switching from fiber %s to %s -->
+<resume '%s'>
 int(3)
-<!-- switching from fiber %x to %x -->
-<suspend '%x'>
-<!-- switching from fiber %x to 0 -->
-<suspend '%x'>
-<!-- switching from fiber 0 to %x -->
-<resume '%x'>
+<!-- switching from fiber %s to %s -->
+<suspend '%s'>
+<!-- switching from fiber %s to 0 -->
+<suspend '%s'>
+<!-- switching from fiber 0 to %s -->
+<resume '%s'>
 int(4)
-<!-- switching from fiber %x to %x -->
-<resume '%x'>
+<!-- switching from fiber %s to %s -->
+<resume '%s'>
 int(5)
-<!-- switching from fiber %x to %x -->
-<returned '%x'>
-<!-- switching from fiber %x to 0 -->
-<returned '%x'>
+<!-- switching from fiber %s to %s -->
+<returned '%s'>
+<!-- switching from fiber %s to 0 -->
+<returned '%s'>

@@ -23,12 +23,12 @@ try {
 ?>
 --EXPECTF--
 <!-- init '%sobserver_fiber_06.php' -->
-<!-- switching from fiber 0 to %x -->
-<init '%x'>
+<!-- switching from fiber 0 to %s -->
+<init '%s'>
 <!-- init {closure}() -->
-<!-- switching from fiber %x to 0 -->
-<suspend '%x'>
-<!-- switching from fiber 0 to %x -->
-<resume '%x'>
-<!-- switching from fiber %x to 0 -->
-<threw '%x'>
+<!-- switching from fiber %s to 0 -->
+<suspend '%s'>
+<!-- switching from fiber 0 to %s -->
+<resume '%s'>
+<!-- switching from fiber %s to 0 -->
+<threw '%s'>
