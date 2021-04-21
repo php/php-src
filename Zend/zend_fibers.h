@@ -52,24 +52,6 @@ typedef struct _zend_fiber_context {
 	zend_fiber_stack stack;
 } zend_fiber_context;
 
-#if _POSIX_MAPPED_FILES
-# include <sys/mman.h>
-# include <limits.h>
-
-static zend_always_inline size_t zend_fiber_page_size()
-{
-	static size_t page_size;
-
-	if (!page_size) {
-		page_size = sysconf(_SC_PAGESIZE);
-	}
-
-	return page_size;
-}
-#else
-# define zend_fiber_page_size() 4096
-#endif
-
 #define ZEND_FIBER_GUARD_PAGES 1
 
 #define ZEND_FIBER_DEFAULT_PAGE_COUNT (((sizeof(void *)) < 8) ? 512 : 2048)
@@ -131,6 +113,8 @@ ZEND_COLD ZEND_NORETURN void zend_error_suspend_fiber(
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
+
+size_t zend_fiber_page_size();
 
 #define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
 
