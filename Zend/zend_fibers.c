@@ -106,7 +106,7 @@ static zend_always_inline void zend_observer_fiber_switch_notify(zend_fiber *fro
 }
 /* }}} */
 
-size_t zend_fiber_page_size()
+static size_t zend_fiber_page_size()
 {
 #if _POSIX_MAPPED_FILES
 	static size_t page_size;

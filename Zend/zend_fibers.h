@@ -52,10 +52,6 @@ typedef struct _zend_fiber_context {
 	zend_fiber_stack stack;
 } zend_fiber_context;
 
-#define ZEND_FIBER_GUARD_PAGES 1
-
-#define ZEND_FIBER_DEFAULT_PAGE_COUNT (((sizeof(void *)) < 8) ? 512 : 2048)
-
 typedef struct _zend_fiber {
 	/* Fiber PHP object handle. */
 	zend_object std;
@@ -111,7 +107,9 @@ ZEND_COLD ZEND_NORETURN void zend_error_suspend_fiber(
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
 
-size_t zend_fiber_page_size();
+#define ZEND_FIBER_GUARD_PAGES 1
+
+#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
 
 #define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
 

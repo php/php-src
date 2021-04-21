@@ -180,7 +180,7 @@ static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 	if (new_value) {
 		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	} else {
-		EG(fiber_stack_size) = zend_fiber_page_size() * ZEND_FIBER_DEFAULT_PAGE_COUNT;
+		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
 	return SUCCESS;
 }
