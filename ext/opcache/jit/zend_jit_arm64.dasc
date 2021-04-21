@@ -3070,7 +3070,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op1_addr))) &&
 		is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))))) {
 		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
-			if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
+			if (Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
 				if (Z_MODE(op1_addr) == IS_REG) {
 					|	adds Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
 				} else {
@@ -3084,7 +3084,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 				|	// TODO: overflow may be missed
 			}
 		} else {
-			if (Z_MODE(op1_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
+			if (Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
 				if (Z_MODE(op2_addr) == IS_REG) {
 					|	adds Rx(result_reg), Rx(Z_REG(op2_addr)), Rx(Z_REG(op2_addr))
 				} else {
