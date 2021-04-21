@@ -92,8 +92,20 @@
 
 #define TMP_ZVAL_OFFSET 0
 #define DASM_ALIGNMENT  16
-#define MAX_IMM12    0xfff            // maximum value for imm12
-#define LDR_STR_IMM  (MAX_IMM12 * 8)  // maximum value for imm12 * 8
+
+/* Encoding of immediate. TODO: shift mode may be supported in the near future. */
+#define MAX_IMM12       0xfff          // maximum value for imm12
+#define MAX_IMM13       0x1fff         // maximum value for imm13
+#define MAX_IMM16       0xffff         // maximum value for imm16
+#define CMP_IMM         MAX_IMM12      // cmp insn
+#define MOVZ_IMM        MAX_IMM16      // movz insn
+#define ADD_SUB_IMM     MAX_IMM12      // add/sub insn
+#define BW_W_IMM        MAX_IMM12      // bitwise insn for 32-bit variant: and, orr, eor
+#define BW_X_IMM        MAX_IMM13      // bitwise insn for 64-bit variant: and, orr, eor
+#define TST_W_IMM       MAX_IMM12      // tst insn for 32-bit variant
+#define TST_X_IMM       MAX_IMM13      // tst insn for 64-bit variant
+#define LDR_STR_PIMM    (MAX_IMM12*8)  // ldr/str insn: pimm is imm12 * 8
+#define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
 
 #include "Zend/zend_cpuinfo.h"
 
@@ -190,26 +202,43 @@ static void* dasm_labels[zend_lb_MAX];
 
 // Type cast to unsigned is used to avoid undefined behavior.
 |.macro LOAD_32BIT_VAL, reg, val
-|	mov reg, #((uint32_t)(val) & 0xffff)
-|	movk reg, #(((uint32_t)(val) >> 16) & 0xffff), lsl #16
+||	if (val >= 0 && val <= MOVZ_IMM) {
+|		movz reg, #val
+||	} else {
+|		mov reg, #((uint32_t)(val) & 0xffff)
+|		movk reg, #(((uint32_t)(val) >> 16) & 0xffff), lsl #16
+||	}
 |.endmacro
 
 |.macro LOAD_64BIT_VAL, reg, val
-|	mov reg, #((uint64_t)(val) & 0xffff)
-|	movk reg, #(((uint64_t)(val) >> 16) & 0xffff), lsl #16
-|	movk reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
-|	movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+||	if (val >= 0 && val <= MOVZ_IMM) {
+|		movz reg, #val
+||	} else {
+|		mov reg, #((uint64_t)(val) & 0xffff)
+|		movk reg, #(((uint64_t)(val) >> 16) & 0xffff), lsl #16
+|		movk reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
+|		movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+||	}
 |.endmacro
 
 // Safe memory load/store with an unsigned immediate offset.
 // When using Z_OFFSET(addr), which is 24-bit long, as the unsigned offset to compute a memory address,
-// we should firstly check whether it's greater than MAX_IMM12.
+// we should firstly check the range.
 |.macro SAFE_MEM_ACC_WITH_UOFFSET, ldr_str_ins, op, base_reg, offset, tmp_reg
-||	if (offset > MAX_IMM12) {
+||	if (offset > LDR_STR_PIMM) {
 |		LOAD_32BIT_VAL tmp_reg, offset
 |		ldr_str_ins op, [base_reg, tmp_reg]
 ||	} else {
 |		ldr_str_ins op, [base_reg, #(offset)]
+||	}
+|.endmacro
+
+|.macro SAFE_MEM_ACC_WITH_UOFFSET_BYTE, ldrb_strb_ins, op, base_reg, offset, tmp_reg
+||	if (offset > LDRB_STRB_PIMM) {
+|		LOAD_32BIT_VAL tmp_reg, offset
+|		ldrb_strb_ins op, [base_reg, tmp_reg]
+||	} else {
+|		ldrb_strb_ins op, [base_reg, #(offset)]
 ||	}
 |.endmacro
 
@@ -348,7 +377,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro LOAD_BASE_ADDR, reg, base, offset
 ||	if (offset) {
-||		if (offset > MAX_IMM12) {
+||		if (offset > ADD_SUB_IMM) {
 |			LOAD_32BIT_VAL reg, offset
 |			add reg, Rx(base), reg
 ||		} else {
@@ -411,7 +440,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 // In x86 implementation, 'val' can be either a constant or a register.
 // In AArch64, use ADD_IP for register case,
-// and use ADD_IP_FROM_CST for constant case, where the value can be represented by imm12.
+// and use ADD_IP_FROM_CST for constant case, where the value can be represented by ADD_SUB_IMM.
 |.macro ADD_IP, val, tmp_reg
 ||	if (GCC_GLOBAL_REGS) {
 |		add IP, IP, val
@@ -423,7 +452,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro ADD_IP_FROM_CST, val, tmp_reg
-||	ZEND_ASSERT(val >=0 && val <= MAX_IMM12);
+||	ZEND_ASSERT(val >=0 && val <= ADD_SUB_IMM);
 ||	if (GCC_GLOBAL_REGS) {
 |		add IP, IP, #val
 ||	} else {
@@ -494,11 +523,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro SET_ZVAL_TYPE_INFO, addr, type, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-||	if (type <= MAX_IMM12) {
-|		mov tmp_reg1, #type
-||	} else {
-|		LOAD_32BIT_VAL tmp_reg1, type
-||	}
+|	LOAD_32BIT_VAL tmp_reg1, type
 |	SAFE_MEM_ACC_WITH_UOFFSET str, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg2
 |.endmacro
 
@@ -632,9 +657,11 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro LONG_OP, long_ins, reg, addr, tmp_reg1, tmp_reg2
+// Define LONG_ADD_SUB, LONG_BW_OP, LONG_MUL, LONG_CMP to replace the LONG_OP in x86 implementation.
+// 'long_ins' should be addition or subtraction.
+|.macro LONG_ADD_SUB, long_ins, reg, addr, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= MAX_IMM12) {
+||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= ADD_SUB_IMM) {
 |			long_ins Rx(reg), Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
 ||		} else {
 |			LOAD_64BIT_VAL tmp_reg1, Z_LVAL_P(Z_ZV(addr))
@@ -650,9 +677,33 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
+// 'long_ins' should be 'and', 'orr' or 'eor'
+|.macro LONG_BW_OP, long_ins, reg, addr, tmp_reg1, tmp_reg2
+||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
+||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= BW_X_IMM) {
+|			long_ins Rx(reg), Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
+||		} else {
+|			LOAD_64BIT_VAL tmp_reg1, Z_LVAL_P(Z_ZV(addr))
+|			long_ins Rx(reg), Rx(reg), tmp_reg1
+||		}
+||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg2
+|		long_ins Rx(reg), Rx(reg), tmp_reg1
+||	} else if (Z_MODE(addr) == IS_REG) {
+|		long_ins Rx(reg), Rx(reg), Rx(Z_REG(addr))
+||	} else {
+||		ZEND_UNREACHABLE();
+||	}
+|.endmacro
+
+// TODO: integer overflow should be detected.
+|.macro LONG_MUL, long_ins, reg, addr, tmp_reg1, tmp_reg2
+|	brk #0	// TODO
+|.endmacro
+
 |.macro LONG_CMP, reg, addr, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= MAX_IMM12) {
+||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= CMP_IMM) {
 |			cmp Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
 ||		} else {
 |			NIY	// TODO
@@ -669,8 +720,9 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro LONG_OP_WITH_CONST_IMM12, long_ins, op1_addr, lval, tmp_reg1, tmp_reg2
-||	ZEND_ASSERT(lval >=0 && lval <= MAX_IMM12);
+// long_ins should be addition or subtraction.
+|.macro LONG_ADD_SUB_WITH_IMM, long_ins, op1_addr, lval, tmp_reg1, tmp_reg2
+||	ZEND_ASSERT(lval >=0 && lval <= ADD_SUB_IMM);
 ||	if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(op1_addr)), Z_OFFSET(op1_addr), tmp_reg2
 |		long_ins tmp_reg1, tmp_reg1, #lval
@@ -692,14 +744,14 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro LONG_CMP_WITH_CONST, cmp_ins, op1_addr, lval, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(op1_addr)), Z_OFFSET(op1_addr), tmp_reg2
-||		if (lval >=0 && lval <= MAX_IMM12) {
+||		if (lval >=0 && lval <= CMP_IMM) {
 |			cmp_ins tmp_reg1, #lval
 ||		} else {
 |			LOAD_64BIT_VAL tmp_reg2, lval
 |			cmp_ins tmp_reg1, tmp_reg2
 ||		}
 ||	} else if (Z_MODE(op1_addr) == IS_REG) {
-||		if (lval >=0 && lval <= MAX_IMM12) {
+||		if (lval >=0 && lval <= CMP_IMM) {
 |			cmp_ins Rx(Z_REG(op1_addr)), #lval
 ||		} else {
 |			LOAD_64BIT_VAL tmp_reg1, lval
@@ -731,22 +783,22 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro LONG_MATH, opcode, reg, addr, tmp_reg1, tmp_reg2
 ||	switch (opcode) {
 ||		case ZEND_ADD:
-|			LONG_OP adds, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_ADD_SUB  adds, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_SUB:
-|			LONG_OP subs, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_ADD_SUB  subs, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_MUL:
-|			NIY	// LONG_OP imul, reg, addr
+|			NIY	// LONG_MUL  imul, reg, addr
 ||			break;
 ||		case ZEND_BW_OR:
-|			LONG_OP orr, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  orr, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_BW_AND:
-|			LONG_OP and, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  and, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		case ZEND_BW_XOR:
-|			LONG_OP eor, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  eor, reg, addr, tmp_reg1, tmp_reg2
 ||			break;
 ||		default:
 ||			ZEND_UNREACHABLE();
@@ -1022,11 +1074,13 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_TYPE, type, val, label
+||	ZEND_ASSERT(val >=0 && val <= CMP_IMM);
 |	cmp type, #val
 |	beq label
 |.endmacro
 
 |.macro IF_NOT_TYPE, type, val, label
+||	ZEND_ASSERT(val >=0 && val <= CMP_IMM);
 |	cmp type, #val
 |	bne label
 |.endmacro
@@ -1036,29 +1090,26 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_NOT_Z_TYPE, zv, val, label, tmp_reg
-||	ZEND_ASSERT(val >=0 && val <= MAX_IMM12);
 |	ldrb tmp_reg, [zv, #offsetof(zval, u1.v.type)]
 |	IF_NOT_TYPE tmp_reg, val, label
 |.endmacro
 
 |.macro CMP_ZVAL_TYPE, addr, val, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-||	ZEND_ASSERT(val <= MAX_IMM12);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
+||	ZEND_ASSERT(val <= CMP_IMM);
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
 |	cmp tmp_reg1, #val
 |.endmacro
 
 |.macro IF_ZVAL_TYPE, addr, val, label, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-||	ZEND_ASSERT(val <= MAX_IMM12);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
 |	IF_TYPE tmp_reg1, val, label
 |.endmacro
 
 |.macro IF_NOT_ZVAL_TYPE, addr, val, label, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-||	ZEND_ASSERT(val <= MAX_IMM12);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), tmp_reg2
 |	IF_NOT_TYPE tmp_reg1, val, label
 |.endmacro
 
@@ -1073,24 +1124,26 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro IF_REFCOUNTED, type_flags, label
+||	ZEND_ASSERT((IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) <= TST_W_IMM);
 |	tst type_flags, #(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)
 |	bne label
 |.endmacro
 
 |.macro IF_NOT_REFCOUNTED, type_flags, label
+||	ZEND_ASSERT((IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) <= TST_W_IMM);
 |	tst type_flags, #(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)
 |	beq label
 |.endmacro
 
 |.macro IF_ZVAL_FLAGS, addr, mask, label, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type_flags), tmp_reg2
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type_flags), tmp_reg2
 |	IF_FLAGS tmp_reg1, mask, label
 |.endmacro
 
 |.macro IF_NOT_ZVAL_FLAGS, addr, mask, label, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type_flags), tmp_reg2
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type_flags), tmp_reg2
 |	IF_NOT_FLAGS tmp_reg1, mask, label
 |.endmacro
 
@@ -2603,7 +2656,7 @@ static int zend_jit_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t
 		return 0;
 	}
 
-	if (var > MAX_IMM12) {
+	if (var > ADD_SUB_IMM) {
 		|	LOAD_32BIT_VAL TMP1, var
 		|	add TMP1, FP, TMP1
 	} else {
@@ -2915,10 +2968,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 		return 0;
 	}
 	if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-		|	LONG_OP_WITH_CONST_IMM12 adds, op1_def_addr, Z_L(1), TMP1, TMP2
+		|	LONG_ADD_SUB_WITH_IMM adds, op1_def_addr, Z_L(1), TMP1, TMP2
 	} else {
 		|	NIY  // TODO: test
-		|	LONG_OP_WITH_CONST_IMM12 subs, op1_def_addr, Z_L(1), TMP1, TMP2
+		|	LONG_ADD_SUB_WITH_IMM subs, op1_def_addr, Z_L(1), TMP1, TMP2
 	}
 
 	if (may_overflow &&
@@ -3107,7 +3160,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 					if (Z_MODE(res_addr) == IS_REG) {
 						|	NIY	// TODO: test
 					} else {
-						|	SET_ZVAL_LVAL res_addr, 0x43e0000000000000, REG0, TMP1
+						uint64_t val = 0x43e0000000000000;
+						|	SET_ZVAL_LVAL res_addr, val, REG0, TMP1
 					}
 					break;
 				} else if (opcode == ZEND_SUB) {
@@ -3968,7 +4022,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 			if (packed_loaded) {
 				|	// ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
 				if (op1_info & MAY_BE_ARRAY_HASH) {
-					||	ZEND_ASSERT(HASH_FLAG_PACKED <= MAX_IMM12);
+					||	ZEND_ASSERT(HASH_FLAG_PACKED <= TST_W_IMM);
 					|	ldr TMP1w, [FCARG1x, #offsetof(zend_array, u.flags)]
 					|	tst TMP1w, #HASH_FLAG_PACKED
 					|	beq >4 // HASH_FIND
@@ -6111,10 +6165,10 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	MEM_LOAD_ZTS ldr, REG2, executor_globals, vm_stack_end, TMP1
 		|	sub REG2, REG2, RX
 		if (func) {
-			||	if (used_stack <= MAX_IMM12) {
+			||	if (used_stack <= CMP_IMM) {
 			|		cmp REG2, #used_stack
 			||	} else {
-			|		LOAD_32BIT_VAL TMP1, used_stack
+			|		LOAD_32BIT_VAL TMP1w, used_stack
 			|		cmp REG2, TMP1
 			||	}
 		} else {
@@ -6162,10 +6216,10 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	}
 
 	if (func) {
-		||	if (used_stack <= MAX_IMM12) {
+		||	if (used_stack <= ADD_SUB_IMM) {
 		|		MEM_LOAD_OP_STORE_ZTS add, ldr, str, #used_stack, executor_globals, vm_stack_top, REG2, TMP1
 		||	} else {
-		|		LOAD_32BIT_VAL TMP1, used_stack
+		|		LOAD_32BIT_VAL TMP1w, used_stack
 		|		MEM_LOAD_OP_STORE_ZTS add, ldr, str, TMP1, executor_globals, vm_stack_top, REG2, TMP2
 		||	}
 	} else {
@@ -6475,7 +6529,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
 			|	ldr REG1, EX->run_time_cache
 			|	mov REG0, RETVALx
-			||	ZEND_ASSERT(opline->result.num <= LDR_STR_IMM);
+			||	ZEND_ASSERT(opline->result.num <= LDR_STR_PIMM);
 			|	str REG0, [REG1, #opline->result.num]
 			|	b >3
 		} else {
@@ -6691,7 +6745,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	if (!func) {
 		|	// if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
 		|	ldr TMP1w, [REG0, #offsetof(zend_function, common.fn_flags)]
-		||	ZEND_ASSERT(ZEND_ACC_STATIC <= MAX_IMM12);
+		||	ZEND_ASSERT(ZEND_ACC_STATIC <= TST_W_IMM);
 		|	tst TMP1w, #ZEND_ACC_STATIC
 		|	bne >1
 		|.cold_code
@@ -6880,7 +6934,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (!func) {
 			if (!trace) {
 				|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
-				||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= MAX_IMM12);
+				||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= TST_W_IMM);
 				|	tst TMP1w, #ZEND_ACC_DEPRECATED
 				|	bne >1
 				|.cold_code
@@ -6979,7 +7033,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			for (i = call_num_args; i < func->op_array.last_var; i++) {
 				uint32_t n = EX_NUM_TO_VAR(i);
 				|	// ZVAL_UNDEF(EX_VAR(n))
-				||	ZEND_ASSERT(n <= MAX_IMM12);
+				||	ZEND_ASSERT(n <= ADD_SUB_IMM);
 				|	add TMP1, RX, #n
 				|	SET_Z_TYPE_INFO TMP1, IS_UNDEF, TMP2w
 			}
@@ -7004,7 +7058,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
 					} else {
 						|	ldr REG0, EX->func
-						||	ZEND_ASSERT((num_args * sizeof(zend_op)) <= MAX_IMM12);
+						||	ZEND_ASSERT((num_args * sizeof(zend_op)) <= ADD_SUB_IMM);
 						if (GCC_GLOBAL_REGS) {
 							|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
 							if (num_args) {
@@ -7065,7 +7119,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	// num_args = EX_NUM_ARGS();
 				|	ldr REG1w, [FP, #offsetof(zend_execute_data, This.u2.num_args)]
 				|	// if (UNEXPECTED(num_args > first_extra_arg))
-				||	ZEND_ASSERT(func->op_array.num_args <= MAX_IMM12);
+				||	ZEND_ASSERT(func->op_array.num_args <= TST_W_IMM);
 				|	cmp REG1w, #(func->op_array.num_args)
 			} else {
 				|	// first_extra_arg = op_array->num_args;
@@ -7113,7 +7167,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	// zval *var = EX_VAR_NUM(num_args);
 			|	lsl REG1, REG1, #4
 			|	add REG1, REG1, FP
-			||  ZEND_ASSERT(ZEND_CALL_FRAME_SLOT * sizeof(zval) <= MAX_IMM12);
+			||	ZEND_ASSERT(ZEND_CALL_FRAME_SLOT * sizeof(zval) <= ADD_SUB_IMM);
 			|	add REG1, REG1, #(ZEND_CALL_FRAME_SLOT * sizeof(zval))
 			|2:
 			|	SET_Z_TYPE_INFO REG1, IS_UNDEF, TMP1w
@@ -7171,7 +7225,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					}
 					|	NIY	// TODO
 				} else {
-					||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= MAX_IMM12);
+					||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= TST_W_IMM);
 					|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
 					|	tst TMP1w, #ZEND_ACC_DEPRECATED
 					|	bne >1
@@ -7444,8 +7498,8 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		|	EMALLOC sizeof(zend_reference), op_array, opline  // Allocate space in REG0
 		|	mov TMP1w, #2
 		|	str TMP1w, [REG0]
-		||	ZEND_ASSERT(GC_REFERENCE <= MAX_IMM12);
-		|	mov TMP1w, #GC_REFERENCE
+		||	ZEND_ASSERT(GC_REFERENCE <= MOVZ_IMM);
+		|	movz TMP1w, #GC_REFERENCE
 		|	str TMP1w, [REG0, #offsetof(zend_reference, gc.u.type_info)]
 		|	str xzr, [REG0, #offsetof(zend_reference, sources.ptr)]
 		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, offsetof(zend_reference, val));
@@ -8521,11 +8575,10 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	if (type_mask != 0) {
 		if (is_power_of_two(type_mask)) {
 			uint32_t type_code = concrete_type(type_mask);
-			||	ZEND_ASSERT(type_code <= MAX_IMM12);
 			|	IF_NOT_ZVAL_TYPE res_addr, type_code, >1, TMP1w, TMP2
 		} else {
 			|	mov REG2w, #1
-			|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, REG1w, Rx(Z_REG(res_addr)), Z_OFFSET(res_addr)+offsetof(zval, u1.v.type), TMP1
+			|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, REG1w, Rx(Z_REG(res_addr)), Z_OFFSET(res_addr)+offsetof(zval, u1.v.type), TMP1
 			|	lsl REG2w, REG2w, REG1w
 			|	LOAD_32BIT_VAL TMP1w, type_mask
 			|	tst REG2w, TMP1w
@@ -8878,14 +8931,14 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	if (!prop_info) {
 		|	ldr REG0, EX->run_time_cache
-		|	LOAD_32BIT_VAL TMP1, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
+		|	LOAD_32BIT_VAL TMP1w, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS)
 		|	add TMP1, TMP1, REG0
 		|	ldr REG2, [TMP1]
 		|	ldr TMP1, [FCARG1x, #offsetof(zend_object, ce)]
 		|	cmp REG2, TMP1
 		|	bne >5
 		|	NIY	// TODO: currently jump to Label 5.
-		|	LOAD_32BIT_VAL TMP1, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)
+		|	LOAD_32BIT_VAL TMP1w, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)
 		|	add TMP1, TMP1, REG0
 		|	ldr REG0, [TMP1]
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
@@ -9465,9 +9518,10 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 				|	IF_ZVAL_TYPE op1_addr, IS_ARRAY, >7, TMP1w, TMP2
 			}
 			|	NIY	// TODO
+			int val = -1;
 			|	LOAD_32BIT_VAL TMP1w, opline->op1.var + offsetof(zval, u2.fe_iter_idx)
 			|	ldr FCARG1w, [FP, TMP1]
-			|	LOAD_32BIT_VAL TMP1w, -1
+			|	LOAD_32BIT_VAL TMP1w, val
 			|	cmp FCARG1w, TMP1w
 			|	beq >7
 			|	EXT_CALL zend_hash_iterator_del, REG0
@@ -9498,11 +9552,7 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 
 			|	SET_EX_OPLINE opline, REG0
 			|	LOAD_ADDR CARG1, str
-			||	if (len <= MAX_IMM12) {
-			|		mov CARG2, #len
-			||	} else {
-			|		LOAD_64BIT_VAL CARG2, len
-			||	}
+			|	LOAD_64BIT_VAL CARG2, len
 			|	EXT_CALL zend_write, REG0
 			if (!zend_jit_check_exception(Dst)) {
 				return 0;
@@ -9784,7 +9834,7 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	|	SET_EX_OPLINE opline, REG0
 	|	// zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
 	|	LOAD_ADDR FCARG1x, zv
-	|	LOAD_32BIT_VAL FCARG2x, opline->op1.num
+	|	LOAD_32BIT_VAL FCARG2w, opline->op1.num
 	|	EXT_CALL zend_jit_get_constant, REG0
 	|	mov REG0, RETVALx
 	|	// ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
