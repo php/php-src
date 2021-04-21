@@ -5727,6 +5727,40 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getGet)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!ref->prop->accessors || !ref->prop->accessors->get) {
+		RETURN_NULL();
+	}
+
+	reflection_method_factory(
+		ref->prop->accessors->get->common.scope, ref->prop->accessors->get, NULL, return_value);
+}
+
+ZEND_METHOD(ReflectionProperty, getSet)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!ref->prop->accessors || !ref->prop->accessors->set) {
+		RETURN_NULL();
+	}
+
+	reflection_method_factory(
+		ref->prop->accessors->set->common.scope, ref->prop->accessors->set, NULL, return_value);
+}
+
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */
 ZEND_METHOD(ReflectionExtension, __construct)
 {

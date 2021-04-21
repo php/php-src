@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 388312e928b54992da6b7e0e0f15dec72d9290f1 */
+ * Stub hash: 7bfb995bcef07303f355cd45d8a2c8c67da0ae4a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -330,6 +330,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty_getDefaultValue arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionProperty_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionProperty_getGet, 0, 0, ReflectionMethod, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty_getSet arginfo_class_ReflectionProperty_getGet
 
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_ReflectionFunctionAbstract___clone
 
@@ -675,6 +680,8 @@ ZEND_METHOD(ReflectionProperty, hasType);
 ZEND_METHOD(ReflectionProperty, hasDefaultValue);
 ZEND_METHOD(ReflectionProperty, getDefaultValue);
 ZEND_METHOD(ReflectionProperty, getAttributes);
+ZEND_METHOD(ReflectionProperty, getGet);
+ZEND_METHOD(ReflectionProperty, getSet);
 ZEND_METHOD(ReflectionClassConstant, __construct);
 ZEND_METHOD(ReflectionClassConstant, __toString);
 ZEND_METHOD(ReflectionClassConstant, getName);
@@ -944,6 +951,8 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, hasDefaultValue, arginfo_class_ReflectionProperty_hasDefaultValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getDefaultValue, arginfo_class_ReflectionProperty_getDefaultValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getAttributes, arginfo_class_ReflectionProperty_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getGet, arginfo_class_ReflectionProperty_getGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getSet, arginfo_class_ReflectionProperty_getSet, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
