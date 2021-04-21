@@ -7200,59 +7200,12 @@ static void zend_compile_accessors(
 		zend_string *name = accessor->name;
 		zend_ast_list *param_list =
 			accessor->child[0] ? zend_ast_get_list(accessor->child[0]) : NULL;
-		zend_ast *stmt_ast = accessor->child[2];
+		zend_ast **stmt_ast_ptr = &accessor->child[2];
 		zend_ast **return_ast_ptr = &accessor->child[3];
+		zend_ast *orig_stmt_ast = *stmt_ast_ptr;
 		CG(zend_lineno) = accessor->start_lineno;
 		bool reset_return_ast = false, reset_param_type_ast = false;
 		uint32_t accessor_kind;
-
-		if (*return_ast_ptr) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Accessor \"%s\" may not have a return type "
-				"(accessor types are determined by the property type)",
-				ZSTR_VAL(name));
-		}
-
-		if (zend_string_equals_literal_ci(name, "get")) {
-			accessor_kind = ZEND_ACCESSOR_GET;
-			if (param_list) {
-				if (param_list->children != 0) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Accessor \"get\" may not have parameters");
-				}
-			} else {
-				accessor->child[0] = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
-			}
-
-			reset_return_ast = true;
-			*return_ast_ptr = prop_type_ast;
-		} else if (zend_string_equals_literal_ci(name, "set")) {
-			accessor_kind = ZEND_ACCESSOR_SET;
-			if (param_list) {
-				if (param_list->children != 1 || !is_valid_set_param(param_list->child[0])) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Accessor \"set\" must have exactly one required by-value parameter");
-				}
-			} else {
-				zend_string *param_name = zend_string_init("value", sizeof("value")-1, 0);
-				zend_ast *param_name_ast = zend_ast_create_zval_from_str(param_name);
-				zend_ast *param = zend_ast_create(
-					ZEND_AST_PARAM, prop_type_ast, param_name_ast,
-					/* expr */ NULL, /* doc_comment */ NULL, /* attributes */ NULL,
-					/* accessors */ NULL);
-				accessor->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
-				reset_param_type_ast = true;
-			}
-			*return_ast_ptr = zend_ast_create_ex(ZEND_AST_TYPE, IS_VOID);
-			if (accessor->flags & ZEND_ACC_RETURN_REFERENCE) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Accessor \"set\" cannot return by reference");
-			}
-		} else {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Unknown accessor \"%s\" for property %s::$%s",
-				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
-		}
 
 		uint32_t accessor_visibility = accessor->flags & ZEND_ACC_PPP_MASK;
 		uint32_t prop_visibility = prop_info->flags & ZEND_ACC_PPP_MASK;
@@ -7298,7 +7251,7 @@ static void zend_compile_accessors(
 			zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be both final and private");
 		}
 		if (accessor->flags & ZEND_ACC_ABSTRACT) {
-			if (stmt_ast) {
+			if (orig_stmt_ast) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Abstract accessor cannot have body");
 			}
 			if (accessor->flags & ZEND_ACC_PRIVATE) {
@@ -7310,18 +7263,88 @@ static void zend_compile_accessors(
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 
+		if (*return_ast_ptr) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Accessor \"%s\" may not have a return type "
+				"(accessor types are determined by the property type)",
+				ZSTR_VAL(name));
+		}
+
+		bool auto_prop = !orig_stmt_ast && !(accessor->flags & ZEND_ACC_ABSTRACT);
+		if (zend_string_equals_literal_ci(name, "get")) {
+			accessor_kind = ZEND_ACCESSOR_GET;
+			if (param_list) {
+				if (param_list->children != 0) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Accessor \"get\" may not have parameters");
+				}
+			} else {
+				accessor->child[0] = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
+			}
+
+			reset_return_ast = true;
+			*return_ast_ptr = prop_type_ast;
+
+			if (auto_prop) {
+				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
+					zend_ast_create(ZEND_AST_VAR,
+						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
+					zend_ast_create_zval_from_str(prop_name));
+				zend_ast *return_stmt = zend_ast_create(ZEND_AST_RETURN, prop_fetch);
+				*stmt_ast_ptr = zend_ast_create_list(1, ZEND_AST_STMT_LIST, return_stmt);
+			}
+		} else if (zend_string_equals_literal_ci(name, "set")) {
+			accessor_kind = ZEND_ACCESSOR_SET;
+			if (param_list) {
+				if (param_list->children != 1 || !is_valid_set_param(param_list->child[0])) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Accessor \"set\" must have exactly one required by-value parameter");
+				}
+			} else {
+				zend_string *param_name = zend_string_init("value", sizeof("value")-1, 0);
+				zend_ast *param_name_ast = zend_ast_create_zval_from_str(param_name);
+				zend_ast *param = zend_ast_create(
+					ZEND_AST_PARAM, prop_type_ast, param_name_ast,
+					/* expr */ NULL, /* doc_comment */ NULL, /* attributes */ NULL,
+					/* accessors */ NULL);
+				accessor->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
+				reset_param_type_ast = true;
+			}
+			*return_ast_ptr = zend_ast_create_ex(ZEND_AST_TYPE, IS_VOID);
+			if (accessor->flags & ZEND_ACC_RETURN_REFERENCE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Accessor \"set\" cannot return by reference");
+			}
+
+			if (auto_prop) {
+				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
+					zend_ast_create(ZEND_AST_VAR,
+						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
+					zend_ast_create_zval_from_str(prop_name));
+				zend_ast *assign_stmt = zend_ast_create(ZEND_AST_ASSIGN, prop_fetch,
+					zend_ast_create(ZEND_AST_VAR,
+						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VALUE))));
+				*stmt_ast_ptr = zend_ast_create_list(1, ZEND_AST_STMT_LIST, assign_stmt);
+			}
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Unknown accessor \"%s\" for property %s::$%s",
+				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+		}
+
 		zend_string *prefixed_name = zend_strpprintf(0, "$%s::%s",
 			zend_get_unmangled_property_name(prop_name), ZSTR_VAL(name));
 		accessor->name = prefixed_name;
 
 		zend_function *func = (zend_function *) zend_compile_func_decl(
 			NULL, (zend_ast *) accessor, /* toplevel */ false);
-		if (stmt_ast) {
-			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-		} else {
-			// TODO: These could use a more compact representation.
-			// Currently we even allocate opcodes for body-less functions.
+		if (auto_prop) {
 			func->common.fn_flags |= ZEND_ACC_AUTO_PROP;
+		}
+
+		// TODO: Make this more precise.
+		if (!auto_prop) {
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		}
 
 		if (!prop_info->accessors) {

@@ -57,9 +57,9 @@ object(ReflectionMethod)#5 (2) {
   ["class"]=>
   string(4) "Test"
 }
-NULL
-Trying to invoke private method Test::$prop2::set() from scope ReflectionMethod
 float(3.141)
+Trying to invoke private method Test::$prop2::set() from scope ReflectionMethod
+int(42)
 
 object(ReflectionMethod)#8 (2) {
   ["name"]=>
