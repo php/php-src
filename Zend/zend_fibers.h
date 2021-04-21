@@ -60,9 +60,6 @@ typedef struct _zend_fiber {
 	/* Fiber PHP object handle. */
 	zend_object std;
 
-	/* Unique ID assigned to this fiber. */
-	zend_long id;
-
 	/* Status of the fiber, one of the ZEND_FIBER_STATUS_* constants. */
 	zend_uchar status;
 

@@ -413,12 +413,10 @@ static zend_object *zend_fiber_object_create(zend_class_entry *ce) /* {{{ */
 	fiber = emalloc(sizeof(zend_fiber));
 	memset(fiber, 0, sizeof(zend_fiber));
 
-	fiber->id = EG(next_fiber_id)++;
-
 	zend_object_std_init(&fiber->std, ce);
 	fiber->std.handlers = &zend_fiber_handlers;
 
-	zend_hash_index_add_ptr(&EG(fibers), fiber->id, fiber);
+	zend_hash_index_add_ptr(&EG(fibers), (uintptr_t) fiber, fiber);
 
 	return &fiber->std;
 }
@@ -443,7 +441,7 @@ static void zend_fiber_object_destroy(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&fiber->value);
 	}
 
-	zend_hash_index_del(&EG(fibers), fiber->id);
+	zend_hash_index_del(&EG(fibers), (uintptr_t) fiber);
 
 	zend_fiber_destroy_context(&fiber->context);
 
@@ -783,7 +781,6 @@ void zend_register_fiber_ce(void)
 void zend_fiber_init(void)
 {
 	EG(current_fiber) = NULL;
-	EG(next_fiber_id) = 0;
 	EG(fiber_error) = NULL;
 
 	zend_hash_init(&EG(fibers), 0, NULL, NULL, 0);

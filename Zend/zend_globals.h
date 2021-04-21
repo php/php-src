@@ -254,9 +254,6 @@ struct _zend_executor_globals {
 	/* Active fiber, NULL when in main thread. */
 	zend_fiber *current_fiber;
 
-	/* Next fiber ID. */
-	zend_long next_fiber_id;
-
 	/* Default fiber C stack size. */
 	zend_long fiber_stack_size;
 
