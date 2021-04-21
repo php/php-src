@@ -22,10 +22,10 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    /** @var string */
+    /** @var string Intentionally left untyped for BC reasons */
     protected $message = "";
     private string $string = "";
-    /** @var int */
+    /** @var int Intentionally left untyped for BC reasons */
     protected $code = 0;
     protected string $file = "";
     protected int $line = 0;
@@ -75,10 +75,10 @@ class ErrorException extends Exception
 
 class Error implements Throwable
 {
-    /** @var string */
+    /** @var string Intentionally left untyped for BC reasons */
     protected $message = "";
     private string $string = "";
-    /** @var int */
+    /** @var int Intentionally left untyped for BC reasons */
     protected $code = 0;
     protected string $file = "";
     protected int $line;

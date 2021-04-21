@@ -761,9 +761,7 @@ void zend_register_default_exception(void) /* {{{ */
 	/* Declared manually because it uses constant E_ERROR. */
 	zval severity_default_value;
 	ZVAL_LONG(&severity_default_value, E_ERROR);
-	zend_string *severity_name = zend_string_init("severity", sizeof("severity") - 1, 1);
-	zend_declare_typed_property(zend_ce_error_exception, severity_name, &severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(severity_name);
+	zend_declare_typed_property(zend_ce_error_exception, ZSTR_KNOWN(ZEND_STR_SEVERITY), &severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
 	zend_ce_error = register_class_Error(zend_ce_throwable);
 	zend_ce_error->create_object = zend_default_exception_new;
