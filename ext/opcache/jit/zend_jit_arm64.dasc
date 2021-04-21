@@ -3179,6 +3179,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
 	zend_reg tmp_reg = ZREG_REG0;
+	bool use_mul = 0;
 
 	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		if (may_overflow && (res_info & MAY_BE_GUARD)
@@ -3258,10 +3259,22 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|	NIY	// TODO: test
 #endif
 	} else if (opcode == ZEND_MUL) {
-		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
-		|	GET_ZVAL_LVAL ZREG_TMP2, op2_addr, TMP2
-		|	mul Rx(result_reg), Rx(result_reg), TMP2
-		|	// TODO: overflow detection
+		use_mul = 1;
+		|	GET_ZVAL_LVAL ZREG_TMP2, op1_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_TMP3, op2_addr, TMP1
+		|	mul Rx(result_reg), TMP2, TMP3
+		if(may_overflow) {
+			/* Use 'smulh' to get the upper 64 bits fo the 128-bit result.
+			 * For signed multiplication, the top 65 bits of the result will contain
+			 * either all zeros or all ones if no overflow occurred.
+			 * Note that 'cmp, TMP1, Rx(result_reg), asr, #63' is not supported by DynASM/arm64
+			 * currently, and we put 'asr' and 'cmp' separately.
+			 * Flag: bne -> overflow. beq -> no overflow.
+			 */
+			|	smulh TMP1, TMP2, TMP3
+			|	asr TMP2, Rx(result_reg), #63
+			|	cmp TMP1, TMP2
+		}
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
 		if ((opcode == ZEND_ADD || opcode == ZEND_SUB)
@@ -3280,7 +3293,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if ((res_info & MAY_BE_ANY) == MAY_BE_LONG) {
-				|	bvs >3
+				if (use_mul) {
+					|	bne >3
+				} else {
+					|	bvs >3
+				}
 				|.cold_code
 				|3:
 				|	EXT_JMP exit_addr, TMP1
@@ -3289,7 +3306,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 					|	mov Rx(Z_REG(res_addr)), Rx(result_reg)
 				}
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				|	bvc >3
+				if (use_mul) {
+					|	beq >3
+				} else {
+					|	bvc >3
+				}
 				|.cold_code
 				|3:
 				|	EXT_JMP exit_addr, TMP1
@@ -3299,9 +3320,17 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			}
 		} else {
 			if (res_info & MAY_BE_LONG) {
-				|	bvs >1
+				if (use_mul) {
+					|	bne >1
+				} else {
+					|	bvs >1
+				}
 			} else {
-				|	bvc >1
+				if (use_mul) {
+					|	beq >1
+				} else {
+					|	bvc >1
+				}
 			}
 		}
 	}
