@@ -7248,6 +7248,10 @@ static void zend_compile_accessors(
 		if (accessor->flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be static");
 		}
+		if (prop_info->flags & ZEND_ACC_STATIC) {
+			// TODO: This restriction can be relaxed.
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare accessors for static property");
+		}
 		if ((accessor->flags & ZEND_ACC_FINAL) && (accessor->flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be both final and private");
 		}
