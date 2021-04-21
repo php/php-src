@@ -163,7 +163,7 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 
 #ifdef VALGRIND_STACK_REGISTER
 	uintptr_t base = (uintptr_t) stack->pointer;
-	stack->valgrind = VALGRIND_STACK_REGISTER(base, base + msize - ZEND_FIBER_GUARD_PAGES * page_size);
+	stack->valgrind = VALGRIND_STACK_REGISTER(base, base + stack->size);
 #endif
 
 	return true;
