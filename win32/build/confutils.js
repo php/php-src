@@ -2266,7 +2266,7 @@ function generate_config_h()
 	indata = infile.ReadAll();
 	infile.Close();
 
-	outfile = FSO.CreateTextFile("main/config.w32.h", true);
+	outfile = FSO.CreateTextFile("main/config.w32.h", true, true);
 
 	indata = indata.replace(new RegExp("@PREFIX@", "g"), prefix);
 	outfile.Write(indata);
