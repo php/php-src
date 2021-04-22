@@ -5889,7 +5889,14 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					|1:
 					break;
 				case ZEND_IS_NOT_IDENTICAL:
-					|	NIY	// TODO
+					if (exit_addr) {
+						| NIY // bvs &exit_addr
+						| NIY // bne &exit_addr
+					} else {
+						| bvs >1
+						| beq => target_label
+						|1:
+					}
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
@@ -5948,7 +5955,14 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					}
 					break;
 				case ZEND_IS_NOT_IDENTICAL:
-					|	NIY	// TODO
+					if (exit_addr) {
+						| bvs >1
+						| NIY // beq &exit_addr
+						|1:
+					} else {
+						| bvs => target_label
+						| bne => target_label
+					}
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
