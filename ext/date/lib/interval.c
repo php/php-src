@@ -127,6 +127,12 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 				rt->d--;
 				rt->h = 24;
 			}
+		} else {
+			/* Then for all the others */
+			rt->h -= dst_h_corr + (two->dst - one->dst);
+			rt->i -= dst_m_corr;
+
+			timelib_do_rel_normalize(rt->invert ? one : two, rt);
 		}
 	} else {
 		/* Then for all the others */
