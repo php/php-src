@@ -1614,7 +1614,15 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 {
 	|->exception_handler_undef:
-	|	NIY_STUB	// TODO
+	|	MEM_LOAD_ZTS ldr, REG0, executor_globals, opline_before_exception, REG0
+	|	ldrb TMP1w, OP:REG0->result_type
+	|	tst TMP1w, #(IS_TMP_VAR|IS_VAR)
+	|	bne >1
+	|	ldr REG0w, OP:REG0->result.var
+	|	add REG0, REG0, FP
+	|	SET_Z_TYPE_INFO REG0, IS_UNDEF, TMP1w
+	|1:
+	|	b ->exception_handler
 
 	return 1;
 }
@@ -9440,15 +9448,61 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 	ZEND_ASSERT(opline->extended_value != MAY_BE_RESOURCE);
 
 	if (op1_info & MAY_BE_UNDEF) {
-		|	NIY	// TODO
+		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+			|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1, TMP1w, TMP2
+			|.cold_code
+			|1:
+		}
+		|	SET_EX_OPLINE opline, REG0
+		|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
+		|	EXT_CALL zend_jit_undefined_op_helper, REG0
+		zend_jit_check_exception_undef_result(Dst, opline);
+		if (opline->extended_value & MAY_BE_NULL) {
+			if (exit_addr) {
+				if (smart_branch_opcode == ZEND_JMPNZ) {
+					|	NIY // b &exit_addr
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0) {
+					|	b >7
+				}
+			} else if (!zend_jit_smart_true(Dst, opline, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0, smart_branch_opcode, target_label, target_label2)) {
+				return 0;
+			}
+		} else {
+			if (exit_addr) {
+				if (smart_branch_opcode == ZEND_JMPZ) {
+					|	NIY // b &exit_addr
+				} else if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0) {
+					|	b >7
+				}
+			} else if (!zend_jit_smart_false(Dst, opline, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0, smart_branch_opcode, target_label)) {
+				return 0;
+			}
+		}
+		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+			|.code
+		}
 	}
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 		mask = opline->extended_value;
 		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
-			|	NIY	// TODO
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
+			if (exit_addr) {
+				if (smart_branch_opcode == ZEND_JMPNZ) {
+					|	NIY // b &exit_addr
+				}
+			} else if (!zend_jit_smart_true(Dst, opline, 0, smart_branch_opcode, target_label, target_label2)) {
+				return 0;
+			}
 	    } else if (!(op1_info & MAY_BE_GUARD) && !(op1_info & mask)) {
-			|	NIY	// TODO
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
+			if (exit_addr) {
+				if (smart_branch_opcode == ZEND_JMPZ) {
+					|	NIY // b &exit_addr
+				}
+			} else if (!zend_jit_smart_false(Dst, opline, 0, smart_branch_opcode, target_label)) {
+				return 0;
+			}
 		} else {
 			bool invert = 0;
 			zend_uchar type;
@@ -9476,36 +9530,177 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 			}
 
 			if (op1_info & MAY_BE_REF) {
-				|	NIY	// TODO
+				|	LOAD_ZVAL_ADDR REG0, op1_addr
+				|	ZVAL_DEREF REG0, op1_info, TMP1w
 			}
 			if (type == 0) {
-				|	NIY	// TODO
+				if (smart_branch_opcode &&
+				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						|	// if (Z_REFCOUNTED_P(cv)) {
+						|	IF_ZVAL_REFCOUNTED op1_addr, >1, TMP1w, TMP2
+						|.cold_code
+						|1:
+					}
+					|	// if (!Z_DELREF_P(cv)) {
+					|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+					|	GC_DELREF FCARG1x, TMP1w
+					if (RC_MAY_BE_1(op1_info)) {
+						if (RC_MAY_BE_N(op1_info)) {
+							|	bne >3
+						}
+						if (op1_info & MAY_BE_REF) {
+							|	ldrb REG0w, [REG0, #offsetof(zval,u1.v.type)]
+						} else {
+							|	LOAD_32BIT_VAL TMP1, (opline->op1.var + offsetof(zval,u1.v.type))
+							|	ldrb REG0w, [FP, TMP1]
+						}
+						|	str REG0w, T1 // save
+						|	// zval_dtor_func(r);
+						|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+						|	ldr REG1w, T1 // restore
+						|	b >2
+					}
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!RC_MAY_BE_1(op1_info)) {
+							|	b >3
+						}
+						|.code
+					}
+					|3:
+					if (op1_info & MAY_BE_REF) {
+						|	ldrb REG1w, [REG0, #offsetof(zval,u1.v.type)]
+					} else {
+						|	LOAD_32BIT_VAL TMP1, (opline->op1.var + offsetof(zval,u1.v.type))
+						|	ldrb REG1w, [FP, TMP1]
+					}
+					|2:
+				} else {
+					if (op1_info & MAY_BE_REF) {
+						|	ldrb REG1w, [REG0, #offsetof(zval,u1.v.type)]
+					} else {
+						|	LOAD_32BIT_VAL TMP1, (opline->op1.var + offsetof(zval,u1.v.type))
+						|	ldrb REG1w, [FP, TMP1]
+					}
+				}
+				|	mov REG0w, #1
+				|	lsl REG0w, REG0w, REG1w
+				|	LOAD_32BIT_VAL TMP1w, mask
+				|	tst REG0w, TMP1w
+				if (exit_addr) {
+					if (smart_branch_opcode == ZEND_JMPNZ) {
+						|	NIY // bne &exit_addr
+					} else {
+						|	NIY // beq &exit_addr
+					}
+				} else if (smart_branch_opcode) {
+					if (smart_branch_opcode == ZEND_JMPZ) {
+						|	beq =>target_label
+					} else if (smart_branch_opcode == ZEND_JMPNZ) {
+						|	bne =>target_label
+					} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+						|	beq =>target_label
+						|	b =>target_label2
+					} else {
+						ZEND_UNREACHABLE();
+					}
+				} else {
+					zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+					|	cset REG0w, ne
+					|	add REG0w, REG0w, #2
+					|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
+				}
 			} else {
 				if (smart_branch_opcode &&
 				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-					|	NIY	// TODO
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						|	// if (Z_REFCOUNTED_P(cv)) {
+						|	IF_ZVAL_REFCOUNTED op1_addr, >1, TMP1w, TMP2
+						|.cold_code
+						|1:
+					}
+					|	// if (!Z_DELREF_P(cv)) {
+					|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+					|	GC_DELREF FCARG1x, TMP1w
+					if (RC_MAY_BE_1(op1_info)) {
+						if (RC_MAY_BE_N(op1_info)) {
+							|	bne >3
+						}
+						if (op1_info & MAY_BE_REF) {
+							|	ldrb REG0w, [REG0, #offsetof(zval,u1.v.type)]
+						} else {
+							|	LOAD_32BIT_VAL TMP1, (opline->op1.var + offsetof(zval,u1.v.type))
+							|	ldrb REG0w, [FP, TMP1]
+						}
+						|	str REG0w, T1 // save
+						|	// zval_dtor_func(r);
+						|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+						|	ldr REG1w, T1 // restore
+						| 	b >2
+					}
+					if ((op1_info) & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						if (!RC_MAY_BE_1(op1_info)) {
+							|	b >3
+						}
+						|.code
+					}
+					|3:
+					if (op1_info & MAY_BE_REF) {
+						|	ldrb REG1w, [REG0, #offsetof(zval,u1.v.type)]
+					} else {
+						|	LOAD_32BIT_VAL TMP1, (opline->op1.var + offsetof(zval,u1.v.type))
+						|	ldrb REG1w, [FP, TMP1]
+					}
+					|2:
+					|	cmp REG1w, #type
 				} else {
 					if (op1_info & MAY_BE_REF) {
-						|	NIY	// TODO
+						|	ldrb TMP1w, [REG0, #offsetof(zval,u1.v.type)]
+						|	cmp TMP1w, #type
 					} else {
-						|	LOAD_32BIT_VAL TMP1w, (opline->op1.var + 8)
-						|	ldrb TMP2w, [FP, TMP1]
-						|	cmp TMP2w, #type
+						|	LOAD_32BIT_VAL TMP1w, (opline->op1.var + offsetof(zval,u1.v.type))
+						|	ldrb TMP1w, [FP, TMP1]
+						|	cmp TMP1w, #type
 					}
 				}
 				if (exit_addr) {
-					|	NIY	// TODO
+					if (invert) {
+						if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	NIY // bne &exit_addr
+						} else {
+							|	NIY // beq &exit_addr
+						}
+					} else {
+						if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	NIY // beq &exit_addr
+						} else {
+							|	NIY // bne &exit_addr
+						}
+					}
 				} else if (smart_branch_opcode) {
 					if (invert) {
-						|	NIY	// TODO
+						if (smart_branch_opcode == ZEND_JMPZ) {
+							|	beq =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPNZ) {
+							|	bne =>target_label
+						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+							|	beq =>target_label
+							|	b =>target_label2
+						} else {
+							ZEND_UNREACHABLE();
+						}
 					} else {
 						if (smart_branch_opcode == ZEND_JMPZ) {
 							|	bne =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPNZ) {
-							|	NIY	// TODO
+							|	beq =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-							|	NIY	// TODO
+							|	bne =>target_label
+							|	b =>target_label2
 						} else {
 							ZEND_UNREACHABLE();
 						}
@@ -9513,7 +9708,14 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 				} else {
 					zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
-					|	NIY	// TODO
+					if (invert) {
+						|	cset REG0w, ne
+					} else {
+						|	cset REG0w, eq
+					}
+					|	add REG0w, REG0w, #2
+					|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
 				}
 			}
 	    }
