@@ -1349,10 +1349,12 @@ ftp_readline(ftpbuf_t *ftp)
 
 		data = eol;
 		if ((rcvd = my_recv(ftp, ftp->fd, data, size)) < 1) {
+			*data = 0;
 			return 0;
 		}
 	} while (size);
 
+	*data = 0;
 	return 0;
 }
 /* }}} */
