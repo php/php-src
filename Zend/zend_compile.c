@@ -7051,7 +7051,7 @@ zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, bool topleve
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
 	bool is_accessor = decl->kind == ZEND_AST_ACCESSOR;
-	zend_string *method_lcname;
+	zend_string *method_lcname = NULL;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
