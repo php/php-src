@@ -8030,7 +8030,6 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		if (opline->op1_type == IS_UNUSED || use_this) {
 			zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 
-			|	NIY	// TODO
 			|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
 		} else {
 		    if (op1_info & MAY_BE_REF) {
@@ -8043,7 +8042,10 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 				} else {
 					/* Hack: Convert reference to regular value to simplify JIT code */
 					ZEND_ASSERT(Z_REG(op1_addr) == ZREG_FP);
-					|	NIY	// TODO
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >1, TMP1w, TMP2
+					|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+					|	EXT_CALL zend_jit_unref_helper, REG0
+					|1:
 				}
 			}
 			if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)- MAY_BE_OBJECT)) {
@@ -8054,12 +8056,11 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 					if (!exit_addr) {
 						return 0;
 					}
-					|	NIY	// TODO
+					|	NIY // IF_NOT_ZVAL_TYPE op1_addr, IS_OBJECT, &exit_addr
 				} else {
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_OBJECT, >1, TMP1w, TMP2
 					|.cold_code
 					|1:
-					|	NIY	// TODO: currently not jump to cold code.
 					if (Z_REG(op1_addr) != ZREG_FCARG1x || Z_OFFSET(op1_addr) != 0) {
 						|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 					}
@@ -8086,7 +8087,11 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 
 		if (func) {
 			|	// fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-			|	NIY	// TODO
+			|	ldr REG0, EX->run_time_cache
+			|	LOAD_32BIT_VAL TMP1w, (opline->result.num + sizeof(void*))
+			|	add REG0, REG0, TMP1
+			|	ldr REG0, [REG0]
+			|	cbz REG0, >1
 		} else {
 			|	// if (CACHED_PTR(opline->result.num) == obj->ce)) {
 			|	ldr REG0, EX->run_time_cache
@@ -8096,7 +8101,6 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 			|	ldr TMP1, [FCARG1x, #offsetof(zend_object, ce)]
 			|	cmp REG2, TMP1
 			|	bne >1
-			|	NIY	// TODO: currently jump to label 1.
 			|	// fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 			|	LOAD_32BIT_VAL TMP1w, (opline->result.num + sizeof(void*))
 			|	add TMP1, TMP1, REG0
@@ -8142,9 +8146,9 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		     !func->common.function_name)) {
 			const zend_op *opcodes = func->op_array.opcodes;
 
-			|	NIY	// TODO
+			|	NIY	// tracing
 		} else {
-			|   NIY	// TODO
+			|   NIY	// tracing
 		}
 	}
 
@@ -8159,11 +8163,21 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	}
 
 	if (!func || (func->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		|	NIY	// TODO
+		|	ldr FCARG1x, T1 // restore
+		|	mov FCARG2x, REG0
+		|	LOAD_32BIT_VAL CARG3w, opline->extended_value
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+			|	EXT_CALL zend_jit_push_static_metod_call_frame_tmp, REG0
+		} else {
+			|	EXT_CALL zend_jit_push_static_metod_call_frame, REG0
+		}
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR) && !use_this)) {
+			|	cbz RETVALx, ->exception_handler
+		}
+		|	mov RX, RETVALx
 	}
 
 	if (!func) {
-		|	NIY	// TODO
 		|	b >9
 		|.code
 	}
@@ -8285,7 +8299,32 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	if (trace && !func) {
-		|	NIY	// TODO
+		if (trace->op == ZEND_JIT_TRACE_DO_ICALL) {
+			ZEND_ASSERT(trace->func->type == ZEND_INTERNAL_FUNCTION);
+#ifndef ZEND_WIN32
+			// TODO: ASLR may cause different addresses in different workers ???
+			func = trace->func;
+			if (JIT_G(current_frame) &&
+			    JIT_G(current_frame)->call &&
+			    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call) >= 0) {
+				call_num_args = TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call);
+			} else {
+				unknown_num_args = 1;
+			}
+#endif
+		} else if (trace->op == ZEND_JIT_TRACE_ENTER) {
+			ZEND_ASSERT(trace->func->type == ZEND_USER_FUNCTION);
+			if (zend_accel_in_shm(trace->func->op_array.opcodes)) {
+				func = trace->func;
+				if (JIT_G(current_frame) &&
+				    JIT_G(current_frame)->call &&
+				    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call) >= 0) {
+					call_num_args = TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call);
+				} else {
+					unknown_num_args = 1;
+				}
+			}
+		}
 	}
 
 	bool may_have_extra_named_params =
@@ -8313,7 +8352,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				if (!exit_addr) {
 					return 0;
 				}
-				|	NIY	// TODO
+				|	ldr REG0, EX:RX->func
+				|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
+				||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= TST_W_IMM);
+				|	tst TMP1w, #ZEND_ACC_DEPRECATED
+				|	NIY // bne &exit_addr
 			}
 		}
 	}
@@ -8345,7 +8388,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	bne >1
 				|.cold_code
 				|1:
-				|	NIY	// TODO
 				if (!GCC_GLOBAL_REGS) {
 					|	mov FCARG1x, RX
 				}
@@ -8359,7 +8401,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|1:
 			}
 		} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
-			|	NIY // TODO
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1x, RX
+			}
+			|	EXT_CALL zend_jit_deprecated_helper, REG0
+			|	cbz RETVALw, ->exception_handler
 		}
 	}
 
@@ -8584,7 +8630,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
-			|	NIY	// TODO: test
 			|	SAVE_IP
 			|	mov FCARG1x, FP
 			|	EXT_CALL zend_observer_fcall_begin, REG0
@@ -8592,7 +8637,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		if (trace) {
 			if (!func && (opline->opcode != ZEND_DO_UCALL)) {
-				|	NIY	// TODO
+				|	b >9
 			}
 		} else {
 #ifdef CONTEXT_THREADED_JIT
@@ -8629,7 +8674,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					if (!exit_addr) {
 						return 0;
 					}
-					|	NIY	// TODO
+					||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= TST_W_IMM);
+					|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
+					|	tst TMP1w, #ZEND_ACC_DEPRECATED
+					|	NIY // bne &exit_addr
 				} else {
 					||	ZEND_ASSERT(ZEND_ACC_DEPRECATED <= TST_W_IMM);
 					|	ldr TMP1w, [REG0, #offsetof(zend_op_array, fn_flags)]
@@ -8637,7 +8685,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	bne >1
 					|.cold_code
 					|1:
-					|	NIY	// TODO
 					if (!GCC_GLOBAL_REGS) {
 						|	mov FCARG1x, RX
 					}
@@ -8651,7 +8698,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|1:
 				}
 			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
-				|	NIY	// TODO
+				if (!GCC_GLOBAL_REGS) {
+					|	mov FCARG1x, RX
+				}
+				|	EXT_CALL zend_jit_deprecated_helper, REG0
+				|	cbz RETVALw, ->exception_handler
+				|	ldr REG0, EX:RX->func // reload
 			}
 		}
 
@@ -8688,7 +8740,16 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, REG0
 		}
 		if (may_have_extra_named_params) {
-			|	NIY // TODO
+		    |	ldrb TMP1w, [RX, #(offsetof(zend_execute_data, This.u1.type_info) + 3)]
+			|	tst TMP1w, #(ZEND_CALL_HAS_EXTRA_NAMED_PARAMS >> 24)
+			|	bne >1
+			|.cold_code
+			|1:
+			|	ldr FCARG1x, [RX, #offsetof(zend_execute_data, extra_named_params)]
+			|	EXT_CALL zend_free_extra_named_params, REG0
+			|	b >2
+			|.code
+			|2:
 		}
 
 		|8:
@@ -8771,7 +8832,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		} else if (trace
 		 && trace->op == ZEND_JIT_TRACE_END
 		 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
-			|	NIY // TODO
+			|	LOAD_IP_ADDR (opline + 1)
 		}
 	}
 
@@ -9583,9 +9644,19 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		return_value_used = -1;
 	}
 
-	// TODO: This macro is only used in four sites. We should design a test variant to cover it.
 	if (ZEND_OBSERVER_ENABLED) {
-		|	NIY	// TODO: test
+		if (Z_MODE(op1_addr) == IS_REG) {
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			if (!zend_jit_spill_store(Dst, op1_addr, dst, op1_info, 1)) {
+				return 0;
+			}
+			op1_addr = dst;
+		}
+		|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+		|	mov FCARG1x, FP
+		|	SET_EX_OPLINE opline, REG0
+		|	EXT_CALL zend_observer_fcall_end, REG0
 	}
 
 	// if (!EX(return_value))
@@ -9615,24 +9686,38 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		}
 		if (return_value_used != 1) {
 			if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				|	NIY	// TODO
+				if (jit_return_label >= 0) {
+					|	IF_NOT_ZVAL_REFCOUNTED op1_addr, =>jit_return_label, TMP1w, TMP2
+				} else {
+					|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >9, TMP1w, TMP2
+				}
 			}
-			|	NIY	// TODO
+			|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+			|	GC_DELREF FCARG1x, TMP1
 			if (RC_MAY_BE_1(op1_info)) {
-				|	NIY	// TODO
+				if (RC_MAY_BE_N(op1_info)) {
+					if (jit_return_label >= 0) {
+						|	bne =>jit_return_label
+					} else {
+						|	bne >9
+					}
+				}
+				|	//SAVE_OPLINE()
+				|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+				|	//????ldr REG1, EX->return_value // reload ???
 			}
 			if (return_value_used == -1) {
 				if (jit_return_label >= 0) {
-					|	NIY	// TODO
+					|	b =>jit_return_label
 				} else {
-					|	NIY	// TODO
+					|	b >9
 				}
 				|.code
 			}
 		}
 	} else if (return_value_used == -1) {
 		if (jit_return_label >= 0) {
-			|	NIY	// TODO: test
+			|	beq =>jit_return_label
 		} else {
 			|	beq >9
 		}
@@ -9640,7 +9725,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 
 	if (return_value_used == 0) {
 		|9:
-		|	NIY	// TODO: test
 		return 1;
 	}
 
@@ -9648,13 +9732,14 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		|	ZVAL_COPY_CONST ret_addr, MAY_BE_ANY, MAY_BE_ANY, zv, ZREG_REG0, ZREG_TMP1, ZREG_FPR0
 		if (Z_REFCOUNTED_P(zv)) {
-			|	NIY // TODO: test
+			|	ADDREF_CONST zv, REG0, TMP1
 		}
 	} else if (opline->op1_type == IS_TMP_VAR) {
 		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 	} else if (opline->op1_type == IS_CV) {
 		if (op1_info & MAY_BE_REF) {
-			|	NIY	// TODO
+			|	LOAD_ZVAL_ADDR REG0, op1_addr
+			|	ZVAL_DEREF REG0, op1_info, TMP1w
 			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
 		}
 		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
@@ -9665,12 +9750,47 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
 			} else if (return_value_used != 1) {
 				|	// if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
-				|	NIY	// TODO
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
 			}
 		}
 	} else {
-		|	NIY	// TODO
+		if (op1_info & MAY_BE_REF) {
+			zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, offsetof(zend_reference, val));
+
+			|	IF_ZVAL_TYPE op1_addr, IS_REFERENCE, >1, TMP1w, TMP2
+			|.cold_code
+			|1:
+			|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
+			|	GET_ZVAL_PTR REG0, op1_addr, TMP1
+			|	// ZVAL_COPY_VALUE(return_value, &ref->value);
+			|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, ref_addr, op1_info, ZREG_REG2, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+			|	GC_DELREF REG0, TMP1
+			|	beq >2
+			|	// if (IS_REFCOUNTED())
+			if (jit_return_label >= 0) {
+				|	IF_NOT_REFCOUNTED REG2w, =>jit_return_label
+			} else {
+				|	IF_NOT_REFCOUNTED REG2w, >9
+			}
+			|	// ADDREF
+			|	GET_ZVAL_PTR REG2, ret_addr, TMP1 // reload
+			|	GC_ADDREF REG2, TMP1
+			if (jit_return_label >= 0) {
+				|	b =>jit_return_label
+			} else {
+				|	b >9
+			}
+			|2:
+			|	mov FCARG1x, REG0
+			|	EFREE_REFERENCE
+			if (jit_return_label >= 0) {
+				|	b =>jit_return_label
+			} else {
+				|	b >9
+			}
+			|.code
+		}
+		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 	}
 
 	|9:
