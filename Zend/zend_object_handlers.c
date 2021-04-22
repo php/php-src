@@ -692,6 +692,7 @@ try_again:
 		}
 
 		bool silent = type == BP_VAR_IS || zobj->ce->__get != NULL;
+		zend_property_info *orig_prop_info = prop_info;
 		get = check_accessor_visibility(&prop_info, zobj->ce, name, get, silent);
 		if (get) {
 			if (!(get->op_array.fn_flags & ZEND_ACC_AUTO_PROP)) {
@@ -723,7 +724,7 @@ try_again:
 				goto try_again;
 			}
 
-			if (cache_slot) {
+			if (cache_slot && prop_info == orig_prop_info) {
 				/* Cache the fact that this accessor has trivial read. This only applies to
 				 * BP_VAR_R and BP_VAR_IS fetches. */
 				CACHE_PTR_EX(cache_slot + 1,
@@ -912,6 +913,7 @@ found:
 		}
 
 		bool silent = zobj->ce->__set != NULL;
+		zend_property_info *orig_prop_info = prop_info;
 		set = check_accessor_visibility(&prop_info, zobj->ce, name, set, silent);
 		if (set) {
 			if (!(set->op_array.fn_flags & ZEND_ACC_AUTO_PROP)) {
@@ -924,7 +926,7 @@ found:
 					OBJ_RELEASE(zobj);
 					return value;
 				}
-			} else if (cache_slot) {
+			} else if (cache_slot && prop_info == orig_prop_info) {
 				/* Cache the fact that this accessor has trivial write. */
 				CACHE_PTR_EX(cache_slot + 1,
 					(void*)((uintptr_t)CACHED_PTR_EX(cache_slot + 1) | ZEND_ACCESSOR_SIMPLE_WRITE_BIT));
