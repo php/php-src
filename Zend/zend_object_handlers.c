@@ -718,6 +718,10 @@ try_again:
 					OBJ_RELEASE(zobj);
 					goto exit;
 				}
+			} else if (cache_slot) {
+				/* Cache the fact that this accessor has trivial read. */
+				CACHE_PTR_EX(cache_slot + 1,
+					(void*)(ZEND_ACCESSOR_PROPERTY_OFFSET | ZEND_ACCESSOR_SIMPLE_READ_BIT));
 			}
 
 			property_offset = prop_info->offset;

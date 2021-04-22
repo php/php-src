@@ -6225,6 +6225,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -6273,6 +6274,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -8562,6 +8568,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -8610,6 +8617,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
@@ -10922,6 +10934,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CONST & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -10970,6 +10983,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -15351,6 +15369,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -15399,6 +15418,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -16781,6 +16805,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMPVAR
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -16829,6 +16854,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
@@ -18103,6 +18133,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_HAN
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -18151,6 +18182,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -31486,6 +31522,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -31534,6 +31571,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -33409,6 +33451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -33457,6 +33500,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
@@ -35925,6 +35973,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_UNUSED & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -35973,6 +36022,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -40123,6 +40177,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -40171,6 +40226,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -43799,6 +43859,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -43847,6 +43908,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
@@ -48852,6 +48918,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+fetch_obj_r_simple:
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (0 || (IS_CV & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -48900,6 +48967,11 @@ fetch_obj_r_fast_copy:
 				} else {
 					/* Fall through to read_property for accessors. */
 					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						goto fetch_obj_r_simple;
+					}
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
