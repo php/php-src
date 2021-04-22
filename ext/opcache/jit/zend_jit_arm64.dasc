@@ -430,7 +430,11 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro LOAD_IP_ADDR_ZTS, struct, field
-|	NIY	// TODO
+|	.if ZTS
+|		NIY	// TODO
+|	.else
+|		LOAD_IP_ADDR &struct.field
+|	.endif
 |.endmacro
 
 |.macro GET_IP, reg
@@ -1664,7 +1668,21 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 static int zend_jit_leave_throw_stub(dasm_State **Dst)
 {
 	|->leave_throw_handler:
-	|	NIY_STUB	// TODO: test
+	|	// if (opline->opcode != ZEND_HANDLE_EXCEPTION) {
+	if (GCC_GLOBAL_REGS) {
+		|	ldrb TMP1w, OP:IP->opcode
+		|	cmp TMP1w, #ZEND_HANDLE_EXCEPTION
+		|	beq >5
+		|	// EG(opline_before_exception) = opline;
+		|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
+		|5:
+		|	// opline = EG(exception_op);
+		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+		|	// HANDLE_EXCEPTION()
+		|	b ->exception_handler
+	} else {
+		|	NIY_STUB // TODO
+	}
 
 	return 1;
 }
@@ -1672,15 +1690,54 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 static int zend_jit_icall_throw_stub(dasm_State **Dst)
 {
 	|->icall_throw_handler:
-	|	NIY_STUB	// TODO
+	|	// zend_rethrow_exception(zend_execute_data *execute_data)
+	|	ldr IP, EX->opline
+	|	// if (EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
+	|	ldrb TMP1w, OP:IP->opcode
+	|	cmp TMP1w,# ZEND_HANDLE_EXCEPTION
+	|	beq >1
+	|	// EG(opline_before_exception) = opline;
+	|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
+	|1:
+	|	// opline = EG(exception_op);
+	|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+	||	if (GCC_GLOBAL_REGS) {
+	|		str IP, EX->opline
+	||	}
+	|	// HANDLE_EXCEPTION()
+	|	b ->exception_handler
 
 	return 1;
 }
 
 static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 {
+	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+
 	|->throw_cannot_pass_by_ref:
-	|	NIY_STUB	// TODO
+	|	ldr REG0, EX->opline
+	|	ldr REG1w, OP:REG0->result.var
+	|	add REG1, REG1, RX
+	|	SET_Z_TYPE_INFO REG1, IS_UNDEF, TMP1w
+	|	// last EX(call) frame may be delayed
+	|	ldr TMP1, EX->call
+	|	cmp RX, TMP1
+	|	beq >1
+	|	ldr REG1, EX->call
+	|	str REG1, EX:RX->prev_execute_data
+	|	str RX, EX->call
+	|1:
+	|	mov RX, REG0
+	|	ldr FCARG1w, OP:REG0->op2.num
+	|	EXT_CALL zend_cannot_pass_by_reference, REG0
+	|	ldrb TMP1w, OP:RX->op1_type
+	|	cmp TMP1w, #IS_TMP_VAR
+	|	bne >9
+	|	ldr REG0, OP:RX->op1.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	b ->exception_handler
 
 	return 1;
 }
@@ -1688,7 +1745,8 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 {
 	|->undefined_offset_ex:
-	|	NIY_STUB	// TODO
+	|	SAVE_IP
+	|	b ->undefined_offset
 
 	return 1;
 }
@@ -1696,7 +1754,28 @@ static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 {
 	|->undefined_offset:
-	|	NIY_STUB	// TODO
+	|	//sub r4, 8
+	|	ldr REG0, EX->opline
+	|	ldr REG1w, OP:REG0->result.var
+	|	add REG1, REG1, FP
+	|	SET_Z_TYPE_INFO REG1, IS_NULL, TMP1w
+	|	ldrb REG1w, OP:REG0->op2_type
+	|	cmp REG1w, #IS_CONST
+	|	bne >2
+	|	ldr REG1w, OP:REG0->op2.constant
+	|	sxtw REG1, REG1w
+	|	add REG0, REG0, REG1
+	|	b >3
+	|2:
+	|	ldr REG0w, OP:REG0->op2.var
+	|	add REG0, REG0, FP
+	|3:
+	|	mov CARG1, #E_WARNING
+	|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
+	|	ldr CARG3, [REG0]
+	|	EXT_JMP zend_error, REG0 // tail call
+	|	//add r4, 8 // stack alignment
+	|	//ret
 
 	return 1;
 }
@@ -1713,7 +1792,29 @@ static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_index_stub(dasm_State **Dst)
 {
 	|->undefined_index:
-	|	NIY_STUB	// TODO
+	|	//sub r4, 8
+	|	ldr REG0, EX->opline
+	|	ldr REG1w, OP:REG0->result.var
+	|	add REG1, REG1, FP
+	|	SET_Z_TYPE_INFO REG1, IS_NULL, TMP1w
+	|	ldrb REG1w, OP:REG0->op2_type
+	|	cmp REG1w, #IS_CONST
+	|	bne >2
+	|	ldr REG1w, OP:REG0->op2.constant
+	|	sxtw REG1, REG1w
+	|   add REG0, REG0, REG1
+	|	b >3
+	|2:
+	|	ldr REG0w, OP:REG0->op2.var
+	|	add REG0, REG0, FP
+	|3:
+	|	mov CARG1, #E_WARNING
+	|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
+	|	ldr CARG3, [REG0]
+	|	add CARG3, CARG3, #offsetof(zend_string, val)
+	|	EXT_JMP zend_error,REG0 // tail call
+	|	//add r4, 8
+	|	//ret
 
 	return 1;
 }
