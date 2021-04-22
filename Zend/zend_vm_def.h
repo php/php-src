@@ -2459,7 +2459,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						} else if (OP_DATA_TYPE == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
+					}
 					zend_hash_add_new(zobj->properties, name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
@@ -2469,6 +2469,16 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 			} else {
 				/* Fall through to write_property for accessors. */
 				ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+				if (ZEND_IS_ACCESSOR_SIMPLE_WRITE(prop_offset)) {
+					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+					property_val = OBJ_PROP(zobj, prop_info->offset);
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+					} else {
+						ZEND_VM_C_GOTO(fast_assign_obj);
+					}
+				}
 			}
 		}
 		name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));

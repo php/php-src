@@ -727,7 +727,7 @@ try_again:
 				/* Cache the fact that this accessor has trivial read. This only applies to
 				 * BP_VAR_R and BP_VAR_IS fetches. */
 				CACHE_PTR_EX(cache_slot + 1,
-					(void*)(ZEND_ACCESSOR_PROPERTY_OFFSET | ZEND_ACCESSOR_SIMPLE_READ_BIT));
+					(void*)((uintptr_t)CACHED_PTR_EX(cache_slot + 1) | ZEND_ACCESSOR_SIMPLE_READ_BIT));
 			}
 
 			retval = OBJ_PROP(zobj, prop_info->offset);
@@ -924,6 +924,10 @@ found:
 					OBJ_RELEASE(zobj);
 					return value;
 				}
+			} else if (cache_slot) {
+				/* Cache the fact that this accessor has trivial write. */
+				CACHE_PTR_EX(cache_slot + 1,
+					(void*)((uintptr_t)CACHED_PTR_EX(cache_slot + 1) | ZEND_ACCESSOR_SIMPLE_WRITE_BIT));
 			}
 
 			property_offset = prop_info->offset;
