@@ -718,14 +718,34 @@ try_again:
 					OBJ_RELEASE(zobj);
 					goto exit;
 				}
-			} else if (cache_slot) {
-				/* Cache the fact that this accessor has trivial read. */
+
+				property_offset = prop_info->offset;
+				goto try_again;
+			}
+
+			if (cache_slot) {
+				/* Cache the fact that this accessor has trivial read. This only applies to
+				 * BP_VAR_R and BP_VAR_IS fetches. */
 				CACHE_PTR_EX(cache_slot + 1,
 					(void*)(ZEND_ACCESSOR_PROPERTY_OFFSET | ZEND_ACCESSOR_SIMPLE_READ_BIT));
 			}
 
-			property_offset = prop_info->offset;
-			goto try_again;
+			retval = OBJ_PROP(zobj, prop_info->offset);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				/* As accessor properties can't be unset, the only way to end up with an undef
+				 * value is via an uninitialized property. */
+				ZEND_ASSERT(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT);
+				goto uninit_error;
+			}
+
+			if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
+					&& !(get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+					&& Z_TYPE_P(retval) != IS_OBJECT) {
+				ZVAL_COPY(rv, retval);
+				retval = rv;
+				zend_error(E_NOTICE, "Indirect modification of accessor property %s::$%s has no effect (did you mean to use \"&get\"?)", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+			}
+			goto exit;
 		} else if (!silent) {
 			return &EG(uninitialized_zval);
 		}
