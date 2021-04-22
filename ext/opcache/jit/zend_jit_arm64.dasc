@@ -83,6 +83,7 @@
 |.define TMP4,    x14
 |.define TMP4w,   w14
 |.define FPTMP,   v16
+|.define FPTMPd,  d16
 
 |.define ZREG_TMP1,   ZREG_X11
 |.define ZREG_TMP2,   ZREG_X12
@@ -3119,13 +3120,13 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 				uint64_t val = 0x3ff0000000000000; // 1.0
 				|	LOAD_64BIT_VAL TMP1, val
-				|	fmov FPR1d, TMP1
-				|	fadd Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPR1d
+				|	fmov FPTMPd, TMP1
+				|	fadd Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMPd
 			} else {
 				uint64_t val = 0x3ff0000000000000; // 1.0
 				|	LOAD_64BIT_VAL TMP1, val
-				|	fmov FPR1d, TMP1
-				|	fsub Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPR1d
+				|	fmov FPTMPd, TMP1
+				|	fsub Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMPd
 			}
 			|	SET_ZVAL_DVAL op1_def_addr, tmp_reg, ZREG_TMP1
 			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
@@ -7038,8 +7039,8 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		|	mov TMP1, #0
-		|	fmov FPR1d, TMP1
-		|	DOUBLE_CMP fcmp, ZREG_FPR1, op1_addr, ZREG_TMP1, ZREG_FPTMP
+		|	fmov FPR0d, TMP1
+		|	DOUBLE_CMP fcmp, ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 		if (set_bool) {
 			if (exit_addr) {
