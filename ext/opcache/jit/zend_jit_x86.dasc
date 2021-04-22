@@ -13688,7 +13688,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >7
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			|	cmp aword [r0 + ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2], 0
+			|	cmp aword [r0 + (opline+1)->extended_value + sizeof(void*) * 2], 0
 			|	jnz >7
 		}
 		|	mov r0, aword [r0 + (opline+1)->extended_value + sizeof(void*)]
@@ -14020,7 +14020,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			|	mov FCARG2a, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2]
+			|	mov FCARG2a, aword [r0 + opline->extended_value + sizeof(void*) * 2]
 		}
 		|	mov r0, aword [r0 + opline->extended_value + sizeof(void*)]
 		|	test r0, r0
