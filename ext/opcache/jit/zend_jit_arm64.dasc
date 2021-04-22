@@ -9880,7 +9880,163 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 	// TODO: support for empty() ???
 	ZEND_ASSERT(!(opline->extended_value & ZEND_ISEMPTY));
 
-	|	NIY	// TODO
+	op2_addr = OP2_ADDR();
+	res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+	if (op1_info & MAY_BE_REF) {
+		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		|	ZVAL_DEREF FCARG1x, op1_info, TMP1w
+		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+	}
+
+	if (op1_info & MAY_BE_ARRAY) {
+		const void *found_exit_addr = NULL;
+		const void *not_found_exit_addr = NULL;
+
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7, TMP1w, TMP2
+		}
+		|	GET_ZVAL_LVAL ZREG_FCARG1x, op1_addr, TMP1
+		if (exit_addr
+		 && !(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY))
+		 && !may_throw
+		 && (!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || op1_avoid_refcounting)
+		 && (!(opline->op2_type & (IS_TMP_VAR|IS_VAR)) || !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)))) {
+			if (smart_branch_opcode == ZEND_JMPNZ) {
+				found_exit_addr = exit_addr;
+			} else {
+				not_found_exit_addr = exit_addr;
+			}
+		}
+		if (!zend_jit_fetch_dimension_address_inner(Dst, opline, BP_JIT_IS, op1_info, op2_info, found_exit_addr, not_found_exit_addr, NULL)) {
+			return 0;
+		}
+
+		if (found_exit_addr) {
+			|9:
+			return 1;
+		} else if (not_found_exit_addr) {
+			|8:
+			return 1;
+		}
+	}
+
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY)) {
+		if (op1_info & MAY_BE_ARRAY) {
+			|.cold_code
+			|7:
+		}
+
+		if (op1_info & (MAY_BE_STRING|MAY_BE_OBJECT)) {
+			|	SET_EX_OPLINE opline, REG0
+		    if (Z_REG(op1_addr) != ZREG_FCARG1x || Z_OFFSET(op1_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+			}
+			if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+				|	LOAD_ADDR FCARG2x, (Z_ZV(op2_addr) + 1)
+			} else {
+				|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
+			}
+			|	EXT_CALL zend_jit_isset_dim_helper, REG0
+			|	cbz RETVALw, >9
+			if (op1_info & MAY_BE_ARRAY) {
+				|	b >8
+				|.code
+			}
+		} else {
+			if (op2_info & MAY_BE_UNDEF) {
+				if (op2_info & MAY_BE_ANY) {
+					|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1, TMP1w, TMP2
+				}
+				|	LOAD_32BIT_VAL FCARG1w, opline->op2.var
+				|	EXT_CALL zend_jit_undefined_op_helper, REG0
+				|1:
+			}
+			if (op1_info & MAY_BE_ARRAY) {
+				|	b >9
+				|.code
+			}
+		}
+	}
+
+#ifdef ZEND_JIT_USE_RC_INFERENCE
+	if ((opline->op2_type & (IS_TMP_VAR|IS_VAR)) && (op1_info & MAY_BE_OBJECT)) {
+		/* Magic offsetExists() may increase refcount of the key */
+		op2_info |= MAY_BE_RCN;
+	}
+#endif
+
+	if (op1_info & (MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_OBJECT)) {
+		|8:
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		if (!op1_avoid_refcounting) {
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		}
+		if (may_throw) {
+			if (!zend_jit_check_exception_undef_result(Dst, opline)) {
+				return 0;
+			}
+		}
+		if (!(opline->extended_value & ZEND_ISEMPTY)) {
+			if (exit_addr) {
+				if (smart_branch_opcode == ZEND_JMPNZ) {
+					|	NIY // b &exit_addr
+				} else {
+					|	b >8
+				}
+			} else if (smart_branch_opcode) {
+				if (smart_branch_opcode == ZEND_JMPZ) {
+					|	b =>target_label2
+				} else if (smart_branch_opcode == ZEND_JMPNZ) {
+					|	b =>target_label
+				} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+					|	b =>target_label2
+				} else {
+					ZEND_UNREACHABLE();
+				}
+			} else {
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+				|	b >8
+			}
+		} else {
+			|	NIY // TODO: support for empty()
+		}
+	}
+
+	|9: // not found
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+	if (!op1_avoid_refcounting) {
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+	}
+	if (may_throw) {
+		if (!zend_jit_check_exception_undef_result(Dst, opline)) {
+			return 0;
+		}
+	}
+	if (!(opline->extended_value & ZEND_ISEMPTY)) {
+		if (exit_addr) {
+			if (smart_branch_opcode == ZEND_JMPZ) {
+				|	NIY // b &exit_addr
+			}
+		} else if (smart_branch_opcode) {
+			if (smart_branch_opcode == ZEND_JMPZ) {
+				|	b =>target_label
+			} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+				|	b =>target_label
+			} else {
+				ZEND_UNREACHABLE();
+			}
+		} else {
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+		}
+	} else {
+		|	NIY // TODO: support for empty()
+	}
+
+	|8:
+
 	return 1;
 }
 
