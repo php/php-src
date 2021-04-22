@@ -873,6 +873,11 @@ PHP_METHOD(xmlreader, open)
 		RETURN_FALSE;
 	}
 
+	if (encoding && CHECK_NULL_PATH(encoding, encoding_len)) {
+		php_error_docref(NULL, E_WARNING, "Encoding must not contain NUL bytes");
+		RETURN_FALSE;
+	}
+
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 
 	if (valid_file) {
@@ -1052,6 +1057,11 @@ PHP_METHOD(xmlreader, XML)
 
 	if (!source_len) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
+		RETURN_FALSE;
+	}
+
+	if (encoding && CHECK_NULL_PATH(encoding, encoding_len)) {
+		php_error_docref(NULL, E_WARNING, "Encoding must not contain NUL bytes");
 		RETURN_FALSE;
 	}
 
