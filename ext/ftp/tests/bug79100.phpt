@@ -19,4 +19,4 @@ ftp_systype($ftp);
 bool(true)
 bool(true)
 
-Warning: ftp_systype(): Connection timed out in %s on line %d
+Warning: ftp_systype(): %rConnection|Operation%r timed out in %s on line %d
