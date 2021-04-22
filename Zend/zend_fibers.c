@@ -351,7 +351,7 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	if (EG(exception)) {
 		if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-			if (EXPECTED(zend_is_fiber_exit(EG(exception)))) {
+			if (EXPECTED(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))) {
 				zend_clear_exception();
 			} else {
 				zend_exception_error(EG(exception), E_ERROR);
@@ -514,9 +514,11 @@ ZEND_METHOD(Fiber, suspend)
 	if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
 		// This occurs when the fiber is GC'ed while suspended, do not add a ref.
 		if (EG(fiber_error)) {
+			// Throw UnwindExit so finally blocks are not executed on fatal error.
 			zend_throw_unwind_exit();
 		} else {
-			zend_throw_fiber_exit();
+			// Otherwise throw GracefulExit to execute finally blocks.
+			zend_throw_graceful_exit();
 		}
 		RETURN_THROWS();
 	}
