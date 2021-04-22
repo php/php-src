@@ -11465,19 +11465,15 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 		if (may_throw) {
-			|	NIY	// TODO
 			|	SET_EX_OPLINE opline, REG0
 		}
 		if (opline->opcode == ZEND_FE_FREE && (op1_info & (MAY_BE_OBJECT|MAY_BE_REF))) {
 			if (op1_info & MAY_BE_ARRAY) {
-				|	NIY	// TODO
 				|	IF_ZVAL_TYPE op1_addr, IS_ARRAY, >7, TMP1w, TMP2
 			}
-			|	NIY	// TODO
-			int val = -1;
-			|	LOAD_32BIT_VAL TMP1w, opline->op1.var + offsetof(zval, u2.fe_iter_idx)
+			|	LOAD_32BIT_VAL TMP1w, (opline->op1.var + offsetof(zval, u2.fe_iter_idx))
 			|	ldr FCARG1w, [FP, TMP1]
-			|	LOAD_32BIT_VAL TMP1w, val
+			|	mvn TMP1w, wzr // TODO: DynAsm fails loading #-1
 			|	cmp FCARG1w, TMP1w
 			|	beq >7
 			|	EXT_CALL zend_hash_iterator_del, REG0
