@@ -5213,7 +5213,22 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 
 	if (op1_info & MAY_BE_REF) {
 		binary_op_type binary_op = get_binary_op(opline->extended_value);
-		|	NIY	// TODO
+		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		|	IF_NOT_Z_TYPE, FCARG1x, IS_REFERENCE, >1, TMP1w
+		|	GET_Z_PTR FCARG1x, FCARG1x
+		|	ldr TMP1, [FCARG1x, #offsetof(zend_reference, sources.ptr)]
+		|	cbnz TMP1, >2
+		|	add FCARG1x, FCARG1x, #offsetof(zend_reference, val)
+		|.cold_code
+		|2:
+		|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
+		|	LOAD_ADDR CARG3, binary_op
+		|	SET_EX_OPLINE opline, REG0
+		|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+		zend_jit_check_exception(Dst);
+		|	b >9
+		|.code
+		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
 	}
 
@@ -5243,7 +5258,7 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 			ZEND_UNREACHABLE();
 	}
 	|9:
-	return 1;
+	return result;
 }
 
 static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
