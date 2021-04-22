@@ -738,12 +738,15 @@ try_again:
 				goto uninit_error;
 			}
 
-			if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
-					&& !(get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
-					&& Z_TYPE_P(retval) != IS_OBJECT) {
+			if (UNEXPECTED(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
+				if (UNEXPECTED(!(get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+						&& Z_TYPE_P(retval) != IS_OBJECT)) {
+					zend_error(E_NOTICE, "Indirect modification of accessor property %s::$%s has no effect (did you mean to use \"&get\"?)", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				} else {
+					ZVAL_MAKE_REF(retval);
+				}
 				ZVAL_COPY(rv, retval);
 				retval = rv;
-				zend_error(E_NOTICE, "Indirect modification of accessor property %s::$%s has no effect (did you mean to use \"&get\"?)", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 			goto exit;
 		} else if (!silent) {

@@ -28,6 +28,12 @@ var_dump($test->byVal);
 
 var_dump($test->byRefType);
 
+try {
+    $test->byRef =& $ref;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECTF--
 array(1) {
@@ -39,3 +45,4 @@ Notice: Indirect modification of accessor property Test::$byVal has no effect (d
 array(0) {
 }
 int(42)
+Cannot assign by reference to overloaded object
