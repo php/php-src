@@ -5197,7 +5197,202 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
 
-	|	NIY	// TODO
+	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
+	op3_addr = OP1_DATA_ADDR();
+
+	if (op1_info & MAY_BE_REF) {
+		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		|	IF_NOT_Z_TYPE FCARG1x, IS_REFERENCE, >1, TMP1w
+		|	GET_Z_PTR FCARG2x, FCARG1x
+		|	ldrb TMP1w, [FCARG2x, #(offsetof(zend_reference, val) + offsetof(zval, u1.v.type))]
+		|	cmp TMP1w, #IS_ARRAY
+		|	bne >2
+		|	add FCARG1x, FCARG2x, #offsetof(zend_reference, val)
+		|	b >3
+		|.cold_code
+		|2:
+		|	SET_EX_OPLINE opline, REG0
+		|	EXT_CALL zend_jit_prepare_assign_dim_ref, REG0
+		|	mov FCARG1x, RETVALx
+		|	cbnz RETVALx, >1
+		|	b ->exception_handler_undef
+		|.code
+		|1:
+		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
+	}
+
+	if (op1_info & MAY_BE_ARRAY) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7, TMP1w, TMP2
+		}
+		|3:
+		|	SEPARATE_ARRAY op1_addr, op1_info, 1, ZREG_TMP1, ZREG_TMP2
+	}
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+		if (op1_info & MAY_BE_ARRAY) {
+			|.cold_code
+			|7:
+		}
+		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE, TMP1w, TMP2
+			|	bgt >7
+		}
+		if (op1_info & MAY_BE_UNDEF) {
+			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1, TMP1w, TMP2
+			}
+			|	SET_EX_OPLINE opline, REG0
+			|	LOAD_32BIT_VAL FCARG1x, opline->op1.var
+			|	EXT_CALL zend_jit_undefined_op_helper, REG0
+			|1:
+		}
+		|	// ZVAL_ARR(container, zend_new_array(8));
+		if (Z_REG(op1_addr) != ZREG_FP) {
+			|	str Rx(Z_REG(op1_addr)), T1 // save
+		}
+		|	EXT_CALL _zend_new_array_0, REG0
+		|	mov REG0, RETVALx
+		if (Z_REG(op1_addr) != ZREG_FP) {
+			|	ldr Rx(Z_REG(op1_addr)), T1 // restore
+		}
+		|	SET_ZVAL_LVAL_FROM_REG op1_addr, REG0, TMP1
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX, TMP1w, TMP2
+		|	mov FCARG1x, REG0
+		if (op1_info & MAY_BE_ARRAY) {
+			|	b >1
+			|.code
+			|1:
+		}
+	}
+
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+		uint32_t var_info;
+		uint32_t var_def_info = zend_array_element_type(op1_def_info, opline->op1_type, 1, 0);
+
+		|6:
+		if (opline->op2_type == IS_UNUSED) {
+			var_info = MAY_BE_NULL;
+
+			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
+			|	LOAD_ADDR_ZTS FCARG2x, executor_globals, uninitialized_zval
+			|	EXT_CALL zend_hash_next_index_insert, REG0
+			|	mov REG0, RETVALx
+			|	// if (UNEXPECTED(!var_ptr)) {
+			|	cbz REG0, >1
+			|.cold_code
+			|1:
+			|	// zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			|	CANNOT_ADD_ELEMENT opline
+			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
+			|	b >9
+			|.code
+		} else {
+			var_info = zend_array_element_type(op1_info, opline->op1_type, 0, 0);
+			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
+				var_info |= MAY_BE_REF;
+			}
+			if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				var_info |= MAY_BE_RC1;
+			}
+
+			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, BP_VAR_RW, op1_info, op2_info, NULL, NULL, NULL)) {
+				return 0;
+			}
+
+			|8:
+			if (op1_info & (MAY_BE_ARRAY_OF_REF)) {
+				binary_op_type binary_op = get_binary_op(opline->extended_value);
+				|	IF_NOT_Z_TYPE, REG0, IS_REFERENCE, >1, TMP1w
+				|	GET_Z_PTR FCARG1x, REG0
+				|	ldr TMP1, [FCARG1x, #offsetof(zend_reference, sources.ptr)]
+				|	cbnz TMP1, >2
+				|	add REG0, FCARG1x, #offsetof(zend_reference, val)
+				|.cold_code
+				|2:
+				|	LOAD_ZVAL_ADDR FCARG2x, op3_addr
+				|	LOAD_ADDR CARG3, binary_op
+				|	SET_EX_OPLINE opline, REG0
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+				zend_jit_check_exception(Dst);
+				|	b >9
+				|.code
+				|1:
+			}
+		}
+
+		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+		switch (opline->extended_value) {
+			case ZEND_ADD:
+			case ZEND_SUB:
+			case ZEND_MUL:
+			case ZEND_DIV:
+				if (!zend_jit_math_helper(Dst, opline, opline->extended_value, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, op1_data_info, 0, var_addr, var_def_info, var_info,
+						1 /* may overflow */, may_throw)) {
+					return 0;
+				}
+				break;
+			case ZEND_BW_OR:
+			case ZEND_BW_AND:
+			case ZEND_BW_XOR:
+			case ZEND_SL:
+			case ZEND_SR:
+			case ZEND_MOD:
+				if (!zend_jit_long_math_helper(Dst, opline, opline->extended_value,
+						IS_CV, opline->op1, var_addr, var_info, NULL,
+						(opline+1)->op1_type, (opline+1)->op1, op3_addr, op1_data_info,
+						op1_data_range,
+						0, var_addr, var_def_info, var_info, may_throw)) {
+					return 0;
+				}
+				break;
+			case ZEND_CONCAT:
+				if (!zend_jit_concat_helper(Dst, opline, IS_CV, opline->op1, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, op1_data_info, var_addr,
+						may_throw)) {
+					return 0;
+				}
+				break;
+			default:
+				ZEND_UNREACHABLE();
+		}
+	}
+
+	if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
+		binary_op_type binary_op;
+
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+			|.cold_code
+			|7:
+		}
+
+		|	SET_EX_OPLINE opline, REG0
+		if (Z_REG(op1_addr) != ZREG_FCARG1x || Z_OFFSET(op1_addr) != 0) {
+			|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
+		}
+	    if (opline->op2_type == IS_UNUSED) {
+			|	mov FCARG2x, xzr
+		} else if (opline->op2_type == IS_CONST && Z_EXTRA_P(RT_CONSTANT(opline, opline->op2)) == ZEND_EXTRA_VALUE) {
+			ZEND_ASSERT(Z_MODE(op2_addr) == IS_CONST_ZVAL);
+			|	LOAD_ADDR FCARG2x, (Z_ZV(op2_addr) + 1)
+		} else {
+			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
+		}
+		binary_op = get_binary_op(opline->extended_value);
+		|	LOAD_ZVAL_ADDR CARG3, op3_addr
+		|	LOAD_ADDR CARG4, binary_op
+		|	EXT_CALL zend_jit_assign_dim_op_helper, REG0
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
+
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
+			|	b >9 // END
+			|.code
+		}
+	}
+
+	|9:
+	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+
 	return 1;
 }
 
