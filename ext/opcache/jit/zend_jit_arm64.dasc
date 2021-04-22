@@ -4576,7 +4576,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|	b >9
 				break;
 			case BP_VAR_W:
-				|	EXT_CALL zend_jit_fetch_dim_w_helper, RETVALx
+				|	EXT_CALL zend_jit_fetch_dim_w_helper, REG0
 				|	mov REG0, RETVALx
 				|	cbnz REG0, >8
 				|	b >9
@@ -5123,12 +5123,13 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t
 				|	str Rx(Z_REG(op1_addr)), T1 // save
 			}
 			|	EXT_CALL _zend_new_array_0, REG0
+			|	mov REG0, RETVALx
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	ldr Rx(Z_REG(op1_addr)), T1 // restore
 			}
-			|	SET_ZVAL_LVAL_FROM_REG op1_addr, RETVALx, TMP1
+			|	SET_ZVAL_LVAL_FROM_REG op1_addr, REG0, TMP1
 			|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX, TMP1w, TMP2
-			|	mov FCARG1x, RETVALx
+			|	mov FCARG1x, REG0
 			|	// ZEND_VM_C_GOTO(assign_dim_op_new_array);
 			|	b <6
 			|2:
