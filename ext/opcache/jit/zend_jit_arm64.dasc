@@ -10829,7 +10829,82 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_string *varname = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 
-	|	NIY	// TODO
+	|	// idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
+	|	ldr REG0, EX->run_time_cache
+	|	LOAD_32BIT_VAL TMP1, opline->extended_value
+	|	ldr REG0, [REG0, TMP1]
+	|	sub REG0, REG0, #1
+	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
+	|	MEM_LOAD_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
+	|	lsl REG1, REG1, #5
+	|	cmp REG0, REG1
+	|	bhs >9
+	|	// Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
+	|	MEM_LOAD_ZTS ldr, TMP1, executor_globals, symbol_table.arData, REG1
+	|	add REG0, REG0, TMP1
+	|	IF_NOT_Z_TYPE REG0, IS_REFERENCE, >9, TMP1w
+	|	// (EXPECTED(p->key == varname))
+	|	ldr TMP1, [REG0, #offsetof(Bucket, key)]
+	|	LOAD_ADDR TMP2, varname
+	|	cmp TMP1, TMP2
+	|	bne >9
+	|	GET_Z_PTR REG0, REG0
+	|	GC_ADDREF REG0, TMP1w
+	|1:
+	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	// if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
+			|	IF_ZVAL_REFCOUNTED op1_addr, >2, TMP1w, TMP2
+			|.cold_code
+			|2:
+		}
+		|	// zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+		|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+		|	// ZVAL_REF(variable_ptr, ref)
+		|	SET_ZVAL_PTR op1_addr, REG0, TMP1
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX, TMP1w, TMP2
+		|	// if (GC_DELREF(garbage) == 0)
+		|	GC_DELREF FCARG1x, TMP1w
+		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			|	bne >3
+		} else {
+			|	bne >5
+		}
+		|	ZVAL_DTOR_FUNC op1_info, opline, TMP1
+		|	b >5
+		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			|3:
+			|	// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
+			|	IF_GC_MAY_NOT_LEAK FCARG1x, >5, TMP1w, TMP2w
+			|	EXT_CALL gc_possible_root, REG0
+			|	b >5
+		}
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|.code
+		}
+	}
+
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		|	// ZVAL_REF(variable_ptr, ref)
+		|	SET_ZVAL_PTR op1_addr, REG0, TMP1
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX, TMP1w, TMP2
+	}
+	|5:
+	//END of handler
+
+	|.cold_code
+	|9:
+	|	LOAD_ADDR FCARG1x, (ptrdiff_t)varname
+	|	ldr FCARG2x, EX->run_time_cache
+	if (opline->extended_value) {
+		|	LOAD_32BIT_VAL TMP1, opline->extended_value
+		|	add FCARG2x, FCARG2x, TMP1
+	}
+	|	EXT_CALL zend_jit_fetch_global_helper, REG0
+	|	mov REG0, RETVALx
+	|	b <1
+	|.code
+
 	return 1;
 }
 
