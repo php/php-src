@@ -3230,7 +3230,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			}
 		} else {
 			|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
-			|	mov TMP1, #floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+			|	mov TMP1, #floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
 			|	lsl Rx(result_reg), Rx(result_reg), TMP1
 			|	// TODO: overflow may be missed
 		}
