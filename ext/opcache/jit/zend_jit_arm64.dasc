@@ -11505,7 +11505,17 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 
 		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
 
-		|	NIY	// TODO: test
+		|	SET_EX_OPLINE opline, REG0
+		|	GET_ZVAL_PTR REG0, op1_addr, TMP1
+		|	add CARG1, REG0, #offsetof(zend_string, val)
+		|	ldr CARG2, [REG0, #offsetof(zend_string, len)]
+		|	EXT_CALL zend_write, REG0
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, opline, ZREG_TMP1, ZREG_TMP2
+		}
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
 	}
 	return 1;
 }
