@@ -11655,7 +11655,25 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1
 {
 	zend_jit_addr res_addr = RES_ADDR();
 
-	|	NIY	// TODO
+	if (opline->op1_type == IS_CONST) {
+		zval *zv;
+		size_t len;
+
+		zv = RT_CONSTANT(opline, opline->op1);
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+		len = Z_STRLEN_P(zv);
+
+		|	SET_ZVAL_LVAL res_addr, len, TMP1, TMP2
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+	} else {
+		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
+
+		|	GET_ZVAL_PTR REG0, op1_addr, TMP1
+		|	ldr REG0, [REG0, #offsetof(zend_string, len)]
+		|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+	}
 	return 1;
 }
 
@@ -11663,7 +11681,27 @@ static int zend_jit_count(dasm_State **Dst, const zend_op *opline, uint32_t op1_
 {
 	zend_jit_addr res_addr = RES_ADDR();
 
-	|	NIY // TODO
+	if (opline->op1_type == IS_CONST) {
+		zval *zv;
+		zend_long count;
+
+		zv = RT_CONSTANT(opline, opline->op1);
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+		count = zend_hash_num_elements(Z_ARRVAL_P(zv));
+
+		|	SET_ZVAL_LVAL res_addr, count, TMP1, TMP2
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+	} else {
+		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY);
+		// Note: See the implementation of ZEND_COUNT in Zend/zend_vm_def.h - arrays do not contain IS_UNDEF starting in php 8.1+.
+
+		|	GET_ZVAL_PTR REG0, op1_addr, TMP1
+		// Sign-extend the 32-bit value to a potentially 64-bit zend_long
+		|	ldr REG0w, [REG0, #offsetof(HashTable, nNumOfElements)]
+		|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+	}
 
 	if (may_throw) {
 		return zend_jit_check_exception(Dst);
