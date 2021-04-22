@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #80900 (switch statement behavior inside function). (twosee)
 
+- XMLReader:
+  . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
+
 29 Apr 2021, PHP 7.4.18
 
 - Core:
