@@ -1908,10 +1908,13 @@ found:
 					*guard &= ~IN_GET;
 					OBJ_RELEASE(zobj);
 
-					result = has_set_exists == ZEND_PROPERTY_NOT_EMPTY
-						? i_zend_is_true(&rv)
-						: (Z_TYPE(rv) != IS_NULL
-							&& (Z_TYPE(rv) != IS_REFERENCE || Z_TYPE_P(Z_REFVAL(rv)) != IS_NULL));
+					if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY) {
+						result = zend_is_true(&rv);
+					} else {
+						ZEND_ASSERT(has_set_exists == ZEND_PROPERTY_ISSET);
+						result = Z_TYPE(rv) != IS_NULL
+							&& (Z_TYPE(rv) != IS_REFERENCE || Z_TYPE_P(Z_REFVAL(rv)) != IS_NULL);
+					}
 					zval_ptr_dtor(&rv);
 					return result;
 				}
