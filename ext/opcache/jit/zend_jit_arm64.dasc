@@ -6710,7 +6710,7 @@ static int zend_jit_identical(dasm_State    **Dst,
 			     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
 			    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
 			     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
-				|	str REG0, T1 // save
+				|	str RETVALw, T1 // save
 				|	SET_EX_OPLINE opline, REG0
 				if (opline->opcode != ZEND_CASE_STRICT) {
 					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
@@ -6719,23 +6719,22 @@ static int zend_jit_identical(dasm_State    **Dst,
 				if (may_throw) {
 					zend_jit_check_exception_undef_result(Dst, opline);
 				}
-				|	ldr REG0, T1 // restore
+				|	ldr RETVALw, T1 // restore
 			}
 		if (smart_branch_opcode) {
-			|	cmp RETVALw, #0
 			if (exit_addr) {
 				if (smart_branch_opcode == ZEND_JMPNZ) {
-					|	NIY // bne &exit_addr
+					|	NIY // cbnz RETVALw, &exit_addr
 				} else {
-					|	NIY // beq &exit_addr
+					|	NIY // cbz RETVALw, &exit_addr
 				}
 			} else if (not_identical_label != (uint32_t)-1) {
-				|	beq =>not_identical_label
+				|	cbz RETVALw, =>not_identical_label
 				if (identical_label != (uint32_t)-1) {
 					|	b =>identical_label
 				}
 			} else if (identical_label != (uint32_t)-1) {
-				|	bne =>identical_label
+				|	cbnz RETVALw, =>identical_label
 			}
 		} else {
 			if (opline->opcode != ZEND_IS_NOT_IDENTICAL) {
