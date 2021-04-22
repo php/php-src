@@ -616,8 +616,8 @@ static void* dasm_labels[zend_lb_MAX];
 // Convert the LONG value 'lval' into DOUBLE type, and move it into 'reg'
 |.macro DOUBLE_GET_LONG, reg, lval, tmp_reg
 ||	if (lval == 0) {
-|		NIY	//	TODO: test
-|		// vxorps xmm(reg-ZREG_V0), xmm(reg-ZREG_V0), xmm(reg-ZREG_V0)
+|		mov Rx(tmp_reg), xzr
+|		fmov Rd(reg-ZREG_V0), Rx(tmp_reg)
 ||	} else {
 |		LOAD_64BIT_VAL Rx(tmp_reg), lval
 |		scvtf Rd(reg-ZREG_V0), Rx(tmp_reg)
@@ -633,7 +633,6 @@ static void* dasm_labels[zend_lb_MAX];
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rx(tmp_reg1), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg2)
 |		scvtf Rd(reg-ZREG_V0), Rx(tmp_reg1)
 ||	} else if (Z_MODE(addr) == IS_REG) {
-|		NIY	// TODO: test
 |		scvtf Rd(reg-ZREG_V0), Rx(Z_REG(addr))
 ||	} else {
 ||		ZEND_UNREACHABLE();
@@ -707,7 +706,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= CMP_IMM) {
 |			cmp Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
 ||		} else {
-|			NIY	// TODO
 |			LOAD_64BIT_VAL tmp_reg1, Z_LVAL_P(Z_ZV(addr))
 |			cmp Rx(reg), tmp_reg1
 ||		}
@@ -973,7 +971,6 @@ static void* dasm_labels[zend_lb_MAX];
 |					SET_ZVAL_LVAL_FROM_REG dst_addr, Rx(Z_REG(src_addr)), Rx(tmp_reg)
 ||				}
 ||			} else if (Z_MODE(dst_addr) == IS_REG) {
-|				NIY	// TODO: test
 |				GET_ZVAL_LVAL Z_REG(dst_addr), src_addr, Rx(tmp_reg)
 ||			} else {
 |				GET_ZVAL_LVAL reg2, src_addr, Rx(tmp_reg)
@@ -981,13 +978,10 @@ static void* dasm_labels[zend_lb_MAX];
 ||			}
 ||		} else if ((src_info & (MAY_BE_ANY|MAY_BE_GUARD)) == MAY_BE_DOUBLE) {
 ||			if (Z_MODE(src_addr) == IS_REG) {
-|				NIY	// TODO: test
 |				SET_ZVAL_DVAL dst_addr, Z_REG(src_addr), tmp_reg
 ||			} else if (Z_MODE(dst_addr) == IS_REG) {
-|				NIY	// TODO: test
 |				GET_ZVAL_DVAL Z_REG(dst_addr), src_addr, tmp_reg
 ||			} else {
-|				NIY	// TODO: test
 |				GET_ZVAL_DVAL fp_tmp_reg, src_addr, tmp_reg
 |				SET_ZVAL_DVAL dst_addr, fp_tmp_reg, tmp_reg
 ||			}
@@ -1256,7 +1250,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||				break;
 ||			} else if (type == IS_OBJECT) {
 ||				if (opline) {
-|					NIY	// TODO
+|					SET_EX_OPLINE opline, REG0
 ||				}
 |				EXT_CALL zend_objects_store_del, tmp_reg
 ||				break;
@@ -1416,7 +1410,6 @@ static void* dasm_labels[zend_lb_MAX];
 |		mov REG0, RETVALx
 ||	}
 ||#else
-|		NIY	// TODO
 |		mov FCARG1x, #size
 |		EXT_CALL _emalloc, REG0
 |		mov REG0, RETVALx
