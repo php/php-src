@@ -1634,7 +1634,6 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_TOP
 		|	tst FCARG1w, TMP1w
 		|	bne >1
-		|	NIY_STUB	// TODO: currently jump to label 1.
 		|	EXT_CALL zend_jit_leave_nested_func_helper, REG0
 		|	ADD_HYBRID_SPAD
 		|	JMP_IP TMP1
@@ -1654,7 +1653,6 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_TOP
 		|	tst FCARG1w, TMP1w
 		|	bne >1
-		|	NIY_STUB	// TODO: currently jump to label 1.
 		|	EXT_JMP zend_jit_leave_nested_func_helper, REG0
 		|1:
 		|	EXT_JMP zend_jit_leave_top_func_helper, REG0
@@ -2048,7 +2046,6 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	}
 
 	|1:
-	|	NIY_STUB  // TODO: test
 	|	blt ->trace_halt
 
 	|	// execute_data = EG(current_execute_data)
