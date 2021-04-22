@@ -11955,7 +11955,6 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	|	ldr REG0, [FCARG1x, TMP1]
 	|	// if (c != NULL)
 	|	cbz REG0, >9
-	|	NIY	// TODO
 	|	// if (!IS_SPECIAL_CACHE_VAL(c))
 	|	tst REG0, #CACHE_SPECIAL
 	|	bne >9
@@ -11980,7 +11979,19 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 
 		zend_uchar type = concrete_type(res_info);
 
-		|	NIY	// TODO
+		if (type < IS_STRING) {
+			|	NIY // IF_NOT_ZVAL_TYPE const_addr, type, &exit_addr
+		} else {
+			|	GET_ZVAL_TYPE_INFO REG2w, const_addr, TMP1
+			|	NIY // IF_NOT_TYPE REF2w, type, &exit_addr
+		}
+		|	ZVAL_COPY_VALUE_V res_addr, -1, const_addr, res_info, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_FPR0
+		if (type < IS_STRING) {
+			|	SET_ZVAL_TYPE_INFO res_addr, type, TMP1w, TMP2
+		} else {
+			|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG2w, TMP1
+			|	TRY_ADDREF res_info, REG2w, REG1, TMP1w
+		}
 	} else {
 		|	ZVAL_COPY_VALUE res_addr, MAY_BE_ANY, const_addr, MAY_BE_ANY, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 		|	TRY_ADDREF MAY_BE_ANY, REG0w, REG1, TMP1w
@@ -11997,7 +12008,6 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	|	mov REG0, RETVALx
 	|	// ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	|	cbnz REG0, <8
-	|	NIY	// TODO
 	|	b ->exception_handler
 	|.code
 	return 1;
