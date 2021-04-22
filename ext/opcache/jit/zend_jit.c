@@ -195,11 +195,6 @@ static bool zend_is_commutative(zend_uchar opcode)
 		opcode == ZEND_BW_XOR;
 }
 
-static bool zend_long_is_power_of_two(zend_long x)
-{
-	return (x > 0) && !(x & (x - 1));
-}
-
 #define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
 	  ssa->var_info && \
