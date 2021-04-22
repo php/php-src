@@ -63,6 +63,11 @@
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
+#ifdef PHP_WIN32
+# undef ETIMEDOUT
+# define ETIMEDOUT WSAETIMEDOUT
+#endif
+
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
