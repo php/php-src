@@ -9286,14 +9286,52 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_smart_true(dasm_State **Dst, const zend_op *opline, int jmp, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2)
 {
-	|	NIY	// TODO
+	if (smart_branch_opcode) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			if (jmp) {
+				|	b >7
+			}
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			|	b =>target_label
+		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+			|	b =>target_label2
+		} else {
+			ZEND_UNREACHABLE();
+		}
+	} else {
+		zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+		if (jmp) {
+			|	b >7
+		}
+	}
 
 	return 1;
 }
 
 static int zend_jit_smart_false(dasm_State **Dst, const zend_op *opline, int jmp, zend_uchar smart_branch_opcode, uint32_t target_label)
 {
-	|	NIY	// TODO
+	if (smart_branch_opcode) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			|	b =>target_label
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			if (jmp) {
+				|	b >7
+			}
+		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+			|	b =>target_label
+		} else {
+			ZEND_UNREACHABLE();
+		}
+	} else {
+		zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+		if (jmp) {
+			|	b >7
+		}
+	}
 
 	return 1;
 }
@@ -9305,7 +9343,90 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 	zval *zv = RT_CONSTANT(opline, opline->op1);
 	zend_jit_addr res_addr = 0;
 
-	|	NIY	// TODO
+	if (smart_branch_opcode && !exit_addr) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			undefined_label = target_label;
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			defined_label = target_label;
+		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
+			undefined_label = target_label;
+			defined_label = target_label2;
+		} else {
+			ZEND_UNREACHABLE();
+		}
+	}
+
+	|	// if (CACHED_PTR(opline->extended_value)) {
+	|	ldr REG0, EX->run_time_cache
+	|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG0, REG0, opline->extended_value, TMP1	
+	|	cbz REG0, >1
+	|	tst REG0, #1
+	|	bne >4
+	|.cold_code
+	|4:
+	|	MEM_LOAD_ZTS ldr, FCARG1x, executor_globals, zend_constants, FCARG1x
+	|	lsr REG0, REG0, #1
+	|	ldr TMP1w, [FCARG1x, #offsetof(HashTable, nNumOfElements)]
+	|	cmp TMP1, REG0
+
+	if (smart_branch_opcode) {
+		if (exit_addr) {
+			if (smart_branch_opcode == ZEND_JMPZ) {
+				|	NIY // beq &exit_addr
+			} else {
+				|	beq >3
+			}
+		} else if (undefined_label != (uint32_t)-1) {
+			|	beq =>undefined_label
+		} else {
+			|	beq >3
+		}
+	} else {
+		|	beq >2
+	}
+	|1:
+	|	SET_EX_OPLINE opline, REG0
+	|	LOAD_ADDR FCARG1x, zv
+	|	EXT_CALL zend_jit_check_constant, REG0
+	if (exit_addr) {
+		if (smart_branch_opcode == ZEND_JMPNZ) {
+			|	cbz RETVALx, >3
+		} else {
+			|	cbnz RETVALx, >3
+		}
+		|	NIY // b &exit_addr
+	} else if (smart_branch_opcode) {
+		if (undefined_label != (uint32_t)-1) {
+			|	cbz RETVALx, =>undefined_label
+		} else {
+			|	cbz RETVALx, >3
+		}
+		if (defined_label != (uint32_t)-1) {
+			|	b =>defined_label
+		} else {
+			|	b >3
+		}
+	} else {
+		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+		|	cbnz RETVALx, >1
+		|2:
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+		|	b >3
+	}
+	|.code
+	if (smart_branch_opcode) {
+		if (exit_addr) {
+			if (smart_branch_opcode == ZEND_JMPNZ) {
+				|	NIY // b &exit_addr
+			}
+		} else if (defined_label != (uint32_t)-1) {
+			|	b =>defined_label
+		}
+	} else {
+		|1:
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+	}
+	|3:
 
 	return 1;
 }
