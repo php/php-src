@@ -107,6 +107,7 @@ if ($pid) {
 				fputs($s, "234 auth type accepted\r\n");
 			} else {
 				fputs($s, "666 dummy\r\n");
+				sleep(1);
 				fputs($s, "666 bogus msg\r\n");
 				exit;
 			}
