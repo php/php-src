@@ -8812,7 +8812,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 			if (!exit_addr) {
 				return 0;
 			}
-			|	NIY // TODO
+			|	NIY // tracing
 		} else {
 			|	ldr REG0, EX:RX->func
 			|	ldr TMP1w, [REG0, #offsetof(zend_function, quick_arg_flags)]
@@ -8821,7 +8821,6 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 			|	bne >1
 			|.cold_code
 			|1:
-			|	NIY	// TODO
 			|	SET_EX_OPLINE opline, REG0
 			|	b ->throw_cannot_pass_by_ref
 			|.code
@@ -8835,7 +8834,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 		|	ZVAL_COPY_CONST arg_addr, MAY_BE_ANY, MAY_BE_ANY, zv, ZREG_REG0, ZREG_TMP1, ZREG_FPR0
 		if (Z_REFCOUNTED_P(zv)) {
-			|	NIY // TODO: test
+			|	ADDREF_CONST zv, REG0, TMP1
 		}
 	} else {
 		|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
@@ -8846,7 +8845,18 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 static int zend_jit_check_undef_args(dasm_State **Dst, const zend_op *opline)
 {
-	|	NIY	// TODO
+	|	ldr FCARG1x, EX->call
+	|	ldrb TMP1w, [FCARG1x, #(offsetof(zend_execute_data, This.u1.type_info) + 3)]
+	|	tst TMP1w, #(ZEND_CALL_MAY_HAVE_UNDEF >> 24)
+	|	bne >1
+	|.cold_code
+	|1:
+	|	SET_EX_OPLINE opline, REG0
+	|	EXT_CALL zend_handle_undef_args, REG0
+	|	cbz RETVALw, >2
+	|	b ->exception_handler
+	|.code
+	|2:
 
 	return 1;
 }
@@ -8875,7 +8885,10 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 	} else if (opline->op1_type == IS_CV) {
 		if (op1_info & MAY_BE_UNDEF) {
 			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-				|	NIY	// TODO
+				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1, TMP1w, TMP2
+				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
+				|	b >2
+				|1:
 			}
 			op1_info &= ~MAY_BE_UNDEF;
 			op1_info |= MAY_BE_NULL;
@@ -8917,7 +8930,9 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 			|	SET_ZVAL_PTR val_addr, REG0, TMP1
 			|	SET_ZVAL_TYPE_INFO val_addr, IS_REFERENCE_EX, TMP1w, TMP2
 		} else {
-			|	NIY	// TODO
+			|	ZVAL_COPY_VALUE ref_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+			|	SET_ZVAL_PTR op1_addr, REG0, TMP1
+			|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX, TMP1w, TMP2
 		}
 		|	SET_ZVAL_PTR arg_addr, REG0, TMP1
 		|	SET_ZVAL_TYPE_INFO arg_addr, IS_REFERENCE_EX, TMP1w, TMP2
@@ -8966,7 +8981,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			|	bne >1
 			|.cold_code
 			|1:
-			|	NIY	// TODO
 			if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 1)) {
 				return 0;
 			}
@@ -8978,7 +8992,26 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 		 && JIT_G(current_frame)
 		 && JIT_G(current_frame)->call
 		 && JIT_G(current_frame)->call->func) {
-			|	NIY	// TODO
+			if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+
+				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+
+				if (!ARG_MAY_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+					if (!(op1_info & MAY_BE_REF)) {
+						/* Don't generate code that always throws exception */
+						return 0;
+					} else {
+						int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+						const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+						if (!exit_addr) {
+							return 0;
+						}
+						|	cmp REG1w, #IS_REFERENCE
+						|	NIY // bne &exit_addr
+					}
+				}
+				return 1;
+			}
 		} else {
 			uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
 
@@ -8989,7 +9022,35 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			|	bne >1
 			|.cold_code
 			|1:
-			|	NIY	// TODO
+
+			mask = ZEND_SEND_PREFER_REF << ((arg_num + 3) * 2);
+
+			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+			if (op1_info & MAY_BE_REF) {
+				|	cmp REG1w, #IS_REFERENCE
+				|	beq >7
+			}
+			|	ldr TMP1w, [REG0, #offsetof(zend_function, quick_arg_flags)]
+			|	LOAD_32BIT_VAL TMP2w, mask
+			|	tst TMP1w, TMP2w
+			|	bne >7
+			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				|	NIY // jmp &exit_addr
+			} else {
+				|	SET_EX_OPLINE opline, REG0
+				|	LOAD_ZVAL_ADDR FCARG1x, arg_addr
+				|	EXT_CALL zend_jit_only_vars_by_reference, REG0
+				if (!zend_jit_check_exception(Dst)) {
+					return 0;
+				}
+				|	b >7
+			}
+
 			|.code
 		}
 	} else if (opline->opcode == ZEND_SEND_FUNC_ARG) {
@@ -9025,7 +9086,6 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			|1:
 		}
 
-		|	NIY	// TODO: test
 		|	SET_EX_OPLINE opline, REG0
 		|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, REG0
@@ -9033,16 +9093,35 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 		|	cbz RETVALx, ->exception_handler
 
 		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-			|	NIY	// TODO: test
 			|	b >7
 			|.code
 		} else {
-			|	NIY	// TODO: test
+			|7:
+			return 1;
 		}
 	}
 
 	if (opline->opcode == ZEND_SEND_VAR_NO_REF) {
-		|	NIY	// TODO: test
+		|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+		if (op1_info & MAY_BE_REF) {
+			|	cmp REG1w, #IS_REFERENCE
+			|	beq >7
+		}
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (!exit_addr) {
+				return 0;
+			}
+			|	NIY // jmp &exit_addr
+		} else {
+			|	SET_EX_OPLINE opline, REG0
+			|	LOAD_ZVAL_ADDR FCARG1x, arg_addr
+			|	EXT_CALL zend_jit_only_vars_by_reference, REG0
+			if (!zend_jit_check_exception(Dst)) {
+				return 0;
+			}
+		}
 	} else {
 		if (op1_info & MAY_BE_REF) {
 			if (opline->op1_type == IS_CV) {
@@ -9058,14 +9137,30 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	IF_ZVAL_TYPE op1_addr, IS_REFERENCE, >1, TMP1w, TMP2
 				|.cold_code
 				|1:
-				|	NIY	// TODO: test. cold-code. not covered currently
+				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
+				|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
+				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
+				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, ref_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+				|	GC_DELREF FCARG1x, TMP1
+				|	beq >1
+				|	IF_NOT_REFCOUNTED REG0w, >2
+				|	GC_ADDREF REG2, TMP1
+				|	b >2
+				|1:
+				|	EFREE_REFERENCE
+				|	b >2
 				|.code
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 				|2:
 			}
 		} else {
 			if (op1_addr != op1_def_addr) {
-				|	NIY	// TODO: test
+				if (!zend_jit_update_regs(Dst, opline->op1.var, op1_addr, op1_def_addr, op1_info)) {
+					return 0;
+				}
+				if (Z_MODE(op1_def_addr) == IS_REG && Z_MODE(op1_addr) != IS_REG) {
+					op1_addr= op1_def_addr;
+				}
 			}
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 			if (opline->op1_type == IS_CV) {
@@ -9086,7 +9181,7 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 	 && JIT_G(current_frame)
 	 && JIT_G(current_frame)->call
 	 && JIT_G(current_frame)->call->func) {
-		|	NIY	// TODO
+		|	NIY	// tracing
 	} else {
 		// if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
