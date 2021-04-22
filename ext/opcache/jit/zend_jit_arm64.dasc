@@ -2856,7 +2856,10 @@ static int zend_jit_spill_store(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 			|	SET_ZVAL_TYPE_INFO dst, IS_LONG, TMP1w, TMP2
 		}
 	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		|	NIY	// TODO
+		|	SET_ZVAL_DVAL dst, Z_REG(src), ZREG_TMP1
+		if (set_type) {
+			|	SET_ZVAL_TYPE_INFO dst, IS_DOUBLE, TMP1w, TMP2
+		}
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -2871,7 +2874,7 @@ static int zend_jit_load_reg(dasm_State **Dst, zend_jit_addr src, zend_jit_addr 
 	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 		|	GET_ZVAL_LVAL Z_REG(dst), src, TMP1
 	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		|	NIY	// TODO
+		|	GET_ZVAL_DVAL Z_REG(dst), src, ZREG_TMP1
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -2889,7 +2892,6 @@ static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg
 static int zend_jit_store_var_if_necessary(dasm_State **Dst, int var, zend_jit_addr src, uint32_t info)
 {
 	if (Z_MODE(src) == IS_REG && Z_STORE(src)) {
-		|	NIY	// TODO: test
 		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 		return zend_jit_spill_store(Dst, src, dst, info, 1);
 	}
