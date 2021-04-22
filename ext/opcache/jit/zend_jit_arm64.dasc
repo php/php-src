@@ -2917,9 +2917,9 @@ static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr sr
 	if (!zend_jit_same_addr(src, dst)) {
 		if (Z_MODE(src) == IS_REG) {
 			if (Z_MODE(dst) == IS_REG) {
-				|	NIY	// TODO
+				|	mov Rx(Z_REG(dst)), Rx(Z_REG(src))
 			} else if (Z_MODE(dst) == IS_MEM_ZVAL) {
-				|	NIY	// TODO
+				|	fmov Rd(Z_REG(dst)-ZREG_V0), Rd(Z_REG(src)-ZREG_V0)
 			} else {
 				ZEND_UNREACHABLE();
 			}
