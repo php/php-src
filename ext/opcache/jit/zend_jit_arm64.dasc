@@ -3076,7 +3076,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 0);
 
 				|	ZVAL_COPY_VALUE res_addr, res_use_info, val_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1w
 			}
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 				if (opline->opcode == ZEND_PRE_INC && opline->result_type != IS_UNUSED) {
@@ -3125,7 +3125,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 			    opline->result_type != IS_UNUSED) {
 				|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, op1_def_info, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-				|	TRY_ADDREF op1_def_info, REG0w, REG1, TMP1
+				|	TRY_ADDREF op1_def_info, REG0w, REG1, TMP1w
 			}
 		}
 		|	b >3
@@ -4704,7 +4704,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 				|	GET_ZVAL_PTR REG2, val_addr, TMP1
-				|	GC_DELREF REG2, TMP1
+				|	GC_DELREF REG2, TMP1w
 				|	// ZVAL_COPY_VALUE(return_value, &ref->val);
 				ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG2, offsetof(zend_reference, val));
 				if (!res_addr) {
@@ -4715,15 +4715,15 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|	beq >2 // GC_DELREF() reached zero
 				|	IF_NOT_REFCOUNTED REG2w, >3
 				if (!res_addr) {
-					|	GC_ADDREF Rx(tmp_reg), TMP1
+					|	GC_ADDREF Rx(tmp_reg), TMP1w
 				} else {
-					|	GC_ADDREF_2 Rx(tmp_reg), TMP1
+					|	GC_ADDREF_2 Rx(tmp_reg), TMP1w
 				}
 				|	b >3
 				|2:
 				if (res_addr) {
 					|	IF_NOT_REFCOUNTED REG2w, >2
-					|	GC_ADDREF Rx(tmp_reg), TMP1
+					|	GC_ADDREF Rx(tmp_reg), TMP1w
 					|2:
 				}
 				if (save_r1) {
@@ -4751,13 +4751,13 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 
 		if (val_type == IS_CV) {
 			if (!res_addr) {
-				|	TRY_ADDREF val_info, REG2w, Rx(tmp_reg), TMP1
+				|	TRY_ADDREF val_info, REG2w, Rx(tmp_reg), TMP1w
 			} else {
-				|	TRY_ADDREF_2 val_info, REG2w, Rx(tmp_reg), TMP1
+				|	TRY_ADDREF_2 val_info, REG2w, Rx(tmp_reg), TMP1w
 			}
 		} else {
 			if (res_addr) {
-				|	TRY_ADDREF val_info, REG2w, Rx(tmp_reg), TMP1
+				|	TRY_ADDREF val_info, REG2w, Rx(tmp_reg), TMP1w
 			}
 		}
 		|3:
@@ -4980,7 +4980,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 					|	str Rx(Z_REG(var_use_addr)), T1 // save
 				}
 				|	GET_ZVAL_PTR FCARG1x, var_use_addr, TMP1
-				|	GC_DELREF FCARG1x, TMP1
+				|	GC_DELREF FCARG1x, TMP1w
 				|	IF_GC_MAY_NOT_LEAK FCARG1x, >5, TMP1w, TMP2w
 				|	EXT_CALL gc_possible_root, TMP1
 				if (Z_REG(var_use_addr) != ZREG_FP) {
@@ -4988,7 +4988,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				}
 			} else {
 				|	GET_ZVAL_PTR Rx(tmp_reg), var_use_addr, TMP1
-				|	GC_DELREF Rx(tmp_reg), TMP1
+				|	GC_DELREF Rx(tmp_reg), TMP1w
 			}
 			|5:
 	    }
@@ -9198,7 +9198,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 				|	ZVAL_DEREF FCARG1x, op1_info, TMP1w
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, val_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1w
 			} else {
 				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1x, 8);
 
@@ -9209,10 +9209,10 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
 				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
 				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, ref_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-				|	GC_DELREF FCARG1x, TMP1
+				|	GC_DELREF FCARG1x, TMP1w
 				|	beq >1
 				|	IF_NOT_REFCOUNTED REG0w, >2
-				|	GC_ADDREF REG2, TMP1
+				|	GC_ADDREF REG2, TMP1w
 				|	b >2
 				|1:
 				|	EFREE_REFERENCE
@@ -9232,7 +9232,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 			}
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 			if (opline->op1_type == IS_CV) {
-				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1w
 			}
 		}
 	}
@@ -9821,7 +9821,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 				}
 			}
 			|	GET_ZVAL_PTR FCARG1x, op1_addr, TMP1
-			|	GC_DELREF FCARG1x, TMP1
+			|	GC_DELREF FCARG1x, TMP1w
 			if (RC_MAY_BE_1(op1_info)) {
 				if (RC_MAY_BE_N(op1_info)) {
 					if (jit_return_label >= 0) {
@@ -9875,7 +9875,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 			if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
 			    (op1_info & (MAY_BE_REF|MAY_BE_OBJECT)) ||
 			    !op_array->function_name) {
-				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1
+				|	TRY_ADDREF op1_info, REG0w, REG2, TMP1w
 			} else if (return_value_used != 1) {
 				|	// if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
@@ -9892,7 +9892,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 			|	GET_ZVAL_PTR REG0, op1_addr, TMP1
 			|	// ZVAL_COPY_VALUE(return_value, &ref->value);
 			|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, ref_addr, op1_info, ZREG_REG2, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-			|	GC_DELREF REG0, TMP1
+			|	GC_DELREF REG0, TMP1w
 			|	beq >2
 			|	// if (IS_REFCOUNTED())
 			if (jit_return_label >= 0) {
@@ -9902,7 +9902,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 			}
 			|	// ADDREF
 			|	GET_ZVAL_PTR REG2, ret_addr, TMP1 // reload
-			|	GC_ADDREF REG2, TMP1
+			|	GC_ADDREF REG2, TMP1w
 			if (jit_return_label >= 0) {
 				|	b =>jit_return_label
 			} else {
@@ -10229,7 +10229,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		} else  {
 			|	// ZVAL_COPY
 			|	ZVAL_COPY_VALUE res_addr, -1, val_addr, res_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-			|	TRY_ADDREF res_info, REG1w, REG2, TMP1
+			|	TRY_ADDREF res_info, REG1w, REG2, TMP1w
 		}
 	}
 	|9: // END
@@ -11815,7 +11815,7 @@ static int zend_jit_fe_reset(dasm_State **Dst, const zend_op *opline, uint32_t o
 		|	// ZVAL_COPY(res, value);
 		|	ZVAL_COPY_VALUE res_addr, -1, op1_addr, op1_info, ZREG_REG0, ZREG_FCARG1x, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 		if (opline->op1_type == IS_CV) {
-			|	TRY_ADDREF op1_info, REG0w, FCARG1x, TMP1
+			|	TRY_ADDREF op1_info, REG0w, FCARG1x, TMP1w
 		}
 	}
 	|	// Z_FE_POS_P(res) = 0;
@@ -11931,7 +11931,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 		} else {
 			|	// ZVAL_COPY(res, value);
 			|	ZVAL_COPY_VALUE var_addr, -1, val_addr, val_info, ZREG_REG0, ZREG_FCARG1x, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-			|	TRY_ADDREF val_info, REG0w, FCARG1x, TMP1
+			|	TRY_ADDREF val_info, REG0w, FCARG1x, TMP1w
 		}
 	}
 
@@ -11983,7 +11983,7 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 		|	NIY	// TODO
 	} else {
 		|	ZVAL_COPY_VALUE res_addr, MAY_BE_ANY, const_addr, MAY_BE_ANY, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-		|	TRY_ADDREF MAY_BE_ANY, REG0w, REG1, TMP1
+		|	TRY_ADDREF MAY_BE_ANY, REG0w, REG1, TMP1w
 	}
 
 	|.cold_code
