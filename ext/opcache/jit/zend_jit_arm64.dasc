@@ -11807,12 +11807,16 @@ static int zend_jit_fe_reset(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 		|	ZVAL_COPY_CONST res_addr, MAY_BE_ANY, MAY_BE_ANY, zv, ZREG_REG0, ZREG_TMP1, ZREG_FPR0
 		if (Z_REFCOUNTED_P(zv)) {
-			|	NIY	// TODO
+			|	ADDREF_CONST zv, REG0, TMP1
 		}
 	} else {
 		zend_jit_addr op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
 
-		|	NIY	// TODO
+		|	// ZVAL_COPY(res, value);
+		|	ZVAL_COPY_VALUE res_addr, -1, op1_addr, op1_info, ZREG_REG0, ZREG_FCARG1x, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+		if (opline->op1_type == IS_CV) {
+			|	TRY_ADDREF op1_info, REG0w, FCARG1x, TMP1
+		}
 	}
 	|	// Z_FE_POS_P(res) = 0;
 	|	LOAD_32BIT_VAL TMP1w, (opline->result.var + offsetof(zval, u2.fe_pos))
@@ -11844,7 +11848,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	|	// ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 	|   // ZEND_VM_CONTINUE();
 	if (exit_addr) {
-		|	NIY	// TODO
+		|	NIY	// bls &exit_addr
 	} else {
 		|	bls =>target_label
 	}
@@ -11855,7 +11859,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	if (!exit_addr || exit_opcode == ZEND_JMP) {
 		|	IF_NOT_Z_TYPE FCARG2x, IS_UNDEF, >3, TMP1w
 	} else {
-		|	NIY	// TODO
+		|	NIY // IF_NOT_Z_TYPE FCARG2a, IS_UNDEF, &exit_addr
 	}
 	|	// p++;
 	|	add FCARG2x, FCARG2x, #sizeof(Bucket)
@@ -11874,7 +11878,38 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 		if (RETURN_VALUE_USED(opline)) {
 			zend_jit_addr res_addr = RES_ADDR();
 
-			|	NIY	// TODO
+			if ((op1_info & MAY_BE_ARRAY_KEY_LONG)
+			 && (op1_info & MAY_BE_ARRAY_KEY_STRING)) {
+				|	// if (!p->key) {
+				|	ldr REG0, [FCARG2x, #offsetof(Bucket, key)]
+				|	cbz REG0, >2
+			}
+			if (op1_info & MAY_BE_ARRAY_KEY_STRING) {
+				|	// ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
+				|	ldr REG0, [FCARG2x, #offsetof(Bucket, key)]
+				|	SET_ZVAL_PTR res_addr, REG0, TMP1
+				|	ldr TMP1w, [REG0, #offsetof(zend_refcounted, gc.u.type_info)]
+				||	ZEND_ASSERT(IS_STR_INTERNED <= TST_W_IMM);
+				|	tst TMP1w, #IS_STR_INTERNED
+				|	beq >1
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING, TMP1w, TMP2
+				|	b >3
+				|1:
+				|	GC_ADDREF REG0, TMP1w
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING_EX, TMP1w, TMP2
+
+				if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+				    |	b >3
+					|2:
+				}
+			}
+			if (op1_info & MAY_BE_ARRAY_KEY_LONG) {
+				|	// ZVAL_LONG(EX_VAR(opline->result.var), p->h);
+				|	ldr REG0, [FCARG2x, #offsetof(Bucket, h)]
+				|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+				|	SET_ZVAL_TYPE_INFO res_addr, IS_LONG, TMP1w, TMP2
+			}
+			|3:
 		}
 
 		val_info = ((op1_info & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
@@ -11894,7 +11929,9 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 				return 0;
 			}
 		} else {
-			|	NIY	// TODO
+			|	// ZVAL_COPY(res, value);
+			|	ZVAL_COPY_VALUE var_addr, -1, val_addr, val_info, ZREG_REG0, ZREG_FCARG1x, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
+			|	TRY_ADDREF val_info, REG0w, FCARG1x, TMP1
 		}
 	}
 
