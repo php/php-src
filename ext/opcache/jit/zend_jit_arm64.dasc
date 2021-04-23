@@ -5243,6 +5243,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	str Rx(Z_REG(op1_addr)), T1 // save
 		}
 		|	EXT_CALL _zend_new_array_0, REG0
+		|	mov REG0, RETVALx
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	ldr Rx(Z_REG(op1_addr)), T1 // restore
 		}
@@ -9265,7 +9266,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 						if (!exit_addr) {
 							return 0;
 						}
-						|	cmp REG1w, #IS_REFERENCE
+						|	and TMP1w, REG1w, #0xff
+						|	cmp TMP1w, #IS_REFERENCE
 						|	NIY // bne &exit_addr
 					}
 				}
@@ -9286,7 +9288,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 			if (op1_info & MAY_BE_REF) {
-				|	cmp REG1w, #IS_REFERENCE
+				|	and TMP1w, REG1w, #0xff
+				|	cmp TMP1w, #IS_REFERENCE
 				|	beq >7
 			}
 			|	ldr TMP1w, [REG0, #offsetof(zend_function, quick_arg_flags)]
