@@ -1581,7 +1581,37 @@ static inline bool is_signed(double d)
 static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 {
 	|->interrupt_handler:
-	|	NIY_STUB	// TODO
+	|	SAVE_IP
+	|	//EG(vm_interrupt) = 0;
+	|	MEM_STORE_ZTS strb, wzr, executor_globals, vm_interrupt, TMP1
+	|	//if (EG(timed_out)) {
+	|	MEM_LOAD_ZTS ldrb, REG0w, executor_globals, timed_out, TMP1
+	|	cbz REG0w, >1
+	|	//zend_timeout();
+	|	EXT_CALL zend_timeout, TMP1
+	|1:
+	|	//} else if (zend_interrupt_function) {
+	if (zend_interrupt_function) {
+		|	//zend_interrupt_function(execute_data);
+		|	mov CARG1, FP
+		|	EXT_CALL zend_interrupt_function, TMP1
+		|	//ZEND_VM_ENTER();
+		|	//execute_data = EG(current_execute_data);
+		|	MEM_LOAD_ZTS ldr, FP, executor_globals, current_execute_data, TMP1
+		|	LOAD_IP
+	}
+	|	//ZEND_VM_CONTINUE()
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		|	ADD_HYBRID_SPAD
+		|	JMP_IP TMP1
+	} else if (GCC_GLOBAL_REGS) {
+		|	add sp, sp, SPAD // stack alignment
+		|	JMP_IP TMP1
+	} else {
+		|	NIY_STUB	// TODO
+	}
+
+	return 1;
 
 	return 1;
 }
@@ -2601,7 +2631,20 @@ static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const void *exit_addr)
 {
-	// TODO: not implemented.
+	|	MEM_LOAD_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
+	if (exit_addr) {
+		|	NIY // cbnz REG0w, &exit_addr
+	} else if (last_valid_opline == opline) {
+		||		zend_jit_use_last_valid_opline();
+		|	cbnz REG0w, ->interrupt_handler
+	} else {
+		|	cbz REG0w, >1
+		|.cold_code
+		|1:
+		|	LOAD_IP_ADDR opline
+		|	b ->interrupt_handler
+		|.code
+	}
 	return 1;
 }
 
