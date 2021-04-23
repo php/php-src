@@ -5068,6 +5068,8 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				bool keep_gc = 0;
 
 				|	GET_ZVAL_PTR Rx(tmp_reg), var_use_addr, TMP1
+#if 0
+				// TODO: This optiization doesn't work on ARM
 				if (tmp_reg == ZREG_FCARG1x) {
 					if (Z_MODE(val_addr) == IS_REG) {
 						keep_gc = 1;
@@ -5088,6 +5090,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 						}
 					}
 				}
+#endif
 				if (!keep_gc) {
 					|	str Rx(tmp_reg), T1 // save
 				}
