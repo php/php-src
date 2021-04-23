@@ -2712,13 +2712,12 @@ PHPAPI void php_handle_aborted_connection(void)
 PHPAPI int php_handle_auth_data(const char *auth)
 {
 	int ret = -1;
-	size_t auth_len = strlen(auth);
 
-	if (auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, auth_len, "Basic ", 6) == 0) {
+	if (auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, strlen(auth), "Basic ", 6) == 0) {
 		char *pass;
 		zend_string *user;
 
-		user = php_base64_decode((const unsigned char*)auth + 6, auth_len - 6);
+		user = php_base64_decode((const unsigned char*)auth + 6, strlen(auth) - 6);
 		if (user) {
 			pass = strchr(ZSTR_VAL(user), ':');
 			if (pass) {
@@ -2737,7 +2736,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 		SG(request_info).auth_digest = NULL;
 	}
 
-	if (ret == -1 && auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, auth_len, "Digest ", 7) == 0) {
+	if (ret == -1 && auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, strlen(auth), "Digest ", 7) == 0) {
 		SG(request_info).auth_digest = estrdup(auth + 7);
 		ret = 0;
 	}
