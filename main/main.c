@@ -2713,7 +2713,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 {
 	int ret = -1;
 
-	if (auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, strlen(auth), "Basic ", 6) == 0) {
+	if (auth && auth[0] != '\0' && zend_binary_strncasecmp(auth, strlen(auth), "Basic ", 6, 6) == 0) {
 		char *pass;
 		zend_string *user;
 
@@ -2736,7 +2736,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 		SG(request_info).auth_digest = NULL;
 	}
 
-	if (ret == -1 && auth && auth[0] != '\0' && zend_binary_strcasecmp(auth, strlen(auth), "Digest ", 7) == 0) {
+	if (ret == -1 && auth && auth[0] != '\0' && zend_binary_strncasecmp(auth, strlen(auth), "Digest ", 7, 7) == 0) {
 		SG(request_info).auth_digest = estrdup(auth + 7);
 		ret = 0;
 	}
