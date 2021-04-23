@@ -2226,6 +2226,11 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht
 	return zend_hash_index_add_new(ht, lval, &EG(uninitialized_zval));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_undefined_offset_delayed(zend_long lval)
+{
+	zend_error_delayed(E_WARNING, "Undefined array key " ZEND_LONG_FMT, lval);
+}
+
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset)
 {
 	zval *retval;
@@ -2495,7 +2500,8 @@ num_undef:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					retval = zend_undefined_offset_write(ht, hval);
+					zend_undefined_offset_delayed(hval);
+					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
 				}
 		} else {
