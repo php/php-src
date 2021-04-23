@@ -450,7 +450,7 @@ ZEND_METHOD(Fiber, start)
 	fiber->fci.named_params = named_params;
 
 	if (!zend_fiber_init_context(&fiber->context, zend_fiber_execute, EG(fiber_stack_size))) {
-		zend_throw_error(NULL, "Could not create fiber context");
+		zend_throw_exception(NULL, "Could not create fiber context", 0);
 		RETURN_THROWS();
 	}
 
@@ -485,6 +485,8 @@ ZEND_METHOD(Fiber, suspend)
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force closed fiber");
 		RETURN_THROWS();
 	}
+
+	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING);
 
 	if (value) {
 		ZVAL_COPY(&fiber->value, value);

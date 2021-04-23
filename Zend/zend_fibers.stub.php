@@ -1,10 +1,8 @@
 <?php
 
-/**
- * @generate-class-entries
- * @strict-properties
- */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class Fiber
 {
     public function __construct(callable $callback) {}
