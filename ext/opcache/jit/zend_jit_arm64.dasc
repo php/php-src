@@ -12008,7 +12008,8 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		|	// value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
 		|	LOAD_ADDR FCARG2x, name
 		|	ldr CARG3, EX->run_time_cache
-		|	LOAD_32BIT_VAL CARG3, opline->extended_value
+		|	LOAD_32BIT_VAL TMP1, opline->extended_value
+		|	add CARG3, CARG3, TMP1
 		if (opline->result_type == IS_UNUSED) {
 			|	mov CARG4, xzr
 		} else {
