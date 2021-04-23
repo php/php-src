@@ -1315,7 +1315,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-static ZEND_COLD void zend_error_impl(
+ZEND_API ZEND_COLD void zend_error_zstr_at(
 		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	zval params[4];
@@ -1453,7 +1453,7 @@ static ZEND_COLD void zend_error_va_list(
 		const char *format, va_list args)
 {
 	zend_string *message = zend_vstrpprintf(0, format, args);
-	zend_error_impl(orig_type, error_filename, error_lineno, message);
+	zend_error_zstr_at(orig_type, error_filename, error_lineno, message);
 	zend_string_release(message);
 }
 
@@ -1570,7 +1570,7 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 	zend_string *filename;
 	uint32_t lineno;
 	get_filename_lineno(type, &filename, &lineno);
-	zend_error_impl(type, filename, lineno, message);
+	zend_error_zstr_at(type, filename, lineno, message);
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
