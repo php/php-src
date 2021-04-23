@@ -2841,32 +2841,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEN
 	USE_OPLINE
 
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
-
-	if (!E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))) {
-		do {
-			/* Do not silence fatal errors */
-			EG(error_reporting) &= E_FATAL_ERRORS;
-			if (!EG(error_reporting_ini_entry)) {
-				zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
-				if (zv) {
-					EG(error_reporting_ini_entry) = (zend_ini_entry *)Z_PTR_P(zv);
-				} else {
-					break;
-				}
-			}
-			if (!EG(error_reporting_ini_entry)->modified) {
-				if (!EG(modified_ini_directives)) {
-					ALLOC_HASHTABLE(EG(modified_ini_directives));
-					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
-				}
-				if (EXPECTED(zend_hash_add_ptr(EG(modified_ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), EG(error_reporting_ini_entry)) != NULL)) {
-					EG(error_reporting_ini_entry)->orig_value = EG(error_reporting_ini_entry)->value;
-					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
-					EG(error_reporting_ini_entry)->modified = 1;
-				}
-			}
-		} while (0);
-	}
+	/* Do not silence fatal errors */
+	EG(error_reporting) &= E_FATAL_ERRORS;
 	ZEND_VM_NEXT_OPCODE();
 }
 
