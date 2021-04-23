@@ -2621,17 +2621,18 @@ PHP_FUNCTION(simplexml_import_dom)
 
 	nodep = php_libxml_import_node(node);
 
-	if (nodep) {
-		if (nodep->doc == NULL) {
-			php_error_docref(NULL, E_WARNING, "Imported Node must have associated Document");
-			RETURN_NULL();
-		}
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-		}
-	} else {
+	if (!nodep) {
 		zend_argument_type_error(1, "must be of type DOMNode, %s given", zend_zval_type_name(node));
 		RETURN_THROWS();
+	}
+
+	if (nodep->doc == NULL) {
+		php_error_docref(NULL, E_WARNING, "Imported Node must have associated Document");
+		RETURN_NULL();
+	}
+
+	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 	}
 
 	if (nodep->type == XML_ELEMENT_NODE) {
