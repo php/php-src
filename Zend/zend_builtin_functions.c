@@ -379,42 +379,36 @@ ZEND_FUNCTION(error_reporting)
 	old_error_reporting = EG(error_reporting);
 
 	if (!err_is_null && err != old_error_reporting) {
-		zend_string *new_val = zend_long_to_str(err);
-		if (UNEXPECTED(!new_val)) {
-			RETURN_THROWS();
+		zend_ini_entry *p = EG(error_reporting_ini_entry);
+
+		if (!p) {
+			zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
+			if (!zv) {
+				/* Ini setting does not exist -- can this happen? */
+				RETURN_LONG(old_error_reporting);
+			}
+
+			p = EG(error_reporting_ini_entry) = (zend_ini_entry*)Z_PTR_P(zv);
+		}
+		if (!p->modified) {
+			if (!EG(modified_ini_directives)) {
+				ALLOC_HASHTABLE(EG(modified_ini_directives));
+				zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+			}
+			if (EXPECTED(zend_hash_add_ptr(EG(modified_ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), p) != NULL)) {
+				p->orig_value = p->value;
+				p->orig_modifiable = p->modifiable;
+				p->modified = 1;
+			}
+		} else if (p->orig_value != p->value) {
+			zend_string_release_ex(p->value, 0);
 		}
 
-		do {
-			zend_ini_entry *p = EG(error_reporting_ini_entry);
-
-			if (!p) {
-				zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
-				if (zv) {
-					p = EG(error_reporting_ini_entry) = (zend_ini_entry*)Z_PTR_P(zv);
-				} else {
-					break;
-				}
-			}
-			if (!p->modified) {
-				if (!EG(modified_ini_directives)) {
-					ALLOC_HASHTABLE(EG(modified_ini_directives));
-					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
-				}
-				if (EXPECTED(zend_hash_add_ptr(EG(modified_ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), p) != NULL)) {
-					p->orig_value = p->value;
-					p->orig_modifiable = p->modifiable;
-					p->modified = 1;
-				}
-			} else if (p->orig_value != p->value) {
-				zend_string_release_ex(p->value, 0);
-			}
-
-			p->value = new_val;
-			EG(error_reporting) = err;
-		} while (0);
+		p->value = zend_long_to_str(err);
+		EG(error_reporting) = err;
 	}
 
-	RETVAL_LONG(old_error_reporting);
+	RETURN_LONG(old_error_reporting);
 }
 /* }}} */
 
