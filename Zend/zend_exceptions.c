@@ -872,7 +872,7 @@ ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exc
 }
 /* }}} */
 
-static void zend_error_va(int type, const char *file, uint32_t lineno, const char *format, ...) /* {{{ */
+static void zend_error_va(int type, zend_string *file, uint32_t lineno, const char *format, ...) /* {{{ */
 {
 	va_list args;
 	va_start(args, format);
@@ -900,8 +900,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 		int type = (ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL;
 
-		zend_observer_error_notify(type, ZSTR_VAL(file), line, message);
-		zend_error_cb(type, ZSTR_VAL(file), line, message);
+		zend_observer_error_notify(type, file, line, message);
+		zend_error_cb(type, file, line, message);
 
 		zend_string_release_ex(file, 0);
 		zend_string_release_ex(message, 0);
@@ -930,7 +930,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 				line = zval_get_long(GET_PROPERTY_SILENT(&zv, ZEND_STR_LINE));
 			}
 
-			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
+			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? file : NULL, line,
 				"Uncaught %s in exception handling during call to %s::__toString()",
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
@@ -944,7 +944,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
 		zend_error_va(severity | E_DONT_BAIL,
-			(file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
+			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
 			"Uncaught %s\n  thrown", ZSTR_VAL(str));
 
 		zend_string_release_ex(str, 0);

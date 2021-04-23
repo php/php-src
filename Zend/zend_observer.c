@@ -245,7 +245,7 @@ ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
 }
 
-void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	zend_llist_element *element;
 	zend_observer_error_cb callback;
