@@ -2619,27 +2619,32 @@ PHP_FUNCTION(simplexml_import_dom)
 		RETURN_THROWS();
 	}
 
-	object = Z_LIBXML_NODE_P(node);
-
 	nodep = php_libxml_import_node(node);
 
-	if (nodep) {
-		if (nodep->doc == NULL) {
-			php_error_docref(NULL, E_WARNING, "Imported Node must have associated Document");
-			RETURN_NULL();
-		}
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-		}
+	if (!nodep) {
+		zend_argument_type_error(1, "must be of type SimpleXMLElement|DOMNode, %s given", zend_zval_type_name(node));
+		RETURN_THROWS();
 	}
 
-	if (nodep && nodep->type == XML_ELEMENT_NODE) {
+	if (nodep->doc == NULL) {
+		php_error_docref(NULL, E_WARNING, "Imported Node must have associated Document");
+		RETURN_NULL();
+	}
+
+	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+	}
+
+	if (nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
 			ce = sxe_class_entry;
 			fptr_count = NULL;
 		} else {
 			fptr_count = php_sxe_find_fptr_count(ce);
 		}
+
+		object = Z_LIBXML_NODE_P(node);
+
 		sxe = php_sxe_object_new(ce, fptr_count);
 		sxe->document = object->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc);
