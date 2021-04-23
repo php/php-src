@@ -4890,7 +4890,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				if (save_r1) {
 					|	str FCARG1x, T1 // save
 				}
-				|	LOAD_ZVAL_ADDR FCARG1x, val_addr
+				|	GET_ZVAL_PTR FCARG1x, val_addr, TMP1
 				|	EFREE_REFERENCE
 				if (save_r1) {
 					|	ldr FCARG1x, T1 // restore
