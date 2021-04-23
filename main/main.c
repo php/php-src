@@ -1144,7 +1144,7 @@ static void clear_last_error() {
 		PG(last_error_message) = NULL;
 	}
 	if (PG(last_error_file)) {
-		free(PG(last_error_file));
+		zend_string_release(PG(last_error_file));
 		PG(last_error_file) = NULL;
 	}
 }
@@ -1188,7 +1188,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		if (zend_string_equals(PG(last_error_message), message)
 			|| (!PG(ignore_repeated_source)
 				&& ((PG(last_error_lineno) != (int)error_lineno)
-					|| strcmp(PG(last_error_file), ZSTR_VAL(error_filename))))) {
+					|| !zend_string_equals(PG(last_error_file), error_filename)))) {
 			display = 1;
 		} else {
 			display = 0;
@@ -1227,7 +1227,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		}
 		PG(last_error_type) = type;
 		PG(last_error_message) = zend_string_copy(message);
-		PG(last_error_file) = strdup(ZSTR_VAL(error_filename));
+		PG(last_error_file) = zend_string_copy(error_filename);
 		PG(last_error_lineno) = error_lineno;
 	}
 
