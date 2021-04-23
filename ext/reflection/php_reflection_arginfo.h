@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5d890da977c41b3e230d368e6beb37f08a3d1446 */
+ * Stub hash: 388312e928b54992da6b7e0e0f15dec72d9290f1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -534,17 +534,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFiber_getExecutingLine arginfo_class_ReflectionAttribute_getTarget
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getCallable, 0, 0, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getTrace, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
 ZEND_END_ARG_INFO()
-
-#define arginfo_class_ReflectionFiber_isStarted arginfo_class_ReflectionClass_isEnum
-
-#define arginfo_class_ReflectionFiber_isSuspended arginfo_class_ReflectionClass_isEnum
-
-#define arginfo_class_ReflectionFiber_isRunning arginfo_class_ReflectionClass_isEnum
-
-#define arginfo_class_ReflectionFiber_isTerminated arginfo_class_ReflectionClass_isEnum
 
 
 ZEND_METHOD(Reflection, getModifierNames);
@@ -763,11 +758,8 @@ ZEND_METHOD(ReflectionFiber, __construct);
 ZEND_METHOD(ReflectionFiber, getFiber);
 ZEND_METHOD(ReflectionFiber, getExecutingFile);
 ZEND_METHOD(ReflectionFiber, getExecutingLine);
+ZEND_METHOD(ReflectionFiber, getCallable);
 ZEND_METHOD(ReflectionFiber, getTrace);
-ZEND_METHOD(ReflectionFiber, isStarted);
-ZEND_METHOD(ReflectionFiber, isSuspended);
-ZEND_METHOD(ReflectionFiber, isRunning);
-ZEND_METHOD(ReflectionFiber, isTerminated);
 
 
 static const zend_function_entry class_ReflectionException_methods[] = {
@@ -1107,11 +1099,8 @@ static const zend_function_entry class_ReflectionFiber_methods[] = {
 	ZEND_ME(ReflectionFiber, getFiber, arginfo_class_ReflectionFiber_getFiber, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFiber, getExecutingFile, arginfo_class_ReflectionFiber_getExecutingFile, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFiber, getExecutingLine, arginfo_class_ReflectionFiber_getExecutingLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getCallable, arginfo_class_ReflectionFiber_getCallable, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFiber, getTrace, arginfo_class_ReflectionFiber_getTrace, ZEND_ACC_PUBLIC)
-	ZEND_ME(ReflectionFiber, isStarted, arginfo_class_ReflectionFiber_isStarted, ZEND_ACC_PUBLIC)
-	ZEND_ME(ReflectionFiber, isSuspended, arginfo_class_ReflectionFiber_isSuspended, ZEND_ACC_PUBLIC)
-	ZEND_ME(ReflectionFiber, isRunning, arginfo_class_ReflectionFiber_isRunning, ZEND_ACC_PUBLIC)
-	ZEND_ME(ReflectionFiber, isTerminated, arginfo_class_ReflectionFiber_isTerminated, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

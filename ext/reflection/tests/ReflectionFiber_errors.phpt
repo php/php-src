@@ -52,6 +52,12 @@ try {
     echo $error->getMessage(), "\n";
 }
 
+try {
+    $reflection->getCallable();
+} catch (Error $error) {
+    echo $error->getMessage(), "\n";
+}
+
 ?>
 --EXPECTF--
 Cannot fetch information from a fiber that has not been started or is terminated
@@ -62,3 +68,4 @@ int(4)
 Cannot fetch information from a fiber that has not been started or is terminated
 Cannot fetch information from a fiber that has not been started or is terminated
 Cannot fetch information from a fiber that has not been started or is terminated
+Cannot fetch the callable from a fiber that has terminated

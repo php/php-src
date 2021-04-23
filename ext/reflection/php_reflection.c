@@ -6772,23 +6772,20 @@ ZEND_METHOD(ReflectionFiber, __construct)
 }
 /* }}} */
 
-/* {{{ proto Fiber ReflectionFiber::getFiber() */
 ZEND_METHOD(ReflectionFiber, getFiber)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_OBJ_COPY(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
 }
-/* }}} */
 
 #define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
 		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status & ZEND_FIBER_STATUS_FINISHED) { \
 			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	} while (0)
 
-/* {{{ proto array ReflectionFiber::getTrace(int $options) */
 ZEND_METHOD(ReflectionFiber, getTrace)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
@@ -6810,9 +6807,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 
 	EG(current_execute_data) = execute_data; // Restore original execute data.
 }
-/* }}} */
 
-/* {{{ proto int ReflectionFiber::getExecutingLine() */
 ZEND_METHOD(ReflectionFiber, getExecutingLine)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
@@ -6830,9 +6825,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 
 	RETURN_LONG(prev_execute_data->opline->lineno);
 }
-/* }}} */
 
-/* {{{ proto string ReflectionFiber::getExecutingFile() */
 ZEND_METHOD(ReflectionFiber, getExecutingFile)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
@@ -6850,51 +6843,20 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 
 	RETURN_STR_COPY(prev_execute_data->func->op_array.filename);
 }
-/* }}} */
 
-/* {{{ proto bool ReflectionFiber::isStarted() */
-ZEND_METHOD(ReflectionFiber, isStarted)
+ZEND_METHOD(ReflectionFiber, getCallable)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_BOOL(fiber->status != ZEND_FIBER_STATUS_INIT);
+	if (fiber == NULL || fiber->status & ZEND_FIBER_STATUS_FINISHED) {
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(&fiber->fci.function_name);
 }
-/* }}} */
-
-/* {{{ proto bool ReflectionFiber::isSuspended() */
-ZEND_METHOD(ReflectionFiber, isSuspended)
-{
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
-}
-/* }}} */
-
-/* {{{ proto bool ReflectionFiber::isRunning() */
-ZEND_METHOD(ReflectionFiber, isRunning)
-{
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_RUNNING);
-}
-/* }}} */
-
-/* {{{ proto bool ReflectionFiber::isTerminated() */
-ZEND_METHOD(ReflectionFiber, isTerminated)
-{
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	RETURN_BOOL(fiber->status & ZEND_FIBER_STATUS_FINISHED);
-}
-/* }}} */
 
 /* {{{ _reflection_write_property */
 static zval *_reflection_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)

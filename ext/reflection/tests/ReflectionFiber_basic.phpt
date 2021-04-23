@@ -3,73 +3,86 @@ ReflectionFiber basic tests
 --FILE--
 <?php
 
-$fiber = new Fiber(function (): void {
-    $fiber = Fiber::this();
+$callable = function (): void {
+    $reflection = new ReflectionFiber(Fiber::this());
     echo "\nWithin Fiber:\n";
-    var_dump($fiber->isStarted());
-    var_dump($fiber->isRunning());
-    var_dump($fiber->isSuspended());
-    var_dump($fiber->isTerminated());
+    var_dump($reflection->getExecutingFile());
+    var_dump($reflection->getExecutingLine());
+    var_dump($reflection->getTrace());
     Fiber::suspend();
-});
+};
+
+$fiber = new Fiber($callable);
 
 $reflection = new ReflectionFiber($fiber);
 
 echo "Before Start:\n";
 var_dump($fiber === $reflection->getFiber());
-var_dump($reflection->isStarted());
-var_dump($reflection->isRunning());
-var_dump($reflection->isSuspended());
-var_dump($reflection->isTerminated());
+var_dump($callable === $reflection->getCallable());
 
 $fiber->start();
 
 echo "\nAfter Start:\n";
-var_dump($reflection->isStarted());
-var_dump($reflection->isRunning());
-var_dump($reflection->isSuspended());
-var_dump($reflection->isTerminated());
 var_dump($reflection->getExecutingFile());
 var_dump($reflection->getExecutingLine());
+var_dump($callable === $reflection->getCallable());
 var_dump($reflection->getTrace());
 
 $fiber->resume();
 
 echo "\nAfter Resume:\n";
-var_dump($fiber->isStarted());
-var_dump($fiber->isRunning());
-var_dump($fiber->isSuspended());
-var_dump($fiber->isTerminated());
+$reflection->getTrace();
 
 ?>
 --EXPECTF--
 Before Start:
 bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+bool(true)
 
 Within Fiber:
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+string(%d) "%sReflectionFiber_basic.php"
+int(7)
+array(2) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%sReflectionFiber_basic.php"
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(8) "getTrace"
+    ["class"]=>
+    string(15) "ReflectionFiber"
+    ["object"]=>
+    object(ReflectionFiber)#4 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(2) {
+    ["function"]=>
+    string(9) "{closure}"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
 
 After Start:
-bool(true)
-bool(false)
-bool(true)
-bool(false)
 string(%d) "%sReflectionFiber_basic.php"
-int(10)
+int(9)
+bool(true)
 array(2) {
   [0]=>
   array(6) {
     ["file"]=>
     string(%d) "%sReflectionFiber_basic.php"
     ["line"]=>
-    int(10)
+    int(9)
     ["function"]=>
     string(7) "suspend"
     ["class"]=>
@@ -91,7 +104,9 @@ array(2) {
 }
 
 After Resume:
-bool(true)
-bool(false)
-bool(false)
-bool(true)
+
+Fatal error: Uncaught Error: Cannot fetch information from a fiber that has not been started or is terminated in %sReflectionFiber_basic.php:%d
+Stack trace:
+#0 %sReflectionFiber_basic.php(%d): ReflectionFiber->getTrace()
+#1 {main}
+  thrown in %sReflectionFiber_basic.php on line %d
