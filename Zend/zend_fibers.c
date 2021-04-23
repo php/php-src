@@ -389,28 +389,32 @@ static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	if (UNEXPECTED(fiber->status == ZEND_FIBER_STATUS_INIT)) {
+	if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
+		zend_object *exception = EG(exception);
+		EG(exception) = NULL;
+		fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
+		GC_ADDREF(&fiber->std);
+		zend_fiber_switch_to(fiber);
+		EG(exception) = exception;
+	}
+}
+
+static void zend_fiber_object_free(zend_object *object)
+{
+	zend_fiber *fiber = (zend_fiber *) object;
+
+	if (fiber->status == ZEND_FIBER_STATUS_INIT) {
 		// Fiber was never started, so we need to release the reference to the callback.
 		zval_ptr_dtor(&fiber->fci.function_name);
-	} else {
-		if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
-			zend_object *exception = EG(exception);
-			EG(exception) = NULL;
-			fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
-			GC_ADDREF(&fiber->std);
-			zend_fiber_switch_to(fiber);
-			EG(exception) = exception;
-		}
-
-		zval_ptr_dtor(&fiber->value);
 	}
+
+	zval_ptr_dtor(&fiber->value);
 
 	zend_hash_index_del(&EG(fibers), (uintptr_t) fiber);
 
 	zend_fiber_destroy_context(&fiber->context);
 
 	zend_object_std_dtor(&fiber->std);
-
 }
 
 ZEND_METHOD(Fiber, __construct)
@@ -694,6 +698,7 @@ void zend_register_fiber_ce(void)
 
 	zend_fiber_handlers = std_object_handlers;
 	zend_fiber_handlers.dtor_obj = zend_fiber_object_destroy;
+	zend_fiber_handlers.free_obj = zend_fiber_object_free;
 	zend_fiber_handlers.clone_obj = NULL;
 
 	zend_ce_fiber_error = register_class_FiberError(zend_ce_error);
