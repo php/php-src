@@ -2615,7 +2615,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	zend_class_entry *ce = sxe_class_entry;
 	zend_function    *fptr_count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|C!", &node, sxe_class_entry, &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
