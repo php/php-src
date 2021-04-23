@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     call_user_func_array). (twosee)
   . Fixed bug #80960 (opendir() warning wrong info when failed on Windows).
     (cmb)
+  . Fixed bug #67792 (HTTP Authorization schemes are treated as case-sensitive).
+    (cmb)
 
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
