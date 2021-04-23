@@ -8090,6 +8090,31 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, throw_op_num);
 }
 
+ZEND_VM_HANDLER(204, ZEND_HANDLE_DELAYED_ERROR, ANY, ANY)
+{
+	const zend_op *next_op = EG(opline_before_exception) + 1;
+	if (next_op->opcode == ZEND_OP_DATA) {
+		next_op++;
+	}
+
+	/* Clear EG(delayed_errors), as more errors may be delayed while we are handling these. */
+	HashTable ht;
+	memcpy(&ht, &EG(delayed_errors), sizeof(HashTable));
+	zend_hash_init(&EG(delayed_errors), 0, NULL, NULL, 0);
+
+	zend_error_info *info;
+	ZEND_HASH_FOREACH_PTR(&ht, info) {
+		zend_error_zstr_at(info->type, info->filename, info->lineno, info->message);
+		zend_string_release(info->filename);
+		zend_string_release(info->message);
+		efree(info);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&ht);
+
+	ZEND_VM_SET_NEXT_OPCODE(next_op);
+	ZEND_VM_CONTINUE();
+}
+
 ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 {
 	USE_OPLINE

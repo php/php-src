@@ -201,6 +201,9 @@ void init_executor(void) /* {{{ */
 
 	zend_max_execution_timer_init();
 	zend_fiber_init();
+
+	zend_hash_init(&EG(delayed_errors), 0, NULL, NULL, 0);
+
 	zend_weakrefs_init();
 
 	EG(active) = 1;
