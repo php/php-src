@@ -42,9 +42,11 @@ $fiber->resume();
 <suspend '%s'>
 <!-- switching from fiber 0 to %s -->
 <destroying '%s'>
-<!-- switching from fiber %s to 0 -->
-<destroyed '%s'>
-<!-- switching from fiber 0 to %s -->
+<!-- switching from fiber %s to %s -->
 <destroying '%s'>
+<destroyed '%s'>
+<!-- switching from fiber %s to %s -->
+<destroying '%s'>
+<destroyed '%s'>
 <!-- switching from fiber %s to 0 -->
 <destroyed '%s'>
