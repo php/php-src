@@ -205,7 +205,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 // Type cast to unsigned is used to avoid undefined behavior.
 |.macro LOAD_32BIT_VAL, reg, val
-||	if (val >= 0 && val <= MOVZ_IMM) {
+||	if (((uintptr_t)(val)) <= MOVZ_IMM) {
 |		movz reg, #val
 ||	} else {
 |		mov reg, #((uint32_t)(val) & 0xffff)
@@ -214,7 +214,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro LOAD_64BIT_VAL, reg, val
-||	if (val >= 0 && val <= MOVZ_IMM) {
+||	if (((uintptr_t)(val)) <= MOVZ_IMM) {
 |		movz reg, #val
 ||	} else {
 |		mov reg, #((uint64_t)(val) & 0xffff)
@@ -228,7 +228,7 @@ static void* dasm_labels[zend_lb_MAX];
 // When using Z_OFFSET(addr), which is 24-bit long, as the unsigned offset to compute a memory address,
 // we should firstly check the range.
 |.macro SAFE_MEM_ACC_WITH_UOFFSET, ldr_str_ins, op, base_reg, offset, tmp_reg
-||	if (offset > LDR_STR_PIMM) {
+||	if (((uintptr_t)(offset)) > LDR_STR_PIMM) {
 |		LOAD_32BIT_VAL tmp_reg, offset
 |		ldr_str_ins op, [base_reg, tmp_reg]
 ||	} else {
@@ -237,7 +237,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SAFE_MEM_ACC_WITH_UOFFSET_BYTE, ldrb_strb_ins, op, base_reg, offset, tmp_reg
-||	if (offset > LDRB_STRB_PIMM) {
+||	if (((uintptr_t)(offset)) > LDRB_STRB_PIMM) {
 |		LOAD_32BIT_VAL tmp_reg, offset
 |		ldrb_strb_ins op, [base_reg, tmp_reg]
 ||	} else {
@@ -380,7 +380,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.macro LOAD_BASE_ADDR, reg, base, offset
 ||	if (offset) {
-||		if (offset > ADD_SUB_IMM) {
+||		if (((uintptr_t)(offset)) > ADD_SUB_IMM) {
 |			LOAD_32BIT_VAL reg, offset
 |			add reg, Rx(base), reg
 ||		} else {
