@@ -76,7 +76,7 @@ typedef struct _zend_fiber {
 
 typedef struct _zend_fiber_error {
 	int type;
-	const char *filename;
+	zend_string *filename;
 	uint32_t lineno;
 	zend_string *message;
 } zend_fiber_error;
@@ -94,7 +94,7 @@ ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fib
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 
 ZEND_COLD void zend_error_suspend_fiber(
-		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);

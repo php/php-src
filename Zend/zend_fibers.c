@@ -287,7 +287,7 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 }
 
 ZEND_COLD void zend_error_suspend_fiber(
-		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	ZEND_ASSERT(EG(current_fiber) && "Must be within an active fiber!");
 
