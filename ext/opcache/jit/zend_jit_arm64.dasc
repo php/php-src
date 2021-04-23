@@ -2631,14 +2631,14 @@ static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const void *exit_addr)
 {
-	|	MEM_LOAD_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
+	|	MEM_LOAD_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
 	if (exit_addr) {
-		|	NIY // cbnz REG0w, &exit_addr
+		|	NIY // cbnz TMP1w, &exit_addr
 	} else if (last_valid_opline == opline) {
 		||		zend_jit_use_last_valid_opline();
-		|	cbnz REG0w, ->interrupt_handler
+		|	cbnz TMP1w, ->interrupt_handler
 	} else {
-		|	cbz REG0w, >1
+		|	cbnz TMP1w, >1
 		|.cold_code
 		|1:
 		|	LOAD_IP_ADDR opline
