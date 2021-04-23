@@ -2289,6 +2289,8 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_const:
+	|	stp x29, x30, [sp,#-16]!
+	|	mov x29, sp
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
@@ -2297,7 +2299,8 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	add sp, sp, #16
+	|	mov sp, x29
+	|	ldp x29, x30, [sp],#16
 	|	ret
 	return 1;
 }
@@ -2309,6 +2312,8 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_tmp:
+	|	stp x29, x30, [sp,#-16]!
+	|	mov x29, sp
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
@@ -2317,7 +2322,8 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	add sp, sp, #16
+	|	mov sp, x29
+	|	ldp x29, x30, [sp],#16
 	|	ret
 	return 1;
 }
@@ -2329,6 +2335,7 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF;
 
 	|->assign_var:
+	|	stp x29, x30, [sp,#-16]!
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
@@ -2337,7 +2344,8 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	add sp, sp, #16
+	|	mov sp, x29
+	|	ldp x29, x30, [sp],#16
 	|	ret
 	return 1;
 }
@@ -2349,6 +2357,8 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv_noref:
+	|	stp x29, x30, [sp,#-16]!
+	|	mov x29, sp
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
@@ -2357,7 +2367,8 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	add sp, sp, #16
+	|	mov sp, x29
+	|	ldp x29, x30, [sp],#16
 	|	ret
 	return 1;
 }
@@ -2369,6 +2380,8 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv:
+	|	stp x29, x30, [sp,#-16]!
+	|	mov x29, sp
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
@@ -2377,7 +2390,8 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	add sp, sp, #16
+	|	mov sp, x29
+	|	ldp x29, x30, [sp],#16
 	|	ret
 	return 1;
 }
