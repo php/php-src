@@ -1733,7 +1733,7 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 	|	ldrb TMP1w, OP:RX->op1_type
 	|	cmp TMP1w, #IS_TMP_VAR
 	|	bne >9
-	|	ldr REG0, OP:RX->op1.var
+	|	ldr REG0w, OP:RX->op1.var
 	|	add REG0, REG0, FP
 	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
 	|9:
