@@ -73,7 +73,6 @@
 #include "zend_dtrace.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
-#include "zend_fibers.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -1773,17 +1772,12 @@ void php_request_shutdown(void *dummy)
 		php_call_shutdown_functions();
 	}
 
-	/* 2. Cleanup all active fibers. */
-	zend_try {
-		zend_fiber_cleanup();
-	} zend_end_try();
-
-	/* 3. Call all possible __destruct() functions */
+	/* 2. Call all possible __destruct() functions */
 	zend_try {
 		zend_call_destructors();
 	} zend_end_try();
 
-	/* 4. Flush all output buffers */
+	/* 3. Flush all output buffers */
 	zend_try {
 		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
 
@@ -1800,27 +1794,27 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 5. Reset max_execution_time (no longer executing php code after response sent) */
+	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
 	zend_try {
 		zend_unset_timeout();
 	} zend_end_try();
 
-	/* 6. Call all extensions RSHUTDOWN functions */
+	/* 5. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
 	}
 
-	/* 7. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
+	/* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
 	zend_try {
 		php_output_deactivate();
 	} zend_end_try();
 
-	/* 8. Free shutdown functions */
+	/* 7. Free shutdown functions */
 	if (PG(modules_activated)) {
 		php_free_shutdown_functions();
 	}
 
-	/* 9. Destroy super-globals */
+	/* 8. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1829,38 +1823,38 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 10. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
 
-	/* 11. free request-bound globals */
+	/* 10. free request-bound globals */
 	php_free_request_globals();
 
-	/* 12. Call all extensions post-RSHUTDOWN functions */
+	/* 11. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 13. SAPI related shutdown (free stuff) */
+	/* 12. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate();
 	} zend_end_try();
 
-	/* 14. free virtual CWD memory */
+	/* 13. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 15. Destroy stream hashes */
+	/* 14. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 16. Free Willy (here be crashes) */
+	/* 15. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
-	/* 17. Deactivate Zend signals */
+	/* 16. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();
 #endif

@@ -397,6 +397,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 			zend_object *exception = EG(exception);
 			EG(exception) = NULL;
 			fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
+			GC_ADDREF(&fiber->std);
 			zend_fiber_switch_to(fiber);
 			EG(exception) = exception;
 		}
@@ -409,23 +410,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_fiber_destroy_context(&fiber->context);
 
 	zend_object_std_dtor(&fiber->std);
-}
 
-void zend_fiber_cleanup(void)
-{
-	zend_fiber *fiber;
-	zend_object *exception = EG(exception);
-	EG(exception) = NULL;
-
-	ZEND_HASH_REVERSE_FOREACH_PTR(&EG(fibers), fiber) {
-		if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
-			fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
-			GC_ADDREF(&fiber->std);
-			zend_fiber_switch_to(fiber);
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	EG(exception) = exception;
 }
 
 ZEND_METHOD(Fiber, __construct)
@@ -708,7 +693,7 @@ void zend_register_fiber_ce(void)
 	zend_ce_fiber->unserialize = zend_class_unserialize_deny;
 
 	zend_fiber_handlers = std_object_handlers;
-	zend_fiber_handlers.free_obj = zend_fiber_object_destroy;
+	zend_fiber_handlers.dtor_obj = zend_fiber_object_destroy;
 	zend_fiber_handlers.clone_obj = NULL;
 
 	zend_ce_fiber_error = register_class_FiberError(zend_ce_error);
