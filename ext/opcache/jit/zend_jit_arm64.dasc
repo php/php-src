@@ -8598,8 +8598,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	beq >1
 						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
 						|1:
-						|	ldr REG2, [REG2]
 					}
+					|	ldr REG2, [REG2]
 				} else {
 					|	tst REG2, #1
 					|	beq >1
