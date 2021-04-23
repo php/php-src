@@ -349,6 +349,8 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	zend_call_function(&fiber->fci, &fiber->fci_cache);
 
+	zval_ptr_dtor(&fiber->fci.function_name);
+
 	if (EG(exception)) {
 		if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
 			if (EXPECTED(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))) {
@@ -390,9 +392,13 @@ static void zend_fiber_object_destroy(zend_object *object)
 	if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
 		zend_object *exception = EG(exception);
 		EG(exception) = NULL;
+
 		fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
+		// Additional reference needed while running, removed in zend_fiber_execute.
 		GC_ADDREF(&fiber->std);
+
 		zend_fiber_switch_to(fiber);
+
 		EG(exception) = exception;
 	}
 }
@@ -451,8 +457,6 @@ ZEND_METHOD(Fiber, start)
 	}
 
 	zend_fiber_switch_to(fiber);
-
-	zval_ptr_dtor(&fiber->fci.function_name);
 
 	if (fiber->status & ZEND_FIBER_STATUS_FINISHED) {
 		RETURN_NULL();
