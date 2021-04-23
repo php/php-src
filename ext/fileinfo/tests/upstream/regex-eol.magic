@@ -1,0 +1,6 @@
+## Ansible Vault files
+0     string    $ANSIBLE_VAULT     Ansible Vault text
+>&1   regex/1l  [0-9]+(\.[0-9]+)+  \b, version %s
+>>&1  regex/1l  [^;]+$             \b, using %s encryption
+!:mime application/ansible-vault
+!:strength +60
