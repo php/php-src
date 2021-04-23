@@ -260,9 +260,6 @@ struct _zend_executor_globals {
 	/* Pointer to fatal error that occurred in a fiber while switching to {main}. */
 	zend_fiber_error *fiber_error;
 
-	/* Currently executing fibers. */
-	HashTable fibers;
-
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

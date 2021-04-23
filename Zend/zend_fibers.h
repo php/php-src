@@ -27,7 +27,6 @@ BEGIN_EXTERN_C()
 
 void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
-void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
