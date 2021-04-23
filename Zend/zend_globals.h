@@ -221,6 +221,7 @@ struct _zend_executor_globals {
 	zend_object *exception, *prev_exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
+	zend_op delayed_error_op[3];
 
 	struct _zend_module_entry *current_module;
 
@@ -248,6 +249,8 @@ struct _zend_executor_globals {
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
+
+	HashTable delayed_errors;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
