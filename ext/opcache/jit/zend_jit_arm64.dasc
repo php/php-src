@@ -11860,7 +11860,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		|	LOAD_32BIT_VAL TMP1, opline->extended_value
 		|	ldr REG2, [REG0, TMP1]
 		|	ldr TMP1, [FCARG1x, #offsetof(zend_object, ce)]
-		|	cmp REG2, TMP2
+		|	cmp REG2, TMP1
 		|	bne >7
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			|	LOAD_32BIT_VAL TMP1, (opline->extended_value + sizeof(void*) * 2)
