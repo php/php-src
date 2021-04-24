@@ -657,10 +657,7 @@ static inheritance_status zend_perform_covariant_type_check(
 				all_success = false;
 			}
 		} ZEND_TYPE_FOREACH_END();
-	} else if (ZEND_TYPE_IS_INTERSECTION(proto_type)) {
-		/* Here each member of the child union must be a subtype of the intersection
-		 * Note: the union can be a single element */
-
+	} else {
 		/* First try to check whether we can succeed without resolving anything */
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
 			inheritance_status status;
@@ -668,46 +665,22 @@ static inheritance_status zend_perform_covariant_type_check(
 			zend_class_entry *fe_ce = NULL;
 
 			if (ZEND_TYPE_HAS_NAME(*single_type)) {
-				fe_class_name = resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
+				fe_class_name = resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
 			} else if (ZEND_TYPE_HAS_CE(*single_type)) {
 				fe_ce = ZEND_TYPE_CE(*single_type);
 				fe_class_name = fe_ce->name;
 			} else {
-				/* standard type */
-				ZEND_ASSERT(0 && "This shouldn't happen yet");
 				continue;
 			}
 
-			status = zend_is_single_type_subtype_intersection(fe_scope,
+			if (UNEXPECTED(ZEND_TYPE_IS_INTERSECTION(proto_type))) {
+				status = zend_is_single_type_subtype_intersection(fe_scope,
+						fe_class_name, fe_ce, proto_scope, proto_type,
+						/* register_unresolved */ false);
+			} else {
+				status = zend_perform_covariant_class_type_check(fe_scope,
 					fe_class_name, fe_ce, proto_scope, proto_type,
 					/* register_unresolved */ false);
-
-			if (status == INHERITANCE_ERROR) {
-				return INHERITANCE_ERROR;
-			}
-			if (status != INHERITANCE_SUCCESS) {
-				all_success = false;
-			}
-		} ZEND_TYPE_FOREACH_END();
-	}
-	/* Only union or single types both in parent and child */
-	else {
-		/* First try to check whether we can succeed without resolving anything */
-		ZEND_TYPE_FOREACH(fe_type, single_type) {
-			inheritance_status status;
-			if (ZEND_TYPE_HAS_NAME(*single_type)) {
-				zend_string *fe_class_name =
-					resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
-				status = zend_perform_covariant_class_type_check(
-					fe_scope, fe_class_name, NULL,
-					proto_scope, proto_type, /* register_unresolved */ 0);
-			} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-				zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
-				status = zend_perform_covariant_class_type_check(
-					fe_scope, fe_ce->name, fe_ce,
-					proto_scope, proto_type, /* register_unresolved */ 0);
-			} else {
-				continue;
 			}
 
 			if (status == INHERITANCE_ERROR) {
