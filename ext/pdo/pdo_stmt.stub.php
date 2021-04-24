@@ -24,7 +24,7 @@ class PDOStatement implements IteratorAggregate
     /** @return bool|null */
     public function debugDumpParams() {}
 
-    /** @return string|null */
+    /** @return string */
     public function errorCode() {}
 
     /** @return array */

@@ -1529,9 +1529,7 @@ PHP_METHOD(PDOStatement, errorCode)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_STMT_GET_OBJ;
-	if (stmt->error_code[0] == '\0') {
-		RETURN_NULL();
-	}
+	ZEND_ASSERT(stmt->error_code[0] != '\0');
 
 	RETURN_STRING(stmt->error_code);
 }
