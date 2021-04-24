@@ -388,6 +388,12 @@ zend.exception_ignore_args = On
 ; of sensitive information in stack traces.
 zend.exception_string_param_max_len = 0
 
+; Limit for recursion via VM reentry, used to prevent stack overflow.
+; This only affects recursion through magic method calls and similar mechanism.
+; Some profiling, debugging or APM extensions might make this limit apply to plain
+; recursion as well, in which case you may wish to raise it.
+;zend.vm_reentry_limit = 1000
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;

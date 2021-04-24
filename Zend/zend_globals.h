@@ -249,6 +249,9 @@ struct _zend_executor_globals {
 
 	zend_get_gc_buffer get_gc_buffer;
 
+	zend_ulong vm_reentry_count;
+	zend_ulong vm_reentry_limit;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
