@@ -623,11 +623,11 @@ static inheritance_status zend_perform_covariant_type_check(
 	zend_type *single_type;
 	bool all_success = true;
 
-	/* For intersection types loop over the parent types first as a child
-	 * can add them */
-	if (ZEND_TYPE_IS_INTERSECTION(fe_type)
-			|| (ZEND_TYPE_IS_INTERSECTION(proto_type) && !ZEND_TYPE_IS_UNION(fe_type))
-	) {
+	/* If the child type is an intersection type then we need to loop over
+	 * the parents firstFor intersection types loop over the parent types first
+	 * as the child can add types, however none of them can be a supertype of
+	 * a parent type. */
+	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
 		/* First try to check whether we can succeed without resolving anything */
 		ZEND_TYPE_FOREACH(proto_type, single_type) {
 			inheritance_status status;
@@ -657,13 +657,12 @@ static inheritance_status zend_perform_covariant_type_check(
 				all_success = false;
 			}
 		} ZEND_TYPE_FOREACH_END();
-	} else if (ZEND_TYPE_IS_INTERSECTION(proto_type) && ZEND_TYPE_IS_UNION(fe_type)) {
-		/* Here each member of the child union must be a subtype of the intersection */
+	} else if (ZEND_TYPE_IS_INTERSECTION(proto_type)) {
+		/* Here each member of the child union must be a subtype of the intersection
+		 * Note: the union can be a single element */
 
 		/* First try to check whether we can succeed without resolving anything */
-		zend_type_list *child_union_types = ZEND_TYPE_LIST(fe_type);
-
-		ZEND_TYPE_LIST_FOREACH(child_union_types, single_type) {
+		ZEND_TYPE_FOREACH(fe_type, single_type) {
 			inheritance_status status;
 			zend_string *fe_class_name;
 			zend_class_entry *fe_ce = NULL;
@@ -689,7 +688,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			if (status != INHERITANCE_SUCCESS) {
 				all_success = false;
 			}
-		} ZEND_TYPE_LIST_FOREACH_END();
+		} ZEND_TYPE_FOREACH_END();
 	}
 	/* Only union or single types both in parent and child */
 	else {
