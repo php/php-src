@@ -342,9 +342,6 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	fiber->fci.retval = &fiber->value;
 
-	// Reference added while running, removed when suspended, and added again once resumed.
-	GC_ADDREF(&fiber->std);
-
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
 
 	zend_call_function(&fiber->fci, &fiber->fci_cache);
@@ -367,9 +364,6 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	zend_vm_stack_destroy();
 	fiber->execute_data = NULL;
-
-	// Remove reference added at last resume.
-	GC_DELREF(&fiber->std);
 }
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
@@ -394,8 +388,6 @@ static void zend_fiber_object_destroy(zend_object *object)
 		EG(exception) = NULL;
 
 		fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
-		// Additional reference needed while running, removed in zend_fiber_execute.
-		GC_ADDREF(&fiber->std);
 
 		zend_fiber_switch_to(fiber);
 
@@ -497,9 +489,6 @@ ZEND_METHOD(Fiber, suspend)
 	fiber->execute_data = execute_data;
 	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 
-	// Remove running reference while suspended.
-	GC_DELREF(&fiber->std);
-
 	zend_fiber_suspend(fiber);
 
 	if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
@@ -515,8 +504,6 @@ ZEND_METHOD(Fiber, suspend)
 	}
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
-	// Add reference while fiber is running.
-	GC_ADDREF(&fiber->std);
 
 	if (fiber->exception) {
 		exception = fiber->exception;
