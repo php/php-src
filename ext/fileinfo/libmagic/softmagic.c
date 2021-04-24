@@ -2025,7 +2025,6 @@ public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32
 	j = 0;
 	ZSTR_VAL(t)[j++] = '~';
 
-	bool add_newline = false;
 	for (i = 0; i < len; i++, j++) {
 		switch (val[i]) {
 			case '~':
@@ -2038,21 +2037,6 @@ public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32
 				ZSTR_VAL(t)[j++] = '0';
 				ZSTR_VAL(t)[j] = '0';
 				break;
-			/* If POSIX regex class negates, make sure possible '\n' is taken into
-			   account. For example "[^;]" is converted to "[^;]\n?" to obey POSIX. */
-			case '^':
-				ZSTR_VAL(t)[j] = val[i];
-				add_newline = (j >= 1 && '[' == ZSTR_VAL(t)[j-1]);
-				break;
-			case ']':
-				ZSTR_VAL(t)[j] = val[i];
-				if (add_newline) {
-					t = zend_string_realloc(t, ZSTR_LEN(t) + 3, GC_TYPE_INFO(t) & IS_STR_PERSISTENT);
-					ZSTR_VAL(t)[j++] = '\\';
-					ZSTR_VAL(t)[j++] = 'n';
-					ZSTR_VAL(t)[j++] = '?';
-					add_newline = false;
-				}
 			default:
 				ZSTR_VAL(t)[j] = val[i];
 				break;
