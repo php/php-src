@@ -12840,7 +12840,58 @@ static int zend_jit_hash_jmp(dasm_State **Dst, const zend_op *opline, const zend
 	int32_t exit_point;
 	const void *exit_addr;
 
-	|	NIY	// TODO
+	if (default_label) {
+		|	NIY	// jz &default_label
+	} else if (next_opline) {
+		|	cbz REG0, >3
+	} else {
+		|	cbz REG0, =>default_b
+	}
+	|	LOAD_ADDR FCARG1x, jumptable
+	|	ldr TMP1, [FCARG1x, #offsetof(HashTable, arData)]
+	|	sub REG0, REG0, TMP1
+	|	mov FCARG1x, #(sizeof(Bucket) / sizeof(void*))
+	|	sdiv REG0, REG0, FCARG1x
+	|	adr FCARG1x, >4
+	|	ldr TMP1, [FCARG1x, REG0]
+	|	br TMP1
+
+	|.jmp_table
+	|.align 8
+	|4:
+	if (trace_info) {
+		trace_info->jmp_table_size += zend_hash_num_elements(jumptable);
+	}
+
+	count = jumptable->nNumUsed;
+	p = jumptable->arData;
+	do {
+		if (Z_TYPE(p->val) == IS_UNDEF) {
+			if (default_label) {
+				|	.addr &default_label
+			} else if (next_opline) {
+				|	.addr >3
+			} else {
+				|	.addr =>default_b
+			}
+		} else {
+			target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val));
+			if (!next_opline) {
+				b = ssa->cfg.map[target - op_array->opcodes];
+				|	.addr =>b
+			} else if (next_opline == target) {
+				|	.addr >3
+			} else {
+				exit_point = zend_jit_trace_get_exit_point(target, 0);
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				|	.addr &exit_addr
+			}
+		}
+		p++;
+		count--;
+	} while (count);
+	|.code
+
 	return 1;
 }
 
@@ -12855,7 +12906,289 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 		next_opline = trace->opline;
 	}
 
-	|	NIY	// TODO
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op1);
+		zval *jump_zv = NULL;
+		int b;
+
+		if (opline->opcode == ZEND_SWITCH_LONG) {
+			if (Z_TYPE_P(zv) == IS_LONG) {
+				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
+			}
+		} else if (opline->opcode == ZEND_SWITCH_STRING) {
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+			}
+		} else if (opline->opcode == ZEND_MATCH) {
+			if (Z_TYPE_P(zv) == IS_LONG) {
+				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
+			} else if (Z_TYPE_P(zv) == IS_STRING) {
+				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+			}
+		} else {
+			ZEND_UNREACHABLE();
+		}
+		if (next_opline) {
+			const zend_op *target;
+
+			if (jump_zv != NULL) {
+				target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv));
+			} else {
+				target = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+			}
+			ZEND_ASSERT(target == next_opline);
+		} else {
+			if (jump_zv != NULL) {
+				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv)) - op_array->opcodes];
+			} else {
+				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+			}
+			|	b =>b
+		}
+	} else {
+		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+		uint32_t op1_info = OP1_INFO();
+		zend_jit_addr op1_addr = OP1_ADDR();
+		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+		const zend_op *target;
+		int default_b = next_opline ? -1 : ssa->cfg.map[default_opline - op_array->opcodes];
+		int b;
+		int32_t exit_point;
+		const void *fallback_label = NULL;
+		const void *default_label = NULL;
+		const void *exit_addr;
+
+		if (next_opline) {
+			if (next_opline != opline + 1) {
+				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				fallback_label = zend_jit_trace_get_exit_addr(exit_point);
+			}
+			if (next_opline != default_opline) {
+				exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
+				default_label = zend_jit_trace_get_exit_addr(exit_point);
+			}
+		}
+
+		if (opline->opcode == ZEND_SWITCH_LONG) {
+			if (op1_info & MAY_BE_LONG) {
+				if (op1_info & MAY_BE_REF) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >1, TMP1w, TMP2
+					|	GET_ZVAL_LVAL ZREG_FCARG2x, op1_addr, TMP1
+					|.cold_code
+					|1:
+					|	// ZVAL_DEREF(op)
+					if (fallback_label) {
+						|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, &fallback_label
+					} else {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >3, TMP1w, TMP2
+					}
+					|	GET_ZVAL_PTR FCARG2x, op1_addr, TMP1
+					if (fallback_label) {
+						|	NIY	// IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_LONG, &fallback_label
+					} else {
+						|	add TMP1, FCARG2x, #offsetof(zend_reference, val)
+						|	IF_NOT_Z_TYPE TMP1, IS_LONG, >3, TMP2w
+					}
+					|	ldr FCARG2x, [FCARG2x, #offsetof(zend_reference, val.value.lval)]
+					|	b >2
+					|.code
+					|2:
+				} else {
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
+						if (fallback_label) {
+							|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, &fallback_label
+						} else {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3, TMP1w, TMP2
+						}
+					}
+					|	GET_ZVAL_LVAL ZREG_FCARG2x, op1_addr, TMP1
+				}
+				if (HT_IS_PACKED(jumptable)) {
+					uint32_t count = jumptable->nNumUsed;
+					Bucket *p = jumptable->arData;
+
+					|	LOAD_32BIT_VAL TMP1w, jumptable->nNumUsed
+					|	cmp FCARG2x, TMP1
+					if (default_label) {
+						|	NIY	// jae &default_label
+					} else if (next_opline) {
+						|	bhs >3
+					} else {
+						|	bhs =>default_b
+					}
+					|	adr REG0, >4
+					|	lsl TMP1, FCARG2x, #3
+					|	ldr TMP1, [REG0, TMP1]
+					|	br TMP1
+
+					|.jmp_table
+					|.align 8
+					|4:
+					if (trace_info) {
+						trace_info->jmp_table_size += count;
+					}
+					p = jumptable->arData;
+					do {
+						if (Z_TYPE(p->val) == IS_UNDEF) {
+							if (default_label) {
+								|	.addr &default_label
+							} else if (next_opline) {
+								|	.addr >3
+							} else {
+								|	.addr =>default_b
+							}
+						} else {
+							target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val));
+							if (!next_opline) {
+								b = ssa->cfg.map[target - op_array->opcodes];
+								|	.addr =>b
+							} else if (next_opline == target) {
+								|	.addr >3
+							} else {
+								exit_point = zend_jit_trace_get_exit_point(target, 0);
+								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								|	.addr &exit_addr
+							}
+						}
+						p++;
+						count--;
+					} while (count);
+					|.code
+					|3:
+				} else {
+					|	LOAD_ADDR FCARG1x, jumptable
+					|	EXT_CALL zend_hash_index_find, REG0
+					|	mov REG0, RETVALx
+					if (!zend_jit_hash_jmp(Dst, opline, op_array, ssa, jumptable, default_b, default_label, next_opline, trace_info)) {
+						return 0;
+					}
+					|3:
+				}
+			}
+		} else if (opline->opcode == ZEND_SWITCH_STRING) {
+			if (op1_info & MAY_BE_STRING) {
+				if (op1_info & MAY_BE_REF) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >1, TMP1w, TMP2
+					|	GET_ZVAL_PTR FCARG2x, op1_addr, TMP1
+					|.cold_code
+					|1:
+					|	// ZVAL_DEREF(op)
+					if (fallback_label) {
+						|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, &fallback_label
+					} else {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >3, TMP1w, TMP2
+					}
+					|	GET_ZVAL_PTR FCARG2x, op1_addr, TMP1
+					if (fallback_label) {
+						|	NIY	// IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_STRING, &fallback_label
+					} else {
+						|	add TMP1, FCARG2x, #offsetof(zend_reference, val)
+						|	IF_NOT_Z_TYPE TMP1, IS_STRING, >3, TMP2w
+					}
+					|	ldr FCARG2x, [FCARG2x, #offsetof(zend_reference, val.value.ptr)]
+					|	b >2
+					|.code
+					|2:
+				} else {
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_STRING)) {
+						if (fallback_label) {
+							|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, &fallback_label
+						} else {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >3, TMP1w, TMP2
+						}
+					}
+					|	GET_ZVAL_PTR FCARG2x, op1_addr, TMP1
+				}
+				|	LOAD_ADDR FCARG1x, jumptable
+				|	EXT_CALL zend_hash_find, REG0
+				|	mov REG0, RETVALx
+				if (!zend_jit_hash_jmp(Dst, opline, op_array, ssa, jumptable, default_b, default_label, next_opline, trace_info)) {
+					return 0;
+				}
+				|3:
+			}
+		} else if (opline->opcode == ZEND_MATCH) {
+			if (op1_info & (MAY_BE_LONG|MAY_BE_STRING)) {
+				if (op1_info & MAY_BE_REF) {
+					|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+					|	ZVAL_DEREF FCARG2x, op1_info, TMP1w
+					op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG2x, 0);
+				}
+				|	LOAD_ADDR FCARG1x, jumptable
+				if (op1_info & MAY_BE_LONG) {
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
+						if (op1_info & MAY_BE_STRING) {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >5, TMP1w, TMP2
+						} else if (op1_info & MAY_BE_UNDEF) {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >6, TMP1w, TMP2
+						} else if (default_label) {
+							|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, &default_label
+						} else if (next_opline) {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3, TMP1w, TMP2
+						} else {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, =>default_b, TMP1w, TMP2
+						}
+					}
+					|	GET_ZVAL_LVAL ZREG_FCARG2x, op1_addr, TMP1
+					|	EXT_CALL zend_hash_index_find, REG0
+					|	mov REG0, RETVALx
+					if (op1_info & MAY_BE_STRING) {
+						|	b >2
+					}
+				}
+				if (op1_info & MAY_BE_STRING) {
+					|5:
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_STRING))) {
+						if (op1_info & MAY_BE_UNDEF) {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >6, TMP1w, TMP2
+						} else if (default_label) {
+							|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, &default_label
+						} else if (next_opline) {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >3, TMP1w, TMP2
+						} else {
+							|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, =>default_b, TMP1w, TMP2
+						}
+					}
+					|	GET_ZVAL_PTR FCARG2x, op1_addr, TMP1
+					|	EXT_CALL zend_hash_find, REG0
+					|	mov REG0, RETVALx
+				}
+				|2:
+				if (!zend_jit_hash_jmp(Dst, opline, op_array, ssa, jumptable, default_b, default_label, next_opline, trace_info)) {
+					return 0;
+				}
+			}
+			if (op1_info & MAY_BE_UNDEF) {
+				|6:
+				if (op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_STRING))) {
+					if (default_label) {
+						|	NIY	// IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, &default_label
+					} else if (next_opline) {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >3, TMP1w, TMP2
+					} else {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, =>default_b, TMP1w, TMP2
+					}
+				}
+				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	SET_EX_OPLINE opline, REG0
+				|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
+				|	EXT_CALL zend_jit_undefined_op_helper, REG0
+				if (!zend_jit_check_exception_undef_result(Dst, opline)) {
+					return 0;
+				}
+			}
+			if (default_label) {
+				|	NIY	// jmp &default_label
+			} else if (next_opline) {
+				|	b >3
+			} else {
+				|	b =>default_b
+			}
+			|3:
+		} else {
+			ZEND_UNREACHABLE();
+		}
+	}
 	return 1;
 }
 
