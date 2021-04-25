@@ -6050,7 +6050,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						if (exit_addr) {
 							|	NIY	// tracing
 						} else {
-							|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+							|	bvs => target_label
 							|	bls => target_label
 						}
 					} else {
@@ -6066,7 +6066,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						if (exit_addr) {
 							|	NIY	// tracing
 						} else {
-							|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+							|	bvs => target_label
 							|	blo => target_label
 						}
 					} else {
@@ -6206,7 +6206,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_SMALLER:
 					if (swap) {
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
-						|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+						|	bvs => target_label
 						|	bls => target_label
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
 					} else {
@@ -6218,7 +6218,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				case ZEND_IS_SMALLER_OR_EQUAL:
 					if (swap) {
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
-						|	bvs => target_label	// TODO: why the NaN check is missing in x86?
+						|	bvs => target_label
 						|	blo => target_label
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
 					} else {
@@ -6309,12 +6309,11 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				|	mov REG0, #IS_TRUE
 				|2:
 				break;
-				break;
 			case ZEND_IS_SMALLER:
 				|	bvs >1
 				|	mov REG0, #IS_TRUE
 				||	if (swap) {
-				|		bhi >2	// TODO: why the NaN check is missing in x86?
+				|		bhi >2
 				||	} else {
 				|		blo >2
 				||	}
@@ -6326,7 +6325,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				|	bvs >1
 				|	mov REG0, #IS_TRUE
 				||	if (swap) {
-				|		bhs >2	// TODO: why the NaN check is missing in x86?
+				|		bhs >2
 				||	} else {
 				|		bls >2
 				||	}
