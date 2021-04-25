@@ -44,9 +44,6 @@ static zend_class_entry *zend_ce_fiber_error;
 
 static zend_object_handlers zend_fiber_handlers;
 
-static zend_object *zend_fiber_object_create(zend_class_entry *ce);
-static void zend_fiber_object_destroy(zend_object *object);
-
 typedef void *fcontext_t;
 
 typedef struct _transfer_t {
@@ -492,7 +489,7 @@ ZEND_METHOD(Fiber, suspend)
 	zend_fiber_suspend(fiber);
 
 	if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-		// This occurs when the fiber is GC'ed while suspended, do not add a ref.
+		// This occurs when the fiber is GC'ed while suspended.
 		if (EG(fiber_error)) {
 			// Throw UnwindExit so finally blocks are not executed on fatal error.
 			zend_throw_unwind_exit();
