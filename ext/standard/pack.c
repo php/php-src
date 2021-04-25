@@ -1007,7 +1007,7 @@ PHP_FUNCTION(unpack)
 						if (type == 's') {
 							v = (int16_t) x;
 						} else if ((type == 'n' && IS_LITTLE_ENDIAN) || (type == 'v' && !IS_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int32(x);
+							v = php_pack_reverse_int32(x) >> 16;
 						} else {
 							v = x;
 						}
