@@ -1550,6 +1550,12 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	zend_long offset;
 
 	offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+		}
+		return;
+	}
 	if (offset < -(zend_long)Z_STRLEN_P(str)) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);

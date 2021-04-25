@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #67792 (HTTP Authorization schemes are treated as case-sensitive).
     (cmb)
+  . Fixed bug Bug #80972 (Memory exhaustion on invalid string offset). (girgias)
 
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
@@ -210,7 +211,7 @@ PHP                                                                        NEWS
     PROCEDURE resultset SIGNAL). (Nikita)
 
 - Standard:
-  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo). 
+  . Fixed bug #77423 (FILTER_VALIDATE_URL accepts URLs with invalid userinfo).
     (CVE-2020-7071) (cmb)
   . Fixed bug #80366 (Return Value of zend_fstat() not Checked). (sagpant, cmb)
   . Fixed bug #80411 (References to null-serialized object break serialize()).
@@ -349,7 +350,7 @@ PHP                                                                        NEWS
   . Fixed bug #80048 (Bug #69100 has not been fixed for Windows). (cmb)
   . Fixed bug #80049 (Memleak when coercing integers to string via variadic
     argument). (Nikita)
-  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-` 
+  . Fixed bug #79699 (PHP parses encoded cookie names so malicious `__Host-`
     cookies can be sent). (CVE-2020-7070) (Stas)
 
 - Calendar:
@@ -368,7 +369,7 @@ PHP                                                                        NEWS
     handlers changed). (SammyK)
 
 - OpenSSL:
-  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12 
+  . Fixed bug #79601 (Wrong ciphertext/tag in AES-CCM encryption for a 12
     bytes IV). (CVE-2020-7069) (Jakub Zelenka)
 
 - PDO:
@@ -450,7 +451,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Core:
-  . Fixed bug #79877 (getimagesize function silently truncates after a null 
+  . Fixed bug #79877 (getimagesize function silently truncates after a null
     byte) (cmb)
   . Fixed bug #79740 (serialize() and unserialize() methods can not be called
     statically). (Nikita)
@@ -511,7 +512,7 @@ PHP                                                                        NEWS
   . Fixed possibly unsupported timercmp() usage. (cmb)
 
 - Exif:
-  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes). 
+  . Fixed bug #79687 (Sony picture - PHP Warning - Make, Model, MakerNotes).
     (cmb)
 
 - Fileinfo:
@@ -727,7 +728,7 @@ PHP                                                                        NEWS
   . Fixed bug #79014 (PHP-FPM & Primary script unknown). (Jakub Zelenka)
 
 - MBstring:
-  . Fixed bug #79371 (mb_strtolower (UTF-32LE): stack-buffer-overflow at 
+  . Fixed bug #79371 (mb_strtolower (UTF-32LE): stack-buffer-overflow at
     php_unicode_tolower_full). (CVE-2020-7065) (cmb)
 
 - MySQLi:
