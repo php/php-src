@@ -52,10 +52,11 @@
 	} \
 	outputpos += (a)*(b);
 
-/* Whether machine is little endian */
-char machine_little_endian;
-
-#define IS_LITTLE_ENDIAN (*(unsigned char *)&(uint16_t){1})
+#ifdef WORDS_BIGENDIAN
+#define MACHINE_LITTLE_ENDIAN 0
+#else
+#define MACHINE_LITTLE_ENDIAN 1
+#endif
 
 /* Mapping of byte from char (8bit) to long for machine endian */
 static int byte_map[1];
@@ -1006,7 +1007,7 @@ PHP_FUNCTION(unpack)
 
 						if (type == 's') {
 							v = (int16_t) x;
-						} else if ((type == 'n' && IS_LITTLE_ENDIAN) || (type == 'v' && !IS_LITTLE_ENDIAN)) {
+						} else if ((type == 'n' && MACHINE_LITTLE_ENDIAN) || (type == 'v' && !MACHINE_LITTLE_ENDIAN)) {
 							v = php_pack_reverse_int32(x) >> 16;
 						} else {
 							v = x;
@@ -1035,7 +1036,7 @@ PHP_FUNCTION(unpack)
 
 						if (type == 'l') {
 							v = (int32_t) x;
-						} else if ((type == 'N' && IS_LITTLE_ENDIAN) || (type == 'V' && !IS_LITTLE_ENDIAN)) {
+						} else if ((type == 'N' && MACHINE_LITTLE_ENDIAN) || (type == 'V' && !MACHINE_LITTLE_ENDIAN)) {
 							v = php_pack_reverse_int32(x);
 						} else {
 							v = x;
@@ -1056,7 +1057,7 @@ PHP_FUNCTION(unpack)
 
 						if (type == 'q') {
 							v = (int64_t) x;
-						} else if ((type == 'J' && IS_LITTLE_ENDIAN) || (type == 'P' && !IS_LITTLE_ENDIAN)) {
+						} else if ((type == 'J' && MACHINE_LITTLE_ENDIAN) || (type == 'P' && !MACHINE_LITTLE_ENDIAN)) {
 							v = php_pack_reverse_int64(x);
 						} else {
 							v = x;
@@ -1156,12 +1157,9 @@ PHP_FUNCTION(unpack)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pack)
 {
-	int machine_endian_check = 1;
 	int i;
 
-	machine_little_endian = ((char *)&machine_endian_check)[0];
-
-	if (machine_little_endian) {
+	if (MACHINE_LITTLE_ENDIAN) {
 		/* Where to get lo to hi bytes from */
 		byte_map[0] = 0;
 
