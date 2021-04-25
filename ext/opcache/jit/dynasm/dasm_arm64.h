@@ -19,10 +19,10 @@
 enum {
   DASM_STOP, DASM_SECTION, DASM_ESC, DASM_REL_EXT,
   /* The following actions need a buffer position. */
-  DASM_ALIGN, DASM_REL_LG, DASM_LABEL_LG,
+  DASM_ALIGN, DASM_REL_LG, DASM_LABEL_LG, DASM_ADDR_LG,
   /* The following actions also have an argument. */
-  DASM_REL_PC, DASM_LABEL_PC,
-  DASM_IMM, DASM_IMM6, DASM_IMM12, DASM_IMM13W, DASM_IMM13X, DASM_IMML,
+  DASM_REL_PC, DASM_LABEL_PC, DASM_ADDR_PC,
+  DASM_IMM, DASM_IMM6, DASM_IMM12, DASM_IMM13W, DASM_IMM13X, DASM_IMML, DASM_IMM_PC,
   DASM_VREG,
   DASM__MAX
 };
@@ -251,14 +251,14 @@ void dasm_put(Dst_DECL, int start, ...)
       case DASM_ESC: p++; ofs += 4; break;
       case DASM_REL_EXT: break;
       case DASM_ALIGN: ofs += (ins & 255); b[pos++] = ofs; break;
-      case DASM_REL_LG:
+      case DASM_REL_LG: case DASM_ADDR_LG:
 	n = (ins & 2047) - 10; pl = D->lglabels + n;
 	/* Bkwd rel or global. */
 	if (n >= 0) { CK(n>=10||*pl<0, RANGE_LG); CKPL(lg, LG); goto putrel; }
 	pl += 10; n = *pl;
 	if (n < 0) n = 0;  /* Start new chain for fwd rel if label exists. */
 	goto linkrel;
-      case DASM_REL_PC:
+      case DASM_REL_PC: case DASM_ADDR_PC:
 	pl = D->pclabels + n; CKPL(pc, PC);
       putrel:
 	n = *pl;
@@ -308,6 +308,12 @@ void dasm_put(Dst_DECL, int start, ...)
       case DASM_IMM13X: {
 	int m = va_arg(ap, int);
 	CK(dasm_imm13(n, m) != -1, RANGE_I);
+	b[pos++] = n;
+	b[pos++] = m;
+	break;
+	}
+      case DASM_IMM_PC: {
+	int m = va_arg(ap, int);
 	b[pos++] = n;
 	b[pos++] = m;
 	break;
@@ -378,11 +384,11 @@ int dasm_link(Dst_DECL, size_t *szp)
 	case DASM_ESC: p++; break;
 	case DASM_REL_EXT: break;
 	case DASM_ALIGN: ofs -= (b[pos++] + ofs) & (ins & 255); break;
-	case DASM_REL_LG: case DASM_REL_PC: pos++; break;
+	case DASM_REL_LG: case DASM_ADDR_LG: case DASM_REL_PC: case DASM_ADDR_PC: pos++; break;
 	case DASM_LABEL_LG: case DASM_LABEL_PC: b[pos++] += ofs; break;
 	case DASM_IMM: case DASM_IMM6: case DASM_IMM12: case DASM_IMM13W:
 	case DASM_IMML: case DASM_VREG: pos++; break;
-	case DASM_IMM13X: pos += 2; break;
+	case DASM_IMM13X: case DASM_IMM_PC: pos += 2; break;
 	}
       }
       stop: (void)0;
@@ -421,6 +427,7 @@ int dasm_encode(Dst_DECL, void *buffer)
       while (1) {
 	unsigned int ins = *p++;
 	unsigned int action = (ins >> 16);
+	unsigned long long addr = 0;
 	int n = (action >= DASM_ALIGN && action < DASM__MAX) ? *b++ : 0;
 	switch (action) {
 	case DASM_STOP: case DASM_SECTION: goto stop;
@@ -461,6 +468,17 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  ins &= 2047; if (ins >= 20) D->globals[ins-10] = (void *)(base + n);
 	  break;
 	case DASM_LABEL_PC: break;
+	case DASM_ADDR_LG:
+	  if (n < 0) {
+	    addr = (unsigned long long)D->globals[-n];
+	    goto patchaddr;
+	  }
+	case DASM_ADDR_PC:
+	  addr = (unsigned long long)(*DASM_POS2PTR(D, n) + base);
+	patchaddr:
+	  cp[-2] = (unsigned int)(addr);
+	  cp[-1] = (unsigned int)(addr >> 32);
+	  break;
 	case DASM_IMM:
 	  cp[-1] |= (n & ((1<<((ins>>5)&31))-1)) << (ins&31);
 	  break;
@@ -472,6 +490,10 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_IMM13W:
 	  cp[-1] |= (dasm_imm13(n, n) << 10);
+	  break;
+	case DASM_IMM_PC:
+	  cp[-2] = (unsigned int)(n);
+	  cp[-1] = (unsigned int)(*b++);
 	  break;
 	case DASM_IMM13X:
 	  cp[-1] |= (dasm_imm13(n, *b++) << 10);
