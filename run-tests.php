@@ -2056,7 +2056,7 @@ TEST $file
         $missing = [];
         foreach ($extensions as $req_ext) {
             if (!in_array(strtolower($req_ext), $loaded)) {
-                if ($req_ext == 'opcache') {
+                if ($req_ext == 'opcache' || $req_ext == 'xdebug') {
                     $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
                     $ini_settings['zend_extension'][] = $ext_file;
                 } else {
