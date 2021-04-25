@@ -38,8 +38,8 @@ local wline, werror, wfatal, wwarn
 -- CHECK: Keep this in sync with the C code!
 local action_names = {
   "STOP", "SECTION", "ESC", "REL_EXT",
-  "ALIGN", "REL_LG", "LABEL_LG",
-  "REL_PC", "LABEL_PC", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML",
+  "ALIGN", "REL_LG", "LABEL_LG", "ADDR_LG",
+  "REL_PC", "LABEL_PC", "ADDR_PC", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML", "IMM_PC",
   "VREG",
 }
 
@@ -1065,6 +1065,26 @@ map_op[".long_*"] = function(params)
     if n < 0 then n = n + 2^32 end
     wputw(n)
     if secpos+2 > maxsecpos then wflush() end
+  end
+end
+
+-- Pseudo-opcodes for jump table entry.
+map_op[".addr_1"] = function(params)
+  if not params then return "&addr | >label | <label | ->label | =>label" end
+  if secpos+1 > maxsecpos then wflush() end
+  local prefix = sub(params[1], 1, 1)
+  if prefix == "&" then
+    wputw(0)
+    wputw(0)
+    local imm = match(params[1], "^&(.*)$")
+    waction("IMM_PC", 0, format("(unsigned int)(%s)", imm))
+    actargs[#actargs+1] = format("(unsigned int)((unsigned long long)(%s)>>32)", imm)
+  else
+    local mode, n, s = parse_label(params[1], false)
+    if mode == "EXT" then werror("not support extern label reference") end
+    wputw(0)
+    wputw(0)
+    waction("ADDR_"..mode, n, s, 1)
   end
 end
 
