@@ -16,13 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
 #include "zend_worklist.h"
 #include "zend_optimizer.h"
 #include "zend_optimizer_internal.h"
+#include "zend_sort.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {

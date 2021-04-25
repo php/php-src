@@ -122,7 +122,7 @@ static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_en
 static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(zend_string *filename);
-static void (*accelerator_orig_zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
+static void (*accelerator_orig_zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
@@ -1686,12 +1686,12 @@ static void zend_accel_set_auto_globals(int mask)
 	ZCG(auto_globals_mask) |= mask;
 }
 
-static void persistent_error_cb(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) {
+static void persistent_error_cb(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) {
 	if (ZCG(record_warnings)) {
 		zend_recorded_warning *warning = emalloc(sizeof(zend_recorded_warning));
 		warning->type = type;
 		warning->error_lineno = error_lineno;
-		warning->error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
+		warning->error_filename = zend_string_copy(error_filename);
 		warning->error_message = zend_string_copy(message);
 
 		ZCG(num_warnings)++;
@@ -1705,7 +1705,7 @@ static void replay_warnings(zend_persistent_script *script) {
 	for (uint32_t i = 0; i < script->num_warnings; i++) {
 		zend_recorded_warning *warning = script->warnings[i];
 		accelerator_orig_zend_error_cb(
-			warning->type, ZSTR_VAL(warning->error_filename), warning->error_lineno,
+			warning->type, warning->error_filename, warning->error_lineno,
 			warning->error_message);
 	}
 }
@@ -4084,13 +4084,13 @@ static void preload_link(void)
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
 			 && zend_hash_exists(EG(class_table), key)) {
 				zend_error_at(
-					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
 			} else {
 				const char *kind, *name;
 				get_unlinked_dependency(ce, &kind, &name);
 				zend_error_at(
-					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload unlinked class %s: %s%s",
 					ZSTR_VAL(ce->name), kind, name);
 			}

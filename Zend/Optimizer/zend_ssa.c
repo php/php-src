@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_dfg.h"
 #include "zend_ssa.h"

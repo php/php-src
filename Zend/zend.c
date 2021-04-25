@@ -77,7 +77,7 @@ ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
-ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
+ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
@@ -489,7 +489,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					}
 					smart_str_appendc(buf, '\n');
 				}
-				
+
 				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
@@ -1315,8 +1315,8 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-static ZEND_COLD void zend_error_impl(
-		int orig_type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+ZEND_API ZEND_COLD void zend_error_zstr_at(
+		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	zval params[4];
 	zval retval;
@@ -1381,7 +1381,7 @@ static ZEND_COLD void zend_error_impl(
 			ZVAL_LONG(&params[0], type);
 
 			if (error_filename) {
-				ZVAL_STRING(&params[2], error_filename);
+				ZVAL_STR_COPY(&params[2], error_filename);
 			} else {
 				ZVAL_NULL(&params[2]);
 			}
@@ -1449,15 +1449,15 @@ static ZEND_COLD void zend_error_impl(
 /* }}} */
 
 static ZEND_COLD void zend_error_va_list(
-		int orig_type, const char *error_filename, uint32_t error_lineno,
+		int orig_type, zend_string *error_filename, uint32_t error_lineno,
 		const char *format, va_list args)
 {
 	zend_string *message = zend_vstrpprintf(0, format, args);
-	zend_error_impl(orig_type, error_filename, error_lineno, message);
+	zend_error_zstr_at(orig_type, error_filename, error_lineno, message);
 	zend_string_release(message);
 }
 
-static ZEND_COLD void get_filename_lineno(int type, const char **filename, uint32_t *lineno) {
+static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint32_t *lineno) {
 	/* Obtain relevant filename and lineno */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -1479,16 +1479,11 @@ static ZEND_COLD void get_filename_lineno(int type, const char **filename, uint3
 		case E_USER_DEPRECATED:
 		case E_RECOVERABLE_ERROR:
 			if (zend_is_compiling()) {
-				*filename = ZSTR_VAL(zend_get_compiled_filename());
+				*filename = zend_get_compiled_filename();
 				*lineno = zend_get_compiled_lineno();
 			} else if (zend_is_executing()) {
-				*filename = zend_get_executed_filename();
-				if ((*filename)[0] == '[') { /* [no active file] */
-					*filename = NULL;
-					*lineno = 0;
-				} else {
-					*lineno = zend_get_executed_lineno();
-				}
+				*filename = zend_get_executed_filename_ex();
+				*lineno = zend_get_executed_lineno();
 			} else {
 				*filename = NULL;
 				*lineno = 0;
@@ -1500,12 +1495,12 @@ static ZEND_COLD void get_filename_lineno(int type, const char **filename, uint3
 			break;
 	}
 	if (!*filename) {
-		*filename = "Unknown";
+		*filename = ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
 	}
 }
 
 ZEND_API ZEND_COLD void zend_error_at(
-		int type, const char *filename, uint32_t lineno, const char *format, ...) {
+		int type, zend_string *filename, uint32_t lineno, const char *format, ...) {
 	va_list args;
 
 	if (!filename) {
@@ -1519,7 +1514,18 @@ ZEND_API ZEND_COLD void zend_error_at(
 }
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
-	const char *filename;
+	zend_string *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+}
+
+ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
+	zend_string *filename;
 	uint32_t lineno;
 	va_list args;
 
@@ -1530,7 +1536,7 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
-		int type, const char *filename, uint32_t lineno, const char *format, ...)
+		int type, zend_string *filename, uint32_t lineno, const char *format, ...)
 {
 	va_list args;
 
@@ -1548,7 +1554,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	const char *filename;
+	zend_string *filename;
 	uint32_t lineno;
 	va_list args;
 
@@ -1561,10 +1567,10 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 }
 
 ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
-	const char *filename;
+	zend_string *filename;
 	uint32_t lineno;
 	get_filename_lineno(type, &filename, &lineno);
-	zend_error_impl(type, filename, lineno, message);
+	zend_error_zstr_at(type, filename, lineno, message);
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */

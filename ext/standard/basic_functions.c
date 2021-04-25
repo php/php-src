@@ -1506,12 +1506,20 @@ PHP_FUNCTION(error_get_last)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PG(last_error_message)) {
+		zval tmp;
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
-		add_assoc_str_ex(return_value, "message", sizeof("message")-1,
-			zend_string_copy(PG(last_error_message)));
-		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
-		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
+
+		ZVAL_LONG(&tmp, PG(last_error_type));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+
+		ZVAL_STR_COPY(&tmp, PG(last_error_message));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+
+		ZVAL_STR_COPY(&tmp, PG(last_error_file));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+
+		ZVAL_LONG(&tmp, PG(last_error_lineno));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	}
 }
 /* }}} */
@@ -1529,7 +1537,7 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {
-			free(PG(last_error_file));
+			zend_string_release(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
 	}

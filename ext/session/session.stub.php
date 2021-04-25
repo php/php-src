@@ -71,7 +71,7 @@ interface SessionHandlerInterface
     /** @return bool */
     public function close();
 
-    /** @return string */
+    /** @return string|false */
     public function read(string $id);
 
     /** @return bool */
@@ -107,7 +107,7 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     /** @return bool */
     public function close() {}
 
-    /** @return string */
+    /** @return string|false */
     public function read(string $id) {}
 
     /** @return bool */

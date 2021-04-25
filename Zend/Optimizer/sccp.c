@@ -17,15 +17,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
+#include "zend_API.h"
+#include "zend_exceptions.h"
+#include "zend_ini.h"
 #include "zend_type_info.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/scdf.h"
 #include "Optimizer/zend_dump.h"
-#include "ext/standard/php_string.h"
-#include "zend_exceptions.h"
 
 /* This implements sparse conditional constant propagation (SCCP) based on the SCDF framework. The
  * used value lattice is defined as follows:

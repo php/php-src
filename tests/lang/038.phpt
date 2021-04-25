@@ -5,7 +5,7 @@ Convert warnings to exceptions
 
 class MyException extends Exception
 {
-    function __construct($errstr, $errno=0, $errfile='', $errline='')
+    function __construct($errstr, $errno=0, $errfile='', $errline=0)
     {
         parent::__construct($errstr, $errno);
         $this->file = $errfile;

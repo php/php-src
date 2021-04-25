@@ -28,7 +28,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
   }
 
   - Methods [55] {
-    Method [ <internal:Reflection> final private method __clone ] {
+    Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
       }

@@ -83,7 +83,7 @@ PHPDBG_INFO(error) /* {{{ */
 {
 	if (PG(last_error_message)) {
 		phpdbg_try_access {
-			phpdbg_writeln("lasterror", "error=\"%s\" file=\"%s\" line=\"%d\"", "Last error: %s at %s line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+			phpdbg_writeln("lasterror", "error=\"%s\" file=\"%s\" line=\"%d\"", "Last error: %s at %s line %d", PG(last_error_message), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
 		} phpdbg_catch_access {
 			phpdbg_notice("lasterror", "error=\"\"", "No error found!");
 		} phpdbg_end_try_access();

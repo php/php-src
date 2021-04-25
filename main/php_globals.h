@@ -134,7 +134,7 @@ struct _php_core_globals {
 
 	int last_error_type;
 	zend_string *last_error_message;
-	char *last_error_file;
+	zend_string *last_error_file;
 	int  last_error_lineno;
 
 	char *php_sys_temp_dir;

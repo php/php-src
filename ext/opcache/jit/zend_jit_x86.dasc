@@ -4244,26 +4244,26 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	}
 
 	if (opcode == ZEND_MUL &&
-		((Z_MODE(op2_addr) == IS_CONST_ZVAL &&
+		Z_MODE(op2_addr) == IS_CONST_ZVAL &&
 		IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op2_addr))) &&
-		is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr)))) ||
-		(Z_MODE(op1_addr) == IS_CONST_ZVAL &&
-		IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op1_addr))) &&
-		is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))))) {
-		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
-			if (Z_MODE(op1_addr) == IS_REG && Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
-				|	lea Ra(result_reg), [Ra(Z_REG(op1_addr))+Ra(Z_REG(op1_addr))]
-			} else {
-				|	GET_ZVAL_LVAL result_reg, op1_addr
-				|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
-			}
+		is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr)))) {
+
+		if (Z_MODE(op1_addr) == IS_REG && Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
+			|	lea Ra(result_reg), [Ra(Z_REG(op1_addr))+Ra(Z_REG(op1_addr))]
 		} else {
-			if (Z_MODE(op2_addr) == IS_REG && Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
-				|	lea Ra(result_reg), [Ra(Z_REG(op2_addr))+Ra(Z_REG(op2_addr))]
-			} else {
-				|	GET_ZVAL_LVAL result_reg, op2_addr
-				|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
-			}
+			|	GET_ZVAL_LVAL result_reg, op1_addr
+			|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+		}
+	} else if (opcode == ZEND_MUL &&
+		Z_MODE(op1_addr) == IS_CONST_ZVAL &&
+		IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op1_addr))) &&
+		is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))) {
+
+		if (Z_MODE(op2_addr) == IS_REG && Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
+			|	lea Ra(result_reg), [Ra(Z_REG(op2_addr))+Ra(Z_REG(op2_addr))]
+		} else {
+			|	GET_ZVAL_LVAL result_reg, op2_addr
+			|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
 		}
 	} else if (opcode == ZEND_DIV &&
 			(Z_MODE(op2_addr) == IS_CONST_ZVAL &&
@@ -13688,7 +13688,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >7
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			|	cmp aword [r0 + ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2], 0
+			|	cmp aword [r0 + (opline+1)->extended_value + sizeof(void*) * 2], 0
 			|	jnz >7
 		}
 		|	mov r0, aword [r0 + (opline+1)->extended_value + sizeof(void*)]
@@ -14020,7 +14020,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			|	mov FCARG2a, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2]
+			|	mov FCARG2a, aword [r0 + opline->extended_value + sizeof(void*) * 2]
 		}
 		|	mov r0, aword [r0 + opline->extended_value + sizeof(void*)]
 		|	test r0, r0
