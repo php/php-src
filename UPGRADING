@@ -153,6 +153,8 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/enumerations
   . Added support for never return type
     RFC: https://wiki.php.net/rfc/noreturn_type
+  . Added support for fibers.
+    RFC: https://wiki.php.net/rfc/fibers
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
