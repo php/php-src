@@ -30,13 +30,13 @@
 #include "zend_fibers_arginfo.h"
 
 #ifdef HAVE_VALGRIND
-#include <valgrind/valgrind.h>
+# include <valgrind/valgrind.h>
 #endif
 
 #ifndef PHP_WIN32
-#include <unistd.h>
-#include <sys/mman.h>
-#include <limits.h>
+# include <unistd.h>
+# include <sys/mman.h>
+# include <limits.h>
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
@@ -416,7 +416,7 @@ ZEND_METHOD(Fiber, __construct)
 		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// Keep a reference to closures or callable objects until the fiber is started.
+	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);
 }
 
@@ -428,7 +428,7 @@ ZEND_METHOD(Fiber, start)
 	zend_array *named_params;
 
 	ZEND_PARSE_PARAMETERS_START(0, -1)
-			Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
+		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
@@ -461,8 +461,8 @@ ZEND_METHOD(Fiber, suspend)
 	zval *exception, *value = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_ZVAL(value);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(!fiber)) {
