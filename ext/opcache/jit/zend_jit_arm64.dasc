@@ -2329,6 +2329,7 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 
 	|->assign_var:
 	|	stp x29, x30, [sp,#-16]!
+	|	mov x29, sp
 	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
