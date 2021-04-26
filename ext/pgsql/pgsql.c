@@ -112,7 +112,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(pgsql)
 #endif
 
-static int le_link, le_plink, le_result, le_lofp, le_string;
+static int le_link, le_plink, le_result, le_lofp;
 
 /* Compatibility definitions */
 
@@ -278,9 +278,9 @@ static void _free_result(zend_resource *rsrc)
 }
 /* }}} */
 
-static void release_string(zend_resource *rsrc)
+static void release_string(zval *zv)
 {
-	zend_string_release((zend_string *) rsrc->ptr);
+	zend_string_release((zend_string *) Z_PTR_P(zv));
 }
 
 static bool _php_pgsql_identifier_is_escaped(const char *identifier, size_t len) /* {{{ */
@@ -356,7 +356,6 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_plink = zend_register_list_destructors_ex(NULL, _close_pgsql_plink, "pgsql link persistent", module_number);
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
-	le_string = zend_register_list_destructors_ex(release_string, NULL, "pgsql string", module_number);
 	/* libpq version */
 	php_libpq_version(buf, sizeof(buf));
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", buf, CONST_CS | CONST_PERSISTENT);
@@ -480,6 +479,8 @@ PHP_RINIT_FUNCTION(pgsql)
 {
 	PGG(default_link) = NULL;
 	PGG(num_links) = PGG(num_persistent);
+	zend_hash_init(&PGG(field_oids), 0, NULL, release_string, 0);
+	zend_hash_init(&PGG(table_oids), 0, NULL, release_string, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -490,6 +491,8 @@ PHP_RSHUTDOWN_FUNCTION(pgsql)
 	/* clean up notice messages */
 	zend_hash_clean(&PGG(notices));
 	zend_hash_clean(&PGG(hashes));
+	zend_hash_destroy(&PGG(field_oids));
+	zend_hash_destroy(&PGG(table_oids));
 	/* clean up persistent connection */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
@@ -1481,61 +1484,47 @@ static inline bool is_valid_oid_string(zend_string *oid, Oid *return_oid)
 }
 
 /* {{{ get_field_name */
-static zend_string *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
+static zend_string *get_field_name(PGconn *pgsql, Oid oid)
 {
-	smart_str str = {0};
-	zend_resource *field_type;
-	zend_string *ret = NULL;
-
-	/* try to lookup the type in the resource list */
-	smart_str_appends(&str, "pgsql_oid_");
-	smart_str_append_unsigned(&str, oid);
-	smart_str_0(&str);
-
-	if ((field_type = zend_hash_find_ptr(list, str.s)) != NULL) {
-		ret = zend_string_copy((zend_string *) field_type->ptr);
-	} else { /* hash all oid's */
-		int i, num_rows;
-		int oid_offset,name_offset;
-		char *tmp_oid, *end_ptr, *tmp_name;
-		zend_resource new_oid_entry;
-		PGresult *result;
-
-		if ((result = PQexec(pgsql, "select oid,typname from pg_type")) == NULL || PQresultStatus(result) != PGRES_TUPLES_OK) {
-			if (result) {
-				PQclear(result);
-			}
-			smart_str_free(&str);
-			return ZSTR_EMPTY_ALLOC();
-		}
-		num_rows = PQntuples(result);
-		oid_offset = PQfnumber(result,"oid");
-		name_offset = PQfnumber(result,"typname");
-
-		for (i=0; i<num_rows; i++) {
-			if ((tmp_oid = PQgetvalue(result,i,oid_offset))==NULL) {
-				continue;
-			}
-
-			smart_str_free(&str);
-			smart_str_appends(&str, "pgsql_oid_");
-			smart_str_appends(&str, tmp_oid);
-			smart_str_0(&str);
-
-			if ((tmp_name = PQgetvalue(result,i,name_offset))==NULL) {
-				continue;
-			}
-			new_oid_entry.type = le_string;
-			new_oid_entry.ptr = zend_string_init(tmp_name, strlen(tmp_name), 0);
-			zend_hash_update_mem(list, str.s, (void *) &new_oid_entry, sizeof(zend_resource));
-			if (!ret && strtoul(tmp_oid, &end_ptr, 10)==oid) {
-				ret = zend_string_copy(new_oid_entry.ptr);
-			}
-		}
-		PQclear(result);
+	zend_string *ret = zend_hash_index_find_ptr(&PGG(field_oids), oid);
+	if (ret) {
+		zend_string_addref(ret);
+		return ret;
 	}
 
-	smart_str_free(&str);
+	PGresult *result = PQexec(pgsql, "select oid,typname from pg_type");
+	if (!result || PQresultStatus(result) != PGRES_TUPLES_OK) {
+		if (result) {
+			PQclear(result);
+		}
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	int num_rows = PQntuples(result);
+	int oid_offset = PQfnumber(result,"oid");
+	int name_offset = PQfnumber(result,"typname");
+	for (int i = 0; i < num_rows; i++) {
+		char *tmp_oid_str = PQgetvalue(result, i, oid_offset);
+		if (!tmp_oid_str) {
+			continue;
+		}
+
+		char *tmp_name = PQgetvalue(result, i, name_offset);
+		if (!tmp_name) {
+			continue;
+		}
+
+		char *end_ptr;
+		Oid tmp_oid = strtoul(tmp_oid_str, &end_ptr, 10);
+
+		zend_string *name = zend_string_init(tmp_name, strlen(tmp_name), 0);
+		zend_hash_index_update_ptr(&PGG(field_oids), tmp_oid, name);
+		if (!ret && tmp_oid == oid) {
+			ret = zend_string_copy(name);
+		}
+	}
+
+	PQclear(result);
 	return ret;
 }
 /* }}} */
@@ -1547,10 +1536,6 @@ PHP_FUNCTION(pg_field_table)
 	pgsql_result_handle *pg_result;
 	zend_long fnum = -1;
 	bool return_oid = 0;
-	Oid oid;
-	smart_str hash_key = {0};
-	char *table_name;
-	zend_resource *field_table;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|b", &result, &fnum, &return_oid) == FAILURE) {
 		RETURN_THROWS();
@@ -1570,8 +1555,7 @@ PHP_FUNCTION(pg_field_table)
 		RETURN_THROWS();
 	}
 
-	oid = PQftable(pg_result->result, (int)fnum);
-
+	Oid oid = PQftable(pg_result->result, (int)fnum);
 	if (InvalidOid == oid) {
 		RETURN_FALSE;
 	}
@@ -1580,49 +1564,37 @@ PHP_FUNCTION(pg_field_table)
 		PGSQL_RETURN_OID(oid);
 	}
 
-	/* try to lookup the table name in the resource list */
-	smart_str_appends(&hash_key, "pgsql_table_oid_");
-	smart_str_append_unsigned(&hash_key, oid);
-	smart_str_0(&hash_key);
-
-	if ((field_table = zend_hash_find_ptr(&EG(regular_list), hash_key.s)) != NULL) {
-		smart_str_free(&hash_key);
-		RETURN_STR_COPY((zend_string *)field_table->ptr);
-	} else { /* Not found, lookup by querying PostgreSQL system tables */
-		PGresult *tmp_res;
-		smart_str querystr = {0};
-		zend_resource new_field_table;
-
-		smart_str_appends(&querystr, "select relname from pg_class where oid=");
-		smart_str_append_unsigned(&querystr, oid);
-		smart_str_0(&querystr);
-
-		if ((tmp_res = PQexec(pg_result->conn, ZSTR_VAL(querystr.s))) == NULL || PQresultStatus(tmp_res) != PGRES_TUPLES_OK) {
-			if (tmp_res) {
-				PQclear(tmp_res);
-			}
-			smart_str_free(&querystr);
-			smart_str_free(&hash_key);
-			RETURN_FALSE;
-		}
-
-		smart_str_free(&querystr);
-
-		if ((table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
-			PQclear(tmp_res);
-			smart_str_free(&hash_key);
-			RETURN_FALSE;
-		}
-
-		new_field_table.type = le_string;
-		new_field_table.ptr = zend_string_init(table_name, strlen(table_name), 0);
-		zend_hash_update_mem(&EG(regular_list), hash_key.s, (void *)&new_field_table, sizeof(zend_resource));
-
-		smart_str_free(&hash_key);
-		PQclear(tmp_res);
-		RETURN_STR_COPY(new_field_table.ptr);
+	zend_string *field_table = zend_hash_index_find_ptr(&PGG(table_oids), oid);
+	if (field_table) {
+		RETURN_STR_COPY(field_table);
 	}
 
+	/* Not found, lookup by querying PostgreSQL system tables */
+	smart_str querystr = {0};
+	smart_str_appends(&querystr, "select relname from pg_class where oid=");
+	smart_str_append_unsigned(&querystr, oid);
+	smart_str_0(&querystr);
+
+	PGresult *tmp_res = PQexec(pg_result->conn, ZSTR_VAL(querystr.s));
+	smart_str_free(&querystr);
+	if (!tmp_res || PQresultStatus(tmp_res) != PGRES_TUPLES_OK) {
+		if (tmp_res) {
+			PQclear(tmp_res);
+		}
+		RETURN_FALSE;
+	}
+
+	char *table_name = PQgetvalue(tmp_res, 0, 0);
+	if (!table_name) {
+		PQclear(tmp_res);
+		RETURN_FALSE;
+	}
+
+	field_table = zend_string_init(table_name, strlen(table_name), 0);
+	zend_hash_index_update_ptr(&PGG(table_oids), oid, field_table);
+
+	PQclear(tmp_res);
+	RETURN_STR_COPY(field_table);
 }
 /* }}} */
 
@@ -1668,8 +1640,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			RETURN_LONG(PQfsize(pgsql_result, (int)field));
 			break;
 		case PHP_PG_FIELD_TYPE:
-			RETURN_STR(get_field_name(
-				pg_result->conn, PQftype(pgsql_result, (int)field), &EG(regular_list)));
+			RETURN_STR(get_field_name(pg_result->conn, PQftype(pgsql_result, (int)field)));
 			break;
 		case PHP_PG_FIELD_TYPE_OID:
 
