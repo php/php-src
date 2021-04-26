@@ -8,14 +8,28 @@ class IntlDateFormatter
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar
      */
-    public function __construct(?string $locale, int $dateType, int $timeType, $timezone = null, $calendar = null, ?string $pattern = null) {}
+    public function __construct(
+        ?string $locale,
+        int $dateType = IntlDateFormatter::FULL,
+        int $timeType = IntlDateFormatter::FULL,
+        $timezone = null,
+        $calendar = null,
+        ?string $pattern = null
+    ) {}
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @return IntlDateFormatter|null
      * @alias datefmt_create
      */
-    public static function create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, ?string $pattern = null) {}
+    public static function create(
+        ?string $locale,
+        int $dateType = IntlDateFormatter::FULL,
+        int $timeType = IntlDateFormatter::FULL,
+        $timezone = null,
+        IntlCalendar|int|null $calendar = null,
+        ?string $pattern = null
+    ) {}
 
     /**
      * @return int|false

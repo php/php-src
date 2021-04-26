@@ -51,8 +51,8 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	char	*locale_str;
 	size_t		locale_len	= 0;
 	Locale		locale;
-	zend_long	date_type	= 0;
-	zend_long	time_type	= 0;
+	zend_long	date_type = UDAT_FULL;
+	zend_long	time_type = UDAT_FULL;
 	zend_object *calendar_obj = NULL;
 	zend_long calendar_long = 0;
 	bool calendar_is_null = 1;
@@ -71,11 +71,11 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset(NULL);
 	object = return_value;
 
-	ZEND_PARSE_PARAMETERS_START(3, 6)
+	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(date_type)
 		Z_PARAM_LONG(time_type)
-		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(timezone_zv)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
 		Z_PARAM_STRING_OR_NULL(pattern_str, pattern_str_len)
