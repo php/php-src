@@ -67,17 +67,17 @@ function zip_entry_compressionmethod($zip_entry): string|false {}
 class ZipArchive implements Countable
 {
     /** @readonly */
-    public int $lastId = -1;
+    public int $lastId;
     /** @readonly */
-    public int $status = 0;
+    public int $status;
     /** @readonly */
-    public int $statusSys = 0;
+    public int $statusSys;
     /** @readonly */
-    public int $numFiles = 0;
+    public int $numFiles;
     /** @readonly */
-    public string $filename = "";
+    public string $filename;
     /** @readonly */
-    public string $comment = "";
+    public string $comment;
 
     /** @return bool|int */
     public function open(string $filename, int $flags = 0) {}

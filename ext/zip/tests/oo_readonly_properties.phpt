@@ -13,6 +13,12 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+try {
+    $zip->lastId += 1;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 var_dump($zip->lastId);
 
 try {
@@ -57,6 +63,7 @@ var_dump($zip->comment);
 
 ?>
 --EXPECT--
+Cannot write read-only property ZipArchive::$lastId
 Cannot write read-only property ZipArchive::$lastId
 int(-1)
 Cannot write read-only property ZipArchive::$status
