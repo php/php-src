@@ -1142,8 +1142,38 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				snprintf(lbuf, llen, "%s[name]", param);
 			}
 			register_http_post_files_variable(lbuf, s, &PG(http_globals)[TRACK_VARS_FILES], 0);
-			efree(filename);
 			s = NULL;
+
+			/* Add $foo_fullpath */
+			if (llen < strlen(param) + MAX_SIZE_OF_INDEX + 1) {
+				llen = (int)strlen(param);
+				lbuf = (char *) safe_erealloc(lbuf, llen, 1, MAX_SIZE_OF_INDEX + 1);
+				llen += MAX_SIZE_OF_INDEX + 1;
+			}
+
+			if (is_arr_upload) {
+				if (abuf) efree(abuf);
+				abuf = estrndup(param, strlen(param)-array_len);
+				snprintf(lbuf, llen, "%s_fullpath[%s]", abuf, array_index);
+			} else {
+				snprintf(lbuf, llen, "%s_fullpath", param);
+			}
+
+			/* Add full path of supplied file for folder uploads via 
+			 * <input type="file" name="files" multiple webkitdirectory>
+			 */
+			if (!is_anonymous) {
+				safe_php_register_variable(lbuf, filename, strlen(filename), NULL, 0);
+			}
+
+			/* Add $foo[fullname] */
+			if (is_arr_upload) {
+				snprintf(lbuf, llen, "%s[fullpath][%s]", abuf, array_index);
+			} else {
+				snprintf(lbuf, llen, "%s[fullpath]", param);
+			}
+			register_http_post_files_variable(lbuf, filename, &PG(http_globals)[TRACK_VARS_FILES], 0);
+			efree(filename);
 
 			/* Possible Content-Type: */
 			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
