@@ -86,7 +86,7 @@
 |.define ZREG_TMP4,   ZREG_X14
 |.define ZREG_FPTMP,  ZREG_V16
 
-|.define HYBRID_SPAD, #16     // padding for stack alignment
+|.define HYBRID_SPAD, #32     // padding for stack alignment
 
 #define SPAD            0x20
 #define NR_SPAD         0x30
