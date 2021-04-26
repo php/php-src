@@ -88,6 +88,9 @@ PHP                                                                        NEWS
   . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
     fetching a BLOB). (Nikita)
 
+. PDO MySQL:
+  . Fixed bug#80908 (PDO::lastInsertId() return wrong). (matt)
+
 . PDO SQLite:
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 
