@@ -7,7 +7,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #67792 (HTTP Authorization schemes are treated as case-sensitive).
     (cmb)
-  . Fixed bug Bug #80972 (Memory exhaustion on invalid string offset). (girgias)
+  . Fixed bug #80972 (Memory exhaustion on invalid string offset). (girgias)
 
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
