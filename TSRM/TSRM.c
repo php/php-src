@@ -741,6 +741,14 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	asm ("leal _tsrm_ls_cache@ntpoff,%0"
           : "=r" (ret));
 	return ret;
+#elif defined(__aarch64__)
+	size_t ret;
+
+	asm("mov %0, xzr\n\t"
+	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
+	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
+	     : "=r" (ret));
+	return ret;
 #else
 	return 0;
 #endif
