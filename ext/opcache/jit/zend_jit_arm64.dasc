@@ -3123,9 +3123,24 @@ static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr sr
 	if (!zend_jit_same_addr(src, dst)) {
 		if (Z_MODE(src) == IS_REG) {
 			if (Z_MODE(dst) == IS_REG) {
-				|	mov Rx(Z_REG(dst)), Rx(Z_REG(src))
+				if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
+					|	mov Rx(Z_REG(dst)), Rx(Z_REG(src))
+				} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+					|	fmov Rd(Z_REG(dst)-ZREG_V0), Rd(Z_REG(src)-ZREG_V0)
+				} else {
+					ZEND_UNREACHABLE();
+				}
 			} else if (Z_MODE(dst) == IS_MEM_ZVAL) {
-				|	fmov Rd(Z_REG(dst)-ZREG_V0), Rd(Z_REG(src)-ZREG_V0)
+				if (!Z_LOAD(src) && !Z_STORE(src)) {
+					if (!zend_jit_spill_store(Dst, src, dst, info,
+							JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+							JIT_G(current_frame) == NULL ||
+							STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var)) == IS_UNKNOWN ||
+							(1 << STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var))) != (info & MAY_BE_ANY)
+					)) {
+						return 0;
+					}
+				}
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -3746,7 +3761,7 @@ static int zend_jit_math_double_double(dasm_State    **Dst,
 		} else if (Z_MODE(val_addr) == IS_REG) {
 			op2_reg = Z_REG(val_addr);
 		} else {
-			op2_reg = ZREG_FPR1;
+			op2_reg = ZREG_FPTMP;
 			|	GET_ZVAL_DVAL op2_reg, val_addr, ZREG_TMP1
 		}
 		|	DOUBLE_MATH_REG opcode, result_reg, op1_reg, op2_reg
