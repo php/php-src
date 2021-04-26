@@ -11,6 +11,8 @@ trigger:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
+      - *.md
+      - ext/*.md
 
 schedules:
   - cron: "0 1 * * *"
