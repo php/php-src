@@ -168,6 +168,18 @@ static void* dasm_labels[zend_lb_MAX];
 
 #define BP_JIT_IS 6
 
+/* helper: determine whether an immediate value can be encoded as the immediate operand of logical instructions */
+static int logical_immediate_p (uint64_t value, uint32_t reg_size)
+{
+	/* fast path: power of two */
+	if (value > 0 && !(value & (value - 1))) {
+		return 1;
+	}
+
+	// TODO: slow path
+	return 0;
+}
+
 /* Not Implemented Yet */
 |.macro NIY
 ||	//ZEND_ASSERT(0);
@@ -219,23 +231,45 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-// TODO: Support logical instruction with an immediate encoded.
 // Bitwise operation with constants. 'ins' can be and/orr/eor/ands. Operands are 64-bit.
 |.macro BW_OP_64_WITH_CONST, ins, reg, op, val, tmp_reg
-|	LOAD_64BIT_VAL tmp_reg, val
-|	ins reg, op, tmp_reg
+||	if (val == 0) {
+|		ins reg, op, xzr
+||	} else if (logical_immediate_p(val, 64)) {
+|		ins reg, op, #val
+||	} else {
+|		LOAD_64BIT_VAL tmp_reg, val
+|		ins reg, op, tmp_reg
+||	}
 |.endmacro
 
 // Test operation 'tst' with constants. Operands are 32-bit.
 |.macro TST_32_WITH_CONST, reg, val, tmp_reg
-|	LOAD_32BIT_VAL tmp_reg, val
-|	tst reg, tmp_reg
+||	if (val == 0) {
+|		tst reg, wzr
+||	} else if (logical_immediate_p((uint32_t)val, 32)) {
+|		tst reg, #val
+||	} else {
+|		LOAD_32BIT_VAL tmp_reg, val
+|		tst reg, tmp_reg
+||	}
 |.endmacro
 
 // Test operation 'tst' with constants. Operands are 64-bit.
 |.macro TST_64_WITH_CONST, reg, val, tmp_reg
-|	LOAD_64BIT_VAL tmp_reg, val
-|	tst reg, tmp_reg
+||	if (val == 0) {
+|		tst reg, xzr
+||	} else if (logical_immediate_p(val, 64)) {
+|		tst reg, #val
+||	} else {
+|		LOAD_64BIT_VAL tmp_reg, val
+|		tst reg, tmp_reg
+||	}
+|.endmacro
+
+// Note: 1 is a valid immediate for logical instruction.
+|.macro TST_64_WITH_ONE, reg
+|	tst reg, #1
 |.endmacro
 
 // Safe memory load/store with an unsigned immediate offset.
@@ -8622,14 +8656,14 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
 					} else {
 						/* the called op_array may be not persisted yet */
-						|	TST_64_WITH_CONST REG2, 1, TMP1
+						|	TST_64_WITH_ONE REG2
 						|	beq >1
 						|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
 						|1:
 					}
 					|	ldr REG2, [REG2]
 				} else {
-					|	TST_64_WITH_CONST REG2, 1, TMP1
+					|	TST_64_WITH_ONE REG2
 					|	beq >1
 					|	MEM_LOAD_OP_ZTS add, ldr, REG2, compiler_globals, map_ptr_base, REG1, TMP1
 					|1:
@@ -9514,7 +9548,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 	|	ldr REG0, EX->run_time_cache
 	|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG0, REG0, opline->extended_value, TMP1	
 	|	cbz REG0, >1
-	|	TST_64_WITH_CONST REG0, 1, TMP1
+	|	TST_64_WITH_ONE REG0
 	|	bne >4
 	|.cold_code
 	|4:
@@ -13466,7 +13500,8 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	|	// if (c != NULL)
 	|	cbz REG0, >9
 	|	// if (!IS_SPECIAL_CACHE_VAL(c))
-	|	TST_64_WITH_CONST REG0, CACHE_SPECIAL, TMP1
+	||	ZEND_ASSERT(CACHE_SPECIAL == 1);
+	|	TST_64_WITH_ONE REG0
 	|	bne >9
 	|8:
 
