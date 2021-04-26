@@ -107,6 +107,7 @@ if ($pid) {
                 fputs($s, "234 auth type accepted\r\n");
             } else {
                 fputs($s, "666 dummy\r\n");
+                sleep(1);
                 fputs($s, "666 bogus msg\r\n");
                 exit;
             }
@@ -197,6 +198,8 @@ if ($pid) {
         } elseif ($buf === "SYST\r\n") {
             if (isset($bug27809)) {
                 fputs($s, "215   OS/400 is the remote operating system. The TCP/IP version is \"V5R2M0\"\r\n");
+            } elseif (isset($bug80901)) {
+                fputs($s, "\r\n" . str_repeat("*", 4096) . "\r\n");
             } else {
                 fputs($s, "215 UNIX Type: L8.\r\n");
             }

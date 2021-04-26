@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug Bug #80972 (Memory exhaustion on invalid string offset). (girgias)
 
+- FTP:
+  . Fixed bug #80901 (Info leak in ftp extension). (cmb)
+
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
 
