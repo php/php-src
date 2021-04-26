@@ -740,19 +740,19 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 
 /* bit helpers */
 
-static bool zend_long_is_power_of_two(zend_long x)
+static zend_always_inline bool zend_long_is_power_of_two(zend_long x)
 {
 	return (x > 0) && !(x & (x - 1));
 }
 
-static uint32_t zend_long_floor_log2(uint64_t x)
+static zend_always_inline uint32_t zend_long_floor_log2(uint64_t x)
 {
 	ZEND_ASSERT(zend_long_is_power_of_two(x));
 	return __builtin_ctzll(x);
 }
 
 /* from http://aggregate.org/MAGIC/ */
-static uint32_t ones32(uint32_t x)
+static zend_always_inline uint32_t ones32(uint32_t x)
 {
 	x -= ((x >> 1) & 0x55555555);
 	x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
@@ -762,7 +762,7 @@ static uint32_t ones32(uint32_t x)
 	return x & 0x0000003f;
 }
 
-static uint32_t floor_log2(uint32_t x)
+static zend_always_inline uint32_t floor_log2(uint32_t x)
 {
 	ZEND_ASSERT(x != 0);
 	x |= (x >> 1);
@@ -773,22 +773,22 @@ static uint32_t floor_log2(uint32_t x)
 	return ones32(x) - 1;
 }
 
-static bool is_power_of_two(uint32_t x)
+static zend_always_inline bool is_power_of_two(uint32_t x)
 {
 	return !(x & (x - 1)) && x != 0;
 }
 
-static bool has_concrete_type(uint32_t value_type)
+static zend_always_inline bool has_concrete_type(uint32_t value_type)
 {
 	return is_power_of_two (value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
 }
 
-static uint32_t concrete_type(uint32_t value_type)
+static zend_always_inline uint32_t concrete_type(uint32_t value_type)
 {
 	return floor_log2(value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
 }
 
-static inline bool is_signed(double d)
+static zend_always_inline bool is_signed(double d)
 {
 	return (((unsigned char*)&d)[sizeof(double)-1] & 0x80) != 0;
 }
