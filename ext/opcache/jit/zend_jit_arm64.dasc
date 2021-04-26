@@ -137,8 +137,6 @@ const char* zend_reg_name[] = {
 
 #if ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
-static size_t tsrm_tls_index;
-static size_t tsrm_tls_offset;
 #endif
 
 /* By default avoid JITing inline handlers if it does not seem profitable due to lack of
@@ -291,14 +289,21 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro LOAD_TSRM_CACHE, reg
-|	NIY	// TODO
+|	//.byte 0x4d, 0xd0, 0x3b, 0xd5 // TODO: hard-coded: mrs TMP3, tpidr_el0
+|	.long 0xd53bd04d // TODO: hard-coded: mrs TMP3, tpidr_el0
+||	ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= ADD_SUB_IMM);
+|	ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
 |.endmacro
 
 |.macro LOAD_ADDR_ZTS, reg, struct, field
 |	.if ZTS
-|		NIY	// TODO
-|		LOAD_TSRM_CACHE reg
-|		add reg, reg, #(struct.._offset + offsetof(zend_..struct, field))
+|		LOAD_TSRM_CACHE TMP3
+||		if (((uintptr_t)(struct.._offset+offsetof(zend_..struct, field))) > ADD_SUB_IMM) {
+|			LOAD_32BIT_VAL reg, (struct.._offset + offsetof(zend_..struct, field))
+|			add reg, reg, TMP3
+||		} else {
+|			add reg, TMP3, #(struct.._offset + offsetof(zend_..struct, field))
+||		}
 |	.else
 |		LOAD_ADDR reg, &struct.field
 |	.endif
@@ -337,9 +342,17 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro MEM_STORE_ZTS, str_ins, op, struct, field, tmp_reg
 |	.if ZTS
-|		NIY	// TODO: test
-|		LOAD_TSRM_CACHE tmp_reg
-|		str_ins op, [tmp_reg, #(struct.._offset+offsetof(zend_..struct, field))]
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET str_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	.else
+|		MEM_STORE str_ins, op, &struct.field, tmp_reg
+|	.endif
+|.endmacro
+
+|.macro MEM_STORE_ZTS_BYTE, str_ins, op, struct, field, tmp_reg
+|	.if ZTS
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE str_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 |	.else
 |		MEM_STORE str_ins, op, &struct.field, tmp_reg
 |	.endif
@@ -353,9 +366,17 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro MEM_LOAD_ZTS, ldr_ins, op, struct, field, tmp_reg
 |	.if ZTS
-|		NIY	// TODO: test
-|		LOAD_TSRM_CACHE tmp_reg
-|		ldr_ins op, [tmp_reg, #(struct.._offset+offsetof(zend_..struct, field))]
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	.else
+|		MEM_LOAD ldr_ins, op, &struct.field, tmp_reg
+|	.endif
+|.endmacro
+
+|.macro MEM_LOAD_ZTS_BYTE, ldr_ins, op, struct, field, tmp_reg
+|	.if ZTS
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldr_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 |	.else
 |		MEM_LOAD ldr_ins, op, &struct.field, tmp_reg
 |	.endif
@@ -371,9 +392,8 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro MEM_LOAD_OP_ZTS, mem_ins, ldr_ins, op, struct, field, tmp_reg1, tmp_reg2
 |	.if ZTS
-|		NIY	// TODO: test
-|		LOAD_TSRM_CACHE tmp_reg1
-|		ldr_ins tmp_reg2, [tmp_reg1, #(struct.._offset+offsetof(zend_..struct, field))]
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr_ins, tmp_reg2, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg1
 |		mem_ins op, op, tmp_reg2
 |	.else
 |		MEM_LOAD_OP mem_ins, ldr_ins, op, &struct.field, tmp_reg1, tmp_reg2
@@ -389,10 +409,19 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro MEM_LOAD_CMP_ZTS, ldr_ins, op, struct, field, tmp_reg1, tmp_reg2
 |	.if ZTS
-|		NIY	// TODO: test
-|		LOAD_TSRM_CACHE tmp_reg1
-|		ldr_ins tmp_reg2, [tmp_reg1, #(struct.._offset+offsetof(zend_..struct, field))]
-|		cmp tmp_reg2, op
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr_ins, tmp_reg1, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg2
+|		cmp tmp_reg1, op
+|	.else
+|		MEM_LOAD_CMP ldr_ins, op, &struct.field, tmp_reg1, tmp_reg2
+|	.endif
+|.endmacro
+
+|.macro MEM_LOAD_CMP_ZTS_BYTE, ldr_ins, op, struct, field, tmp_reg1, tmp_reg2
+|	.if ZTS
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldr_ins, tmp_reg1, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg2
+|		cmp tmp_reg1, op
 |	.else
 |		MEM_LOAD_CMP ldr_ins, op, &struct.field, tmp_reg1, tmp_reg2
 |	.endif
@@ -409,11 +438,17 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro MEM_LOAD_OP_STORE_ZTS, mem_ins, ldr_ins, str_ins, op, struct, field, tmp_reg1, tmp_reg2
 |	.if ZTS
-|		NIY	// TODO: test
-|		LOAD_TSRM_CACHE tmp_reg1
-|		ldr_ins tmp_reg2, [tmp_reg1, #(struct.._offset+offsetof(zend_..struct, field))]
-|		mem_ins tmp_reg2, tmp_reg2, op
-|		str_ins tmp_reg2, [tmp_reg1, #(struct.._offset+offsetof(zend_..struct, field))]
+|		LOAD_TSRM_CACHE TMP3
+||		if (((uintptr_t)(struct.._offset+offsetof(zend_..struct, field))) > LDRB_STRB_PIMM) {
+|			LOAD_32BIT_VAL tmp_reg1, (struct.._offset+offsetof(zend_..struct, field))
+|			ldr_ins tmp_reg2, [TMP3, tmp_reg1]
+|			mem_ins tmp_reg2, tmp_reg2, op
+|			str_ins tmp_reg2, [TMP3, tmp_reg1]
+||		} else {
+|			ldr_ins tmp_reg2, [TMP3, #(struct.._offset+offsetof(zend_..struct, field))]
+|			mem_ins tmp_reg2, tmp_reg2, op
+|			str_ins tmp_reg2, [TMP3, #(struct.._offset+offsetof(zend_..struct, field))]
+||		}
 |	.else
 |		MEM_LOAD_OP_STORE mem_ins, ldr_ins, str_ins, op, &struct.field, tmp_reg1, tmp_reg2
 |	.endif
@@ -474,9 +509,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
-|.macro LOAD_IP_ADDR_ZTS, struct, field
+|.macro LOAD_IP_ADDR_ZTS, struct, field, tmp_reg
 |	.if ZTS
-|		NIY	// TODO
+||		if (GCC_GLOBAL_REGS) {
+|			LOAD_TSRM_CACHE IP
+|	   		SAFE_MEM_ACC_WITH_UOFFSET ldr, IP, IP, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+||		} else {
+|			LOAD_TSRM_CACHE RX
+|	   		SAFE_MEM_ACC_WITH_UOFFSET ldr, RX, RX, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|			str RX, EX->opline
+||		}
 |	.else
 |		LOAD_IP_ADDR &struct.field
 |	.endif
@@ -1576,9 +1618,9 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|->interrupt_handler:
 	|	SAVE_IP
 	|	//EG(vm_interrupt) = 0;
-	|	MEM_STORE_ZTS strb, wzr, executor_globals, vm_interrupt, TMP1
+	|	MEM_STORE_ZTS_BYTE strb, wzr, executor_globals, vm_interrupt, TMP1
 	|	//if (EG(timed_out)) {
-	|	MEM_LOAD_ZTS ldrb, REG0w, executor_globals, timed_out, TMP1
+	|	MEM_LOAD_ZTS_BYTE ldrb, REG0w, executor_globals, timed_out, TMP1
 	|	cbz REG0w, >1
 	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, TMP1
@@ -1697,7 +1739,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
 		|5:
 		|	// opline = EG(exception_op);
-		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
 		|	// HANDLE_EXCEPTION()
 		|	b ->exception_handler
 	} else {
@@ -1709,7 +1751,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
 		|5:
 		|	// opline = EG(exception_op);
-		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
 		|	ldp FP, RX, T2               // retore FP and IP
 		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 		|	mov RETVALx, #2     // ZEND_VM_LEAVE
@@ -1732,7 +1774,7 @@ static int zend_jit_icall_throw_stub(dasm_State **Dst)
 	|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
 	|1:
 	|	// opline = EG(exception_op);
-	|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+	|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
 	||	if (GCC_GLOBAL_REGS) {
 	|		str IP, EX->opline
 	||	}
@@ -2187,7 +2229,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	LOAD_IP
 
 	|	// check for interrupt (try to avoid this ???)
-	|	MEM_LOAD_CMP_ZTS ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
+	|	MEM_LOAD_CMP_ZTS_BYTE ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
 	|	bne ->interrupt_handler
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
@@ -2543,6 +2585,10 @@ static int zend_jit_setup(void)
 		tsrm_tls_index = ti[0] * 8;
 #endif
 	}
+# elif defined(__aarch64__)
+	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
+# elif
 # endif
 #endif
 
@@ -2638,7 +2684,7 @@ static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const void *exit_addr)
 {
-	|	MEM_LOAD_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+	|	MEM_LOAD_ZTS_BYTE ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
 	if (exit_addr) {
 		|	NIY // cbnz TMP1w, &exit_addr
 	} else if (last_valid_opline == opline) {
@@ -2658,7 +2704,7 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void *timeout_exit_addr)
 {
 	if (timeout_exit_addr) {
-		|	MEM_LOAD_CMP_ZTS ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
+		|	MEM_LOAD_CMP_ZTS_BYTE ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
 		|	beq =>loop_label
 		|	EXT_JMP timeout_exit_addr, TMP1
 	} else {
