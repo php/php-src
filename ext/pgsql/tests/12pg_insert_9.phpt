@@ -54,11 +54,11 @@ echo "Ok\n";
 --EXPECTF--
 INSERT INTO "php_pgsql_test" ("num","str","bin") VALUES (1234,E'AAA',E'\\x424242');
 INSERT INTO "php_pgsql_test" ("num","str","bin") VALUES ('1234','AAA','BBB');
-object(PgSqlResult)#%d (0) {
+object(PgSql\Result)#%d (0) {
 }
 Array of values must be an associative array with string keys
 Array of values must be an associative array with string keys
 Values must be of type string|int|float|bool|null, array given
 Values must be of type string|int|float|bool|null, stdClass given
-Values must be of type string|int|float|bool|null, PgSql given
+Values must be of type string|int|float|bool|null, PgSql\Connection given
 Ok

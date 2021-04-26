@@ -53,9 +53,9 @@ pg_close($dbh);
 
 ?>
 --EXPECTF--
-object(PgSqlResult)#%d (0) {
+object(PgSql\Result)#%d (0) {
 }
-object(PgSqlResult)#%d (0) {
+object(PgSql\Result)#%d (0) {
 }
 array(1) {
   [0]=>

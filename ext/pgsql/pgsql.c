@@ -169,7 +169,7 @@ static void pgsql_link_free(pgsql_link_handle *link)
 	}
 	PGG(num_links)--;
 
-	zend_hash_del(&PGG(regular_list), link->hash);
+	zend_hash_del(&PGG(connections), link->hash);
 
 	link->conn = NULL;
 	zend_string_release(link->hash);
@@ -257,7 +257,6 @@ static void pgsql_lob_free_obj(zend_object *obj)
 
 	zend_object_std_dtor(&lofp->std);
 }
-static int le_link, le_plink, le_result, le_lofp;
 
 /* Compatibility definitions */
 
@@ -286,6 +285,8 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 
 static void php_pgsql_set_default_link(pgsql_link_handle *link)
 {
+	GC_ADDREF(res);
+
 	PGG(default_link) = link;
 }
 
@@ -312,10 +313,9 @@ static void _php_pgsql_notice_handler(void *l, const char *message)
 	}
 
 	pgsql_link_handle *link;
-	HashTable *notices, tmp_notices;
 	zval tmp;
 
-	link = ((pgsql_link_handle *) l);
+	link = (pgsql_link_handle *) l;
 	if (!link->notices) {
 		link->notices = zend_new_array(1);
 	}
@@ -325,7 +325,8 @@ static void _php_pgsql_notice_handler(void *l, const char *message)
 		php_error_docref(NULL, E_NOTICE, "%s", ZSTR_VAL(trimmed_message));
 	}
 
-	add_next_index_str(link->notices, trimmed_message);
+	ZVAL_STR(&tmp, trimmed_message);
+	zend_hash_next_index_insert(link->notices, &tmp);
 }
 
 static int _rollback_transactions(zval *el)
@@ -357,12 +358,6 @@ static int _rollback_transactions(zval *el)
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
-}
-
-static void _free_ptr(zend_resource *rsrc)
-{
-	pgLofp *lofp = (pgLofp *)rsrc->ptr;
-	efree(lofp);
 }
 
 static void release_string(zval *zv)
@@ -409,7 +404,7 @@ static PHP_GINIT_FUNCTION(pgsql)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
-	zend_hash_init(&pgsql_globals->regular_list, 0, NULL, ZVAL_PTR_DTOR, 1);
+	zend_hash_init(&pgsql_globals->connections, 0, NULL, ZVAL_PTR_DTOR, 1);
 }
 
 static void php_libpq_version(char *buf, size_t len)
@@ -434,7 +429,7 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	le_plink = zend_register_list_destructors_ex(NULL, _close_pgsql_plink, "pgsql link persistent", module_number);
 
-	pgsql_link_ce = register_class_PgSql();
+	pgsql_link_ce = register_class_PgSql_Connection();
 	pgsql_link_ce->create_object = pgsql_link_create_object;
 	pgsql_link_ce->serialize = zend_class_serialize_deny;
 	pgsql_link_ce->unserialize = zend_class_unserialize_deny;
@@ -446,7 +441,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_link_object_handlers.clone_obj = NULL;
 	pgsql_link_object_handlers.compare = zend_objects_not_comparable;
 
-	pgsql_result_ce = register_class_PgSqlResult();
+	pgsql_result_ce = register_class_PgSql_Result();
 	pgsql_result_ce->create_object = pgsql_result_create_object;
 	pgsql_result_ce->serialize = zend_class_serialize_deny;
 	pgsql_result_ce->unserialize = zend_class_unserialize_deny;
@@ -458,7 +453,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_result_object_handlers.clone_obj = NULL;
 	pgsql_result_object_handlers.compare = zend_objects_not_comparable;
 
-	pgsql_lob_ce = register_class_PgSqlLob();
+	pgsql_lob_ce = register_class_PgSql_Lob();
 	pgsql_lob_ce->create_object = pgsql_lob_create_object;
 	pgsql_lob_ce->serialize = zend_class_serialize_deny;
 	pgsql_lob_ce->unserialize = zend_class_unserialize_deny;
@@ -579,7 +574,7 @@ PHP_MINIT_FUNCTION(pgsql)
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
-	zend_hash_destroy(&PGG(regular_list));
+	zend_hash_destroy(&PGG(connections));
 
 	return SUCCESS;
 }
@@ -726,7 +721,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * and add a pointer to it with hashed_details as the key.
 		 */
 		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
-			&& (index_ptr = zend_hash_find_ptr(&PGG(regular_list), str.s)) != NULL) {
+			&& (index_ptr = zend_hash_find_ptr(&PGG(connections), str.s)) != NULL) {
 			php_pgsql_set_default_link(pgsql_link_from_obj(Z_OBJ_P(index_ptr)));
 			GC_ADDREF(Z_OBJ_P(index_ptr));
 			ZVAL_COPY(return_value, index_ptr);
@@ -768,9 +763,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* add it to the hash */
 		ZVAL_COPY(&new_index_ptr, return_value);
-		zend_hash_update(&PGG(regular_list), str.s, &new_index_ptr);
+		zend_hash_update(&PGG(connections), str.s, &new_index_ptr);
 
-		/* Keep track of link => hash mapping, so we can remove the hash entry from regular_list
+		/* Keep track of link => hash mapping, so we can remove the hash entry from connections
 		 * when the connection is closed. This uses the address of the connection rather than the
 		 * zend_resource, because the resource destructor is passed a stack copy of the resource
 		 * structure. */
@@ -842,7 +837,7 @@ PHP_FUNCTION(pg_close)
 	if (!pgsql_link) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-		zend_hash_del(&PGG(regular_list), link->hash);
+		zend_hash_del(&PGG(connections), link->hash);
 		PGG(default_link) = NULL;
 		RETURN_TRUE;
 	}
@@ -851,7 +846,7 @@ PHP_FUNCTION(pg_close)
 	CHECK_PGSQL_LINK(link);
 
 	if (link == FETCH_DEFAULT_LINK()) {
-		zend_hash_del(&PGG(regular_list), link->hash);
+		zend_hash_del(&PGG(connections), link->hash);
 		PGG(default_link) = NULL;
 	}
 	pgsql_link_free(link);

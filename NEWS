@@ -99,10 +99,9 @@ PHP                                                                        NEWS
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 
 - PgSQL:
-  . Convert resource<pgsql link> to object \PgSql. (Máté)
-  . Convert resource<pgsql result> to object \PgSqlResult. (Máté)
-  . Convert resource<pgsql large object> to object \PgSqlLob. (Máté)
-  . Convert resource<pgsql string> to object \PgsqlString. (Máté)
+  . Convert resource<pgsql link> to object \PgSql\Connection. (Máté)
+  . Convert resource<pgsql result> to object \PgSql\Result. (Máté)
+  . Convert resource<pgsql large object> to object \PgSql\Lob. (Máté)
 
 - PSpell:
   . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)

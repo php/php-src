@@ -147,8 +147,8 @@ typedef struct pgsql_link_handle {
 	PGconn *conn;
 	zend_string *hash;
 	HashTable *notices;
-	zend_object std;
 	bool persistent;
+	zend_object std;
 } pgsql_link_handle;
 
 typedef struct pgLofp {
@@ -191,7 +191,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	HashTable hashes; /* hashes for each connection */
 	HashTable field_oids;
 	HashTable table_oids;
-	HashTable regular_list; /* connection list */
+	HashTable connections;
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)

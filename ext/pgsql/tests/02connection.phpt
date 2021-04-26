@@ -54,5 +54,5 @@ pg_close($db);
 
 ?>
 --EXPECTF--
-object(PgSql)#%d (0) {
+object(PgSql\Connection)#%d (0) {
 }
