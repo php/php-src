@@ -23,5 +23,7 @@ int(1)
 Fatal error: Uncaught Exception: test in %sfiber-throw-in-destruct.php:%d
 Stack trace:
 #0 [internal function]: class@anonymous::{closure}()
-#1 {main}
+#1 %sfiber-throw-in-destruct.php(%d): Fiber->resume()
+#2 [internal function]: class@anonymous->__destruct()
+#3 {main}
   thrown in %sfiber-throw-in-destruct.php on line %d

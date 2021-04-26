@@ -44,6 +44,8 @@ static zend_class_entry *zend_ce_fiber_error;
 
 static zend_object_handlers zend_fiber_handlers;
 
+static zend_function zend_fiber_function = { ZEND_INTERNAL_FUNCTION };
+
 typedef void *fcontext_t;
 
 typedef struct _transfer_t {
@@ -331,8 +333,12 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 	EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
 
 	fiber->execute_data = (zend_execute_data *) stack->top;
+	fiber->stack_bottom = fiber->execute_data;
 
 	memset(fiber->execute_data, 0, sizeof(zend_execute_data));
+
+	fiber->execute_data->func = &zend_fiber_function;
+	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	EG(current_execute_data) = fiber->execute_data;
 	EG(jit_trace_num) = 0;
@@ -360,6 +366,7 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	zend_vm_stack_destroy();
 	fiber->execute_data = NULL;
+	fiber->stack_bottom = NULL;
 }
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
@@ -494,6 +501,7 @@ ZEND_METHOD(Fiber, suspend)
 
 	fiber->execute_data = execute_data;
 	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
+	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_suspend(fiber);
 
@@ -547,6 +555,7 @@ ZEND_METHOD(Fiber, resume)
 	}
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
+	fiber->stack_bottom->prev_execute_data = execute_data;
 
 	zend_fiber_switch_to(fiber);
 
@@ -578,6 +587,7 @@ ZEND_METHOD(Fiber, throw)
 	fiber->exception = exception;
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
+	fiber->stack_bottom->prev_execute_data = execute_data;
 
 	zend_fiber_switch_to(fiber);
 

@@ -20,5 +20,6 @@ string(4) "test"
 Fatal error: Uncaught Exception: test in %sfailing-fiber.php:%d
 Stack trace:
 #0 [internal function]: {closure}()
-#1 {main}
+#1 %sfailing-fiber.php(%d): Fiber->resume('test')
+#2 {main}
   thrown in %sfailing-fiber.php on line %d

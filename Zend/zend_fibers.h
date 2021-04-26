@@ -67,6 +67,9 @@ typedef struct _zend_fiber {
 	/* Current Zend VM execute data being run by the fiber. */
 	zend_execute_data *execute_data;
 
+	/* Frame on the bottom of the fiber vm stack. */
+	zend_execute_data *stack_bottom;
+
 	/* Exception to be thrown from Fiber::suspend(). */
 	zval *exception;
 
