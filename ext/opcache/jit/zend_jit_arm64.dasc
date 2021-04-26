@@ -1913,6 +1913,7 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 static int zend_jit_invalid_this_stub(dasm_State **Dst)
 {
 	|->invalid_this:
+	|	UNDEF_OPLINE_RESULT TMP1w
 	|	mov CARG1, xzr
 	|	LOAD_ADDR CARG2, "Using $this when not in object context"
 	|	EXT_CALL zend_throw_error, REG0
