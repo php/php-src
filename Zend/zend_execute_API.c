@@ -187,6 +187,8 @@ void init_executor(void) /* {{{ */
 
 	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
 
+	zend_hash_init(&EG(delayed_errors), 0, NULL, NULL, 0);
+
 	zend_weakrefs_init();
 
 	EG(active) = 1;
