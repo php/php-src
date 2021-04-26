@@ -13896,7 +13896,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 						IS_CV, opline->op1, var_addr, var_info, NULL,
 						(opline+1)->op1_type, (opline+1)->op1, val_addr, val_info,
 						val_range,
-						0, var_addr, var_def_info, var_info, 0)) {
+						0, var_addr, var_def_info, var_info, /* may throw */ 1)) {
 					return 0;
 				}
 				break;
