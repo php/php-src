@@ -120,10 +120,9 @@ static int le_link, le_plink, le_result, le_lofp;
 #define pg_encoding_to_char(x) "SQL_ASCII"
 #endif
 
-/* {{{ _php_pgsql_trim_message */
-static char * _php_pgsql_trim_message(const char *message, size_t *len)
+static zend_string *_php_pgsql_trim_message(const char *message)
 {
-	register size_t i = strlen(message);
+	size_t i = strlen(message);
 
 	if (i>2 && (message[i-2] == '\r' || message[i-2] == '\n') && message[i-1] == '.') {
 		--i;
@@ -131,26 +130,13 @@ static char * _php_pgsql_trim_message(const char *message, size_t *len)
 	while (i>1 && (message[i-1] == '\r' || message[i-1] == '\n')) {
 		--i;
 	}
-	if (len) {
-		*len = i;
-	}
-	return estrndup(message, i);
+	return zend_string_init(message, i, 0);
 }
-/* }}} */
 
-/* {{{ _php_pgsql_trim_result */
-static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
-{
-	return *buf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL);
-}
-/* }}} */
-
-#define PQErrorMessageTrim(pgsql, buf) _php_pgsql_trim_result(pgsql, buf)
-
-#define PHP_PQ_ERROR(text, pgsql) {										\
-		char *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql), NULL); \
-		php_error_docref(NULL, E_WARNING, text, msgbuf);		\
-		efree(msgbuf);													\
+#define PHP_PQ_ERROR(text, pgsql) { \
+		zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql)); \
+		php_error_docref(NULL, E_WARNING, text, ZSTR_VAL(msgbuf)); \
+		zend_string_release(msgbuf); \
 } \
 
 /* {{{ php_pgsql_set_default_link */
@@ -206,25 +192,23 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 /* {{{ _php_pgsql_notice_handler */
 static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
-	zval *notices;
-	zval tmp;
-	char *trimed_message;
-	size_t trimed_message_len;
-
-	if (! PGG(ignore_notices)) {
-		notices = zend_hash_index_find(&PGG(notices), (zend_ulong)resource_id);
-		if (!notices) {
-			array_init(&tmp);
-			notices = &tmp;
-			zend_hash_index_update(&PGG(notices), (zend_ulong)resource_id, notices);
-		}
-		trimed_message = _php_pgsql_trim_message(message, &trimed_message_len);
-		if (PGG(log_notices)) {
-			php_error_docref(NULL, E_NOTICE, "%s", trimed_message);
-		}
-		add_next_index_stringl(notices, trimed_message, trimed_message_len);
-		efree(trimed_message);
+	if (PGG(ignore_notices)) {
+		return;
 	}
+
+	zval tmp;
+	zval *notices = zend_hash_index_find(&PGG(notices), (zend_ulong)resource_id);
+	if (!notices) {
+		array_init(&tmp);
+		notices = &tmp;
+		zend_hash_index_update(&PGG(notices), (zend_ulong)resource_id, notices);
+	}
+
+	zend_string *trimmed_message = _php_pgsql_trim_message(message);
+	if (PGG(log_notices)) {
+		php_error_docref(NULL, E_NOTICE, "%s", ZSTR_VAL(trimmed_message));
+	}
+	add_next_index_str(notices, trimmed_message);
 }
 /* }}} */
 
@@ -776,7 +760,6 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 	zend_resource *link;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
-	char *msgbuf;
 	char *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r!", &pgsql_link) == FAILURE) {
@@ -799,10 +782,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			result = PQdb(pgsql);
 			break;
 		case PHP_PG_ERROR_MESSAGE:
-			result = PQErrorMessageTrim(pgsql, &msgbuf);
-			RETVAL_STRING(result);
-			efree(result);
-			return;
+			RETURN_STR(_php_pgsql_trim_message(PQerrorMessage(pgsql)));
 		case PHP_PG_OPTIONS:
 			result = PQoptions(pgsql);
 			break;
