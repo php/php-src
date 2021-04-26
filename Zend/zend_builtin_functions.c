@@ -29,6 +29,7 @@
 #include "zend_generators.h"
 #include "zend_builtin_functions_arginfo.h"
 #include "zend_smart_str.h"
+#include "zend_fibers.h"
 
 /* }}} */
 
@@ -1759,7 +1760,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		stack_frame = zend_new_array(8);
 		zend_hash_real_init_mixed(stack_frame);
 
-		if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
+		zend_fiber *fiber = zend_fiber_from_base_frame(prev);
+
+		if (fiber) {
+			ZVAL_OBJ_COPY(&tmp, &fiber->std);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FIBER), &tmp, 1);
+		} else if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 			filename = prev->func->op_array.filename;
 			if (prev->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
@@ -1894,6 +1900,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 			ZVAL_INTERNED_STR(&tmp, pseudo_function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
+		}
+
+		if (!fiber && ZEND_CALL_INFO(call) & ZEND_CALL_SUSPENDED) {
+			ZVAL_TRUE(&tmp);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_SUSPENDED), &tmp, 1);
 		}
 
 		ZVAL_ARR(&tmp, stack_frame);

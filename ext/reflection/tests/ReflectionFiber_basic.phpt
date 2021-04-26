@@ -63,7 +63,10 @@ array(2) {
     }
   }
   [1]=>
-  array(2) {
+  array(3) {
+    ["fiber"]=>
+    object(Fiber)#2 (0) {
+    }
     ["function"]=>
     string(9) "{closure}"
     ["args"]=>
@@ -94,7 +97,10 @@ array(2) {
     }
   }
   [1]=>
-  array(2) {
+  array(3) {
+    ["fiber"]=>
+    object(Fiber)#2 (0) {
+    }
     ["function"]=>
     string(9) "{closure}"
     ["args"]=>

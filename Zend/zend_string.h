@@ -556,6 +556,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SLEEP,                  "__sleep") \
 	_(ZEND_STR_WAKEUP,                 "__wakeup") \
 	_(ZEND_STR_CASES,                  "cases") \
+	_(ZEND_STR_FIBER,                  "fiber") \
+	_(ZEND_STR_SUSPENDED,              "suspended") \
 	_(ZEND_STR_FROM,                   "from") \
 	_(ZEND_STR_TRYFROM,                "tryFrom") \
 	_(ZEND_STR_TRYFROM_LOWERCASE,      "tryfrom") \

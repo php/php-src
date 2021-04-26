@@ -550,6 +550,11 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_SUSPENDED), 1);
+	if (tmp && Z_TYPE_P(tmp) == IS_TRUE) {
+		smart_str_appends(str, "[suspended] ");
+	}
+
 	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
@@ -571,7 +576,12 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 			smart_str_appends(str, "): ");
 		}
 	} else {
-		smart_str_appends(str, "[internal function]: ");
+		tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FIBER), 1);
+		if (tmp) {
+			smart_str_appends(str, "{fiber}: ");
+		} else {
+			smart_str_appends(str, "[internal function]: ");
+		}
 	}
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_CLASS));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));

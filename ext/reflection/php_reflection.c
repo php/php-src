@@ -6790,6 +6790,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
 	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_execute_data *prev_execute_data;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -6797,6 +6798,9 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 	ZEND_PARSE_PARAMETERS_END();
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
+
+	prev_execute_data = fiber->stack_bottom->prev_execute_data;
+	fiber->stack_bottom->prev_execute_data = NULL;
 
 	if (EG(current_fiber) != fiber) {
 		// No need to replace current execute data if within the current fiber.
@@ -6806,6 +6810,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 	zend_fetch_debug_backtrace(return_value, 0, options, 0);
 
 	EG(current_execute_data) = execute_data; // Restore original execute data.
+	fiber->stack_bottom->prev_execute_data = prev_execute_data; // Restore prev execute data on fiber stack.
 }
 
 ZEND_METHOD(ReflectionFiber, getExecutingLine)

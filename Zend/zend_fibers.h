@@ -67,6 +67,9 @@ typedef struct _zend_fiber {
 	/* Current Zend VM execute data being run by the fiber. */
 	zend_execute_data *execute_data;
 
+	/* Frame on the bottom of the fiber vm stack. */
+	zend_execute_data *stack_bottom;
+
 	/* Exception to be thrown from Fiber::suspend(). */
 	zval *exception;
 
@@ -98,6 +101,9 @@ ZEND_COLD void zend_error_suspend_fiber(
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
+
+bool zend_fiber_is_base_frame(const zend_execute_data *execute_data);
+zend_fiber *zend_fiber_from_base_frame(const zend_execute_data *execute_data);
 
 #define ZEND_FIBER_GUARD_PAGES 1
 
