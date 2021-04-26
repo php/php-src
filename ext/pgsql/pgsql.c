@@ -278,6 +278,11 @@ static void _free_result(zend_resource *rsrc)
 }
 /* }}} */
 
+static void release_string(zend_resource *rsrc)
+{
+	zend_string_release((zend_string *) rsrc->ptr);
+}
+
 static bool _php_pgsql_identifier_is_escaped(const char *identifier, size_t len) /* {{{ */
 {
 	/* Handle edge case. Cannot be a escaped string */
@@ -351,7 +356,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_plink = zend_register_list_destructors_ex(NULL, _close_pgsql_plink, "pgsql link persistent", module_number);
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
-	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
+	le_string = zend_register_list_destructors_ex(release_string, NULL, "pgsql string", module_number);
 	/* libpq version */
 	php_libpq_version(buf, sizeof(buf));
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", buf, CONST_CS | CONST_PERSISTENT);
@@ -1476,11 +1481,11 @@ static inline bool is_valid_oid_string(zend_string *oid, Oid *return_oid)
 }
 
 /* {{{ get_field_name */
-static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
+static zend_string *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
 	smart_str str = {0};
 	zend_resource *field_type;
-	char *ret=NULL;
+	zend_string *ret = NULL;
 
 	/* try to lookup the type in the resource list */
 	smart_str_appends(&str, "pgsql_oid_");
@@ -1488,7 +1493,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 	smart_str_0(&str);
 
 	if ((field_type = zend_hash_find_ptr(list, str.s)) != NULL) {
-		ret = estrdup((char *)field_type->ptr);
+		ret = zend_string_copy((zend_string *) field_type->ptr);
 	} else { /* hash all oid's */
 		int i, num_rows;
 		int oid_offset,name_offset;
@@ -1501,7 +1506,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 				PQclear(result);
 			}
 			smart_str_free(&str);
-			return estrndup("", sizeof("") - 1);
+			return ZSTR_EMPTY_ALLOC();
 		}
 		num_rows = PQntuples(result);
 		oid_offset = PQfnumber(result,"oid");
@@ -1521,10 +1526,10 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 				continue;
 			}
 			new_oid_entry.type = le_string;
-			new_oid_entry.ptr = estrdup(tmp_name);
+			new_oid_entry.ptr = zend_string_init(tmp_name, strlen(tmp_name), 0);
 			zend_hash_update_mem(list, str.s, (void *) &new_oid_entry, sizeof(zend_resource));
 			if (!ret && strtoul(tmp_oid, &end_ptr, 10)==oid) {
-				ret = estrdup(tmp_name);
+				ret = zend_string_copy(new_oid_entry.ptr);
 			}
 		}
 		PQclear(result);
@@ -1582,7 +1587,7 @@ PHP_FUNCTION(pg_field_table)
 
 	if ((field_table = zend_hash_find_ptr(&EG(regular_list), hash_key.s)) != NULL) {
 		smart_str_free(&hash_key);
-		RETURN_STRING((char *)field_table->ptr);
+		RETURN_STR_COPY((zend_string *)field_table->ptr);
 	} else { /* Not found, lookup by querying PostgreSQL system tables */
 		PGresult *tmp_res;
 		smart_str querystr = {0};
@@ -1610,12 +1615,12 @@ PHP_FUNCTION(pg_field_table)
 		}
 
 		new_field_table.type = le_string;
-		new_field_table.ptr = estrdup(table_name);
+		new_field_table.ptr = zend_string_init(table_name, strlen(table_name), 0);
 		zend_hash_update_mem(&EG(regular_list), hash_key.s, (void *)&new_field_table, sizeof(zend_resource));
 
 		smart_str_free(&hash_key);
 		PQclear(tmp_res);
-		RETURN_STRING(table_name);
+		RETURN_STR_COPY(new_field_table.ptr);
 	}
 
 }
@@ -1662,11 +1667,9 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 		case PHP_PG_FIELD_SIZE:
 			RETURN_LONG(PQfsize(pgsql_result, (int)field));
 			break;
-		case PHP_PG_FIELD_TYPE: {
-				char *name = get_field_name(pg_result->conn, PQftype(pgsql_result, (int)field), &EG(regular_list));
-				RETVAL_STRING(name);
-				efree(name);
-			}
+		case PHP_PG_FIELD_TYPE:
+			RETURN_STR(get_field_name(
+				pg_result->conn, PQftype(pgsql_result, (int)field), &EG(regular_list)));
 			break;
 		case PHP_PG_FIELD_TYPE_OID:
 
