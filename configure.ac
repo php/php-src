@@ -1181,6 +1181,55 @@ dnl ----------------------------------------------------------------------------
 PHP_HELP_SEPARATOR([Zend:])
 PHP_CONFIGURE_PART(Configuring Zend)
 
+AC_MSG_CHECKING(for fiber switching context)
+fibers="yes"
+
+AS_CASE([$host_cpu],
+  [x86_64*|amd64*], [fiber_cpu="x86_64"],
+  [x86*|amd*|i?86*|pentium], [fiber_cpu="i386"],
+  [aarch64*|arm64*], [fiber_cpu="arm64"],
+  [arm*], [fiber_cpu="arm32"],
+  [ppc64*], [fiber_cpu="ppc64"],
+  [powerpc*], [fiber_cpu="ppc32"],
+  [s390x*], [fiber_cpu="s390x"],
+  [mips64*], [fiber_cpu="mips64"],
+  [mips*], [fiber_cpu="mips32"],
+  [fiber_cpu="unknown"]
+)
+
+AS_CASE([$host_os],
+  [darwin*], [fiber_os="mac"],
+  [fiber_os="other"]
+)
+
+AS_CASE([$fiber_cpu],
+  [x86_64], [fiber_asm_file_prefix="x86_64_sysv"],
+  [i386], [fiber_asm_file_prefix="i386_sysv"],
+  [arm64], [fiber_asm_file_prefix="arm64_aapcs"],
+  [arm32], [fiber_asm_file_prefix="arm_aapcs"],
+  [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
+  [ppc32], [fiber_asm_file_prefix="ppc_sysv"],
+  [s390x], [fiber_asm_file_prefix="s390x_sysv"],
+  [mips64], [fiber_asm_file_prefix="mips64_n64"],
+  [mips32], [fiber_asm_file_prefix="mips32_o32"],
+  [fiber_asm_file_prefix="unknown"]
+)
+
+if test "$fiber_os" = 'mac'; then
+  fiber_asm_file="combined_sysv_macho_gas.S"
+elif test "$fiber_asm_file_prefix" != 'unknown'; then
+  fiber_asm_file="${fiber_asm_file_prefix}_elf_gas.S"
+else
+  fibers="no"
+fi
+
+if test "$fibers" = 'yes'; then
+  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file} jump_${fiber_asm_file})
+  AC_MSG_RESULT([$fiber_asm_file])
+else
+  AC_MSG_ERROR([Unable to determine platform!])
+fi
+
 LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
@@ -1544,7 +1593,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c \
+    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

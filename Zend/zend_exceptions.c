@@ -43,8 +43,11 @@ ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
 
-/* Internal pseudo-exception that is not exposed to userland. */
+/* Internal pseudo-exception that is not exposed to userland. Throwing this exception *does not* execute finally blocks. */
 static zend_class_entry zend_ce_unwind_exit;
+
+/* Internal pseudo-exception that is not exposed to userland. Throwing this exception *does* execute finally blocks. */
+static zend_class_entry zend_ce_graceful_exit;
 
 ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
@@ -94,7 +97,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		return;
 	}
 
-	if (exception == add_previous || zend_is_unwind_exit(add_previous)) {
+	if (exception == add_previous || zend_is_unwind_exit(add_previous) || zend_is_graceful_exit(add_previous)) {
 		OBJ_RELEASE(add_previous);
 		return;
 	}
@@ -791,6 +794,8 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_unhandled_match_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
+
+	INIT_CLASS_ENTRY(zend_ce_graceful_exit, "GracefulExit", NULL);
 }
 /* }}} */
 
@@ -949,7 +954,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);
-	} else if (ce_exception == &zend_ce_unwind_exit) {
+	} else if (ce_exception == &zend_ce_unwind_exit || ce_exception == &zend_ce_graceful_exit) {
 		/* We successfully unwound, nothing more to do.
 		 * We still return FAILURE in this case, as further execution should still be aborted. */
 	} else {
@@ -987,7 +992,20 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 	EG(current_execute_data)->opline = EG(exception_op);
 }
 
-ZEND_API bool zend_is_unwind_exit(zend_object *ex)
+ZEND_API ZEND_COLD void zend_throw_graceful_exit(void)
+{
+	ZEND_ASSERT(!EG(exception));
+	EG(exception) = zend_objects_new(&zend_ce_graceful_exit);
+	EG(opline_before_exception) = EG(current_execute_data)->opline;
+	EG(current_execute_data)->opline = EG(exception_op);
+}
+
+ZEND_API bool zend_is_unwind_exit(const zend_object *ex)
 {
 	return ex->ce == &zend_ce_unwind_exit;
+}
+
+ZEND_API bool zend_is_graceful_exit(const zend_object *ex)
+{
+	return ex->ce == &zend_ce_graceful_exit;
 }

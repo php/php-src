@@ -27,6 +27,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_smart_str.h"
+#include "zend_fibers.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
@@ -40,6 +41,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_opcode;
 	char *observer_show_opcode_in_user_handler;
 	int observer_nesting_depth;
+	int observer_fiber_switch;
 	int replace_zend_execute_ex;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
@@ -348,6 +350,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.observer.show_opcode_in_user_handler", "", PHP_INI_SYSTEM, OnUpdateString, observer_show_opcode_in_user_handler, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_switch", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_switch, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
@@ -392,6 +395,45 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 			break;
 		}
 		e++;
+	}
+}
+
+static void fiber_address_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		php_printf("<!-- switching from fiber %p to %p -->\n", from, to);
+	}
+}
+
+static void fiber_enter_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		if (to) {
+			if (to->status == ZEND_FIBER_STATUS_INIT) {
+				php_printf("<init '%p'>\n", to);
+			} else if (to->status == ZEND_FIBER_STATUS_RUNNING && (!from || from->status == ZEND_FIBER_STATUS_RUNNING)) {
+				php_printf("<resume '%p'>\n", to);
+			} else if (to->status == ZEND_FIBER_STATUS_SHUTDOWN) {
+				php_printf("<destroying '%p'>\n", to);
+			}
+		}
+	}
+}
+
+static void fiber_suspend_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		if (from) {
+			if (from->status == ZEND_FIBER_STATUS_SUSPENDED) {
+				php_printf("<suspend '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_RETURNED) {
+				php_printf("<returned '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_THREW) {
+				php_printf("<threw '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_SHUTDOWN) {
+				php_printf("<destroyed '%p'>\n", from);
+			}
+		}
 	}
 }
 
@@ -440,6 +482,12 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	if (ZT_G(observer_enabled) && ZT_G(observer_show_opcode_in_user_handler)) {
 		observer_set_user_opcode_handler(ZT_G(observer_show_opcode_in_user_handler), observer_show_opcode_in_user_handler);
+	}
+
+	if (ZT_G(observer_enabled)) {
+		zend_observer_fiber_switch_register(fiber_address_observer);
+		zend_observer_fiber_switch_register(fiber_enter_observer);
+		zend_observer_fiber_switch_register(fiber_suspend_observer);
 	}
 
 	return SUCCESS;

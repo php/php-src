@@ -61,6 +61,8 @@ END_EXTERN_C()
 
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
+typedef struct _zend_fiber zend_fiber;
+typedef struct _zend_fiber_error zend_fiber_error;
 
 
 struct _zend_compiler_globals {
@@ -248,6 +250,15 @@ struct _zend_executor_globals {
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
+
+	/* Active fiber, NULL when in main thread. */
+	zend_fiber *current_fiber;
+
+	/* Default fiber C stack size. */
+	zend_long fiber_stack_size;
+
+	/* Pointer to fatal error that occurred in a fiber while switching to {main}. */
+	zend_fiber_error *fiber_error;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

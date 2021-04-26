@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6f36123e16ed34e45a527094ab643b6b57669a5d */
+ * Stub hash: 388312e928b54992da6b7e0e0f15dec72d9290f1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -523,6 +523,24 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionEnumBackedCase_getBackingValue, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFiber___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, fiber, Fiber, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFiber_getFiber, 0, 0, Fiber, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionFiber_getExecutingFile arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionFiber_getExecutingLine arginfo_class_ReflectionAttribute_getTarget
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getCallable, 0, 0, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getTrace, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(Reflection, getModifierNames);
 ZEND_METHOD(ReflectionClass, __clone);
@@ -736,6 +754,12 @@ ZEND_METHOD(ReflectionEnumUnitCase, __construct);
 ZEND_METHOD(ReflectionEnumUnitCase, getEnum);
 ZEND_METHOD(ReflectionEnumBackedCase, __construct);
 ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue);
+ZEND_METHOD(ReflectionFiber, __construct);
+ZEND_METHOD(ReflectionFiber, getFiber);
+ZEND_METHOD(ReflectionFiber, getExecutingFile);
+ZEND_METHOD(ReflectionFiber, getExecutingLine);
+ZEND_METHOD(ReflectionFiber, getCallable);
+ZEND_METHOD(ReflectionFiber, getTrace);
 
 
 static const zend_function_entry class_ReflectionException_methods[] = {
@@ -1069,6 +1093,17 @@ static const zend_function_entry class_ReflectionEnumBackedCase_methods[] = {
 	ZEND_FE_END
 };
 
+
+static const zend_function_entry class_ReflectionFiber_methods[] = {
+	ZEND_ME(ReflectionFiber, __construct, arginfo_class_ReflectionFiber___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getFiber, arginfo_class_ReflectionFiber_getFiber, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getExecutingFile, arginfo_class_ReflectionFiber_getExecutingFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getExecutingLine, arginfo_class_ReflectionFiber_getExecutingLine, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getCallable, arginfo_class_ReflectionFiber_getCallable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFiber, getTrace, arginfo_class_ReflectionFiber_getTrace, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
 static zend_class_entry *register_class_ReflectionException(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
@@ -1360,6 +1395,17 @@ static zend_class_entry *register_class_ReflectionEnumBackedCase(zend_class_entr
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnumBackedCase", class_ReflectionEnumBackedCase_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionEnumUnitCase);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ReflectionFiber(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionFiber", class_ReflectionFiber_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
