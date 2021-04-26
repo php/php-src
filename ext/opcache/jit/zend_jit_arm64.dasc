@@ -1608,8 +1608,6 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	}
 
 	return 1;
-
-	return 1;
 }
 
 static int zend_jit_exception_handler_stub(dasm_State **Dst)
