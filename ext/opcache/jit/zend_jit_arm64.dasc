@@ -11911,7 +11911,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 					(((prop_info->offset - (sizeof(zend_object) - sizeof(zval))) / sizeof(zval)) * sizeof(void*));
 
 				|	ldr REG0, [FCARG1x, #offsetof(zend_object, ce)]
-				|	ldr	REG0, [REG1, #offsetof(zend_class_entry, properties_info_table)]
+				|	ldr	REG0, [REG0, #offsetof(zend_class_entry, properties_info_table)]
 				|	LOAD_32BIT_VAL TMP1,  prop_info_offset
 				|	ldr FCARG2x, [REG0, TMP1]
 			}
