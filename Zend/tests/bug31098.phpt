@@ -35,11 +35,12 @@ try {
 }
 echo $simpleString["0"] === "B"?"ok\n":"bug\n";
 try {
+    /* This must not affect the string value */
     $simpleString["wrong"] = "f";
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-echo $simpleString["0"] === "f"?"ok\n":"bug\n";
+echo $simpleString["0"] === "B"?"ok\n":"bug\n";
 ?>
 --EXPECTF--
 bool(false)
