@@ -43,16 +43,11 @@
 |.define FCARG1w, w0
 |.define FCARG2x, x1
 |.define FCARG2w, w1
-|.define SPAD,    #0x10       // padding for CPU stack alignment
+|.define SPAD,    #0x20       // padding for CPU stack alignment
 |.define NR_SPAD, #0x30       // padding for CPU stack alignment
-|.define T4,      [sp, #0x20] // Used to store old value of LR (CALL VM only)
-|.define T3,      [sp, #0x18] // Used to store old value of IP (CALL VM only)
-|.define T2,      [sp, #0x10] // Used to store old value of FP (CALL VM only)
-|.define T1,      [sp]
-|.define A4,      [r4+0xC]  // preallocated slots for arguments of "cdecl" functions (intersect with T1)
-|.define A3,      [r4+0x8]
-|.define A2,      [r4+0x4]
-|.define A1,      [r4]
+|.define T3,      [sp, #0x28] // Used to store old value of IP (CALL VM only)
+|.define T2,      [sp, #0x20] // Used to store old value of FP (CALL VM only)
+|.define T1,      [sp, #0x10]
 
 // We use REG0/1/2 and FPR0/1 to replace r0/1/2 and xmm0/1 in the x86 implementation.
 // Scratch registers
@@ -93,7 +88,9 @@
 
 |.define HYBRID_SPAD, #16     // padding for stack alignment
 
-#define TMP_ZVAL_OFFSET 0
+#define SPAD            0x20
+#define NR_SPAD         0x30
+#define TMP_ZVAL_OFFSET 16
 #define DASM_ALIGNMENT  16
 
 /* Encoding of immediate. TODO: shift mode may be supported in the near future. */
@@ -191,16 +188,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	brk #0
 |.endmacro
 
-/* In x86/64, HYBRID_SPAD bytes are reserved on the stack only if flag ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
- * is not defined, because the 16-byte redzone, allocated on the stack when the flag is defined, can be
- * reused. In AArch64, it's safe that these bytes are always reserved because the stack layout might
- * change along software evolution, making the redzone not reusable any longer. */
 |.macro ADD_HYBRID_SPAD
+||#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 |	add sp, sp, HYBRID_SPAD
+||#endif
 |.endmacro
 
 |.macro SUB_HYBRID_SPAD
+||#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 |	sub sp, sp, HYBRID_SPAD
+||#endif
 |.endmacro
 
 |.macro LOAD_ADDR, reg, addr
@@ -1601,10 +1598,13 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	ADD_HYBRID_SPAD
 		|	JMP_IP TMP1
 	} else if (GCC_GLOBAL_REGS) {
-		|	add sp, sp, SPAD // stack alignment
+		|	ldp x29, x30, [sp], #SPAD // stack alignment
 		|	JMP_IP TMP1
 	} else {
-		|	NIY_STUB	// TODO
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
+		|	mov RETVALx, #1     // ZEND_VM_ENTER
+		|	ret
 	}
 
 	return 1;
@@ -1623,15 +1623,14 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 		const void *handler = EG(exception_op)->handler;
 
 		if (GCC_GLOBAL_REGS) {
-			|	add sp, sp, SPAD        // stack alignment
+			|	ldp x29, x30, [sp], #SPAD // stack alignment
 			|	EXT_JMP handler, REG0
 		} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			|	NIY_STUB	// TODO: tracing
 		} else {
 			|	mov FCARG1x, FP
-			|	ldp FP, RX, T2          // retore FP and IP
-			|	ldr LR, T4              // retore LR
-			|	add sp, sp, NR_SPAD     // stack alignment
+			|	ldp FP, RX, T2               // retore FP and IP
+			|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 			|	EXT_JMP handler, REG0
 		}
 	}
@@ -1670,12 +1669,11 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 		|	JMP_IP TMP1
 	} else {
 		if (GCC_GLOBAL_REGS) {
-			|	add sp, sp, SPAD
+			|	ldp x29, x30, [sp], #SPAD // stack alignment
 		} else {
 			|	mov FCARG2x, FP
-			|	ldp FP, RX, T2      // retore FP and IP
-			|	ldr LR, T4          // retore LR
-			|	add sp, sp, NR_SPAD
+			|	ldp FP, RX, T2               // retore FP and IP
+			|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 		}
 		|	TST_32_WITH_CONST FCARG1w, ZEND_CALL_TOP, TMP1w
 		|	bne >1
@@ -1703,7 +1701,19 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|	// HANDLE_EXCEPTION()
 		|	b ->exception_handler
 	} else {
-		|	NIY_STUB // TODO
+		|	GET_IP TMP1
+		|	ldrb TMP1w, OP:TMP1->opcode
+		|	cmp TMP1w, #ZEND_HANDLE_EXCEPTION
+		|	beq >5
+		|	// EG(opline_before_exception) = opline;
+		|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
+		|5:
+		|	// opline = EG(exception_op);
+		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
+		|	mov RETVALx, #2     // ZEND_VM_LEAVE
+		|	ret
 	}
 
 	return 1;
@@ -2159,12 +2169,11 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	ADD_HYBRID_SPAD
 		|	JMP_IP TMP1
 	} else if (GCC_GLOBAL_REGS) {
-		|	add sp, sp, SPAD    // stack alignment
+		|	ldp x29, x30, [sp], #SPAD // stack alignment
 		|	JMP_IP TMP1
 	} else {
-		|	ldp FP, RX, T2      // retore FP and IP
-		|	ldr LR, T4          // retore LR
-		|	add sp, sp, NR_SPAD // stack alignment
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 		|	mov RETVALx, #1     // ZEND_VM_ENTER
 		|	ret
 	}
@@ -2190,7 +2199,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	ldr REG0, [REG0]
 		|	br REG0
 	} else if (GCC_GLOBAL_REGS) {
-		|	add sp, sp, SPAD        // stack alignment
+		|	ldp x29, x30, [sp], #SPAD // stack alignment
 		|	ldr REG0, EX->func
 		|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 		|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
@@ -2210,10 +2219,9 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	tst RETVALw, RETVALw
 		|	blt ->trace_halt
 		|
-		|	ldp FP, RX, T2          // retore FP and IP
-		|	ldr LR, T4              // retore LR
-		|	add sp, sp, NR_SPAD     // stack alignment
-		|	mov RETVALx, #1         // ZEND_VM_ENTER
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
+		|	mov RETVALx, #1              // ZEND_VM_ENTER
 		|	ret
 	}
 
@@ -2282,9 +2290,8 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_const:
-	|	stp x29, x30, [sp,#-16]!
+	|	stp x29, x30, [sp,#-32]!
 	|	mov x29, sp
-	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2292,8 +2299,7 @@ static int zend_jit_assign_const_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	mov sp, x29
-	|	ldp x29, x30, [sp],#16
+	|	ldp x29, x30, [sp],#32
 	|	ret
 	return 1;
 }
@@ -2305,9 +2311,8 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN;
 
 	|->assign_tmp:
-	|	stp x29, x30, [sp,#-16]!
+	|	stp x29, x30, [sp,#-32]!
 	|	mov x29, sp
-	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2315,8 +2320,7 @@ static int zend_jit_assign_tmp_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	mov sp, x29
-	|	ldp x29, x30, [sp],#16
+	|	ldp x29, x30, [sp],#32
 	|	ret
 	return 1;
 }
@@ -2328,9 +2332,8 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF;
 
 	|->assign_var:
-	|	stp x29, x30, [sp,#-16]!
+	|	stp x29, x30, [sp,#-32]!
 	|	mov x29, sp
-	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2338,8 +2341,7 @@ static int zend_jit_assign_var_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	mov sp, x29
-	|	ldp x29, x30, [sp],#16
+	|	ldp x29, x30, [sp],#32
 	|	ret
 	return 1;
 }
@@ -2351,9 +2353,8 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv_noref:
-	|	stp x29, x30, [sp,#-16]!
+	|	stp x29, x30, [sp,#-32]!
 	|	mov x29, sp
-	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2361,8 +2362,7 @@ static int zend_jit_assign_cv_noref_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	mov sp, x29
-	|	ldp x29, x30, [sp],#16
+	|	ldp x29, x30, [sp],#32
 	|	ret
 	return 1;
 }
@@ -2374,9 +2374,8 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 	uint32_t val_info = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF/*|MAY_BE_UNDEF*/;
 
 	|->assign_cv:
-	|	stp x29, x30, [sp,#-16]!
+	|	stp x29, x30, [sp,#-32]!
 	|	mov x29, sp
-	|	sub sp, sp, #16
 	if (!zend_jit_assign_to_variable(
 			Dst, NULL,
 			var_addr, var_addr, -1, -1,
@@ -2384,8 +2383,7 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 			0, 0)) {
 		return 0;
 	}
-	|	mov sp, x29
-	|	ldp x29, x30, [sp],#16
+	|	ldp x29, x30, [sp],#32
 	|	ret
 	return 1;
 }
@@ -2574,11 +2572,12 @@ static int zend_jit_prologue(dasm_State **Dst)
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	SUB_HYBRID_SPAD
 	} else if (GCC_GLOBAL_REGS) {
-		|	sub sp, sp, SPAD       // stack alignment
+		|	sub sp, sp, SPAD   // TODO: stp x29, x30, [sp, #-SPAD]! can't be compiled
+		|	stp x29, x30, [sp] // stack alignment
 	} else {
-		|	sub sp, sp, NR_SPAD    // stack alignment
+		|	sub sp, sp, NR_SPAD    // TODO: stp x29, x30, [sp, #-NR_SPAD]! can't be compiled
+		|	stp x29, x30, [sp]     // stack alignment
 		|	stp FP, RX, T2         // save FP and IP
-		|	str LR, T4             // save LR
 		|	mov FP, FCARG1x
 	}
 	return 1;
@@ -2781,7 +2780,7 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 			|	br REG0
 		}
 	} else if (GCC_GLOBAL_REGS) {
-		|	add sp, sp, SPAD        // stack alignment
+		|	ldp x29, x30, [sp], #SPAD // stack alignment
 		if (!original_handler) {
 			|	JMP_IP TMP1
 		} else {
@@ -2804,10 +2803,9 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 			|	ldr REG0, [REG0]
 			|	blr REG0
 		}
-		|	ldp FP, RX, T2          // retore FP and IP
-		|	ldr LR, T4              // retore LR
-		|	add sp, sp, NR_SPAD     // stack alignment
-		|	mov RETVALx, #2         // ZEND_VM_LEAVE
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
+		|	mov RETVALx, #2              // ZEND_VM_LEAVE
 		|	ret
 	}
 	return 1;
@@ -2936,12 +2934,11 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 		const void *handler = opline->handler;
 
 		if (GCC_GLOBAL_REGS) {
-			|	add sp, sp, SPAD    // stack alignment
+			|	ldp x29, x30, [sp], #SPAD // stack alignment
 		} else {
 			|	mov FCARG1x, FP
-			|	ldp FP, RX, T2      // retore FP and IP
-			|	ldr LR, T4          // retore LR
-			|	add sp, sp, NR_SPAD // stack alignment
+			|	ldp FP, RX, T2               // retore FP and IP
+			|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 		}
 		|	EXT_JMP handler, REG0
 	}
@@ -8314,6 +8311,9 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|1:
 		|	LOAD_ADDR FCARG2x, function_name
 		|	mov CARG3, sp
+		if (TMP_ZVAL_OFFSET != 0) {
+			|	add CARG3, CARG3, #TMP_ZVAL_OFFSET
+		}
 		|	SET_EX_OPLINE opline, REG0
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
 			|	EXT_CALL zend_jit_find_method_tmp_helper, REG0
@@ -8847,12 +8847,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	ADD_HYBRID_SPAD
 				|	JMP_IP TMP1
 			} else if (GCC_GLOBAL_REGS) {
-				|	add sp, sp, SPAD    // stack alignment
+				|	ldp x29, x30, [sp], #SPAD // stack alignment
 				|	JMP_IP TMP1
 			} else {
-				|	ldp FP, RX, T2      // retore FP and IP
-				|	ldr LR, T4          // retore LR
-				|	add sp, sp, NR_SPAD // stack alignment
+				|	ldp FP, RX, T2               // retore FP and IP
+				|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
 				|	mov RETVALx, #1     // ZEND_VM_ENTER
 				|	ret
 			}
@@ -10106,7 +10105,7 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 		|	JMP_IP TMP1
 #endif
 	} else if (GCC_GLOBAL_REGS) {
-		|	add sp, sp, SPAD    // stack alignment
+		|	ldp x29, x30, [sp], #SPAD // stack alignment
 #ifdef CONTEXT_THREADED_JIT
 		|	NIY	// TODO
 #else
@@ -10119,10 +10118,9 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 		//       the value of execute_data in execute_ex()
 		|	NIY	// TODO
 #else
-		|	ldp FP, RX, T2      // restore FP and IP
-		|	ldr LR, T4          // restore LR
-		|	add sp, sp, NR_SPAD // stack alignment
-		|	mov RETVALx, #2     // ZEND_VM_LEAVE ????
+		|	ldp FP, RX, T2               // retore FP and IP
+		|	ldp x29, x30, [sp], #NR_SPAD // stack alignment
+		|	mov RETVALx, #2              // ZEND_VM_LEAVE ????
 		|	ret
 #endif
 	}
