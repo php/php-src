@@ -136,6 +136,8 @@ typedef struct _zend_jit_registers_buf {
 
 typedef uint64_t zend_regset;
 
+#define ZEND_REGSET_64BIT 1
+
 # define ZEND_REGSET_FIXED \
 	(ZEND_REGSET(ZREG_RSP) | ZEND_REGSET(ZREG_RLR) | ZEND_REGSET(ZREG_RFP) | \
 	ZEND_REGSET(ZREG_RPR) | ZEND_REGSET(ZREG_FP) | ZEND_REGSET(ZREG_IP) | \
