@@ -2396,7 +2396,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!(op1_info & MAY_BE_LONG)
 						 || !(op2_info & MAY_BE_LONG)) {
-							break;
+						 	/* Might emit deprecation notices */
+						 	goto jit_failure;
 						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
@@ -2562,7 +2563,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 || opline->extended_value == ZEND_MOD) {
 							if (!(op1_info & MAY_BE_LONG)
 							 || !(op2_info & MAY_BE_LONG)) {
-								break;
+								/* Might emit deprecation notices */
+								goto jit_failure;
 							}
 						} else if (opline->extended_value == ZEND_CONCAT) {
 							if (!(op1_info & MAY_BE_STRING)
