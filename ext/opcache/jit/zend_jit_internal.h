@@ -30,7 +30,7 @@
 #define ZEND_REGSET_IS_SINGLETON(regset) \
 	(regset && !(regset & (regset - 1)))
 
-#if (ZREG_NUM <= 32)
+#if (!ZEND_REGSET_64BIT)
 #define ZEND_REGSET(reg) \
 	(1u << (reg))
 #else
@@ -38,7 +38,7 @@
 	(1ull << (reg))
 #endif
 
-#if (ZREG_NUM <= 32)
+#if (!ZEND_REGSET_64BIT)
 #define ZEND_REGSET_INTERVAL(reg1, reg2) \
 	(((1u << ((reg2) - (reg1) + 1)) - 1) << (reg1))
 #else
@@ -65,14 +65,12 @@
 	((set1) & ~(set2))
 
 #if !defined(_WIN32)
-# if (ZREG_NUM <= 32)
+# if (!ZEND_REGSET_64BIT)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
-# elif(ZREG_NUM <= 64)
+# else
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctzll(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63))
-# else
-#  error "Too many registers"
 # endif
 #else
 # include <intrin.h>
