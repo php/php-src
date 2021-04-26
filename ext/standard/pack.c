@@ -58,6 +58,11 @@
 #define MACHINE_LITTLE_ENDIAN 1
 #endif
 
+typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
+typedef ZEND_SET_ALIGNED(1, uint64_t unaligned_uint64_t);
+typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
+
 /* Mapping of byte from char (8bit) to long for machine endian */
 static int byte_map[1];
 
@@ -95,6 +100,11 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 	}
 }
 /* }}} */
+
+static inline uint16_t php_pack_reverse_int16(uint16_t arg)
+{
+	return ((arg & 0xFF) << 8) | ((arg >> 8) & 0xFF);
+}
 
 /* {{{ php_pack_reverse_int32 */
 static inline uint32_t php_pack_reverse_int32(uint32_t arg)
@@ -1002,13 +1012,12 @@ PHP_FUNCTION(unpack)
 					case 'n':   /* unsigned big endian     */
 					case 'v': { /* unsigned little endian  */
 						zend_long v = 0;
-						uint16_t x;
-						memcpy(&x, &input[inputpos], 2);
+						uint16_t x = *((unaligned_uint16_t*) &input[inputpos]);
 
 						if (type == 's') {
 							v = (int16_t) x;
 						} else if ((type == 'n' && MACHINE_LITTLE_ENDIAN) || (type == 'v' && !MACHINE_LITTLE_ENDIAN)) {
-							v = php_pack_reverse_int32(x) >> 16;
+							v = php_pack_reverse_int16(x);
 						} else {
 							v = x;
 						}
@@ -1019,8 +1028,7 @@ PHP_FUNCTION(unpack)
 
 					case 'i':   /* signed integer, machine size, machine endian */
 					case 'I': { /* unsigned integer, machine size, machine endian */
-						unsigned int x;
-						memcpy(&x, &input[inputpos], sizeof(unsigned int));
+						unsigned int x = *((unaligned_uint*) &input[inputpos]);
 						zend_long v = (type == 'i') ? (int) x : x;
 						add_assoc_long(return_value, n, v);
 						break;
@@ -1031,8 +1039,7 @@ PHP_FUNCTION(unpack)
 					case 'N':   /* unsigned big endian     */
 					case 'V': { /* unsigned little endian  */
 						zend_long v = 0;
-						uint32_t x;
-						memcpy(&x, &input[inputpos], 4);
+						uint32_t x = *((unaligned_uint32_t*) &input[inputpos]);
 
 						if (type == 'l') {
 							v = (int32_t) x;
@@ -1052,8 +1059,7 @@ PHP_FUNCTION(unpack)
 					case 'J':   /* unsigned big endian     */
 					case 'P': { /* unsigned little endian  */
 						zend_long v = 0;
-						uint64_t x;
-						memcpy(&x, &input[inputpos], 8);
+						uint64_t x = *((unaligned_uint64_t*) &input[inputpos]);
 
 						if (type == 'q') {
 							v = (int64_t) x;
