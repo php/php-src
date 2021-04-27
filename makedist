@@ -40,8 +40,10 @@ if test "${2}" -lt "13" -o "${2}" -eq "13" -a "${3}" -lt "5"; then
 fi
 IFS="$old_IFS"
 
-if test "x$PHPROOT" = "x"; then
-    PHPROOT=git@git.php.net:php-src.git;
+if test "x$PHPROOT" != "x"; then
+    remote_option=--remote=$PHPROOT
+else
+    remote_option=
 fi
 
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
@@ -72,7 +74,7 @@ fi
 
 # Export PHP
 $ECHO_N "makedist: exporting tag 'php-$VER' from '$PHPROOT'...$ECHO_C"
-git archive --format=tar --remote=$PHPROOT refs/tags/php-$VER --prefix=php-$VER/ | (cd $MY_OLDPWD; tar xvf -) || exit 4
+git archive --format=tar $remote_option refs/tags/php-$VER --prefix=php-$VER/ | (cd $MY_OLDPWD; tar xvf -) || exit 4
 echo ""
 
 cd $DIR || exit 5

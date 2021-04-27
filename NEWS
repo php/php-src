@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.28
 
+- Core:
+  . Fixed ./makedist wrt. to GH move. (cmb, Remi)
+
 - Imap:
   . Fixed bug #80710 (imap_mail_compose() header injection). (cmb, Stas)
 
