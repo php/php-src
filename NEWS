@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
     Zelenka)
 
+- Imap:
+  . Fixed bug #80710 (imap_mail_compose() header injection). (cmb, Stas)
+
 - LibXML:
   . Fixed bug #73533 (Invalid memory access in php_libxml_xmlCheckUTF8). (cmb)
 
