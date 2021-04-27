@@ -1162,10 +1162,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			/* Add full path of supplied file for folder uploads via 
 			 * <input type="file" name="files" multiple webkitdirectory>
 			 */
-			if (!is_anonymous) {
-				safe_php_register_variable(lbuf, filename, strlen(filename), NULL, 0);
-			}
-
 			/* Add $foo[fullname] */
 			if (is_arr_upload) {
 				snprintf(lbuf, llen, "%s[fullpath][%s]", abuf, array_index);
