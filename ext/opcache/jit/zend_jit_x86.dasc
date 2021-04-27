@@ -4180,6 +4180,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
 	zend_reg tmp_reg = ZREG_R0;
+	bool use_ovf_flag = 1;
 
 	if (Z_MODE(res_addr) == IS_REG && (res_info & MAY_BE_LONG)) {
 		if (may_overflow && (res_info & MAY_BE_GUARD)
@@ -4211,7 +4212,23 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|	GET_ZVAL_LVAL result_reg, op1_addr
 			|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
 			if (may_overflow) {
-				// TODO: check overflow.
+				/* Compare 'op' and '((op << n) >> n)' for overflow.
+				 * Flag: jne -> overflow. je -> no overflow.
+				 */
+				use_ovf_flag = 0;
+				|	sar Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+				if (Z_MODE(op1_addr) == IS_CONST_ZVAL) {
+					|	cmp Ra(result_reg), Z_LVAL_P(Z_ZV(op1_addr))
+				} else if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
+					|	cmp Ra(result_reg), [Ra(Z_REG(op1_addr))+Z_OFFSET(op1_addr)]
+				} else if (Z_MODE(op1_addr) == IS_REG) {
+					|	cmp Ra(result_reg), Ra(Z_REG(op1_addr))
+				} else {
+					ZEND_UNREACHABLE();
+				}
+				|	pushf
+				|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+				|	popf
 			}
 		}
 	} else if (opcode == ZEND_MUL &&
@@ -4226,7 +4243,23 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|	GET_ZVAL_LVAL result_reg, op2_addr
 			|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
 			if (may_overflow) {
-				// TODO: check overflow.
+				/* Compare 'op' and '((op << n) >> n)' for overflow.
+				 * Flag: jne -> overflow. je -> no overflow.
+				 */
+				use_ovf_flag = 0;
+				|	sar Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
+				if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+					|	cmp Ra(result_reg), Z_LVAL_P(Z_ZV(op2_addr))
+				} else if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
+					|	cmp Ra(result_reg), [Ra(Z_REG(op2_addr))+Z_OFFSET(op2_addr)]
+				} else if (Z_MODE(op2_addr) == IS_REG) {
+					|	cmp Ra(result_reg), Ra(Z_REG(op2_addr))
+				} else {
+					ZEND_UNREACHABLE();
+				}
+				|	pushf
+				|	shl Ra(result_reg), floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
+				|	popf
 			}
 		}
 	} else if (opcode == ZEND_DIV &&
@@ -4267,20 +4300,36 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if ((res_info & MAY_BE_ANY) == MAY_BE_LONG) {
-				|	jo &exit_addr
+				if (use_ovf_flag) {
+					|	jo &exit_addr
+				} else {
+					|	jne &exit_addr
+				}
 				if (Z_MODE(res_addr) == IS_REG && result_reg != Z_REG(res_addr)) {
 					|	mov Ra(Z_REG(res_addr)), Ra(result_reg)
 				}
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-				|	jno &exit_addr
+				if (use_ovf_flag) {
+					|	jno &exit_addr
+				} else {
+					|	je &exit_addr
+				}
 			} else {
 				ZEND_UNREACHABLE();
 			}
 		} else {
 			if (res_info & MAY_BE_LONG) {
-				|	jo >1
+				if (use_ovf_flag) {
+					|	jo >1
+				} else {
+					|	jne >1
+				}
 			} else {
-				|	jno >1
+				if (use_ovf_flag) {
+					|	jno >1
+				} else {
+					|	je >1
+				}
 			}
 		}
 	}
