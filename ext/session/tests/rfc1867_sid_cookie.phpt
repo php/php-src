@@ -53,8 +53,10 @@ string(%d) "rfc1867-sid-cookie"
 bool(true)
 array(2) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["fullpath"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""
@@ -66,8 +68,10 @@ array(2) {
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file2.txt"
+    ["fullpath"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""
