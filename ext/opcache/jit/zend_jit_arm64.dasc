@@ -1742,11 +1742,11 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|	b ->exception_handler
 	} else {
 		|	GET_IP TMP1
-		|	ldrb TMP1w, OP:TMP1->opcode
-		|	cmp TMP1w, #ZEND_HANDLE_EXCEPTION
+		|	ldrb TMP2w, OP:TMP1->opcode
+		|	cmp TMP2w, #ZEND_HANDLE_EXCEPTION
 		|	beq >5
 		|	// EG(opline_before_exception) = opline;
-		|	MEM_STORE_ZTS str, IP, executor_globals, opline_before_exception, TMP2
+		|	MEM_STORE_ZTS str, TMP1, executor_globals, opline_before_exception, TMP2
 		|5:
 		|	// opline = EG(exception_op);
 		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
