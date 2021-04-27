@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-15 Apr 2021, PHP 7.4.18RC1
+?? ??? ????, PHP 7.4.18
 
 - Core:
   . Fixed bug #80781 (Error handler that throws ErrorException infinite loop).
@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #80880 (SSL_read on shutdown, ftp/proc_open). (cmb, Jakub
     Zelenka)
+
+- Imap:
+  . Fixed bug #80710 (imap_mail_compose() header injection). (cmb, Stas)
 
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
