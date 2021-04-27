@@ -40,7 +40,7 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
         [
           AC_CANONICAL_HOST
           case $host_cpu in
-          arm*|i[34567]86|x86_64|mips*|powerpc*|sparc)
+          arm*|i[[34567]]86|x86_64|mips*|powerpc*|sparc)
             ac_cv_have_pcre2_jit=yes
             ;;
           *)
