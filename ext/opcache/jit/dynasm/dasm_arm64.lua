@@ -1077,7 +1077,7 @@ map_op[".addr_1"] = function(params)
     wputw(0)
     wputw(0)
     local imm = match(params[1], "^&(.*)$")
-    waction("IMM_PC", 0, format("(unsigned int)(%s)", imm))
+    waction("IMM_PC", 0, format("(unsigned int)(unsigned long long)(%s)", imm))
     actargs[#actargs+1] = format("(unsigned int)((unsigned long long)(%s)>>32)", imm)
   else
     local mode, n, s = parse_label(params[1], false)
