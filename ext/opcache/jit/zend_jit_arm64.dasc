@@ -2018,7 +2018,13 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_hot_code:
-	|	NIY_STUB	// TODO
+	||	ZEND_ASSERT(ZEND_JIT_COUNTER_INIT <= MOVZ_IMM);
+	|	movz TMP1w, #ZEND_JIT_COUNTER_INIT
+	|	strh TMP1w, [REG2]
+	|	mov FCARG1x, FP
+	|	GET_IP FCARG2x
+	|	EXT_CALL zend_jit_hot_func, REG0
+	|	JMP_IP TMP1
 	return 1;
 }
 
@@ -2048,7 +2054,24 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
  */
 static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 {
-	|	NIY_STUB	// TODO
+	|	ldr REG0, EX->func
+	|	ldr REG1, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	ldr REG2, [REG1, #offsetof(zend_jit_op_array_hot_extension, counter)]
+	|	LOAD_32BIT_VAL TMP1w, cost
+	|	ldrh TMP2w, [REG2]
+	|	sub TMP2w, TMP2w, TMP1w
+	|	strh TMP2w, [REG2]
+	|	cmp TMP2w, #0
+	|	ble ->hybrid_hot_code
+	|	GET_IP REG2
+	|	ldr TMP1, [REG0, #offsetof(zend_op_array, opcodes)]
+	|	sub REG2, REG2, TMP1
+	|	// divide by sizeof(zend_op)
+	||	ZEND_ASSERT(sizeof(zend_op) == 32);
+	|	asr REG2, REG2, #2
+	|	add TMP1, REG1, REG2
+	|	ldr TMP1, [TMP1, #offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
+	|	br TMP1
 	return 1;
 }
 
