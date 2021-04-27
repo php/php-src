@@ -4020,77 +4020,84 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		property_info = pemalloc(sizeof(zend_property_info), 1);
 	} else {
 		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
-		if (Z_TYPE_P(property) == IS_CONSTANT_AST) {
-			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-			if (access_type & ZEND_ACC_STATIC) {
-				ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
-			} else {
-				ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
-			}
-		}
-	}
-
-	if (Z_TYPE_P(property) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR_P(property))) {
-		zval_make_interned_string(property);
 	}
 
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
-	if (access_type & ZEND_ACC_STATIC) {
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
-			property_info->offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
-			zend_hash_del(&ce->properties_info, name);
-		} else {
-			property_info->offset = ce->default_static_members_count++;
-			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
+	if (!(access_type & ZEND_ACC_VIRTUAL)) {
+		if (Z_TYPE_P(property) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR_P(property))) {
+			zval_make_interned_string(property);
 		}
-		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
-		if (!ZEND_MAP_PTR(ce->static_members_table)) {
-			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
-			if (!EG(current_execute_data)) {
-				ZEND_MAP_PTR_NEW(ce->static_members_table);
-			} else {
-				/* internal class loaded by dl() */
-				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			if (Z_REFCOUNTED_P(property)) {
+				zend_error_noreturn(E_CORE_ERROR, "Internal zvals cannot be refcounted");
 			}
+		} else {
+			if (Z_TYPE_P(property) == IS_CONSTANT_AST) {
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				if (access_type & ZEND_ACC_STATIC) {
+					ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
+				} else {
+					ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
+				}
+			}
+		}
+
+		if (access_type & ZEND_ACC_STATIC) {
+			if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
+				(property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
+				property_info->offset = property_info_ptr->offset;
+				zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
+				zend_hash_del(&ce->properties_info, name);
+			} else {
+				property_info->offset = ce->default_static_members_count++;
+				ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
+			}
+			ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
+			if (!ZEND_MAP_PTR(ce->static_members_table)) {
+				ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+				if (!EG(current_execute_data)) {
+					ZEND_MAP_PTR_NEW(ce->static_members_table);
+				} else {
+					/* internal class loaded by dl() */
+					ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+				}
+			}
+		} else {
+			zval *property_default_ptr;
+			if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
+				(property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
+				property_info->offset = property_info_ptr->offset;
+				zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
+				zend_hash_del(&ce->properties_info, name);
+
+				ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+				ZEND_ASSERT(ce->properties_info_table != NULL);
+				ce->properties_info_table[OBJ_PROP_TO_NUM(property_info->offset)] = property_info;
+			} else {
+				property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
+				ce->default_properties_count++;
+				ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+
+				/* For user classes this is handled during linking */
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
+					ce->properties_info_table[ce->default_properties_count - 1] = property_info;
+				}
+			}
+			property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
+			ZVAL_COPY_VALUE(property_default_ptr, property);
+			Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 		}
 	} else {
-		zval *property_default_ptr;
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
-			property_info->offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
-			zend_hash_del(&ce->properties_info, name);
-
-			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
-			ZEND_ASSERT(ce->properties_info_table != NULL);
-			ce->properties_info_table[OBJ_PROP_TO_NUM(property_info->offset)] = property_info;
-		} else {
-			property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
-			ce->default_properties_count++;
-			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
-
-			/* For user classes this is handled during linking */
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->properties_info_table = perealloc(ce->properties_info_table, sizeof(zend_property_info *) * ce->default_properties_count, 1);
-				ce->properties_info_table[ce->default_properties_count - 1] = property_info;
-			}
-		}
-		property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
-		ZVAL_COPY_VALUE(property_default_ptr, property);
-		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
+		/* Virtual properties have no backing storage, the offset should never be used. */
+		property_info->offset = (uint32_t)-1;
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
 			name = zend_new_interned_string(zend_string_copy(name));
-		}
-
-		if (Z_REFCOUNTED_P(property)) {
-			zend_error_noreturn(E_CORE_ERROR, "Internal zvals cannot be refcounted");
 		}
 	}
 

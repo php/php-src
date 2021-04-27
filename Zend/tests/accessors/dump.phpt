@@ -26,7 +26,7 @@ var_dump(new Test);
 
 ?>
 --EXPECT--
-object(Test)#1 (5) {
+object(Test)#1 (4) {
   ["prop"]=>
   int(1)
   ["prop2"]=>
@@ -35,6 +35,4 @@ object(Test)#1 (5) {
   int(3)
   ["prop4"]=>
   int(4)
-  ["prop5"]=>
-  NULL
 }

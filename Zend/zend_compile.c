@@ -6464,6 +6464,25 @@ static void zend_compile_accessors(
 		zend_property_info *prop_info, zend_string *prop_name,
 		zend_ast *prop_type_ast, zend_ast_list *accessors);
 
+static uint32_t get_virtual_flag(zend_ast *accessors_ast) {
+	if (!accessors_ast) {
+		/* If no accessors are used, a backing property is certainly needed. */
+		return 0;
+	}
+
+	/* If any of the accessors are auto-generated, a backing property is needed. */
+	zend_ast_list *accessors = zend_ast_get_list(accessors_ast);
+	for (uint32_t i = 0; i < accessors->children; i++) {
+		zend_ast_decl *accessor = (zend_ast_decl *) accessors->child[i];
+		if (!accessor->child[2]) {
+			return 0;
+		}
+	}
+
+	/* This property is purely virtual. */
+	return ZEND_ACC_VIRTUAL;
+}
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fallback_return_type) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -6666,7 +6685,9 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_string *doc_comment =
 				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_property_info *prop = zend_declare_typed_property(
-				scope, name, &default_value, visibility | ZEND_ACC_PROMOTED, doc_comment, type);
+				scope, name, &default_value,
+				visibility | get_virtual_flag(accessors_ast) | ZEND_ACC_PROMOTED,
+				doc_comment, type);
 			if (accessors_ast) {
 				zend_ast_list *accessors = zend_ast_get_list(accessors_ast);
 				for (uint32_t i = 0; i < accessors->children; i++) {
@@ -7463,7 +7484,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+		info = zend_declare_typed_property(
+			ce, name, &value_zv, flags | get_virtual_flag(accessors_ast), doc_comment, type);
 
 		if (accessors_ast) {
 			zend_compile_accessors(info, name, type_ast, zend_ast_get_list(accessors_ast));

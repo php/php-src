@@ -1140,15 +1140,20 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
-			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
-				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
-				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0
+					&& !(parent_info->flags & ZEND_ACC_VIRTUAL)) {
+				if (!(child_info->flags & ZEND_ACC_VIRTUAL)) {
+					int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
+					int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+					/* Don't keep default properties in GC (they may be freed by opcache) */
+					zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
+					ce->default_properties_table[parent_num] =
+						ce->default_properties_table[child_num];
+					ZVAL_UNDEF(&ce->default_properties_table[child_num]);
+				}
 
-				/* Don't keep default properties in GC (they may be freed by opcache) */
-				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
-				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
-				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 				child_info->offset = parent_info->offset;
+				child_info->flags &= ~ZEND_ACC_VIRTUAL;
 			}
 
 			zend_function **parent_accessors = parent_info->accessors;
@@ -1307,7 +1312,8 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 	}
 
 	ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0) {
+		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0
+				&& !(prop->flags & ZEND_ACC_VIRTUAL)) {
 			table[OBJ_PROP_TO_NUM(prop->offset)] = prop;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2123,6 +2129,15 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				} else {
 					not_compatible = 1;
 
+					if (colliding_prop->accessors || property_info->accessors) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"%s and %s define the same accessor property ($%s) in the composition of %s. Conflict resolution between accessor properties is currently not supported. Class was composed",
+							ZSTR_VAL(find_first_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
+							ZSTR_VAL(property_info->ce->name),
+							ZSTR_VAL(prop_name),
+							ZSTR_VAL(ce->name));
+					}
+
 					if ((colliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC)) &&
 						property_types_compatible(property_info, colliding_prop, PROP_INVARIANT) == INHERITANCE_SUCCESS
@@ -2172,28 +2187,22 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 								ZSTR_VAL(ce->name));
 					}
 
-					if (colliding_prop->accessors || property_info->accessors) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"%s and %s define the same accessor property ($%s) in the composition of %s. Conflict resolution between accessor properties is currently not supported. Class was composed",
-							ZSTR_VAL(find_first_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
-							ZSTR_VAL(property_info->ce->name),
-							ZSTR_VAL(prop_name),
-							ZSTR_VAL(ce->name));
-					}
-
 					continue;
 				}
 			}
 
 			/* property not found, so lets add it */
-			if (flags & ZEND_ACC_STATIC) {
-				prop_value = &traits[i]->default_static_members_table[property_info->offset];
-				ZEND_ASSERT(Z_TYPE_P(prop_value) != IS_INDIRECT);
+			if (!(flags & ZEND_ACC_VIRTUAL)) {
+				if (flags & ZEND_ACC_STATIC) {
+					prop_value = &traits[i]->default_static_members_table[property_info->offset];
+					ZEND_ASSERT(Z_TYPE_P(prop_value) != IS_INDIRECT);
+				} else {
+					prop_value = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
+				}
+				Z_TRY_ADDREF_P(prop_value);
 			} else {
-				prop_value = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
+				prop_value = NULL;
 			}
-
-			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 
 			zend_type type = property_info->type;

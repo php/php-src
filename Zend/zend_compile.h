@@ -235,11 +235,14 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 8...)                          |     |     |     */
+/* Property Flags (unused: 9...)                          |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
 #define ZEND_ACC_PROMOTED                (1 <<  7) /*     |     |  X  |     */
+/*                                                        |     |     |     */
+/* Virtual property without backing storage               |     |     |     */
+#define ZEND_ACC_VIRTUAL                 (1 <<  8) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 29...)                            |     |     |     */
 /* ===========                                            |     |     |     */

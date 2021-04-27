@@ -706,7 +706,7 @@ try_again:
 					if (Z_TYPE_P(rv) != IS_UNDEF) {
 						retval = rv;
 						if (!Z_ISREF_P(rv) &&
-							(type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
+							(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
 							if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
 								zend_error(E_NOTICE, "Indirect modification of accessor property %s::$%s has no effect (did you mean to use \"&get\"?)", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 							}
@@ -718,6 +718,13 @@ try_again:
 					/* The return type is already enforced through the method return type. */
 					OBJ_RELEASE(zobj);
 					goto exit;
+				}
+
+				if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+					zend_throw_error(NULL,
+						"Cannot recursively read %s::$%s in accessor without backing property",
+						ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					return &EG(uninitialized_zval);
 				}
 
 				property_offset = prop_info->offset;
@@ -930,6 +937,13 @@ found:
 				/* Cache the fact that this accessor has trivial write. */
 				CACHE_PTR_EX(cache_slot + 1,
 					(void*)((uintptr_t)CACHED_PTR_EX(cache_slot + 1) | ZEND_ACCESSOR_SIMPLE_WRITE_BIT));
+			}
+
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL,
+					"Cannot recursively write %s::$%s in accessor without backing property",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return &EG(error_zval);
 			}
 
 			property_offset = prop_info->offset;
@@ -1924,6 +1938,13 @@ found:
 					zval_ptr_dtor(&rv);
 					return result;
 				}
+			}
+
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL,
+					"Cannot recursively read %s::$%s in accessor without backing property",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return 0;
 			}
 
 			property_offset = prop_info->offset;

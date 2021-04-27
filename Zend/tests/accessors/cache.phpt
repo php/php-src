@@ -4,9 +4,10 @@ Test caching of accessor property kind
 <?php
 
 class Test {
+    private $_prop;
     public $prop {
-        &get { echo __METHOD__, "\n"; return $this->prop; }
-        set { echo __METHOD__, "\n"; $this->prop = $value; }
+        &get { echo __METHOD__, "\n"; return $this->_prop; }
+        set { echo __METHOD__, "\n"; $this->_prop = $value; }
     }
 }
 
