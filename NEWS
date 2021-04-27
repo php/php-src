@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
 
+- ODBC:
+  . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
+
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
 
