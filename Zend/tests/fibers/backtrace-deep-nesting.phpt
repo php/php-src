@@ -3,7 +3,8 @@ Backtrace in deeply nested function call
 --FILE--
 <?php
 
-function suspend_fiber(int $level): void {
+function suspend_fiber(int $level): void
+{
     if ($level >= 10) {
         $value = \Fiber::suspend($level);
         failing_function($value);
@@ -12,11 +13,13 @@ function suspend_fiber(int $level): void {
     suspend_fiber($level + 1);
 }
 
-function failing_function(string $value): never {
+function failing_function(string $value): never
+{
     throw_exception();
 }
 
-function throw_exception(): never {
+function throw_exception(): never
+{
     throw new Exception;
 }
 
@@ -34,17 +37,17 @@ Fatal error: Uncaught Exception in %sbacktrace-deep-nesting.php:%d
 Stack trace:
 #0 %sbacktrace-deep-nesting.php(%d): throw_exception()
 #1 %sbacktrace-deep-nesting.php(%d): failing_function('test')
-#2 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(10)
-#3 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(9)
-#4 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(8)
-#5 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(7)
-#6 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(6)
-#7 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(5)
-#8 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(4)
-#9 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(3)
-#10 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(2)
-#11 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(1)
-#12 [suspended] %sbacktrace-deep-nesting.php(%d): suspend_fiber(0)
+#2 %sbacktrace-deep-nesting.php(%d): suspend_fiber(10)
+#3 %sbacktrace-deep-nesting.php(%d): suspend_fiber(9)
+#4 %sbacktrace-deep-nesting.php(%d): suspend_fiber(8)
+#5 %sbacktrace-deep-nesting.php(%d): suspend_fiber(7)
+#6 %sbacktrace-deep-nesting.php(%d): suspend_fiber(6)
+#7 %sbacktrace-deep-nesting.php(%d): suspend_fiber(5)
+#8 %sbacktrace-deep-nesting.php(%d): suspend_fiber(4)
+#9 %sbacktrace-deep-nesting.php(%d): suspend_fiber(3)
+#10 %sbacktrace-deep-nesting.php(%d): suspend_fiber(2)
+#11 %sbacktrace-deep-nesting.php(%d): suspend_fiber(1)
+#12 %sbacktrace-deep-nesting.php(%d): suspend_fiber(0)
 #13 {fiber}: {closure}()
 #14 %sbacktrace-deep-nesting.php(%d): Fiber->resume('test')
 #15 {main}

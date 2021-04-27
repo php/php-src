@@ -1902,11 +1902,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 		}
 
-		if (!fiber && ZEND_CALL_INFO(call) & ZEND_CALL_SUSPENDED) {
-			ZVAL_TRUE(&tmp);
-			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_SUSPENDED), &tmp, 1);
-		}
-
 		ZVAL_ARR(&tmp, stack_frame);
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 

@@ -481,7 +481,6 @@ ZEND_METHOD(Fiber, suspend)
 {
 	zend_fiber *fiber = EG(current_fiber);
 	zval *exception, *value = NULL;
-	zend_execute_data *frame = execute_data->prev_execute_data;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -509,11 +508,6 @@ ZEND_METHOD(Fiber, suspend)
 	fiber->execute_data = execute_data;
 	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 	fiber->stack_bottom->prev_execute_data = NULL;
-
-	while (frame) {
-		ZEND_CALL_INFO(frame) |= ZEND_CALL_SUSPENDED;
-		frame = frame->prev_execute_data;
-	}
 
 	zend_fiber_suspend(fiber);
 

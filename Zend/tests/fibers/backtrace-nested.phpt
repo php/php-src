@@ -3,7 +3,8 @@ Backtrace in nested function call
 --FILE--
 <?php
 
-function suspend_fiber(): void {
+function suspend_fiber(): void
+{
     \Fiber::suspend();
     throw new Exception;
 }
@@ -20,7 +21,7 @@ $fiber->resume();
 --EXPECTF--
 Fatal error: Uncaught Exception in %sbacktrace-nested.php:%d
 Stack trace:
-#0 [suspended] %sbacktrace-nested.php(%d): suspend_fiber()
+#0 %sbacktrace-nested.php(%d): suspend_fiber()
 #1 {fiber}: {closure}()
 #2 %sbacktrace-nested.php(%d): Fiber->resume()
 #3 {main}
