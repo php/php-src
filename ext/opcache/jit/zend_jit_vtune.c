@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+#if defined(__x86_64__) || defined(i386)
+
 #define HAVE_VTUNE 1
 
 #include "jit/vtune/jitprofiling.h"
@@ -40,3 +42,5 @@ static void zend_jit_vtune_register(const char *name,
 
 	iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void*)&jmethod);
 }
+
+#endif /* defined(__x86_64__) || defined(i386) */

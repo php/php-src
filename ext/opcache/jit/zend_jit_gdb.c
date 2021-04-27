@@ -22,12 +22,8 @@
 
 
 #if defined(__x86_64__) || defined(i386)
-#define HAVE_GDB
-#else
-#warning Missing GDB JIT support on this platform
-#endif
 
-#ifdef HAVE_GDB
+#define HAVE_GDB
 
 #include "zend_elf.h"
 #include "zend_gdb.h"
@@ -497,4 +493,4 @@ static void zend_jit_gdb_init(void)
 #endif
 }
 
-#endif
+#endif /* defined(__x86_64__) || defined(i386) */
