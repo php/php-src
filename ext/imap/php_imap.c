@@ -3072,7 +3072,7 @@ static zend_bool header_injection(zend_string *str, zend_bool adrlist)
 		 /* adrlists do not support folding, but swallow trailing line breaks */
 		 && !((adrlist && p[1] == '\0')
 		  /* other headers support folding */
-		  || !adrlist && (p[1] == ' ' || p[1] == '\t'))) {
+		  || (!adrlist && (p[1] == ' ' || p[1] == '\t')))) {
 			return 1;
 		}
 		p++;
