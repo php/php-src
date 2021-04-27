@@ -75,21 +75,15 @@ function snmp_read_mib(string $filename): bool {}
 
 class SNMP
 {
+    /** @readonly */
     public array $info;
-    /** @var int|null */
-    public $max_oids;
-    /** @var int */
-    public $valueretrieval;
-    /** @var bool */
-    public $quick_print;
-    /** @var bool */
-    public $enum_print;
-    /** @var int */
-    public $oid_output_format;
-    /** @var bool */
-    public $oid_increasing_check = true;
-    /** @var int */
-    public $exceptions_enabled = 0;
+    public ?int $max_oids;
+    public int $valueretrieval;
+    public bool $quick_print;
+    public bool $enum_print;
+    public int $oid_output_format;
+    public bool $oid_increasing_check;
+    public int $exceptions_enabled;
 
     public function __construct(int $version, string $hostname, string $community, int $timeout = -1, int $retries = -1) {}
 

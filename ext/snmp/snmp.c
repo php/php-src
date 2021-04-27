@@ -1677,19 +1677,30 @@ zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *valu
 	obj = php_snmp_fetch_object(object);
 	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
-	if (hnd && hnd->write_func) {
-		hnd->write_func(obj, value);
-		/*
-		if (!PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) == 0) {
-			Z_ADDREF_P(value);
-			zval_ptr_dtor(&value);
+	if (hnd) {
+		if (!hnd->write_func) {
+			zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			return &EG(error_zval);
 		}
-		*/
-	} else {
-		value = zend_std_write_property(object, name, value, cache_slot);
+
+		zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
+		if (prop && ZEND_TYPE_IS_SET(prop->type)) {
+			zval tmp;
+			ZVAL_COPY(&tmp, value);
+			if (!zend_verify_property_type(prop, &tmp,
+						ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+				zval_ptr_dtor(&tmp);
+				return &EG(error_zval);
+			}
+			hnd->write_func(obj, &tmp);
+			zval_ptr_dtor(&tmp);
+		} else {
+			hnd->write_func(obj, value);
+		}
+		return value;
 	}
 
-	return value;
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 /* }}} */
 
@@ -1821,14 +1832,6 @@ PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
-static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval)
-{
-	zend_throw_error(NULL, "SNMP::$info property is read-only");
-	return FAILURE;
-}
-/* }}} */
-
-/* {{{ */
 static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval;
@@ -1841,7 +1844,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 	lval = zval_get_long(newval);
 
 	if (lval <= 0) {
-		zend_value_error("max_oids must be greater than 0 or null");
+		zend_value_error("SNMP::$max_oids must be greater than 0 or null");
 		return FAILURE;
 	}
 	snmp_object->max_oids = lval;
@@ -1924,8 +1927,11 @@ static void free_php_snmp_properties(zval *el)  /* {{{ */
 #define PHP_SNMP_PROPERTY_ENTRY_RECORD(name) \
 	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	php_snmp_write_##name }
 
+#define PHP_SNMP_READONLY_PROPERTY_ENTRY_RECORD(name) \
+	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	NULL }
+
 const php_snmp_prop_handler php_snmp_property_entries[] = {
-	PHP_SNMP_PROPERTY_ENTRY_RECORD(info),
+	PHP_SNMP_READONLY_PROPERTY_ENTRY_RECORD(info),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(max_oids),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),

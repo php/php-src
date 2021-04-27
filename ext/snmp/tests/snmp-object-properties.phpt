@@ -192,5 +192,5 @@ NULL
 bool(false)
 SNMP retrieval method must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
 SNMP output print format must be an SNMP_OID_OUTPUT_* constant
-SNMP::$info property is read-only
+Cannot write read-only property SNMP::$info
 NULL
