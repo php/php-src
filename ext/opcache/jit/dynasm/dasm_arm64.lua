@@ -39,7 +39,7 @@ local wline, werror, wfatal, wwarn
 local action_names = {
   "STOP", "SECTION", "ESC", "REL_EXT",
   "ALIGN", "REL_LG", "LABEL_LG", "ADDR_LG",
-  "REL_PC", "LABEL_PC", "ADDR_PC", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML", "IMM_PC",
+  "REL_PC", "LABEL_PC", "ADDR_PC", "REL_A", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML", "IMM_PC",
   "VREG",
 }
 
@@ -943,10 +943,17 @@ local function parse_template(params, template, nparams, pos)
       op = parse_load_pair(params, nparams, n, op)
 
     elseif p == "B" then
-      local mode, v, s = parse_label(q, false); n = n + 1
-      local m = branch_type(op)
-      waction("REL_"..mode, v+m, s, 1)
-
+      -- &expr (pointer)
+      if sub(q, 1, 1) == "&" then
+        local a = sub(q,2); n = n + 1
+        local m = branch_type(op)
+        waction("REL_A", m, format("(unsigned int)(unsigned long long)(%s)", a))
+        actargs[#actargs+1] = format("(unsigned int)((unsigned long long)(%s)>>32)", a)
+      else
+        local mode, v, s = parse_label(q, false); n = n + 1
+        local m = branch_type(op)
+        waction("REL_"..mode, v+m, s, 1)
+      end
     elseif p == "I" then
       op = op + parse_imm12(q); n = n + 1
     elseif p == "i" then

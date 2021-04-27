@@ -21,7 +21,7 @@ enum {
   /* The following actions need a buffer position. */
   DASM_ALIGN, DASM_REL_LG, DASM_LABEL_LG, DASM_ADDR_LG,
   /* The following actions also have an argument. */
-  DASM_REL_PC, DASM_LABEL_PC, DASM_ADDR_PC,
+  DASM_REL_PC, DASM_LABEL_PC, DASM_ADDR_PC, DASM_REL_A,
   DASM_IMM, DASM_IMM6, DASM_IMM12, DASM_IMM13W, DASM_IMM13X, DASM_IMML, DASM_IMM_PC,
   DASM_VREG,
   DASM__MAX
@@ -312,6 +312,7 @@ void dasm_put(Dst_DECL, int start, ...)
 	b[pos++] = m;
 	break;
 	}
+      case DASM_REL_A:
       case DASM_IMM_PC: {
 	int m = va_arg(ap, int);
 	b[pos++] = n;
@@ -388,7 +389,7 @@ int dasm_link(Dst_DECL, size_t *szp)
 	case DASM_LABEL_LG: case DASM_LABEL_PC: b[pos++] += ofs; break;
 	case DASM_IMM: case DASM_IMM6: case DASM_IMM12: case DASM_IMM13W:
 	case DASM_IMML: case DASM_VREG: pos++; break;
-	case DASM_IMM13X: case DASM_IMM_PC: pos += 2; break;
+	case DASM_IMM13X: case DASM_REL_A: case DASM_IMM_PC: pos += 2; break;
 	}
       }
       stop: (void)0;
@@ -438,6 +439,11 @@ int dasm_encode(Dst_DECL, void *buffer)
 	case DASM_ALIGN:
 	  ins &= 255; while ((((char *)cp - base) & ins)) *cp++ = 0xe1a00000;
 	  break;
+	case DASM_REL_A:
+      addr = (((unsigned long long)(*b++)) << 32) | (unsigned int)n;
+      CK((((addr - (ptrdiff_t)(cp+4)) + 0x08000000) >> 28) == 0, RANGE_REL);
+      n = (unsigned int)(addr - (ptrdiff_t)cp + 4);
+      goto patchrel;
 	case DASM_REL_LG:
 	  if (n < 0) {
 	    n = (int)((ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp + 4);
