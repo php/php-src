@@ -43,7 +43,7 @@ array(3) {
     }
   }
   [1]=>
-  array(5) {
+  array(4) {
     ["file"]=>
     string(%d) "%sReflectionFiber_backtrace.php"
     ["line"]=>
@@ -53,8 +53,6 @@ array(3) {
     ["args"]=>
     array(0) {
     }
-    ["suspended"]=>
-    bool(true)
   }
   [2]=>
   array(6) {
