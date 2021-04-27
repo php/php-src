@@ -999,7 +999,9 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |			ldr Rd(dst_reg-ZREG_V0), [Rx(tmp_reg1)]
 |			SET_ZVAL_DVAL dst_addr, dst_reg, tmp_reg2
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
-|			NIY	// TODO:
+||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : fp_tmp_reg;
+|			DOUBLE_GET_LONG dst_reg, Z_LVAL_P(zv), tmp_reg1
+|			SET_ZVAL_DVAL dst_addr, dst_reg, tmp_reg2
 ||		} else {
 |			// In x64, if the range of this LONG value can be represented via INT type, only move the low 32 bits into dst_addr.
 |			// Note that imm32 is signed extended to 64 bits during mov.
@@ -1029,7 +1031,17 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |			SET_ZVAL_DVAL dst_addr, dst_reg, tmp_reg2
 |			SET_ZVAL_DVAL res_addr, dst_reg, tmp_reg2
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
-|			NIY	// TODO:
+||			if (Z_MODE(dst_addr) == IS_REG) {
+|				DOUBLE_GET_LONG Z_REG(dst_addr), Z_LVAL_P(zv), tmp_reg1
+|				SET_ZVAL_DVAL res_addr, Z_REG(dst_addr), tmp_reg2
+||			} else if (Z_MODE(res_addr) == IS_REG) {
+|				DOUBLE_GET_LONG Z_REG(res_addr), Z_LVAL_P(zv), tmp_reg1
+|				SET_ZVAL_DVAL dst_addr, Z_REG(res_addr), tmp_reg2
+||			} else {
+|				DOUBLE_GET_LONG fp_tmp_reg, Z_LVAL_P(zv), tmp_reg1
+|				SET_ZVAL_DVAL dst_addr, fp_tmp_reg, tmp_reg2
+|				SET_ZVAL_DVAL res_addr, fp_tmp_reg, tmp_reg2
+||			}
 ||		} else {
 ||			if (Z_MODE(dst_addr) == IS_REG) {
 |				SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv), Rx(tmp_reg1), Rx(tmp_reg2)
