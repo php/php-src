@@ -136,8 +136,7 @@ static void zend_jit_perf_jitdump_open(void)
 	}
 	fd = open(path, O_RDONLY);
 #elif defined(__sun)
-	const char *path = getexecname();
-	fd = open(path, O_RDONLY);
+	fd = open("/proc/self/path/a.out", O_RDONLY);
 #elif defined(__HAIKU__)
 	char path[PATH_MAX];
 	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,

@@ -64,8 +64,7 @@ void zend_elf_load_symbols(void)
 	}
 	int fd = open(path, O_RDONLY);
 #elif defined(__sun)
-	const char *path = getexecname();
-	int fd = open(path, O_RDONLY);
+	int fd = open("/proc/self/path/a.out", O_RDONLY);
 #elif defined(__HAIKU__)
 	char path[PATH_MAX];
 	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,
