@@ -1451,7 +1451,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					ZVAL_NULL(&tmp);
 					break;
 				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1, rc);
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
 					ZVAL_FALSE(&tmp);
 				} else {
 					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
@@ -1463,7 +1463,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					ZVAL_NULL(&tmp);
 					break;
 				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1, rc);
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
 					ZVAL_FALSE(&tmp);
 					break;
 				}
@@ -1613,7 +1613,7 @@ PHP_FUNCTION(odbc_fetch_into)
 					ZVAL_NULL(&tmp);
 					break;
 				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1, rc);
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
 					ZVAL_FALSE(&tmp);
 				} else {
 					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
@@ -1625,7 +1625,7 @@ PHP_FUNCTION(odbc_fetch_into)
 					ZVAL_NULL(&tmp);
 					break;
 				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1, rc);
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
 					ZVAL_FALSE(&tmp);
 					break;
 				}
@@ -1860,7 +1860,7 @@ PHP_FUNCTION(odbc_result)
 				RETURN_NULL();
 			} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
 				zend_string_efree(field_str);
-				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1, rc);
+				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
 				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might
@@ -1886,7 +1886,7 @@ PHP_FUNCTION(odbc_result)
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				RETURN_NULL();
 			} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
-				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1, rc);
+				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
 				RETURN_FALSE;
 			} else {
 				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
@@ -1920,7 +1920,7 @@ PHP_FUNCTION(odbc_result)
 			efree(field);
 			RETURN_NULL();
 		} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
-			php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1, rc);
+			php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
 			efree(field);
 			RETURN_FALSE;
 		}
@@ -2032,7 +2032,7 @@ PHP_FUNCTION(odbc_result_all)
 					if (rc == SQL_SUCCESS_WITH_INFO) {
 						if (result->values[i].vallen == SQL_NO_TOTAL) {
 							php_printf("</td></tr></table>");
-							php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1, rc);
+							php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1);
 							efree(buf);
 							RETURN_FALSE;
 						} else {
@@ -2055,7 +2055,7 @@ PHP_FUNCTION(odbc_result_all)
 					if (result->values[i].vallen == SQL_NULL_DATA) {
 						php_printf("<td>NULL</td>");
 					} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1, rc);
+						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1);
 						php_printf("<td>FALSE</td>");
 					} else {
 						php_printf("<td>%s</td>", result->values[i].value);
