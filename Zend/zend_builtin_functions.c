@@ -1744,6 +1744,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	while (call && (limit == 0 || frameno < limit)) {
 		zend_execute_data *prev = call->prev_execute_data;
+		filename = NULL;
 
 		if (!prev) {
 			/* add frame for a handler call without {main} code */
@@ -1807,7 +1808,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				}
 				prev_call = prev;
 			}
-			filename = NULL;
 		}
 
 		func = call->func;
