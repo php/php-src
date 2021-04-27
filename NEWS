@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #80800 (imap_open() fails when the flags parameter includes
     CL_EXPUNGE). (girgias)
+  . Fixed bug #80710 (imap_mail_compose() header injection). (cmb, Stas)
 
 - Intl:
   . Fixed bug #80763 (msgfmt_format() does not accept DateTime references).
