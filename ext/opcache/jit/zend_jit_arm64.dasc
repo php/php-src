@@ -6178,8 +6178,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						| NIY // beq &exit_addr
 						|1:
 					} else {
-						| bvs => target_label
-						| bne => target_label
+						|	bne => target_label
 					}
 					break;
 				case ZEND_IS_SMALLER:
