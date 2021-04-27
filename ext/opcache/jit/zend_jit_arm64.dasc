@@ -1989,7 +1989,25 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_profile_jit:
-	|	NIY_STUB	// TODO
+	|	// ++zend_jit_profile_counter;
+	|	LOAD_ADDR REG0, &zend_jit_profile_counter
+	|	ldr TMP1, [REG0]
+	|	add TMP1, TMP1, #1
+	|	str TMP1, [REG0]
+	|	// op_array = (zend_op_array*)EX(func);
+	|	ldr REG0, EX->func
+	|	// run_time_cache = EX(run_time_cache);
+	|	ldr REG2, EX->run_time_cache
+	|	// jit_extension = (const void*)ZEND_FUNC_INFO(op_array);
+	|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	// ++ZEND_COUNTER_INFO(op_array)
+	|	LOAD_32BIT_VAL TMP1w, (zend_jit_profile_counter_rid * sizeof(void*))
+	|	ldr TMP2, [REG2, TMP1]
+	|	add TMP2, TMP2, #1
+	|	str TMP2, [REG2, TMP1]
+	|	// return ((zend_vm_opcode_handler_t)jit_extension->orig_handler)()
+	|	ldr TMP1, [REG0, #offsetof(zend_jit_op_array_extension, orig_handler)]
+	|	br TMP1
 	return 1;
 }
 
