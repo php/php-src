@@ -1172,7 +1172,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 				}
 			}
 
-			if (node->type == XML_ELEMENT_NODE && (! match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix))) {
+			if (node->type == XML_ELEMENT_NODE && (! match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) || node->type == XML_ENTITY_DECL) {
 				goto next_iter;
 			}
 
@@ -1871,7 +1871,7 @@ static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 
 		if (sxe->node && sxe->node->node) {
 			if (sxe->node->node->children) {
-				contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->node->children, 1);
+				contents = xmlNodeListGetRawString((xmlDocPtr) sxe->document->ptr, sxe->node->node->children, 1);
 			}
 		}
 	}
