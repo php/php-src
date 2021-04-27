@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.28
 
+- Imap:
+  . Fixed bug #80710 (imap_mail_compose() header injection). (cmb, Stas)
 
 04 Feb 2021, PHP 7.3.27
 
