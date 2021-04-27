@@ -2822,14 +2822,75 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 	return 1;
 }
 
-typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
-typedef ZEND_SET_ALIGNED(1, int32_t unaligned_int32_t);
-
 static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size, const void *from_addr, const void *to_addr)
 {
 	int ret = 0;
+	uint8_t *p, *end;
+	size_t code_size = size;
+	ptrdiff_t delta;
 
-	abort();  // TODO
+	if (jmp_table_size) {
+		const void **jmp_slot = (const void **)((char*)code + size);
+
+		code_size -= jmp_table_size * sizeof(void*);
+		do {
+			jmp_slot--;
+			if (*jmp_slot == from_addr) {
+				*jmp_slot = to_addr;
+				ret++;
+			}
+		} while (--jmp_table_size);
+	}
+
+	p = (uint8_t*)code;
+	end = p + code_size;
+	while (p < end) {
+		uint32_t *ins_ptr = (uint32_t*)p;
+		uint32_t ins = *ins_ptr;
+		if ((ins & 0xfc000000u) == 0x14000000u) {
+			// B (imm26:0..25)
+			delta = (uint32_t*)from_addr - ins_ptr;
+			if (((ins ^ (uint32_t)delta) & 0x01ffffffu) == 0) {
+				delta = (uint32_t*)to_addr - ins_ptr;
+				if (((delta + 0x02000000) >> 26) == 0) {
+					abort(); // brnach target out of range
+				}
+				*ins_ptr = (ins & 0xfc000000u) | ((uint32_t)delta & 0x03ffffffu);
+				ret++;
+			}
+		} else if ((ins & 0xff000000u) == 0x54000000u ||
+		           (ins & 0x7e000000u) == 0x34000000u) {
+			// B.cond, CBZ, CBNZ (imm19:5..23)
+			delta = (uint32_t*)from_addr - ins_ptr;
+			if (((ins ^ ((uint32_t)delta << 5)) & 0x00ffffe0u) == 0) {
+				delta = (uint32_t*)to_addr - ins_ptr;
+				if (((delta + 0x80000) >> 19) == 0) {
+					abort(); // brnach target out of range
+				}
+				*ins_ptr = (ins & 0xff00001fu) | (((uint32_t)delta & 0x7ffffu) << 5);
+				ret++;
+			}
+		} else if ((ins & 0x7e000000u) == 0x36000000u) {
+			// TBZ, TBNZ (imm14:5..18)
+			delta = (uint32_t*)from_addr - ins_ptr;
+			if (((ins ^ ((uint32_t)delta << 5)) & 0x0007ffe0u) == 0) {
+				delta = (uint32_t*)to_addr - ins_ptr;
+				if (((delta + 0x2000) >> 14) == 0) {
+					abort(); // brnach target out of range
+				}
+				*ins_ptr = (ins & 0xfff8001fu) | (((uint32_t)delta & 0x3fffu) << 5);
+				ret++;
+			}
+		}
+		p += 4;
+	}
+
+	JIT_CACHE_FLUSH(code, (char*)code + size);
+
+#ifdef HAVE_VALGRIND
+	VALGRIND_DISCARD_TRANSLATIONS(code, size);
+#endif
+
 	return ret;
 }
 
