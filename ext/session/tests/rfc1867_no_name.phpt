@@ -62,8 +62,10 @@ array(2) {
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file2.txt"
+    ["fullpath"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""
