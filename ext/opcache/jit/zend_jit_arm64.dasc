@@ -99,7 +99,8 @@
 #define CMP_IMM         MAX_IMM12      // cmp insn
 #define MOVZ_IMM        MAX_IMM16      // movz insn
 #define ADD_SUB_IMM     MAX_IMM12      // add/sub insn
-#define LDR_STR_PIMM    (MAX_IMM12*8)  // ldr/str insn: pimm is imm12 * 8
+#define LDR_STR_PIMM64  (MAX_IMM12*8)  // ldr/str insn for 64-bit register: pimm is imm12 * 8
+#define LDR_STR_PIMM32  (MAX_IMM12*4)  // ldr/str insn for 32-bit register: pimm is imm12 * 4
 #define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
 
 #include "Zend/zend_cpuinfo.h"
@@ -270,8 +271,18 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 // Safe memory load/store with an unsigned immediate offset.
 // When using Z_OFFSET(addr), which is 24-bit long, as the unsigned offset to compute a memory address,
 // we should firstly check the range.
+// Use SAFE_MEM_ACC_WITH_UOFFSET if 'op' is 64-bit register. Use SAFE_MEM_ACC_WITH_UOFFSET_32 if 'op' is 32-bit register.
 |.macro SAFE_MEM_ACC_WITH_UOFFSET, ldr_str_ins, op, base_reg, offset, tmp_reg
-||	if (((uintptr_t)(offset)) > LDR_STR_PIMM) {
+||	if (((uintptr_t)(offset)) > LDR_STR_PIMM64) {
+|		LOAD_32BIT_VAL tmp_reg, offset
+|		ldr_str_ins op, [base_reg, tmp_reg]
+||	} else {
+|		ldr_str_ins op, [base_reg, #(offset)]
+||	}
+|.endmacro
+
+|.macro SAFE_MEM_ACC_WITH_UOFFSET_32, ldr_str_ins, op, base_reg, offset, tmp_reg
+||	if (((uintptr_t)(offset)) > LDR_STR_PIMM32) {
 |		LOAD_32BIT_VAL tmp_reg, offset
 |		ldr_str_ins op, [base_reg, tmp_reg]
 ||	} else {
@@ -340,6 +351,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	str_ins op, [tmp_reg]
 |.endmacro
 
+// 'op' is 64-bit register
 |.macro MEM_STORE_ZTS, str_ins, op, struct, field, tmp_reg
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
@@ -349,12 +361,22 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	.endif
 |.endmacro
 
-|.macro MEM_STORE_ZTS_BYTE, str_ins, op, struct, field, tmp_reg
+// 'op' is 32-bit register
+|.macro MEM_STORE_32_ZTS, str_ins, op, struct, field, tmp_reg
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
-|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE str_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|		SAFE_MEM_ACC_WITH_UOFFSET_32 str_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 |	.else
 |		MEM_STORE str_ins, op, &struct.field, tmp_reg
+|	.endif
+|.endmacro
+
+|.macro MEM_STORE_BYTE_ZTS, strb_ins, op, struct, field, tmp_reg
+|	.if ZTS
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE strb_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	.else
+|		MEM_STORE strb_ins, op, &struct.field, tmp_reg
 |	.endif
 |.endmacro
 
@@ -373,12 +395,21 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	.endif
 |.endmacro
 
-|.macro MEM_LOAD_ZTS_BYTE, ldr_ins, op, struct, field, tmp_reg
+|.macro MEM_LOAD_32_ZTS, ldr_ins, op, struct, field, tmp_reg
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
-|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldr_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|		SAFE_MEM_ACC_WITH_UOFFSET_32 ldr_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 |	.else
 |		MEM_LOAD ldr_ins, op, &struct.field, tmp_reg
+|	.endif
+|.endmacro
+
+|.macro MEM_LOAD_BYTE_ZTS, ldrb_ins, op, struct, field, tmp_reg
+|	.if ZTS
+|		LOAD_TSRM_CACHE TMP3
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb_ins, op, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	.else
+|		MEM_LOAD ldrb_ins, op, &struct.field, tmp_reg
 |	.endif
 |.endmacro
 
@@ -417,13 +448,13 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	.endif
 |.endmacro
 
-|.macro MEM_LOAD_CMP_ZTS_BYTE, ldr_ins, op, struct, field, tmp_reg1, tmp_reg2
+|.macro MEM_LOAD_CMP_BYTE_ZTS, ldrb_ins, op, struct, field, tmp_reg1, tmp_reg2
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
-|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldr_ins, tmp_reg1, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg2
+|		SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb_ins, tmp_reg1, TMP3, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg2
 |		cmp tmp_reg1, op
 |	.else
-|		MEM_LOAD_CMP ldr_ins, op, &struct.field, tmp_reg1, tmp_reg2
+|		MEM_LOAD_CMP ldrb_ins, op, &struct.field, tmp_reg1, tmp_reg2
 |	.endif
 |.endmacro
 
@@ -439,7 +470,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.macro MEM_LOAD_OP_STORE_ZTS, mem_ins, ldr_ins, str_ins, op, struct, field, tmp_reg1, tmp_reg2
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
-||		if (((uintptr_t)(struct.._offset+offsetof(zend_..struct, field))) > LDRB_STRB_PIMM) {
+||		if (((uintptr_t)(struct.._offset+offsetof(zend_..struct, field))) > LDR_STR_PIMM64) {
 |			LOAD_32BIT_VAL tmp_reg1, (struct.._offset+offsetof(zend_..struct, field))
 |			ldr_ins tmp_reg2, [TMP3, tmp_reg1]
 |			mem_ins tmp_reg2, tmp_reg2, op
@@ -607,23 +638,25 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro GET_ZVAL_TYPE, reg, addr, tmp_reg
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldrb, reg, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.v.type), tmp_reg
+|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, reg, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.v.type), tmp_reg
 |.endmacro
 
+// 'reg' is 32-bit register
 |.macro GET_ZVAL_TYPE_INFO, reg, addr, tmp_reg
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	SAFE_MEM_ACC_WITH_UOFFSET ldr, reg, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg
+|	SAFE_MEM_ACC_WITH_UOFFSET_32 ldr, reg, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg
 |.endmacro
 
 |.macro SET_ZVAL_TYPE_INFO, addr, type, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
 |	LOAD_32BIT_VAL tmp_reg1, type
-|	SAFE_MEM_ACC_WITH_UOFFSET str, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg2
+|	SAFE_MEM_ACC_WITH_UOFFSET_32 str, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg2
 |.endmacro
 
+// 'type' is 32-bit register
 |.macro SET_ZVAL_TYPE_INFO_FROM_REG, addr, type, tmp_reg
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	SAFE_MEM_ACC_WITH_UOFFSET str, type, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg
+|	SAFE_MEM_ACC_WITH_UOFFSET_32 str, type, Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval,u1.type_info), tmp_reg
 |.endmacro
 
 |.macro GET_Z_PTR, reg, zv
@@ -1616,9 +1649,9 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|->interrupt_handler:
 	|	SAVE_IP
 	|	//EG(vm_interrupt) = 0;
-	|	MEM_STORE_ZTS_BYTE strb, wzr, executor_globals, vm_interrupt, TMP1
+	|	MEM_STORE_BYTE_ZTS strb, wzr, executor_globals, vm_interrupt, TMP1
 	|	//if (EG(timed_out)) {
-	|	MEM_LOAD_ZTS_BYTE ldrb, REG0w, executor_globals, timed_out, TMP1
+	|	MEM_LOAD_BYTE_ZTS ldrb, REG0w, executor_globals, timed_out, TMP1
 	|	cbz REG0w, >1
 	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, TMP1
@@ -2268,7 +2301,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	LOAD_IP
 
 	|	// check for interrupt (try to avoid this ???)
-	|	MEM_LOAD_CMP_ZTS_BYTE ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
+	|	MEM_LOAD_CMP_BYTE_ZTS ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
 	|	bne ->interrupt_handler
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
@@ -2723,7 +2756,7 @@ static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const void *exit_addr)
 {
-	|	MEM_LOAD_ZTS_BYTE ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+	|	MEM_LOAD_BYTE_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
 	if (exit_addr) {
 		|	cbnz TMP1w, &exit_addr
 	} else if (last_valid_opline == opline) {
@@ -2743,7 +2776,7 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void *timeout_exit_addr)
 {
 	if (timeout_exit_addr) {
-		|	MEM_LOAD_CMP_ZTS_BYTE ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
+		|	MEM_LOAD_CMP_BYTE_ZTS ldrb, wzr, executor_globals, vm_interrupt, REG0w, TMP1
 		|	beq =>loop_label
 		|	b &timeout_exit_addr
 	} else {
@@ -2806,7 +2839,7 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 		|	sub sp, sp, #16
 		|	stp TMP1, TMP2, [sp]       // save TMP1 and TMP2
 		|	LOAD_32BIT_VAL TMP1w, trace_num
-		|	MEM_STORE_ZTS str, TMP1w, executor_globals, jit_trace_num, TMP2
+		|	MEM_STORE_32_ZTS str, TMP1w, executor_globals, jit_trace_num, TMP2
 		|	ldp TMP1, TMP2, [sp]      // retore TMP1 and TMP2
 		|	add sp, sp, #16
 	} else {
@@ -2814,7 +2847,7 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 		zend_reg tmp2 = ZEND_REGSET_FIRST(ZEND_REGSET_EXCL(regset, tmp1));
 
 		|	LOAD_32BIT_VAL Rw(tmp1), trace_num
-		|	MEM_STORE_ZTS str, Rw(tmp1), executor_globals, jit_trace_num, Rx(tmp2)
+		|	MEM_STORE_32_ZTS str, Rw(tmp1), executor_globals, jit_trace_num, Rx(tmp2)
 		(void)tmp1;
 		(void)tmp2;
 	}
@@ -8269,7 +8302,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
 			|	ldr REG1, EX->run_time_cache
 			|	mov REG0, RETVALx
-			||	ZEND_ASSERT(opline->result.num <= LDR_STR_PIMM);
+			||	ZEND_ASSERT(opline->result.num <= LDR_STR_PIMM64);
 			|	str REG0, [REG1, #opline->result.num]
 			|	b >3
 		} else {
@@ -11138,7 +11171,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|	ldr REG0, [REG0, TMP1]
 	|	sub REG0, REG0, #1
 	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
-	|	MEM_LOAD_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
+	|	MEM_LOAD_32_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
 	|	lsl REG1, REG1, #5
 	|	cmp REG0, REG1
 	|	bhs >9
