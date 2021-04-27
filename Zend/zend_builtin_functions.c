@@ -1674,6 +1674,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARR(backtrace), frame_no, frame) {
 		ZEND_ASSERT(Z_TYPE_P(frame) == IS_ARRAY);
+		zval *fiber = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FIBER), 1);
 		zval *function = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), 1);
 		zval *class = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_CLASS), 1);
 		zval *type = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_TYPE), 1);
@@ -1704,6 +1705,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 			smart_str_appendc(&str, ':');
 			smart_str_append_long(&str, Z_LVAL_P(line));
 			smart_str_appendc(&str, ']');
+		}
+		if (fiber) {
+			smart_str_appends(&str, " started {fiber}");
 		}
 		smart_str_appendc(&str, '\n');
 	} ZEND_HASH_FOREACH_END();
