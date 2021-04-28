@@ -44,10 +44,6 @@ typedef struct _func_info_t {
 	{name, sizeof(name)-1, (MAY_BE_RC1 | (info)), NULL}
 #define FN(name, info) \
 	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | (info)), NULL}
-#define FR(name, info) \
-	{name, sizeof(name)-1, (MAY_BE_REF | (info)), NULL}
-#define FX(name, info) \
-	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | (info)), NULL}
 #define FC(name, callback) \
 	{name, sizeof(name)-1, 0, callback}
 
