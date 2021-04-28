@@ -294,7 +294,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		}
 	}
 
-	if (php_stream_is_filtered(stream)) {
+	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		php_error_docref(NULL, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
