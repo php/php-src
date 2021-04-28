@@ -803,22 +803,27 @@ static const func_info_t func_infos[] = {
 static HashTable func_info;
 ZEND_API int zend_func_info_rid = -1;
 
-static uint32_t get_internal_func_info(
-		const zend_call_info *call_info, const zend_ssa *ssa) {
-	zend_function *callee_func = call_info->callee_func;
+uint32_t zend_get_internal_func_info(
+		const zend_function *callee_func, const zend_call_info *call_info, const zend_ssa *ssa) {
 	if (callee_func->common.scope) {
 		/* This is a method, not a function. */
 		return 0;
 	}
 
-	zval *zv = zend_hash_find_known_hash(&func_info, callee_func->common.function_name);
+	zend_string *name = callee_func->common.function_name;
+	if (!name) {
+		/* zend_pass_function has no name. */
+		return 0;
+	}
+
+	zval *zv = zend_hash_find_known_hash(&func_info, name);
 	if (!zv) {
 		return 0;
 	}
 
 	func_info_t *info = Z_PTR_P(zv);
 	if (info->info_func) {
-		return info->info_func(call_info, ssa);
+		return call_info ? info->info_func(call_info, ssa) : 0;
 	} else {
 		return info->info;
 	}
@@ -834,7 +839,7 @@ ZEND_API uint32_t zend_get_func_info(
 	*ce_is_instanceof = 0;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-		uint32_t internal_ret = get_internal_func_info(call_info, ssa);
+		uint32_t internal_ret = zend_get_internal_func_info(callee_func, call_info, ssa);
 #if !ZEND_DEBUG
 		if (internal_ret) {
 			return internal_ret;

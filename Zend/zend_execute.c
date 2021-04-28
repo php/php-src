@@ -42,6 +42,7 @@
 #include "zend_smart_str.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -1198,6 +1199,68 @@ static void zend_verify_internal_read_property_type(zend_object *obj, zend_strin
 	if (prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO && ZEND_TYPE_IS_SET(prop_info->type)) {
 		zend_verify_property_type(prop_info, val, /* strict */ true);
 	}
+}
+
+#ifndef ZEND_VERIFY_FUNC_INFO
+# define ZEND_VERIFY_FUNC_INFO 0
+#endif
+
+static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
+#if ZEND_VERIFY_FUNC_INFO
+	zend_string *name = fn->common.function_name;
+	uint32_t type_mask = zend_get_internal_func_info(fn, NULL, NULL);
+	if (!type_mask) {
+		return;
+	}
+
+	/* Always check refcount of arrays, as immutable arrays are RCN. */
+	if (Z_REFCOUNTED_P(retval) || Z_TYPE_P(retval) == IS_ARRAY) {
+		if (!(type_mask & MAY_BE_RC1)) {
+			zend_error_noreturn(E_CORE_ERROR, "%s() missing rc1", ZSTR_VAL(name));
+		}
+		if (Z_REFCOUNT_P(retval) > 1 && !(type_mask & MAY_BE_RCN)) {
+			zend_error_noreturn(E_CORE_ERROR, "%s() missing rcn", ZSTR_VAL(name));
+		}
+	}
+
+	uint32_t type = 1u << Z_TYPE_P(retval);
+	if (!(type_mask & type)) {
+		zend_error_noreturn(E_CORE_ERROR, "%s() missing type %s",
+			ZSTR_VAL(name), zend_get_type_by_const(Z_TYPE_P(retval)));
+	}
+
+	if (Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *ht = Z_ARRVAL_P(retval);
+		uint32_t num_checked = 0;
+		zend_string *str;
+		zval *val;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
+			if (str) {
+				if (!(type_mask & MAY_BE_ARRAY_KEY_STRING)) {
+					zend_error_noreturn(E_CORE_ERROR,
+						"%s() missing array_key_string", ZSTR_VAL(name));
+				}
+			} else {
+				if (!(type_mask & MAY_BE_ARRAY_KEY_LONG)) {
+					zend_error_noreturn(E_CORE_ERROR,
+						"%s() missing array_key_long", ZSTR_VAL(name));
+				}
+			}
+
+			uint32_t array_type = 1u << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+			if (!(type_mask & array_type)) {
+				zend_error_noreturn(E_CORE_ERROR,
+					"%s() missing array element type %s",
+					ZSTR_VAL(name), zend_get_type_by_const(Z_TYPE_P(retval)));
+			}
+
+			/* Don't check all elements of large arrays. */
+			if (++num_checked > 16) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+#endif
 }
 #endif
 
