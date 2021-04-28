@@ -55,6 +55,20 @@ try {
     echo 'TypeError', \PHP_EOL;
 }
 
+try {
+    $string[(string) 10e120] = 'E';
+    var_dump($string);
+} catch (\TypeError) {
+    echo 'TypeError', \PHP_EOL;
+}
+var_dump($string);
+try {
+    $string[$string_float] = 'E';
+} catch (\TypeError) {
+    echo 'TypeError', \PHP_EOL;
+}
+var_dump($string);
+
 ?>
 --EXPECTF--
 int(0)
@@ -85,3 +99,7 @@ Float variable
 
 Warning: String offset cast occurred in %s on line %d
 string(34) "Eere is some text for good measure"
+TypeError
+string(34) "Here is some text for good measure"
+TypeError
+string(34) "Here is some text for good measure"
