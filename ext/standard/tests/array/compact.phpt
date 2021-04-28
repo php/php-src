@@ -21,7 +21,7 @@ try {
 try {
 	$foo = 'bar';
 	$bar = 'baz';
-	$result = compact($foo, [true]);
+	$result = compact($foo, [42]);
 } catch (TypeError $e) {
 	echo "TypeError: ".$e->getMessage();
 }
@@ -34,5 +34,5 @@ array(2) {
   ["state"]=>
   string(2) "CA"
 }
-TypeError: Parameter 1 in compact() must be string or array of strings
-TypeError: Parameter 2 in compact() must be string or array of strings
+TypeError: compact(): Argument #1 ($var_name) must be string or array of strings, bool given
+TypeError: compact(): Argument #2 must be string or array of strings, int given
