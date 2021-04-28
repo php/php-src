@@ -2447,7 +2447,7 @@ PHP_FUNCTION(extract)
 }
 /* }}} */
 
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) /* {{{ */
+static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry, int pos) /* {{{ */
 {
 	zval *value_ptr, data;
 
@@ -2475,11 +2475,14 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			Z_PROTECT_RECURSION_P(entry);
 		}
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(entry), value_ptr) {
-			php_compact_var(eg_active_symbol_table, return_value, value_ptr);
+			php_compact_var(eg_active_symbol_table, return_value, value_ptr, pos);
 		} ZEND_HASH_FOREACH_END();
 	    if (Z_REFCOUNTED_P(entry)) {
 			Z_UNPROTECT_RECURSION_P(entry);
 		}
+	} else {
+		zend_throw_error(zend_ce_type_error, "Parameter %d in compact() must be string or array of strings", pos);
+		return;
 	}
 }
 /* }}} */
@@ -2512,7 +2515,7 @@ PHP_FUNCTION(compact)
 	}
 
 	for (i = 0; i < num_args; i++) {
-		php_compact_var(symbol_table, return_value, &args[i]);
+		php_compact_var(symbol_table, return_value, &args[i], i + 1);
 	}
 }
 /* }}} */
