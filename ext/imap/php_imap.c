@@ -171,7 +171,7 @@ static zend_object* imap_object_create(zend_class_entry* ce) {
 }
 
 static zend_function *imap_object_get_constructor(zend_object *zobj) {
-	zend_throw_error(NULL, "Cannot directly construct IMAPConnection, use imap_open() instead");
+	zend_throw_error(NULL, "Cannot directly construct IMAP\\Connection, use imap_open() instead");
 	return NULL;
 }
 
@@ -198,7 +198,7 @@ static void imap_object_destroy(zend_object *zobj) {
 #define GET_IMAP_STREAM(imap_conn_struct, zval_imap_obj) \
 	imap_conn_struct = imap_object_from_zend_object(Z_OBJ_P(zval_imap_obj)); \
 	if (!imap_conn_struct) { \
-		zend_throw_exception(zend_ce_value_error, "IMAPConnection is already closed", 0); \
+		zend_throw_exception(zend_ce_value_error, "IMAP\\Connection is already closed", 0); \
 		RETURN_THROWS(); \
 	}
 
@@ -477,7 +477,7 @@ PHP_MINIT_FUNCTION(imap)
 	ssl_onceonlyinit ();
 #endif
 
-	php_imap_ce = register_class_IMAPConnection();
+	php_imap_ce = register_class_IMAP_Connection();
 	php_imap_ce->create_object = imap_object_create;
 	php_imap_ce->serialize = zend_class_serialize_deny;
 	php_imap_ce->unserialize = zend_class_unserialize_deny;
@@ -785,7 +785,7 @@ PHP_FUNCTION(imap_open)
 	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
 	 * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
 	 * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
-	 * IMAPConnection object being destroyed naturally at the end of the PHP script */
+	 * IMAP\Connection object being destroyed naturally at the end of the PHP script */
 	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | PHP_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
 	 		| OP_SILENT | OP_PROTOTYPE | OP_SECURE)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of the OP_* constants, and CL_EXPUNGE");
@@ -908,7 +908,7 @@ PHP_FUNCTION(imap_reopen)
 	/* Check for PHP_EXPUNGE and not CL_EXPUNGE as the user land facing CL_EXPUNGE constant is defined
      * to something different to prevent clashes between CL_EXPUNGE and an OP_* constant allowing setting
      * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
-     * IMAPConnection object being destroyed naturally at the end of the PHP script */
+     * IMAP\Connection object being destroyed naturally at the end of the PHP script */
 	if (options && ((options & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | OP_EXPUNGE | PHP_EXPUNGE)) != 0)) {
 		zend_argument_value_error(3, "must be a bitmask of OP_READONLY, OP_ANONYMOUS, OP_HALFOPEN, "
 			"OP_EXPUNGE, and CL_EXPUNGE");
@@ -940,7 +940,7 @@ PHP_FUNCTION(imap_reopen)
 
 	imap_conn_struct->imap_stream = mail_open(imap_conn_struct->imap_stream, ZSTR_VAL(mailbox), flags);
 	if (imap_conn_struct->imap_stream == NIL) {
-		/* IMAPConnection object will release it self. */
+		/* IMAP\Connection object will release it self. */
 		php_error_docref(NULL, E_WARNING, "Couldn't re-open stream");
 		RETURN_FALSE;
 	}
