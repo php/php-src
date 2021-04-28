@@ -3702,7 +3702,7 @@ ZEND_METHOD(ReflectionClassConstant, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref));
+	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_ACC_PPP_MASK);
 }
 /* }}} */
 

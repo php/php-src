@@ -8,7 +8,10 @@ enum Foo {
     const Baz = self::Bar;
 }
 
-echo (new ReflectionEnumUnitCase(Foo::class, 'Bar'))->getName() . "\n";
+$case = new ReflectionEnumUnitCase(Foo::class, 'Bar');
+var_dump($case->getName());
+var_dump($case->isPublic());
+var_dump($case->getModifiers());
 
 try {
     new ReflectionEnumUnitCase(Foo::class, 'Baz');
@@ -30,7 +33,9 @@ try {
 
 ?>
 --EXPECT--
-Bar
+string(3) "Bar"
+bool(true)
+int(1)
 Constant Foo::Baz is not a case
 Constant Foo::Qux does not exist
 ReflectionEnumUnitCase::__construct(): Argument #1 ($class) must be of type object|string, array given
