@@ -39,7 +39,7 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-#if defined(__x86_64__) || defined(i386)
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 #include "jit/zend_jit_x86.h"
 #elif defined (__aarch64__)
 #include "jit/zend_jit_arm64.h"
@@ -206,7 +206,7 @@ static bool zend_is_commutative(zend_uchar opcode)
 #define OP2_RANGE()      OP_RANGE(ssa_op, op2)
 #define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
 
-#if defined(__x86_64__) || defined(i386)
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 #include "dynasm/dasm_x86.h"
 #elif defined(__aarch64__)
 #include "dynasm/dasm_arm64.h"
@@ -224,7 +224,7 @@ static bool zend_is_commutative(zend_uchar opcode)
 # include "jit/zend_jit_oprofile.c"
 #endif
 
-#if defined(__x86_64__) || defined(i386)
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 #include "jit/zend_jit_vtune.c"
 #include "jit/zend_jit_x86.c"
 #elif defined(__aarch64__)
