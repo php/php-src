@@ -89,12 +89,9 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	}
 }
 
-#define UNKNOWN_INFO (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF)
-
 static const func_info_t func_infos[] = {
 	/* zend */
 	F1("zend_version",            MAY_BE_STRING),
-	FN("func_get_arg",            UNKNOWN_INFO),
 	FN("func_get_args",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars",          MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("get_class_methods",       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
@@ -249,14 +246,7 @@ static const func_info_t func_infos[] = {
 	F1("get_current_user",             MAY_BE_STRING),
 	F1("get_cfg_var",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
-	FN("call_user_func",               UNKNOWN_INFO),
-	FN("call_user_func_array",         UNKNOWN_INFO),
-	FN("call_user_method",             UNKNOWN_INFO),
-	FN("call_user_method_array",       UNKNOWN_INFO),
-	FN("forward_static_call",          UNKNOWN_INFO),
-	FN("forward_static_call_array",    UNKNOWN_INFO),
 	F1("serialize",                    MAY_BE_STRING),
-	FN("unserialize",                  UNKNOWN_INFO),
 	F1("var_export",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("print_r",                      MAY_BE_TRUE | MAY_BE_STRING),
 	F0("register_shutdown_function",   MAY_BE_NULL | MAY_BE_FALSE),
@@ -359,19 +349,10 @@ static const func_info_t func_infos[] = {
 	F0("usort",                        MAY_BE_TRUE),
 	F0("uasort",                       MAY_BE_TRUE),
 	F0("uksort",                       MAY_BE_TRUE),
-	FN("end",                          UNKNOWN_INFO),
-	FN("prev",                         UNKNOWN_INFO),
-	FN("next",                         UNKNOWN_INFO),
-	FN("reset",                        UNKNOWN_INFO),
-	FN("current",                      UNKNOWN_INFO),
-	FN("min",                          UNKNOWN_INFO),
-	FN("max",                          UNKNOWN_INFO),
 	F1("compact",                      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill_keys",              MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FC("range",                        zend_range_info),
-	FN("array_pop",                    UNKNOWN_INFO),
-	FN("array_shift",                  UNKNOWN_INFO),
 	F1("array_splice",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_slice",                  MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_replace",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -744,8 +725,6 @@ static const func_info_t func_infos[] = {
 	F1("exif_thumbnail",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/filter */
-	FN("filter_input",							UNKNOWN_INFO),
-	FN("filter_var",							UNKNOWN_INFO),
 	F1("filter_input_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
@@ -881,9 +860,8 @@ ZEND_API uint32_t zend_get_func_info(
 			if (internal_ret & ~ret) {
 				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
 			}
-			/* Check whether the func info is completely redundant with arginfo.
-			 * Ignore UNKNOWN_INFO for now. */
-			if (internal_ret == ret && (internal_ret & MAY_BE_ANY) != MAY_BE_ANY) {
+			/* Check whether the func info is completely redundant with arginfo. */
+			if (internal_ret == ret) {
 				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(lcname));
 			}
 			/* If the return type is not mixed, check that the types match exactly if we exclude
