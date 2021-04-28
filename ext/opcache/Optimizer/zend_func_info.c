@@ -418,7 +418,7 @@ static const func_info_t func_infos[] = {
 	F1("strftime",                              MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gmstrftime",                            MAY_BE_FALSE | MAY_BE_STRING),
 	F1("localtime",                             MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
-	F1("getdate",                               MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("getdate",                               MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("date_create",                           MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("date_create_immutable",                 MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("date_create_from_format",               MAY_BE_FALSE | MAY_BE_OBJECT),
