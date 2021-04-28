@@ -4048,7 +4048,7 @@ static int zend_jit_math_long_double(dasm_State    **Dst,
 	if (Z_MODE(op2_addr) == IS_REG) {
 		op2_reg = Z_REG(op2_addr);
 	} else {
-		op2_reg = ZREG_FPR1;
+		op2_reg = ZREG_FPTMP;
 		|	GET_ZVAL_DVAL op2_reg, op2_addr, ZREG_TMP1
 	}
 
@@ -4085,7 +4085,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 		if (Z_MODE(op1_addr) == IS_REG) {
 			op1_reg = Z_REG(op1_addr);
 		} else {
-			op1_reg = ZREG_FPR1;
+			op1_reg = ZREG_FPTMP;
 			|	GET_ZVAL_DVAL op1_reg, op1_addr, ZREG_TMP1
 		}
 		|	DOUBLE_MATH_REG opcode, result_reg, result_reg, op1_reg
@@ -4109,7 +4109,7 @@ static int zend_jit_math_double_long(dasm_State    **Dst,
 		 && Z_LVAL_P(Z_ZV(op2_addr)) == 0) {
 			/* +/- 0 */
 		} else {
-			op2_reg = ZREG_FPR1;
+			op2_reg = ZREG_FPTMP;
 			|	DOUBLE_GET_ZVAL_LVAL op2_reg, op2_addr, ZREG_TMP1, ZREG_TMP2
 			|	DOUBLE_MATH_REG opcode, result_reg, op1_reg, op2_reg
 		}
