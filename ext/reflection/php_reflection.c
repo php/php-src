@@ -569,7 +569,7 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
-	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
+	char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
 	const char *type;
 
 	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
@@ -3666,7 +3666,7 @@ static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
-	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & mask);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & mask);
 }
 /* }}} */
 
@@ -3702,7 +3702,7 @@ ZEND_METHOD(ReflectionClassConstant, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(Z_ACCESS_FLAGS(ref->value));
+	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref));
 }
 /* }}} */
 
@@ -3777,7 +3777,7 @@ ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & ZEND_CLASS_CONST_IS_CASE);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE);
 }
 
 /* {{{ reflection_class_object_ctor */
@@ -4525,7 +4525,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 			RETURN_THROWS();
 		}
 
-		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & filter) {
 			ZVAL_COPY_OR_DUP(&val, &constant->value);
 			zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
 		}
@@ -4555,7 +4555,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), name, constant) {
-		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & filter) {
 			zval class_const;
 			reflection_class_constant_factory(name, constant, &class_const);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
@@ -6595,7 +6595,7 @@ ZEND_METHOD(ReflectionEnum, hasCase)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(Z_ACCESS_FLAGS(class_const->value) & ZEND_CLASS_CONST_IS_CASE);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(class_const) & ZEND_CLASS_CONST_IS_CASE);
 }
 
 ZEND_METHOD(ReflectionEnum, getCase)
@@ -6615,7 +6615,7 @@ ZEND_METHOD(ReflectionEnum, getCase)
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Case %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
-	if (!(Z_ACCESS_FLAGS(constant->value) & ZEND_CLASS_CONST_IS_CASE)) {
+	if (!(ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "%s::%s is not a case", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
@@ -6638,7 +6638,7 @@ ZEND_METHOD(ReflectionEnum, getCases)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
-		if (Z_ACCESS_FLAGS(constant->value) & ZEND_CLASS_CONST_IS_CASE) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE) {
 			zval class_const;
 			reflection_enum_case_factory(ce, name, constant, &class_const);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
@@ -6690,7 +6690,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, __construct)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(Z_ACCESS_FLAGS(ref->value) & ZEND_CLASS_CONST_IS_CASE)) {
+	if (!(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE)) {
 		zval *case_name = reflection_prop_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s is not a case", ZSTR_VAL(ref->ce->name), Z_STRVAL_P(case_name));
 		RETURN_THROWS();

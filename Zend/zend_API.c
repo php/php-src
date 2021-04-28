@@ -4326,7 +4326,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
 	ZVAL_COPY_VALUE(&c->value, value);
-	Z_ACCESS_FLAGS(c->value) = access_type;
+	ZEND_CLASS_CONST_FLAGS(c) = access_type;
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;
