@@ -49,7 +49,7 @@ var_dump($_SESSION);
 
 ?>
 --EXPECTF--
-Deprecated: The Serializable interface is deprecated. If you need to retain the Serializable interface for cross-version compatibility, you can suppress this warning by implementing __serialize() and __unserialize() in addition, which will take precedence over Serializable in PHP versions that support them in %s on line %d
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
 Warning: session_start(): Session cannot be started after headers have already been sent in %s on line %d
 
