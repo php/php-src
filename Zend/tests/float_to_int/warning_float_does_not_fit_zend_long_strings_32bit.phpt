@@ -1,8 +1,8 @@
 --TEST--
-Implicit float to int conversions when float too large should warn, string offset variant
+Implicit float to int conversions when float too large should warn, string offset variant, 32bit variant
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
@@ -76,7 +76,7 @@ var_dump($string);
 ?>
 --EXPECTF--
 int(0)
-int(9223372036854775807)
+int(2147483647)
 Attempt to read
 Float
 
@@ -88,11 +88,11 @@ Warning: String offset cast occurred in %s on line %d
 string(1) "H"
 Float casted to string compile
 
-Warning: Uninitialized string offset 9223372036854775807 in %s on line %d
+Warning: Uninitialized string offset 2147483647 in %s on line %d
 TypeError
 Float string variable
 
-Warning: Uninitialized string offset 9223372036854775807 in %s on line %d
+Warning: Uninitialized string offset 2147483647 in %s on line %d
 TypeError
 Attempt to assign
 Float

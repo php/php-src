@@ -1,8 +1,8 @@
 --TEST--
-Explicit (int) cast must not warn
+Explicit (int) cast must not warn 32bit variation
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
@@ -33,6 +33,6 @@ int(0)
 int(0)
 int(3)
 int(3)
-int(9223372036854775807)
-int(9223372036854775807)
+int(2147483647)
+int(2147483647)
 int(0)

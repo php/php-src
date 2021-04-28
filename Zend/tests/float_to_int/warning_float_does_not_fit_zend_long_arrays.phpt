@@ -7,7 +7,7 @@ $float = 10e120;
 $string_float = (string) $float;
 
 var_dump((int) $float);
-var_dump((int) $string_float);
+var_dump((int) $string_float === PHP_INT_MAX);
 
 $arrayConstant = [10e120 => 'Large float', (string) 10e120 => 'String large float'];
 $arrayDynamic = [$float => 'Large float', $string_float => 'String large float'];
@@ -24,7 +24,7 @@ var_dump($array[$string_float]);
 ?>
 --EXPECTF--
 int(0)
-int(9223372036854775807)
+bool(true)
 
 Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
 

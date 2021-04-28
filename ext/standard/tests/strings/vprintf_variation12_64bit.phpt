@@ -15,22 +15,15 @@ echo "*** Testing vprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
 $formats =
-    '%o %+o %-o
-    %lo %4o %-4o
-    %10.4o %-10.4o %.4o
-    %\'#2o %\'2o %\'$2o %\'_2o
-    %3$o %4$o %1$o %2$o';
+    '"%o" "%+o" "%-o"
+    "%lo" "%4o" "%-4o"
+    "%10.4o" "%-10.4o" "%.4o"
+    "%\'#2o" "%\'2o" "%\'$2o" "%\'_2o"
+    "%3$o" "%4$o" "%1$o" "%2$o"';
 
 // Arrays of non octal values for the format defined in $format.
 // Each sub array contains non octal values which correspond to each format in $format
 $args_array = array(
-
-  // array of float values
-  array(2.2, .2, 10.2,
-        123456.234, -1234.6789, +1234.6789,
-        2e10, +2e12, 22e+12,
-        12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
 
   // array of int values
   array(2, -2, +2,
@@ -66,11 +59,12 @@ $args_array = array(
 // and with non-octal values from the above $args_array array
 $counter = 1;
 foreach($args_array as $args) {
-  echo "\n-- Iteration $counter --\n";
-  $result = vprintf($formats, $args);
-  echo "\n";
-  var_dump($result);
-  $counter++;
+    echo "\n-- Iteration $counter --\n";
+    ob_start();
+    $bytes = vprintf($formats, $args);
+    var_dump(ob_get_clean());
+    var_dump($bytes);
+    $counter++;
 }
 
 ?>
@@ -78,69 +72,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-
-Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -1234.6789 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1234.6789 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 12345.78 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 12.000000011111 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -12.00000111111 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
-2 0 12
-    361100 1777777777777777775456 2322
-                          
-    30071 14 1777777777777777777764 1777777777777777416700
-    12 361100 2 0
-int(149)
+string(235) ""2" "1777777777777777777776" "2"
+    "361100" "1777777777777720715133" "57062645"
+    "          " "          " ""
+    "57060664" "4475347" "1777777777777721631371" "1777777777777720717336"
+    "2" "361100" "2" "1777777777777777777776""
+int(235)
 
 -- Iteration 2 --
-2 1777777777777777777776 2
-    361100 1777777777777720715133 57062645
-                          
-    57060664 4475347 1777777777777721631371 1777777777777720717336
-    2 361100 2 1777777777777777777776
-int(201)
+string(133) ""0" "0" "0"
+    "173" "1777777777777777777605" "173 "
+    "          " "          " ""
+    "2322" "0" "$0" "_0"
+    "0" "173" "0" "0""
+int(133)
 
 -- Iteration 3 --
-0 0 0
-    173 1777777777777777777605 173 
-                          
-    2322 0 $0 _0
-    0 173 0 0
-int(99)
+string(109) ""1" "1" "1"
+    "1" "   1" "1   "
+    "          " "          " ""
+    "#1" "1" "$1" "_1"
+    "1" "1" "1" "1""
+int(109)
 
 -- Iteration 4 --
-1 1 1
-    1    1 1   
-                          
-    #1 1 $1 _1
-    1 1 1 1
-int(75)
-
--- Iteration 5 --
-1 1 0
-    1    0 1   
-                          
-    #0 1 $1 _0
-    0 1 1 1
-int(75)
+string(109) ""1" "1" "0"
+    "1" "   0" "1   "
+    "          " "          " ""
+    "#0" "1" "$1" "_0"
+    "0" "1" "1" "1""
+int(109)

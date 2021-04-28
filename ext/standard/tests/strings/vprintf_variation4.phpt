@@ -2,7 +2,7 @@
 Test vprintf() function : usage variations - int formats with non-integer values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+//if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
@@ -15,11 +15,11 @@ echo "*** Testing vprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
 $formats =
-  '%d %+d %-d
-   %ld %4d %-4d
-   %10.4d %-10.4d %.4d %04.4d
-   %\'#2d %\'2d %\'$2d %\'_2d
-   %3$d %4$d %1$d %2$d';
+    '"%d" "%+d" "%-d"
+    "%ld" "%4d" "%-4d"
+    "%10.4d" "%-10.4d" "%.4d" "%04.4d"
+    "%\'#2d" "%\'2d" "%\'$2d" "%\'_2d"
+    "%3$d" "%4$d" "%1$d" "%2$d"';
 
 // Arrays of non int values for the format defined in $format.
 // Each sub array contains non int values which correspond to each format in $format
@@ -51,11 +51,12 @@ $args_array = array(
 // and with non-int values from the above $args_array array
 $counter = 1;
 foreach($args_array as $args) {
-  echo "\n-- Iteration $counter --\n";
-  $result = vprintf($formats, $args);
-  echo "\n";
-  var_dump($result);
-  $counter++;
+    echo "\n-- Iteration $counter --\n";
+    ob_start();
+    $bytes = vprintf($formats, $args);
+    var_dump(ob_get_clean());
+    var_dump($bytes);
+    $counter++;
 }
 
 ?>
@@ -63,25 +64,25 @@ foreach($args_array as $args) {
 *** Testing vprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
-0 +0 0
-   123 -123 123
-            0 0          123456 0000
-   1234 0 $0 _0
-   0 123 0 0
-int(89)
+string(129) ""0" "+0" "0"
+    "123" "-123" "123 "
+    "         0" "0         " "123456" "0000"
+    "1234" "0" "$0" "_0"
+    "0" "123" "0" "0""
+int(129)
 
 -- Iteration 2 --
-1 +1 1
-   1    1 1
-            1 1          1 0001
-   #1 1 $1 _1
-   1 1 1 1
-int(78)
+string(118) ""1" "+1" "1"
+    "1" "   1" "1   "
+    "         1" "1         " "1" "0001"
+    "#1" "1" "$1" "_1"
+    "1" "1" "1" "1""
+int(118)
 
 -- Iteration 3 --
-1 +1 0
-   1    0 1
-            1 0          1 0000
-   #0 1 $1 _0
-   0 1 1 1
-int(78)
+string(118) ""1" "+1" "0"
+    "1" "   0" "1   "
+    "         1" "0         " "1" "0000"
+    "#0" "1" "$1" "_0"
+    "0" "1" "1" "1""
+int(118)

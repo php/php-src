@@ -15,22 +15,15 @@ echo "*** Testing vprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
 $formats =
-    '%x %+x %-x
-    %lx %4x %-4x
-    %10.4x %-10.4x %.4x
-    %\'#2x %\'2x %\'$2x %\'_2x
-    %3$x %4$x %1$x %2$x';
+    '"%x" "%+x" "%-x"
+    "%lx" "%4x" "%-4x"
+    "%10.4x" "%-10.4x" "%.4x"
+    "%\'#2x" "%\'2x" "%\'$2x" "%\'_2x"
+    "%3$x" "%4$x" "%1$x" "%2$x"';
 
 // Arrays of non hexa values for the format defined in $format.
 // Each sub array contains non hexa values which correspond to each format in $format
 $args_array = array(
-
-  // array of float values
-  array(2.2, .2, 10.2,
-        123456.234, -1234.6789, +1234.6789,
-        2e10, +2e12, 22e+12,
-        12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
 
   // array of int values
   array(2, -2, +2,
@@ -67,11 +60,12 @@ $args_array = array(
 
 $counter = 1;
 foreach($args_array as $args) {
-  echo "\n-- Iteration $counter --\n";
-  $result = vprintf($formats, $args);
-  echo "\n";
-  var_dump($result);
-  $counter++;
+    echo "\n-- Iteration $counter --\n";
+    ob_start();
+    $bytes = vprintf($formats, $args);
+    var_dump(ob_get_clean());
+    var_dump($bytes);
+    $counter++;
 }
 
 ?>
@@ -79,69 +73,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-
-Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -1234.6789 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 1234.6789 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 12345.78 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 12.000000011111 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -12.00000111111 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 10.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 123456.234 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 2.2 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 0.2 to int in %s on line %d
-2 0 a
-    1e240 fffffffffffffb2e 4d2 
-                          
-    3039 c fffffffffffffff4 fffffffffffe1dc0
-    a 1e240 2 0
-int(125)
+string(198) ""2" "fffffffffffffffe" "2"
+    "1e240" "ffffffffff439a5b" "bc65a5"
+    "          " "          " ""
+    "bc61b4" "127ae7" "ffffffffff4732f9" "ffffffffff439ede"
+    "2" "1e240" "2" "fffffffffffffffe""
+int(198)
 
 -- Iteration 2 --
-2 fffffffffffffffe 2
-    1e240 ffffffffff439a5b bc65a5
-                          
-    bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
-    2 1e240 2 fffffffffffffffe
-int(164)
+string(124) ""0" "0" "0"
+    "7b" "ffffffffffffff85" "7b  "
+    "          " "          " ""
+    "4d2" "0" "$0" "_0"
+    "0" "7b" "0" "0""
+int(124)
 
 -- Iteration 3 --
-0 0 0
-    7b ffffffffffffff85 7b  
-                          
-    4d2 0 $0 _0
-    0 7b 0 0
-int(90)
+string(109) ""1" "1" "1"
+    "1" "   1" "1   "
+    "          " "          " ""
+    "#1" "1" "$1" "_1"
+    "1" "1" "1" "1""
+int(109)
 
 -- Iteration 4 --
-1 1 1
-    1    1 1   
-                          
-    #1 1 $1 _1
-    1 1 1 1
-int(75)
-
--- Iteration 5 --
-1 1 0
-    1    0 1   
-                          
-    #0 1 $1 _0
-    0 1 1 1
-int(75)
+string(109) ""1" "1" "0"
+    "1" "   0" "1   "
+    "          " "          " ""
+    "#0" "1" "$1" "_0"
+    "0" "1" "1" "1""
+int(109)
