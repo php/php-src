@@ -19,7 +19,7 @@ $float_numbers    = array( 0, 1, -1, 0.32, -0.32, 3.4. -3.4, 2.54, -2.54, 1.2345
 $int_variation    = array( "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" );
 $int_numbers      = array( 0, 1, -1, 23333333, -23333333, "1234" );
 
-$char_variation   = array( 'a', "a", 67, -67, 99 );
+$char_variation   = array( 'a', "a", 67, -150 /* j */, 99 );
 
 $string_variation = array( "%5s", "%-5s", "%05s", "%'#5s" );
 $strings          = array( NULL, "abc", 'aaa' );
@@ -101,7 +101,7 @@ print_r($int_numbers);
  }
 
 
-/* Chararter type variations */
+/* Character type variations */
 echo "\n\n*** Output for char type ***\n";
 echo "\n Input Characters variation array is:\n";
 print_r($char_variation);
@@ -473,7 +473,7 @@ Array
 %0
 %0
 C
-�
+j
 c
 
 *** Output for scientific type ***
