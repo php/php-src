@@ -225,7 +225,7 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 {
 	unsigned int i;
 
-#if defined(__x86_64__) || defined(i386)
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 	if (cs_insn_group(cs, insn, X86_GRP_JUMP)) {
 		for (i = 0; i < insn->detail->x86.op_count; i++) {
 			if (insn->detail->x86.operands[i].type == X86_OP_IMM) {
@@ -319,7 +319,7 @@ static int zend_jit_disasm(const char    *name,
 #endif
 
 #ifdef HAVE_CAPSTONE
-# if defined(__x86_64__) || defined(_WIN64)
+# if defined(__x86_64__) || defined(_WIN64) || defined(ZEND_WIN32)
 	if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK)
 		return 0;
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
