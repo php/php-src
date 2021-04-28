@@ -808,13 +808,14 @@ static HashTable func_info;
 ZEND_API int zend_func_info_rid = -1;
 
 static uint32_t get_internal_func_info(
-		const zend_call_info *call_info, const zend_ssa *ssa, zend_string *lcname) {
-	if (call_info->callee_func->common.scope) {
+		const zend_call_info *call_info, const zend_ssa *ssa) {
+	zend_function *callee_func = call_info->callee_func;
+	if (callee_func->common.scope) {
 		/* This is a method, not a function. */
 		return 0;
 	}
 
-	zval *zv = zend_hash_find_ex(&func_info, lcname, 1);
+	zval *zv = zend_hash_find_ex(&func_info, callee_func->common.function_name, 1);
 	if (!zv) {
 		return 0;
 	}
@@ -837,9 +838,7 @@ ZEND_API uint32_t zend_get_func_info(
 	*ce_is_instanceof = 0;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2));
-
-		uint32_t internal_ret = get_internal_func_info(call_info, ssa, lcname);
+		uint32_t internal_ret = get_internal_func_info(call_info, ssa);
 #if !ZEND_DEBUG
 		if (internal_ret) {
 			return internal_ret;
@@ -851,14 +850,15 @@ ZEND_API uint32_t zend_get_func_info(
 
 #if ZEND_DEBUG
 		if (internal_ret) {
+			zend_string *name = callee_func->common.function_name;
 			/* Check whether the func_info information is a subset of the information we can
 			 * compute from the specified return type, otherwise it contains redundant types. */
 			if (internal_ret & ~ret) {
-				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
+				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(name));
 			}
 			/* Check whether the func info is completely redundant with arginfo. */
 			if (internal_ret == ret) {
-				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(lcname));
+				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(name));
 			}
 			/* If the return type is not mixed, check that the types match exactly if we exclude
 			 * RC and array information. */
@@ -868,7 +868,7 @@ ZEND_API uint32_t zend_get_func_info(
 				/* Func info may contain "true" types as well as isolated "null" and "false". */
 				if (diff && !(diff == MAY_BE_FALSE && (ret & MAY_BE_FALSE))
 						&& (internal_ret_any & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
-					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(lcname));
+					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(name));
 				}
 			}
 			return internal_ret;
