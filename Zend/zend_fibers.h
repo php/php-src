@@ -29,6 +29,7 @@ void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
+extern zend_function zend_fiber_function;
 
 typedef struct _zend_fiber_context zend_fiber_context;
 
@@ -102,9 +103,6 @@ ZEND_COLD void zend_error_suspend_fiber(
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
 
-bool zend_fiber_is_base_frame(const zend_execute_data *execute_data);
-zend_fiber *zend_fiber_from_base_frame(const zend_execute_data *execute_data);
-
 #define ZEND_FIBER_GUARD_PAGES 1
 
 #define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
@@ -112,5 +110,22 @@ zend_fiber *zend_fiber_from_base_frame(const zend_execute_data *execute_data);
 #define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
 
 END_EXTERN_C()
+
+static zend_always_inline bool zend_fiber_is_base_frame(const zend_execute_data *execute_data)
+{
+	return execute_data
+		&& execute_data->func == &zend_fiber_function
+		&& Z_TYPE(execute_data->This) == IS_OBJECT
+		&& Z_OBJCE(execute_data->This) == zend_ce_fiber;
+}
+
+static zend_always_inline zend_fiber *zend_fiber_from_base_frame(const zend_execute_data *execute_data)
+{
+	if (zend_fiber_is_base_frame(execute_data)) {
+		return (zend_fiber *) Z_OBJ(execute_data->This);
+	}
+
+	return NULL;
+}
 
 #endif

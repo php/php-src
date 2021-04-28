@@ -304,20 +304,6 @@ ZEND_COLD void zend_error_suspend_fiber(
 	abort(); // This fiber should never be resumed.
 }
 
-zend_always_inline bool zend_fiber_is_base_frame(const zend_execute_data *execute_data)
-{
-	return execute_data && execute_data->func == &zend_fiber_function && Z_OBJCE(execute_data->This) == zend_ce_fiber;
-}
-
-zend_fiber *zend_fiber_from_base_frame(const zend_execute_data *execute_data)
-{
-	if (zend_fiber_is_base_frame(execute_data)) {
-		return (zend_fiber *) Z_OBJ(execute_data->This);
-	}
-
-	return NULL;
-}
-
 static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size)
 {
 	zend_vm_stack page = emalloc(size);
