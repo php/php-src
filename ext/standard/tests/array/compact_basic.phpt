@@ -19,7 +19,7 @@ $f="string";
 var_dump (compact(array("a", "b", "c", "d", "e", "f")));
 // simple parameter test
 var_dump (compact("a", "b", "c", "d", "e", "f"));
-var_dump (compact(array("keyval"=>"a", "b"=>"b", "c"=>1)));
+var_dump (compact(array("keyval"=>"a", "b"=>"b")));
 
 echo "Done";
 ?>
