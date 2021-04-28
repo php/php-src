@@ -21,4 +21,4 @@ unlink($fn);
 
 ?>
 --EXPECT--
-imap_append(): Argument #1 ($imap) must be of type IMAPConnection, resource given
+imap_append(): Argument #1 ($imap) must be of type IMAP\Connection, resource given
