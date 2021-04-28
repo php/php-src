@@ -56,6 +56,7 @@ BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_func_info_rid;
 
+void zend_verify_internal_func_info(zend_function *fn, zval *retval);
 ZEND_API uint32_t zend_get_func_info(
 	const zend_call_info *call_info, const zend_ssa *ssa,
 	zend_class_entry **ce, bool *ce_is_instanceof);

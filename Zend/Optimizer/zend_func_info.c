@@ -834,6 +834,72 @@ static const func_info_t func_infos[] = {
 static HashTable func_info;
 ZEND_API int zend_func_info_rid = -1;
 
+void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
+	if (fn->common.scope) {
+		/* This is a method, not a function. */
+		return;
+	}
+
+	zend_string *name = fn->common.function_name;
+	if (!name) {
+		/* The pass function has no name. */
+		return;
+	}
+
+	zval *zv = zend_hash_find_ex(&func_info, name, 1);
+	if (!zv) {
+		return;
+	}
+
+	func_info_t *info = Z_PTR_P(zv);
+	if (info->info_func) {
+		return;
+	}
+
+	uint32_t type_mask = info->info;
+	if (Z_REFCOUNTED_P(retval)) {
+		if (!(type_mask & MAY_BE_RC1)) {
+			zend_error_noreturn(E_CORE_ERROR, "%s() missing rc1", ZSTR_VAL(name));
+		}
+		if (Z_REFCOUNT_P(retval) > 1 && !(type_mask & MAY_BE_RCN)) {
+			zend_error_noreturn(E_CORE_ERROR, "%s() missing rcn", ZSTR_VAL(name));
+		}
+	}
+
+	uint32_t type = 1u << Z_TYPE_P(retval);
+	if (!(type_mask & type)) {
+		zend_error_noreturn(E_CORE_ERROR, "%s() missing type", ZSTR_VAL(name));
+	}
+
+	if (Z_TYPE_P(retval) == IS_ARRAY) {
+		/* Don't check large arrays. */
+		HashTable *ht = Z_ARRVAL_P(retval);
+		if (zend_hash_num_elements(ht) < 16) {
+			zend_string *str;
+			zval *val;
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
+				if (str) {
+					if (!(type_mask & MAY_BE_ARRAY_KEY_STRING)) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"%s() missing array_key_string", ZSTR_VAL(name));
+					}
+				} else {
+					if (!(type_mask & MAY_BE_ARRAY_KEY_LONG)) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"%s() missing array_key_long", ZSTR_VAL(name));
+					}
+				}
+
+				uint32_t array_type = 1u << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+				if (!(type_mask & array_type)) {
+					zend_error_noreturn(E_CORE_ERROR,
+						"%s() missing array_of_type", ZSTR_VAL(name));
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	}
+}
+
 static uint32_t get_internal_func_info(
 		const zend_call_info *call_info, const zend_ssa *ssa, zend_string *lcname) {
 	if (call_info->callee_func->common.scope) {
