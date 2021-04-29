@@ -238,9 +238,6 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class constant is deprecated                           |     |     |     */
-#define ZEND_CLASS_CONST_DEPRECATED      (1 << 7)  /*     |     |     |  X  */
-/*                                                        |     |     |     */
 /* Class Flags (unused: 29...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
