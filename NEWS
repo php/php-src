@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
 
+- PDO_pgsql:
+  . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
+    PDO::PARAM_STR). (Matteo)
+
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
 
