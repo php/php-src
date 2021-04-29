@@ -8,6 +8,10 @@ opcache.jit_buffer_size=32M
 ;opcache.jit_debug=257
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>
 --FILE--
 <?php
 function foo($var) {
