@@ -8300,9 +8300,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 				return 0;
 			}
 
-			|	blt &exit_addr
+			|	blo &exit_addr
 		} else {
-			|	blt >1
+			|	blo >1
 			|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
 			|.cold_code
 			|1:
@@ -14218,7 +14218,11 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	|	// ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 	|   // ZEND_VM_CONTINUE();
 	if (exit_addr) {
-		|	bls &exit_addr
+		if (exit_opcode == ZEND_JMP) {
+			|	bls &exit_addr
+		} else {
+			|	bls >3
+		}
 	} else {
 		|	bls =>target_label
 	}
