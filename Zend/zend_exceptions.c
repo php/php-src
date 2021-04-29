@@ -335,12 +335,9 @@ ZEND_METHOD(Exception, __wakeup)
 
 	zval value, *pvalue;
 	zval *object = ZEND_THIS;
-	CHECK_EXC_TYPE(ZEND_STR_MESSAGE,  IS_STRING);
-	CHECK_EXC_TYPE(ZEND_STR_STRING,   IS_STRING);
-	CHECK_EXC_TYPE(ZEND_STR_CODE,     IS_LONG);
-	CHECK_EXC_TYPE(ZEND_STR_FILE,     IS_STRING);
-	CHECK_EXC_TYPE(ZEND_STR_LINE,     IS_LONG);
-	/* The type of $trace and $previous is enforced through typed properties. */
+	CHECK_EXC_TYPE(ZEND_STR_MESSAGE, IS_STRING);
+	CHECK_EXC_TYPE(ZEND_STR_CODE,    IS_LONG);
+	/* The type of all other properties is enforced through typed properties. */
 }
 /* }}} */
 
