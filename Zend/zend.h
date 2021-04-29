@@ -119,6 +119,7 @@ typedef struct _zend_class_dependency {
 } zend_class_dependency;
 
 typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
+typedef struct _zend_error_info zend_error_info;
 
 struct _zend_inheritance_cache_entry {
 	zend_inheritance_cache_entry *next;
@@ -126,6 +127,8 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *parent;
 	zend_class_dependency        *dependencies;
 	uint32_t                      dependencies_count;
+	uint32_t                      num_warnings;
+	zend_error_info             **warnings;
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
@@ -388,6 +391,8 @@ typedef struct _zend_error_info {
 ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
 ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
+ZEND_API void zend_begin_record_errors(void);
+ZEND_API void zend_free_recorded_errors(void);
 
 #define DEBUG_BACKTRACE_PROVIDE_OBJECT (1<<0)
 #define DEBUG_BACKTRACE_IGNORE_ARGS    (1<<1)

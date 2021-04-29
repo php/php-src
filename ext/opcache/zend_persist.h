@@ -28,5 +28,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 void zend_persist_class_entry_calc(zend_class_entry *ce);
 zend_class_entry *zend_persist_class_entry(zend_class_entry *ce);
 void zend_update_parent_ce(zend_class_entry *ce);
+void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warnings);
+zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings);
 
 #endif /* ZEND_PERSIST_H */

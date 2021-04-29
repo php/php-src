@@ -2681,6 +2681,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					}
 					return ret;
 				}
+
+				/* Make sure warnings (such as deprecations) thrown during inheritance
+				 * will be recoreded in the inheritance cache. */
+				zend_begin_record_errors();
 			} else {
 				is_cacheable = 0;
 			}
@@ -2751,6 +2755,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	zend_build_properties_info_table(ce);
+	EG(record_errors) = false;
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
@@ -2796,6 +2801,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+	zend_free_recorded_errors();
 	if (traits_and_interfaces) {
 		free_alloca(traits_and_interfaces, use_heap);
 	}

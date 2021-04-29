@@ -561,12 +561,12 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_persist_warnings_calc(zend_persistent_script *script) {
-	ADD_SIZE(script->num_warnings * sizeof(zend_error_info *));
-	for (uint32_t i = 0; i < script->num_warnings; i++) {
+void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warnings) {
+	ADD_SIZE(num_warnings * sizeof(zend_error_info *));
+	for (uint32_t i = 0; i < num_warnings; i++) {
 		ADD_SIZE(sizeof(zend_error_info));
-		ADD_STRING(script->warnings[i]->filename);
-		ADD_STRING(script->warnings[i]->message);
+		ADD_STRING(warnings[i]->filename);
+		ADD_STRING(warnings[i]->message);
 	}
 }
 
@@ -606,7 +606,8 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		zend_persist_op_array_calc(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
-	zend_persist_warnings_calc(new_persistent_script);
+	zend_persist_warnings_calc(
+		new_persistent_script->num_warnings, new_persistent_script->warnings);
 
 	new_persistent_script->corrupted = 0;
 

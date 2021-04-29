@@ -779,6 +779,9 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
+	executor_globals->record_errors = false;
+	executor_globals->num_errors = 0;
+	executor_globals->errors = NULL;
 }
 /* }}} */
 
@@ -1356,6 +1359,20 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		return;
 	}
 
+	if (EG(record_errors)) {
+		zend_error_info *info = emalloc(sizeof(zend_error_info));
+		info->type = type;
+		info->lineno = error_lineno;
+		info->filename = zend_string_copy(error_filename);
+		info->message = zend_string_copy(message);
+
+		/* This is very inefficient for a large number of errors.
+		 * Use pow2 realloc if it becomes a problem. */
+		EG(num_errors)++;
+		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info) * EG(num_errors));
+		EG(errors)[EG(num_errors)-1] = info;
+	}
+
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1592,6 +1609,31 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 	uint32_t lineno;
 	get_filename_lineno(type, &filename, &lineno);
 	zend_error_zstr_at(type, filename, lineno, message);
+}
+
+ZEND_API void zend_begin_record_errors(void)
+{
+	ZEND_ASSERT(!EG(record_errors) && "Error recoreding already enabled");
+	EG(record_errors) = true;
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
+}
+
+ZEND_API void zend_free_recorded_errors(void)
+{
+	if (!EG(num_errors)) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
+		zend_error_info *info = EG(errors)[i];
+		zend_string_release(info->filename);
+		zend_string_release(info->message);
+		efree(info);
+	}
+	efree(EG(errors));
+	EG(errors) = NULL;
+	EG(num_errors) = 0;
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
