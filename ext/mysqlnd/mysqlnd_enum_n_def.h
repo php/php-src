@@ -364,9 +364,6 @@ typedef enum mysqlnd_server_option
 #define GROUP_FLAG				32768
 #define NUM_FLAG				32768
 
-#define IS_PRI_KEY(n)	((n) & PRI_KEY_FLAG)
-#define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
-#define IS_BLOB(n)		((n) & BLOB_FLAG)
 #define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
 
 

@@ -787,24 +787,10 @@ static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	if (F->def) {
 		add_assoc_string(return_value, "mysql:def", F->def);
 	}
-	if (IS_NOT_NULL(F->flags)) {
-		add_next_index_string(&flags, "not_null");
-	}
-	if (IS_PRI_KEY(F->flags)) {
-		add_next_index_string(&flags, "primary_key");
-	}
-	if (F->flags & MULTIPLE_KEY_FLAG) {
-		add_next_index_string(&flags, "multiple_key");
-	}
-	if (F->flags & UNIQUE_KEY_FLAG) {
-		add_next_index_string(&flags, "unique_key");
-	}
-	if (IS_BLOB(F->flags)) {
-		add_next_index_string(&flags, "blob");
-	}
+
 	str = type_to_name_native(F->type);
 	if (str) {
-		add_assoc_string(return_value, "native_type", str);
+		add_assoc_string(return_value, "mysql:decl_type", str);
 	}
 
 	enum pdo_param_type param_type;
@@ -820,12 +806,30 @@ static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 #endif
 			param_type = PDO_PARAM_INT;
 			break;
+		case MYSQL_TYPE_NULL:
+			param_type = PDO_PARAM_NULL;
+			break;
 		default:
 			param_type = PDO_PARAM_STR;
 			break;
 	}
 	add_assoc_long(return_value, "pdo_type", param_type);
 
+	if (F->flags & NOT_NULL_FLAG) {
+		add_next_index_string(&flags, "not_null");
+	}
+	if (F->flags & PRI_KEY_FLAG) {
+		add_next_index_string(&flags, "primary_key");
+	}
+	if (F->flags & MULTIPLE_KEY_FLAG) {
+		add_next_index_string(&flags, "multiple_key");
+	}
+	if (F->flags & UNIQUE_KEY_FLAG) {
+		add_next_index_string(&flags, "unique_key");
+	}
+	if (F->flags & BLOB_FLAG) {
+		add_next_index_string(&flags, "blob");
+	}
 	add_assoc_zval(return_value, "flags", &flags);
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));
 

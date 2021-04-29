@@ -9,7 +9,7 @@ MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 $stmt = $db->query('SELECT VERSION() as _version');
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
-$version = ((int)substr($row['_version'], 0, 1) * 10) + (int)substr($row['_version'], 2, 1);
+$version = ((int)strtok($row['_version'], '.') * 10) + (int)strtok('.');
 if ($version < 51)
     die("skip Test needs MySQL 5.1+");
 ?>
@@ -58,7 +58,7 @@ try {
         printf("[009] Expecting false because of invalid offset got %s\n", var_export($tmp, true));
 
 
-    function test_meta(&$db, $offset, $sql_type, $value, $native_type, $pdo_type) {
+    function test_meta(&$db, $offset, $sql_type, $value, $decl_type, $pdo_type) {
 
         $db->exec('DROP TABLE IF EXISTS test');
 
@@ -77,7 +77,6 @@ try {
         $stmt = $db->prepare('SELECT id, label FROM test');
         $stmt->execute();
         $meta = $stmt->getColumnMeta(1);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (empty($meta)) {
             printf("[%03d + 2] getColumnMeta() failed, %d - %s\n", $offset,
@@ -99,34 +98,34 @@ try {
             return false;
         }
 
-        if (!is_null($native_type)) {
-            if (!isset($meta['native_type'])) {
-                printf("[%03d + 5] Element native_type missing, %s\n", $offset,
+        if (!is_null($decl_type)) {
+            if (!isset($meta['mysql:decl_type'])) {
+                printf("[%03d + 5] Element mysql:decl_type missing, %s\n", $offset,
                     var_export($meta, true));
                 return false;
             }
 
-            if (!is_array($native_type))
-                $native_type = array($native_type);
+            if (!is_array($decl_type))
+                $decl_type = array($decl_type);
 
             $found = false;
-            foreach ($native_type as $k => $type) {
-                if ($meta['native_type'] == $type) {
+            foreach ($decl_type as $k => $type) {
+                if ($meta['mysql:decl_type'] == $type) {
                     $found = true;
                     break;
                 }
             }
 
             if (!$found) {
-                printf("[%03d + 6] Expecting native type %s, %s\n", $offset,
-                    var_export($native_type, true), var_export($meta, true));
+                printf("[%03d + 6] Expecting native type %s, got %s\n", $offset,
+                    var_export($decl_type, true), var_export($meta['mysql:decl_type'], true));
                 return false;
             }
         }
 
         if (!is_null($pdo_type) && ($meta['pdo_type'] != $pdo_type)) {
             printf("[%03d + 6] Expecting PDO type %s got %s (%s)\n", $offset,
-                $pdo_type, var_export($meta, true), var_export($meta['native_type']));
+                $pdo_type, var_export($meta, true), var_export($meta['mysql:decl_type']));
             return false;
         }
 
@@ -288,8 +287,8 @@ try {
 
     $stmt = $db->query('SELECT NULL AS col1');
     $meta = $stmt->getColumnMeta(0);
-    if ('NULL' !== $meta['native_type'])
-        printf("[1006] Expecting NULL got %s\n", $meta['native_type']);
+    if ('NULL' !== $meta['mysql:decl_type'])
+        printf("[1006] Expecting NULL got %s\n", $meta['mysql:decl_type']);
 
 } catch (PDOException $e) {
     // we should never get here, we use warnings, but never trust a system...
