@@ -772,7 +772,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo_
 } /* }}} */
 
 
-static int oci_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
+static int oci_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	OCIParam *param = NULL;
@@ -983,7 +983,7 @@ const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	oci_stmt_col_meta,
+	oci_stmt_get_column_meta,
 	NULL,
 	NULL
 };

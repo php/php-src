@@ -299,7 +299,7 @@ static int pdo_sqlite_stmt_get_col(
 	}
 }
 
-static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
+static int pdo_sqlite_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	const char *str;
@@ -398,7 +398,7 @@ const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_param_hook,
 	NULL, /* set_attr */
 	pdo_sqlite_stmt_get_attribute, /* get_attr */
-	pdo_sqlite_stmt_col_meta,
+	pdo_sqlite_stmt_get_column_meta,
 	NULL, /* next_rowset */
 	pdo_sqlite_stmt_cursor_closer
 };

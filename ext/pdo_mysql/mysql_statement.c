@@ -762,14 +762,14 @@ static char *type_to_name_native(int type) /* {{{ */
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
 } /* }}} */
 
-static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
+static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	const MYSQL_FIELD *F;
 	zval flags;
 	char *str;
 
-	PDO_DBG_ENTER("pdo_mysql_stmt_col_meta");
+	PDO_DBG_ENTER("pdo_mysql_stmt_get_column_meta");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (!S->result) {
 		PDO_DBG_RETURN(FAILURE);
@@ -869,7 +869,7 @@ const struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	pdo_mysql_stmt_col_meta,
+	pdo_mysql_stmt_get_column_meta,
 	pdo_mysql_stmt_next_rowset,
 	pdo_mysql_stmt_cursor_closer
 };
