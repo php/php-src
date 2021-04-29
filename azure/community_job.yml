@@ -51,6 +51,7 @@ jobs:
     - script: |
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
         cd framework
+        git rev-parse HEAD
         php7.4 /usr/bin/composer install --no-progress
         # Hack to disable a test that hangs on azure
         sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
@@ -64,6 +65,7 @@ jobs:
     - script: |
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
+        git rev-parse HEAD
         php7.4 /usr/bin/composer install --no-progress
         php7.4 ./phpunit install
         export USE_ZEND_ALLOC=0
@@ -83,6 +85,7 @@ jobs:
     - script: |
         git clone https://github.com/amphp/amp.git --branch=master --depth=1
         cd amp
+        git rev-parse HEAD
         php /usr/bin/composer install --no-progress --ignore-platform-reqs
         export USE_ZEND_ALLOC=0
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
@@ -92,6 +95,7 @@ jobs:
     - script: |
         git clone https://github.com/sebastianbergmann/phpunit.git --branch=master --depth=1
         cd phpunit
+        git rev-parse HEAD
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
@@ -104,6 +108,7 @@ jobs:
     - script: |
         php7.4 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo
+        git rev-parse HEAD
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
