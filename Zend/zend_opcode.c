@@ -462,6 +462,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 					zend_cleanup_internal_class_data(ce);
 				}
 			}
+
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->ce == ce) {
+					zend_string_release(prop_info->name);
+					zend_type_release(prop_info->type, /* persistent */ 1);
+					free(prop_info);
+				}
+			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 

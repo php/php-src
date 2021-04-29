@@ -58,17 +58,6 @@ static void zend_type_copy_ctor(zend_type *type, bool persistent) {
 	}
 }
 
-static zend_property_info *zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
-{
-	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
-	memcpy(new_property_info, property_info, sizeof(zend_property_info));
-	zend_string_addref(new_property_info->name);
-	zend_type_copy_ctor(&new_property_info->type, /* persistent */ 1);
-
-	return new_property_info;
-}
-/* }}} */
-
 static zend_function *zend_duplicate_internal_function(zend_function *func, zend_class_entry *ce) /* {{{ */
 {
 	zend_function *new_function;
@@ -1100,12 +1089,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-			child_info = zend_duplicate_property_info_internal(parent_info);
-		} else {
-			child_info = parent_info;
-		}
-		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
+		_zend_hash_append_ptr(&ce->properties_info, key, parent_info);
 	}
 }
 /* }}} */
