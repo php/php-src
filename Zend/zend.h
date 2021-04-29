@@ -119,6 +119,7 @@ typedef struct _zend_class_dependency {
 } zend_class_dependency;
 
 typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
+typedef struct _zend_error_info zend_error_info;
 
 struct _zend_inheritance_cache_entry {
 	zend_inheritance_cache_entry *next;
@@ -126,6 +127,8 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *parent;
 	zend_class_dependency        *dependencies;
 	uint32_t                      dependencies_count;
+	uint32_t                      num_warnings;
+	zend_error_info             **warnings;
 	zend_class_entry             *traits_and_interfaces[1];
 };
 

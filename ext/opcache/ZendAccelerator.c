@@ -1685,9 +1685,9 @@ static void zend_accel_set_auto_globals(int mask)
 	ZCG(auto_globals_mask) |= mask;
 }
 
-static void replay_warnings(zend_persistent_script *script) {
-	for (uint32_t i = 0; i < script->num_warnings; i++) {
-		zend_error_info *warning = script->warnings[i];
+static void replay_warnings(uint32_t num_warnings, zend_error_info **warnings) {
+	for (uint32_t i = 0; i < num_warnings; i++) {
+		zend_error_info *warning = warnings[i];
 		zend_error_zstr_at(warning->type, warning->filename, warning->lineno, warning->message);
 	}
 }
@@ -1902,7 +1902,7 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 				}
 			}
 		}
-		replay_warnings(persistent_script);
+		replay_warnings(persistent_script->num_warnings, persistent_script->warnings);
 
 	    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
 			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
@@ -2219,7 +2219,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				}
 			}
 		}
-		replay_warnings(persistent_script);
+		replay_warnings(persistent_script->num_warnings, persistent_script->warnings);
 		from_shared_memory = 1;
 	}
 
@@ -2294,6 +2294,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 				if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
 					zend_map_ptr_extend(ZCSG(map_ptr_last));
 				}
+				replay_warnings(entry->num_warnings, entry->warnings);
 				return entry->ce;
 			}
 
@@ -2365,6 +2366,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 	ZCG(current_persistent_script) = &dummy;
 	zend_persist_class_entry_calc(ce);
+	zend_persist_warnings_calc(EG(num_errors), EG(errors));
 	size = dummy.size;
 
 	zend_shared_alloc_clear_xlat_table();
@@ -2420,6 +2422,11 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	zend_update_parent_ce(new_ce);
 	entry->next = proto->inheritance_cache;
 	proto->inheritance_cache = entry;
+
+	entry->num_warnings = EG(num_errors);
+	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
 
 	zend_shared_alloc_destroy_xlat_table();
 

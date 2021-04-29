@@ -1268,17 +1268,16 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_persist_warnings(zend_persistent_script *script) {
-	if (script->warnings) {
-		script->warnings = zend_shared_memdup_free(
-			script->warnings, script->num_warnings * sizeof(zend_error_info *));
-		for (uint32_t i = 0; i < script->num_warnings; i++) {
-			script->warnings[i] = zend_shared_memdup_free(
-				script->warnings[i], sizeof(zend_error_info));
-			zend_accel_store_string(script->warnings[i]->filename);
-			zend_accel_store_string(script->warnings[i]->message);
+zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings) {
+	if (warnings) {
+		warnings = zend_shared_memdup_free(warnings, num_warnings * sizeof(zend_error_info *));
+		for (uint32_t i = 0; i < num_warnings; i++) {
+			warnings[i] = zend_shared_memdup_free(warnings[i], sizeof(zend_error_info));
+			zend_accel_store_string(warnings[i]->filename);
+			zend_accel_store_string(warnings[i]->message);
 		}
 	}
+	return warnings;
 }
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
@@ -1329,7 +1328,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 			ZEND_MAP_PTR_NEW(script->script.main_op_array.static_variables_ptr);
 		}
 	}
-	zend_persist_warnings(script);
+	script->warnings = zend_persist_warnings(script->num_warnings, script->warnings);
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);

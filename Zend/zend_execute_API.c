@@ -188,6 +188,10 @@ void init_executor(void) /* {{{ */
 
 	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
 
+	EG(record_errors) = false;
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
+
 	zend_fiber_init();
 	zend_weakrefs_init();
 
