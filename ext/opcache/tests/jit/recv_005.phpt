@@ -1,5 +1,5 @@
 --TEST--
-JIT RECV: 001
+JIT RECV: 005
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
