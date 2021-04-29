@@ -8391,7 +8391,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			|	str TMP1w, [REG0]
 		}
 		|	//	object_or_called_scope = closure->called_scope;
-		|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG1, REG0, offsetof(zend_closure, called_scope), TMP2
+		|	ldr REG1, [REG0, #offsetof(zend_closure, called_scope)]
 		|	str REG1, EX:RX->This.value.ptr
 		|	// call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
 		|	//	(closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
@@ -8400,14 +8400,14 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	LOAD_32BIT_VAL TMP1w, (ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE)
 		|	orr REG2w, REG2w, TMP1w
 		|	//	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-		|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, TMP1w, REG0, offsetof(zend_closure, this_ptr.u1.v.type), TMP2
+		|	ldrb TMP1w, [REG0, #offsetof(zend_closure, this_ptr.u1.v.type)]
 		|	cmp TMP1w, #IS_UNDEF
 		|	beq >1
 		|	//	call_info |= ZEND_CALL_HAS_THIS;
 		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_HAS_THIS
 		|	orr REG2w, REG2w, TMP1w
 		|	//	object_or_called_scope = Z_OBJ(closure->this_ptr);
-		|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG1, REG0, offsetof(zend_closure, this_ptr.value.ptr), TMP2
+		|	ldr REG1, [REG0, #offsetof(zend_closure, this_ptr.value.ptr)]
 	    |1:
 		|	// ZEND_SET_CALL_INFO(call, 0, call_info);
 		|	ldr TMP1w, EX:RX->This.u1.type_info
