@@ -884,18 +884,18 @@ static void zend_file_cache_serialize_warnings(
 		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
 {
 	if (script->warnings) {
-		zend_recorded_warning **warnings;
+		zend_error_info **warnings;
 		SERIALIZE_PTR(script->warnings);
 		warnings = script->warnings;
 		UNSERIALIZE_PTR(warnings);
 
 		for (uint32_t i = 0; i < script->num_warnings; i++) {
-			zend_recorded_warning *warning;
+			zend_error_info *warning;
 			SERIALIZE_PTR(warnings[i]);
 			warning = warnings[i];
 			UNSERIALIZE_PTR(warning);
-			SERIALIZE_STR(warning->error_filename);
-			SERIALIZE_STR(warning->error_message);
+			SERIALIZE_STR(warning->filename);
+			SERIALIZE_STR(warning->message);
 		}
 	}
 }
@@ -1678,8 +1678,8 @@ static void zend_file_cache_unserialize_warnings(zend_persistent_script *script,
 		UNSERIALIZE_PTR(script->warnings);
 		for (uint32_t i = 0; i < script->num_warnings; i++) {
 			UNSERIALIZE_PTR(script->warnings[i]);
-			UNSERIALIZE_STR(script->warnings[i]->error_filename);
-			UNSERIALIZE_STR(script->warnings[i]->error_message);
+			UNSERIALIZE_STR(script->warnings[i]->filename);
+			UNSERIALIZE_STR(script->warnings[i]->message);
 		}
 	}
 }

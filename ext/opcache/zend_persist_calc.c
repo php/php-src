@@ -562,11 +562,11 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 }
 
 static void zend_persist_warnings_calc(zend_persistent_script *script) {
-	ADD_SIZE(script->num_warnings * sizeof(zend_recorded_warning *));
+	ADD_SIZE(script->num_warnings * sizeof(zend_error_info *));
 	for (uint32_t i = 0; i < script->num_warnings; i++) {
-		ADD_SIZE(sizeof(zend_recorded_warning));
-		ADD_STRING(script->warnings[i]->error_filename);
-		ADD_STRING(script->warnings[i]->error_message);
+		ADD_SIZE(sizeof(zend_error_info));
+		ADD_STRING(script->warnings[i]->filename);
+		ADD_STRING(script->warnings[i]->message);
 	}
 }
 

@@ -1686,27 +1686,26 @@ static void zend_accel_set_auto_globals(int mask)
 	ZCG(auto_globals_mask) |= mask;
 }
 
-static void persistent_error_cb(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) {
+static void persistent_error_cb(int type, zend_string *filename, const uint32_t lineno, zend_string *message) {
 	if (ZCG(record_warnings)) {
-		zend_recorded_warning *warning = emalloc(sizeof(zend_recorded_warning));
+		zend_error_info *warning = emalloc(sizeof(zend_error_info));
 		warning->type = type;
-		warning->error_lineno = error_lineno;
-		warning->error_filename = zend_string_copy(error_filename);
-		warning->error_message = zend_string_copy(message);
+		warning->lineno = lineno;
+		warning->filename = zend_string_copy(filename);
+		warning->message = zend_string_copy(message);
 
 		ZCG(num_warnings)++;
-		ZCG(warnings) = erealloc(ZCG(warnings), sizeof(zend_recorded_warning) * ZCG(num_warnings));
+		ZCG(warnings) = erealloc(ZCG(warnings), sizeof(zend_error_info) * ZCG(num_warnings));
 		ZCG(warnings)[ZCG(num_warnings)-1] = warning;
 	}
-	accelerator_orig_zend_error_cb(type, error_filename, error_lineno, message);
+	accelerator_orig_zend_error_cb(type, filename, lineno, message);
 }
 
 static void replay_warnings(zend_persistent_script *script) {
 	for (uint32_t i = 0; i < script->num_warnings; i++) {
-		zend_recorded_warning *warning = script->warnings[i];
+		zend_error_info *warning = script->warnings[i];
 		accelerator_orig_zend_error_cb(
-			warning->type, warning->error_filename, warning->error_lineno,
-			warning->error_message);
+			warning->type, warning->filename, warning->lineno, warning->message);
 	}
 }
 
@@ -1716,9 +1715,9 @@ static void free_recorded_warnings() {
 	}
 
 	for (uint32_t i = 0; i < ZCG(num_warnings); i++) {
-		zend_recorded_warning *warning = ZCG(warnings)[i];
-		zend_string_release(warning->error_filename);
-		zend_string_release(warning->error_message);
+		zend_error_info *warning = ZCG(warnings)[i];
+		zend_string_release(warning->filename);
+		zend_string_release(warning->message);
 		efree(warning);
 	}
 	efree(ZCG(warnings));

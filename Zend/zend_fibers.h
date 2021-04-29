@@ -74,13 +74,6 @@ typedef struct _zend_fiber {
 	zval value;
 } zend_fiber;
 
-typedef struct _zend_fiber_error {
-	int type;
-	zend_string *filename;
-	uint32_t lineno;
-	zend_string *message;
-} zend_fiber_error;
-
 static const zend_uchar ZEND_FIBER_STATUS_INIT      = 0x0;
 static const zend_uchar ZEND_FIBER_STATUS_SUSPENDED = 0x1;
 static const zend_uchar ZEND_FIBER_STATUS_RUNNING   = 0x2;

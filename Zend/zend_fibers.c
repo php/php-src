@@ -278,7 +278,7 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 			abort(); // This fiber should never be resumed.
 		}
 
-		zend_fiber_error *error = EG(fiber_error);
+		zend_error_info *error = EG(fiber_error);
 		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
 	}
 }
@@ -288,7 +288,7 @@ ZEND_COLD void zend_error_suspend_fiber(
 {
 	ZEND_ASSERT(EG(current_fiber) && "Must be within an active fiber!");
 
-	zend_fiber_error *error = emalloc(sizeof(zend_fiber_error));
+	zend_error_info *error = emalloc(sizeof(zend_error_info));
 
 	error->type = orig_type;
 	error->filename = error_filename;

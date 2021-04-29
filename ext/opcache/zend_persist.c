@@ -1271,12 +1271,12 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 static void zend_persist_warnings(zend_persistent_script *script) {
 	if (script->warnings) {
 		script->warnings = zend_shared_memdup_free(
-			script->warnings, script->num_warnings * sizeof(zend_recorded_warning *));
+			script->warnings, script->num_warnings * sizeof(zend_error_info *));
 		for (uint32_t i = 0; i < script->num_warnings; i++) {
 			script->warnings[i] = zend_shared_memdup_free(
-				script->warnings[i], sizeof(zend_recorded_warning));
-			zend_accel_store_string(script->warnings[i]->error_filename);
-			zend_accel_store_string(script->warnings[i]->error_message);
+				script->warnings[i], sizeof(zend_error_info));
+			zend_accel_store_string(script->warnings[i]->filename);
+			zend_accel_store_string(script->warnings[i]->message);
 		}
 	}
 }
