@@ -219,10 +219,6 @@ typedef struct _zend_accel_globals {
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
-	/* Temporary storage for warnings before they are moved into persistent_script. */
-	bool                    record_warnings;
-	uint32_t                num_warnings;
-	zend_error_info       **warnings;
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;

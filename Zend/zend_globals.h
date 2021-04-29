@@ -260,6 +260,12 @@ struct _zend_executor_globals {
 	/* Pointer to fatal error that occurred in a fiber while switching to {main}. */
 	zend_error_info *fiber_error;
 
+	/* If record_errors is enabled, all emitted diagnostics will be recorded,
+	 * in addition to being processed as usual. */
+	bool record_errors;
+	uint32_t num_errors;
+	zend_error_info **errors;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

@@ -122,7 +122,6 @@ static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_en
 static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(zend_string *filename);
-static void (*accelerator_orig_zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
@@ -1686,43 +1685,11 @@ static void zend_accel_set_auto_globals(int mask)
 	ZCG(auto_globals_mask) |= mask;
 }
 
-static void persistent_error_cb(int type, zend_string *filename, const uint32_t lineno, zend_string *message) {
-	if (ZCG(record_warnings)) {
-		zend_error_info *warning = emalloc(sizeof(zend_error_info));
-		warning->type = type;
-		warning->lineno = lineno;
-		warning->filename = zend_string_copy(filename);
-		warning->message = zend_string_copy(message);
-
-		ZCG(num_warnings)++;
-		ZCG(warnings) = erealloc(ZCG(warnings), sizeof(zend_error_info) * ZCG(num_warnings));
-		ZCG(warnings)[ZCG(num_warnings)-1] = warning;
-	}
-	accelerator_orig_zend_error_cb(type, filename, lineno, message);
-}
-
 static void replay_warnings(zend_persistent_script *script) {
 	for (uint32_t i = 0; i < script->num_warnings; i++) {
 		zend_error_info *warning = script->warnings[i];
-		accelerator_orig_zend_error_cb(
-			warning->type, warning->filename, warning->lineno, warning->message);
+		zend_error_zstr_at(warning->type, warning->filename, warning->lineno, warning->message);
 	}
-}
-
-static void free_recorded_warnings() {
-	if (!ZCG(num_warnings)) {
-		return;
-	}
-
-	for (uint32_t i = 0; i < ZCG(num_warnings); i++) {
-		zend_error_info *warning = ZCG(warnings)[i];
-		zend_string_release(warning->filename);
-		zend_string_release(warning->message);
-		efree(warning);
-	}
-	efree(ZCG(warnings));
-	ZCG(warnings) = NULL;
-	ZCG(num_warnings) = 0;
 }
 
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, zend_op_array **op_array_p)
@@ -1802,9 +1769,9 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	/* Override them with ours */
 	ZVAL_UNDEF(&EG(user_error_handler));
-	ZCG(record_warnings) = ZCG(accel_directives).record_warnings;
-	ZCG(num_warnings) = 0;
-	ZCG(warnings) = NULL;
+	if (ZCG(accel_directives).record_warnings) {
+		zend_begin_record_errors();
+	}
 
 	zend_try {
 		orig_compiler_options = CG(compiler_options);
@@ -1827,11 +1794,11 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	/* Restore originals */
 	CG(active_op_array) = orig_active_op_array;
 	EG(user_error_handler) = orig_user_error_handler;
-	ZCG(record_warnings) = 0;
+	EG(record_errors) = 0;
 
 	if (!op_array) {
 		/* compilation failed */
-		free_recorded_warnings();
+		zend_free_recorded_errors();
 		if (do_bailout) {
 			zend_bailout();
 		}
@@ -1850,10 +1817,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
 			zend_build_delayed_early_binding_list(op_array) :
 			(uint32_t)-1;
-	new_persistent_script->num_warnings = ZCG(num_warnings);
-	new_persistent_script->warnings = ZCG(warnings);
-	ZCG(num_warnings) = 0;
-	ZCG(warnings) = NULL;
+	new_persistent_script->num_warnings = EG(num_errors);
+	new_persistent_script->warnings = EG(errors);
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
 
@@ -3300,10 +3267,6 @@ file_cache_fallback:
 	 * include_once/require_once statements */
 	accelerator_orig_zend_resolve_path = zend_resolve_path;
 	zend_resolve_path = persistent_zend_resolve_path;
-
-	/* Override error callback, so we can store errors that occur during compilation */
-	accelerator_orig_zend_error_cb = zend_error_cb;
-	zend_error_cb = persistent_error_cb;
 
 	/* Override chdir() function */
 	if ((func = zend_hash_str_find_ptr(CG(function_table), "chdir", sizeof("chdir")-1)) != NULL &&
