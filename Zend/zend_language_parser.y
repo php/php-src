@@ -952,8 +952,7 @@ absolute_trait_method_reference:
 
 method_body:
 		';' /* abstract method */		{ $$ = NULL; }
-	|	'{' inner_statement_list '}'	{ $$ = $2; }
-	|   T_DOUBLE_ARROW expr ';'  { $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
+	|	function_body	{ $$ = $1; }
 ;
 
 variable_modifiers:
