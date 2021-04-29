@@ -1619,7 +1619,7 @@ PHP_ADD_SOURCES(Zend, \
 
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend Zend/Optimizer)
+PHP_ADD_BUILD_DIR(Zend Zend/asm Zend/Optimizer)
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
