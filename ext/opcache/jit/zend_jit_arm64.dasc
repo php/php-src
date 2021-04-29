@@ -227,6 +227,23 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
+// Extract the low 8 bits from 'src_reg' into 'dst_reg'. 0xff can be encoded as imm for 'and' instruction.
+|.macro GET_LOW_8BITS, dst_reg, src_reg
+|	and dst_reg, src_reg, #0xff
+|.endmacro
+
+// Bitwise operation with constants. 'ins' can be and/orr/eor/ands. Operands are 32-bit.
+|.macro BW_OP_32_WITH_CONST, ins, reg, op, val, tmp_reg
+||	if (val == 0) {
+|		ins reg, op, wzr
+||	} else if (logical_immediate_p((uint32_t)val, 32)) {
+|		ins reg, op, #val
+||	} else {
+|		LOAD_32BIT_VAL tmp_reg, val
+|		ins reg, op, tmp_reg
+||	}
+|.endmacro
+
 // Bitwise operation with constants. 'ins' can be and/orr/eor/ands. Operands are 64-bit.
 |.macro BW_OP_64_WITH_CONST, ins, reg, op, val, tmp_reg
 ||	if (val == 0) {
@@ -8375,8 +8392,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 				|	str TMP1w, EX:RX->This.u1.type_info
 			} else {
 				|	ldr TMP1w, EX:RX->This.u1.type_info
-				|	LOAD_32BIT_VAL TMP2w, (ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS)
-				|	orr TMP1w, TMP1w, TMP2w
+				|	BW_OP_32_WITH_CONST orr, TMP1w, TMP1w, (ZEND_CALL_HAS_THIS | ZEND_CALL_RELEASE_THIS), TMP2w
 				|	str TMP1w, EX:RX->This.u1.type_info
 			}
 	    }
@@ -8396,16 +8412,14 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	// call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
 		|	//	(closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 		|	ldr REG2w, [REG0, #offsetof(zend_closure, func.common.fn_flags)]
-		|	and REG2w, REG2w, #ZEND_ACC_FAKE_CLOSURE
-		|	LOAD_32BIT_VAL TMP1w, (ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE)
-		|	orr REG2w, REG2w, TMP1w
+		|	BW_OP_32_WITH_CONST and, REG2w, REG2w, ZEND_ACC_FAKE_CLOSURE, TMP1w
+		|	BW_OP_32_WITH_CONST orr, REG2w, REG2w, (ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE), TMP1w
 		|	//	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		|	ldrb TMP1w, [REG0, #offsetof(zend_closure, this_ptr.u1.v.type)]
 		|	cmp TMP1w, #IS_UNDEF
 		|	beq >1
 		|	//	call_info |= ZEND_CALL_HAS_THIS;
-		|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_HAS_THIS
-		|	orr REG2w, REG2w, TMP1w
+		|	BW_OP_32_WITH_CONST orr, REG2w, REG2w, ZEND_CALL_HAS_THIS, TMP1w
 		|	//	object_or_called_scope = Z_OBJ(closure->this_ptr);
 		|	ldr REG1, [REG0, #offsetof(zend_closure, this_ptr.value.ptr)]
 	    |1:
@@ -9267,7 +9281,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov FCARG1x, RX
 				}
 				|	EXT_CALL zend_jit_deprecated_helper, REG0
-				|	and RETVALw, RETVALw, #0xff
+				|	GET_LOW_8BITS RETVALw, RETVALw
 				|	cmp RETVALw, #0       // Result is 0 on exception
 				|	ldr REG0, EX:RX->func // reload
 				|	bne >1
@@ -9561,7 +9575,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	mov FCARG1x, RX
 					}
 					|	EXT_CALL zend_jit_deprecated_helper, REG0
-					|	and RETVALw, RETVALw, #0xff
+					|	GET_LOW_8BITS RETVALw, RETVALw
 					|	cmp RETVALw, #0       // Result is 0 on exception
 					|	ldr REG0, EX:RX->func // reload
 					|	bne >1
@@ -9940,7 +9954,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 						if (!exit_addr) {
 							return 0;
 						}
-						|	and TMP1w, REG1w, #0xff
+						|	GET_LOW_8BITS TMP1w, REG1w
 						|	cmp TMP1w, #IS_REFERENCE
 						|	bne &exit_addr
 					}
@@ -9961,7 +9975,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 			if (op1_info & MAY_BE_REF) {
-				|	and TMP1w, REG1w, #0xff
+				|	GET_LOW_8BITS TMP1w, REG1w
 				|	cmp TMP1w, #IS_REFERENCE
 				|	beq >7
 			}
@@ -10037,7 +10051,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 	if (opline->opcode == ZEND_SEND_VAR_NO_REF) {
 		|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
 		if (op1_info & MAY_BE_REF) {
-			|	and TMP1w, REG1w, #0xff
+			|	GET_LOW_8BITS TMP1w, REG1w
 			|	cmp TMP1w, #IS_REFERENCE
 			|	beq >7
 		}
@@ -10121,12 +10135,12 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 				|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 				||	if (reuse_ip) {
 				|		ldr TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
-				|		orr TMP1w, TMP1w, #ZEND_CALL_SEND_ARG_BY_REF
+				|		BW_OP_32_WITH_CONST orr, TMP1w, TMP1w, ZEND_CALL_SEND_ARG_BY_REF, TMP2w
 				|		str TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
 				||	} else {
 				|		ldr REG0, EX->call
 				|		ldr TMP1w, [REG0, #offsetof(zend_execute_data, This.u1.type_info)]
-				|		orr TMP1w, TMP1w, #ZEND_CALL_SEND_ARG_BY_REF
+				|		BW_OP_32_WITH_CONST orr, TMP1w, TMP1w, ZEND_CALL_SEND_ARG_BY_REF, TMP2w
 				|		str TMP1w, [REG0, #offsetof(zend_execute_data, This.u1.type_info)]
 				||	}
 			}
@@ -10136,12 +10150,12 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 				|	// ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 				||	if (reuse_ip) {
 				|		ldr TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
-				|		and TMP1w, TMP1w, #(~ZEND_CALL_SEND_ARG_BY_REF)
+				|		BW_OP_32_WITH_CONST and, TMP1w, TMP1w, (~ZEND_CALL_SEND_ARG_BY_REF), TMP2w
 				|		str TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
 				||	} else {
 				|		ldr REG0, EX->call
 				|		ldr TMP1w, [REG0, #offsetof(zend_execute_data, This.u1.type_info)]
-				|		and TMP1w, TMP1w, #(~ZEND_CALL_SEND_ARG_BY_REF)
+				|		BW_OP_32_WITH_CONST and, TMP1w, TMP1w, (~ZEND_CALL_SEND_ARG_BY_REF), TMP2w
 				|		str TMP1w, [REG0, #offsetof(zend_execute_data, This.u1.type_info)]
 				||	}
 			}
@@ -10162,8 +10176,7 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline)
 		|1:
 		|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 		|	ldr TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
-		|	LOAD_32BIT_VAL TMP2w, ZEND_CALL_SEND_ARG_BY_REF
-		|	orr TMP1w, TMP1w, TMP2w
+		|	BW_OP_32_WITH_CONST orr, TMP1w, TMP1w, ZEND_CALL_SEND_ARG_BY_REF, TMP2w
 		|	str TMP1w, [RX, #offsetof(zend_execute_data, This.u1.type_info)]
 		|	b >1
 		|.code
@@ -11078,7 +11091,7 @@ static int zend_jit_zval_copy_deref(dasm_State **Dst, zend_jit_addr res_addr, ze
 
 	|	GET_ZVAL_PTR REG1, val_addr, TMP1
 	|	IF_NOT_REFCOUNTED REG2w, >2, TMP1w
-	|	and TMP2w, REG2w, #0xff  // TMP2w -> low 8 bits of REG2w
+	|	GET_LOW_8BITS TMP2w, REG2w
 	|	IF_NOT_TYPE TMP2w, IS_REFERENCE, >1
 	|	add REG1, REG1, #offsetof(zend_reference, val)
 	|	GET_Z_TYPE_INFO REG2w, REG1
@@ -11372,7 +11385,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 				|	IF_NOT_ZVAL_TYPE val_addr, type, &res_exit_addr, TMP1w, TMP2
 			} else {
 				|	GET_ZVAL_TYPE_INFO REG2w, val_addr, TMP1
-				|	and TMP1w, REG2w, #0xff
+				|	GET_LOW_8BITS TMP1w, REG2w
 				|	IF_NOT_TYPE TMP1w, type, &res_exit_addr
 			}
 			|	// ZVAL_COPY
@@ -11929,7 +11942,7 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	|	mov REG0w, RETVALw
 
 	if (check_exception) {
-		|	and REG0w, REG0w, #0xff
+		|	GET_LOW_8BITS REG0w, REG0w
 		|	tst REG0w, REG0w
 		if (in_cold) {
 			|	bne >1
@@ -12346,7 +12359,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 					|.code
 				}
 			} else if (flags == ZEND_FETCH_REF) {
-				|	and TMP1w, REG2w, #0xff
+				|	GET_LOW_8BITS TMP1w, REG2w
 				|	IF_TYPE TMP1w, IS_REFERENCE, >1
 				if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 					|	LOAD_ADDR FCARG2x, prop_info
@@ -12428,7 +12441,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			type = concrete_type(res_info);
 
 			|	// ZVAL_DEREF()
-			|	and TMP1w, REG2w, #0xff
+			|	GET_LOW_8BITS TMP1w, REG2w
 			|	IF_NOT_TYPE TMP1w, IS_REFERENCE, >1
 			|	GET_Z_PTR REG0, REG0
 			|	add REG0, REG0, #offsetof(zend_reference, val)
@@ -12438,7 +12451,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			} else {
 				|	GET_ZVAL_TYPE_INFO REG2w, val_addr, TMP1
 				|1:
-				|	and TMP1w, REG2w, #0xff
+				|	GET_LOW_8BITS TMP1w, REG2w
 				|	IF_NOT_TYPE TMP1w, type, &exit_addr
 			}
 			|	// ZVAL_COPY
