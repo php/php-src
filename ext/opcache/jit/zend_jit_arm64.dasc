@@ -3903,9 +3903,9 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		|	NIY	// TODO: test
 #endif
 	} else if (opcode == ZEND_MUL) {
-		|	GET_ZVAL_LVAL ZREG_TMP2, op1_addr, TMP1
-		|	GET_ZVAL_LVAL ZREG_TMP3, op2_addr, TMP1
-		|	mul Rx(result_reg), TMP2, TMP3
+		|	GET_ZVAL_LVAL ZREG_TMP1, op1_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_TMP2, op2_addr, TMP2
+		|	mul Rx(result_reg), TMP1, TMP2
 		if(may_overflow) {
 			/* Use 'smulh' to get the upper 64 bits fo the 128-bit result.
 			 * For signed multiplication, the top 65 bits of the result will contain
@@ -3915,9 +3915,8 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			 * Flag: bne -> overflow. beq -> no overflow.
 			 */
 			use_ovf_flag = 0;
-			|	smulh TMP1, TMP2, TMP3
-			|	asr TMP2, Rx(result_reg), #63
-			|	cmp TMP1, TMP2
+			|	smulh TMP1, TMP1, TMP2
+			|	cmp TMP1, Rx(result_reg), asr #63
 		}
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
