@@ -35,6 +35,11 @@ function mul2_big_int64(int $a) {
   var_dump($res);
 }
 
+function mul2(int $a) {
+  $res = $a * 2; // $a + $a
+  var_dump($res);
+}
+
 mul2_8(3);
 mul2_8(-11);
 mul2_8(0x7fffffffffffffff);
@@ -47,6 +52,8 @@ mul2_big_int32(0x10000000000);
 mul2_big_int64(3);
 mul2_big_int64(-3);
 mul2_big_int64(0x100000000);
+mul2(10);
+mul2(0x7fffffffffffffff);
 ?>
 --EXPECT--
 int(24)
@@ -60,4 +67,6 @@ int(-805306368)
 float(2.9514790517935283E+20)
 int(12884901888)
 int(-12884901888)
+float(1.8446744073709552E+19)
+int(20)
 float(1.8446744073709552E+19)

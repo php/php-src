@@ -3848,53 +3848,37 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 	}
 
 	if (opcode == ZEND_MUL &&
-		Z_MODE(op2_addr) == IS_CONST_ZVAL &&
-		zend_long_is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr)))) {
-
-		if (Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
-			if (Z_MODE(op1_addr) == IS_REG) {
-				|	adds Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
-			} else {
-				|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
-				|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
-			}
+			Z_MODE(op2_addr) == IS_CONST_ZVAL &&
+			Z_LVAL_P(Z_ZV(op2_addr)) == 2) {
+		if (Z_MODE(op1_addr) == IS_REG) {
+			|	adds Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
 		} else {
-			|	GET_ZVAL_LVAL ZREG_TMP1, op1_addr, TMP2
-			|	mov TMP2, #zend_long_floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
-			|	lsl Rx(result_reg), TMP1, TMP2
-			if (may_overflow) {
-				/* Compare 'op' and '((op << n) >> n)' for overflow.
-				 * Flag: bne -> overflow. beq -> no overflow.
-				 */
-				use_ovf_flag = 0;
-				|	asr TMP3, Rx(result_reg), TMP2
-				|	cmp TMP1, TMP3
-			}
+			|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+			|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
 		}
 	} else if (opcode == ZEND_MUL &&
-		Z_MODE(op1_addr) == IS_CONST_ZVAL &&
-		zend_long_is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))) {
-
-		if (Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
-			if (Z_MODE(op2_addr) == IS_REG) {
-				|	adds Rx(result_reg), Rx(Z_REG(op2_addr)), Rx(Z_REG(op2_addr))
-			} else {
-				|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
-				|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
-			}
+			Z_MODE(op2_addr) == IS_CONST_ZVAL &&
+			!may_overflow &&
+			zend_long_is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr)))) {
+		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+		|	mov TMP1, #zend_long_floor_log2(Z_LVAL_P(Z_ZV(op2_addr)))
+		|	lsl Rx(result_reg), Rx(result_reg), TMP1
+	} else if (opcode == ZEND_MUL &&
+			Z_MODE(op1_addr) == IS_CONST_ZVAL &&
+			Z_LVAL_P(Z_ZV(op1_addr)) == 2) {
+		if (Z_MODE(op2_addr) == IS_REG) {
+			|	adds Rx(result_reg), Rx(Z_REG(op2_addr)), Rx(Z_REG(op2_addr))
 		} else {
-			|	GET_ZVAL_LVAL ZREG_TMP1, op2_addr, TMP2
-			|	mov TMP2, #zend_long_floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
-			|	lsl Rx(result_reg), TMP1, TMP2
-			if (may_overflow) {
-				/* Compare 'op' and '((op << n) >> n)' for overflow.
-				 * Flag: bne -> overflow. beq -> no overflow.
-				 */
-				use_ovf_flag = 0;
-				|	asr TMP3, Rx(result_reg), TMP2
-				|	cmp TMP1, TMP3
-			}
+			|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
+			|	adds Rx(result_reg), Rx(result_reg), Rx(result_reg)
 		}
+	} else if (opcode == ZEND_MUL &&
+			Z_MODE(op1_addr) == IS_CONST_ZVAL &&
+			!may_overflow &&
+			zend_long_is_power_of_two(Z_LVAL_P(Z_ZV(op1_addr)))) {
+		|	GET_ZVAL_LVAL result_reg, op2_addr, TMP1
+		|	mov TMP1, #zend_long_floor_log2(Z_LVAL_P(Z_ZV(op1_addr)))
+		|	lsl Rx(result_reg), Rx(result_reg), TMP1
 	} else if (opcode == ZEND_DIV &&
 			(Z_MODE(op2_addr) == IS_CONST_ZVAL &&
 			is_power_of_two(Z_LVAL_P(Z_ZV(op2_addr))))) {
