@@ -11975,9 +11975,9 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 			if (!exit_addr) {
 				return 0;
 			}
-			|	blt &exit_addr
+			|	blo &exit_addr
 		} else {
-			|	blt >1
+			|	blo >1
 			|.cold_code
 			|1:
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
