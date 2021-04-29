@@ -1127,7 +1127,8 @@ void zend_shutdown(void) /* {{{ */
 	virtual_cwd_shutdown();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
+	zend_hash_graceful_reverse_destroy(GLOBAL_CLASS_TABLE);
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
