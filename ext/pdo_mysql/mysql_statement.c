@@ -713,53 +713,69 @@ static int pdo_mysql_stmt_get_col(
 #endif
 } /* }}} */
 
-static char *type_to_name_native(int type) /* {{{ */
+static char *type_to_name_native(int type, int flags) /* {{{ */
 {
-#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
-
     switch (type) {
-        PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
-        PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
-#ifdef FIELD_TYPE_TINY
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
-#endif
-#ifdef FIELD_TYPE_BIT
-        PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
-#endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
-        PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
-#ifdef FIELD_TYPE_NEWDECIMAL
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
-#endif
-#ifdef FIELD_TYPE_GEOMETRY
-        PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
-#endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
-#ifdef FIELD_TYPE_YEAR
-        PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
-#endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SET)
-        PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
-#ifdef FIELD_TYPE_NEWDATE
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
-#endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
-        default:
+		case MYSQL_TYPE_DECIMAL:
+		case MYSQL_TYPE_NEWDECIMAL:
+			return "DECIMAL";
+		case MYSQL_TYPE_TINY:
+			return "TINYINT";
+		case MYSQL_TYPE_SHORT:
+			return "SMALLINT";
+		case MYSQL_TYPE_LONG:
+			return "INT";
+		case MYSQL_TYPE_FLOAT:
+			return "FLOAT";
+		case MYSQL_TYPE_DOUBLE:
+			return "DOUBLE";
+		case MYSQL_TYPE_NULL:
+			return "NULL";
+		case MYSQL_TYPE_TIMESTAMP:
+			return "TIMESTAMP";
+		case MYSQL_TYPE_LONGLONG:
+			return "BIGINT";
+		case MYSQL_TYPE_INT24:
+			return "MEDIUMINT";
+		case MYSQL_TYPE_DATE:
+		case MYSQL_TYPE_NEWDATE:
+			return "DATE";
+		case MYSQL_TYPE_TIME:
+			return "TIME";
+		case MYSQL_TYPE_DATETIME:
+			return "DATETIME";
+		case MYSQL_TYPE_YEAR:
+			return "YEAR";
+		case MYSQL_TYPE_VARCHAR:
+			return "VARCHAR";
+		case MYSQL_TYPE_BIT:
+			return "BIT";
+		case MYSQL_TYPE_JSON:
+			return "JSON";
+		case MYSQL_TYPE_ENUM:
+			return "ENUM";
+		case MYSQL_TYPE_SET:
+			return "SET";
+		case MYSQL_TYPE_TINY_BLOB:
+			return (flags & BINARY_FLAG) ? "TINYBLOB" : "TINYTEXT";
+		case MYSQL_TYPE_MEDIUM_BLOB:
+			return (flags & BINARY_FLAG) ? "MEDIUMBLOB" : "MEDIUMTEXT";
+		case MYSQL_TYPE_LONG_BLOB:
+			return (flags & BINARY_FLAG) ? "LONGBLOB" : "LONGTEXT";
+		case MYSQL_TYPE_BLOB:
+			return (flags & BINARY_FLAG) ? "BLOB" : "TEXT";
+		case MYSQL_TYPE_VAR_STRING:
+			return (flags & BINARY_FLAG) ? "VARBINARY" : "VARCHAR";
+		case MYSQL_TYPE_STRING:
+			if(flags & ENUM_FLAG) return "ENUM";
+			if(flags & SET_FLAG) return "SET";
+			return (flags & BINARY_FLAG) ? "BINARY" : "CHAR";
+		case MYSQL_TYPE_GEOMETRY:
+			return "GEOMETRY";
+		default:
             return NULL;
     }
-#undef PDO_MYSQL_NATIVE_TYPE_NAME
+	
 } /* }}} */
 
 static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
@@ -788,7 +804,7 @@ static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 		add_assoc_string(return_value, "mysql:def", F->def);
 	}
 
-	str = type_to_name_native(F->type);
+	str = type_to_name_native(F->type, F->flags);
 	if (str) {
 		add_assoc_string(return_value, "mysql:decl_type", str);
 	}

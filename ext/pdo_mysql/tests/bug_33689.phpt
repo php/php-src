@@ -52,7 +52,7 @@ Array
 )
 Array
 (
-    [native_type] => LONG
+    [mysql:decl_type] => INT
     [flags] => Array
         (
             [0] => not_null

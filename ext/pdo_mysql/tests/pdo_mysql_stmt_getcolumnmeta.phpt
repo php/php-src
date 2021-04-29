@@ -68,7 +68,8 @@ try {
             return true;
         }
 
-        if (!$db->exec(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $value))) {
+        $stmt = $db->prepare("INSERT INTO test(id, label) VALUES (1, ?)");
+        if (!$stmt->execute([$value])) {
             printf("[%03d] + 1] Insert failed, %d - %s\n", $offset,
                 $db->errorCode(), var_export($db->errorInfo(), true));
             return false;
@@ -84,7 +85,7 @@ try {
             return false;
         }
 
-        $elements = array('flags', 'table', 'name', 'len', 'precision', 'pdo_type');
+        $elements = array('flags', 'table', 'name', 'len', 'precision', 'pdo_type', 'mysql:decl_type');
         foreach ($elements as $k => $element)
             if (!isset($meta[$element])) {
                 printf("[%03d + 3] Element %s missing, %s\n", $offset,
@@ -109,7 +110,7 @@ try {
                 $decl_type = array($decl_type);
 
             $found = false;
-            foreach ($decl_type as $k => $type) {
+            foreach ($decl_type as $type) {
                 if ($meta['mysql:decl_type'] == $type) {
                     $found = true;
                     break;
@@ -125,7 +126,7 @@ try {
 
         if (!is_null($pdo_type) && ($meta['pdo_type'] != $pdo_type)) {
             printf("[%03d + 6] Expecting PDO type %s got %s (%s)\n", $offset,
-                $pdo_type, var_export($meta, true), var_export($meta['mysql:decl_type']));
+                $pdo_type, var_export($meta['pdo_type'], true), var_export($meta['mysql:decl_type'], true));
             return false;
         }
 
@@ -138,22 +139,23 @@ try {
     $real_as_float = (false === stristr($row['_mode'], "REAL_AS_FLOAT")) ? false : true;
 
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+    test_meta($db, 10, 'INT NULL', NULL, 'INT', PDO::PARAM_INT);
     test_meta($db, 20, 'BIT(8)', 1, 'BIT', PDO::PARAM_INT);
-    test_meta($db, 30, 'TINYINT', -127, 'TINY', PDO::PARAM_INT);
-    test_meta($db, 40, 'TINYINT UNSIGNED', 255, 'TINY', PDO::PARAM_INT);
-    test_meta($db, 50, 'BOOLEAN', 1, NULL, PDO::PARAM_INT);
+    test_meta($db, 30, 'TINYINT', -127, 'TINYINT', PDO::PARAM_INT);
+    test_meta($db, 40, 'TINYINT UNSIGNED', 255, 'TINYINT', PDO::PARAM_INT);
+    test_meta($db, 50, 'BOOLEAN', 1, 'TINYINT', PDO::PARAM_INT);
 
-    test_meta($db, 60, 'SMALLINT', -32768, 'SHORT', PDO::PARAM_INT);
-    test_meta($db, 70, 'SMALLINT UNSIGNED', 65535, 'SHORT', PDO::PARAM_INT);
+    test_meta($db, 60, 'SMALLINT', -32768, 'SMALLINT', PDO::PARAM_INT);
+    test_meta($db, 70, 'SMALLINT UNSIGNED', 65535, 'SMALLINT', PDO::PARAM_INT);
 
-    test_meta($db, 80, 'MEDIUMINT', -8388608, 'INT24', PDO::PARAM_INT);
-    test_meta($db, 90, 'MEDIUMINT UNSIGNED', 16777215, 'INT24', PDO::PARAM_INT);
+    test_meta($db, 80, 'MEDIUMINT', -8388608, 'MEDIUMINT', PDO::PARAM_INT);
+    test_meta($db, 90, 'MEDIUMINT UNSIGNED', 16777215, 'MEDIUMINT', PDO::PARAM_INT);
 
-    test_meta($db, 100, 'INT', -2147483648, 'LONG', PDO::PARAM_INT);
-    test_meta($db, 110, 'INT UNSIGNED', 4294967295, 'LONG', PDO::PARAM_INT);
+    test_meta($db, 100, 'INT', -2147483648, 'INT', PDO::PARAM_INT);
+    test_meta($db, 110, 'INT UNSIGNED', 4294967295, 'INT', PDO::PARAM_INT);
 
-    test_meta($db, 120, 'BIGINT', '-9223372036854775808', 'LONGLONG', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
-    test_meta($db, 130, 'BIGINT UNSIGNED', '18446744073709551615', 'LONGLONG', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
+    test_meta($db, 120, 'BIGINT', '-9223372036854775808', 'BIGINT', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
+    test_meta($db, 130, 'BIGINT UNSIGNED', '18446744073709551615', 'BIGINT', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
 
     test_meta($db, 130, 'REAL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
     test_meta($db, 140, 'REAL UNSIGNED', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
@@ -186,37 +188,43 @@ try {
     test_meta($db, 360, 'DATETIME', '2008-03-23 14:38:00', 'DATETIME', PDO::PARAM_STR);
     test_meta($db, 370, 'YEAR', '2008', 'YEAR', PDO::PARAM_INT);
 
-    test_meta($db, 380, 'CHAR(1)', 'a', 'STRING', PDO::PARAM_STR);
-    test_meta($db, 390, 'CHAR(10)', '0123456789', 'STRING', PDO::PARAM_STR);
-    test_meta($db, 400, 'CHAR(255)', str_repeat('z', 255), 'STRING', PDO::PARAM_STR);
-    test_meta($db, 410, 'VARCHAR(1)', 'a', 'VAR_STRING', PDO::PARAM_STR);
-    test_meta($db, 420, 'VARCHAR(10)', '0123456789', 'VAR_STRING', PDO::PARAM_STR);
-    test_meta($db, 430, 'VARCHAR(255)', str_repeat('z', 255), 'VAR_STRING', PDO::PARAM_STR);
+    test_meta($db, 380, 'CHAR(1)', 'a', 'CHAR', PDO::PARAM_STR);
+    test_meta($db, 390, 'CHAR(10)', '0123456789', 'CHAR', PDO::PARAM_STR);
+    test_meta($db, 400, 'CHAR(255)', str_repeat('z', 255), 'CHAR', PDO::PARAM_STR);
+    test_meta($db, 410, 'VARCHAR(1)', 'a', 'VARCHAR', PDO::PARAM_STR);
+    test_meta($db, 420, 'VARCHAR(10)', '0123456789', 'VARCHAR', PDO::PARAM_STR);
+    test_meta($db, 430, 'VARCHAR(255)', str_repeat('z', 255), 'VARCHAR', PDO::PARAM_STR);
 
-    test_meta($db, 440, 'BINARY(1)', str_repeat('a', 1), 'STRING', PDO::PARAM_STR);
-    test_meta($db, 450, 'BINARY(255)', str_repeat('b', 255), 'STRING', PDO::PARAM_STR);
-    test_meta($db, 460, 'VARBINARY(1)', str_repeat('a', 1), 'VAR_STRING', PDO::PARAM_STR);
-    test_meta($db, 470, 'VARBINARY(255)', str_repeat('b', 255), 'VAR_STRING', PDO::PARAM_STR);
+    test_meta($db, 440, 'BINARY(1)', str_repeat('a', 1), 'BINARY', PDO::PARAM_STR);
+    test_meta($db, 450, 'BINARY(255)', str_repeat('b', 255), 'BINARY', PDO::PARAM_STR);
+    test_meta($db, 460, 'VARBINARY(1)', str_repeat('a', 1), 'VARBINARY', PDO::PARAM_STR);
+    test_meta($db, 470, 'VARBINARY(255)', str_repeat('b', 255), 'VARBINARY', PDO::PARAM_STR);
 
+    /* These are all represented as BLOB in MySQL */
     test_meta($db, 480, 'TINYBLOB', str_repeat('b', 255), 'BLOB', PDO::PARAM_STR);
     test_meta($db, 490, 'BLOB', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
     test_meta($db, 500, 'MEDIUMBLOB', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
     test_meta($db, 510, 'LONGBLOB', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
 
-    test_meta($db, 520, 'TINYTEXT', str_repeat('b', 255), 'BLOB', PDO::PARAM_STR);
+    /* BINARY TEXT columns are all represented as BLOB in MySQL, everything else is just TEXT */
+    test_meta($db, 520, 'TINYTEXT', str_repeat('b', 255), 'TEXT', PDO::PARAM_STR);
     test_meta($db, 530, 'TINYTEXT BINARY', str_repeat('b', 255), 'BLOB', PDO::PARAM_STR);
 
-    test_meta($db, 560, 'TEXT', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
+    test_meta($db, 560, 'TEXT', str_repeat('b', 256), 'TEXT', PDO::PARAM_STR);
     test_meta($db, 570, 'TEXT BINARY', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
 
-    test_meta($db, 580, 'MEDIUMTEXT', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
+    test_meta($db, 580, 'MEDIUMTEXT', str_repeat('b', 256), 'TEXT', PDO::PARAM_STR);
     test_meta($db, 590, 'MEDIUMTEXT BINARY', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
 
-    test_meta($db, 600, 'LONGTEXT', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
+    test_meta($db, 600, 'LONGTEXT', str_repeat('b', 256), 'TEXT', PDO::PARAM_STR);
     test_meta($db, 610, 'LONGTEXT BINARY', str_repeat('b', 256), 'BLOB', PDO::PARAM_STR);
 
-    test_meta($db, 620, "ENUM('yes', 'no') DEFAULT 'yes'", 'no', NULL, PDO::PARAM_STR);
-    test_meta($db, 630, "SET('yes', 'no') DEFAULT 'yes'", 'no', NULL, PDO::PARAM_STR);
+    test_meta($db, 620, "ENUM('yes', 'no') DEFAULT 'yes'", 'no', 'ENUM', PDO::PARAM_STR);
+    test_meta($db, 630, "SET('yes', 'no') DEFAULT 'yes'", 'no', 'SET', PDO::PARAM_STR);
+
+    /* These are all represented as BLOB in MySQL */
+    test_meta($db, 640, "JSON DEFAULT ''", '["json"]', 'BLOB', PDO::PARAM_STR);
+    test_meta($db, 650, "GEOMETRY DEFAULT ST_X(Point(15, 20))", NULL, 'GEOMETRY', PDO::PARAM_STR);
 
 /*
   | spatial_type
