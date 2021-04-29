@@ -9,6 +9,10 @@ opcache.protect_memory=1
 ;opcache.jit_debug=257
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>
 --FILE--
 <?php
 function inc(int|float $x) {
