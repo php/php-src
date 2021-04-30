@@ -105,7 +105,7 @@
 
 #define B_IMM26         (((1<<26)-1)*4)
 
-static bool arm64_may_use_b(void *addr)
+static bool arm64_may_use_b(const void *addr)
 {
 	if (addr >= dasm_buf && addr < dasm_end) {
 		return (((char*)dasm_end - (char*)dasm_buf) < B_IMM26);
