@@ -1216,15 +1216,15 @@ AS_CASE([$fiber_cpu],
 )
 
 if test "$fiber_os" = 'mac'; then
-  fiber_asm_file="combined_sysv_macho_gas.S"
+  fiber_asm_file="combined_sysv_macho_gas"
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
-  fiber_asm_file="${fiber_asm_file_prefix}_elf_gas.S"
+  fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
   fibers="no"
 fi
 
 if test "$fibers" = 'yes'; then
-  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file} jump_${fiber_asm_file})
+  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
   AC_MSG_RESULT([$fiber_asm_file])
 else
   AC_MSG_ERROR([Unable to determine platform!])

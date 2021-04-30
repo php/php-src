@@ -149,7 +149,7 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 	return true;
 }
 
-void zend_fiber_stack_free(zend_fiber_stack *stack)
+static void zend_fiber_stack_free(zend_fiber_stack *stack)
 {
 	if (!stack->pointer) {
 		return;
@@ -287,6 +287,7 @@ ZEND_COLD void zend_error_suspend_fiber(
 		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	ZEND_ASSERT(EG(current_fiber) && "Must be within an active fiber!");
+	ZEND_ASSERT(orig_type & E_FATAL_ERRORS && "Error type must be fatal");
 
 	zend_error_info *error = emalloc(sizeof(zend_error_info));
 
