@@ -8898,9 +8898,10 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|.cold_code
 		|1:
 		|	LOAD_ADDR FCARG2x, function_name
-		|	mov CARG3, sp
-		if (TMP_ZVAL_OFFSET != 0) {
-			|	add CARG3, CARG3, #TMP_ZVAL_OFFSET
+		if (TMP_ZVAL_OFFSET == 0) {
+			|	mov CARG3, sp
+		} else {
+			|	add CARG3, sp, #TMP_ZVAL_OFFSET
 		}
 		|	SET_EX_OPLINE opline, REG0
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
