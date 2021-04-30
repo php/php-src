@@ -907,6 +907,18 @@ found:
 	} else if (IS_ACCESSOR_PROPERTY_OFFSET(property_offset)) {
 		zend_function *set = prop_info->accessors[ZEND_ACCESSOR_SET];
 		if (!set) {
+			zend_function *get = prop_info->accessors[ZEND_ACCESSOR_GET];
+			if (get && (get->common.fn_flags & ZEND_ACC_AUTO_PROP)) {
+				/* Auto-property with only get allows initialization assignment. */
+				property_offset = prop_info->offset;
+				variable_ptr = OBJ_PROP(zobj, property_offset);
+				if (Z_TYPE_P(variable_ptr) == IS_UNDEF) {
+					ZEND_ASSERT(Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT);
+					Z_PROP_FLAG_P(variable_ptr) = 0;
+					goto write_std_property;
+				}
+			}
+
 			zend_throw_error(NULL, "Property %s::$%s is read-only",
 				ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			return &EG(error_zval);
@@ -916,7 +928,7 @@ found:
 		zend_property_info *orig_prop_info = prop_info;
 		set = check_accessor_visibility(&prop_info, zobj->ce, name, set, silent);
 		if (set) {
-			if (!(set->op_array.fn_flags & ZEND_ACC_AUTO_PROP)) {
+			if (!(set->common.fn_flags & ZEND_ACC_AUTO_PROP)) {
 				uint32_t *guard = zend_get_property_guard(zobj, name);
 				if (UNEXPECTED((*guard) & IN_SET)) {
 					zend_throw_error(NULL, "Cannot recursively write %s::$%s in accessor",
