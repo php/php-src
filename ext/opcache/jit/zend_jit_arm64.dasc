@@ -103,6 +103,20 @@
 #define LDR_STR_PIMM32  (MAX_IMM12*4)  // ldr/str insn for 32-bit register: pimm is imm12 * 4
 #define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
 
+#define B_IMM26         (((1<<26)-1)*4)
+
+static bool arm64_may_use_b(void *addr)
+{
+	if (addr >= dasm_buf && addr < dasm_end) {
+		return (((char*)dasm_end - (char*)dasm_buf) < B_IMM26);
+	} else if (addr >= dasm_end) {
+		return (((char*)addr - (char*)dasm_buf) < B_IMM26);
+	} else if (addr < dasm_buf) {
+		return (((char*)dasm_end - (char*)addr) < B_IMM26);
+	}
+	return 0;
+}
+
 #include "Zend/zend_cpuinfo.h"
 
 #ifdef HAVE_VALGRIND
@@ -609,13 +623,21 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro EXT_CALL, func, tmp_reg
-|	LOAD_ADDR tmp_reg, func
-|	blr tmp_reg
+||	if (arm64_may_use_b(func)) {
+|		bl &func
+||	} else {
+|		LOAD_ADDR tmp_reg, func
+|		blr tmp_reg
+||	}
 |.endmacro
 
 |.macro EXT_JMP, func, tmp_reg
-|	LOAD_ADDR tmp_reg, func
-|	br tmp_reg
+||	if (arm64_may_use_b(func)) {
+|		b &func
+||	} else {
+|		LOAD_ADDR tmp_reg, func
+|		br tmp_reg
+||	}
 |.endmacro
 
 |.macro SAVE_IP
