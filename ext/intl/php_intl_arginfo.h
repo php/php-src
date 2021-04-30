@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce080d7e55629b144760568ee6e8f249215ab48f */
+ * Stub hash: 770f8e5a0df2f52b217af7d1145cb799a9bf0187 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -367,12 +367,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_get_error_message, 0, 1,
 	ZEND_ARG_OBJ_INFO(0, formatter, IntlDateFormatter, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datetimepatterngenerator_create, 0, 0, IntlDateTimePatternGenerator, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datepatterngenerator_create, 0, 0, IntlDatePatternGenerator, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datetimepatterngenerator_get_best_pattern, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, patternGenerator, IntlDateTimePatternGenerator, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datepatterngenerator_get_best_pattern, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, patternGenerator, IntlDatePatternGenerator, 0)
 	ZEND_ARG_TYPE_INFO(0, skeleton, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -881,8 +881,8 @@ ZEND_FUNCTION(datefmt_parse);
 ZEND_FUNCTION(datefmt_localtime);
 ZEND_FUNCTION(datefmt_get_error_code);
 ZEND_FUNCTION(datefmt_get_error_message);
-ZEND_FUNCTION(datetimepatterngenerator_create);
-ZEND_FUNCTION(datetimepatterngenerator_get_best_pattern);
+ZEND_FUNCTION(datepatterngenerator_create);
+ZEND_FUNCTION(datepatterngenerator_get_best_pattern);
 ZEND_FUNCTION(numfmt_create);
 ZEND_FUNCTION(numfmt_format);
 ZEND_FUNCTION(numfmt_parse);
@@ -1073,8 +1073,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(datefmt_localtime, arginfo_datefmt_localtime)
 	ZEND_FE(datefmt_get_error_code, arginfo_datefmt_get_error_code)
 	ZEND_FE(datefmt_get_error_message, arginfo_datefmt_get_error_message)
-	ZEND_FE(datetimepatterngenerator_create, arginfo_datetimepatterngenerator_create)
-	ZEND_FE(datetimepatterngenerator_get_best_pattern, arginfo_datetimepatterngenerator_get_best_pattern)
+	ZEND_FE(datepatterngenerator_create, arginfo_datepatterngenerator_create)
+	ZEND_FE(datepatterngenerator_get_best_pattern, arginfo_datepatterngenerator_get_best_pattern)
 	ZEND_FE(numfmt_create, arginfo_numfmt_create)
 	ZEND_FE(numfmt_format, arginfo_numfmt_format)
 	ZEND_FE(numfmt_parse, arginfo_numfmt_parse)

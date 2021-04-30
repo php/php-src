@@ -1,5 +1,5 @@
 --TEST--
-IntlDateTimePatternGenerator::getBestPattern(): errors
+IntlDatePatternGenerator::getBestPattern(): errors
 --SKIPIF--
 <?php
 if (!extension_loaded('intl')) die('skip intl extension not enabled');
@@ -7,10 +7,10 @@ if (!extension_loaded('intl')) die('skip intl extension not enabled');
 <?php
 ini_set("intl.error_level", E_WARNING);
 
-$dtpg = new IntlDateTimePatternGenerator();
+$dtpg = new IntlDatePatternGenerator();
 var_dump($dtpg->getBestPattern("jjmm\x80"));
 
 ?>
 --EXPECTF--
-Warning: IntlDateTimePatternGenerator::getBestPattern(): Skeleton is not a valid UTF-8 string in %s on line %d
+Warning: IntlDatePatternGenerator::getBestPattern(): Skeleton is not a valid UTF-8 string in %s on line %d
 bool(false)

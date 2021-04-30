@@ -12,8 +12,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef DATETIMEPATTERNGENERATOR_CLASS_H
-#define DATETIMEPATTERNGENERATOR_CLASS_H
+#ifndef DATEPATTERNGENERATOR_CLASS_H
+#define DATEPATTERNGENERATOR_CLASS_H
 
 //redefinition of inline in PHP headers causes problems, so include this before
 #include <math.h>
@@ -37,12 +37,12 @@ typedef struct {
 	DateTimePatternGenerator*	dtpg;
 
 	zend_object	zo;
-} IntlDateTimePatternGenerator_object;
+} IntlDatePatternGenerator_object;
 
-static inline IntlDateTimePatternGenerator_object *php_intl_datetimepatterngenerator_fetch_object(zend_object *obj) {
-	return (IntlDateTimePatternGenerator_object *)((char*)(obj) - XtOffsetOf(IntlDateTimePatternGenerator_object, zo));
+static inline IntlDatePatternGenerator_object *php_intl_datepatterngenerator_fetch_object(zend_object *obj) {
+	return (IntlDatePatternGenerator_object *)((char*)(obj) - XtOffsetOf(IntlDatePatternGenerator_object, zo));
 }
-#define Z_INTL_DATETIMEPATTERNGENERATOR_P(zv) php_intl_datetimepatterngenerator_fetch_object(Z_OBJ_P(zv))
+#define Z_INTL_DATETIMEPATTERNGENERATOR_P(zv) php_intl_datepatterngenerator_fetch_object(Z_OBJ_P(zv))
 
 #define DTPATTERNGEN_ERROR(dtpgo)		(dtpgo)->err
 #define DTPATTERNGEN_ERROR_P(dtpgo)		&(DTPATTERNGEN_ERROR(dtpgo))
@@ -50,20 +50,20 @@ static inline IntlDateTimePatternGenerator_object *php_intl_datetimepatterngener
 #define DTPATTERNGEN_ERROR_CODE(dtpgo)	INTL_ERROR_CODE(DTPATTERNGEN_ERROR(dtpgo))
 #define DTPATTERNGEN_ERROR_CODE_P(dtpgo)	&(INTL_ERROR_CODE(DTPATTERNGEN_ERROR(dtpgo)))
 
-#define DTPATTERNGEN_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(IntlDateTimePatternGenerator, dtpgo)
+#define DTPATTERNGEN_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(IntlDatePatternGenerator, dtpgo)
 #define DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_DATETIMEPATTERNGENERATOR, dtpgo)
 #define DTPATTERNGEN_METHOD_FETCH_OBJECT \
 	DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (dtpgo->dtpg == NULL) \
 	{ \
-		zend_throw_error(NULL, "Found unconstructed IntlDateTimePatternGenerator"); \
+		zend_throw_error(NULL, "Found unconstructed IntlDatePatternGenerator"); \
 		RETURN_THROWS(); \
 	}
 
-void dateformat_register_IntlDateTimePatternGenerator_class(void);
+void dateformat_register_IntlDatePatternGenerator_class(void);
 
-extern zend_class_entry *IntlDateTimePatternGenerator_ce_ptr;
+extern zend_class_entry *IntlDatePatternGenerator_ce_ptr;
 
-extern zend_object_handlers IntlDateTimePatternGenerator_handlers;
+extern zend_object_handlers IntlDatePatternGenerator_handlers;
 
-#endif /* #ifndef DATETIMEPATTERNGENERATOR_CLASS_H */
+#endif /* #ifndef DATEPATTERNGENERATOR_CLASS_H */

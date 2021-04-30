@@ -21,7 +21,7 @@
 extern "C" {
 #include "php_intl.h"
 #define USE_DATETIMEPATTERNGENERATOR_POINTER 1
-#include "datetimepatterngenerator_class.h"
+#include "datepatterngenerator_class.h"
 #include <zend_exceptions.h>
 #include <assert.h>
 }
@@ -30,14 +30,14 @@ using icu::DateTimePatternGenerator;
 using icu::Locale;
 using icu::StringPiece;
 
-/* {{{ Internal constructor for IntlDateTimePatternGenerator */
+/* {{{ Internal constructor for IntlDatePatternGenerator */
 static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 	char		*locale_str;
 	size_t		locale_len	= 0;
 	Locale		locale;
-	IntlDateTimePatternGenerator_object* dtpgo;
+	IntlDatePatternGenerator_object* dtpgo;
 
 	intl_error_reset(NULL);
 	object = return_value;
@@ -76,10 +76,10 @@ error:
 }
 /* }}} */
 
-/* {{{ Create IntlDateTimePatternGenerator. */
-U_CFUNC PHP_FUNCTION( datetimepatterngenerator_create )
+/* {{{ Create IntlDatePatternGenerator. */
+U_CFUNC PHP_FUNCTION( datepatterngenerator_create )
 {
-    object_init_ex( return_value, IntlDateTimePatternGenerator_ce_ptr );
+    object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
     if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
@@ -87,8 +87,8 @@ U_CFUNC PHP_FUNCTION( datetimepatterngenerator_create )
 }
 /* }}} */
 
-/* {{{ IntlDateTimePatternGenerator object constructor. */
-U_CFUNC PHP_METHOD( IntlDateTimePatternGenerator, __construct )
+/* {{{ IntlDatePatternGenerator object constructor. */
+U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 {
 	zend_error_handling error_handling;
 
@@ -109,7 +109,7 @@ U_CFUNC PHP_METHOD( IntlDateTimePatternGenerator, __construct )
 
 
 /* {{{ Get date format pattern from skeleton. */
-U_CFUNC PHP_FUNCTION(datetimepatterngenerator_get_best_pattern)
+U_CFUNC PHP_FUNCTION(datepatterngenerator_get_best_pattern)
 {
 	char			*skeleton_str	= NULL;
 	size_t			skeleton_len;
@@ -120,7 +120,7 @@ U_CFUNC PHP_FUNCTION(datetimepatterngenerator_get_best_pattern)
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
-		&object, IntlDateTimePatternGenerator_ce_ptr,  &skeleton_str, &skeleton_len ) == FAILURE )
+		&object, IntlDatePatternGenerator_ce_ptr,  &skeleton_str, &skeleton_len ) == FAILURE )
 	{
 		RETURN_THROWS();
 	}
