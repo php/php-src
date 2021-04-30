@@ -7424,6 +7424,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		zend_string *doc_comment = NULL;
 		zval value_zv;
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
+		flags |= get_virtual_flag(accessors_ast);
 
 		if (!accessors_ast) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
@@ -7478,14 +7479,18 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}
+
+			if (flags & ZEND_ACC_VIRTUAL) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot specify default value for property with explicit accessors");
+			}
 		} else if (!ZEND_TYPE_IS_SET(type)) {
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		info = zend_declare_typed_property(
-			ce, name, &value_zv, flags | get_virtual_flag(accessors_ast), doc_comment, type);
+		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (accessors_ast) {
 			zend_compile_accessors(info, name, type_ast, zend_ast_get_list(accessors_ast));
