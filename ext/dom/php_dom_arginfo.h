@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c41e6d58eb8b0bbdb07401c4f1eb92c6ba3d324c */
+ * Stub hash: 9913983970c7a26ce1e6d71dc290d5eaab894643 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -908,12 +908,12 @@ static zend_class_entry *register_class_DOMNode(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOMNameSpaceNode(void)
+static zend_class_entry *register_class_DOMNameSpaceNode(zend_class_entry *class_entry_DOMNode)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DOMNameSpaceNode", class_DOMNameSpaceNode_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 
 	return class_entry;
 }
