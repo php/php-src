@@ -835,11 +835,11 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 // Define LONG_ADD_SUB, LONG_BW_OP, LONG_MUL, LONG_CMP to replace the LONG_OP in x86 implementation.
 // 'long_ins' should be addition or subtraction.
-|.macro LONG_ADD_SUB, long_ins, reg, addr, tmp_reg1, tmp_reg2
+|.macro LONG_ADD_SUB, long_ins, reg, addr, tmp_reg1
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		ADD_SUB_64_WITH_CONST long_ins, Rx(reg), Rx(reg), Z_LVAL_P(Z_ZV(addr)), tmp_reg1
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg2
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg1
 |		long_ins Rx(reg), Rx(reg), tmp_reg1
 ||	} else if (Z_MODE(addr) == IS_REG) {
 |		long_ins Rx(reg), Rx(reg), Rx(Z_REG(addr))
@@ -849,11 +849,11 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 // 'long_ins' should be 'and', 'orr' or 'eor'
-|.macro LONG_BW_OP, long_ins, reg, addr, tmp_reg1, tmp_reg2
+|.macro LONG_BW_OP, long_ins, reg, addr, tmp_reg1
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		BW_OP_64_WITH_CONST long_ins, Rx(reg), Rx(reg), Z_LVAL_P(Z_ZV(addr)), tmp_reg1
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg2
+|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg1
 |		long_ins Rx(reg), Rx(reg), tmp_reg1
 ||	} else if (Z_MODE(addr) == IS_REG) {
 |		long_ins Rx(reg), Rx(reg), Rx(Z_REG(addr))
@@ -930,22 +930,22 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
-|.macro LONG_MATH, opcode, reg, addr, tmp_reg1, tmp_reg2
+|.macro LONG_MATH, opcode, reg, addr, tmp_reg1
 ||	switch (opcode) {
 ||		case ZEND_ADD:
-|			LONG_ADD_SUB  adds, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_ADD_SUB  adds, reg, addr, tmp_reg1
 ||			break;
 ||		case ZEND_SUB:
-|			LONG_ADD_SUB  subs, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_ADD_SUB  subs, reg, addr, tmp_reg1
 ||			break;
 ||		case ZEND_BW_OR:
-|			LONG_BW_OP  orr, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  orr, reg, addr, tmp_reg1
 ||			break;
 ||		case ZEND_BW_AND:
-|			LONG_BW_OP  and, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  and, reg, addr, tmp_reg1
 ||			break;
 ||		case ZEND_BW_XOR:
-|			LONG_BW_OP  eor, reg, addr, tmp_reg1, tmp_reg2
+|			LONG_BW_OP  eor, reg, addr, tmp_reg1
 ||			break;
 ||		default:
 ||			ZEND_UNREACHABLE();
@@ -3939,7 +3939,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		} else if (same_ops && opcode != ZEND_DIV) {
 			|	LONG_MATH_REG opcode, Rx(result_reg), Rx(result_reg), Rx(result_reg)
 		} else {
-			|	LONG_MATH opcode, result_reg, op2_addr, TMP1, TMP2
+			|	LONG_MATH opcode, result_reg, op2_addr, TMP1
 		}
 	}
 	if (may_overflow) {
@@ -4652,7 +4652,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	LONG_MATH_REG opcode, Rx(result_reg), Rx(result_reg), Rx(result_reg)
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
-		|	LONG_MATH opcode, result_reg, op2_addr, TMP1, TMP2
+		|	LONG_MATH opcode, result_reg, op2_addr, TMP1
 	}
 
 	if (Z_MODE(res_addr) != IS_REG || Z_REG(res_addr) != result_reg) {
