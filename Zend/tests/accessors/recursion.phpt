@@ -1,5 +1,5 @@
 --TEST--
-Recursion behavior of properties without backing property
+Recursion behavior of accessors
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ class Test {
         set;
     }
 
-    public int $prop4 {
+    public int $prop4 = 0 {
         get;
         set { $this->prop4 = $value * 2; }
     }
@@ -49,10 +49,22 @@ try {
 }
 
 $test->prop3 = 1;
-var_dump($test->prop3);
-var_dump(isset($test->prop3));
+try {
+    var_dump($test->prop3);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(isset($test->prop3));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-$test->prop4 = 1;
+try {
+    $test->prop4 = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($test->prop4);
 var_dump(isset($test->prop4));
 
@@ -60,17 +72,18 @@ var_dump($test);
 
 ?>
 --EXPECT--
-Cannot recursively write Test::$prop in accessor without backing property
-Cannot recursively read Test::$prop in accessor without backing property
-Cannot recursively read Test::$prop in accessor without backing property
-Cannot recursively read Test::$prop2 in accessor without backing property
-int(2)
-bool(true)
-int(2)
+Cannot recursively write Test::$prop in accessor
+Cannot recursively read Test::$prop in accessor
+Cannot recursively read Test::$prop in accessor
+Cannot recursively read Test::$prop2 in accessor
+Cannot recursively read Test::$prop3 in accessor
+Cannot recursively read Test::$prop3 in accessor
+Cannot recursively write Test::$prop4 in accessor
+int(0)
 bool(true)
 object(Test)#1 (2) {
   ["prop3"]=>
   int(1)
   ["prop4"]=>
-  int(2)
+  int(0)
 }
