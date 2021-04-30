@@ -14,4 +14,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot declare complex accessors for a promoted property in %s on line %d
+Fatal error: Can only use implicit accessors for a promoted property in %s on line %d

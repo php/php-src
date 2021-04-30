@@ -6694,7 +6694,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 					zend_ast_decl *accessor = (zend_ast_decl *) accessors->child[i];
 					if (accessor->child[2]) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-							"Cannot declare complex accessors for a promoted property");
+							"Can only use implicit accessors for a promoted property");
 					}
 				}
 				zend_compile_accessors(prop, name, type_ast, accessors);
@@ -7217,6 +7217,8 @@ static void zend_compile_accessors(
 		zend_error_noreturn(E_COMPILE_ERROR, "Accessor list cannot be empty");
 	}
 
+	bool has_any_implicit_accessor = false;
+	bool has_any_explicit_accessor = false;
 	for (uint32_t i = 0; i < accessors->children; i++) {
 		zend_ast_decl *accessor = (zend_ast_decl *) accessors->child[i];
 		zend_string *name = accessor->name;
@@ -7303,7 +7305,9 @@ static void zend_compile_accessors(
 				ZSTR_VAL(name));
 		}
 
-		bool auto_prop = !orig_stmt_ast && !(accessor->flags & ZEND_ACC_ABSTRACT);
+		/* Abstract properties are neither explicit nor implicit. */
+		bool implicit_prop = !orig_stmt_ast && !(accessor->flags & ZEND_ACC_ABSTRACT);
+		bool explicit_prop = orig_stmt_ast && !(accessor->flags & ZEND_ACC_ABSTRACT);
 		if (zend_string_equals_literal_ci(name, "get")) {
 			accessor_kind = ZEND_ACCESSOR_GET;
 			if (param_list) {
@@ -7318,7 +7322,7 @@ static void zend_compile_accessors(
 			reset_return_ast = true;
 			*return_ast_ptr = prop_type_ast;
 
-			if (auto_prop) {
+			if (implicit_prop) {
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
@@ -7349,7 +7353,7 @@ static void zend_compile_accessors(
 					"Accessor \"set\" cannot return by reference");
 			}
 
-			if (auto_prop) {
+			if (implicit_prop) {
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
@@ -7368,12 +7372,12 @@ static void zend_compile_accessors(
 		accessor->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
 		zend_function *func = (zend_function *) zend_compile_func_decl(
 			NULL, (zend_ast *) accessor, /* toplevel */ false);
-		if (auto_prop) {
+		if (implicit_prop) {
+			has_any_implicit_accessor = true;
 			func->common.fn_flags |= ZEND_ACC_AUTO_PROP;
 		}
-
-		// TODO: Make this more precise.
-		if (!auto_prop) {
+		if (explicit_prop) {
+			has_any_explicit_accessor = true;
 			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		}
 
@@ -7396,6 +7400,11 @@ static void zend_compile_accessors(
 		if (reset_param_type_ast) {
 			zend_ast_get_list(accessor->child[0])->child[0]->child[0] = NULL;
 		}
+	}
+
+	if (has_any_explicit_accessor && has_any_implicit_accessor) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot specify both implicit and explicit accessors for the same property");
 	}
 }
 
