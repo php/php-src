@@ -9345,12 +9345,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// opline = op_array->opcodes;
 		if (func && !unknown_num_args) {
+			|	ADD_SUB_64_WITH_CONST_32 add, TMP1, RX, (EX_NUM_TO_VAR(call_num_args) + offsetof(zval, u1.type_info)), TMP1 // induction variable
 			for (i = call_num_args; i < func->op_array.last_var; i++) {
-				uint32_t n = EX_NUM_TO_VAR(i);
 				|	// ZVAL_UNDEF(EX_VAR(n))
-				||	ZEND_ASSERT(n <= ADD_SUB_IMM);
-				|	add TMP1, RX, #n
-				|	SET_Z_TYPE_INFO TMP1, IS_UNDEF, TMP2w
+				|	str wzr, [TMP1], #16
 			}
 
 			if (call_num_args <= func->op_array.num_args) {
