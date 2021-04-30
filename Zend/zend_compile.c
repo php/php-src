@@ -6676,7 +6676,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			/* Don't give the property an explicit default value. For typed properties this means
 			 * uninitialized, for untyped properties it means an implicit null default value. */
 			zval default_value;
-			if (ZEND_TYPE_IS_SET(type)) {
+			if (ZEND_TYPE_IS_SET(type) || accessors_ast) {
 				ZVAL_UNDEF(&default_value);
 			} else {
 				ZVAL_NULL(&default_value);
@@ -7499,7 +7499,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot specify default value for property with explicit accessors");
 			}
-		} else if (!ZEND_TYPE_IS_SET(type)) {
+		} else if (!ZEND_TYPE_IS_SET(type) && !accessors_ast) {
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);

@@ -835,7 +835,7 @@ call_getter:
 uninit_error:
 	if (type != BP_VAR_IS) {
 		if (UNEXPECTED(prop_info)) {
-			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
+			zend_throw_error(NULL, "Property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
 		} else {
@@ -915,6 +915,9 @@ found:
 				if (Z_TYPE_P(variable_ptr) == IS_UNDEF) {
 					ZEND_ASSERT(Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT);
 					Z_PROP_FLAG_P(variable_ptr) = 0;
+					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+						prop_info = NULL;
+					}
 					goto write_std_property;
 				}
 			}
