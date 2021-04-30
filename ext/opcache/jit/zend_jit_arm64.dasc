@@ -324,6 +324,39 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
+|.macro ADD_SUB_32_WITH_CONST, ins, res_reg, op1_reg, val, tmp_reg
+||	if (val == 0) {
+|		ins res_reg, op1_reg, wzr
+||	} else if (((int32_t)(val)) > 0 && ((int32_t)(val)) <= CMP_IMM) {
+|		ins res_reg, op1_reg, #val
+||	} else {
+|		LOAD_32BIT_VAL tmp_reg, val
+|		ins res_reg, op1_reg, tmp_reg
+||	}
+|.endmacro
+
+|.macro ADD_SUB_64_WITH_CONST_32, ins, res_reg, op1_reg, val, tmp_reg
+||	if (val == 0) {
+|		ins res_reg, op1_reg, xzr
+||	} else if (((int32_t)(val)) > 0 && ((int32_t)(val)) <= CMP_IMM) {
+|		ins res_reg, op1_reg, #val
+||	} else {
+|		LOAD_32BIT_VAL tmp_reg, val
+|		ins res_reg, op1_reg, tmp_reg
+||	}
+|.endmacro
+
+|.macro ADD_SUB_64_WITH_CONST, ins, res_reg, op1_reg, val, tmp_reg
+||	if (val == 0) {
+|		ins res_reg, op1_reg, xzr
+||	} else if (((int64_t)(val)) > 0 && ((int64_t)(val)) <= CMP_IMM) {
+|		ins res_reg, op1_reg, #val
+||	} else {
+|		LOAD_64BIT_VAL tmp_reg, val
+|		ins res_reg, op1_reg, tmp_reg
+||	}
+|.endmacro
+
 // Safe memory load/store with an unsigned immediate offset.
 // When using Z_OFFSET(addr), which is 24-bit long, as the unsigned offset to compute a memory address,
 // we should firstly check the range.
@@ -365,12 +398,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.macro LOAD_ADDR_ZTS, reg, struct, field
 |	.if ZTS
 |		LOAD_TSRM_CACHE TMP3
-||		if (((uintptr_t)(struct.._offset+offsetof(zend_..struct, field))) > ADD_SUB_IMM) {
-|			LOAD_32BIT_VAL reg, (struct.._offset + offsetof(zend_..struct, field))
-|			add reg, reg, TMP3
-||		} else {
-|			add reg, TMP3, #(struct.._offset + offsetof(zend_..struct, field))
-||		}
+|		ADD_SUB_64_WITH_CONST_32 add, reg, TMP3, (struct.._offset + offsetof(zend_..struct, field)), reg
 |	.else
 |		LOAD_ADDR reg, &struct.field
 |	.endif
@@ -520,12 +548,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro LOAD_BASE_ADDR, reg, base, offset
 ||	if (offset) {
-||		if (((uintptr_t)(offset)) > ADD_SUB_IMM) {
-|			LOAD_32BIT_VAL reg, offset
-|			add reg, Rx(base), reg
-||		} else {
-|			add reg, Rx(base), #offset
-||		}
+|		ADD_SUB_64_WITH_CONST_32 add, reg, Rx(base), offset, reg
 ||	} else {
 ||		if (base == ZREG_RSP) {
 |			mov reg, sp
@@ -814,12 +837,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 // 'long_ins' should be addition or subtraction.
 |.macro LONG_ADD_SUB, long_ins, reg, addr, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-||		if(Z_LVAL_P(Z_ZV(addr)) >= 0 && Z_LVAL_P(Z_ZV(addr)) <= ADD_SUB_IMM) {
-|			long_ins Rx(reg), Rx(reg), #(Z_LVAL_P(Z_ZV(addr)))
-||		} else {
-|			LOAD_64BIT_VAL tmp_reg1, Z_LVAL_P(Z_ZV(addr))
-|			long_ins Rx(reg), Rx(reg), tmp_reg1
-||		}
+|		ADD_SUB_64_WITH_CONST long_ins, Rx(reg), Rx(reg), Z_LVAL_P(Z_ZV(addr)), tmp_reg1
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg2
 |		long_ins Rx(reg), Rx(reg), tmp_reg1
@@ -2131,12 +2149,7 @@ static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	ldr REG1, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	ldr REG2, [REG1, #offsetof(zend_jit_op_array_hot_extension, counter)]
 	|	ldrh TMP2w, [REG2]
-	||	if (cost > ADD_SUB_IMM) {
-	|		LOAD_32BIT_VAL TMP1w, cost
-	|		subs TMP2w, TMP2w, TMP1w
-	||	} else {
-	|		subs TMP2w, TMP2w, #cost
-	||	}
+	|	ADD_SUB_32_WITH_CONST subs, TMP2w, TMP2w, cost, TMP1w
 	|	strh TMP2w, [REG2]
 	|	ble ->hybrid_hot_code
 	|	GET_IP REG2
@@ -2209,12 +2222,7 @@ static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	add TMP1, REG1, IP
 	|	ldr REG2, [TMP1, #offsetof(zend_op_trace_info, counter)]
 	|	ldrh TMP2w, [REG2]
-	||	if (cost > ADD_SUB_IMM) {
-	|		LOAD_32BIT_VAL TMP3w, cost
-	|		subs TMP2w, TMP2w, TMP3w
-	||	} else {
-	|		subs TMP2w, TMP2w, #cost
-	||	}
+	|	ADD_SUB_32_WITH_CONST subs, TMP2w, TMP2w, cost, TMP3w
 	|	strh TMP2w, [REG2]
 	|	ble ->hybrid_hot_trace
 	|	ldr TMP2, [TMP1, #offsetof(zend_op_trace_info, orig_handler)]
@@ -2436,12 +2444,7 @@ static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 	|	strb TMP1w, [sp, #-16]!
 	|1:
 	|	ldrb TMP1w, [sp]
-	||	if (n > ADD_SUB_IMM) {
-	|		LOAD_32BIT_VAL TMP2w, n
-	|		add TMP1w, TMP1w, TMP2w
-	||	} else {
-	|		add TMP1w, TMP1w, #n
-	||	}
+	|	ADD_SUB_32_WITH_CONST add, TMP1w, TMP1w, n, TMP2w
 	|	str TMP1w, [sp]
 	|	b ->trace_exit
 
@@ -8879,35 +8882,17 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		if (func) {
 			|	// fbc = CACHED_PTR(opline->result.num + sizeof(void*));
 			|	ldr REG0, EX->run_time_cache
-			||	if (opline->result.num + sizeof(void*) > ADD_SUB_IMM) {
-			|		LOAD_32BIT_VAL TMP1w, (opline->result.num + sizeof(void*))
-			|		add REG0, REG0, TMP1
-			||	} else {
-			|		add REG0, REG0, #(opline->result.num + sizeof(void*))
-			||	}
-			|	ldr REG0, [REG0]
+			|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG0, REG0, (opline->result.num + sizeof(void*)), TMP1
 			|	cbz REG0, >1
 		} else {
 			|	// if (CACHED_PTR(opline->result.num) == obj->ce)) {
 			|	ldr REG0, EX->run_time_cache
-			||	if (opline->result.num > ADD_SUB_IMM) {
-			|		LOAD_32BIT_VAL TMP1w, opline->result.num
-			|		add TMP1, REG0, TMP1
-			||	} else {
-			|		add TMP1, REG0, #opline->result.num
-			||	}
-			|	ldr REG2, [TMP1]
+			|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG2, REG0, opline->result.num, TMP1
 			|	ldr TMP1, [FCARG1x, #offsetof(zend_object, ce)]
 			|	cmp REG2, TMP1
 			|	bne >1
 			|	// fbc = CACHED_PTR(opline->result.num + sizeof(void*));
-			||	if (opline->result.num + sizeof(void*) > ADD_SUB_IMM) {
-			|		LOAD_32BIT_VAL TMP1w, (opline->result.num + sizeof(void*))
-			|		add TMP1, TMP1, REG0
-			||	} else {
-			|		add TMP1, REG0, #(opline->result.num + sizeof(void*))
-			||	}
-			|	ldr REG0, [TMP1]
+			|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG0, REG0, (opline->result.num + sizeof(void*)), TMP1
 		}
 
 		|.cold_code
@@ -11854,12 +11839,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|	LOAD_ADDR FCARG1x, (ptrdiff_t)varname
 	|	ldr FCARG2x, EX->run_time_cache
 	if (opline->extended_value) {
-		if (opline->extended_value > ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1, opline->extended_value
-			|	add FCARG2x, FCARG2x, TMP1
-		} else {
-			|	add FCARG2x, FCARG2x, #opline->extended_value
-		}
+		|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, FCARG2x, opline->extended_value, TMP1
 	}
 	|	EXT_CALL zend_jit_fetch_global_helper, REG0
 	|	mov REG0, RETVALx
@@ -12837,12 +12817,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		|	// value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
 		|	LOAD_ADDR FCARG2x, name
 		|	ldr CARG3, EX->run_time_cache
-		if (opline->extended_value > ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1, opline->extended_value
-			|	add CARG3, CARG3, TMP1
-		} else {
-			|	add CARG3, CARG3, #opline->extended_value
-		}
+		|	ADD_SUB_64_WITH_CONST_32 add, CARG3, CARG3, opline->extended_value, TMP1
 		if (opline->result_type == IS_UNUSED) {
 			|	mov CARG4, xzr
 		} else {
@@ -13146,12 +13121,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 		|	LOAD_ADDR FCARG2x, name
 		|	LOAD_ZVAL_ADDR CARG3, val_addr
 		|	ldr CARG4, EX->run_time_cache
-		if ((opline+1)->extended_value > ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1w, (opline+1)->extended_value
-			|	add CARG4, CARG4, TMP1
-		} else {
-			|	add CARG4, CARG4, #(opline+1)->extended_value
-		}
+		|	ADD_SUB_64_WITH_CONST_32 add, CARG4, CARG4, (opline+1)->extended_value, TMP1
 		|	LOAD_ADDR CARG5, binary_op
 		|	EXT_CALL zend_jit_assign_obj_op_helper, REG0
 
@@ -13296,13 +13266,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		needs_slow_path = 1;
 
 		|	ldr REG0, EX->run_time_cache
-		if (opline->extended_value >= ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1w, opline->extended_value
-			|	add TMP1, REG0, TMP1
-		} else {
-			|	add TMP1, REG0, #opline->extended_value
-		}
-		|	ldr REG2, [TMP1]
+		|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG2, REG0, opline->extended_value, TMP1
 		|	ldr TMP1, [FCARG1x, #offsetof(zend_object, ce)]
 		|	cmp REG2, TMP1
 		|	bne >5
@@ -13420,12 +13384,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 
 		|	LOAD_ZVAL_ADDR CARG3, val_addr
 		|	ldr CARG4, EX->run_time_cache
-		if (opline->extended_value > ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1w, opline->extended_value
-			|	add CARG4, CARG4, TMP1
-		} else {
-			|	add CARG4, CARG4, #opline->extended_value
-		}
+		|	ADD_SUB_64_WITH_CONST_32 add, CARG4, CARG4, opline->extended_value, TMP1
 		if (RETURN_VALUE_USED(opline)) {
 			|	LOAD_ZVAL_ADDR CARG5, res_addr
 		} else {
@@ -14047,12 +14006,7 @@ static bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *opline,
 		|	ldr FCARG2x, EX->func
 		|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
 		|	ldr REG0, EX->run_time_cache
-		if (opline->op2.num > ADD_SUB_IMM) {
-			|	LOAD_32BIT_VAL TMP1, opline->op2.num
-			|	add CARG4, REG0, TMP1
-		} else {
-			|	add CARG4, REG0, #opline->op2.num
-		}
+		|	ADD_SUB_64_WITH_CONST_32 add, CARG4, REG0, opline->op2.num, TMP1
 		|	EXT_CALL zend_jit_verify_return_slow, REG0
 		if (!zend_jit_check_exception(Dst)) {
 			return 0;
