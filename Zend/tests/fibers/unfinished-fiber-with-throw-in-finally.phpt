@@ -44,5 +44,5 @@ fiber
 inner finally
 finally exception
 outer finally
-Cannot suspend in a force closed fiber
+Cannot suspend in a force-closed fiber
 done

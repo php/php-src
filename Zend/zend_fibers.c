@@ -349,8 +349,6 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 		if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
 			if (EXPECTED(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))) {
 				zend_clear_exception();
-			} else {
-				zend_exception_error(EG(exception), E_ERROR);
 			}
 		} else {
 			fiber->status = ZEND_FIBER_STATUS_THREW;
@@ -380,14 +378,24 @@ static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	if (fiber->status == ZEND_FIBER_STATUS_SUSPENDED) {
-		zend_object *exception = EG(exception);
-		EG(exception) = NULL;
+	if (fiber->status != ZEND_FIBER_STATUS_SUSPENDED) {
+		return;
+	}
 
-		fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
+	zend_object *exception = EG(exception);
+	EG(exception) = NULL;
 
-		zend_fiber_switch_to(fiber);
+	fiber->status = ZEND_FIBER_STATUS_SHUTDOWN;
 
+	zend_fiber_switch_to(fiber);
+
+	if (EG(exception)) {
+		zend_exception_set_previous(EG(exception), exception);
+
+		if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+			zend_exception_error(EG(exception), E_ERROR);
+		}
+	} else {
 		EG(exception) = exception;
 	}
 }
@@ -471,7 +479,7 @@ ZEND_METHOD(Fiber, suspend)
 	}
 
 	if (UNEXPECTED(fiber->status == ZEND_FIBER_STATUS_SHUTDOWN)) {
-		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force closed fiber");
+		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 		RETURN_THROWS();
 	}
 

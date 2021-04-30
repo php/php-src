@@ -1,5 +1,5 @@
 --TEST--
-Suspend in force closed fiber
+Suspend in force-closed fiber
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ unset($fiber);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught FiberError: Cannot suspend in a force closed fiber in %ssuspend-in-force-close-fiber.php:%d
+Fatal error: Uncaught FiberError: Cannot suspend in a force-closed fiber in %ssuspend-in-force-close-fiber.php:%d
 Stack trace:
 #0 %ssuspend-in-force-close-fiber.php(%d): Fiber::suspend()
 #1 [internal function]: {closure}()
