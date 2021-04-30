@@ -242,8 +242,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
 			zend_unexpected_extra_named_error();
 			break;
-		default:
-			ZEND_ASSERT(error_code != ZPP_ERROR_OK);
+		case ZPP_ERROR_FAILURE:
+			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
