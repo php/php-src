@@ -730,7 +730,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		free(compiler_globals->function_table);
 	}
 	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
-		zend_hash_destroy(compiler_globals->class_table);
+		/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
+		zend_hash_graceful_reverse_destroy(compiler_globals->class_table);
 		free(compiler_globals->class_table);
 	}
 	if (compiler_globals->auto_globals != GLOBAL_AUTO_GLOBALS_TABLE) {
