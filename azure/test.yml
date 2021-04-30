@@ -17,7 +17,7 @@ steps:
       export SKIP_IO_CAPTURE_TESTS=1
       export MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-6.0/bin/llvm-symbolizer
       rm -rf junit.xml | true
-      php run-tests.php -P -q \
+      sapi/cli/php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
