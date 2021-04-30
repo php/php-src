@@ -206,8 +206,17 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 	if (result[0] == isc_info_sql_records) {
 		unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
 
+		if (result_size > sizeof(result)) {
+			ret = -1;
+			goto free_statement;
+		}
 		while (result[i] != isc_info_end && i < result_size) {
 			short len = (short)isc_vax_integer(&result[i+1],2);
+			/* bail out on bad len */
+			if (len != 1 && len != 2 && len != 4) {
+				ret = -1;
+				goto free_statement;
+			}
 			if (result[i] != isc_info_req_select_count) {
 				ret += isc_vax_integer(&result[i+3],len);
 			}
