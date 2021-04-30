@@ -201,29 +201,75 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro LOAD_ADDR, reg, addr
 |	// 48-bit virtual address
-|	mov reg, #((uintptr_t)(addr) & 0xffff)
-|	movk reg, #(((uintptr_t)(addr) >> 16) & 0xffff), lsl #16
-|	movk reg, #(((uintptr_t)(addr) >> 32) & 0xffff), lsl #32
+||	if (((uintptr_t)(addr)) == 0) {
+|		mov reg, xzr
+||	} else if (((uintptr_t)(addr)) <= MOVZ_IMM) {
+| 		movz reg, #((uint64_t)(addr))
+||	} else if ((uintptr_t)(addr) & 0xffff) {
+|		movz reg, #((uintptr_t)(addr) & 0xffff)
+||		if (((uintptr_t)(addr) >> 16) & 0xffff) {
+|			movk reg, #(((uintptr_t)(addr) >> 16) & 0xffff), lsl #16
+||		}
+||		if (((uintptr_t)(addr) >> 32) & 0xffff) {
+|			movk reg, #(((uintptr_t)(addr) >> 32) & 0xffff), lsl #32
+||		}
+||	} else if (((uintptr_t)(addr) >> 16) & 0xffff) {
+|		movz reg, #(((uintptr_t)(addr) >> 16) & 0xffff), lsl #16
+||		if (((uintptr_t)(addr) >> 32) & 0xffff) {
+|			movk reg, #(((uintptr_t)(addr) >> 32) & 0xffff), lsl #32
+||		}
+||	} else {
+|		movz reg, #(((uintptr_t)(addr) >> 32) & 0xffff), lsl #32
+||	}
 |.endmacro
 
 // Type cast to unsigned is used to avoid undefined behavior.
 |.macro LOAD_32BIT_VAL, reg, val
-||	if (((uintptr_t)(val)) <= MOVZ_IMM) {
-|		movz reg, #val
+||	if (((uint32_t)(val)) <= MOVZ_IMM) {
+|		movz reg, #((uint32_t)(val))
+||	} else if (((uint32_t)(val) & 0xffff)) {
+|		movz reg, #((uint32_t)(val) & 0xffff)
+||		if ((((uint32_t)(val) >> 16) & 0xffff)) {
+|			movk reg, #(((uint32_t)(val) >> 16) & 0xffff), lsl #16
+||		}
 ||	} else {
-|		mov reg, #((uint32_t)(val) & 0xffff)
-|		movk reg, #(((uint32_t)(val) >> 16) & 0xffff), lsl #16
+|		movz reg, #(((uint32_t)(val) >> 16) & 0xffff), lsl #16
 ||	}
 |.endmacro
 
 |.macro LOAD_64BIT_VAL, reg, val
-||	if (((uintptr_t)(val)) <= MOVZ_IMM) {
-|		movz reg, #val
+||	if (((uint64_t)(val)) == 0) {
+|		mov reg, xzr
+||	} else if (((uint64_t)(val)) <= MOVZ_IMM) {
+|		movz reg, #((uint64_t)(val))
+||	} else if (~((uint64_t)(val)) <= MOVZ_IMM) {
+| 		movn reg, #(~((uint64_t)(val)))
+||	} else if ((uint64_t)(val) & 0xffff) {
+|		movz reg, #((uint64_t)(val) & 0xffff)
+||		if (((uint64_t)(val) >> 16) & 0xffff) {
+|			movk reg, #(((uint64_t)(val) >> 16) & 0xffff), lsl #16
+||		}
+||		if (((uint64_t)(val) >> 32) & 0xffff) {
+|			movk reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
+||		}
+||		if ((((uint64_t)(val) >> 48) & 0xffff)) {
+|			movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+||		}
+||	} else if (((uint64_t)(val) >> 16) & 0xffff) {
+|		movz reg, #(((uint64_t)(val) >> 16) & 0xffff), lsl #16
+||		if (((uint64_t)(val) >> 32) & 0xffff) {
+|			movk reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
+||		}
+||		if ((((uint64_t)(val) >> 48) & 0xffff)) {
+|			movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+||		}
+||	} else if (((uint64_t)(val) >> 32) & 0xffff) {
+|		movz reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
+||		if ((((uint64_t)(val) >> 48) & 0xffff)) {
+|			movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+||		}
 ||	} else {
-|		mov reg, #((uint64_t)(val) & 0xffff)
-|		movk reg, #(((uint64_t)(val) >> 16) & 0xffff), lsl #16
-|		movk reg, #(((uint64_t)(val) >> 32) & 0xffff), lsl #32
-|		movk reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
+|		movz reg, #(((uint64_t)(val) >> 48) & 0xffff), lsl #48
 ||	}
 |.endmacro
 
