@@ -1066,7 +1066,7 @@ static void inherit_accessor(
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 
-		*child_ptr = zend_duplicate_function(parent, ce, /* is_interface */ false);
+		*child_ptr = zend_duplicate_function(parent, ce);
 		return;
 	}
 
@@ -2213,7 +2213,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				memcpy(accessors, property_info->accessors, ZEND_ACCESSOR_STRUCT_SIZE);
 				for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
 					if (accessors[i]) {
-						accessors[i] = zend_duplicate_function(accessors[i], ce, false);
+						accessors[i] = zend_duplicate_function(accessors[i], ce);
 						if (accessors[i]->common.fn_flags & ZEND_ACC_ABSTRACT) {
 							ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 						}
