@@ -7217,7 +7217,8 @@ static void zend_compile_accessors(
 		zend_error_noreturn(E_COMPILE_ERROR, "Accessor list cannot be empty");
 	}
 
-	bool has_any_implicit_accessor = false;
+	bool has_implicit_get = false;
+	bool has_implicit_set = false;
 	bool has_any_explicit_accessor = false;
 	for (uint32_t i = 0; i < accessors->children; i++) {
 		zend_ast_decl *accessor = (zend_ast_decl *) accessors->child[i];
@@ -7323,6 +7324,7 @@ static void zend_compile_accessors(
 			*return_ast_ptr = prop_type_ast;
 
 			if (implicit_prop) {
+				has_implicit_get = true;
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
@@ -7354,6 +7356,7 @@ static void zend_compile_accessors(
 			}
 
 			if (implicit_prop) {
+				has_implicit_set = true;
 				zend_ast *prop_fetch = zend_ast_create(ZEND_AST_PROP,
 					zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
@@ -7373,7 +7376,6 @@ static void zend_compile_accessors(
 		zend_function *func = (zend_function *) zend_compile_func_decl(
 			NULL, (zend_ast *) accessor, /* toplevel */ false);
 		if (implicit_prop) {
-			has_any_implicit_accessor = true;
 			func->common.fn_flags |= ZEND_ACC_AUTO_PROP;
 		}
 		if (explicit_prop) {
@@ -7402,9 +7404,13 @@ static void zend_compile_accessors(
 		}
 	}
 
-	if (has_any_explicit_accessor && has_any_implicit_accessor) {
+	if (has_any_explicit_accessor && (has_implicit_get || has_implicit_set)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot specify both implicit and explicit accessors for the same property");
+	}
+
+	if (has_implicit_set && !prop_info->accessors[ZEND_ACCESSOR_GET]) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot have implicit set without get");
 	}
 }
 

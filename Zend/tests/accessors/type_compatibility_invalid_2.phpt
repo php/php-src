@@ -4,10 +4,10 @@ Invalid type compatibility for write-only property
 <?php
 
 class A {
-    public int|float $a { set; }
+    public int|float $a { set {} }
 }
 class B extends A {
-    public int $a { set; }
+    public int $a { set {} }
 }
 
 ?>
