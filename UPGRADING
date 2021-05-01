@@ -226,6 +226,9 @@ PHP 8.1 UPGRADE NOTES
   . Binding in execute has been added to mysqli prepared statements.
     Parameters can now be passed to mysqli_stmt::execute as an array.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
+  . A new function has been added to mysqli_result called mysqli_fetch_column().
+    It allows for fetching single scalar values from the result set.
+    RFC: https://wiki.php.net/rfc/mysqli_fetch_column
 
 - PDO MySQL:
   . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
