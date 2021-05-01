@@ -436,6 +436,39 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
+/* {{{ Fetch a column from the result row  */
+PHP_FUNCTION(mysqli_fetch_column)
+{
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	zval 			row_array;
+	zend_long		col_no = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &col_no) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES*, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+
+	if (col_no < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	if (col_no >= mysql_num_fields(result)) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
+		RETURN_THROWS();
+	}
+
+	php_mysqli_fetch_into_hash_aux(&row_array, result, MYSQLI_NUM);
+	if (Z_TYPE(row_array) != IS_ARRAY) {
+		zval_ptr_dtor_nogc(&row_array);
+		RETURN_FALSE;
+	}
+
+	ZVAL_COPY(return_value, zend_hash_index_find(Z_ARR(row_array), col_no));
+	zval_ptr_dtor_nogc(&row_array);
+}
+/* }}} */
+
 /* {{{ Fetches all result rows as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_all)
 {
