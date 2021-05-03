@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
 
+- XMLReader:
+  . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
+
 29 Apr 2021, PHP 8.0.5
 
 - Core:
