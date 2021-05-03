@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
+  . Fixed bug #79100 (Wrong FTP error messages). (cmb)
 
 - ODBC:
   . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
