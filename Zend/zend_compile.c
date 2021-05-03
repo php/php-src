@@ -7414,10 +7414,10 @@ static void zend_compile_accessors(
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot have implicit set without get");
 	}
 
-	if (has_implicit_get && !has_implicit_set
-			&& (get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+	if (get && (get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			&& !prop_info->accessors[ZEND_ACCESSOR_SET]) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot have implicit &get without set. "
+			"Cannot have &get without set. "
 			"Either remove the \"&\" or add \"set\" accessor");
 	}
 }

@@ -1,10 +1,10 @@
 --TEST--
-Cannot have only &get (implicit)
+Cannot have only &get (explicit)
 --FILE--
 <?php
 
 class Test {
-    public $prop { &get; }
+    public $prop { &get {} }
 }
 
 ?>

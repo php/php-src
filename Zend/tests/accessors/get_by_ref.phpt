@@ -7,15 +7,18 @@ class Test {
     public $_byVal = [];
     public $byVal {
         get { return $this->_byVal; }
+        set { $this->_byVal = $value; }
     }
 
     public $_byRef = [];
     public $byRef {
         &get { return $this->_byRef; }
+        set { $this->_byRef = $value; }
     }
 
     public int $byRefType {
         &get { $var = "42"; return $var; }
+        set { }
     }
 }
 

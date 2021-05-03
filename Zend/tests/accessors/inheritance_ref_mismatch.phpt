@@ -4,10 +4,10 @@ By-ref return mismatch during inheritance
 <?php
 
 class A {
-    public $prop { &get {} }
+    public $prop { &get; set; }
 }
 class B extends A {
-    public $prop { get {} }
+    public $prop { get; }
 }
 
 ?>
