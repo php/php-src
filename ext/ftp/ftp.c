@@ -59,6 +59,11 @@
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
+#ifdef PHP_WIN32
+# undef ETIMEDOUT
+# define ETIMEDOUT WSAETIMEDOUT
+#endif
+
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
@@ -1260,7 +1265,8 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *arg
 
 	data = ftp->outbuf;
 
-	/* Clear the extra-lines buffer */
+	/* Clear the inbuf and extra-lines buffer */
+	ftp->inbuf[0] = '\0';
 	ftp->extra = NULL;
 
 	if (my_send(ftp, ftp->fd, data, size) != size) {
@@ -1430,15 +1436,15 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
+			char buf[256];
+			if (n == 0) {
 #ifdef PHP_WIN32
-			if (n == 0) {
 				_set_errno(ETIMEDOUT);
-			}
 #else
-			if (n == 0) {
 				errno = ETIMEDOUT;
-			}
 #endif
+			}
+			php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror(errno, buf, sizeof buf));
 			return -1;
 		}
 
@@ -1466,18 +1472,17 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	SSL *handle = NULL;
 	php_socket_t fd;
 #endif
-
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
+		char buf[256];
+		if (n == 0) {
 #ifdef PHP_WIN32
-		if (n == 0) {
 			_set_errno(ETIMEDOUT);
-		}
 #else
-		if (n == 0) {
 			errno = ETIMEDOUT;
-		}
 #endif
+		}
+		php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror(errno, buf, sizeof buf));
 		return -1;
 	}
 
@@ -1543,15 +1548,15 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
+		char buf[256];
+		if (n == 0) {
 #ifdef PHP_WIN32
-		if (n == 0) {
 			_set_errno(ETIMEDOUT);
-		}
 #else
-		if (n == 0) {
 			errno = ETIMEDOUT;
-		}
 #endif
+		}
+		php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror(errno, buf, sizeof buf));
 		return 0;
 	}
 
@@ -1566,15 +1571,15 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, POLLOUT, 1000);
 	if (n < 1) {
+		char buf[256];
+		if (n == 0) {
 #ifdef PHP_WIN32
-		if (n == 0) {
 			_set_errno(ETIMEDOUT);
-		}
 #else
-		if (n == 0) {
 			errno = ETIMEDOUT;
-		}
 #endif
+		}
+		php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror(errno, buf, sizeof buf));
 		return 0;
 	}
 
@@ -1590,15 +1595,15 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
+		char buf[256];
+		if (n == 0) {
 #ifdef PHP_WIN32
-		if (n == 0) {
 			_set_errno(ETIMEDOUT);
-		}
 #else
-		if (n == 0) {
 			errno = ETIMEDOUT;
-		}
 #endif
+		}
+		php_error_docref(NULL, E_WARNING, "%s", php_socket_strerror(errno, buf, sizeof buf));
 		return -1;
 	}
 

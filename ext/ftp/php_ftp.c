@@ -248,7 +248,9 @@ PHP_FUNCTION(ftp_login)
 
 	/* log in */
 	if (!ftp_login(ftp, user, user_len, pass, pass_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -269,7 +271,9 @@ PHP_FUNCTION(ftp_pwd)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (!(pwd = ftp_pwd(ftp))) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -289,7 +293,9 @@ PHP_FUNCTION(ftp_cdup)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (!ftp_cdup(ftp)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -312,7 +318,9 @@ PHP_FUNCTION(ftp_chdir)
 
 	/* change directories */
 	if (!ftp_chdir(ftp, dir, dir_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -335,7 +343,9 @@ PHP_FUNCTION(ftp_exec)
 
 	/* execute serverside command */
 	if (!ftp_exec(ftp, cmd, cmd_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -377,7 +387,9 @@ PHP_FUNCTION(ftp_mkdir)
 
 	/* create directory */
 	if (NULL == (tmp = ftp_mkdir(ftp, dir, dir_len))) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -400,7 +412,9 @@ PHP_FUNCTION(ftp_rmdir)
 
 	/* remove directorie */
 	if (!ftp_rmdir(ftp, dir, dir_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -423,7 +437,9 @@ PHP_FUNCTION(ftp_chmod)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (!ftp_chmod(ftp, mode, filename, filename_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -557,7 +573,9 @@ PHP_FUNCTION(ftp_systype)
 	GET_FTPBUF(ftp, z_ftp);
 
 	if (NULL == (syst = ftp_syst(ftp))) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -599,7 +617,9 @@ PHP_FUNCTION(ftp_fget)
 	}
 
 	if (!ftp_get(ftp, stream, file, file_len, xtype, resumepos)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -645,7 +665,9 @@ PHP_FUNCTION(ftp_nb_fget)
 	ftp->closestream = 0; /* do not close */
 
 	if ((ret = ftp_nb_get(ftp, stream, file, file_len, xtype, resumepos)) == PHP_FTP_FAILED) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_LONG(ret);
 	}
 
@@ -725,7 +747,9 @@ PHP_FUNCTION(ftp_get)
 	if (!ftp_get(ftp, outstream, remote, remote_len, xtype, resumepos)) {
 		php_stream_close(outstream);
 		VCWD_UNLINK(local);
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -790,7 +814,9 @@ PHP_FUNCTION(ftp_nb_get)
 		php_stream_close(outstream);
 		ftp->stream = NULL;
 		VCWD_UNLINK(local);
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
@@ -876,7 +902,9 @@ PHP_FUNCTION(ftp_fput)
 	}
 
 	if (!ftp_put(ftp, remote, remote_len, stream, xtype, startpos)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -926,7 +954,9 @@ PHP_FUNCTION(ftp_nb_fput)
 	ftp->closestream = 0; /* do not close */
 
 	if (((ret = ftp_nb_put(ftp, remote, remote_len, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_LONG(ret);
 	}
 
@@ -976,7 +1006,9 @@ PHP_FUNCTION(ftp_put)
 
 	if (!ftp_put(ftp, remote, remote_len, instream, xtype, startpos)) {
 		php_stream_close(instream);
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 	php_stream_close(instream);
@@ -1008,7 +1040,9 @@ PHP_FUNCTION(ftp_append)
 
 	if (!ftp_append(ftp, remote, remote_len, instream, xtype)) {
 		php_stream_close(instream);
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 	php_stream_close(instream);
@@ -1126,7 +1160,9 @@ PHP_FUNCTION(ftp_rename)
 
 	/* rename the file */
 	if (!ftp_rename(ftp, src, src_len, dest, dest_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -1149,7 +1185,9 @@ PHP_FUNCTION(ftp_delete)
 
 	/* delete the file */
 	if (!ftp_delete(ftp, file, file_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
@@ -1172,7 +1210,9 @@ PHP_FUNCTION(ftp_site)
 
 	/* send the site command */
 	if (!ftp_site(ftp, cmd, cmd_len)) {
-		php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		if (*ftp->inbuf) {
+			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
+		}
 		RETURN_FALSE;
 	}
 
