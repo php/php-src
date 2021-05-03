@@ -925,6 +925,33 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 }
 /* }}} */
 
+void dom_node_remove_ids_from_doc(xmlNodePtr node) /* {{{ */
+{
+	xmlNodePtr child;
+	xmlAttrPtr attrp;
+
+	if (node->type == XML_DTD_NODE) {
+		return; // Skip DTD nodes, see bug #54601
+	}
+
+	child = node->children;
+	while (child) {
+		dom_node_remove_ids_from_doc(child);
+		child = child->next;
+	}
+
+	attrp = node->properties;
+	while (attrp) {
+		if (attrp->atype == XML_ATTRIBUTE_ID) {
+			xmlRemoveID(attrp->doc, attrp);
+			attrp->atype = 0;
+			break;
+		}
+		attrp = attrp->next;
+	}
+}
+/* }}} */
+
 /* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
@@ -1217,6 +1244,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	while (children) {
 		if (children == child) {
 			xmlUnlinkNode(child);
+			dom_node_remove_ids_from_doc(child);
 			DOM_RET_OBJ(child, &ret, intern);
 			return;
 		}
