@@ -860,6 +860,11 @@ PHP_METHOD(XMLReader, open)
 		RETURN_THROWS();
 	}
 
+	if (encoding && CHECK_NULL_PATH(encoding, encoding_len)) {
+		php_error_docref(NULL, E_WARNING, "Encoding must not contain NUL bytes");
+		RETURN_FALSE;
+	}
+
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 
 	if (valid_file) {
@@ -1033,6 +1038,11 @@ PHP_METHOD(XMLReader, XML)
 	if (!source_len) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
+	}
+
+	if (encoding && CHECK_NULL_PATH(encoding, encoding_len)) {
+		php_error_docref(NULL, E_WARNING, "Encoding must not contain NUL bytes");
+		RETURN_FALSE;
 	}
 
 	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
