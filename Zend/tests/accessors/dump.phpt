@@ -13,7 +13,14 @@ class Test {
     }
 }
 
-var_dump(new Test);
+$test = new Test;
+var_dump($test);
+var_dump(get_object_vars($test));
+var_dump((array) $test);
+
+foreach ($test as $prop => $value) {
+    echo "$prop => $value\n";
+}
 
 ?>
 --EXPECT--
@@ -23,3 +30,17 @@ object(Test)#1 (2) {
   ["prop2"]=>
   int(2)
 }
+array(2) {
+  ["prop"]=>
+  int(1)
+  ["prop2"]=>
+  int(2)
+}
+array(2) {
+  ["prop"]=>
+  int(1)
+  ["prop2"]=>
+  int(2)
+}
+prop => 1
+prop2 => 2
