@@ -5381,6 +5381,16 @@ ZEND_METHOD(ReflectionProperty, isStatic)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, isAbstract)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_ABSTRACT);
+}
+
+ZEND_METHOD(ReflectionProperty, isFinal)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+
 /* {{{ Returns whether this property is default (declared at compilation time). */
 ZEND_METHOD(ReflectionProperty, isDefault)
 {
@@ -5407,7 +5417,7 @@ ZEND_METHOD(ReflectionProperty, getModifiers)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_FINAL | ZEND_ACC_ABSTRACT;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -6979,6 +6989,8 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_ABSTRACT", ZEND_ACC_ABSTRACT);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_FINAL", ZEND_ACC_FINAL);
 
 	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr);
 	reflection_init_class_handlers(reflection_class_constant_ptr);

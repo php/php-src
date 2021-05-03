@@ -412,6 +412,12 @@ class ReflectionProperty implements Reflector
     public function isStatic() {}
 
     /** @return bool */
+    public function isAbstract() {}
+
+    /** @return bool */
+    public function isFinal() {}
+
+    /** @return bool */
     public function isDefault() {}
 
     public function isPromoted(): bool {}

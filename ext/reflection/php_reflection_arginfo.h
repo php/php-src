@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7bfb995bcef07303f355cd45d8a2c8c67da0ae4a */
+ * Stub hash: dc739b4c643af886db4eb97647f6d6174ee2980a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -308,6 +308,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionProperty_isStatic arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isAbstract arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isFinal arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionProperty_isDefault arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -669,6 +673,8 @@ ZEND_METHOD(ReflectionProperty, isPublic);
 ZEND_METHOD(ReflectionProperty, isPrivate);
 ZEND_METHOD(ReflectionProperty, isProtected);
 ZEND_METHOD(ReflectionProperty, isStatic);
+ZEND_METHOD(ReflectionProperty, isAbstract);
+ZEND_METHOD(ReflectionProperty, isFinal);
 ZEND_METHOD(ReflectionProperty, isDefault);
 ZEND_METHOD(ReflectionProperty, isPromoted);
 ZEND_METHOD(ReflectionProperty, getModifiers);
@@ -940,6 +946,8 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, isPrivate, arginfo_class_ReflectionProperty_isPrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isProtected, arginfo_class_ReflectionProperty_isProtected, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isStatic, arginfo_class_ReflectionProperty_isStatic, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isAbstract, arginfo_class_ReflectionProperty_isAbstract, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isFinal, arginfo_class_ReflectionProperty_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isDefault, arginfo_class_ReflectionProperty_isDefault, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPromoted, arginfo_class_ReflectionProperty_isPromoted, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getModifiers, arginfo_class_ReflectionProperty_getModifiers, ZEND_ACC_PUBLIC)
