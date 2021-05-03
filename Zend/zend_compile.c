@@ -7409,8 +7409,16 @@ static void zend_compile_accessors(
 			"Cannot specify both implicit and explicit accessors for the same property");
 	}
 
-	if (has_implicit_set && !prop_info->accessors[ZEND_ACCESSOR_GET]) {
+	zend_function *get = prop_info->accessors[ZEND_ACCESSOR_GET];
+	if (has_implicit_set && !get) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot have implicit set without get");
+	}
+
+	if (has_implicit_get && !has_implicit_set
+			&& (get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot have implicit &get without set. "
+			"Either remove the \"&\" or add \"set\" accessor");
 	}
 }
 
