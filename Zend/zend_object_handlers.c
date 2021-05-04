@@ -743,8 +743,11 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				if (UNEXPECTED(!(get->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 						&& Z_TYPE_P(retval) != IS_OBJECT)) {
 					zend_error(E_NOTICE, "Indirect modification of accessor property %s::$%s has no effect (did you mean to use \"&get\"?)", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
-				} else {
-					ZVAL_MAKE_REF(retval);
+				} else if (!Z_ISREF_P(retval)) {
+					ZVAL_NEW_REF(retval, retval);
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(retval), prop_info);
+					}
 				}
 				ZVAL_COPY(rv, retval);
 				retval = rv;
