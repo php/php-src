@@ -356,11 +356,12 @@ static int pdo_odbc_get_info_string(pdo_dbh_t *dbh, SQLUSMALLINT type, zval *val
 	SQLSMALLINT out_len;
 	char buf[256];
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
-	rc = SQLGetInfo(H->dbc, type, (SQLPOINTER)buf, 256, &out_len);
+	rc = SQLGetInfo(H->dbc, type, (SQLPOINTER)buf, sizeof(buf), &out_len);
 	/* returning -1 is treated as an error, not as unsupported */
-	if (rc == -1)
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		return -1;
-	ZVAL_STRING(val, buf);
+	}
+	ZVAL_STRINGL(val, buf, out_len);
 	return 1;
 }
 
