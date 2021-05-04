@@ -123,7 +123,7 @@ function openssl_pkcs7_sign(string $input_filename, string $output_filename, Ope
 function openssl_pkcs7_decrypt(string $input_filename, string $output_filename, $certificate, $private_key = null): bool {}
 
 /** @param array $certificates */
-function openssl_pkcs7_read(string $input_filename, &$certificates): bool {}
+function openssl_pkcs7_read(string $data, &$certificates): bool {}
 
 function openssl_cms_verify(string $input_filename, int $flags = 0, ?string $certificates = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
