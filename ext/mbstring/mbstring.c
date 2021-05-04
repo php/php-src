@@ -2442,6 +2442,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		}
 		/* convert value */
 		ZEND_ASSERT(entry);
+try_again:
 		switch(Z_TYPE_P(entry)) {
 			case IS_STRING:
 				cval = php_mb_convert_encoding(
@@ -2466,6 +2467,9 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 					ZVAL_EMPTY_ARRAY(&entry_tmp);
 				}
 				break;
+			case IS_REFERENCE:
+				entry = Z_REFVAL_P(entry);
+				goto try_again;
 			case IS_OBJECT:
 			default:
 				if (key) {
