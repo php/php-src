@@ -728,7 +728,6 @@ found:
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
 			/* Writes to uninitializde typed properties bypass __set(). */
-			Z_PROP_FLAG_P(variable_ptr) = 0;
 			goto write_std_property;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
@@ -783,6 +782,7 @@ write_std_property:
 					goto exit;
 				}
 				value = &tmp;
+				Z_PROP_FLAG_P(variable_ptr) = 0;
 				goto found; /* might have been updated via e.g. __toString() */
 			}
 
