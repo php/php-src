@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.19
+06 May 2021, PHP 7.4.19
 
 - PDO_pgsql:
   . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
