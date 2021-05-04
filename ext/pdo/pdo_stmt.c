@@ -1254,7 +1254,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_CLASS_OR_NULL(ce)
-		Z_PARAM_ARRAY(ctor_args)
+		Z_PARAM_ARRAY_OR_NULL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
@@ -1266,12 +1266,10 @@ PHP_METHOD(PDOStatement, fetchObject)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	if (ctor_args) {
-		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-			ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
-		} else {
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-		}
+	if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+		ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
+	} else {
+		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 	}
 	if (ce) {
 		stmt->fetch.cls.ce = ce;
