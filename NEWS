@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.19
+?? ??? ????, PHP 7.4.20
 
 - Core:
   . Fixed bug #80929 (Method name corruption related to repeated calls to
@@ -34,6 +34,13 @@ PHP                                                                        NEWS
 
 - XMLReader:
   . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
+
+06 May 2021, PHP 7.4.19
+
+- PDO_pgsql:
+  . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
+    PDO::PARAM_STR). (Matteo)
+
 
 29 Apr 2021, PHP 7.4.18
 
