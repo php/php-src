@@ -917,7 +917,6 @@ found:
 				variable_ptr = OBJ_PROP(zobj, property_offset);
 				if (Z_TYPE_P(variable_ptr) == IS_UNDEF) {
 					ZEND_ASSERT(Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT);
-					Z_PROP_FLAG_P(variable_ptr) = 0;
 					if (!ZEND_TYPE_IS_SET(prop_info->type)) {
 						prop_info = NULL;
 					}
