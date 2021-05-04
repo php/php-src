@@ -1411,6 +1411,9 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 
 	if (ce_flags & (ZEND_ACC_HAS_AST_PROPERTIES|ZEND_ACC_HAS_AST_STATICS)) {
 		ZEND_HASH_FOREACH_PTR(&class_type->properties_info, prop_info) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				continue;
+			}
 			if (prop_info->flags & ZEND_ACC_STATIC) {
 				val = static_members_table + prop_info->offset;
 			} else {
