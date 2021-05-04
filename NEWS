@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+06 May 2021, PHP 8.0.6
+
+- PDO_pgsql:
+  . Revert "Fixed bug #80892 (PDO::PARAM_INT is treated the same as PDO::PARAM_STR)"
+    from PHP 8.0.5.
+
 29 Apr 2021, PHP 8.0.5
 
 - Core:
