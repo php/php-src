@@ -914,8 +914,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					return 0;
 				}
 				if (!stmt->fetch.cls.fci.size) {
-					if (!do_fetch_class_prepare(stmt))
-					{
+					if (!do_fetch_class_prepare(stmt)) {
+						zval_ptr_dtor(return_value);
 						return 0;
 					}
 				}
