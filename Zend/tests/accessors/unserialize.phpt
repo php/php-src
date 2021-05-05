@@ -17,18 +17,32 @@ class Test {
 
 $test = new Test(1, 2);
 var_dump($s = serialize($test));
-var_dump($test2 = unserialize($s));
-$test2->prop3;
-$test2->prop3 = 42;
+var_dump($test_u = unserialize($s));
+$test_u->prop3;
+$test_u->prop3 = 42;
 
-// TODO: This should probably be forbidden.
 $s = 'O:4:"Test":1:{s:5:"prop3";i:42;}';
-var_dump($test3 = unserialize($s));
-$test3->prop3;
-$test3->prop3 = 42;
+var_dump(unserialize($s));
+echo "\n";
+
+// Override implicit accessor with explicit.
+class Test2 extends Test {
+    public $prop1 {
+        get { echo __METHOD__, "\n"; }
+    }
+}
+
+$test2 = new Test2(1, 2);
+var_dump($s = serialize($test2));
+var_dump($test2_u = unserialize($s));
+$test2_u->prop1;
+$test2_u->prop1 = 42;
+
+$s = 'O:5:"Test2":1:{s:5:"prop1";i:42;}';
+var_dump(unserialize($s));
 
 ?>
---EXPECT--
+--EXPECTF--
 string(47) "O:4:"Test":2:{s:5:"prop1";i:1;s:5:"prop2";i:2;}"
 object(Test)#2 (2) {
   ["prop1"]=>
@@ -38,9 +52,21 @@ object(Test)#2 (2) {
 }
 Test::$prop3::get
 Test::$prop3::set
-object(Test)#3 (1) {
-  ["prop3"]=>
+
+Warning: unserialize(): Cannot unserialize value for property Test::$prop3 with explicit accessors in %s on line %d
+
+Notice: unserialize(): Error at offset 26 of 32 bytes in %s on line %d
+bool(false)
+
+string(48) "O:5:"Test2":2:{s:5:"prop1";i:1;s:5:"prop2";i:2;}"
+object(Test2)#4 (2) {
+  ["prop1"]=>
+  int(1)
+  ["prop2"]=>
+  int(2)
+}
+Test2::$prop1::get
+object(Test2)#5 (1) {
+  ["prop1"]=>
   int(42)
 }
-Test::$prop3::get
-Test::$prop3::set
