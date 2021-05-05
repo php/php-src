@@ -7367,7 +7367,7 @@ static void zend_compile_accessors(
 			}
 		} else {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Unknown accessor \"%s\" for property %s::$%s",
+				"Unknown accessor \"%s\" for property %s::$%s, expected \"get\" or \"set\"",
 				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
 		}
 

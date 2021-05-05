@@ -11,4 +11,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Unknown accessor "foobar" for property Test::$prop in %s on line %d
+Fatal error: Unknown accessor "foobar" for property Test::$prop, expected "get" or "set" in %s on line %d
