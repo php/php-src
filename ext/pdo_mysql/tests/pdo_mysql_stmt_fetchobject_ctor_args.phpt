@@ -49,13 +49,6 @@ try {
 
 $stmt->execute();
 try {
-    $obj = $stmt->fetchObject(Foo::class, null);
-} catch (ArgumentCountError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-$stmt->execute();
-try {
     $obj = $stmt->fetchObject(Foo::class, []);
 } catch (ArgumentCountError $exception) {
     echo $exception->getMessage() . "\n";
@@ -67,10 +60,6 @@ var_dump($obj);
 
 $stmt->execute();
 $obj = $stmt->fetchObject(Bar::class);
-var_dump($obj);
-
-$stmt->execute();
-$obj = $stmt->fetchObject(Bar::class, null);
 var_dump($obj);
 
 $stmt->execute();
@@ -93,14 +82,9 @@ MySQLPDOTest::dropTestTable();
 --EXPECTF--
 Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
 Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
-Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected
 object(Foo)#%d (2) {
   ["a"]=>
   int(123)
-  ["id"]=>
-  int(1)
-}
-object(Bar)#%d (1) {
   ["id"]=>
   int(1)
 }
