@@ -364,6 +364,10 @@ gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
 
+gdImagePtr gdImageCreateFromAvif(FILE *infile);
+gdImagePtr gdImageCreateFromAvifPtr(int size, void *data);
+gdImagePtr gdImageCreateFromAvifCtx(gdIOCtx *infile);
+
 gdImagePtr gdImageCreateFromTga( FILE * fp );
 gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx);
 gdImagePtr gdImageCreateFromTgaPtr(int size, void *data);
@@ -623,6 +627,13 @@ void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
 gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
+
+//TODO: we may not need all of these
+void gdImageAvif(gdImagePtr im, FILE *outfile);
+void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
+void *gdImageAvifPtr(gdImagePtr im, int *size);
+void *gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed);
+void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed);
 
 /* A custom data sink. For backwards compatibility. Use
 	gdIOCtx instead. */

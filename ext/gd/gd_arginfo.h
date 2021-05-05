@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4db5a04f57436fffff4d34f4e44db7b7fdc39874 */
+ * Stub hash: 6c091ec5dc43771d26c3dac479ede7b38aa6e574 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -144,6 +144,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromstring, 0, 1,
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_GD_AVIF)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromavif, 0, 1, GdImage, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgif, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -205,6 +211,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagexbm, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground_color, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_AVIF)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageavif, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, speed, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegif, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -593,6 +608,9 @@ ZEND_FUNCTION(imagesetbrush);
 ZEND_FUNCTION(imagecreate);
 ZEND_FUNCTION(imagetypes);
 ZEND_FUNCTION(imagecreatefromstring);
+#if defined(HAVE_GD_AVIF)
+ZEND_FUNCTION(imagecreatefromavif);
+#endif
 ZEND_FUNCTION(imagecreatefromgif);
 #if defined(HAVE_GD_JPG)
 ZEND_FUNCTION(imagecreatefromjpeg);
@@ -618,6 +636,9 @@ ZEND_FUNCTION(imagecreatefrombmp);
 ZEND_FUNCTION(imagecreatefromtga);
 #endif
 ZEND_FUNCTION(imagexbm);
+#if defined(HAVE_GD_AVIF)
+ZEND_FUNCTION(imageavif);
+#endif
 ZEND_FUNCTION(imagegif);
 #if defined(HAVE_GD_PNG)
 ZEND_FUNCTION(imagepng);
@@ -728,6 +749,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreate, arginfo_imagecreate)
 	ZEND_FE(imagetypes, arginfo_imagetypes)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
+#if defined(HAVE_GD_AVIF)
+	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)
+#endif
 	ZEND_FE(imagecreatefromgif, arginfo_imagecreatefromgif)
 #if defined(HAVE_GD_JPG)
 	ZEND_FE(imagecreatefromjpeg, arginfo_imagecreatefromjpeg)
@@ -753,6 +777,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreatefromtga, arginfo_imagecreatefromtga)
 #endif
 	ZEND_FE(imagexbm, arginfo_imagexbm)
+#if defined(HAVE_GD_AVIF)
+	ZEND_FE(imageavif, arginfo_imageavif)
+#endif
 	ZEND_FE(imagegif, arginfo_imagegif)
 #if defined(HAVE_GD_PNG)
 	ZEND_FE(imagepng, arginfo_imagepng)

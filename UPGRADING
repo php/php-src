@@ -201,6 +201,10 @@ PHP 8.1 UPGRADE NOTES
     when dynamic pm is selected. The default value is 32 which was the previous
     hard coded value.
 
+- GD:
+  . Avif support is now available through the imagecreatefromavif() and
+    imageavif() functions, if libgd has been built with avif support.
+
 - hash:
   . The following functions have changed signatures:
 
