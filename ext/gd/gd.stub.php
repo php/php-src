@@ -68,6 +68,10 @@ function imagecreatefromstring(string $data): GdImage|false {}
 
 function imagecreatefromgif(string $filename): GdImage|false {}
 
+#ifdef HAVE_GD_AVIF
+function imagecreatefromavif(string $filename): GdImage|false {}
+#endif
+
 #ifdef HAVE_GD_JPG
 function imagecreatefromjpeg(string $filename): GdImage|false {}
 #endif
