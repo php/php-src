@@ -228,6 +228,9 @@ PHP_FUNCTION(gethostbynamel)
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
+#ifdef HAVE_INET_NTOP
+	char addr4[INET_ADDRSTRLEN];
+#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(hostname, hostname_len)
@@ -255,7 +258,11 @@ PHP_FUNCTION(gethostbynamel)
 		}
 
 		in = *h_addr_entry;
+#ifdef HAVE_INET_NTOP
+		add_next_index_string(return_value, inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN));
+#else
 		add_next_index_string(return_value, inet_ntoa(in));
+#endif
 	}
 }
 /* }}} */
@@ -266,7 +273,10 @@ static zend_string *php_gethostbyname(char *name)
 	struct hostent *hp;
 	struct in_addr *h_addr_0; /* Don't call this h_addr, it's a macro! */
 	struct in_addr in;
-	char *address;
+#ifdef HAVE_INET_NTOP
+	char addr4[INET_ADDRSTRLEN];
+#endif
+	const char *address;
 
 	hp = php_network_gethostbyname(name);
 	if (!hp) {
@@ -281,7 +291,11 @@ static zend_string *php_gethostbyname(char *name)
 
 	memcpy(&in.s_addr, h_addr_0, sizeof(in.s_addr));
 
+#ifdef HAVE_INET_NTOP
+	address = inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN);
+#else
 	address = inet_ntoa(in);
+#endif
 	return zend_string_init(address, strlen(address), 0);
 }
 /* }}} */
