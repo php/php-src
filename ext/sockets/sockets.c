@@ -220,8 +220,10 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
+#ifndef HAVE_INET_NTOP
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
+#endif
 
 static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
@@ -1072,10 +1074,12 @@ PHP_FUNCTION(socket_getsockname)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &addr, &port) == FAILURE) {
@@ -1096,8 +1100,8 @@ PHP_FUNCTION(socket_getsockname)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			ZEND_TRY_ASSIGN_REF_STRING(addr, addr6);
+			inet_ntop(AF_INET6, &sin6->sin6_addr,  addrbuf, sizeof(addrbuf));
+			ZEND_TRY_ASSIGN_REF_STRING(addr, addrbuf);
 
 			if (port != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin6->sin6_port));
@@ -1107,11 +1111,14 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (port != NULL) {
@@ -1144,10 +1151,12 @@ PHP_FUNCTION(socket_getpeername)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &arg2, &arg3) == FAILURE) {
@@ -1168,9 +1177,9 @@ PHP_FUNCTION(socket_getpeername)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
 
-			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr6);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, addrbuf);
 
 			if (arg3 != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(arg3, htons(sin6->sin6_port));
@@ -1181,11 +1190,14 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
@@ -1517,12 +1529,14 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in	sin;
 #if HAVE_IPV6
 	struct sockaddr_in6	sin6;
-	char				addr6[INET6_ADDRSTRLEN];
+#endif
+#ifdef HAVE_INET_NTOP
+	char				addrbuf[INET6_ADDRSTRLEN];
 #endif
 	socklen_t			slen;
 	int					retval;
 	zend_long				arg3, arg4;
-	char				*address;
+	const char			*address;
 	zend_string			*recv_buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozllz|z", &arg1, socket_ce, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
@@ -1580,7 +1594,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
+#ifdef HAVE_INET_NTOP
+			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			address = inet_ntoa(sin.sin_addr);
+#endif
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
@@ -1607,11 +1625,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			memset(addr6, 0, INET6_ADDRSTRLEN);
-			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
+			memset(addrbuf, 0, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_REF_STRING(arg5, addr6[0] ? addr6 : "::");
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, addrbuf[0] ? addrbuf : "::");
 			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif

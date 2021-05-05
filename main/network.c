@@ -237,7 +237,11 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	freeaddrinfo(res);
 #else
+#ifdef HAVE_INET_PTON
+	if (!inet_pton(AF_INET, host, &in)) {
+#else
 	if (!inet_aton(host, &in)) {
+#endif
 		if(strlen(host) > MAXFQDNLEN) {
 			host_info = NULL;
 			errno = E2BIG;
@@ -555,7 +559,11 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 		goto out;
 	}
 #endif
+#ifdef HAVE_INET_PTON
+	if (inet_pton(AF_INET, tmp, &in4->sin_addr) > 0) {
+#else
 	if (inet_aton(tmp, &in4->sin_addr) > 0) {
+#endif
 		in4->sin_port = htons(port);
 		in4->sin_family = AF_INET;
 		*sl = sizeof(struct sockaddr_in);
@@ -617,15 +625,19 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 	}
 
 	if (textaddr) {
-#if HAVE_IPV6 && HAVE_INET_NTOP
+#ifdef HAVE_INET_NTOP
 		char abuf[256];
 #endif
-		char *buf = NULL;
+		const char *buf = NULL;
 
 		switch (sa->sa_family) {
 			case AF_INET:
 				/* generally not thread safe, but it *is* thread safe under win32 */
+#ifdef HAVE_INET_NTOP
+				buf = inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr, (char *)&abuf, sizeof(abuf));
+#else
 				buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
+#endif
 				if (buf) {
 					*textaddr = strpprintf(0, "%s:%d",
 						buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
@@ -862,7 +874,11 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 					in4->sin_family = sa->sa_family;
 					in4->sin_port = htons(bindport);
+#ifdef HAVE_INET_PTON
+					if (!inet_pton(AF_INET, bindto, &in4->sin_addr)) {
+#else
 					if (!inet_aton(bindto, &in4->sin_addr)) {
+#endif
 						php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
 						goto skip_bind;
 					}
