@@ -1129,7 +1129,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		}
 		if (parent_info->flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final property %s::$%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(key));
+				ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key));
 		}
 		if (!(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {

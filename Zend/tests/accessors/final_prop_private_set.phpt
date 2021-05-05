@@ -13,4 +13,4 @@ class B extends A {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final property B::$prop in %s on line %d
+Fatal error: Cannot override final property A::$prop in %s on line %d
