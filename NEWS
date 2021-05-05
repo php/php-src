@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
 
+- Opcache:
+  . Fixed bug #81007 (JIT "not supported" on 32-bit x86 -- build problem?).
+    (Nikita)
+
 - PDO_pgsql:
   . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
     PDO::PARAM_STR). (Matteo)

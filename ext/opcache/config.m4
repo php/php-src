@@ -29,7 +29,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
-      x86*)
+      i[[34567]]86*|x86*)
         ;;
       *)
         AC_MSG_WARN([JIT not supported by host architecture])
