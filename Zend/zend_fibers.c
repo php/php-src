@@ -405,7 +405,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 
 		zend_exception_set_previous(EG(exception), exception);
 
-		if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+		if (!EG(current_execute_data)) {
 			zend_exception_error(EG(exception), E_ERROR);
 		}
 	} else {
