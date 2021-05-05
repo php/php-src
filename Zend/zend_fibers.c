@@ -398,6 +398,11 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_fiber_switch_to(fiber);
 
 	if (EG(exception)) {
+		if (!exception && EG(current_execute_data) && EG(current_execute_data)->func
+				&& ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+			zend_rethrow_exception(EG(current_execute_data));
+		}
+
 		zend_exception_set_previous(EG(exception), exception);
 
 		if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
