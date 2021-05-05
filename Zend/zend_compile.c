@@ -7260,8 +7260,7 @@ static void zend_compile_accessors(
 					"All interface members are implicitly abstract");
 			}
 			accessor->flags |= ZEND_ACC_ABSTRACT;
-		}
-		if (prop_info->flags & ZEND_ACC_ABSTRACT) {
+		} else if (prop_info->flags & ZEND_ACC_ABSTRACT) {
 			if (accessor->flags & ZEND_ACC_ABSTRACT) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Accessor on abstract property cannot be explicitly abstract");
@@ -7291,6 +7290,9 @@ static void zend_compile_accessors(
 				// TODO Trait exception?
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Accessor cannot be both abstract and private");
+			}
+			if (accessor->flags & ZEND_ACC_FINAL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Accessor cannot be both abstract and final");
 			}
 
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
@@ -7431,6 +7433,18 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 
 	if ((flags & ZEND_ACC_FINAL) && (flags & ZEND_ACC_PRIVATE)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Property cannot be both final and private");
+	}
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Property in interface cannot be final");
+		}
+		if (flags & ZEND_ACC_ABSTRACT) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Property in interface cannot be explicitly abstract. "
+				"All interface members are implicitly abstract");
+		}
+		flags |= ZEND_ACC_ABSTRACT;
 	}
 
 	for (i = 0; i < children; ++i) {
