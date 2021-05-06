@@ -172,8 +172,6 @@ static void* dasm_labels[zend_lb_MAX];
 
 |.section code, cold_code, jmp_table
 
-#define IS_32BIT(addr) (((uintptr_t)(addr)) <= 0x7fffffff)
-
 #define IS_SIGNED_32BIT(val) ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= (-2147483647 - 1)))
 
 #define BP_JIT_IS 6
@@ -464,10 +462,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	.endif
 |.endmacro
 
-|.macro ADDR_OP1, addr_ins, addr, tmp_reg
-|	NIY	// TODO
-|.endmacro
-
 // Move the 48-bit address 'addr' into 'tmp_reg' and store it into the dest addr 'op1'
 |.macro ADDR_STORE, op1, addr, tmp_reg
 |	LOAD_ADDR tmp_reg, addr
@@ -479,14 +473,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	LOAD_ADDR tmp_reg1, addr
 |	ldr tmp_reg2, op1
 |	cmp tmp_reg2, tmp_reg1
-|.endmacro
-
-|.macro PUSH_ADDR, addr, tmp_reg
-|	ADDR_OP1 push, addr, tmp_reg
-|.endmacro
-
-|.macro PUSH_ADDR_ZTS, struct, field, tmp_reg
-|	NIY	// TODO
 |.endmacro
 
 // Store the value from a register 'op' into memory 'addr'
@@ -602,10 +588,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	.endif
 |.endmacro
 
-|.macro MEM_OP3_3, mem_ins, op1, op2, prefix, addr, tmp_reg
-|	NIY	// TODO
-|.endmacro
-
 |.macro LOAD_BASE_ADDR, reg, base, offset
 ||	if (offset) {
 |		ADD_SUB_64_WITH_CONST_32 add, reg, Rx(base), offset, reg
@@ -616,10 +598,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |			mov reg, Rx(base)
 ||		}
 ||	}
-|.endmacro
-
-|.macro PUSH_BASE_ADDR, base, offset, tmp_reg
-|	NIY	// TODO
 |.endmacro
 
 |.macro EXT_CALL, func, tmp_reg
@@ -737,16 +715,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
-|.macro PUSH_ZVAL_ADDR, addr, tmp_reg
-||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		PUSH_ADDR Z_ZV(addr), tmp_reg
-||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-|		PUSH_BASE_ADDR Z_REG(addr), Z_OFFSET(addr), tmp_reg
-||	} else {
-||		ZEND_UNREACHABLE();
-||	}
-|.endmacro
-
 |.macro GET_Z_TYPE_INFO, reg, zv
 |	ldr reg, [zv, #offsetof(zval,u1.type_info)]
 |.endmacro
@@ -805,16 +773,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	SAFE_MEM_ACC_WITH_UOFFSET str, val, Rx(Z_REG(addr)), Z_OFFSET(addr), tmp_reg
 |.endmacro
 
-|.macro GET_ZVAL_W2, reg, addr
-||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	NIY	// TODO
-|.endmacro
-
-|.macro SET_ZVAL_W2, addr, val
-||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-|	NIY	// TODO
-|.endmacro
-
 |.macro UNDEF_OPLINE_RESULT, tmp_reg
 |	ldr REG0, EX->opline
 |	ldr REG0w, OP:REG0->result.var
@@ -822,35 +780,18 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	SET_Z_TYPE_INFO REG0, IS_UNDEF, tmp_reg
 |.endmacro
 
-// Define DOUBLE_CMP and DOUBLE_CMP to replace SSE_AVX_OP and SSE_OP in x86 implementation.
-// Conduct floating point operation 'ins'. Operand1 is from 'reg', and operands2 is from 'addr'.
-// Use DOUBLE_CMP for comparisons and use DOUBLE_OP for arithmetic operations.
-|.macro DOUBLE_CMP, ins, reg, addr, tmp_reg, fp_tmp_reg
+// Define DOUBLE_CMP to replace SSE_AVX_OP and SSE_OP for comparions in x86 implementation.
+// Operand1 is from 'reg', and operand2 is from 'addr'.
+|.macro DOUBLE_CMP, reg, addr, tmp_reg, fp_tmp_reg
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
 |		ldr Rd(fp_tmp_reg-ZREG_V0), [Rx(tmp_reg)]
-|		ins Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+|		fcmp Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(fp_tmp_reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
-|		ins Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
+|		fcmp Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
 ||	} else if (Z_MODE(addr) == IS_REG) {
-|		ins Rd(reg-ZREG_V0), Rd(Z_REG(addr)-ZREG_V0)
-||	} else {
-||		ZEND_UNREACHABLE();
-||	}
-|.endmacro
-
-|.macro DOUBLE_OP, ins, reg, addr, tmp_reg, fp_tmp_reg
-|	NIY	// TODO
-||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
-|		ldr Rd(fp_tmp_reg-ZREG_V0), [Rx(tmp_reg)]
-|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
-||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
-|		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(fp_tmp_reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
-|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
-||	} else if (Z_MODE(addr) == IS_REG) {
-|		ins Rd(reg-ZREG_V0), Rd(reg-ZREG_V0), Rd(Z_REG(addr)-ZREG_V0)
+|		fcmp Rd(reg-ZREG_V0), Rd(Z_REG(addr)-ZREG_V0)
 ||	} else {
 ||		ZEND_UNREACHABLE();
 ||	}
@@ -930,11 +871,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
-// TODO: integer overflow should be detected.
-|.macro LONG_MUL, long_ins, reg, addr, tmp_reg1, tmp_reg2
-|	brk #0	// TODO
-|.endmacro
-
 |.macro LONG_CMP, reg, addr, tmp_reg1, tmp_reg2
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		CMP_64_WITH_CONST Rx(reg), Z_LVAL_P(Z_ZV(addr)), tmp_reg1
@@ -960,10 +896,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	} else {
 ||		ZEND_UNREACHABLE();
 ||	}
-|.endmacro
-
-|.macro LONG_OP_WITH_32BIT_CONST, long_ins, op1_addr, lval
-|	NIY	// TODO
 |.endmacro
 
 // Define LONG_CMP_WITH_CONST to replace LONG_OP_WITH_CONST in the x86 implementation.
@@ -6935,7 +6867,7 @@ static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, zen
 	zend_reg tmp_reg = ZREG_FPR0;
 
 	|	DOUBLE_GET_ZVAL_LVAL tmp_reg, op1_addr, ZREG_REG0, ZREG_TMP1
-	|	DOUBLE_CMP fcmp, tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
+	|	DOUBLE_CMP tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, 0, smart_branch_opcode, target_label, target_label2, exit_addr);
 }
@@ -6945,7 +6877,7 @@ static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, zen
 	zend_reg tmp_reg = ZREG_FPR0;
 
 	|	DOUBLE_GET_ZVAL_LVAL tmp_reg, op2_addr, ZREG_REG0, ZREG_TMP1
-	|	DOUBLE_CMP fcmp, tmp_reg, op1_addr, ZREG_TMP1, ZREG_FPTMP
+	|	DOUBLE_CMP tmp_reg, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, /* swap */ 1, smart_branch_opcode, target_label, target_label2, exit_addr);
 }
@@ -6955,15 +6887,15 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, z
 	bool swap = 0;
 
 	if (Z_MODE(op1_addr) == IS_REG) {
-		|	DOUBLE_CMP fcmp, Z_REG(op1_addr), op2_addr, ZREG_TMP1, ZREG_FPTMP
+		|	DOUBLE_CMP Z_REG(op1_addr), op2_addr, ZREG_TMP1, ZREG_FPTMP
 	} else if (Z_MODE(op2_addr) == IS_REG) {
-		|	DOUBLE_CMP fcmp, Z_REG(op2_addr), op1_addr, ZREG_TMP1, ZREG_FPTMP
+		|	DOUBLE_CMP Z_REG(op2_addr), op1_addr, ZREG_TMP1, ZREG_FPTMP
 		swap = 1;
 	} else {
 		zend_reg tmp_reg = ZREG_FPR0;
 
 		|	GET_ZVAL_DVAL tmp_reg, op1_addr, ZREG_TMP1
-		|	DOUBLE_CMP fcmp, tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
+		|	DOUBLE_CMP tmp_reg, op2_addr, ZREG_TMP1, ZREG_FPTMP
 	}
 
 	return zend_jit_cmp_double_common(Dst, opline, res_addr, swap, smart_branch_opcode, target_label, target_label2, exit_addr);
@@ -8020,7 +7952,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		|	mov TMP1, xzr
 		|	fmov FPR0d, TMP1
-		|	DOUBLE_CMP fcmp, ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
+		|	DOUBLE_CMP ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 		if (set_bool) {
 			if (exit_addr) {
