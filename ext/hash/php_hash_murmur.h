@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,7 @@ typedef struct {
 	uint32_t h;
 	uint32_t carry;
 	uint32_t len;
-} PHP_MURMUR3A_CTX; 
+} PHP_MURMUR3A_CTX;
 #define PHP_MURMUR3A_SPEC "lll"
 
 PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args);
@@ -33,7 +33,7 @@ typedef struct {
 	uint32_t h[4];
 	uint32_t carry[4];
 	uint32_t len;
-} PHP_MURMUR3C_CTX; 
+} PHP_MURMUR3C_CTX;
 #define PHP_MURMUR3C_SPEC "lllllllll"
 
 PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args);
@@ -45,7 +45,7 @@ typedef struct {
 	uint64_t h[2];
 	uint64_t carry[2];
 	uint32_t len;
-} PHP_MURMUR3F_CTX; 
+} PHP_MURMUR3F_CTX;
 #define PHP_MURMUR3F_SPEC "qqqql"
 
 PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args);
