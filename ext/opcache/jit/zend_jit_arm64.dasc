@@ -888,9 +888,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.macro LONG_ADD_SUB_WITH_IMM, long_ins, op1_addr, lval, tmp_reg1, tmp_reg2
 ||	ZEND_ASSERT(lval >=0 && lval <= ADD_SUB_IMM);
 ||	if (Z_MODE(op1_addr) == IS_MEM_ZVAL) {
-|		SAFE_MEM_ACC_WITH_UOFFSET ldr, tmp_reg1, Rx(Z_REG(op1_addr)), Z_OFFSET(op1_addr), tmp_reg2
-|		long_ins tmp_reg1, tmp_reg1, #lval
-|		SAFE_MEM_ACC_WITH_UOFFSET str, tmp_reg1, Rx(Z_REG(op1_addr)), Z_OFFSET(op1_addr), tmp_reg2
+||		if (((uint32_t)(Z_OFFSET(op1_addr))) > LDR_STR_PIMM64) {
+|			LOAD_32BIT_VAL tmp_reg2, Z_OFFSET(op1_addr)
+|			ldr tmp_reg1, [Rx(Z_REG(op1_addr)), tmp_reg2]
+|			long_ins tmp_reg1, tmp_reg1, #lval
+|			str tmp_reg1, [Rx(Z_REG(op1_addr)), tmp_reg2]
+||		} else {
+|			ldr tmp_reg1, [Rx(Z_REG(op1_addr)), #Z_OFFSET(op1_addr)]
+|			long_ins tmp_reg1, tmp_reg1, #lval
+|			str tmp_reg1, [Rx(Z_REG(op1_addr)), #Z_OFFSET(op1_addr)]
+||		}
 ||	} else if (Z_MODE(op1_addr) == IS_REG) {
 |		long_ins Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr)), #lval
 ||	} else {
