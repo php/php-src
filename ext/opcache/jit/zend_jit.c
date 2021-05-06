@@ -3604,7 +3604,9 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 		}
 		func_info = ZEND_FUNC_INFO(op_array);
 		func_info->call_map = zend_build_call_map(&CG(arena), func_info, op_array);
-		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		if ((op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+			!ZEND_ARG_TYPE_IS_TENTATIVE(&((zend_function *) op_array)->common.arg_info[-1])
+		) {
 			zend_init_func_return_info(op_array, script, &func_info->return_info);
 		}
 	}
@@ -3920,7 +3922,9 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				info->call_map = zend_build_call_map(&CG(arena), info, call_graph.op_arrays[i]);
-				if (call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				if ((call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+					!ZEND_ARG_TYPE_IS_TENTATIVE(&((zend_function *) call_graph.op_arrays[i])->common.arg_info[-1])
+				) {
 					zend_init_func_return_info(call_graph.op_arrays[i], script, &info->return_info);
 				}
 			}
