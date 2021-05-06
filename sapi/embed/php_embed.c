@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -184,12 +184,12 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	zend_signal_startup();
 
 	/* SAPI initialization (SINIT)
-	 * 
+	 *
 	 * Initialize the SAPI globals (memset to 0). After this point we can set
 	 * SAPI globals via the SG() macro.
-	 * 
+	 *
 	 * Reentrancy startup.
-	 * 
+	 *
 	 * This also sets 'php_embed_module.ini_entries = NULL' so we cannot
 	 * allocate the INI entries until after this call.
 	 */
@@ -206,13 +206,13 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	 * configuration hash table at the very end of php_init_config(). This
 	 * means these settings will overwrite any INI settings that were set from
 	 * an INI file.
-	 * 
+	 *
 	 * To provide overwritable INI defaults, hook the ini_defaults function
 	 * pointer that is part of the sapi_module_struct
 	 * (php_embed_module.ini_defaults).
 	 *
 	 *     void (*ini_defaults)(HashTable *configuration_hash);
-	 * 
+	 *
 	 * This callback is invoked as soon as the configuration hash table is
 	 * allocated so any INI settings added via this callback will have the
 	 * lowest precedence and will allow INI files to overwrite them.
