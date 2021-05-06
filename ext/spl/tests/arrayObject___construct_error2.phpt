@@ -4,11 +4,11 @@ SPL: ArrayObject::__construct with too many arguments.
 <?php
 echo "Too many arguments:\n";
 Class C implements Iterator {
-    function current() {}
+    function current(): mixed {}
     function next() {}
     function key() {}
-    function valid() {}
-    function rewind() {}
+    function valid(): bool {}
+    function rewind(): void {}
 }
 
 try {

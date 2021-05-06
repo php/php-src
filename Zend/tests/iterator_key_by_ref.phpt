@@ -3,7 +3,7 @@ Iterator::key() with by-ref return
 --FILE--
 <?php
 class Test extends ArrayIterator {
-    function &key() {
+    function &key(): mixed {
         return $foo;
     }
 }

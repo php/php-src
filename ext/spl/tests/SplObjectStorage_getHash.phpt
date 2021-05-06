@@ -9,6 +9,7 @@ $s[$o1] = "some_value\n";
 echo $s->offsetGet($o1);
 
 class MySplObjectStorage extends SplObjectStorage {
+    #[ReturnTypeWillChange]
     public function getHash($obj) {
         return 2;
     }
@@ -22,9 +23,8 @@ try {
 }
 
 class MySplObjectStorage2 extends SplObjectStorage {
-    public function getHash($obj) {
+    public function getHash($obj): string {
         throw new Exception("foo");
-        return "asd";
     }
 }
 
@@ -36,7 +36,7 @@ try {
 }
 
 class MySplObjectStorage3 extends SplObjectStorage {
-    public function getHash($obj) {
+    public function getHash($obj): string {
         return "asd";
     }
 }

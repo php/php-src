@@ -7,7 +7,7 @@ Lukasz Andrzejak meltir@meltir.com
 <?php
 class ext_heap extends SplMaxHeap {
   public $fail = false;
-  public function compare($val1,$val2) {
+  public function compare($val1,$val2): int {
     if ($this->fail)
       throw new Exception('Corrupting heap',99);
     return 0;

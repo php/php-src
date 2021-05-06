@@ -5,7 +5,7 @@ simplexml
 --FILE--
 <?php
 class SXE extends SimpleXmlElement {
-    public function count() {
+    public function count(): int {
         echo "Called Count!\n";
         return parent::count();
     }

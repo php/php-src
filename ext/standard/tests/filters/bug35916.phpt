@@ -7,7 +7,7 @@ $file = __DIR__ . "/bug35916.txt";
 
 class strtoupper_filter extends php_user_filter
 {
-        function filter($in, $out, &$consumed, $closing)
+        function filter($in, $out, &$consumed, $closing): int
         {
         while($bucket=stream_bucket_make_writeable($in)) {
             $bucket->data = strtoupper($bucket->data);
@@ -17,11 +17,13 @@ class strtoupper_filter extends php_user_filter
                 }
         return PSFS_PASS_ON;
         }
-    function onCreate()
+    function onCreate(): bool
     {
         echo "fffffffffff\n";
+
+        return true;
     }
-    function onClose()
+    function onClose(): void
     {
         echo "hello\n";
     }

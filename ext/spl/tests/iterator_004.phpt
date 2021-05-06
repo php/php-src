@@ -14,32 +14,32 @@ class NumericArrayIterator implements Iterator
         $this->a = $a;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         echo __METHOD__ . "\n";
         $this->i = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         $ret = $this->i < count($this->a);
         echo __METHOD__ . '(' . ($ret ? 'true' : 'false') . ")\n";
         return $ret;
     }
 
-    public function key()
+    public function key(): mixed
     {
         echo __METHOD__ . "\n";
         return $this->i;
     }
 
-    public function current()
+    public function current(): mixed
     {
         echo __METHOD__ . "\n";
         return $this->a[$this->i];
     }
 
-    public function next()
+    public function next(): void
     {
         echo __METHOD__ . "\n";
         $this->i++;
@@ -48,7 +48,7 @@ class NumericArrayIterator implements Iterator
 
 class SeekableNumericArrayIterator extends NumericArrayIterator implements SeekableIterator
 {
-    public function seek($index)
+    public function seek($index): void
     {
         if ($index < count($this->a)) {
             $this->i = $index;

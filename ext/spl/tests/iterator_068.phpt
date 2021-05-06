@@ -7,11 +7,11 @@ class Test implements Iterator {
     function foo() {
         echo __METHOD__ . "()\n";
     }
-    function rewind() {}
-    function valid() {}
-    function current() {}
-    function key() {}
-    function next() {}
+    function rewind(): void {}
+    function valid(): bool {}
+    function current(): mixed {}
+    function key(): mixed {}
+    function next(): void {}
 }
 
 class TestIteratorIterator extends IteratorIterator {

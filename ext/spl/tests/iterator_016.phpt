@@ -5,7 +5,7 @@ SPL: RecursiveIteratorIterator and beginChildren/endChildren
 
 class Menu extends ArrayObject
 {
-    function getIterator()
+    function getIterator(): Iterator
     {
         echo __METHOD__ . "\n";
         return new RecursiveArrayIterator($this);
@@ -18,7 +18,7 @@ class MenuOutput extends RecursiveIteratorIterator
     {
         parent::__construct($it);
     }
-    function rewind()
+    function rewind(): void
     {
         echo "<ul>\n";
         parent::rewind();
@@ -32,7 +32,7 @@ class MenuOutput extends RecursiveIteratorIterator
     {
         echo str_repeat('  ',$this->getDepth())."</ul>\n";
     }
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid()) {
             echo "<ul>\n";

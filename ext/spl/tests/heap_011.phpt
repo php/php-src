@@ -3,7 +3,7 @@ SPL: SplHeap with overridden compare()
 --FILE--
 <?php
 class SplMinHeap2 extends SplMinHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b): int {
         return -parent::compare($a,$b);
     }
 }
@@ -15,7 +15,7 @@ $h->insert(2);
 var_dump($h->top());
 
 class SplMaxHeap2 extends SplMaxHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b): int {
         return -parent::compare($a,$b);
     }
 }

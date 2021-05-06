@@ -24,7 +24,7 @@ interface MySessionHandlerInterface {
 class MySession2 implements MySessionHandlerInterface {
     public $path;
 
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         if (!$path) {
             $path = sys_get_temp_dir();
         }
@@ -32,11 +32,11 @@ class MySession2 implements MySessionHandlerInterface {
         return true;
     }
 
-    public function close() {
+    public function close(): bool {
         return true;
     }
 
-    public function read($id) {
+    public function read($id): string {
         return (string)@file_get_contents($this->path . $id);
     }
 
@@ -48,7 +48,7 @@ class MySession2 implements MySessionHandlerInterface {
         @unlink($this->path . $id);
     }
 
-    public function gc($maxlifetime) {
+    public function gc($maxlifetime): bool {
         foreach (glob($this->path . '*') as $filename) {
             if (filemtime($filename) + $maxlifetime < time()) {
                 @unlink($filename);

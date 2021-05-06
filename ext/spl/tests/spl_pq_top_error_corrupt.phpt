@@ -8,7 +8,7 @@ Nathaniel McHugh nat@fishtrap.co.uk
 
 class myPriorityQueue extends SplPriorityQueue{
 
-    public function compare($a, $b){
+    public function compare($a, $b): int {
          if ($b == 2) {
         throw new Exception('ignore me');
         }  else {

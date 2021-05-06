@@ -31,12 +31,12 @@ var_dump($o2[2][2] === $o2[2]);
 echo "#### Extending ArrayObject\n";
 unset($o,$x,$s1,$s2,$o1,$o2);
 class ArrayObject2 extends ArrayObject {
-    public function __serialize() {
+    public function __serialize(): array {
         return parent::__serialize();
     }
 
-    public function __unserialize($s) {
-        return parent::__unserialize($s);
+    public function __unserialize($s): void {
+        parent::__unserialize($s);
     }
 }
 

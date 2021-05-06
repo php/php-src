@@ -7,7 +7,7 @@ TestFest London May 2009
 <?php
 // override heap to force corruption by throwing exception in compare
 class SplMinHeap2 extends SplMinHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b): int {
         throw new Exception('Corrupt heap');
     }
 }

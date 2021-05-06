@@ -5,7 +5,7 @@ SPL: ArrayObject::seek() and exceptions
 
 class foo extends ArrayObject
 {
-    public function seek($key)
+    public function seek($key): void
     {
         echo __METHOD__ . "($key)\n";
         throw new Exception("hi");

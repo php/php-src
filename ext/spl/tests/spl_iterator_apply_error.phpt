@@ -4,7 +4,7 @@ SPL: Error: iterator_apply when an iterator method (eg rewind) throws exception
 <?php
 
 class MyArrayIterator extends ArrayIterator {
-    public function rewind() {
+    public function rewind(): void {
         throw new Exception('Make the iterator break');
     }
 }

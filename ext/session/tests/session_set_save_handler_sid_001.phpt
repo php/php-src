@@ -15,7 +15,7 @@ echo "*** Testing session_set_save_handler() function: create_sid ***\n";
 class MySession2 {
     public $path;
 
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         if (!$path) {
             $path = sys_get_temp_dir();
         }
@@ -23,15 +23,15 @@ class MySession2 {
         return true;
     }
 
-    public function close() {
+    public function close(): bool {
         return true;
     }
 
-    public function read($id) {
+    public function read($id): string {
         return (string)@file_get_contents($this->path . $id);
     }
 
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         // Empty $data = 0 = false
         return (bool)file_put_contents($this->path . $id, $data);
     }
@@ -40,7 +40,7 @@ class MySession2 {
         @unlink($this->path . $id);
     }
 
-    public function gc($maxlifetime) {
+    public function gc($maxlifetime): bool {
         foreach (glob($this->path . '*') as $filename) {
             if (filemtime($filename) + $maxlifetime < time()) {
                 @unlink($filename);

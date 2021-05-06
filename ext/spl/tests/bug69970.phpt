@@ -6,7 +6,7 @@ Bug #69970 (Use-after-free vulnerability in spl_recursive_it_move_forward_ex())
 $count = 10;
 
 class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator {
-  function rewind() {
+  function rewind(): void {
     echo "dummy\n";
   }
   function endChildren() {

@@ -14,12 +14,12 @@ ob_start();
 echo "*** Testing session_set_save_handler() : incomplete implementation ***\n";
 
 class MySession6 extends SessionHandler {
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         // don't call parent
         return true;
     }
 
-    public function read($id) {
+    public function read($id): string|false {
         // should error because parent::open hasn't been called
         return parent::read($id);
     }
