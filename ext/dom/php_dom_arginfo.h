@@ -28,18 +28,18 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMChildNode_replaceWith arginfo_class_DOMParentNode_append
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_appendChild, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMNode_appendChild, 0, 1, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_C14N, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMNode_C14N, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, exclusive, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, withComments, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, xpath, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nsPrefixes, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_C14NFile, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMNode_C14NFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, exclusive, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, withComments, _IS_BOOL, 0, "false")
@@ -47,102 +47,117 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_C14NFile, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nsPrefixes, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_cloneNode, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMNode_cloneNode, 0, 0, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_getLineNo, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_getLineNo, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNode_getNodePath arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_getNodePath, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNode_hasAttributes arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_hasAttributes, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNode_hasChildNodes arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMNode_hasChildNodes arginfo_class_DOMNode_hasAttributes
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_insertBefore, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMNode_insertBefore, 0, 1, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, child, DOMNode, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_isDefaultNamespace, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isDefaultNamespace, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_isSameNode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSameNode, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, otherNode, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_isSupported, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSupported, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, feature, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_lookupNamespaceURI, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_lookupNamespaceURI, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNode_lookupPrefix arginfo_class_DOMNode_isDefaultNamespace
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_lookupPrefix, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNode_normalize arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_normalize, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_removeChild, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMNode_removeChild, 0, 1, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, child, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_replaceChild, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMNode_replaceChild, 0, 2, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO(0, child, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMImplementation_getFeature arginfo_class_DOMNode_isSupported
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, feature, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMImplementation_hasFeature arginfo_class_DOMNode_isSupported
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 1, DOMDocumentType, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, publicId, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, systemId, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, DOMDocument, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifiedName, IS_STRING, 0, "\"\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, doctype, DOMDocumentType, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocumentFragment___construct arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocumentFragment___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocumentFragment_appendXML arginfo_class_DOMCdataSection___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocumentFragment_appendXML, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocumentFragment_append arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMDocumentFragment_prepend arginfo_class_DOMParentNode_append
 
-#define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMNodeList_count, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMNodeList_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNodeList_item, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMNodeList_item, 0, 1, DOMNode, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMCharacterData_appendData arginfo_class_DOMCdataSection___construct
+#define arginfo_class_DOMCharacterData_appendData arginfo_class_DOMDocumentFragment_appendXML
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMCharacterData_substringData, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMCharacterData_substringData, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMCharacterData_insertData, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMCharacterData_insertData, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMCharacterData_deleteData arginfo_class_DOMCharacterData_substringData
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMCharacterData_deleteData, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMCharacterData_replaceData, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMCharacterData_replaceData, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -161,7 +176,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMAttr___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMAttr_isId arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMAttr_isId arginfo_class_DOMNode_hasAttributes
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
@@ -169,62 +184,82 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_getAttribute, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttribute, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_getAttributeNS, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttributeNS, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_getAttributeNode arginfo_class_DOMElement_getAttribute
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMElement_getAttributeNode, 0, 1, DOMAttr|DOMNamespaceNode, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_getAttributeNodeNS arginfo_class_DOMElement_getAttributeNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMElement_getAttributeNodeNS, 0, 2, DOMAttr|DOMNamespaceNode, MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_getElementsByTagName arginfo_class_DOMElement_getAttribute
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_getElementsByTagName, 0, 1, DOMNodeList, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_getElementsByTagNameNS, 0, 2, DOMNodeList, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_hasAttribute arginfo_class_DOMElement_getAttribute
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_hasAttribute, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_hasAttributeNS arginfo_class_DOMElement_getAttributeNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_hasAttributeNS, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_removeAttribute arginfo_class_DOMElement_getAttribute
+#define arginfo_class_DOMElement_removeAttribute arginfo_class_DOMElement_hasAttribute
 
-#define arginfo_class_DOMElement_removeAttributeNS arginfo_class_DOMElement_getAttributeNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_removeAttributeNS, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_removeAttributeNode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMElement_removeAttributeNode, 0, 1, DOMAttr, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setAttribute, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMElement_setAttribute, 0, 2, DOMAttr, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setAttributeNS, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setAttributeNS, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_setAttributeNode arginfo_class_DOMElement_removeAttributeNode
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMElement_setAttributeNode, 0, 1, DOMAttr, MAY_BE_NULL|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMElement_setAttributeNodeNS arginfo_class_DOMElement_removeAttributeNode
+#define arginfo_class_DOMElement_setAttributeNodeNS arginfo_class_DOMElement_setAttributeNode
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setIdAttribute, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setIdAttribute, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, isId, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setIdAttributeNS, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setIdAttributeNS, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, isId, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMElement_setIdAttributeNode, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setIdAttributeNode, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
 	ZEND_ARG_TYPE_INFO(0, isId, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -246,135 +281,145 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createAttribute, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createAttribute, 0, 1, DOMAttr, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createAttributeNS, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createAttributeNS, 0, 2, DOMAttr, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_createCDATASection arginfo_class_DOMCdataSection___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createCDATASection, 0, 1, DOMCdataSection, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_createComment arginfo_class_DOMCdataSection___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createComment, 0, 1, DOMComment, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_createDocumentFragment arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createDocumentFragment, 0, 0, DOMDocumentFragment, MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createElement, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createElement, 0, 1, DOMElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createElementNS, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createElementNS, 0, 2, DOMElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createEntityReference, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createEntityReference, 0, 1, DOMEntityReference, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_createProcessingInstruction, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createProcessingInstruction, 0, 1, DOMProcessingInstruction, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, target, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_createTextNode arginfo_class_DOMCdataSection___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_createTextNode, 0, 1, DOMText, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_getElementById, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMDocument_getElementById, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, elementId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_getElementsByTagName arginfo_class_DOMElement_getAttribute
+#define arginfo_class_DOMDocument_getElementsByTagName arginfo_class_DOMElement_getElementsByTagName
 
-#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getAttributeNS
+#define arginfo_class_DOMDocument_getElementsByTagNameNS arginfo_class_DOMElement_getElementsByTagNameNS
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_importNode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_importNode, 0, 1, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_load, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_load, 0, 1, DOMDocument, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_loadXML, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_loadXML, 0, 1, DOMDocument, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_normalizeDocument arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMDocument_normalizeDocument arginfo_class_DOMNode_normalize
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_registerNodeClass, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_registerNodeClass, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, baseClass, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, extendedClass, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_save arginfo_class_DOMDocument_load
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_save, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
 
 #if defined(LIBXML_HTML_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_loadHTML, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_loadHTML, 0, 1, DOMDocument, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_HTML_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_loadHTMLFile, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_loadHTMLFile, 0, 1, DOMDocument, MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_HTML_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_saveHTML, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_saveHTML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_HTML_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_saveHTMLFile, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_saveXML, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_schemaValidate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_schemaValidate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_schemaValidateSource, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_schemaValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_relaxNGValidate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_relaxNGValidate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_relaxNGValidateSource, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_relaxNGValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_class_DOMDocument_validate arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMDocument_validate arginfo_class_DOMNode_hasAttributes
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument_xinclude, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_xinclude, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -386,25 +431,32 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMText___construct arginfo_class_DOMComment___construct
 
-#define arginfo_class_DOMText_isWhitespaceInElementContent arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMText_isWhitespaceInElementContent arginfo_class_DOMNode_hasAttributes
 
-#define arginfo_class_DOMText_isElementContentWhitespace arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMText_isElementContentWhitespace arginfo_class_DOMNode_hasAttributes
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMText_splitText, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMText_splitText, 0, 1, DOMText, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNamedNodeMap_getNamedItem arginfo_class_DOMElement_getAttribute
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMNamedNodeMap_getNamedItem, 0, 1, DOMNode, 1)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMNamedNodeMap_getNamedItemNS arginfo_class_DOMElement_getAttributeNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMNamedNodeMap_getNamedItemNS, 0, 2, DOMNode, 1)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMNamedNodeMap_item arginfo_class_DOMNodeList_item
 
-#define arginfo_class_DOMNamedNodeMap_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMNamedNodeMap_count arginfo_class_DOMNodeList_count
 
 #define arginfo_class_DOMNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
-#define arginfo_class_DOMEntityReference___construct arginfo_class_DOMDocument_createEntityReference
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMEntityReference___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMProcessingInstruction___construct arginfo_class_DOMAttr___construct
 
@@ -416,7 +468,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath_evaluate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_evaluate, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, DOMNode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
@@ -428,14 +480,14 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath_registerNamespace, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerNamespace, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctions, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctions, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_MASK(0, restrict, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 #endif

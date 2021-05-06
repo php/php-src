@@ -89,32 +89,35 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_session_start, 0, 0, _IS_BOOL, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_open, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SessionHandlerInterface_open, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SessionHandlerInterface_close, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_read, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SessionHandlerInterface_read, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_write, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SessionHandlerInterface_write, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SessionHandlerInterface_destroy arginfo_class_SessionHandlerInterface_read
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SessionHandlerInterface_destroy, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SessionHandlerInterface_gc, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SessionHandlerInterface_gc, 0, 1, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, max_lifetime, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SessionIdInterface_create_sid arginfo_class_SessionHandlerInterface_close
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SessionIdInterface_create_sid, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SessionUpdateTimestampHandlerInterface_validateId arginfo_class_SessionHandlerInterface_read
+#define arginfo_class_SessionUpdateTimestampHandlerInterface_validateId arginfo_class_SessionHandlerInterface_destroy
 
 #define arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp arginfo_class_SessionHandlerInterface_write
 
@@ -126,11 +129,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionHandler_write arginfo_class_SessionHandlerInterface_write
 
-#define arginfo_class_SessionHandler_destroy arginfo_class_SessionHandlerInterface_read
+#define arginfo_class_SessionHandler_destroy arginfo_class_SessionHandlerInterface_destroy
 
 #define arginfo_class_SessionHandler_gc arginfo_class_SessionHandlerInterface_gc
 
-#define arginfo_class_SessionHandler_create_sid arginfo_class_SessionHandlerInterface_close
+#define arginfo_class_SessionHandler_create_sid arginfo_class_SessionIdInterface_create_sid
 
 
 ZEND_FUNCTION(session_name);

@@ -7,23 +7,28 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ResourceBundle_create arginfo_class_ResourceBundle___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_ResourceBundle_create, 0, 2, ResourceBundle, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, bundle, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle_get, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ResourceBundle_get, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle_count, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ResourceBundle_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle_getLocales, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ResourceBundle_getLocales, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, bundle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ResourceBundle_getErrorCode arginfo_class_ResourceBundle_count
 
-#define arginfo_class_ResourceBundle_getErrorMessage arginfo_class_ResourceBundle_count
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ResourceBundle_getErrorMessage, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ResourceBundle_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
