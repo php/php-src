@@ -255,6 +255,14 @@ static void place_essa_pis(
 			default:
 				continue;
 		}
+
+		/* The following patterns all inspect the opline directly before the JMPZ opcode.
+		 * Make sure that it is part of the same block, otherwise it might not be a dominating
+		 * assignment. */
+		if (blocks[j].len == 1) {
+			continue;
+		}
+
 		if (opline->op1_type == IS_TMP_VAR &&
 		    ((opline-1)->opcode == ZEND_IS_EQUAL ||
 		     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||

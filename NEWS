@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #80900 (switch statement behavior inside function). (twosee)
+  . Fixed bug #81015 (Opcache optimization assumes wrong part of ternary
+    operator in if-condition). (Nikita)
 
 - XMLReader:
   . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
