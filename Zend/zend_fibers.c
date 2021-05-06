@@ -58,7 +58,7 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
-#define ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, trace_num) do { \
+#define ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, trace_num, bailout) do { \
 	stack = EG(vm_stack); \
 	stack->top = EG(vm_stack_top); \
 	stack->end = EG(vm_stack_end); \
@@ -66,9 +66,10 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 	execute_data = EG(current_execute_data); \
 	error_reporting = EG(error_reporting); \
 	trace_num = EG(jit_trace_num); \
+	bailout = EG(bailout); \
 } while (0)
 
-#define ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, trace_num) do { \
+#define ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, trace_num, bailout) do { \
 	EG(vm_stack) = stack; \
 	EG(vm_stack_top) = stack->top; \
 	EG(vm_stack_end) = stack->end; \
@@ -76,6 +77,7 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 	EG(current_execute_data) = execute_data; \
 	EG(error_reporting) = error_reporting; \
 	EG(jit_trace_num) = trace_num; \
+	EG(bailout) = bailout; \
 } while (0)
 
 #if defined(MAP_STACK) && !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
@@ -241,12 +243,13 @@ static void zend_fiber_suspend(zend_fiber *fiber)
 	zend_execute_data *execute_data;
 	int error_reporting;
 	uint32_t jit_trace_num;
+	JMP_BUF *bailout;
 
-	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num);
+	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
 
 	zend_fiber_suspend_context(&fiber->context);
 
-	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num);
+	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
 }
 
 static void zend_fiber_switch_to(zend_fiber *fiber)
@@ -257,12 +260,13 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 	zend_execute_data *execute_data;
 	int error_reporting;
 	uint32_t jit_trace_num;
+	JMP_BUF *bailout;
 
 	previous = EG(current_fiber);
 
 	zend_observer_fiber_switch_notify(previous, fiber);
 
-	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num);
+	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
 
 	EG(current_fiber) = fiber;
 
@@ -270,40 +274,16 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 
 	EG(current_fiber) = previous;
 
-	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num);
+	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
 
 	zend_observer_fiber_switch_notify(fiber, previous);
 
-	if (UNEXPECTED(EG(fiber_error)) && fiber->status != ZEND_FIBER_STATUS_SHUTDOWN) {
-		if (previous) {
-			zend_fiber_suspend(previous); // Still in fiber, suspend again until in {main}.
-			abort(); // This fiber should never be resumed.
-		}
-
-		zend_error_info *error = EG(fiber_error);
-		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	if (UNEXPECTED(fiber->status == ZEND_FIBER_STATUS_BAILOUT)) {
+		// zend_bailout() was called in the fiber, so call it again in the previous fiber or {main}.
+		zend_bailout();
 	}
 }
 
-ZEND_COLD void zend_error_suspend_fiber(
-		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
-{
-	ZEND_ASSERT(EG(current_fiber) && "Must be within an active fiber!");
-	ZEND_ASSERT(orig_type & E_FATAL_ERRORS && "Error type must be fatal");
-
-	zend_error_info *error = emalloc(sizeof(zend_error_info));
-
-	error->type = orig_type;
-	error->filename = error_filename;
-	error->lineno = error_lineno;
-	error->message = message;
-
-	EG(fiber_error) = error;
-
-	zend_fiber_suspend(EG(current_fiber));
-
-	abort(); // This fiber should never be resumed.
-}
 
 static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size)
 {
@@ -348,21 +328,25 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
 
-	zend_call_function(&fiber->fci, &fiber->fci_cache);
+	zend_first_try {
+		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
-	zval_ptr_dtor(&fiber->fci.function_name);
+		zval_ptr_dtor(&fiber->fci.function_name);
 
-	if (EG(exception)) {
-		if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-			if (EXPECTED(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))) {
-				zend_clear_exception();
+		if (EG(exception)) {
+			if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
+				if (EXPECTED(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))) {
+					zend_clear_exception();
+				}
+			} else {
+				fiber->status = ZEND_FIBER_STATUS_THREW;
 			}
 		} else {
-			fiber->status = ZEND_FIBER_STATUS_THREW;
+			fiber->status = ZEND_FIBER_STATUS_RETURNED;
 		}
-	} else {
-		fiber->status = ZEND_FIBER_STATUS_RETURNED;
-	}
+	} zend_catch {
+		fiber->status = ZEND_FIBER_STATUS_BAILOUT;
+	} zend_end_try();
 
 	zend_vm_stack_destroy();
 	fiber->execute_data = NULL;
@@ -512,13 +496,7 @@ ZEND_METHOD(Fiber, suspend)
 
 	if (fiber->status == ZEND_FIBER_STATUS_SHUTDOWN) {
 		// This occurs when the fiber is GC'ed while suspended.
-		if (EG(fiber_error)) {
-			// Throw UnwindExit so finally blocks are not executed on fatal error.
-			zend_throw_unwind_exit();
-		} else {
-			// Otherwise throw GracefulExit to execute finally blocks.
-			zend_throw_graceful_exit();
-		}
+		zend_throw_graceful_exit();
 		RETURN_THROWS();
 	}
 
@@ -718,5 +696,4 @@ void zend_register_fiber_ce(void)
 void zend_fiber_init(void)
 {
 	EG(current_fiber) = NULL;
-	EG(fiber_error) = NULL;
 }

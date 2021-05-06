@@ -775,7 +775,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
 	executor_globals->current_fiber = NULL;
-	executor_globals->fiber_error = NULL;
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
@@ -1347,11 +1346,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
-
-	/* Fatal errors must be handled in {main} */
-	if (type & E_FATAL_ERRORS && EG(current_fiber)) {
-		zend_error_suspend_fiber(orig_type, error_filename, error_lineno, message);
-	}
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
