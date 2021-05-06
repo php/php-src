@@ -24,6 +24,7 @@
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
+ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
 
 static HashTable internal_attributes;
 
@@ -65,6 +66,11 @@ ZEND_METHOD(Attribute, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), flags);
+}
+
+ZEND_METHOD(ReturnTypeWillChange, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -278,6 +284,9 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
+
+	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
+	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
 }
 
 void zend_attributes_shutdown(void)

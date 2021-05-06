@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 47ac64b027cdeb0e9996147277f79fa9d6b876bd */
+ * Stub hash: 0b2b52d4f891a594ccfcbcc0edeec97a9e0f80e6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -58,6 +58,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionFunctionAbstract_hasReturnType arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionFunctionAbstract_getReturnType arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType, 0, 0, ReflectionType, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getAttributes, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -218,8 +224,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_isTrait arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_isEnum, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionClass_isEnum arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionClass_isAbstract arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -311,7 +316,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_isDefault arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-#define arginfo_class_ReflectionProperty_isPromoted arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionProperty_isPromoted arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_getModifiers arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -325,7 +330,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_hasType arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-#define arginfo_class_ReflectionProperty_hasDefaultValue arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionProperty_hasDefaultValue arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_getDefaultValue arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -358,7 +363,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
-#define arginfo_class_ReflectionClassConstant_isEnumCase arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionClassConstant_isEnumCase arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionParameter___clone arginfo_class_ReflectionFunctionAbstract___clone
 
@@ -405,7 +410,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter_isVariadic arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-#define arginfo_class_ReflectionParameter_isPromoted arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionParameter_isPromoted arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionParameter_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
@@ -482,7 +487,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionAttribute_getTarget, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionAttribute_isRepeated arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionAttribute_isRepeated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionAttribute_getArguments arginfo_class_ReflectionUnionType_getTypes
 
@@ -505,10 +510,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionEnum_getCases arginfo_class_ReflectionUnionType_getTypes
 
-#define arginfo_class_ReflectionEnum_isBacked arginfo_class_ReflectionClass_isEnum
+#define arginfo_class_ReflectionEnum_isBacked arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionEnum_getBackingType, 0, 0, ReflectionType, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionEnum_getBackingType arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType
 
 #define arginfo_class_ReflectionEnumUnitCase___construct arginfo_class_ReflectionClassConstant___construct
 
@@ -569,6 +573,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables);
 ZEND_METHOD(ReflectionFunctionAbstract, returnsReference);
 ZEND_METHOD(ReflectionFunctionAbstract, hasReturnType);
 ZEND_METHOD(ReflectionFunctionAbstract, getReturnType);
+ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType);
+ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType);
 ZEND_METHOD(ReflectionFunctionAbstract, getAttributes);
 ZEND_METHOD(ReflectionFunction, __construct);
 ZEND_METHOD(ReflectionFunction, __toString);
@@ -805,6 +811,8 @@ static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
 	ZEND_ME(ReflectionFunctionAbstract, returnsReference, arginfo_class_ReflectionFunctionAbstract_returnsReference, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, hasReturnType, arginfo_class_ReflectionFunctionAbstract_hasReturnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getReturnType, arginfo_class_ReflectionFunctionAbstract_getReturnType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, hasTentativeReturnType, arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getTentativeReturnType, arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getAttributes, arginfo_class_ReflectionFunctionAbstract_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

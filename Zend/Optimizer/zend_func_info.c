@@ -844,7 +844,7 @@ ZEND_API uint32_t zend_get_func_info(
 #endif
 
 		ret = zend_get_return_info_from_signature_only(
-			callee_func, /* script */ NULL, ce, ce_is_instanceof);
+			callee_func, /* script */ NULL, ce, ce_is_instanceof, /* use_tentative_return_info */ !call_info->is_prototype);
 
 #if ZEND_DEBUG
 		if (internal_ret) {
@@ -884,7 +884,7 @@ ZEND_API uint32_t zend_get_func_info(
 		}
 		if (!ret) {
 			ret = zend_get_return_info_from_signature_only(
-				callee_func, /* TODO: script */ NULL, ce, ce_is_instanceof);
+				callee_func, /* TODO: script */ NULL, ce, ce_is_instanceof, /* use_tentative_return_info */ !call_info->is_prototype);
 		}
 	}
 	return ret;

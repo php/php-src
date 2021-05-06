@@ -57,6 +57,10 @@ PHP 8.1 UPGRADE NOTES
     This means that static variables in methods now behave the same way as
     static properties.
     RFC: https://wiki.php.net/rfc/static_variable_inheritance
+  . Most non-final internal methods now require overriding methods to declare a
+    compatible return type, otherwise a deprecated notice is emitted during
+    inheritance validation.
+    RFC: https://wiki.php.net/rfc/internal_method_return_types
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects

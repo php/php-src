@@ -599,16 +599,20 @@ class ReturnInfo {
     public $type;
     /** @var Type|null */
     public $phpDocType;
+    /** @var bool */
+    public $tentativeReturnType;
 
-    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType) {
+    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType) {
         $this->byRef = $byRef;
         $this->type = $type;
         $this->phpDocType = $phpDocType;
+        $this->tentativeReturnType = $tentativeReturnType;
     }
 
     public function equals(ReturnInfo $other): bool {
         return $this->byRef === $other->byRef
-            && Type::equals($this->type, $other->type);
+            && Type::equals($this->type, $other->type)
+            && $this->tentativeReturnType === $other->tentativeReturnType;
     }
 
     public function getMethodSynopsisType(): ?Type {
@@ -1431,6 +1435,7 @@ function parseFunctionLike(
         $isDeprecated = false;
         $verify = true;
         $docReturnType = null;
+        $tentativeReturnType = false;
         $docParamTypes = [];
 
         if ($comment) {
@@ -1452,8 +1457,10 @@ function parseFunctionLike(
                     }
                 } else if ($tag->name === 'deprecated') {
                     $isDeprecated = true;
-                }  else if ($tag->name === 'no-verify') {
+                } else if ($tag->name === 'no-verify') {
                     $verify = false;
+                } else if ($tag->name === 'tentative-return-type') {
+                    $tentativeReturnType = true;
                 } else if ($tag->name === 'return') {
                     $docReturnType = $tag->getType();
                 } else if ($tag->name === 'param') {
@@ -1530,7 +1537,8 @@ function parseFunctionLike(
         $return = new ReturnInfo(
             $func->returnsByRef(),
             $returnType ? Type::fromNode($returnType) : null,
-            $docReturnType ? Type::fromPhpDoc($docReturnType) : null
+            $docReturnType ? Type::fromPhpDoc($docReturnType) : null,
+            $tentativeReturnType
         );
 
         return new FuncInfo(
@@ -1814,18 +1822,22 @@ function parseStubFile(string $code): FileInfo {
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
     $returnType = $funcInfo->return->type;
+    $isTentativeReturnType = $funcInfo->return->tentativeReturnType;
+
     if ($returnType !== null) {
         if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
             if ($simpleReturnType->isBuiltin) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    "%s(%s, %d, %d, %s, %d)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $simpleReturnType->toTypeCode(), $returnType->isNullable()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    "%s(%s, %d, %d, %s, %d)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $simpleReturnType->toEscapedName(), $returnType->isNullable()
@@ -1835,14 +1847,16 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
             $arginfoType = $returnType->toArginfoType();
             if ($arginfoType->hasClassType()) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(%s, %d, %d, %s, %s)\n",
+                    "%s(%s, %d, %d, %s, %s)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $arginfoType->toClassTypeString(), $arginfoType->toTypeMask()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(%s, %d, %d, %s)\n",
+                    "%s(%s, %d, %d, %s)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $arginfoType->toTypeMask()
