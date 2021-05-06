@@ -63,7 +63,7 @@ PHP 8.1 UPGRADE NOTES
     instead of resources.
 
 - IMAP:
-  . The IMAP functions now accept and return, respectively, IMAPConnection objects
+  . The IMAP functions now accept and return, respectively, IMAP\Connection objects
     instead of resources.
 
 - LDAP:
