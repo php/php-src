@@ -51,6 +51,8 @@ PHP_METHOD(php_user_filter, filter)
 PHP_METHOD(php_user_filter, onCreate)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_TRUE;
 }
 
 PHP_METHOD(php_user_filter, onClose)

@@ -12,7 +12,7 @@ class php_user_filter
      */
     public function filter($in, $out, &$consumed, bool $closing) {}
 
-    /** @return void */
+    /** @return bool */
     public function onCreate() {}
 
     /** @return void */
