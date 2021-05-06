@@ -9,7 +9,7 @@ echo "*** Testing new DateTime() : with user format() method ***\n";
 
 class DateTimeExt extends DateTime
 {
-    public function format($format = "F j, Y, g:i:s a")
+    public function format($format = "F j, Y, g:i:s a"): string
     {
         return parent::format($format);
     }

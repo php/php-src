@@ -4003,7 +4003,7 @@ uint32_t zend_get_return_info_from_signature_only(
 		const zend_function *func, const zend_script *script,
 		zend_class_entry **ce, bool *ce_is_instanceof) {
 	uint32_t type;
-	if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && !ZEND_ARG_TYPE_IS_TENTATIVE(func->common.arg_info - 1)) {
 		zend_arg_info *ret_info = func->common.arg_info - 1;
 		type = zend_fetch_arg_info_type(script, ret_info, ce);
 		*ce_is_instanceof = ce != NULL;
@@ -4025,15 +4025,16 @@ uint32_t zend_get_return_info_from_signature_only(
 ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret)
 {
-	if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_ssa_range tmp_range = {0, 0, 0, 0};
-		bool is_instanceof = false;
-		ret->type = zend_get_return_info_from_signature_only(
-			(zend_function *) op_array, script, &ret->ce, &is_instanceof);
-		ret->is_instanceof = is_instanceof;
-		ret->range = tmp_range;
-		ret->has_range = 0;
-	}
+	ZEND_ASSERT((op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE));
+	ZEND_ASSERT(!ZEND_ARG_TYPE_IS_TENTATIVE(&((zend_function *) op_array)->common.arg_info[-1]));
+
+	zend_ssa_range tmp_range = {0, 0, 0, 0};
+	bool is_instanceof = false;
+	ret->type = zend_get_return_info_from_signature_only(
+		(zend_function *) op_array, script, &ret->ce, &is_instanceof);
+	ret->is_instanceof = is_instanceof;
+	ret->range = tmp_range;
+	ret->has_range = 0;
 }
 
 void zend_func_return_info(const zend_op_array   *op_array,

@@ -336,7 +336,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
 								bool by_ref = (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) != 0;
-								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0));
+								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0, 0));
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;

@@ -591,7 +591,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		if (Z_FUNC(p->val)->common.function_name) {
 			Z_FUNC(p->val)->common.function_name = new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
-		if (Z_FUNC(p->val)->common.arg_info &&
+		if ((Z_FUNC(p->val)->common.arg_info) &&
 		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
@@ -3885,7 +3885,9 @@ static bool preload_needed_types_known(zend_class_entry *ce) {
 	zend_string *lcname;
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
 		uint32_t i;
-		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		if ((fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
+			!ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])
+		) {
 			if (!preload_is_type_known(ce, &fptr->common.arg_info[-1].type) &&
 				preload_is_method_maybe_override(ce, lcname)) {
 				return 0;
