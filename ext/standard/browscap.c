@@ -220,8 +220,8 @@ typedef struct _browscap_parser_ctx {
 	HashTable str_interned;
 } browscap_parser_ctx;
 
-static zend_string *browscap_intern_str(
-		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
+static void browscap_intern_str(
+		browscap_parser_ctx *ctx, zend_string *str, zend_string **ret, bool persistent) {
 	zend_string *interned = zend_hash_find_ptr(&ctx->str_interned, str);
 	if (interned) {
 		zend_string_addref(interned);
@@ -233,11 +233,11 @@ static zend_string *browscap_intern_str(
 		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
 	}
 
-	return interned;
+	*ret = interned;
 }
 
-static zend_string *browscap_intern_str_ci(
-		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
+static void browscap_intern_str_ci(
+		browscap_parser_ctx *ctx, zend_string *str, zend_string **ret, bool persistent) {
 	zend_string *lcname;
 	zend_string *interned;
 	ALLOCA_FLAG(use_heap);
@@ -257,7 +257,7 @@ static zend_string *browscap_intern_str_ci(
 	}
 
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
-	return interned;
+	*ret = interned;
 }
 
 static void browscap_add_kv(
@@ -325,7 +325,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				) {
 					new_value = ZSTR_EMPTY_ALLOC();
 				} else { /* Other than true/false setting */
-					new_value = browscap_intern_str(ctx, Z_STR_P(arg2), persistent);
+					browscap_intern_str(ctx, Z_STR_P(arg2), &new_value, persistent);
 				}
 
 				if (zend_string_equals_literal_ci(Z_STR_P(arg1), "parent")) {
@@ -345,7 +345,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 
 					ctx->current_entry->parent = new_value;
 				} else {
-					new_key = browscap_intern_str_ci(ctx, Z_STR_P(arg1), persistent);
+					browscap_intern_str_ci(ctx, Z_STR_P(arg1), &new_key, persistent);
 					browscap_add_kv(bdata, new_key, new_value, persistent);
 					ctx->current_entry->kv_end = bdata->kv_used;
 				}
