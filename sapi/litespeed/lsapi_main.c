@@ -649,7 +649,7 @@ static int lsapi_execute_script(void)
     char *p;
     int len;
 	zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
-	file_handle->primary_script = 1;
+	file_handle.primary_script = true;
 
     p = argv0;
     *p++ = ':';
@@ -1335,9 +1335,9 @@ static int cli_main( int argc, char * argv[] )
                             file_handle.opened_path = NULL;
                             ret = php_lint_script(&file_handle);
                             if (ret==SUCCESS) {
-                                zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+                                zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
                             } else {
-                                zend_printf("Errors parsing %s\n", file_handle.filename);
+                                zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
                             }
 
                         } else {
