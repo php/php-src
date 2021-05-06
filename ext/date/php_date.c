@@ -2496,53 +2496,61 @@ PHP_METHOD(DateTimeImmutable, createFromInterface)
 }
 /* }}} */
 
-static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht)
+static bool php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht)
 {
 	zval             *z_date;
+	zval             *z_timezone_type;
+	zval             *z_timezone;
 	zval              tmp_obj;
 	timelib_tzinfo   *tzi;
 
 	z_date = zend_hash_str_find(myht, "date", sizeof("date")-1);
-	if (z_date && Z_TYPE_P(z_date) == IS_STRING) {
-		zval *z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
-		if (z_timezone_type && Z_TYPE_P(z_timezone_type) == IS_LONG) {
-			zval *z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
-			if (z_timezone && Z_TYPE_P(z_timezone) == IS_STRING) {
-				switch (Z_LVAL_P(z_timezone_type)) {
-					case TIMELIB_ZONETYPE_OFFSET:
-					case TIMELIB_ZONETYPE_ABBR: {
-						char *tmp = emalloc(Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2);
-						int ret;
-						snprintf(tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2, "%s %s", Z_STRVAL_P(z_date), Z_STRVAL_P(z_timezone));
-						ret = php_date_initialize(*dateobj, tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 1, NULL, NULL, 0);
-						efree(tmp);
-						return 1 == ret;
-					}
+	if (!z_date || Z_TYPE_P(z_date) != IS_STRING) {
+		return false;
+	}
 
-					case TIMELIB_ZONETYPE_ID: {
-						int ret;
-						php_timezone_obj *tzobj;
+	z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
+	if (!z_timezone_type || Z_TYPE_P(z_timezone_type) != IS_LONG) {
+		return false;
+	}
 
-						tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
+	z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
+	if (!z_timezone || Z_TYPE_P(z_timezone) != IS_STRING) {
+		return false;
+	}
 
-						if (tzi == NULL) {
-							return 0;
-						}
+	switch (Z_LVAL_P(z_timezone_type)) {
+		case TIMELIB_ZONETYPE_OFFSET:
+		case TIMELIB_ZONETYPE_ABBR: {
+			char *tmp = emalloc(Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2);
+			int ret;
+			snprintf(tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2, "%s %s", Z_STRVAL_P(z_date), Z_STRVAL_P(z_timezone));
+			ret = php_date_initialize(*dateobj, tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 1, NULL, NULL, 0);
+			efree(tmp);
+			return 1 == ret;
+		}
 
-						tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, &tmp_obj));
-						tzobj->type = TIMELIB_ZONETYPE_ID;
-						tzobj->tzi.tz = tzi;
-						tzobj->initialized = 1;
+		case TIMELIB_ZONETYPE_ID: {
+			int ret;
+			php_timezone_obj *tzobj;
 
-						ret = php_date_initialize(*dateobj, Z_STRVAL_P(z_date), Z_STRLEN_P(z_date), NULL, &tmp_obj, 0);
-						zval_ptr_dtor(&tmp_obj);
-						return 1 == ret;
-					}
-				}
+			tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
+
+			if (tzi == NULL) {
+				return false;
 			}
+
+			tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, &tmp_obj));
+			tzobj->type = TIMELIB_ZONETYPE_ID;
+			tzobj->tzi.tz = tzi;
+			tzobj->initialized = 1;
+
+			ret = php_date_initialize(*dateobj, Z_STRVAL_P(z_date), Z_STRLEN_P(z_date), NULL, &tmp_obj, 0);
+			zval_ptr_dtor(&tmp_obj);
+			return 1 == ret;
 		}
 	}
-	return 0;
+	return false;
 } /* }}} */
 
 /* {{{ */
