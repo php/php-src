@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81007 (JIT "not supported" on 32-bit x86 -- build problem?).
     (Nikita)
+  . Fixed bug #81015 (Opcache optimization assumes wrong part of ternary
+    operator in if-condition). (Nikita)
 
 - PDO_pgsql:
   . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
