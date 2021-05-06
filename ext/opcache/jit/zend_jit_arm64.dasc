@@ -2290,9 +2290,12 @@ static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	add TMP1, REG1, IP
 	|	ldr REG2, [TMP1, #offsetof(zend_op_trace_info, counter)]
 	|	ldrh TMP2w, [REG2]
-	|	ADD_SUB_32_WITH_CONST subs, TMP2w, TMP2w, cost, TMP3w
+	|	ADD_SUB_32_WITH_CONST subs, TMP2w, TMP2w, cost, TMP1w
 	|	strh TMP2w, [REG2]
 	|	ble ->hybrid_hot_trace
+	// Note: "REG1 + IP" is re-calculated as TMP1 is used as temporary register by the prior
+	// ADD_SUB_32_WITH_CONST. Will optimize in the future if more temporary registers are available.
+	|	add TMP1, REG1, IP
 	|	ldr TMP2, [TMP1, #offsetof(zend_op_trace_info, orig_handler)]
 	|	br TMP2
 
