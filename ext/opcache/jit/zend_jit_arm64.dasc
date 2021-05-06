@@ -4980,8 +4980,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (val == 0) {
 					|	cmp REG0, xzr
 				} else if (val > 0 && !op2_loaded) {
-					|	LOAD_64BIT_VAL TMP1, val
-					|	cmp REG0, TMP1
+					|	CMP_64_WITH_CONST REG0, val, TMP1
 				} else {
 					|	cmp REG0, FCARG2x
 				}
@@ -7575,7 +7574,7 @@ static int zend_jit_identical(dasm_State    **Dst,
 		zval *val = Z_ZV(op1_addr);
 
 		|	ldrb TMP1w, [FCARG2x, #offsetof(zval, u1.v.type)]
-		|	cmp TMP1w, #Z_TYPE_P(val)
+		|	CMP_32_WITH_CONST TMP1w, Z_TYPE_P(val), TMP2w
 		if (smart_branch_opcode) {
 			if (opline->op2_type == IS_VAR && (op2_info & MAY_BE_REF)) {
 				|	bne >8
@@ -7627,7 +7626,7 @@ static int zend_jit_identical(dasm_State    **Dst,
 		zval *val = Z_ZV(op2_addr);
 
 		|	ldrb TMP1w, [FCARG1x, #offsetof(zval, u1.v.type)]
-		|	cmp TMP1w, #Z_TYPE_P(val)
+		|	CMP_32_WITH_CONST TMP1w, Z_TYPE_P(val), TMP2w
 		if (smart_branch_opcode) {
 			if (opline->opcode != ZEND_CASE_STRICT
 			 && opline->op1_type == IS_VAR && (op1_info & MAY_BE_REF)) {
@@ -9503,8 +9502,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	// num_args = EX_NUM_ARGS();
 				|	ldr REG1w, [FP, #offsetof(zend_execute_data, This.u2.num_args)]
 				|	// if (UNEXPECTED(num_args > first_extra_arg))
-				||	ZEND_ASSERT(func->op_array.num_args <= CMP_IMM);
-				|	cmp REG1w, #(func->op_array.num_args)
+				|	CMP_32_WITH_CONST REG1w, (func->op_array.num_args), TMP1w
 			} else {
 				|	// first_extra_arg = op_array->num_args;
 				|	ldr REG2w, [REG0, #offsetof(zend_op_array, num_args)]
@@ -10590,6 +10588,8 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 						|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, REG1w, FP, (opline->op1.var + offsetof(zval,u1.v.type)), TMP1
 					}
 					|2:
+					// Note: 'type' is of uchar type and holds a positive value,
+					// hence it's safe to directly encode it as the imm field of 'cmp' instruction.
 					|	cmp REG1w, #type
 				} else {
 					if (op1_info & MAY_BE_REF) {
