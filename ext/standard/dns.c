@@ -169,20 +169,30 @@ PHP_FUNCTION(gethostbyaddr)
 static zend_string *php_gethostbyaddr(char *ip)
 {
 #if HAVE_IPV6 && HAVE_INET_PTON
-	struct in6_addr addr6;
-#endif
+	struct sockaddr_in sa4;
+	struct sockaddr_in6 sa6;
+	char out[NI_MAXHOST];
+
+	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
+		sa6.sin6_family = AF_INET6;
+
+		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+			return zend_string_init(ip, strlen(ip), 0);
+		}
+		return zend_string_init(out, strlen(out), 0);
+	} else if (inet_pton(AF_INET, ip, &sa4.sin_addr)) {
+		sa4.sin_family = AF_INET;
+
+		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+			return zend_string_init(ip, strlen(ip), 0);
+		}
+		return zend_string_init(out, strlen(out), 0);
+	}
+	return NULL; /* not a valid IP */
+#else
 	struct in_addr addr;
 	struct hostent *hp;
 
-#if HAVE_IPV6 && HAVE_INET_PTON
-	if (inet_pton(AF_INET6, ip, &addr6)) {
-		hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
-	} else if (inet_pton(AF_INET, ip, &addr)) {
-		hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
-	} else {
-		return NULL;
-	}
-#else
 	addr.s_addr = inet_addr(ip);
 
 	if (addr.s_addr == -1) {
@@ -190,13 +200,13 @@ static zend_string *php_gethostbyaddr(char *ip)
 	}
 
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
-#endif
 
 	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
 		return zend_string_init(ip, strlen(ip), 0);
 	}
 
 	return zend_string_init(hp->h_name, strlen(hp->h_name), 0);
+#endif
 }
 /* }}} */
 
