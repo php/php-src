@@ -486,7 +486,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	zval *iterator;
 	zend_class_entry *ce_iterator;
 	zend_long mode, flags;
-	zend_error_handling error_handling;
 	zval caching_it, aggregate_retval;
 
 	switch (rit_type) {
@@ -500,7 +499,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				RETURN_THROWS();
 			}
 
-			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
 				zend_function **getiterator_cache = Z_OBJCE_P(iterator)->iterator_funcs_ptr
 					? &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator : NULL;
@@ -525,7 +523,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				RETURN_THROWS();
 			}
 
-			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
 				zend_function **getiterator_cache = Z_OBJCE_P(iterator)->iterator_funcs_ptr
 					? &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator : NULL;
@@ -542,7 +539,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 			zval_ptr_dtor(iterator);
 		}
 		zend_throw_exception(spl_ce_InvalidArgumentException, "An instance of RecursiveIterator or IteratorAggregate creating it is required", 0);
-		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
@@ -591,8 +587,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].state = RS_START;
 	intern->iterators[0].haschildren = NULL;
 	intern->iterators[0].getchildren = NULL;
-
-	zend_restore_error_handling(&error_handling);
 
 	if (EG(exception)) {
 		zend_object_iterator *sub_iter;
@@ -1382,11 +1376,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			intern->dit_type = DIT_AppendIterator;
-			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
 			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
-			zend_restore_error_handling(&error_handling);
 			return intern;
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
@@ -1405,6 +1397,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 
+			/* pcre_get_compiled_regex_cache() might emit E_WARNINGs that we want to promote to exception */
 			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex);
 			zend_restore_error_handling(&error_handling);
