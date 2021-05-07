@@ -90,6 +90,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",   IMAGE_FILETYPE_AVIF,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -1183,6 +1184,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/vnd.microsoft.icon";
 		case IMAGE_FILETYPE_WEBP:
 			return "image/webp";
+		case IMAGE_FILETYPE_AVIF:
+			return "image/avif";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1264,6 +1267,8 @@ PHP_FUNCTION(image_type_to_extension)
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			imgext = ".webp";
+		case IMAGE_FILETYPE_AVIF:
+			imgext = ".avif";
 			break;
 	}
 
@@ -1430,6 +1435,9 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			result = php_handle_webp(stream);
+			break;
+		case IMAGE_FILETYPE_AVIF:
+			result = php_handle_avif(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
