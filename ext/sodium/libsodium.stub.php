@@ -58,6 +58,34 @@ function sodium_crypto_box_seal_open(string $ciphertext, string $key_pair): stri
 
 function sodium_crypto_box_secretkey(string $key_pair): string {}
 
+#ifdef crypto_core_ristretto255_HASHBYTES
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string {}
+
+function sodium_crypto_core_ristretto255_from_hash(string $s): string {}
+
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool {}
+
+function sodium_crypto_core_ristretto255_random(): string {}
+
+function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_scalar_complement(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_invert(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_scalar_negate(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_random(): string {}
+
+function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string {}
+#endif
+
 function sodium_crypto_kx_keypair(): string {}
 
 function sodium_crypto_kx_publickey(string $key_pair): string {}
@@ -105,6 +133,12 @@ function sodium_crypto_pwhash_scryptsalsa208sha256_str_verify(string $hash, stri
 #endif
 
 function sodium_crypto_scalarmult(string $n, string $p): string {}
+
+#ifdef crypto_core_ristretto255_HASHBYTES
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string {}
+
+function sodium_crypto_scalarmult_ristretto255_base(string $n): string {}
+#endif
 
 function sodium_crypto_secretbox(string $message, string $nonce, string $key): string {}
 

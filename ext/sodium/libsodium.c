@@ -365,6 +365,20 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING",
 						   sodium_base64_VARIANT_URLSAFE_NO_PADDING, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef crypto_core_ristretto255_HASHBYTES
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES",
+						   crypto_scalarmult_ristretto255_BYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES",
+						   crypto_scalarmult_ristretto255_SCALARBYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES",
+						   crypto_core_ristretto255_BYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES",
+						   crypto_core_ristretto255_HASHBYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES",
+						   crypto_core_ristretto255_SCALARBYTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES",
+						   crypto_core_ristretto255_NONREDUCEDSCALARBYTES, CONST_CS | CONST_PERSISTENT);
+#endif
 
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 	if (FAILURE == PHP_MINIT(sodium_password_hash)(INIT_FUNC_ARGS_PASSTHRU)) {
@@ -2544,6 +2558,69 @@ PHP_FUNCTION(sodium_crypto_scalarmult)
 	RETURN_NEW_STR(q);
 }
 
+#ifdef crypto_core_ristretto255_HASHBYTES
+PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255)
+{
+	zend_string   *q;
+	unsigned char *n;
+	unsigned char *p;
+	size_t         n_len;
+	size_t         p_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&n, &n_len, &p, &p_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (n_len != crypto_scalarmult_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (p_len != crypto_scalarmult_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	q = zend_string_alloc(crypto_scalarmult_ristretto255_BYTES, 0);
+	if (crypto_scalarmult_ristretto255((unsigned char *) ZSTR_VAL(q), n, p) != 0) {
+		zend_string_efree(q);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(q)[crypto_scalarmult_BYTES] = 0;
+
+	RETURN_NEW_STR(q);
+}
+
+PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255_base)
+{
+	zend_string   *q;
+	unsigned char *n;
+	size_t         n_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &n, &n_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (n_len != crypto_scalarmult_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	q = zend_string_alloc(crypto_scalarmult_ristretto255_BYTES, 0);
+	if (crypto_scalarmult_ristretto255_base((unsigned char *) ZSTR_VAL(q), n) != 0) {
+		zend_string_efree(q);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(q)[crypto_scalarmult_BYTES] = 0;
+
+	RETURN_NEW_STR(q);
+}
+#endif
+
 PHP_FUNCTION(sodium_crypto_kx_seed_keypair)
 {
 	unsigned char *sk;
@@ -3426,5 +3503,322 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey)
 		RETURN_THROWS();
 	}
 	crypto_secretstream_xchacha20poly1305_rekey((void *) state);
+}
+#endif
+
+#ifdef crypto_core_ristretto255_HASHBYTES
+PHP_FUNCTION(sodium_crypto_core_ristretto255_add)
+{
+	zend_string   *r;
+	unsigned char *p;
+	unsigned char *q;
+	size_t         p_len;
+	size_t         q_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&p, &p_len, &q, &q_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (p_len != crypto_core_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (q_len != crypto_core_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	if (crypto_core_ristretto255_add((unsigned char *) ZSTR_VAL(r), p, q) != 0) {
+		zend_string_efree(r);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(r)[crypto_core_ristretto255_BYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_from_hash)
+{
+	zend_string   *r;
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_HASHBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	if (crypto_core_ristretto255_from_hash((unsigned char *) ZSTR_VAL(r), s) != 0) {
+		zend_string_efree(r);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_is_valid_point)
+{
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(crypto_core_ristretto255_is_valid_point(s));
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_random)
+{
+	zend_string   *r;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	crypto_core_ristretto255_random((unsigned char *) ZSTR_VAL(r));
+	ZSTR_VAL(r)[crypto_core_ristretto255_BYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_add)
+{
+	zend_string   *r;
+	unsigned char *p;
+	unsigned char *q;
+	size_t         p_len;
+	size_t         q_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&p, &p_len, &q, &q_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (p_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (q_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	crypto_core_ristretto255_scalar_add((unsigned char *) ZSTR_VAL(r), p, q);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_complement)
+{
+	zend_string   *r;
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	crypto_core_ristretto255_scalar_complement((unsigned char *) ZSTR_VAL(r), s);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_invert)
+{
+	zend_string   *r;
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	if (crypto_core_ristretto255_scalar_invert((unsigned char *) ZSTR_VAL(r), s) != 0) {
+		zend_string_efree(r);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_mul)
+{
+	zend_string   *r;
+	unsigned char *x;
+	unsigned char *y;
+	size_t         x_len;
+	size_t         y_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&x, &x_len, &y, &y_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (x_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (y_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	crypto_core_ristretto255_scalar_mul((unsigned char *) ZSTR_VAL(r), x, y);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_negate)
+{
+	zend_string   *r;
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	crypto_core_ristretto255_scalar_negate((unsigned char *) ZSTR_VAL(r), s);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_random)
+{
+	zend_string   *r;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	};
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	crypto_core_ristretto255_scalar_random((unsigned char *) ZSTR_VAL(r));
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_reduce)
+{
+	zend_string   *r;
+	unsigned char *s;
+	size_t         s_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &s, &s_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (s_len != crypto_core_ristretto255_NONREDUCEDSCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_SCALARBYTES, 0);
+	crypto_core_ristretto255_scalar_reduce((unsigned char *) ZSTR_VAL(r), s);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_sub)
+{
+	zend_string   *r;
+	unsigned char *p;
+	unsigned char *q;
+	size_t         p_len;
+	size_t         q_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&p, &p_len, &q, &q_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (p_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (q_len != crypto_core_ristretto255_SCALARBYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	crypto_core_ristretto255_scalar_sub((unsigned char *) ZSTR_VAL(r), p, q);
+	ZSTR_VAL(r)[crypto_core_ristretto255_SCALARBYTES] = 0;
+	RETURN_NEW_STR(r);
+}
+
+PHP_FUNCTION(sodium_crypto_core_ristretto255_sub)
+{
+	zend_string   *r;
+	unsigned char *p;
+	unsigned char *q;
+	size_t         p_len;
+	size_t         q_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&p, &p_len, &q, &q_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (p_len != crypto_core_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 1,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (q_len != crypto_core_ristretto255_BYTES) {
+		zend_argument_error(sodium_exception_ce, 2,
+							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
+	if (crypto_core_ristretto255_sub((unsigned char *) ZSTR_VAL(r), p, q) != 0) {
+		zend_string_efree(r);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(r)[crypto_core_ristretto255_BYTES] = 0;
+	RETURN_NEW_STR(r);
 }
 #endif

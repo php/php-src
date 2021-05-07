@@ -314,6 +314,34 @@ PHP 8.1 UPGRADE NOTES
     flush its buffers to physical storage.
     RFC: https://wiki.php.net/rfc/fsync_function
 
+- Sodium:
+  . Added the XChaCha20 stream cipher interface functions:
+
+    - sodium_crypto_stream_xchacha20()
+    - sodium_crypto_stream_xchacha20_keygen()
+    - sodium_crypto_stream_xchacha20_xor()
+
+  . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
+
+    Ristretto is a technique for constructing prime order elliptic curve groups with non-malleable encodings.
+    Ristretto255 implements Ristretto atop Curve25519.
+
+    - sodium_crypto_core_ristretto255_add()
+    - sodium_crypto_core_ristretto255_from_hash()
+    - sodium_crypto_core_ristretto255_is_valid_point()
+    - sodium_crypto_core_ristretto255_random()
+    - sodium_crypto_core_ristretto255_scalar_add()
+    - sodium_crypto_core_ristretto255_scalar_complement()
+    - sodium_crypto_core_ristretto255_scalar_invert()
+    - sodium_crypto_core_ristretto255_scalar_mul()
+    - sodium_crypto_core_ristretto255_scalar_negate()
+    - sodium_crypto_core_ristretto255_scalar_random()
+    - sodium_crypto_core_ristretto255_scalar_reduce()
+    - sodium_crypto_core_ristretto255_scalar_sub()
+    - sodium_crypto_core_ristretto255_sub()
+    - sodium_crypto_scalarmult_ristretto255()
+    - sodium_crypto_scalarmult_ristretto255_base()
+
 ========================================
 7. New Classes and Interfaces
 ========================================
