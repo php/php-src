@@ -249,7 +249,7 @@ static zend_string *browscap_intern_str_ci(
 	if (interned) {
 		zend_string_addref(interned);
 	} else {
-		interned = zend_string_dup(lcname, persistent);
+		interned = zend_string_init(ZSTR_VAL(lcname), ZSTR_LEN(lcname), persistent);
 		if (persistent) {
 			interned = zend_new_interned_string(interned);
 		}
