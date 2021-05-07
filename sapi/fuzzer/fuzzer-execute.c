@@ -27,14 +27,6 @@ static uint32_t steps_left;
  * we can assume that we don't use global registers / hybrid VM. */
 typedef int (ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *);
 
-static ZEND_NORETURN void fuzzer_bailout() {
-	/* Disable object destructors, like we would do for fatal errors. In particular, if we
-	 * perform a bailout from a fiber to the main stack, we should not try to destroy the
-	 * fiber. */
-	zend_objects_store_mark_destructed(&EG(objects_store));
-	zend_bailout();
-}
-
 static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	while (1) {
 		int ret;
@@ -42,7 +34,7 @@ static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 			/* Reset steps before bailing out, so code running after bailout (e.g. in
 			 * destructors) will get another MAX_STEPS, rather than UINT32_MAX steps. */
 			steps_left = MAX_STEPS;
-			fuzzer_bailout();
+			zend_bailout();
 		}
 
 		if ((ret = ((opcode_handler_t) EX(opline)->handler)(execute_data)) != 0) {
@@ -60,7 +52,7 @@ static zend_op_array *(*orig_compile_string)(zend_string *source_string, const c
 static zend_op_array *fuzzer_compile_string(zend_string *str, const char *filename) {
 	if (ZSTR_LEN(str) > MAX_SIZE) {
 		/* Avoid compiling huge inputs via eval(). */
-		fuzzer_bailout();
+		zend_bailout();
 	}
 
 	return orig_compile_string(str, filename);
