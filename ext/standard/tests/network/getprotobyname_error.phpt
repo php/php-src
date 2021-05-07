@@ -2,6 +2,10 @@
 getprotobyname function errors test
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die('skip msan missing interceptor for getprotobyname()');
+?>
 --FILE--
 <?php
 // invalid protocol name
