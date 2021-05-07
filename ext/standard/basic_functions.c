@@ -2371,18 +2371,17 @@ PHP_FUNCTION(getprotobynumber)
 /* {{{ Registers a tick callback function */
 PHP_FUNCTION(register_tick_function)
 {
-	user_tick_function_entry *tick_fe = emalloc(sizeof(user_tick_function_entry));
+	user_tick_function_entry tick_fe;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe->fci, &tick_fe->fci_cache,
-			&tick_fe->fci.params, &tick_fe->fci.param_count) == FAILURE) {
-		efree(tick_fe);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache,
+			&tick_fe.fci.params, &tick_fe.fci.param_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	tick_fe->calling = false;
-	Z_TRY_ADDREF(tick_fe->fci.function_name);
-	for (size_t i = 0; i < tick_fe->fci.param_count; i++) {
-		Z_TRY_ADDREF(tick_fe->fci.params[i]);
+	tick_fe.calling = false;
+	Z_TRY_ADDREF(tick_fe.fci.function_name);
+	for (size_t i = 0; i < tick_fe.fci.param_count; i++) {
+		Z_TRY_ADDREF(tick_fe.fci.params[i]);
 	}
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
@@ -2392,8 +2391,7 @@ PHP_FUNCTION(register_tick_function)
 		php_add_tick_function(run_user_tick_functions, NULL);
 	}
 
-	zend_llist_add_element(BG(user_tick_functions), tick_fe);
-	efree(tick_fe);
+	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
 
 	RETURN_TRUE;
 }
@@ -2402,19 +2400,17 @@ PHP_FUNCTION(register_tick_function)
 /* {{{ Unregisters a tick callback function */
 PHP_FUNCTION(unregister_tick_function)
 {
-	user_tick_function_entry *tick_fe = emalloc(sizeof(user_tick_function_entry));
+	user_tick_function_entry tick_fe;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &tick_fe->fci, &tick_fe->fci_cache) == FAILURE) {
-		efree(tick_fe);
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(tick_fe.fci, tick_fe.fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 
-	zend_llist_del_element(BG(user_tick_functions), tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
-	efree(tick_fe);
+	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
 }
 /* }}} */
 
