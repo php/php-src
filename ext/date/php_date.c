@@ -2215,10 +2215,10 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	/* update last errors and warnings */
 	update_errors_warnings(err);
 
-
+	/* If called from a constructor throw an exception */
 	if ((flags & PHP_DATE_INIT_CTOR) && err && err->error_count) {
 		/* spit out the first library error message, at least */
-		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
+		zend_throw_exception_ex(NULL, 0, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {
@@ -2386,7 +2386,6 @@ PHP_METHOD(DateTime, __construct)
 	zval *timezone_object = NULL;
 	char *time_str = NULL;
 	size_t time_str_len = 0;
-	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -2394,9 +2393,7 @@ PHP_METHOD(DateTime, __construct)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, PHP_DATE_INIT_CTOR);
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
@@ -2406,7 +2403,6 @@ PHP_METHOD(DateTimeImmutable, __construct)
 	zval *timezone_object = NULL;
 	char *time_str = NULL;
 	size_t time_str_len = 0;
-	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -2414,9 +2410,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	php_date_initialize(Z_PHPDATE_P(ZEND_THIS), time_str, time_str_len, NULL, timezone_object, PHP_DATE_INIT_CTOR);
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
@@ -3686,35 +3680,35 @@ PHP_FUNCTION(timezone_location_get)
 }
 /* }}} */
 
-static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *format, size_t format_length) /* {{{ */
+static bool date_interval_initialize(timelib_rel_time **rt, /*const*/ char *format, size_t format_length) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;
 	int               r = 0;
-	int               retval = 0;
+	bool              retval = false;
 	timelib_error_container *errors;
 
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
-		retval = FAILURE;
+		zend_throw_exception_ex(NULL, 0, "Unknown or bad format (%s)", format);
+		retval = false;
 		if (p) {
 			timelib_rel_time_dtor(p);
 		}
 	} else {
 		if(p) {
 			*rt = p;
-			retval = SUCCESS;
+			retval = true;
 		} else {
 			if(b && e) {
 				timelib_update_ts(b, NULL);
 				timelib_update_ts(e, NULL);
 				*rt = timelib_diff(b, e);
-				retval = SUCCESS;
+				retval = true;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Failed to parse interval (%s)", format);
-				retval = FAILURE;
+				zend_throw_exception_ex(NULL, 0, "Failed to parse interval (%s)", format);
+				retval = false;
 			}
 		}
 	}
@@ -3853,20 +3847,19 @@ PHP_METHOD(DateInterval, __construct)
 {
 	zend_string *interval_string = NULL;
 	timelib_rel_time *reltime;
-	zend_error_handling error_handling;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(interval_string)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string)) == SUCCESS) {
-		php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
-		diobj->diff = reltime;
-		diobj->initialized = 1;
-		diobj->civil_or_wall = PHP_DATE_WALL;
+	if (!date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string))) {
+		RETURN_THROWS();
 	}
-	zend_restore_error_handling(&error_handling);
+
+	php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
+	diobj->diff = reltime;
+	diobj->initialized = 1;
+	diobj->civil_or_wall = PHP_DATE_WALL;
 }
 /* }}} */
 
@@ -4117,19 +4110,19 @@ PHP_FUNCTION(date_interval_format)
 }
 /* }}} */
 
-static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, size_t format_length) /* {{{ */
+static bool date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, size_t format_length) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;
 	int               r = 0;
-	int               retval = 0;
 	timelib_error_container *errors;
+	bool              retval = false;
 
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
-		retval = FAILURE;
+		retval = false;
+		zend_throw_exception_ex(NULL, 0, "Unknown or bad format (%s)", format);
 		if (b) {
 			timelib_time_dtor(b);
 		}
@@ -4144,7 +4137,7 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 		*et = e;
 		*d  = p;
 		*recurrences = r;
-		retval = SUCCESS;
+		retval = true;
 	}
 	timelib_error_container_dtor(errors);
 	return retval;
@@ -4160,7 +4153,6 @@ PHP_METHOD(DatePeriod, __construct)
 	char *isostr = NULL;
 	size_t   isostr_len = 0;
 	timelib_time *clone;
-	zend_error_handling error_handling;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
@@ -4175,28 +4167,25 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
-		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
-		zend_restore_error_handling(&error_handling);
-		if (EG(exception)) {
+		if (!date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len)) {
 			RETURN_THROWS();
 		}
 
 		if (dpobj->start == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
@@ -4238,7 +4227,7 @@ PHP_METHOD(DatePeriod, __construct)
 
 	if (dpobj->end == NULL && recurrences < 1) {
 		zend_string *func = get_active_function_or_method_name();
-		zend_throw_error(zend_ce_exception, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
 		zend_string_release(func);
 		RETURN_THROWS();
 	}
