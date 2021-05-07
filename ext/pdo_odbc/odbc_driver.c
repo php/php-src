@@ -350,6 +350,21 @@ static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
+static int pdo_odbc_get_info_string(pdo_dbh_t *dbh, SQLUSMALLINT type, zval *val)
+{
+	RETCODE rc;
+	SQLSMALLINT out_len;
+	char buf[256];
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	rc = SQLGetInfo(H->dbc, type, (SQLPOINTER)buf, sizeof(buf), &out_len);
+	/* returning -1 is treated as an error, not as unsupported */
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		return -1;
+	}
+	ZVAL_STRINGL(val, buf, out_len);
+	return 1;
+}
+
 static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -359,9 +374,11 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
+			return pdo_odbc_get_info_string(dbh, SQL_DBMS_VER, val);
+		case PDO_ATTR_SERVER_INFO:
+			return pdo_odbc_get_info_string(dbh, SQL_DBMS_NAME, val);
 		case PDO_ATTR_PREFETCH:
 		case PDO_ATTR_TIMEOUT:
-		case PDO_ATTR_SERVER_INFO:
 		case PDO_ATTR_CONNECTION_STATUS:
 			break;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
