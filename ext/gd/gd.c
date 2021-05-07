@@ -371,6 +371,7 @@ PHP_MINIT_FUNCTION(gd)
 
 	REGISTER_INI_ENTRIES();
 
+	REGISTER_LONG_CONSTANT("IMG_AVIF", PHP_IMG_AVIF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_GIF", PHP_IMG_GIF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", PHP_IMG_JPG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPEG", PHP_IMG_JPEG, CONST_CS | CONST_PERSISTENT);
@@ -601,6 +602,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_BMP
 	php_info_print_table_row(2, "BMP Support", "enabled");
 #endif
+#ifdef HAVE_GD_AVIF
+	php_info_print_table_row(2, "AVIF Support", "enabled");
+#endif
 #ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
 #endif
@@ -654,6 +658,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "BMP Support", 1);
 #else
 	add_assoc_bool(return_value, "BMP Support", 0);
+#endif
+#ifdef HAVE_GD_AVIF
+	add_assoc_bool(return_value, "AVIF Support", 1);
+#else
+	add_assoc_bool(return_value, "AVIF Support", 0);
 #endif
 #ifdef HAVE_GD_TGA
 	add_assoc_bool(return_value, "TGA Read Support", 1);
@@ -1407,7 +1416,7 @@ PHP_FUNCTION(imagecreate)
 }
 /* }}} */
 
-/* {{{ Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM */
+/* {{{ Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM, etc */
 PHP_FUNCTION(imagetypes)
 {
 	int ret = 0;
@@ -1430,6 +1439,9 @@ PHP_FUNCTION(imagetypes)
 #endif
 #ifdef HAVE_GD_TGA
 	ret |= PHP_IMG_TGA;
+#endif
+#ifdef HAVE_GD_AVIF
+	ret |= PHP_IMG_AVIF;
 #endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1586,6 +1598,14 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 #else
 			php_error_docref(NULL, E_WARNING, "No WEBP support in this PHP build");
+			RETURN_FALSE;
+#endif
+
+#ifdef HAVE_GD_AVIF
+			im = _php_image_create_from_string(data, "AVIF", gdImageCreateFromAvifCtx);
+			break;
+#else
+			php_error_docref(NULL, E_WARNING, "No AVIF support in this PHP build");
 			RETURN_FALSE;
 #endif
 
@@ -1768,6 +1788,15 @@ PHP_FUNCTION(imagecreatefromxbm)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm, NULL);
 }
 /* }}} */
+
+#ifdef HAVE_GD_AVIF
+/* {{{ Create a new image from AVIF file or URL */
+PHP_FUNCTION(imagecreatefromavif)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF", gdImageCreateFromAvif, gdImageCreateFromAvifCtx);
+}
+/* }}} */
+#endif /* HAVE_GD_AVIF */
 
 #ifdef HAVE_GD_XPM
 /* {{{ Create a new image from XPM file or URL */
@@ -1995,6 +2024,15 @@ PHP_FUNCTION(imagewebp)
 }
 /* }}} */
 #endif /* HAVE_GD_WEBP */
+
+#ifdef HAVE_GD_AVIF
+/* {{{ Output AVIF image to browser or file */
+PHP_FUNCTION(imageavif)
+{
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF", gdImageAvifCtx);
+}
+/* }}} */
+#endif /* HAVE_GD_AVIF */
 
 #ifdef HAVE_GD_JPG
 /* {{{ Output JPEG image to browser or file */
@@ -4217,6 +4255,12 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				quality = 80;
 			}
 			(*func_p)(im, ctx, (int) quality);
+			break;
+		case PHP_GDIMG_TYPE_AVIF:
+			if (speed == -1) {
+				speed = 6;
+			}
+			(*func_p)(im, ctx, (int) quality, (int) speed);
 			break;
 		case PHP_GDIMG_TYPE_PNG:
 			(*func_p)(im, ctx, (int) quality, (int) basefilter);

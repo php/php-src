@@ -66,11 +66,11 @@ function imagetypes(): int {}
 
 function imagecreatefromstring(string $data): GdImage|false {}
 
-function imagecreatefromgif(string $filename): GdImage|false {}
-
 #ifdef HAVE_GD_AVIF
 function imagecreatefromavif(string $filename): GdImage|false {}
 #endif
+
+function imagecreatefromgif(string $filename): GdImage|false {}
 
 #ifdef HAVE_GD_JPG
 function imagecreatefromjpeg(string $filename): GdImage|false {}
@@ -107,6 +107,11 @@ function imagecreatefromtga(string $filename): GdImage|false {}
 #endif
 
 function imagexbm(GdImage $image, ?string $filename, ?int $foreground_color = null): bool {}
+
+#ifdef HAVE_GD_AVIF
+/** @param resource|string|null $file */
+function imageavif(GdImage $image, $file = null, int $quality = -1, int $speed = -1): bool {}
+#endif
 
 /** @param resource|string|null $file */
 function imagegif(GdImage $image, $file = null): bool {}

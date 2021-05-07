@@ -12,6 +12,7 @@ steps:
                        slapd \
                        language-pack-de \
                        re2c \
+                       libavif-dev \
                        libgmp-dev \
                        libicu-dev \
                        libtidy-dev \
