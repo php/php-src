@@ -4,6 +4,9 @@ parameters:
 steps:
   - script: |
       sudo apt-get update -y | true
+      # There appears to be some kind of conflict with the libzip from ondrej's PPA.
+      # Purge existing libzip and let it be reinstalled to avoid it.
+      sudo apt-get purge -y libzip4
       sudo apt install bison \
                        re2c \
                        locales \
