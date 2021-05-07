@@ -2218,7 +2218,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size
 	/* If called from a constructor throw an exception */
 	if ((flags & PHP_DATE_INIT_CTOR) && err && err->error_count) {
 		/* spit out the first library error message, at least */
-		zend_throw_error(zend_ce_exception, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
+		zend_throw_exception_ex(NULL, 0, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {
@@ -3691,7 +3691,7 @@ static bool date_interval_initialize(timelib_rel_time **rt, /*const*/ char *form
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		zend_throw_error(zend_ce_exception, "Unknown or bad format (%s)", format);
+		zend_throw_exception_ex(NULL, 0, "Unknown or bad format (%s)", format);
 		retval = false;
 		if (p) {
 			timelib_rel_time_dtor(p);
@@ -3707,7 +3707,7 @@ static bool date_interval_initialize(timelib_rel_time **rt, /*const*/ char *form
 				*rt = timelib_diff(b, e);
 				retval = true;
 			} else {
-				zend_throw_error(zend_ce_exception, "Failed to parse interval (%s)", format);
+				zend_throw_exception_ex(NULL, 0, "Failed to parse interval (%s)", format);
 				retval = false;
 			}
 		}
@@ -4110,17 +4110,19 @@ PHP_FUNCTION(date_interval_format)
 }
 /* }}} */
 
-static void date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, size_t format_length) /* {{{ */
+static bool date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, size_t format_length) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;
 	int               r = 0;
 	timelib_error_container *errors;
+	bool              retval = false;
 
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		zend_throw_error(zend_ce_exception, "Unknown or bad format (%s)", format);
+		retval = false;
+		zend_throw_exception_ex(NULL, 0, "Unknown or bad format (%s)", format);
 		if (b) {
 			timelib_time_dtor(b);
 		}
@@ -4135,8 +4137,10 @@ static void date_period_initialize(timelib_time **st, timelib_time **et, timelib
 		*et = e;
 		*d  = p;
 		*recurrences = r;
+		retval = true;
 	}
 	timelib_error_container_dtor(errors);
+	return retval;
 } /* }}} */
 
 /* {{{ Creates new DatePeriod object. */
@@ -4163,26 +4167,25 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
-		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
-		if (EG(exception)) {
+		if (!date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len)) {
 			RETURN_THROWS();
 		}
 
 		if (dpobj->start == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->interval == NULL) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
 			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+			zend_throw_exception_ex(NULL, 0, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
 			zend_string_release(func);
 			RETURN_THROWS();
 		}
@@ -4224,7 +4227,7 @@ PHP_METHOD(DatePeriod, __construct)
 
 	if (dpobj->end == NULL && recurrences < 1) {
 		zend_string *func = get_active_function_or_method_name();
-		zend_throw_error(zend_ce_exception, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
 		zend_string_release(func);
 		RETURN_THROWS();
 	}
