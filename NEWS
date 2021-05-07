@@ -91,6 +91,10 @@ PHP                                                                        NEWS
 . PDO MySQL:
   . Fixed bug#80908 (PDO::lastInsertId() return wrong). (matt)
 
+. PDO ODBC:
+  . Implement PDO_ATTR_SERVER_VERSION and PDO_ATTR_SERVER_INFO for
+    PDO::getAttribute(). (Calvin Buckley)
+
 . PDO SQLite:
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 

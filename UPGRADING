@@ -297,6 +297,10 @@ PHP 8.1 UPGRADE NOTES
   . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
 
+- PDO ODBC:
+  . PDO::getAttributes() with PDO::ATTR_SERVER_INFO and PDO::ATTR_SERVER_VERSION
+    now return values instead of throwing PDOException.
+
 ========================================
 6. New Functions
 ========================================
