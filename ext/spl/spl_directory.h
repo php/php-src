@@ -80,8 +80,7 @@ struct _spl_filesystem_object {
 			php_stream         *stream;
 			php_stream_context *context;
 			zval               *zcontext;
-			char               *open_mode;
-			size_t             open_mode_len;
+			zend_string        *open_mode;
 			zval               current_zval;
 			char               *current_line;
 			size_t             current_line_len;

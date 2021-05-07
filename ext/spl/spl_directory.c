@@ -130,7 +130,7 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		break;
 	case SPL_FS_FILE:
 		if (intern->u.file.open_mode) {
-			efree(intern->u.file.open_mode);
+			zend_string_release(intern->u.file.open_mode);
 		}
 		if (intern->orig_path) {
 			zend_string_release(intern->orig_path);
@@ -304,6 +304,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	intern->type = SPL_FS_FILE;
 	php_stat(intern->file_name, FS_IS_DIR, &tmp);
 	if (Z_TYPE(tmp) == IS_TRUE) {
+		zend_string_release(intern->u.file.open_mode);
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Cannot use SplFileObject with directories");
@@ -311,14 +312,15 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	}
 
 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
-	intern->u.file.stream = php_stream_open_wrapper_ex(ZSTR_VAL(intern->file_name), intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, intern->u.file.context);
+	intern->u.file.stream = php_stream_open_wrapper_ex(ZSTR_VAL(intern->file_name), ZSTR_VAL(intern->u.file.open_mode), (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, intern->u.file.context);
 
 	if (!ZSTR_LEN(intern->file_name) || !intern->u.file.stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot open file '%s'", ZSTR_VAL(intern->file_name));
 		}
-		intern->file_name = NULL; /* until here it is not a copy */
+		zend_string_release(intern->u.file.open_mode);
 		intern->u.file.open_mode = NULL;
+		intern->file_name = NULL; /* until here it is not a copy */
 		return FAILURE;
 	}
 
@@ -336,8 +338,6 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	}
 
 	intern->orig_path = zend_string_init(intern->u.file.stream->orig_path, strlen(intern->u.file.stream->orig_path), 0);
-
-	intern->u.file.open_mode = estrndup(intern->u.file.open_mode, intern->u.file.open_mode_len);
 
 	/* avoid reference counting in debug mode, thus do it manually */
 	ZVAL_RES(&intern->u.file.zresource, intern->u.file.stream->res);
@@ -519,12 +519,11 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		{
 			ce = ce ? ce : source->file_class;
 
-			char *open_mode = "r";
-			size_t open_mode_len = 1;
+			zend_string *open_mode = ZSTR_CHAR('r');
 			zval *resource = NULL;
 
-			if (zend_parse_parameters(num_args, "|sbr!",
-				&open_mode, &open_mode_len, &use_include_path, &resource) == FAILURE
+			if (zend_parse_parameters(num_args, "|Sbr!",
+				&open_mode, &use_include_path, &resource) == FAILURE
 			) {
 				return NULL;
 			}
@@ -538,7 +537,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 
 			if (ce->constructor->common.scope != spl_ce_SplFileObject) {
 				ZVAL_STR_COPY(&arg1, source->file_name);
-				ZVAL_STRINGL(&arg2, open_mode, open_mode_len);
+				ZVAL_STR_COPY(&arg2, open_mode);
 				zend_call_method_with_2_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1, &arg2);
 				zval_ptr_dtor(&arg1);
 				zval_ptr_dtor(&arg2);
@@ -554,8 +553,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 					intern->path = zend_string_init(path, path_len, 0);
 				}
 
-				intern->u.file.open_mode = open_mode;
-				intern->u.file.open_mode_len = open_mode_len;
+				intern->u.file.open_mode = zend_string_copy(open_mode);
 				intern->u.file.zcontext = resource;
 
 				zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
@@ -658,7 +656,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_FILE) {
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", sizeof("openMode")-1);
-		ZVAL_STRINGL(&tmp, intern->u.file.open_mode, intern->u.file.open_mode_len);
+		ZVAL_STR_COPY(&tmp, intern->u.file.open_mode);
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, 0);
 		stmp[1] = '\0';
@@ -2048,29 +2046,24 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 PHP_METHOD(SplFileObject, __construct)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+	zend_string *open_mode = ZSTR_CHAR('r');
 	bool use_include_path = 0;
 	size_t path_len;
 	zend_error_handling error_handling;
 
-	intern->u.file.open_mode = NULL;
-	intern->u.file.open_mode_len = 0;
+	intern->u.file.open_mode = ZSTR_CHAR('r');
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|sbr!",
-			&intern->file_name,
-			&intern->u.file.open_mode, &intern->u.file.open_mode_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|Sbr!",
+			&intern->file_name, &open_mode,
 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
 		RETURN_THROWS();
 	}
 
-	if (intern->u.file.open_mode == NULL) {
-		intern->u.file.open_mode = "r";
-		intern->u.file.open_mode_len = 1;
-	}
-
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
+	intern->u.file.open_mode = zend_string_copy(open_mode);
 	if (spl_filesystem_file_open(intern, use_include_path, 0) == SUCCESS) {
 		path_len = strlen(intern->u.file.stream->orig_path);
 
@@ -2113,8 +2106,7 @@ PHP_METHOD(SplTempFileObject, __construct)
 		file_name = zend_string_init("php://temp", sizeof("php://temp")-1, 0);
 	}
 	intern->file_name = file_name;
-	intern->u.file.open_mode = "wb";
-	intern->u.file.open_mode_len = sizeof("wb")-1;
+	intern->u.file.open_mode = zend_string_init("wb", sizeof("wb")-1, 0);
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 	if (spl_filesystem_file_open(intern, 0, 0) == SUCCESS) {
