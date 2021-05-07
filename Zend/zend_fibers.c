@@ -39,6 +39,10 @@
 # include <limits.h>
 #endif
 
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/common_interface_defs.h>
+#endif
+
 ZEND_API zend_class_entry *zend_ce_fiber;
 static zend_class_entry *zend_ce_fiber_error;
 
@@ -180,13 +184,21 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 {
 	zend_fiber_context *context = transfer.data;
 
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_finish_switch_fiber(NULL, &context->stack.bottom, &context->stack.capacity);
+#endif
+
 	context->caller = transfer.context;
 
 	context->function(context);
 
 	context->self = NULL;
 
-	zend_fiber_suspend_context(context);
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_start_switch_fiber(NULL, context->stack.bottom, context->stack.capacity);
+#endif
+
+	jump_fcontext(context->caller, NULL);
 
 	abort();
 }
@@ -222,7 +234,16 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 {
 	ZEND_ASSERT(to && to->self && to->stack.pointer && "Invalid fiber context");
 
+#ifdef __SANITIZE_ADDRESS__
+	void *fake_stack;
+	__sanitizer_start_switch_fiber(&fake_stack, to->stack.pointer, to->stack.size);
+#endif
+
 	transfer_t transfer = jump_fcontext(to->self, to);
+
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.bottom, &to->stack.capacity);
+#endif
 
 	to->self = transfer.context;
 }
@@ -231,7 +252,16 @@ ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current)
 {
 	ZEND_ASSERT(current && current->caller && current->stack.pointer && "Invalid fiber context");
 
+#ifdef __SANITIZE_ADDRESS__
+	void *fake_stack;
+	__sanitizer_start_switch_fiber(&fake_stack, current->stack.bottom, current->stack.capacity);
+#endif
+
 	transfer_t transfer = jump_fcontext(current->caller, NULL);
+
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_finish_switch_fiber(fake_stack, &current->stack.bottom, &current->stack.capacity);
+#endif
 
 	current->caller = transfer.context;
 }

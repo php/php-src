@@ -41,6 +41,11 @@ typedef struct _zend_fiber_stack {
 #ifdef HAVE_VALGRIND
 	int valgrind;
 #endif
+
+#ifdef __SANITIZE_ADDRESS__
+	const void *bottom;
+	size_t capacity;
+#endif
 } zend_fiber_stack;
 
 typedef struct _zend_fiber_context {
