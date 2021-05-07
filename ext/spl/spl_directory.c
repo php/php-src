@@ -2114,7 +2114,7 @@ PHP_METHOD(SplTempFileObject, __construct)
 	}
 	intern->file_name = file_name;
 	intern->u.file.open_mode = "wb";
-	intern->u.file.open_mode_len = 1;
+	intern->u.file.open_mode_len = sizeof("wb")-1;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 	if (spl_filesystem_file_open(intern, 0, 0) == SUCCESS) {
