@@ -714,10 +714,7 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 	char b[32];
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, val);
 	size_t l = b + sizeof(b) - 1 - s;
-	size_t new_len = smart_str_alloc(buf, 2 + l + 1, 0);
-	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-
-	ZSTR_LEN(buf->s) = new_len;
+	char *res = smart_str_extend(buf, 2 + l + 1);
 	memcpy(res, "i:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -730,10 +727,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 	char b[32];
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, len);
 	size_t l = b + sizeof(b) - 1 - s;
-	size_t new_len = smart_str_alloc(buf, 2 + l + 2 + len + 2, 0);
-	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-
-	ZSTR_LEN(buf->s) = new_len;
+	char *res = smart_str_extend(buf, 2 + l + 2 + len + 2);
 	memcpy(res, "s:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -748,17 +742,14 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 
 static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
 {
-	char b[32], *s, *res;
-	size_t l, new_len;
+	char b[32];
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	size_t class_name_len = ZSTR_LEN(class_name);
-	s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
-	l = b + sizeof(b) - 1 - s;
-	new_len = smart_str_alloc(buf, 2 + l + 2 + class_name_len + 2, 0);
-	res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-	ZSTR_LEN(buf->s) = new_len;
+	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
+	size_t l = b + sizeof(b) - 1 - s;
+	char *res = smart_str_extend(buf, 2 + l + 2 + class_name_len + 2);
 	memcpy(res, "O:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -1044,15 +1035,11 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[PHP_DOUBLE_MAX_LENGTH], *res;
-			size_t len, new_len;
-
+			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			len = strlen(tmp_str);
-			new_len = smart_str_alloc(buf, 2 + len + 1, 0);
-			res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-			ZSTR_LEN(buf->s) = new_len;
 
+			size_t len = strlen(tmp_str);
+			char *res = smart_str_extend(buf, 2 + len + 1);
 			memcpy(res, "d:", 2);
 			res += 2;
 			memcpy(res, tmp_str, len);
@@ -1129,16 +1116,12 @@ again:
 					size_t serialized_length;
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash) == SUCCESS) {
-						char b1[32], b2[32], *s1, *s2, *res;
-						size_t l1, l2, new_len;
-
-						s1 = zend_print_long_to_buf(b1 + sizeof(b1) - 1, ZSTR_LEN(Z_OBJCE_P(struc)->name));
-						l1 = b1 + sizeof(b1) - 1 - s1;
-						s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
-						l2 = b2 + sizeof(b2) - 1 - s2;
-						new_len = smart_str_alloc(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1, 0);
-						res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-						ZSTR_LEN(buf->s) = new_len;
+						char b1[32], b2[32];
+						char *s1 = zend_print_long_to_buf(b1 + sizeof(b1) - 1, ZSTR_LEN(Z_OBJCE_P(struc)->name));
+						size_t l1 = b1 + sizeof(b1) - 1 - s1;
+						char *s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
+						size_t l2 = b2 + sizeof(b2) - 1 - s2;
+						char *res = smart_str_extend(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1);
 						memcpy(res, "C:", 2);
 						res += 2;
 						memcpy(res, s1, l1);
