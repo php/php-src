@@ -2765,7 +2765,7 @@ PHP_METHOD(ZipArchive, extractTo)
 		}
 		for (i = 0; i < nelems; i++) {
 			zval *zval_file;
-			if ((zval_file = zend_hash_index_find_deref(Z_ARRVAL_P(zval_files), i)) != NULL) {
+			if ((zval_file = zend_hash_index_find_deref(files_ht, i)) != NULL) {
 				switch (Z_TYPE_P(zval_file)) {
 					case IS_LONG:
 						break;
