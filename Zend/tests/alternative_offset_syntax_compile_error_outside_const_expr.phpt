@@ -6,4 +6,4 @@ $foo = 'BAR';
 var_dump($foo{0});
 ?>
 --EXPECTF--
-Fatal error: Array and string offset access syntax with curly braces is no longer supported in %s on line 3
+Parse error: syntax error, unexpected token "{", expecting ")" in %s on line %d

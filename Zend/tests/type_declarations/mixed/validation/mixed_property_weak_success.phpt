@@ -32,4 +32,4 @@ try {
 
 ?>
 --EXPECT--
-Typed property Foo::$property1 must not be accessed before initialization
+Property Foo::$property1 must not be accessed before initialization

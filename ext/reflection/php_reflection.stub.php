@@ -411,6 +411,10 @@ class ReflectionProperty implements Reflector
     /** @return bool */
     public function isStatic() {}
 
+    public function isAbstract(): bool {}
+
+    public function isFinal(): bool {}
+
     /** @return bool */
     public function isDefault() {}
 
@@ -441,6 +445,10 @@ class ReflectionProperty implements Reflector
 
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getGet(): ?ReflectionMethod {}
+
+    public function getSet(): ?ReflectionMethod {}
 }
 
 class ReflectionClassConstant implements Reflector

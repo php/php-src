@@ -2044,6 +2044,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+ZEND_VM_C_LABEL(fetch_obj_r_simple):
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -2054,20 +2055,33 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 							ZEND_VM_NEXT_OPCODE();
 						}
 					}
-				} else if (EXPECTED(zobj->properties != NULL)) {
-					name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
-					if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
-						uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
+				} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
+					if (EXPECTED(zobj->properties != NULL)) {
+						name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+						if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
+							uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
 
-						if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
-							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
+							if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+								Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
-							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
-								retval = &p->val;
+								if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+									(EXPECTED(p->key == name) ||
+									 (EXPECTED(p->h == ZSTR_H(name)) &&
+									  EXPECTED(p->key != NULL) &&
+									  EXPECTED(zend_string_equal_content(p->key, name))))) {
+									retval = &p->val;
+									if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
+										ZEND_VM_C_GOTO(fetch_obj_r_copy);
+									} else {
+										ZEND_VM_C_GOTO(fetch_obj_r_fast_copy);
+									}
+								}
+								CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+							}
+							retval = zend_hash_find_ex(zobj->properties, name, 1);
+							if (EXPECTED(retval)) {
+								uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
+								CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 									ZEND_VM_C_GOTO(fetch_obj_r_copy);
 								} else {
@@ -2075,17 +2089,14 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 								}
 							}
 						}
-						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
-					if (EXPECTED(retval)) {
-						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
-						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
-							ZEND_VM_C_GOTO(fetch_obj_r_copy);
-						} else {
-							ZEND_VM_C_GOTO(fetch_obj_r_fast_copy);
-						}
+				} else {
+					/* Fall through to read_property for accessors. */
+					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+					if (ZEND_IS_ACCESSOR_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						ZEND_VM_C_GOTO(fetch_obj_r_simple);
 					}
 				}
 			}
@@ -2210,20 +2221,33 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 							ZEND_VM_NEXT_OPCODE();
 						}
 					}
-				} else if (EXPECTED(zobj->properties != NULL)) {
-					name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
-					if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
-						uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
+				} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
+					if (EXPECTED(zobj->properties != NULL)) {
+						name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+						if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
+							uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
 
-						if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
-							Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
+							if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+								Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
-							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-						        (EXPECTED(p->key == name) ||
-						         (EXPECTED(p->h == ZSTR_H(name)) &&
-						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(zend_string_equal_content(p->key, name))))) {
-								retval = &p->val;
+								if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+									(EXPECTED(p->key == name) ||
+									 (EXPECTED(p->h == ZSTR_H(name)) &&
+									  EXPECTED(p->key != NULL) &&
+									  EXPECTED(zend_string_equal_content(p->key, name))))) {
+									retval = &p->val;
+									if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
+										ZEND_VM_C_GOTO(fetch_obj_is_copy);
+									} else {
+										ZEND_VM_C_GOTO(fetch_obj_is_fast_copy);
+									}
+								}
+								CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+							}
+							retval = zend_hash_find_ex(zobj->properties, name, 1);
+							if (EXPECTED(retval)) {
+								uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
+								CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 									ZEND_VM_C_GOTO(fetch_obj_is_copy);
 								} else {
@@ -2231,18 +2255,10 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 								}
 							}
 						}
-						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
-					if (EXPECTED(retval)) {
-						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
-						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
-							ZEND_VM_C_GOTO(fetch_obj_is_copy);
-						} else {
-							ZEND_VM_C_GOTO(fetch_obj_is_fast_copy);
-						}
-					}
+				} else {
+					/* Fall through to read_property for accessors. */
+					ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
 				}
 			}
 			name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
@@ -2401,7 +2417,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						ZEND_VM_C_GOTO(exit_assign_obj);
 					}
 				}
-			} else {
+			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 				if (EXPECTED(zobj->properties != NULL)) {
 					if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
@@ -2443,12 +2459,25 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						} else if (OP_DATA_TYPE == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
+					}
 					zend_hash_add_new(zobj->properties, name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
 					ZEND_VM_C_GOTO(exit_assign_obj);
+				}
+			} else {
+				/* Fall through to write_property for accessors. */
+				ZEND_ASSERT(IS_ACCESSOR_PROPERTY_OFFSET(prop_offset));
+				if (ZEND_IS_ACCESSOR_SIMPLE_WRITE(prop_offset)) {
+					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+					property_val = OBJ_PROP(zobj, prop_info->offset);
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
+						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+					} else {
+						ZEND_VM_C_GOTO(fast_assign_obj);
+					}
 				}
 			}
 		}

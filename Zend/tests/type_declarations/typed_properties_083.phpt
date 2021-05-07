@@ -61,7 +61,7 @@ array(1) {
   int(1)
 }
 string(71) "Cannot auto-initialize an array inside property Foo::$p of type ?string"
-string(65) "Typed property Foo::$p must not be accessed before initialization"
+string(59) "Property Foo::$p must not be accessed before initialization"
 string(71) "Cannot auto-initialize an array inside property Foo::$p of type ?string"
 NULL
 array(1) {

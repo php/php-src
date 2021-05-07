@@ -414,6 +414,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zend_hash_release(prop_info->attributes);
 					}
 					zend_type_release(prop_info->type, /* persistent */ 0);
+					if (prop_info->accessors) {
+						for (uint32_t i = 0; i < ZEND_ACCESSOR_COUNT; i++) {
+							if (prop_info->accessors[i]) {
+								destroy_op_array(&prop_info->accessors[i]->op_array);
+							}
+						}
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);

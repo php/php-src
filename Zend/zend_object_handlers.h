@@ -27,9 +27,18 @@ struct _zend_property_info;
 
 #define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uintptr_t)(intptr_t)(-1))
 
-#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) > 0)
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) >= 8)
 #define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
+#define IS_ACCESSOR_PROPERTY_OFFSET(offset) \
+	((intptr_t)(offset) > 0 && (intptr_t)(offset) < 8)
 #define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
+
+#define ZEND_ACCESSOR_SIMPLE_READ_BIT 2u
+#define ZEND_ACCESSOR_SIMPLE_WRITE_BIT 4u
+#define ZEND_IS_ACCESSOR_SIMPLE_READ(offset) \
+	(((offset) & ZEND_ACCESSOR_SIMPLE_READ_BIT) != 0)
+#define ZEND_IS_ACCESSOR_SIMPLE_WRITE(offset) \
+	(((offset) & ZEND_ACCESSOR_SIMPLE_WRITE_BIT) != 0)
 
 #define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
 #define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 2))

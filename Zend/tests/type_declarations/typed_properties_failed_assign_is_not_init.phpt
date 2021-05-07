@@ -31,6 +31,6 @@ try {
 
 ?>
 --EXPECT--
-Typed property Test::$prop must not be accessed before initialization
+Property Test::$prop must not be accessed before initialization
 Cannot assign string to property Test::$prop of type int
-Typed property Test::$prop must not be accessed before initialization
+Property Test::$prop must not be accessed before initialization
