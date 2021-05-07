@@ -159,7 +159,7 @@ class mysqli
     public function get_warnings() {}
 
     /**
-     * @return mysqli|false
+     * @return null|false
      */
     public function init() {}
 
