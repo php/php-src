@@ -39,6 +39,9 @@ PHP                                                                        NEWS
 - XMLReader:
   . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
 
+- Zip:
+  . Fixed bug #80863 (ZipArchive::extractTo() ignores references). (cmb)
+
 06 May 2021, PHP 8.0.6
 
 - PDO_pgsql:
