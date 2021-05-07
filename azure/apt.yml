@@ -4,6 +4,7 @@ parameters:
 steps:
   - script: |
       sudo apt-get update -y | true
+      sudo apt-get purge -y libzip4
       sudo apt install bison \
                        re2c \
                        locales \
