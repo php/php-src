@@ -2522,11 +2522,11 @@ static bool php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myh
 	switch (Z_LVAL_P(z_timezone_type)) {
 		case TIMELIB_ZONETYPE_OFFSET:
 		case TIMELIB_ZONETYPE_ABBR: {
-			char *tmp = emalloc(Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2);
-			int ret;
-			snprintf(tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 2, "%s %s", Z_STRVAL_P(z_date), Z_STRVAL_P(z_timezone));
-			ret = php_date_initialize(*dateobj, tmp, Z_STRLEN_P(z_date) + Z_STRLEN_P(z_timezone) + 1, NULL, NULL, 0);
-			efree(tmp);
+			zend_string *tmp = zend_string_concat3(
+				Z_STRVAL_P(z_date), Z_STRLEN_P(z_date), " ", 1,
+				Z_STRVAL_P(z_timezone), Z_STRLEN_P(z_timezone));
+			int ret = php_date_initialize(*dateobj, ZSTR_VAL(tmp), ZSTR_LEN(tmp), NULL, NULL, 0);
+			zend_string_release(tmp);
 			return 1 == ret;
 		}
 
