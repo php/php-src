@@ -192,16 +192,6 @@ static inline bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) 
 		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
 }
 
-static void _default_get_name(zval *object, zval *return_value) /* {{{ */
-{
-	zval *name = reflection_prop_name(object);
-	if (Z_ISUNDEF_P(name)) {
-		RETURN_FALSE;
-	}
-	ZVAL_COPY(return_value, name);
-}
-/* }}} */
-
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
@@ -3634,15 +3624,24 @@ ZEND_METHOD(ReflectionClassConstant, __toString)
 	reflection_object *intern;
 	zend_class_constant *ref;
 	smart_str str = {0};
-	zval name;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ref);
-	_default_get_name(ZEND_THIS, &name);
-	_class_const_string(&str, Z_STRVAL(name), ref, "");
-	zval_ptr_dtor(&name);
+
+	zval *name = reflection_prop_name(ZEND_THIS);
+	if (Z_ISUNDEF_P(name)) {
+		zend_throw_error(NULL,
+			"Typed property ReflectionClassConstant::$name "
+			"must not be accessed before initialization");
+		RETURN_THROWS();
+	}
+	ZVAL_DEREF(name);
+	ZEND_ASSERT(Z_TYPE_P(name) == IS_STRING);
+
+	_class_const_string(&str, Z_STRVAL_P(name), ref, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
@@ -3653,7 +3652,16 @@ ZEND_METHOD(ReflectionClassConstant, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	zval *name = reflection_prop_name(ZEND_THIS);
+	if (Z_ISUNDEF_P(name)) {
+		zend_throw_error(NULL,
+			"Typed property ReflectionClassConstant::$name "
+			"must not be accessed before initialization");
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 

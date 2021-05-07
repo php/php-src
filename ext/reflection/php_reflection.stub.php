@@ -455,7 +455,7 @@ class ReflectionClassConstant implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return mixed */
