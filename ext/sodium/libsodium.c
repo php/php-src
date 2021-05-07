@@ -3581,10 +3581,7 @@ PHP_FUNCTION(sodium_crypto_core_ristretto255_is_valid_point)
 							"must be SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES bytes long");
 		RETURN_THROWS();
 	}
-	if (crypto_core_ristretto255_is_valid_point(s) != 1) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(crypto_core_ristretto255_is_valid_point(s));
 }
 
 PHP_FUNCTION(sodium_crypto_core_ristretto255_random)
@@ -3595,7 +3592,7 @@ PHP_FUNCTION(sodium_crypto_core_ristretto255_random)
 		RETURN_THROWS();
 	}
 	r = zend_string_alloc(crypto_core_ristretto255_BYTES, 0);
-    crypto_core_ristretto255_random((unsigned char *) ZSTR_VAL(r));
+	crypto_core_ristretto255_random((unsigned char *) ZSTR_VAL(r));
 	ZSTR_VAL(r)[crypto_core_ristretto255_BYTES] = 0;
 	RETURN_NEW_STR(r);
 }

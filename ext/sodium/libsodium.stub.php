@@ -67,7 +67,7 @@ function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool {}
 
 function sodium_crypto_core_ristretto255_random(): string {}
 
-function sodium_crypto_core_ristretto255_scalar_add(string $p, string $q): string {}
+function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string {}
 
 function sodium_crypto_core_ristretto255_scalar_complement(string $s): string {}
 
@@ -81,7 +81,7 @@ function sodium_crypto_core_ristretto255_scalar_random(): string {}
 
 function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string {}
 
-function sodium_crypto_core_ristretto255_scalar_sub(string $p, string $q): string {}
+function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string {}
 
 function sodium_crypto_core_ristretto255_sub(string $p, string $q): string {}
 #endif

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 84584a76aa7f397e0c23a4612f5132f6088ecb28 */
+ * Stub hash: 286436656e37c5d71de69ed6365b5202e0965f19 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -154,7 +154,10 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
-#define arginfo_sodium_crypto_core_ristretto255_scalar_add arginfo_sodium_crypto_core_ristretto255_add
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_core_ristretto255_scalar_add, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, x, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, y, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
@@ -166,10 +169,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_core_ristretto255_scalar_mul, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, x, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, y, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_sodium_crypto_core_ristretto255_scalar_mul arginfo_sodium_crypto_core_ristretto255_scalar_add
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
@@ -185,7 +185,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
-#define arginfo_sodium_crypto_core_ristretto255_scalar_sub arginfo_sodium_crypto_core_ristretto255_add
+#define arginfo_sodium_crypto_core_ristretto255_scalar_sub arginfo_sodium_crypto_core_ristretto255_scalar_add
 #endif
 
 #if defined(crypto_core_ristretto255_HASHBYTES)
