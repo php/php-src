@@ -11841,7 +11841,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 
 	|	// idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
 	|	ldr REG0, EX->run_time_cache
-	|	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldr, REG0, REG0, opline->extended_value, TMP1
+	|	SAFE_MEM_ACC_WITH_UOFFSET ldr, REG0, REG0, opline->extended_value, TMP1
 	|	sub REG0, REG0, #1
 	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|	MEM_LOAD_32_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
