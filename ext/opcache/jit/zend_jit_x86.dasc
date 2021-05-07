@@ -4223,7 +4223,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			|	lea Ra(result_reg), [Ra(Z_REG(op2_addr))+Ra(Z_REG(op2_addr))]
 		} else {
 			|	GET_ZVAL_LVAL result_reg, op2_addr
-			|	lea Ra(result_reg), [Ra(result_reg)+Ra(result_reg)]
+			|	add Ra(result_reg), Ra(result_reg)
 		}
 	} else if (opcode == ZEND_MUL &&
 			Z_MODE(op1_addr) == IS_CONST_ZVAL &&
