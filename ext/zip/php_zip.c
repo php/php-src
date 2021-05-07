@@ -2728,7 +2728,6 @@ PHP_METHOD(ZipArchive, extractTo)
 	zend_string *files_str = NULL;
 	HashTable *files_ht = NULL;
 
-	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
 	char *pathto;
 	size_t pathto_len;
@@ -2765,7 +2764,8 @@ PHP_METHOD(ZipArchive, extractTo)
 			RETURN_FALSE;
 		}
 		for (i = 0; i < nelems; i++) {
-			if ((zval_file = zend_hash_index_find(files_ht, i)) != NULL) {
+			zval *zval_file;
+			if ((zval_file = zend_hash_index_find_deref(Z_ARRVAL_P(zval_files), i)) != NULL) {
 				switch (Z_TYPE_P(zval_file)) {
 					case IS_LONG:
 						break;
