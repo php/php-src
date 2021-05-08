@@ -872,7 +872,8 @@ allow_url_include = Off
 ; https://php.net/from
 ;from="john@doe.com"
 
-; Define the User-Agent string. PHP's default setting for this is empty.
+; Define the User-Agent when using the HTTP wrapper (e.g. file_get_contents). PHP's default setting for this is empty.
+; See curl.user_agent when using cURL for requests
 ; https://php.net/user-agent
 ;user_agent="PHP"
 
@@ -1918,6 +1919,11 @@ ldap.max_links = -1
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.
 ;curl.cainfo =
+
+; Define the User-Agent when using cURL for requests. PHP's default setting for this is empty.
+; See user_agent (without prefix) to set the User-Agent when using the HTTP wrapper (e.g. file_get_contents)
+; https://php.net/curl-user-agent
+;curl.user_agent="PHP"
 
 [openssl]
 ; The location of a Certificate Authority (CA) file on the local filesystem
