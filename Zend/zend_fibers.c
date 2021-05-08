@@ -185,7 +185,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	zend_fiber_context *context = transfer.data;
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(NULL, &context->stack.bottom, &context->stack.capacity);
+	__sanitizer_finish_switch_fiber(NULL, &context->stack.prior_pointer, &context->stack.prior_size);
 #endif
 
 	context->caller = transfer.context;
@@ -195,7 +195,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	context->self = NULL;
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_start_switch_fiber(NULL, context->stack.bottom, context->stack.capacity);
+	__sanitizer_start_switch_fiber(NULL, context->stack.prior_pointer, context->stack.prior_size);
 #endif
 
 	jump_fcontext(context->caller, NULL);
@@ -242,7 +242,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	transfer_t transfer = jump_fcontext(to->self, to);
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.bottom, &to->stack.capacity);
+	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
 #endif
 
 	to->self = transfer.context;
@@ -254,13 +254,13 @@ ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current)
 
 #ifdef __SANITIZE_ADDRESS__
 	void *fake_stack;
-	__sanitizer_start_switch_fiber(&fake_stack, current->stack.bottom, current->stack.capacity);
+	__sanitizer_start_switch_fiber(&fake_stack, current->stack.prior_pointer, current->stack.prior_size);
 #endif
 
 	transfer_t transfer = jump_fcontext(current->caller, NULL);
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(fake_stack, &current->stack.bottom, &current->stack.capacity);
+	__sanitizer_finish_switch_fiber(fake_stack, &current->stack.prior_pointer, &current->stack.prior_size);
 #endif
 
 	current->caller = transfer.context;

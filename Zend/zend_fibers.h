@@ -43,8 +43,8 @@ typedef struct _zend_fiber_stack {
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
-	const void *bottom;
-	size_t capacity;
+	const void *prior_pointer;
+	size_t prior_size;
 #endif
 } zend_fiber_stack;
 
