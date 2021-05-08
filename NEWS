@@ -54,7 +54,7 @@ PHP                                                                        NEWS
     (Paulius Sapragonas)
 
 - FTP:
-  . Convert resource<ftp> to object \FTPConnection. (Sara)
+  . Convert resource<ftp> to object \FTP\Connection. (Sara)
 
 - GD:
   . Convert resource<gd font> to object \GdFont. (Sara)

@@ -62,6 +62,10 @@ PHP 8.1 UPGRADE NOTES
   . The fileinfo functions now accept and return, respectively, finfo objects
     instead of resources.
 
+- FTP:
+  . The FTP functions now accept and return, respectively, FTP\Connection objects
+    instead of resources.
+
 - IMAP:
   . The IMAP functions now accept and return, respectively, IMAP\Connection objects
     instead of resources.
