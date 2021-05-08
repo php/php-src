@@ -110,9 +110,9 @@ PHPAPI php_basic_globals basic_globals;
 #include "basic_functions_arginfo.h"
 
 typedef struct _user_tick_function_entry {
-	zval *arguments;
-	int arg_count;
-	int calling;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	bool calling;
 } user_tick_function_entry;
 
 /* some prototypes for local functions */
@@ -1678,12 +1678,12 @@ void user_shutdown_function_dtor(zval *zv) /* {{{ */
 
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
-	int i;
-
-	for (i = 0; i < tick_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&tick_function_entry->arguments[i]);
+	zval_ptr_dtor(&tick_function_entry->fci.function_name);
+	for (size_t i = 0; i < tick_function_entry->fci.param_count; i++) {
+		zval_ptr_dtor(&tick_function_entry->fci.params[i]);
 	}
-	efree(tick_function_entry->arguments);
+
+	efree(tick_function_entry);
 }
 /* }}} */
 
@@ -1713,27 +1713,19 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 
 static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 {
-	zval retval;
-	zval *function = &tick_fe->arguments[0];
+	/* Prevent re-entrant calls to the same user ticks function */
+	if (!tick_fe->calling) {
+		zval tmp;
 
-	/* Prevent reentrant calls to the same user ticks function */
-	if (! tick_fe->calling) {
-		tick_fe->calling = 1;
+		/* set tmp zval */
+		tick_fe->fci.retval = &tmp;
 
-		if (call_user_function(NULL, NULL,
-								function,
-								&retval,
-								tick_fe->arg_count - 1,
-								tick_fe->arguments + 1
-								) == SUCCESS) {
-			zval_ptr_dtor(&retval);
-		} else {
-			zend_string *function_name = zend_get_callable_name(function);
-			zend_throw_error(NULL, "Registered tick function %s() cannot be called, function does not exist", ZSTR_VAL(function_name));
-			zend_string_release(function_name);
-		}
+		tick_fe->calling = true;
+		zend_call_function(&tick_fe->fci, &tick_fe->fci_cache);
 
-		tick_fe->calling = 0;
+		/* Destroy return value */
+		zval_ptr_dtor(&tmp);
+		tick_fe->calling = false;
 	}
 }
 /* }}} */
@@ -1746,8 +1738,8 @@ static void run_user_tick_functions(int tick_count, void *arg) /* {{{ */
 
 static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_tick_function_entry * tick_fe2) /* {{{ */
 {
-	zval *func1 = &tick_fe1->arguments[0];
-	zval *func2 = &tick_fe2->arguments[0];
+	zval *func1 = &tick_fe1->fci.function_name;
+	zval *func2 = &tick_fe2->fci.function_name;
 	int ret;
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
@@ -2387,46 +2379,23 @@ PHP_FUNCTION(getprotobynumber)
 PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
-	int i;
-	zend_string *function_name = NULL;
 
-	tick_fe.calling = 0;
-	tick_fe.arg_count = ZEND_NUM_ARGS();
-
-	if (tick_fe.arg_count < 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	tick_fe.arguments = (zval *) safe_emalloc(sizeof(zval), tick_fe.arg_count, 0);
-
-	if (zend_get_parameters_array(ZEND_NUM_ARGS(), tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
-		efree(tick_fe.arguments);
-		RETURN_FALSE;
-	}
-
-	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
-		efree(tick_fe.arguments);
-		zend_argument_type_error(1, "must be a valid tick callback, \"%s\" given", ZSTR_VAL(function_name));
-		zend_string_release_ex(function_name, 0);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache,
+			&tick_fe.fci.params, &tick_fe.fci.param_count) == FAILURE) {
 		RETURN_THROWS();
-	} else if (function_name) {
-		zend_string_release_ex(function_name, 0);
 	}
 
-	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {
-		convert_to_string(&tick_fe.arguments[0]);
+	tick_fe.calling = false;
+	Z_TRY_ADDREF(tick_fe.fci.function_name);
+	for (size_t i = 0; i < tick_fe.fci.param_count; i++) {
+		Z_TRY_ADDREF(tick_fe.fci.params[i]);
 	}
-
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
 		zend_llist_init(BG(user_tick_functions),
 						sizeof(user_tick_function_entry),
 						(llist_dtor_func_t) user_tick_function_dtor, 0);
 		php_add_tick_function(run_user_tick_functions, NULL);
-	}
-
-	for (i = 0; i < tick_fe.arg_count; i++) {
-		Z_TRY_ADDREF(tick_fe.arguments[i]);
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
@@ -2439,22 +2408,16 @@ PHP_FUNCTION(register_tick_function)
 PHP_FUNCTION(unregister_tick_function)
 {
 	user_tick_function_entry tick_fe;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_FUNC(tick_fe.fci, tick_fe.fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 
-	tick_fe.arguments = (zval *) emalloc(sizeof(zval));
-	ZVAL_COPY_VALUE(&tick_fe.arguments[0], &fci.function_name);
-	tick_fe.arg_count = 1;
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
-	efree(tick_fe.arguments);
 }
 /* }}} */
 
