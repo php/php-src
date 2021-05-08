@@ -384,6 +384,9 @@ PHP 8.1 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- The log_errors_max_len ini setting has been removed. It no longer had an
+  effect since PHP 8.0.
+
 ========================================
 12. Windows Support
 ========================================
