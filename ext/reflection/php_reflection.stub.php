@@ -459,7 +459,7 @@ class ReflectionClassConstant implements Reflector
     public function getName() {}
 
     /** @return mixed */
-    public function getValue() {}
+    public function getValue(): mixed {}
 
     /** @return bool */
     public function isPublic() {}
