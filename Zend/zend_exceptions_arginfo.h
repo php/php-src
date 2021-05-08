@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a9ce2975a7449a621d364beca646525fc56b294 */
+ * Stub hash: e47e6e03980e6507ff1890bb5558b028cbe30d03 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -272,7 +272,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zval property_message_default_value;
 	ZVAL_EMPTY_STRING(&property_message_default_value);
 	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
-	zend_declare_property_ex(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_message_name);
 
 	zval property_string_default_value;
