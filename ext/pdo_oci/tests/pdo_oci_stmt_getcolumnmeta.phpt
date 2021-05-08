@@ -97,7 +97,7 @@ SQL
     }
 
 
-    function test_return($meta, $offset, $native_type, $pdo_type){
+    function test_return($meta, $offset, $decl_type, $pdo_type){
         if (empty($meta)) {
             printf("[%03d + 2] getColumnMeta() failed, %d - %s\n", $offset,
                 $stmt->errorCode(), var_export($stmt->errorInfo(), true));
@@ -111,34 +111,34 @@ SQL
                 return false;
             }
 
-        if (!is_null($native_type)) {
-            if (!isset($meta['native_type'])) {
-                printf("[%03d + 4] Element native_type missing, %s\n", $offset,
+        if (!is_null($decl_type)) {
+            if (!isset($meta['oci:decl_type'])) {
+                printf("[%03d + 4] Element oci:decl_type missing, %s\n", $offset,
                     var_export($meta, true));
                 return false;
             }
 
-            if (!is_array($native_type))
-                $native_type = array($native_type);
+            if (!is_array($decl_type))
+                $decl_type = array($decl_type);
 
             $found = false;
-            foreach ($native_type as $k => $type) {
-                if ($meta['native_type'] == $type) {
+            foreach ($decl_type as $k => $type) {
+                if ($meta['oci:decl_type'] == $type) {
                     $found = true;
                     break;
                 }
             }
 
             if (!$found) {
-                printf("[%03d + 5] Expecting native type %s, %s\n", $offset,
-                    var_export($native_type, true), var_export($meta, true));
+                printf("[%03d + 5] Expecting native type %s, got %s\n", $offset,
+                    var_export($decl_type, true), var_export($meta['oci:decl_type'], true));
                 return false;
             }
         }
 
         if (!is_null($pdo_type) && ($meta['pdo_type'] != $pdo_type)) {
             printf("[%03d + 6] Expecting PDO type %s got %s (%s)\n", $offset,
-                $pdo_type, var_export($meta, true), var_export($meta['native_type']));
+                $pdo_type, var_export($meta['pdo_type'], true), var_export($meta['oci:decl_type'], true));
             return false;
         }
 
@@ -146,7 +146,7 @@ SQL
     }
 
 
-    function test_meta(&$db, $offset, $sql_type, $value, $native_type, $pdo_type) {
+    function test_meta(&$db, $offset, $sql_type, $value, $decl_type, $pdo_type) {
 
         $db->exec(<<<SQL
 BEGIN
@@ -173,7 +173,7 @@ SQL
         $stmt = $db->prepare('SELECT id, label FROM test');
         $stmt->execute();
         $meta = $stmt->getColumnMeta(1);
-        return test_return($meta, $offset, $native_type, $pdo_type);
+        return test_return($meta, $offset, $decl_type, $pdo_type);
     }
 
     echo "Test 2.2 testing numeric columns\n";

@@ -819,121 +819,97 @@ static int oci_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 #ifdef SQLT_TIMESTAMP
 		case SQLT_TIMESTAMP:
 			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP");
-			add_assoc_string(return_value, "native_type", "TIMESTAMP");
 			break;
 #endif
 #ifdef SQLT_TIMESTAMP_TZ
 		case SQLT_TIMESTAMP_TZ:
 			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP WITH TIMEZONE");
-			add_assoc_string(return_value, "native_type", "TIMESTAMP WITH TIMEZONE");
 			break;
 #endif
 #ifdef SQLT_TIMESTAMP_LTZ
 		case SQLT_TIMESTAMP_LTZ:
 			add_assoc_string(return_value, "oci:decl_type", "TIMESTAMP WITH LOCAL TIMEZONE");
-			add_assoc_string(return_value, "native_type", "TIMESTAMP WITH LOCAL TIMEZONE");
 			break;
 #endif
 #ifdef SQLT_INTERVAL_YM
 		case SQLT_INTERVAL_YM:
 			add_assoc_string(return_value, "oci:decl_type", "INTERVAL YEAR TO MONTH");
-			add_assoc_string(return_value, "native_type", "INTERVAL YEAR TO MONTH");
 			break;
 #endif
 #ifdef SQLT_INTERVAL_DS
 		case SQLT_INTERVAL_DS:
 			add_assoc_string(return_value, "oci:decl_type", "INTERVAL DAY TO SECOND");
-			add_assoc_string(return_value, "native_type", "INTERVAL DAY TO SECOND");
 			break;
 #endif
 		case SQLT_DAT:
 			add_assoc_string(return_value, "oci:decl_type", "DATE");
-			add_assoc_string(return_value, "native_type", "DATE");
 			break;
 		case SQLT_FLT :
 		case SQLT_NUM:
 			/* if the precision is nonzero and scale is -127 then it is a FLOAT */
 			if (scale == -127 && precis != 0) {
 				add_assoc_string(return_value, "oci:decl_type", "FLOAT");
-				add_assoc_string(return_value, "native_type", "FLOAT");
 			} else {
 				add_assoc_string(return_value, "oci:decl_type", "NUMBER");
-				add_assoc_string(return_value, "native_type", "NUMBER");
 			}
 			break;
 		case SQLT_LNG:
 			add_assoc_string(return_value, "oci:decl_type", "LONG");
-			add_assoc_string(return_value, "native_type", "LONG");
 			break;
 		case SQLT_BIN:
 			add_assoc_string(return_value, "oci:decl_type", "RAW");
-			add_assoc_string(return_value, "native_type", "RAW");
 			break;
 		case SQLT_LBI:
 			add_assoc_string(return_value, "oci:decl_type", "LONG RAW");
-			add_assoc_string(return_value, "native_type", "LONG RAW");
 			break;
 		case SQLT_CHR:
 		case SQLT_VCS:
 			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NVARCHAR2");
-				add_assoc_string(return_value, "native_type", "NVARCHAR2");
 			} else {
 				add_assoc_string(return_value, "oci:decl_type", "VARCHAR2");
-				add_assoc_string(return_value, "native_type", "VARCHAR2");
 			}
 			break;
 		case SQLT_AFC:
 			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NCHAR");
-				add_assoc_string(return_value, "native_type", "NCHAR");
 			} else {
 				add_assoc_string(return_value, "oci:decl_type", "CHAR");
-				add_assoc_string(return_value, "native_type", "CHAR");
 			}
 			break;
 		case SQLT_BLOB:
 			add_assoc_string(return_value, "oci:decl_type", "BLOB");
 			add_next_index_string(&flags, "blob");
-			add_assoc_string(return_value, "native_type", "BLOB");
 			break;
 		case SQLT_CLOB:
 			if (charset_form == SQLCS_NCHAR) {
 				add_assoc_string(return_value, "oci:decl_type", "NCLOB");
-				add_assoc_string(return_value, "native_type", "NCLOB");
 			} else {
 				add_assoc_string(return_value, "oci:decl_type", "CLOB");
-				add_assoc_string(return_value, "native_type", "CLOB");
 			}
 			add_next_index_string(&flags, "blob");
 			break;
 		case SQLT_BFILE:
 			add_assoc_string(return_value, "oci:decl_type", "BFILE");
 			add_next_index_string(&flags, "blob");
-			add_assoc_string(return_value, "native_type", "BFILE");
 			break;
 		case SQLT_RDD:
 			add_assoc_string(return_value, "oci:decl_type", "ROWID");
-			add_assoc_string(return_value, "native_type", "ROWID");
 			break;
 		case SQLT_BFLOAT:
 		case SQLT_IBFLOAT:
 			add_assoc_string(return_value, "oci:decl_type", "BINARY_FLOAT");
-			add_assoc_string(return_value, "native_type", "BINARY_FLOAT");
 			break;
 		case SQLT_BDOUBLE:
 		case SQLT_IBDOUBLE:
 			add_assoc_string(return_value, "oci:decl_type", "BINARY_DOUBLE");
-			add_assoc_string(return_value, "native_type", "BINARY_DOUBLE");
 			break;
 		default:
 			add_assoc_long(return_value, "oci:decl_type", dtype);
-			add_assoc_string(return_value, "native_type", "UNKNOWN");
 		}
 	} else {
 		/* if the column is NULL */
 		add_assoc_long(return_value, "oci:decl_type", 0);
-		add_assoc_string(return_value, "native_type", "NULL");
 	}
 
 	switch (dtype) {
