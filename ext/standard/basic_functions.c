@@ -1722,6 +1722,9 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 
 		tick_fe->calling = true;
 		zend_call_function(&tick_fe->fci, &tick_fe->fci_cache);
+
+		/* Destroy return value */
+		zval_ptr_dtor(&tmp);
 		tick_fe->calling = false;
 	}
 }
