@@ -2481,8 +2481,8 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			Z_UNPROTECT_RECURSION_P(entry);
 		}
 	} else {
-		zend_argument_type_error(pos, "must be string or array of strings, %s given", zend_zval_type_name(entry));
-		RETURN_THROWS();
+		php_error_docref(NULL, E_WARNING, "Argument #%d must be string or array of strings, %s given", pos, zend_zval_type_name(entry));
+		return;
 	}
 }
 /* }}} */
