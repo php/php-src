@@ -83,7 +83,7 @@ static zend_object* ftp_object_create(zend_class_entry* ce) {
 }
 
 static zend_function *ftp_object_get_constructor(zend_object *zobj) {
-	zend_throw_error(NULL, "Cannot directly construct FTPConnection, use ftp_connect() or ftp_ssl_connect() instead");
+	zend_throw_error(NULL, "Cannot directly construct FTP\\Connection, use ftp_connect() or ftp_ssl_connect() instead");
 	return NULL;
 }
 
@@ -108,7 +108,7 @@ PHP_MINIT_FUNCTION(ftp)
 #endif
 #endif
 
-	php_ftp_ce = register_class_FTPConnection();
+	php_ftp_ce = register_class_FTP_Connection();
 	php_ftp_ce->create_object = ftp_object_create;
 	php_ftp_ce->serialize = zend_class_serialize_deny;
 	php_ftp_ce->unserialize = zend_class_unserialize_deny;
@@ -229,7 +229,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 #define GET_FTPBUF(ftpbuf, zftp) \
 	ftpbuf = ftp_object_from_zend_object(Z_OBJ_P(zftp))->ftp; \
 	if (!ftpbuf) { \
-		zend_throw_exception(zend_ce_value_error, "FTPConnection is already closed", 0); \
+		zend_throw_exception(zend_ce_value_error, "FTP\\Connection is already closed", 0); \
 		RETURN_THROWS(); \
 	}
 
