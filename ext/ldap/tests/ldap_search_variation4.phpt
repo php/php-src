@@ -32,7 +32,7 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 array(2) {
   ["count"]=>

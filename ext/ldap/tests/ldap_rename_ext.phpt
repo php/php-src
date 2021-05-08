@@ -42,7 +42,7 @@ ldap_rename($link, "cn=userZ,$base", "cn=userA", "$base", true);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)

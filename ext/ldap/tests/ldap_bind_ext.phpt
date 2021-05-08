@@ -44,28 +44,28 @@ var_dump(
 );
 ?>
 --EXPECTF--
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(49)
 string(0) ""
 array(0) {
 }
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(34)

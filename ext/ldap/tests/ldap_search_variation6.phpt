@@ -45,10 +45,10 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 array(2) {
   [0]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
   [1]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
 }
 array(4) {
@@ -214,10 +214,10 @@ array(4) {
 bool(true)
 array(2) {
   [0]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
   [1]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
 }
 array(1) {
@@ -230,10 +230,10 @@ array(1) {
 }
 array(2) {
   [0]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
   [1]=>
-  object(LDAPResult)#%d (0) {
+  object(LDAP\Result)#%d (0) {
   }
 }
 array(1) {

@@ -104,7 +104,7 @@ array(1) {
     }
   }
 }
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 int(1)
 bool(true)
