@@ -1124,10 +1124,6 @@ PHP 8.0 UPGRADE NOTES
   . New INI directive to choose the version of the .NET framework to use for
     dotnet objects.
 
-- log_errors_max_len
-  . INI directive for setting the maximum length of log_errors in bytes no
-    longer has any effect and has been removed.
-
 ========================================
 12. Windows Support
 ========================================

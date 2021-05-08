@@ -4,6 +4,8 @@ Bug #80901 (Info leak in ftp extension)
 <?php
 require 'skipif.inc';
 ?>
+--INI--
+log_errors_max_len=0
 --FILE--
 <?php
 $bug80901 = true;

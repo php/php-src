@@ -68,6 +68,7 @@ struct _php_core_globals {
 	zend_uchar display_errors;
 	zend_bool display_startup_errors;
 	zend_bool log_errors;
+	zend_long      log_errors_max_len;
 	zend_bool ignore_repeated_errors;
 	zend_bool ignore_repeated_source;
 	zend_bool report_memleaks;
