@@ -296,6 +296,7 @@ function main(): void
         'precision=14',
         'serialize_precision=-1',
         'memory_limit=128M',
+        'log_errors_max_len=0',
         'opcache.fast_shutdown=0',
         'opcache.file_update_protection=0',
         'opcache.revalidate_freq=0',

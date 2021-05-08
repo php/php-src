@@ -4,6 +4,8 @@ Fix #80960 (opendir() warning wrong info when failed on Windows)
 <?php
 if (PHP_OS_FAMILY !== "Windows") die("skip for Windows only");
 ?>
+--INI--
+log_errors_max_len=0
 --FILE--
 <?php
 opendir("notexist*");

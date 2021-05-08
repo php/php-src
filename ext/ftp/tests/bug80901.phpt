@@ -3,6 +3,8 @@ Bug #80901 (Info leak in ftp extension)
 --EXTENSIONS--
 ftp
 pcntl
+--INI--
+log_errors_max_len=0
 --FILE--
 <?php
 $bug80901 = true;
