@@ -1722,7 +1722,6 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 
 		tick_fe->calling = true;
 		zend_call_function(&tick_fe->fci, &tick_fe->fci_cache);
-		zend_release_fcall_info_cache(&tick_fe->fci_cache);
 		tick_fe->calling = false;
 	}
 }
