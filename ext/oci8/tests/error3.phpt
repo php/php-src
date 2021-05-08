@@ -10,8 +10,6 @@ if ($cv[0] < 11 || ($cv[0] == 11 && $cv[1] < 2) || ($cv[0] == 11 && $cv[1] == 2 
     die("skip test works only with Oracle 11.2.0.3 or greater version of Oracle client libraries");
 }
 ?>
---INI--
-log_errors_max_len=4096
 --FILE--
 <?php
 
