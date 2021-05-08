@@ -24,7 +24,7 @@ array(10) {
   int(0)
   ["column_source"]=>
   string(13) "TABLE_CATALOG"
-  ["native_type"]=>
+  ["dblib:decl_type"]=>
   string(4) "char"
   ["native_type_id"]=>
   int(%d)

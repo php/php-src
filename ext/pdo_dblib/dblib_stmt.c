@@ -485,7 +485,7 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
 	add_assoc_long(return_value, "scale", (int) dbtypeinfo->scale );
 	add_assoc_string(return_value, "column_source", dbcolsource(H->link, colno+1));
-	add_assoc_string(return_value, "native_type", pdo_dblib_get_field_name(coltype));
+	add_assoc_string(return_value, "dblib:decl_type", pdo_dblib_get_field_name(coltype));
 	add_assoc_long(return_value, "native_type_id", coltype);
 	add_assoc_long(return_value, "native_usertype_id", dbcolutype(H->link, colno+1));
 
