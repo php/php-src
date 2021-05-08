@@ -15,9 +15,7 @@ if ($stmt->columnCount()) {
 }
 ?>
 --EXPECT--
-array(6) {
-  ["native_type"]=>
-  string(4) "null"
+array(5) {
   ["pdo_type"]=>
   int(0)
   ["flags"]=>
