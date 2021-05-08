@@ -83,12 +83,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	NULL,
 };
 
-
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * EUC-KR => wchar
- */
 int
 mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 {
@@ -96,9 +92,9 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 
 	switch (filter->status) {
 	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
+		if (c >= 0 && c < 0x80) { /* latin */
 			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff && c != 0xc9) {	/* dbcs lead byte */
+		} else if (c > 0xa0 && c < 0xff && c != 0xc9) { /* dbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
@@ -108,7 +104,7 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	case 1:		/* dbcs second byte */
+	case 1: /* dbcs second byte */
 		filter->status = 0;
 		c1 = filter->cache;
 		flag = 0;
@@ -140,7 +136,7 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 				w |= MBFL_WCSPLANE_KSC5601;
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
+		} else if ((c >= 0 && c < 0x21) || c == 0x7f) { /* CTLs */
 			CK((*filter->output_function)(c, filter->data));
 		} else {
 			w = (c1 << 8) | c;
@@ -158,15 +154,10 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-/*
- * wchar => EUC-KR
- */
 int
 mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 {
-	int c1, c2, s;
-
-	s = 0;
+	int c1, c2, s = 0;
 
 	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
 		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
@@ -186,8 +177,8 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 
 	c1 = (s >> 8) & 0xff;
 	c2 = s & 0xff;
-	/* exclude UHC extension area */
-	if (c1 < 0xa1 || c2 < 0xa1){
+	/* exclude UHC extension area (although we are using the UHC conversion tables) */
+	if (c1 < 0xa1 || c2 < 0xa1) {
 		s = c;
 	}
 
@@ -203,7 +194,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 		}
 	}
 	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
+		if (s < 0x80) { /* latin */
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
