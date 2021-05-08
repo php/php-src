@@ -71,7 +71,7 @@ PHP 8.1 UPGRADE NOTES
     instead of resources.
 
 - LDAP:
-  . The LDAP functions now accept and return, respectively, LDAP\LDAP objects
+  . The LDAP functions now accept and return, respectively, LDAP\Connection objects
     instead of "ldap link" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
   . The LDAP functions now accept and return, respectively, LDAP\Result objects

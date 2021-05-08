@@ -121,7 +121,7 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\LDAP, use ldap_create() instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_create() instead");
 	return NULL;
 }
 
@@ -826,7 +826,7 @@ PHP_MINIT_FUNCTION(ldap)
 {
 	REGISTER_INI_ENTRIES();
 
-	ldap_link_ce = register_class_LDAP_LDAP();
+	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
 	ldap_link_ce->serialize = zend_class_serialize_deny;
 	ldap_link_ce->unserialize = zend_class_unserialize_deny;
