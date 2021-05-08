@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #67792 (HTTP Authorization schemes are treated as case-sensitive).
     (cmb)
   . Fixed bug #80972 (Memory exhaustion on invalid string offset). (girgias)
+  . Removed log_errors_max_len ini directive from default ini files, since it
+    no longer had any effect since PHP 8.0.0. (Michael Voříšek)
 
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
