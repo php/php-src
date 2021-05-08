@@ -1715,8 +1715,13 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 {
 	/* Prevent re-entrant calls to the same user ticks function */
 	if (!tick_fe->calling) {
+		zval tmp;
+
+		/* set tmp zval */
+		tick_fe->fci.retval = &tmp;
+
 		tick_fe->calling = true;
-		zend_fcall_info_call(&tick_fe->fci, &tick_fe->fci_cache, tick_fe->fci.retval, NULL);
+		zend_call_function(&tick_fe->fci, &tick_fe->fci_cache);
 		zend_release_fcall_info_cache(&tick_fe->fci_cache);
 		tick_fe->calling = false;
 	}
