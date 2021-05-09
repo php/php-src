@@ -1679,9 +1679,7 @@ void user_shutdown_function_dtor(zval *zv) /* {{{ */
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
 	zval_ptr_dtor(&tick_function_entry->fci.function_name);
-	for (size_t i = 0; i < tick_function_entry->fci.param_count; i++) {
-		zval_ptr_dtor(&tick_function_entry->fci.params[i]);
-	}
+	zend_fcall_info_args_clear(&tick_function_entry->fci, true);
 }
 /* }}} */
 
@@ -2377,17 +2375,19 @@ PHP_FUNCTION(getprotobynumber)
 PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
+	zval *params;
+	uint32_t param_count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache,
-			&tick_fe.fci.params, &tick_fe.fci.param_count) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_FUNC(tick_fe.fci, tick_fe.fci_cache)
+		Z_PARAM_VARIADIC('+', params, param_count);
+	ZEND_PARSE_PARAMETERS_END();
 
 	tick_fe.calling = false;
 	Z_TRY_ADDREF(tick_fe.fci.function_name);
-	for (size_t i = 0; i < tick_fe.fci.param_count; i++) {
-		Z_TRY_ADDREF(tick_fe.fci.params[i]);
-	}
+	tick_fe.fci.params = NULL;
+	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
+
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
 		zend_llist_init(BG(user_tick_functions),
