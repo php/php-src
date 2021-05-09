@@ -2385,7 +2385,6 @@ PHP_FUNCTION(register_tick_function)
 
 	tick_fe.calling = false;
 	Z_TRY_ADDREF(tick_fe.fci.function_name);
-	tick_fe.fci.params = NULL;
 	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
 
 	if (!BG(user_tick_functions)) {
