@@ -35,8 +35,8 @@ function checkColumns(array $meta): void
 {
     $expected = [
         'name' => 'string',
-        'len' => 'integer',
-        'precision' => 'integer',
+        'len' => 'int',
+        'precision' => 'int',
     ];
     $forbidden = [
         'native_type'
@@ -47,8 +47,8 @@ function checkColumns(array $meta): void
         if (!in_array($key, $existing, true)) {
             throw new Exception('Missing column '.$key);
         }
-        if (gettype($meta[$key]) !== $type) {
-            throw new Exception('Wrong type for column '.$key.', expected '.$type.' but got '.gettype($meta[$key]));
+        if (get_debug_type($meta[$key]) !== $type) {
+            throw new Exception('Wrong type for column '.$key.', expected '.$type.' but got '.get_debug_type($meta[$key]));
         }
     }
     foreach ($forbidden as $key) {
