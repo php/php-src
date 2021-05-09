@@ -55,7 +55,7 @@
 # endif
 #endif
 
-#ifdef __SANITIZE_ADDRESS__
+#if defined(__SANITIZE_ADDRESS__) && !defined(_MSC_VER)
 # include <sanitizer/common_interface_defs.h>
 #endif
 
