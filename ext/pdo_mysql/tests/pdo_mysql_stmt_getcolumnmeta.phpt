@@ -54,9 +54,11 @@ try {
     }
 
     // invalid offset
-    if (false !== ($tmp = $stmt->getColumnMeta(1)))
-        printf("[009] Expecting false because of invalid offset got %s\n", var_export($tmp, true));
-
+    try {
+        $tmp = $stmt->getColumnMeta(1);
+    } catch (ValueError $e) {
+        printf("%s\n", $e->getMessage());
+    }
 
     function test_meta(&$db, $offset, $sql_type, $value, $decl_type, $pdo_type) {
 
@@ -310,4 +312,5 @@ print "done!";
 --EXPECT--
 PDOStatement::getColumnMeta(): Argument #1 ($column) must be greater than or equal to 0
 Testing native PS...
+PDOStatement::getColumnMeta(): Argument #1 ($column) must be less than the number of columns
 done!
