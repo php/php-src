@@ -17,45 +17,62 @@ PDOTest::skip();
  * test file.
  */
 ?>
---XFAIL--
-This feature is not yet finalized, no test makes sense
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+
+if (getenv('REDIR_TEST_DIR') === false) {
+    putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+}
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$data = array(
-    array('10', 'Abc', 'zxy'),
-    array('20', 'Def', 'wvu'),
-    array('30', 'Ghi', 'tsr'),
-    array('40', 'Jkl', 'qpo'),
-    array('50', 'Mno', 'nml'),
-    array('60', 'Pqr', 'kji'),
-);
+/**
+ * Enforce basic columns and forbid native_type
+ */
+function checkColumns(array $meta): void
+{
+    $expected = [
+        'name' => 'string',
+        'len' => 'integer',
+        'precision' => 'integer',
+    ];
+    $forbidden = [
+        'native_type'
+    ];
+    $existing = array_keys($meta);
+
+    foreach ($expected as $key => $type) {
+        if (!in_array($key, $existing, true)) {
+            throw new Exception('Missing column '.$key);
+        }
+        if (gettype($meta[$key]) !== $type) {
+            throw new Exception('Wrong type for column '.$key.', expected '.$type.' but got '.gettype($meta[$key]));
+        }
+    }
+    foreach ($forbidden as $key) {
+        if (in_array($key, $existing, true)) {
+            throw new Exception('Forbidden column '.$key);
+        }
+    }
+}
 
 // Insert using question mark placeholders
 $stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
-foreach ($data as $row) {
-    $stmt->execute($row);
-}
+$stmt->execute(array('10', 'Abc', 'zxy'));
 
 // Retrieve column metadata for a result set returned by explicit SELECT
 $select = $db->query('SELECT id, val, val2 FROM test');
-$meta = $select->getColumnMeta(0);
-var_dump($meta);
-$meta = $select->getColumnMeta(1);
-var_dump($meta);
-$meta = $select->getColumnMeta(2);
-var_dump($meta);
+checkColumns($select->getColumnMeta(0));
+
+$meta = $select->getColumnMeta(3);
 
 // Retrieve column metadata for a result set returned by a function
 $select = $db->query('SELECT COUNT(*) FROM test');
-$meta = $select->getColumnMeta(0);
-var_dump($meta);
+checkColumns($select->getColumnMeta(0));
 
+echo 'Done!';
 ?>
 --EXPECT--
-The unexpected!
+Done!
