@@ -67,12 +67,12 @@ string(%d) "dn:%s"
 string(0) ""
 bool(true)
 string(%d) "dn:cn=user%s"
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 string(%d) "dn:%s"
 bool(true)
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 string(%d) "%s"

@@ -13,5 +13,5 @@ $link = ldap_connect($host, $port);
 var_dump($link);
 ?>
 --EXPECTF--
-object(LDAP)#%d (0) {
+object(LDAP\Connection)#%d (0) {
 }

@@ -42,7 +42,7 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
-object(LDAPResultEntry)#%d (0) {
+object(LDAP\ResultEntry)#%d (0) {
 }
 array(3) {
   [0]=>

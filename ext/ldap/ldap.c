@@ -121,7 +121,7 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP, use ldap_create() instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_create() instead");
 	return NULL;
 }
 
@@ -167,7 +167,7 @@ static zend_object *ldap_result_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_result_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAPResult, use the dedicated functions instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Result, use the dedicated functions instead");
 	return NULL;
 }
 
@@ -205,7 +205,7 @@ static zend_object *ldap_result_entry_create_object(zend_class_entry *class_type
 }
 
 static zend_function *ldap_result_entry_get_constructor(zend_object *obj) {
-	zend_throw_error(NULL, "Cannot directly construct LDAPResultEntry, use the dedicated functions instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead");
 	return NULL;
 }
 
@@ -826,7 +826,7 @@ PHP_MINIT_FUNCTION(ldap)
 {
 	REGISTER_INI_ENTRIES();
 
-	ldap_link_ce = register_class_LDAP();
+	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
 	ldap_link_ce->serialize = zend_class_serialize_deny;
 	ldap_link_ce->unserialize = zend_class_unserialize_deny;
@@ -838,7 +838,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_ce = register_class_LDAPResult();
+	ldap_result_ce = register_class_LDAP_Result();
 	ldap_result_ce->create_object = ldap_result_create_object;
 	ldap_result_ce->serialize = zend_class_serialize_deny;
 	ldap_result_ce->unserialize = zend_class_unserialize_deny;
@@ -850,7 +850,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_result_object_handlers.clone_obj = NULL;
 	ldap_result_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_entry_ce = register_class_LDAPResultEntry();
+	ldap_result_entry_ce = register_class_LDAP_ResultEntry();
 	ldap_result_entry_ce->create_object = ldap_result_entry_create_object;
 	ldap_result_entry_ce->serialize = zend_class_serialize_deny;
 	ldap_result_entry_ce->unserialize = zend_class_unserialize_deny;

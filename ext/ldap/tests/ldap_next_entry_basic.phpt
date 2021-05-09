@@ -28,7 +28,7 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-object(LDAPResultEntry)#%d (0) {
+object(LDAP\ResultEntry)#%d (0) {
 }
 array(2) {
   [0]=>
