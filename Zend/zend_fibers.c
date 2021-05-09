@@ -336,29 +336,31 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 		error_reporting = E_ALL;
 	}
 
-	zend_vm_stack stack = zend_fiber_vm_stack_alloc(ZEND_FIBER_VM_STACK_SIZE);
-	EG(vm_stack) = stack;
-	EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
-	EG(vm_stack_end) = stack->end;
-	EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
-
-	fiber->execute_data = (zend_execute_data *) stack->top;
-	fiber->stack_bottom = fiber->execute_data;
-
-	memset(fiber->execute_data, 0, sizeof(zend_execute_data));
-
-	fiber->execute_data->func = &zend_fiber_function;
-	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
-
-	EG(current_execute_data) = fiber->execute_data;
-	EG(jit_trace_num) = 0;
-	EG(error_reporting) = error_reporting;
-
-	fiber->fci.retval = &fiber->value;
-
-	fiber->status = ZEND_FIBER_STATUS_RUNNING;
+	EG(vm_stack) = NULL;
 
 	zend_first_try {
+		zend_vm_stack stack = zend_fiber_vm_stack_alloc(ZEND_FIBER_VM_STACK_SIZE);
+		EG(vm_stack) = stack;
+		EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
+		EG(vm_stack_end) = stack->end;
+		EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
+
+		fiber->execute_data = (zend_execute_data *) stack->top;
+		fiber->stack_bottom = fiber->execute_data;
+
+		memset(fiber->execute_data, 0, sizeof(zend_execute_data));
+
+		fiber->execute_data->func = &zend_fiber_function;
+		fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
+
+		EG(current_execute_data) = fiber->execute_data;
+		EG(jit_trace_num) = 0;
+		EG(error_reporting) = error_reporting;
+
+		fiber->fci.retval = &fiber->value;
+
+		fiber->status = ZEND_FIBER_STATUS_RUNNING;
+
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
 		zval_ptr_dtor(&fiber->fci.function_name);
