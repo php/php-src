@@ -1682,8 +1682,6 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 	for (size_t i = 0; i < tick_function_entry->fci.param_count; i++) {
 		zval_ptr_dtor(&tick_function_entry->fci.params[i]);
 	}
-
-	efree(tick_function_entry);
 }
 /* }}} */
 
