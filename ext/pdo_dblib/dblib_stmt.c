@@ -469,10 +469,6 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	DBTYPEINFO* dbtypeinfo;
 	int coltype;
 
-	if(colno >= stmt->column_count || colno < 0)  {
-		return FAILURE;
-	}
-
 	array_init(return_value);
 
 	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);

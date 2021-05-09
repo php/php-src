@@ -66,13 +66,16 @@ $stmt->execute(array('10', 'Abc', 'zxy'));
 $select = $db->query('SELECT id, val, val2 FROM test');
 checkColumns($select->getColumnMeta(0));
 
-$meta = $select->getColumnMeta(3);
+try {
+    $meta = $select->getColumnMeta(3);
+} catch (ValueError $e) {
+    printf("%s\n", $e->getMessage());
+}
 
 // Retrieve column metadata for a result set returned by a function
 $select = $db->query('SELECT COUNT(*) FROM test');
 checkColumns($select->getColumnMeta(0));
 
-echo 'Done!';
 ?>
 --EXPECT--
-Done!
+PDOStatement::getColumnMeta(): Argument #1 ($column) must be less than the number of columns

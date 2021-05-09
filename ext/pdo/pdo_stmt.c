@@ -1670,14 +1670,18 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
-	if (colno < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
 
 	if (!stmt->methods->get_column_meta) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support meta data");
 		RETURN_FALSE;
+	}
+
+	if (colno < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	} else if (colno >= stmt->column_count) {
+		zend_argument_value_error(1, "must be less than the number of columns");
+		RETURN_THROWS();
 	}
 
 	PDO_STMT_CLEAR_ERR();

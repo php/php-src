@@ -308,10 +308,6 @@ static int pdo_sqlite_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zv
 	if (!S->stmt) {
 		return FAILURE;
 	}
-	if(colno >= sqlite3_column_count(S->stmt)) {
-		/* error invalid column */
-		return FAILURE;
-	}
 
 	array_init(return_value);
 	array_init(&flags);

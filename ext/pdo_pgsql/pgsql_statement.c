@@ -599,10 +599,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 		return FAILURE;
 	}
 
-	if (colno >= stmt->column_count) {
-		return FAILURE;
-	}
-
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 

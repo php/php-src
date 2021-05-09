@@ -790,10 +790,6 @@ static int pdo_mysql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	if (!S->result) {
 		PDO_DBG_RETURN(FAILURE);
 	}
-	if (colno >= stmt->column_count) {
-		/* error invalid column */
-		PDO_DBG_RETURN(FAILURE);
-	}
 
 	array_init(return_value);
 	array_init(&flags);

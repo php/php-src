@@ -783,10 +783,6 @@ static int oci_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	if (!S->stmt) {
 		return FAILURE;
 	}
-	if (colno >= stmt->column_count) {
-		/* error invalid column */
-		return FAILURE;
-	}
 
 	array_init(return_value);
 	array_init(&flags);
