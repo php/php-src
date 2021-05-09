@@ -1676,6 +1676,11 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 		RETURN_FALSE;
 	}
 
+	if (stmt->column_count == 0) {
+		/* Can't fetch meta data for a column if there are no columns */
+		RETURN_FALSE;
+	}
+
 	if (colno < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();

@@ -72,6 +72,11 @@ try {
     printf("%s\n", $e->getMessage());
 }
 
+$stmt = $db->prepare("SELECT 42");
+if (false !== $stmt->getColumnMeta(0)) {
+    throw new Exception('If no columns are present in the statement then the function should return false.');
+}
+
 // Retrieve column metadata for a result set returned by a function
 $select = $db->query('SELECT COUNT(*) FROM test');
 checkColumns($select->getColumnMeta(0));
