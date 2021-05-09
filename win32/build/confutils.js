@@ -1241,6 +1241,8 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	if (PHP_SANITIZER == "yes") {
 		if (CLANG_TOOLSET) {
 			add_asan_opts("CFLAGS_" + SAPI, "LIBS_" + SAPI, (is_lib ? "ARFLAGS_" : "LDFLAGS_") + SAPI);
+		} else if (VS_TOOLSET) {
+			ADD_FLAG("CFLAGS", "/fsanitize=address");
 		}
 	}
 

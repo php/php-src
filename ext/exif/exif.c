@@ -48,7 +48,7 @@
 /* needed for ssize_t definition */
 #include <sys/types.h>
 
-#ifdef __SANITIZE_ADDRESS__
+#if defined(__SANITIZE_ADDRESS__) && !defined(_MSC_VER)
 # include <sanitizer/asan_interface.h>
 #endif
 
