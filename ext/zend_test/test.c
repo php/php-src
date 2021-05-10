@@ -257,22 +257,25 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ 
 /* }}} */
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
-	zend_internal_function *fptr;
+    if (zend_string_equals_literal_ci(name, "test")) {
+	    zend_internal_function *fptr;
 
-	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = (zend_internal_function *) &EG(trampoline);
-	} else {
-		fptr = emalloc(sizeof(zend_internal_function));
-	}
-	memset(fptr, 0, sizeof(zend_internal_function));
-	fptr->type = ZEND_INTERNAL_FUNCTION;
-	fptr->num_args = 1;
-	fptr->scope = (*object)->ce;
-	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-	fptr->function_name = zend_string_copy(name);
-	fptr->handler = ZEND_FN(zend_test_func);
+	    if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		    fptr = (zend_internal_function *) &EG(trampoline);
+	    } else {
+		    fptr = emalloc(sizeof(zend_internal_function));
+	    }
+	    memset(fptr, 0, sizeof(zend_internal_function));
+	    fptr->type = ZEND_INTERNAL_FUNCTION;
+	    fptr->num_args = 1;
+	    fptr->scope = (*object)->ce;
+	    fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+	    fptr->function_name = zend_string_copy(name);
+	    fptr->handler = ZEND_FN(zend_test_func);
 
-	return (zend_function*)fptr;
+	    return (zend_function*)fptr;
+    }
+	return zend_std_get_method(object, name, key);
 }
 /* }}} */
 
@@ -320,6 +323,16 @@ static ZEND_METHOD(_ZendTestClass, is_object) {
 static ZEND_METHOD(_ZendTestClass, returnsStatic) {
 	ZEND_PARSE_PARAMETERS_NONE();
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
+static ZEND_METHOD(_ZendTestClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
+}
+
+static ZEND_METHOD(_ZendTestChildClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
 }
 
 static ZEND_METHOD(_ZendTestTrait, testMethod) {

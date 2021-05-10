@@ -200,22 +200,45 @@ static bool class_visible(zend_class_entry *ce) {
 	}
 }
 
+static zend_always_inline void register_unresolved_class(zend_string *name) {
+	/* We'll autoload this class and process delayed variance obligations later. */
+	if (!CG(delayed_autoloads)) {
+		ALLOC_HASHTABLE(CG(delayed_autoloads));
+		zend_hash_init(CG(delayed_autoloads), 0, NULL, NULL, 0);
+	}
+	zend_hash_add_empty_element(CG(delayed_autoloads), name);
+}
+
 static zend_class_entry *lookup_class(
 		zend_class_entry *scope, zend_string *name, bool register_unresolved) {
-	uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
-	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, flags);
+	zend_class_entry *ce;
+
+	if (UNEXPECTED(!EG(active))) {
+		zend_string *lc_name = zend_string_tolower(name);
+
+		ce = zend_hash_find_ptr(CG(class_table), lc_name);
+
+		zend_string_release(lc_name);
+
+		if (register_unresolved && !ce) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "%s must be registered before %s",
+				ZSTR_VAL(name), ZSTR_VAL(scope->name));
+	    }
+
+		return ce;
+	}
+
+	ce = zend_lookup_class_ex(
+	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
+
 	if (!CG(in_compilation)) {
 		if (ce) {
 			return ce;
 		}
 
 		if (register_unresolved) {
-			/* We'll autoload this class and process delayed variance obligations later. */
-			if (!CG(delayed_autoloads)) {
-				ALLOC_HASHTABLE(CG(delayed_autoloads));
-				zend_hash_init(CG(delayed_autoloads), 0, NULL, NULL, 0);
-			}
-			zend_hash_add_empty_element(CG(delayed_autoloads), name);
+			register_unresolved_class(name);
 		}
 	} else {
 		if (ce && class_visible(ce)) {
