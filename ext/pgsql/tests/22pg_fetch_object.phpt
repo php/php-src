@@ -30,9 +30,9 @@ try {
 
 echo "Ok\n";
 ?>
---EXPECT--
+--EXPECTF--
 test_class::__construct(1,2)
-object(test_class)#1 (3) {
+object(test_class)#%d (3) {
   ["num"]=>
   string(1) "0"
   ["str"]=>

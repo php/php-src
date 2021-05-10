@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-No PostgreSQL link opened yet
+No PostgreSQL connection opened yet

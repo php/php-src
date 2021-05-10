@@ -120,6 +120,17 @@ PHP 8.1 UPGRADE NOTES
     types. You can restore the previous behavior by enabling the
     PDO::ATTR_STRINGIFY_FETCHES option.
 
+- PgSQL:
+  . The PgSQL functions now accept and return, respectively, \PgSql\Connection
+    objects instead of "pgsql link" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The PgSQL functions now accept and return, respectively, \PgSql\Result
+    objects instead of "pgsql result" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The PgSQL functions now accept and return, respectively, \PgSql\Lob
+    objects instead of "pgsql large object" resources. Return value checks
+    using is_resource() should be replaced with checks for `false`.
+
 - PSpell:
   . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
     instead of "pspell" resources. Return value checks using is_resource()

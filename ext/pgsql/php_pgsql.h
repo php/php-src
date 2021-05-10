@@ -57,108 +57,6 @@ PHP_MSHUTDOWN_FUNCTION(pgsql);
 PHP_RINIT_FUNCTION(pgsql);
 PHP_RSHUTDOWN_FUNCTION(pgsql);
 PHP_MINFO_FUNCTION(pgsql);
-/* connection functions */
-PHP_FUNCTION(pg_connect);
-PHP_FUNCTION(pg_pconnect);
-PHP_FUNCTION(pg_connect_poll);
-PHP_FUNCTION(pg_close);
-PHP_FUNCTION(pg_connection_reset);
-PHP_FUNCTION(pg_connection_status);
-PHP_FUNCTION(pg_connection_busy);
-PHP_FUNCTION(pg_host);
-PHP_FUNCTION(pg_dbname);
-PHP_FUNCTION(pg_port);
-PHP_FUNCTION(pg_tty);
-PHP_FUNCTION(pg_options);
-PHP_FUNCTION(pg_version);
-PHP_FUNCTION(pg_ping);
-PHP_FUNCTION(pg_parameter_status);
-PHP_FUNCTION(pg_transaction_status);
-/* query functions */
-PHP_FUNCTION(pg_query);
-PHP_FUNCTION(pg_query_params);
-PHP_FUNCTION(pg_prepare);
-PHP_FUNCTION(pg_execute);
-PHP_FUNCTION(pg_send_query);
-PHP_FUNCTION(pg_send_query_params);
-PHP_FUNCTION(pg_send_prepare);
-PHP_FUNCTION(pg_send_execute);
-PHP_FUNCTION(pg_cancel_query);
-/* result functions */
-PHP_FUNCTION(pg_fetch_assoc);
-PHP_FUNCTION(pg_fetch_array);
-PHP_FUNCTION(pg_fetch_object);
-PHP_FUNCTION(pg_fetch_result);
-PHP_FUNCTION(pg_fetch_row);
-PHP_FUNCTION(pg_fetch_all);
-PHP_FUNCTION(pg_fetch_all_columns);
-PHP_FUNCTION(pg_affected_rows);
-PHP_FUNCTION(pg_get_result);
-PHP_FUNCTION(pg_result_seek);
-PHP_FUNCTION(pg_result_status);
-PHP_FUNCTION(pg_free_result);
-PHP_FUNCTION(pg_last_oid);
-PHP_FUNCTION(pg_num_rows);
-PHP_FUNCTION(pg_num_fields);
-PHP_FUNCTION(pg_field_name);
-PHP_FUNCTION(pg_field_num);
-PHP_FUNCTION(pg_field_size);
-PHP_FUNCTION(pg_field_type);
-PHP_FUNCTION(pg_field_type_oid);
-PHP_FUNCTION(pg_field_prtlen);
-PHP_FUNCTION(pg_field_is_null);
-PHP_FUNCTION(pg_field_table);
-/* async message functions */
-PHP_FUNCTION(pg_get_notify);
-PHP_FUNCTION(pg_socket);
-PHP_FUNCTION(pg_consume_input);
-PHP_FUNCTION(pg_flush);
-PHP_FUNCTION(pg_get_pid);
-/* error message functions */
-PHP_FUNCTION(pg_result_error);
-PHP_FUNCTION(pg_result_error_field);
-PHP_FUNCTION(pg_last_error);
-PHP_FUNCTION(pg_last_notice);
-/* copy functions */
-PHP_FUNCTION(pg_put_line);
-PHP_FUNCTION(pg_end_copy);
-PHP_FUNCTION(pg_copy_to);
-PHP_FUNCTION(pg_copy_from);
-/* large object functions */
-PHP_FUNCTION(pg_lo_create);
-PHP_FUNCTION(pg_lo_unlink);
-PHP_FUNCTION(pg_lo_open);
-PHP_FUNCTION(pg_lo_close);
-PHP_FUNCTION(pg_lo_read);
-PHP_FUNCTION(pg_lo_write);
-PHP_FUNCTION(pg_lo_read_all);
-PHP_FUNCTION(pg_lo_import);
-PHP_FUNCTION(pg_lo_export);
-PHP_FUNCTION(pg_lo_seek);
-PHP_FUNCTION(pg_lo_tell);
-PHP_FUNCTION(pg_lo_truncate);
-
-/* debugging functions */
-PHP_FUNCTION(pg_trace);
-PHP_FUNCTION(pg_untrace);
-
-/* utility functions */
-PHP_FUNCTION(pg_client_encoding);
-PHP_FUNCTION(pg_set_client_encoding);
-PHP_FUNCTION(pg_set_error_verbosity);
-PHP_FUNCTION(pg_escape_string);
-PHP_FUNCTION(pg_escape_bytea);
-PHP_FUNCTION(pg_unescape_bytea);
-PHP_FUNCTION(pg_escape_literal);
-PHP_FUNCTION(pg_escape_identifier);
-
-/* misc functions */
-PHP_FUNCTION(pg_meta_data);
-PHP_FUNCTION(pg_convert);
-PHP_FUNCTION(pg_insert);
-PHP_FUNCTION(pg_update);
-PHP_FUNCTION(pg_delete);
-PHP_FUNCTION(pg_select);
 
 /* connection options - ToDo: Add async connection option */
 #define PGSQL_CONNECT_FORCE_NEW     (1<<1)
@@ -245,15 +143,25 @@ typedef enum _php_pgsql_data_type {
 	PG_UNKNOWN
 } php_pgsql_data_type;
 
+typedef struct pgsql_link_handle {
+	PGconn *conn;
+	zend_string *hash;
+	HashTable *notices;
+	bool persistent;
+	zend_object std;
+} pgsql_link_handle;
+
 typedef struct pgLofp {
 	PGconn *conn;
 	int lofd;
+	zend_object std;
 } pgLofp;
 
 typedef struct _php_pgsql_result_handle {
 	PGconn *conn;
 	PGresult *result;
 	int row;
+	zend_object std;
 } pgsql_result_handle;
 
 typedef struct _php_pgsql_notice {
@@ -278,13 +186,11 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long max_links,max_persistent;
 	zend_long allow_persistent;
 	zend_long auto_reset_persistent;
-	int le_lofp,le_string;
 	int ignore_notices,log_notices;
-	HashTable notices;  /* notice message for each connection */
-	zend_resource *default_link; /* default link when connection is omitted */
-	HashTable hashes; /* hashes for each connection */
+	zend_object *default_link; /* default link when connection is omitted */
 	HashTable field_oids;
 	HashTable table_oids;
+	HashTable connections;
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)

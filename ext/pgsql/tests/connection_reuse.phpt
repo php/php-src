@@ -1,20 +1,17 @@
 --TEST--
-Reopen connection after it was closed
+Reusing connection with same connection string
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
 include('config.inc');
 
-/* Run me under valgrind */
 $db1 = pg_connect($conn_str);
-unset($db1);
-var_dump(pg_close());
-
 $db2 = pg_connect($conn_str);
-unset($db2);
-var_dump(pg_close());
+var_dump($db1, $db2);
 ?>
 --EXPECT--
-bool(true)
-bool(true)
+object(PgSql\Connection)#1 (0) {
+}
+object(PgSql\Connection)#1 (0) {
+}
