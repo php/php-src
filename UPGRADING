@@ -120,6 +120,14 @@ PHP 8.1 UPGRADE NOTES
     types. You can restore the previous behavior by enabling the
     PDO::ATTR_STRINGIFY_FETCHES option.
 
+- PSpell:
+  . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
+    instead of "pspell" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The PSpell functions now accept and return, respectively, PSpell\Config objects
+    instead of "pspell config" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
   . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),

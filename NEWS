@@ -99,8 +99,8 @@ PHP                                                                        NEWS
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 
 - PSpell:
-  . Convert resource<pspell> to object \PSpell. (Sara)
-  . Convert resource<pspell config> to object \PSpellConfig. (Sara)
+  . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)
+  . Convert resource<pspell config> to object \PSpell\Config. (Sara)
 
 - Sodium:
   . Added the XChaCha20 stream cipher functions. (P.I.E. Security Team)
