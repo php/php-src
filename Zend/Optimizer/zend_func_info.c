@@ -658,8 +658,6 @@ static const func_info_t func_infos[] = {
 	F1("session_encode",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/pgsql */
-	FN("pg_connect",							MAY_BE_FALSE | MAY_BE_OBJECT),
-	FN("pg_pconnect",							MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("pg_dbname",								MAY_BE_STRING),
 	F1("pg_options",							MAY_BE_STRING),
 	F1("pg_port",								MAY_BE_STRING),
