@@ -154,7 +154,7 @@ static zend_object *pgsql_link_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *pgsql_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSql, use pg_connect() or pg_pconnect() instead");
+	zend_throw_error(NULL, "Cannot directly construct PgSql\\Connection, use pg_connect() or pg_pconnect() instead");
 	return NULL;
 }
 
@@ -210,7 +210,7 @@ static zend_object *pgsql_result_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *pgsql_result_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSqlResult, use a dedicated function instead");
+	zend_throw_error(NULL, "Cannot directly construct PgSql\\Result, use a dedicated function instead");
 	return NULL;
 }
 
@@ -248,7 +248,7 @@ static zend_object *pgsql_lob_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *pgsql_lob_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSqlLob, use pg_lo_open() instead");
+	zend_throw_error(NULL, "Cannot directly construct PgSql\\Lob, use pg_lo_open() instead");
 	return NULL;
 }
 

@@ -31,6 +31,6 @@ pg_query($conn, "ROLLBACK");
 pg_close($conn);
 ?>
 --EXPECTF--
-pg_lo_create(): Argument #1 ($connection) must be of type PgSql when the connection is provided
+pg_lo_create(): Argument #1 ($connection) must be of type PgSql when the connection is provided%w
 int(%d)
 int(%d)
