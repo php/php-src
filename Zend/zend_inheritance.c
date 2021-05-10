@@ -200,14 +200,31 @@ static bool class_visible(zend_class_entry *ce) {
 	}
 }
 
+static zend_always_inline void register_unresolved_class(zend_string *name) {
+	/* We'll autoload this class and process delayed variance obligations later. */
+	if (!CG(delayed_autoloads)) {
+		ALLOC_HASHTABLE(CG(delayed_autoloads));
+		zend_hash_init(CG(delayed_autoloads), 0, NULL, NULL, 0);
+	}
+	zend_hash_add_empty_element(CG(delayed_autoloads), name);
+}
+
 static zend_class_entry *lookup_class(
 		zend_class_entry *scope, zend_string *name, bool register_unresolved) {
-	uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
-	zend_class_entry *ce = NULL;
+	if (UNEXPECTED(!EG(active))) {
+		if (zend_string_equals_ci(scope->name, name)) {
+			return scope;
+		}
 
-	if (EG(class_table)) {
-		ce = zend_lookup_class_ex(name, NULL, flags);
+		if (register_unresolved) {
+			register_unresolved_class(name);
+		}
+
+		return NULL;
 	}
+
+	zend_class_entry *ce = zend_lookup_class_ex(
+	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 	if (!CG(in_compilation)) {
 		if (ce) {
@@ -215,12 +232,7 @@ static zend_class_entry *lookup_class(
 		}
 
 		if (register_unresolved) {
-			/* We'll autoload this class and process delayed variance obligations later. */
-			if (!CG(delayed_autoloads)) {
-				ALLOC_HASHTABLE(CG(delayed_autoloads));
-				zend_hash_init(CG(delayed_autoloads), 0, NULL, NULL, 0);
-			}
-			zend_hash_add_empty_element(CG(delayed_autoloads), name);
+			register_unresolved_class(name);
 		}
 	} else {
 		if (ce && class_visible(ce)) {
