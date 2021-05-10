@@ -211,19 +211,26 @@ static zend_always_inline void register_unresolved_class(zend_string *name) {
 
 static zend_class_entry *lookup_class(
 		zend_class_entry *scope, zend_string *name, bool register_unresolved) {
+	zend_class_entry *ce;
+
 	if (UNEXPECTED(!EG(active))) {
-		if (zend_string_equals_ci(scope->name, name)) {
-			return scope;
-		}
+		zend_string *lc_name =
+			zend_string_tolower(name);
 
-		if (register_unresolved) {
-			register_unresolved_class(name);
-		}
+		ce = zend_hash_find_ptr(CG(class_table), lc_name);
 
-		return NULL;
+		zend_string_release(lc_name);
+
+		if (!ce) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "%s must be loaded before %s",
+				ZSTR_VAL(name), ZSTR_VAL(scope->name));
+	    }
+
+		return ce;
 	}
 
-	zend_class_entry *ce = zend_lookup_class_ex(
+	ce = zend_lookup_class_ex(
 	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 	if (!CG(in_compilation)) {
