@@ -6,7 +6,10 @@ interface Throwable extends Stringable
 {
     public function getMessage(): string;
 
-    /** @return int */
+    /**
+     * @return int
+     * @no-generate-tentative-return-type
+     */
     public function getCode();
 
     public function getFile(): string;
@@ -41,7 +44,10 @@ class Exception implements Throwable
 
     final public function getMessage(): string {}
 
-    /** @return int */
+    /**
+     * @return int
+     * @no-generate-tentative-return-type
+     */
     final public function getCode() {}
 
     final public function getFile(): string {}
@@ -103,6 +109,7 @@ class Error implements Throwable
     /**
      * @return int
      * @implementation-alias Exception::getCode
+     * @no-generate-tentative-return-type
      */
     final public function getCode() {}
 

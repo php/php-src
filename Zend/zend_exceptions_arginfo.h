@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a9ce2975a7449a621d364beca646525fc56b294 */
+ * Stub hash: c3d9ef0c553b1ec3bd9927987226d76ce4a1b342 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getCode, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Throwable_getCode, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Throwable_getFile arginfo_class_Throwable_getMessage
