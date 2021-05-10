@@ -188,7 +188,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long auto_reset_persistent;
 	int ignore_notices,log_notices;
 	zend_object *default_link; /* default link when connection is omitted */
-	HashTable hashes; /* hashes for each connection */
 	HashTable field_oids;
 	HashTable table_oids;
 	HashTable connections;

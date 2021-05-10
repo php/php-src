@@ -297,18 +297,16 @@ static void php_pgsql_set_default_link(zend_object *obj)
 
 static void _close_pgsql_plink(zend_resource *rsrc)
 {
-	if (rsrc->ptr) {
-		PGconn *link = (PGconn *)rsrc->ptr;
-		PGresult *res;
+	PGconn *link = (PGconn *)rsrc->ptr;
+	PGresult *res;
 
-		while ((res = PQgetResult(link))) {
-			PQclear(res);
-		}
-		PQfinish(link);
-		PGG(num_persistent)--;
-		PGG(num_links)--;
-		rsrc->ptr = NULL;
+	while ((res = PQgetResult(link))) {
+		PQclear(res);
 	}
+	PQfinish(link);
+	PGG(num_persistent)--;
+	PGG(num_links)--;
+	rsrc->ptr = NULL;
 }
 
 static void _php_pgsql_notice_handler(void *l, const char *message)
@@ -317,10 +315,9 @@ static void _php_pgsql_notice_handler(void *l, const char *message)
 		return;
 	}
 
-	pgsql_link_handle *link;
 	zval tmp;
+	pgsql_link_handle *link = (pgsql_link_handle *) l;
 
-	link = (pgsql_link_handle *) l;
 	if (!link->notices) {
 		link->notices = zend_new_array(1);
 	}
@@ -1531,7 +1528,7 @@ PHP_FUNCTION(pg_last_notice)
 			break;
 		case PGSQL_NOTICE_CLEAR:
 			if (notices) {
-				zend_hash_clean(link->notices);
+				zend_hash_clean(notices);
 			}
 			RETURN_TRUE;
 			break;
@@ -2524,13 +2521,9 @@ PHP_FUNCTION(pg_lo_open)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, pgsql_lob_ce);
-	pgsql_lofp = Z_PGSQL_LOB_P(return_value);
-
 	if ((pgsql_lofd = lo_open(pgsql, oid, pgsql_mode)) == -1) {
 		if (create) {
 			if ((oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == 0) {
-				zval_ptr_dtor(return_value);
 				php_error_docref(NULL, E_WARNING, "Unable to create PostgreSQL large object");
 				RETURN_FALSE;
 			} else {
@@ -2541,24 +2534,19 @@ PHP_FUNCTION(pg_lo_open)
 						php_error_docref(NULL, E_WARNING, "Unable to open PostgreSQL large object");
 					}
 
-					zval_ptr_dtor(return_value);
 					RETURN_FALSE;
-				} else {
-					pgsql_lofp->conn = pgsql;
-					pgsql_lofp->lofd = pgsql_lofd;
-					return;
 				}
 			}
 		} else {
-			zval_ptr_dtor(return_value);
 			php_error_docref(NULL, E_WARNING, "Unable to open PostgreSQL large object");
 			RETURN_FALSE;
 		}
-	} else {
-		pgsql_lofp->conn = pgsql;
-		pgsql_lofp->lofd = pgsql_lofd;
-		return;
 	}
+
+	object_init_ex(return_value, pgsql_lob_ce);
+	pgsql_lofp = Z_PGSQL_LOB_P(return_value);
+	pgsql_lofp->conn = pgsql;
+	pgsql_lofp->lofd = pgsql_lofd;
 }
 /* }}} */
 
