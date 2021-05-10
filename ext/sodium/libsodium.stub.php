@@ -52,7 +52,7 @@ function sodium_crypto_box_publickey(string $key_pair): string {}
 
 function sodium_crypto_box_publickey_from_secretkey(string $secret_key): string {}
 
-function sodium_crypto_box_seal(string $message, string $key_pair): string {}
+function sodium_crypto_box_seal(string $message, string $public_key): string {}
 
 function sodium_crypto_box_seal_open(string $ciphertext, string $key_pair): string|false {}
 
@@ -176,7 +176,7 @@ function sodium_crypto_sign_keypair(): string {}
 
 function sodium_crypto_sign_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-function sodium_crypto_sign_open(string $ciphertext, string $public_key): string|false {}
+function sodium_crypto_sign_open(string $signed_message, string $public_key): string|false {}
 
 function sodium_crypto_sign_publickey(string $key_pair): string {}
 
@@ -212,7 +212,7 @@ function sodium_memcmp(string $string1, string $string2): int {}
 
 function sodium_memzero(string &$string): void {}
 
-function sodium_pad(string $string, int $length): string {}
+function sodium_pad(string $string, int $block_size): string {}
 
 function sodium_unpad(string $string, int $block_size): string {}
 
