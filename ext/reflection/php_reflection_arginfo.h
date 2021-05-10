@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cef133f3196139e48f8ce1ada0994e538503856d */
+ * Stub hash: 47ac64b027cdeb0e9996147277f79fa9d6b876bd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -342,8 +342,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_getName arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClassConstant_getValue, 0, 0, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionClassConstant_getValue arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionClassConstant_isPublic arginfo_class_ReflectionFunctionAbstract_inNamespace
 
