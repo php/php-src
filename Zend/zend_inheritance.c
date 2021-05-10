@@ -214,16 +214,15 @@ static zend_class_entry *lookup_class(
 	zend_class_entry *ce;
 
 	if (UNEXPECTED(!EG(active))) {
-		zend_string *lc_name =
-			zend_string_tolower(name);
+		zend_string *lc_name = zend_string_tolower(name);
 
 		ce = zend_hash_find_ptr(CG(class_table), lc_name);
 
 		zend_string_release(lc_name);
 
-		if (!ce) {
+		if (register_unresolved && !ce) {
 			zend_error_noreturn(
-				E_COMPILE_ERROR, "%s must be loaded before %s",
+				E_COMPILE_ERROR, "%s must be registered before %s",
 				ZSTR_VAL(name), ZSTR_VAL(scope->name));
 	    }
 
