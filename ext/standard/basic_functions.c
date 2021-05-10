@@ -2361,10 +2361,9 @@ PHP_FUNCTION(register_tick_function)
 	zval *params;
 	uint32_t param_count;
 
-	ZEND_PARSE_PARAMETERS_START(1, -1)
-		Z_PARAM_FUNC(tick_fe.fci, tick_fe.fci_cache)
-		Z_PARAM_VARIADIC('+', params, param_count);
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache, &params, &param_count) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	tick_fe.calling = false;
 	Z_TRY_ADDREF(tick_fe.fci.function_name);
