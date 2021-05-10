@@ -2358,8 +2358,8 @@ PHP_FUNCTION(getprotobynumber)
 PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
-	zval *params;
-	uint32_t param_count;
+	zval *params = NULL;
+	uint32_t param_count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache, &params, &param_count) == FAILURE) {
 		RETURN_THROWS();
