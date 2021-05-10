@@ -16,6 +16,7 @@ $result = compact(true);
 $foo = 'bar';
 $bar = 'baz';
 $result = compact($foo, [42]);
+var_dump($result);
 
 ?>
 --EXPECTF--
@@ -30,3 +31,7 @@ array(2) {
 Warning: compact(): Argument #1 must be string or array of strings, bool given in %s on line %d
 
 Warning: compact(): Argument #2 must be string or array of strings, int given in %s on line %d
+array(1) {
+  ["bar"]=>
+  string(3) "baz"
+}
