@@ -6,7 +6,11 @@ Internal class variance
 <?php
 $test = new _ZendTestChildClass;
 
-var_dump($test->returnsThrowable());
+try {
+    $test->returnsThrowable();
+} catch (\Error) {
+    echo "OK";
+}
 ?>
 --EXPECT--
-string(16) "returnsThrowable"
+OK
