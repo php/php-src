@@ -4216,7 +4216,7 @@ static gdIOCtx *create_output_context() {
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
 	zval *imgind;
-	zend_long quality = -1, basefilter = -1;
+	zend_long quality = -1, basefilter = -1, speed = -1;
 	gdImagePtr im;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
@@ -4227,6 +4227,10 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	} else if (image_type == PHP_GDIMG_TYPE_PNG) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else if (image_type == PHP_GDIMG_TYPE_AVIF) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &speed) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
