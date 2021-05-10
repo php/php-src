@@ -436,6 +436,13 @@ static inheritance_status zend_perform_covariant_type_check(
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
+	/* Apart from void, everything is trivially covariant to the mixed type.
+	 * Handle this case separately to ensure it never requires class loading. */
+	if (ZEND_TYPE_PURE_MASK(proto_type) == MAY_BE_ANY &&
+			!ZEND_TYPE_CONTAINS_CODE(fe_type, IS_VOID)) {
+		return INHERITANCE_SUCCESS;
+	}
+
 	/* Builtin types may be removed, but not added */
 	uint32_t fe_type_mask = ZEND_TYPE_PURE_MASK(fe_type);
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
