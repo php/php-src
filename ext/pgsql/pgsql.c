@@ -731,7 +731,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * and add a pointer to it with hashed_details as the key.
 		 */
 		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
-			&& (index_ptr = zend_hash_find_ptr(&PGG(connections), str.s)) != NULL) {
+			&& (index_ptr = zend_hash_find(&PGG(connections), str.s)) != NULL) {
 			php_pgsql_set_default_link(Z_OBJ_P(index_ptr));
 			ZVAL_COPY(return_value, index_ptr);
 
