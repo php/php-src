@@ -203,7 +203,12 @@ static bool class_visible(zend_class_entry *ce) {
 static zend_class_entry *lookup_class(
 		zend_class_entry *scope, zend_string *name, bool register_unresolved) {
 	uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
-	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, flags);
+	zend_class_entry *ce = NULL;
+
+	if (EG(class_table)) {
+		ce = zend_lookup_class_ex(name, NULL, flags);
+	}
+
 	if (!CG(in_compilation)) {
 		if (ce) {
 			return ce;
