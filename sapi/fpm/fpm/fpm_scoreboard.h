@@ -16,6 +16,9 @@
 #define FPM_SCOREBOARD_ACTION_SET 0
 #define FPM_SCOREBOARD_ACTION_INC 1
 
+#define FPM_SCOREBOARD_LOCK_HANG 0
+#define FPM_SCOREBOARD_LOCK_NOHANG 1
+
 struct fpm_scoreboard_proc_s {
 	union {
 		atomic_t lock;
@@ -85,6 +88,9 @@ void fpm_scoreboard_child_use(struct fpm_scoreboard_s *scoreboard, int child_ind
 
 void fpm_scoreboard_proc_free(struct fpm_scoreboard_s *scoreboard, int child_index);
 int fpm_scoreboard_proc_alloc(struct fpm_scoreboard_s *scoreboard, int *child_index);
+
+struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard, int copy_procs);
+void fpm_scoreboard_free_copy(struct fpm_scoreboard_s *scoreboard);
 
 #ifdef HAVE_TIMES
 float fpm_scoreboard_get_tick();
