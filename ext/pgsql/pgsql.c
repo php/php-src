@@ -289,7 +289,7 @@ static void php_pgsql_set_default_link(zend_object *obj)
 	GC_ADDREF(obj);
 
 	if (PGG(default_link) != NULL) {
-		GC_DELREF(obj);
+		zend_object_release(PGG(default_link));
 	}
 
 	PGG(default_link) = obj;
@@ -409,7 +409,7 @@ static PHP_GINIT_FUNCTION(pgsql)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
-	zend_hash_init(&pgsql_globals->connections, 0, NULL, ZVAL_PTR_DTOR, 1);
+	zend_hash_init(&pgsql_globals->connections, 0, NULL, NULL, 1);
 }
 
 static void php_libpq_version(char *buf, size_t len)
@@ -595,6 +595,11 @@ PHP_RINIT_FUNCTION(pgsql)
 
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
+	if (PGG(default_link)) {
+		zend_object_release(PGG(default_link));
+		PGG(default_link) = NULL;
+	}
+
 	zend_hash_destroy(&PGG(field_oids));
 	zend_hash_destroy(&PGG(table_oids));
 	/* clean up persistent connection */
@@ -718,7 +723,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link->notices = NULL;
 		link->persistent = 1;
 	} else { /* Non persistent connection */
-		zval *index_ptr, new_index_ptr;
+		zval *index_ptr;
 
 		/* first we check the hash for the hashed_details key. If it exists,
 		 * it should point us to the right offset where the actual pgsql link sits.
@@ -766,8 +771,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link->persistent = 0;
 
 		/* add it to the hash */
-		ZVAL_COPY(&new_index_ptr, return_value);
-		zend_hash_update(&PGG(connections), str.s, &new_index_ptr);
+		zend_hash_update(&PGG(connections), str.s, return_value);
 
 		/* Keep track of link => hash mapping, so we can remove the hash entry from connections
 		 * when the connection is closed. This uses the address of the connection rather than the
