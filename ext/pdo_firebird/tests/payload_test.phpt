@@ -4,6 +4,7 @@ FB payload server satisfies connection attempt
 <?php
 if (!extension_loaded('pdo_firebird')) die("skip pdo_firebird extension not available");
 if (!extension_loaded('sockets')) die("skip sockets extension not available");
+if (getenv('SKIP_ASAN')) die('xfail leaks memory FIXME');
 ?>
 --FILE--
 <?php
