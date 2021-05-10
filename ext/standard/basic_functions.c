@@ -1664,14 +1664,10 @@ PHP_FUNCTION(forward_static_call_array)
 
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
-	int i;
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 
-	zval_ptr_dtor(&shutdown_function_entry->function_name);
-	for (i = 0; i < shutdown_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
-	}
-	efree(shutdown_function_entry->arguments);
+	zval_ptr_dtor(&shutdown_function_entry->fci.function_name);
+	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
 	efree(shutdown_function_entry);
 }
 /* }}} */
@@ -1685,24 +1681,16 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 
 static int user_shutdown_function_call(zval *zv) /* {{{ */
 {
-    php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
+	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
+	zend_result call_status;
 
-	if (!zend_is_callable(&shutdown_function_entry->function_name, 0, NULL)) {
-		zend_string *function_name = zend_get_callable_name(&shutdown_function_entry->function_name);
-		zend_throw_error(NULL, "Registered shutdown function %s() cannot be called, function does not exist", ZSTR_VAL(function_name));
-		zend_string_release(function_name);
-		return 0;
-	}
+	/* set retval zval for FCI struct */
+	shutdown_function_entry->fci.retval = &retval;
+	call_status = zend_call_function(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
+	ZEND_ASSERT(call_status == SUCCESS);
+	zval_ptr_dtor(&retval);
 
-	if (call_user_function(NULL, NULL,
-				&shutdown_function_entry->function_name,
-				&retval,
-				shutdown_function_entry->arg_count,
-				shutdown_function_entry->arguments) == SUCCESS)
-	{
-		zval_ptr_dtor(&retval);
-	}
 	return 0;
 }
 /* }}} */
@@ -1761,8 +1749,7 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
 			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
-		}
-		zend_end_try();
+		} zend_end_try();
 	}
 }
 /* }}} */
@@ -1786,23 +1773,19 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry entry;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval *args;
-	int arg_count = 0;
+	zval *params = NULL;
+	uint32_t param_count = 0;
+	bool status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &fci, &fcc, &args, &arg_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &entry.fci, &entry.fci_cache, &params, &param_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY(&entry.function_name, &fci.function_name);
-	entry.arguments = (zval *) safe_emalloc(sizeof(zval), arg_count, 0);
-	entry.arg_count = arg_count;
-	for (int i = 0; i < arg_count; i++) {
-		ZVAL_COPY(&entry.arguments[i], &args[i]);
-	}
+	Z_TRY_ADDREF(entry.fci.function_name);
+	zend_fcall_info_argp(&entry.fci, param_count, params);
 
-	append_user_shutdown_function(&entry);
+	status = append_user_shutdown_function(&entry);
+	ZEND_ASSERT(status);
 }
 /* }}} */
 
