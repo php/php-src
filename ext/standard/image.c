@@ -1149,6 +1149,13 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ php_handle_avif }}} */
+/* TODO: This is just a stub */
+static struct gfxinfo *php_handle_avif(php_stream * stream) {
+	return NULL;
+}
+
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
