@@ -2047,13 +2047,18 @@ PHP_FUNCTION(session_set_save_handler)
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
-			ZVAL_STRING(&shutdown_function_entry.function_name, "session_register_shutdown");
-			shutdown_function_entry.arg_count = 0;
-			shutdown_function_entry.arguments = NULL;
+			zval callable;
+			zend_result result;
+
+			ZVAL_STRING(&callable, "session_register_shutdown");
+			result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
+				&shutdown_function_entry.fci_cache, NULL, NULL);
+
+			ZEND_ASSERT(result == SUCCESS);
 
 			/* add shutdown function, removing the old one if it exists */
 			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry)) {
-				zval_ptr_dtor(&shutdown_function_entry.function_name);
+				zval_ptr_dtor(&callable);
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2654,6 +2659,8 @@ PHP_FUNCTION(session_status)
 PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;
+	zval callable;
+	zend_result result;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2663,13 +2670,14 @@ PHP_FUNCTION(session_register_shutdown)
 	 * function after calling session_set_save_handler(), which expects
 	 * the session still to be available.
 	 */
+	ZVAL_STRING(&callable, "session_write_close");
+	result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
+		&shutdown_function_entry.fci_cache, NULL, NULL);
 
-	ZVAL_STRING(&shutdown_function_entry.function_name, "session_write_close");
-	shutdown_function_entry.arg_count = 0;
-	shutdown_function_entry.arguments = NULL;
+	ZEND_ASSERT(result == SUCCESS);
 
 	if (!append_user_shutdown_function(&shutdown_function_entry)) {
-		zval_ptr_dtor(&shutdown_function_entry.function_name);
+		zval_ptr_dtor(&callable);
 
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown
