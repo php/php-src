@@ -1020,7 +1020,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 	bool have_varargs = 0;
 	bool have_optional_args = 0;
 	zval **varargs = NULL;
-	int *n_varargs = NULL;
+	uint32_t *n_varargs = NULL;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -1115,11 +1115,11 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 		}
 
 		if (*type_spec == '*' || *type_spec == '+') {
-			int num_varargs = num_args + 1 - post_varargs;
+			uint32_t num_varargs = num_args + 1 - post_varargs;
 
 			/* eat up the passed in storage even if it won't be filled in with varargs */
 			varargs = va_arg(*va, zval **);
-			n_varargs = va_arg(*va, int *);
+			n_varargs = va_arg(*va, uint32_t *);
 			type_spec++;
 
 			if (num_varargs > 0) {
