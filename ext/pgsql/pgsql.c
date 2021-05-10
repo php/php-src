@@ -845,10 +845,8 @@ PHP_FUNCTION(pg_close)
 	if (!pgsql_link) {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-		zend_hash_del(&PGG(connections), link->hash);
-		GC_DELREF(PGG(default_link));
+		zend_object_release(PGG(default_link));
 		PGG(default_link) = NULL;
-		pgsql_link_free(link);
 		RETURN_TRUE;
 	}
 
@@ -856,7 +854,6 @@ PHP_FUNCTION(pg_close)
 	CHECK_PGSQL_LINK(link);
 
 	if (link == FETCH_DEFAULT_LINK()) {
-		zend_hash_del(&PGG(connections), link->hash);
 		GC_DELREF(PGG(default_link));
 		PGG(default_link) = NULL;
 	}
