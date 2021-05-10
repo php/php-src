@@ -322,6 +322,16 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic) {
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
 
+static ZEND_METHOD(_ZendTestClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
+}
+
+static ZEND_METHOD(_ZendTestChildClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
+}
+
 static ZEND_METHOD(_ZendTestTrait, testMethod) {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
