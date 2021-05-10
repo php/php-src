@@ -88,7 +88,7 @@ static zend_object *php_pspell_object_to_zend_object(php_pspell_object *obj) {
 
 static zend_function *php_pspell_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpell object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Dictionary object except through helper functions");
 	return NULL;
 }
 
@@ -126,7 +126,7 @@ static zend_object *php_pspell_config_object_to_zend_object(php_pspell_config_ob
 
 static zend_function *php_pspell_config_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpellConfig object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Config object except through helper functions");
 	return NULL;
 }
 
@@ -150,7 +150,7 @@ static void php_pspell_config_object_free(zend_object *zobj) {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
-	php_pspell_ce = register_class_PSpell();
+	php_pspell_ce = register_class_PSpell_Dictionary();
 	php_pspell_ce->create_object = php_pspell_object_create;
 	php_pspell_ce->serialize = zend_class_serialize_deny;
 	php_pspell_ce->unserialize = zend_class_unserialize_deny;
@@ -161,7 +161,7 @@ static PHP_MINIT_FUNCTION(pspell)
 	php_pspell_handlers.get_constructor = php_pspell_object_get_constructor;
 	php_pspell_handlers.offset = XtOffsetOf(php_pspell_object, std);
 
-	php_pspell_config_ce = register_class_PSpellConfig();
+	php_pspell_config_ce = register_class_PSpell_Config();
 	php_pspell_config_ce->create_object = php_pspell_config_object_create;
 	php_pspell_config_ce->serialize = zend_class_serialize_deny;
 	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
