@@ -78,7 +78,8 @@
 		zend_throw_error(NULL, "No PostgreSQL connection opened yet"); \
 		RETURN_THROWS(); \
 	}
-#define FETCH_DEFAULT_LINK() PGG(default_link)
+#define FETCH_DEFAULT_LINK() \
+	(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL)
 
 #define CHECK_PGSQL_LINK(link_handle) \
 	if (link_handle->conn == NULL) { \
@@ -283,11 +284,15 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 		zend_string_release(msgbuf); \
 } \
 
-static void php_pgsql_set_default_link(pgsql_link_handle *link)
+static void php_pgsql_set_default_link(zend_object *obj)
 {
-	GC_ADDREF(res);
+	GC_ADDREF(obj);
 
-	PGG(default_link) = link;
+	if (PGG(default_link) != NULL) {
+		GC_DELREF(obj);
+	}
+
+	PGG(default_link) = obj;
 }
 
 static void _close_pgsql_plink(zend_resource *rsrc)
@@ -715,15 +720,14 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else { /* Non persistent connection */
 		zval *index_ptr, new_index_ptr;
 
-		/* first we check the hash for the hashed_details key.  if it exists,
+		/* first we check the hash for the hashed_details key. If it exists,
 		 * it should point us to the right offset where the actual pgsql link sits.
 		 * if it doesn't, open a new pgsql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
 		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
 			&& (index_ptr = zend_hash_find_ptr(&PGG(connections), str.s)) != NULL) {
-			php_pgsql_set_default_link(pgsql_link_from_obj(Z_OBJ_P(index_ptr)));
-			GC_ADDREF(Z_OBJ_P(index_ptr));
+			php_pgsql_set_default_link(Z_OBJ_P(index_ptr));
 			ZVAL_COPY(return_value, index_ptr);
 
 			goto cleanup;
@@ -776,7 +780,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_OBJECT) {
 		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, link);
 	}
-	php_pgsql_set_default_link(link);
+	php_pgsql_set_default_link(Z_OBJ_P(return_value));
 
 cleanup:
 	smart_str_free(&str);
@@ -838,7 +842,9 @@ PHP_FUNCTION(pg_close)
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 		zend_hash_del(&PGG(connections), link->hash);
+		GC_DELREF(PGG(default_link));
 		PGG(default_link) = NULL;
+		pgsql_link_free(link);
 		RETURN_TRUE;
 	}
 
@@ -847,6 +853,7 @@ PHP_FUNCTION(pg_close)
 
 	if (link == FETCH_DEFAULT_LINK()) {
 		zend_hash_del(&PGG(connections), link->hash);
+		GC_DELREF(PGG(default_link));
 		PGG(default_link) = NULL;
 	}
 	pgsql_link_free(link);
