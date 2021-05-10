@@ -361,8 +361,10 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
+/** @deprecated */
 function register_tick_function(callable $callback, mixed ...$args): bool {}
 
+/** @deprecated */
 function unregister_tick_function(callable $callback): void {}
 
 function is_uploaded_file(string $filename): bool {}

@@ -19,7 +19,8 @@ $i = 0; // dummy
 echo "Done!\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
 Start!
 Signal handler called!
 Done!

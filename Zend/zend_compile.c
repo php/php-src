@@ -6072,6 +6072,8 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
 			FC(declarables).ticks = zval_get_long(&value_zv);
 			zval_ptr_dtor_nogc(&value_zv);
+
+			zend_error(E_DEPRECATED, "declare(ticks) is deprecated");
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
 			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {

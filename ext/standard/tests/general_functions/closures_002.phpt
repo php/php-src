@@ -17,6 +17,9 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
+
+Deprecated: Function register_tick_function() is deprecated in %s on line %d
 Test
 %d
 %d

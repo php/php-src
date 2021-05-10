@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 810b8bfbdf037702fcaec2ff81998c2bc2cefae8 */
+ * Stub hash: 18acffadf93ba167b53af5b3dd302338a93bf03c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3003,8 +3003,8 @@ static const zend_function_entry ext_functions[] = {
 #if HAVE_GETPROTOBYNUMBER
 	ZEND_FE(getprotobynumber, arginfo_getprotobynumber)
 #endif
-	ZEND_FE(register_tick_function, arginfo_register_tick_function)
-	ZEND_FE(unregister_tick_function, arginfo_unregister_tick_function)
+	ZEND_DEP_FE(register_tick_function, arginfo_register_tick_function)
+	ZEND_DEP_FE(unregister_tick_function, arginfo_unregister_tick_function)
 	ZEND_FE(is_uploaded_file, arginfo_is_uploaded_file)
 	ZEND_FE(move_uploaded_file, arginfo_move_uploaded_file)
 	ZEND_FE(parse_ini_file, arginfo_parse_ini_file)

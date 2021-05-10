@@ -18,9 +18,16 @@ declare (ticks=1) {
     echo "Done\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
+
+Deprecated: Function register_tick_function() is deprecated in %s on line %d
 hello
+
+Deprecated: Function unregister_tick_function() is deprecated in %s on line %d
 Registered tick function cannot be unregistered while it is being executed
 Done
 hello
+
+Deprecated: Function unregister_tick_function() is deprecated in %s on line %d
 Registered tick function cannot be unregistered while it is being executed

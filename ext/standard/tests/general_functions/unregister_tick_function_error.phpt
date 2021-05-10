@@ -10,5 +10,8 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
+
+Deprecated: Function unregister_tick_function() is deprecated in %s on line %d
 unregister_tick_function(): Argument #1 ($callback) must be a valid callback, function "a" not found or invalid function name

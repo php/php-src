@@ -13,7 +13,8 @@ c:
     print "ok!\n";
     goto b;
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
 ok!
 ok!
 ok!

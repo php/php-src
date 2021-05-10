@@ -6,5 +6,6 @@ declare(ticks=1);
 namespace test;
 echo "ok\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
 ok

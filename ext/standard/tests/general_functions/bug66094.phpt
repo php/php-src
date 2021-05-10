@@ -7,6 +7,11 @@ register_tick_function($closure = function () { echo "Tick!\n"; });
 unregister_tick_function($closure);
 echo "done";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: declare(ticks) is deprecated in %s on line %d
+
+Deprecated: Function register_tick_function() is deprecated in %s on line %d
 Tick!
+
+Deprecated: Function unregister_tick_function() is deprecated in %s on line %d
 done
