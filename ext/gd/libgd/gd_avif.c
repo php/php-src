@@ -360,7 +360,7 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 		goto cleanup;
 
 	if (!isAvifSrgbImage(decoder->image))
-		gd_error_ex(LOG_WARNING, "Image's color profile is not sRGB");
+		zend_error(E_WARNING, "Image's color profile is not sRGB");
 
 	// Set up the avifRGBImage, and convert it from YUV to an 8-bit RGB image.
 	// (While AVIF image pixel depth can be 8, 10, or 12 bits, GD truecolor images are 8-bit.)
@@ -460,7 +460,6 @@ void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed)
 	avifResult result;
 	avifRGBImage rgb;
 	avifRWData avifOutput = AVIF_DATA_EMPTY;
-	avifBool failed = AVIF_FALSE;
 	avifBool lossless = quality == 100;
 	avifEncoder *encoder = NULL;
 
@@ -569,11 +568,10 @@ void gdImageAvifEx(gdImagePtr im, FILE *outFile, int quality, int speed)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 
-	if (out == NULL)
-		return;
-
-	gdImageAvifCtx(im, out, quality, speed);
-	out->gd_free(out);
+	if (out != NULL) {
+		gdImageAvifCtx(im, out, quality, speed);
+		out->gd_free(out);
+	}
 }
 
 void gdImageAvif(gdImagePtr im, FILE *outFile)
@@ -590,10 +588,8 @@ void * gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed)
 		return NULL;
 	}
 
-	if (gdImageAvifCtx(im, out, quality, speed))
-		rv = NULL;
-	else
-		rv = gdDPExtractData(out, size);
+	gdImageAvifCtx(im, out, quality, speed);
+	rv = gdDPExtractData(out, size);
 
 	out->gd_free(out);
 	return rv;
