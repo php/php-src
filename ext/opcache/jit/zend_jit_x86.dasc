@@ -8790,7 +8790,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			|	sub edx, dword [r0 + offsetof(zend_closure, func.op_array.last_var)]
 			|	sub edx, dword [r0 + offsetof(zend_closure, func.op_array.T)]
 		}
-		|	shl edx, 5
+		|	shl edx, 4
 		|.if X64
 			|	movsxd r2, edx
 		|.endif
