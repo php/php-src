@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #80972 (Memory exhaustion on invalid string offset). (girgias)
 
+- FPM:
+  . Fixed bug #65800 (Events port mechanism). (psumbera)
+
 - FTP:
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
   . Fixed bug #79100 (Wrong FTP error messages). (cmb)
