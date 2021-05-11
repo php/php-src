@@ -1119,7 +1119,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||		has_concrete_type(src_info & MAY_BE_ANY)) {
 ||		if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
 ||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (src_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD))) {
-||				zend_uchar type = concrete_type(src_info);
+||				uint32_t type = concrete_type(src_info);
 |				SET_ZVAL_TYPE_INFO dst_addr, type, Rw(tmp_reg1), Rx(tmp_reg2)
 ||			}
 ||		}
@@ -1206,7 +1206,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 ||	if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 ||	    has_concrete_type(src_info & MAY_BE_ANY)) {
-||		zend_uchar type = concrete_type(src_info);
+||		uint32_t type = concrete_type(src_info);
 ||		if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
 ||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (src_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
 |				SET_ZVAL_TYPE_INFO dst_addr, type, Rw(tmp_reg), Rx(tmp_reg2)
@@ -1227,7 +1227,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro IF_TYPE, type, val, label
-||	ZEND_ASSERT(val >=0 && val <= CMP_IMM);
 ||	if (val == 0) {
 |		cbz type, label
 ||	} else {
@@ -1237,7 +1236,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro IF_NOT_TYPE, type, val, label
-||	ZEND_ASSERT(val >=0 && val <= CMP_IMM);
 ||	if (val == 0) {
 |		cbnz type, label
 ||	} else {
@@ -1258,7 +1256,6 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro CMP_ZVAL_TYPE, addr, val, tmp_reg
 ||	ZEND_ASSERT(Z_MODE(addr) == IS_MEM_ZVAL);
-||	ZEND_ASSERT(val <= CMP_IMM);
 |	SAFE_MEM_ACC_WITH_UOFFSET_BYTE ldrb, Rw(tmp_reg), Rx(Z_REG(addr)), Z_OFFSET(addr)+offsetof(zval, u1.v.type), Rx(tmp_reg)
 |	cmp Rw(tmp_reg), #val
 |.endmacro
@@ -11349,7 +11346,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 
 		|8:
 		if (res_exit_addr) {
-			zend_uchar type = concrete_type(res_info);
+			uint32_t type = concrete_type(res_info);
 			if (op1_info & MAY_BE_ARRAY_OF_REF) {
 				|	ZVAL_DEREF REG0, MAY_BE_REF, TMP1w
 			}
@@ -12367,7 +12364,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 			int32_t exit_point;
 			const void *exit_addr;
-			zend_uchar type;
+			uint32_t type;
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
@@ -14282,7 +14279,7 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 		res_info &= ~MAY_BE_GUARD;
 		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 
-		zend_uchar type = concrete_type(res_info);
+		uint32_t type = concrete_type(res_info);
 
 		if (type < IS_STRING) {
 			|	IF_NOT_ZVAL_TYPE const_addr, type, &exit_addr, ZREG_TMP1
