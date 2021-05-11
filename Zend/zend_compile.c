@@ -6907,7 +6907,25 @@ static void add_stringable_interface(zend_class_entry *ce) {
 		zend_string_init("stringable", sizeof("stringable") - 1, 0);
 }
 
-zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
+static bool has_only_promoted_params(zend_ast *params_ast) {
+	zend_ast_list *list = zend_ast_get_list(params_ast);
+	if (list->children == 0) {
+		/* We require at least one promoted parameter. */
+		return false;
+	}
+
+	for (uint32_t i = 0; i < list->children; i++) {
+		zend_ast *param = list->child[i];
+		if (!(param->attr & ZEND_ACC_PPP_MASK)) {
+			/* Not a promoted parameter. */
+			return false;
+		}
+	}
+
+	return true;
+}
+
+zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_ast *params_ast, bool has_body) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
@@ -6939,8 +6957,8 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 		}
 
 		ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-	} else if (!has_body) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body",
+	} else if (!has_body && !has_only_promoted_params(params_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Method %s::%s() must contain body",
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
@@ -7066,7 +7084,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ 
 
 	if (is_method) {
 		bool has_body = stmt_ast != NULL;
-		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
+		method_lcname = zend_begin_method_decl(op_array, decl->name, params_ast, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
