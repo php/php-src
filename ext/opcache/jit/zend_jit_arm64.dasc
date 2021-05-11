@@ -670,6 +670,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
+|.macro ADD_IP_SHIFT, val, shift, tmp_reg
+||	if (GCC_GLOBAL_REGS) {
+|		add IP, IP, val, shift
+||	} else {
+|		ldr tmp_reg, EX->opline
+|		add tmp_reg, tmp_reg, val, shift
+|		str tmp_reg, EX->opline
+||	}
+|.endmacro
+
 |.macro ADD_IP_FROM_CST, val, tmp_reg
 ||	ZEND_ASSERT(val >=0 && val <= ADD_SUB_IMM);
 ||	if (GCC_GLOBAL_REGS) {
@@ -1926,8 +1936,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|	ldrb REG1w, OP:REG0->op2_type
 	|	cmp REG1w, #IS_CONST
 	|	bne >2
-	|	ldr REG1w, OP:REG0->op2.constant
-	|	sxtw REG1, REG1w
+	|	ldrsw REG1, OP:REG0->op2.constant
 	|	add REG0, REG0, REG1
 	|	b >3
 	|2:
@@ -1964,8 +1973,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	|	ldrb REG1w, OP:REG0->op2_type
 	|	cmp REG1w, #IS_CONST
 	|	bne >2
-	|	ldr REG1w, OP:REG0->op2.constant
-	|	sxtw REG1, REG1w
+	|	ldrsw REG1, OP:REG0->op2.constant
 	|   add REG0, REG0, REG1
 	|	b >3
 	|2:
@@ -2019,8 +2027,7 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 	|	ldr REG0, EX->opline
 	|	mov CARG1, xzr
 	|	LOAD_ADDR CARG2, "Call to undefined function %s()"
-	|	ldr CARG3w, [REG0, #offsetof(zend_op, op2.constant)]
-	|	sxtw CARG3, CARG3w
+	|	ldrsw CARG3, [REG0, #offsetof(zend_op, op2.constant)]
 	|	ldr CARG3, [REG0, CARG3]
 	|	add CARG3, CARG3, #offsetof(zend_string, val)
 	|	EXT_CALL zend_throw_error, REG0
@@ -4939,14 +4946,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (val >= 0) {
 					|	ldr REG0, [FCARG1x, #offsetof(zend_array, arData)]
 					if (val != 0) {
-						|	LOAD_64BIT_VAL TMP1, val * sizeof(Bucket)
-						|	add REG0, REG0, TMP1
+						|	ADD_SUB_64_WITH_CONST add, REG0, REG0, (val * sizeof(Bucket)), TMP1
 					}
 				} else {
-					|	mov REG0, FCARG2x
-					|	lsl REG0, REG0, #5
 					|	ldr TMP1, [FCARG1x, #offsetof(zend_array, arData)]
-					|	add REG0, REG0, TMP1
+					|	add REG0, TMP1, FCARG2x, lsl #5
 				}
 			}
 		}
@@ -8257,9 +8261,8 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			|	ldr TMP1w, [REG0, #offsetof(zend_closure, func.op_array.T)]
 			|	sub REG2w, REG2w, TMP1w
 		}
-		|	lsl REG2w, REG2w, #5
 		|	sxtw REG2, REG2w
-		|	sub FCARG1x, FCARG1x, REG2
+		|	sub FCARG1x, FCARG1x, REG2, lsl #5
 		|1:
 	}
 
@@ -9469,8 +9472,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	// opline += num_args;
 				||	ZEND_ASSERT(sizeof(zend_op) == 32);
 				|	mov REG2w, REG1w
-				|	lsl REG2, REG2, #5
-				|	ADD_IP REG2, TMP1
+				|	ADD_IP_SHIFT REG2, lsl #5, TMP1
 			}
 			|1:
 			|	// if (EXPECTED((int)num_args < op_array->last_var)) {
@@ -9482,8 +9484,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	subs REG2w, REG2w, REG1w
 			|	ble >3
 			|	// zval *var = EX_VAR_NUM(num_args);
-			|	lsl REG1, REG1, #4
-			|	add REG1, REG1, FP
+			|	add REG1, FP, REG1, lsl #4
 			||	ZEND_ASSERT(ZEND_CALL_FRAME_SLOT * sizeof(zval) <= ADD_SUB_IMM);
 			|	add REG1, REG1, #(ZEND_CALL_FRAME_SLOT * sizeof(zval))
 			|2:
@@ -11783,8 +11784,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|	sub REG0, REG0, #1
 	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|	MEM_LOAD_32_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
-	|	lsl REG1, REG1, #5
-	|	cmp REG0, REG1
+	|	cmp REG0, REG1, lsl #5
 	|	bhs >9
 	|	// Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 	|	MEM_LOAD_ZTS ldr, TMP1, executor_globals, symbol_table.arData, REG1
@@ -13791,8 +13791,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 						|	bhs =>default_b
 					}
 					|	adr REG0, >4
-					|	lsl TMP1, FCARG2x, #3
-					|	ldr TMP1, [REG0, TMP1]
+					|	ldr TMP1, [REG0, FCARG2x, lsl #3]
 					|	br TMP1
 
 					|.jmp_table
@@ -14132,9 +14131,8 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	|	// p = fe_ht->arData + pos;
 	||	ZEND_ASSERT(sizeof(Bucket) == 32);
 	|	mov FCARG2w, REG0w
-	|	lsl FCARG2x, FCARG2x, #5
 	|	ldr TMP1, [FCARG1x, #offsetof(zend_array, arData)]
-	|	add FCARG2x, FCARG2x, TMP1
+	|	add FCARG2x, TMP1, FCARG2x, lsl #5
 	|1:
 	|	// if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 	|	ldr TMP1w, [FCARG1x, #offsetof(zend_array, nNumUsed)]
