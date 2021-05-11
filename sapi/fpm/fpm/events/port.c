@@ -112,7 +112,7 @@ static int fpm_event_port_clean() /* {{{ */
  */
 static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
 {
-	int ret
+	int ret;
 	unsigned int i, nget;
 	timespec_t t;
 
