@@ -2098,9 +2098,16 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 	|	// jit_extension = (const void*)ZEND_FUNC_INFO(op_array);
 	|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	// ++ZEND_COUNTER_INFO(op_array)
-	|	SAFE_MEM_ACC_WITH_UOFFSET ldr, TMP2, REG2, (zend_jit_profile_counter_rid * sizeof(void*)), TMP1
-	|	add TMP2, TMP2, #1
-	|	str TMP2, [REG2, TMP1]
+	||	if ((zend_jit_profile_counter_rid * sizeof(void*)) > LDR_STR_PIMM64) {
+	|		LOAD_32BIT_VAL TMP1, (zend_jit_profile_counter_rid * sizeof(void*))
+	|		ldr TMP2, [REG2, TMP1]
+	|		add TMP2, TMP2, #1
+	|		str TMP2, [REG2, TMP1]
+	||	} else {
+	|		ldr TMP2, [REG2, #(zend_jit_profile_counter_rid * sizeof(void*))]
+	|		add TMP2, TMP2, #1
+	|		str TMP2, [REG2, #(zend_jit_profile_counter_rid * sizeof(void*))]
+	||	}
 	|	// return ((zend_vm_opcode_handler_t)jit_extension->orig_handler)()
 	|	ldr TMP1, [REG0, #offsetof(zend_jit_op_array_extension, orig_handler)]
 	|	br TMP1
