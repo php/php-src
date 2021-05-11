@@ -56,7 +56,7 @@ array(2) {
   array(6) {
     ["name"]=>
     string(9) "file1.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""
@@ -71,7 +71,7 @@ array(2) {
   array(6) {
     ["name"]=>
     string(9) "file2.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""

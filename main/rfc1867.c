@@ -55,7 +55,7 @@ PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **
 static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, bool override_protection);
 
 /* The longest property name we use in an uploaded file array */
-#define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
+#define MAX_SIZE_OF_INDEX sizeof("[full_path]")
 
 /* The longest anonymous name */
 #define MAX_SIZE_ANONNAME 33
@@ -1147,11 +1147,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			/* Add full path of supplied file for folder uploads via 
 			 * <input type="file" name="files" multiple webkitdirectory>
 			 */
-			/* Add $foo[fullname] */
+			/* Add $foo[full_path] */
 			if (is_arr_upload) {
-				snprintf(lbuf, llen, "%s[fullpath][%s]", abuf, array_index);
+				snprintf(lbuf, llen, "%s[full_path][%s]", abuf, array_index);
 			} else {
-				snprintf(lbuf, llen, "%s[fullpath]", param);
+				snprintf(lbuf, llen, "%s[full_path]", param);
 			}
 			register_http_post_files_variable(lbuf, filename, &PG(http_globals)[TRACK_VARS_FILES], 0);
 			efree(filename);

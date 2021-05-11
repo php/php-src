@@ -42,7 +42,7 @@ array(1) {
       [0]=>
       string(9) "file1.txt"
     }
-    ["fullpath"]=>
+    ["full_path"]=>
     array(1) {
       [0]=>
       string(9) "file1.txt"

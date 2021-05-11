@@ -55,7 +55,7 @@ array(1) {
   array(6) {
     ["name"]=>
     string(12) "laruence.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(12) "laruence.txt"
     ["type"]=>
     string(10) "text/plain"

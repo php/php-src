@@ -27,7 +27,7 @@ array(1) {
   array(6) {
     ["name"]=>
     string(12) "bug37276.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(12) "bug37276.txt"
     ["type"]=>
     string(10) "text/plain"

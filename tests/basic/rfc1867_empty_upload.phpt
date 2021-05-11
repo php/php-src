@@ -43,7 +43,7 @@ array(3) {
   array(6) {
     ["name"]=>
     string(9) "file1.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(16) "text/plain-file1"
@@ -58,7 +58,7 @@ array(3) {
   array(6) {
     ["name"]=>
     string(0) ""
-    ["fullpath"]=>
+    ["full_path"]=>
     string(0) ""
     ["type"]=>
     string(0) ""
@@ -73,7 +73,7 @@ array(3) {
   array(6) {
     ["name"]=>
     string(9) "file3.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file3.txt"
     ["type"]=>
     string(16) "text/plain-file3"

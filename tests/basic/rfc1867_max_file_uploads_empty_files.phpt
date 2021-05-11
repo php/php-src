@@ -43,7 +43,7 @@ array(4) {
   array(6) {
     ["name"]=>
     string(0) ""
-    ["fullpath"]=>
+    ["full_path"]=>
     string(0) ""
     ["type"]=>
     string(0) ""
@@ -58,7 +58,7 @@ array(4) {
   array(6) {
     ["name"]=>
     string(0) ""
-    ["fullpath"]=>
+    ["full_path"]=>
     string(0) ""
     ["type"]=>
     string(0) ""
@@ -73,7 +73,7 @@ array(4) {
   array(6) {
     ["name"]=>
     string(9) "file4.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file4.txt"
     ["type"]=>
     string(15) "text/plain-file"
@@ -88,7 +88,7 @@ array(4) {
   array(6) {
     ["name"]=>
     string(9) "file1.txt"
-    ["fullpath"]=>
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(15) "text/plain-file"
