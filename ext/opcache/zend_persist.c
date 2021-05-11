@@ -485,21 +485,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				ZEND_ASSERT(op_array->vars != NULL);
 			}
 			ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
-#ifdef HAVE_JIT
-			if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
-			    !ZCG(current_persistent_script)->corrupted) {
-				if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
-				 || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
-				 || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
-				 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
-
-					if (jit_extension) {
-						ZEND_SET_FUNC_INFO(op_array, jit_extension);
-					}
-				}
-			}
-#endif
 			return;
 		}
 	} else {
@@ -700,13 +685,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
-
-#ifdef HAVE_JIT
-	if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
-	    !ZCG(current_persistent_script)->corrupted) {
-		zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
-	}
-#endif
 }
 
 static void zend_persist_op_array(zval *zv)
@@ -726,6 +704,11 @@ static void zend_persist_op_array(zval *zv)
 				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
 			}
 		}
+#ifdef HAVE_JIT
+		if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+			zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+		}
+#endif
 	} else {
 		/* This can happen during preloading, if a dynamic function definition is declared. */
 		Z_PTR_P(zv) = old_op_array;
@@ -1253,7 +1236,11 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 {
 	Bucket *p;
 	zend_class_entry *ce;
+#ifdef HAVE_JIT
+	bool orig_jit_on = JIT_G(on);
 
+	JIT_G(on) = 0;
+#endif
     zend_hash_persist(class_table);
 	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
@@ -1266,6 +1253,39 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 			zend_update_parent_ce(ce);
 		}
 	} ZEND_HASH_FOREACH_END();
+#ifdef HAVE_JIT
+	JIT_G(on) = orig_jit_on;
+	if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
+	    !ZCG(current_persistent_script)->corrupted) {
+	    zend_op_array *op_array;
+
+	    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
+				ce = Z_PTR(p->val);
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+					if (op_array->type == ZEND_USER_FUNCTION) {
+						if (op_array->scope == ce
+						 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+							zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+							for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+								zend_jit_op_array(op_array->dynamic_func_defs[i], ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+							}
+						} else if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
+						 || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
+						 || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
+						 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+							void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+
+							if (jit_extension) {
+								ZEND_SET_FUNC_INFO(op_array, jit_extension);
+							}
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+#endif
 }
 
 zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings) {
@@ -1327,6 +1347,11 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		if (script->script.main_op_array.static_variables) {
 			ZEND_MAP_PTR_NEW(script->script.main_op_array.static_variables_ptr);
 		}
+#ifdef HAVE_JIT
+		if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+			zend_jit_op_array(&script->script.main_op_array, &script->script);
+		}
+#endif
 	}
 	script->warnings = zend_persist_warnings(script->num_warnings, script->warnings);
 
