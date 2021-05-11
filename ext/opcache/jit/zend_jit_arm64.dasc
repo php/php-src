@@ -643,7 +643,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |	   		SAFE_MEM_ACC_WITH_UOFFSET ldr, IP, IP, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 ||		} else {
 |			LOAD_TSRM_CACHE RX
-|	   		SAFE_MEM_ACC_WITH_UOFFSET ldr, RX, RX, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	   		add RX, RX, #(struct.._offset+offsetof(zend_..struct, field))
 |			str RX, EX->opline
 ||		}
 |	.else
