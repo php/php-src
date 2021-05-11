@@ -1270,10 +1270,22 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 							for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
 								zend_jit_op_array(op_array->dynamic_func_defs[i], ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 							}
-						} else if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
-						 || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
-						 || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
-						 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+	    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
+				ce = Z_PTR(p->val);
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+					if (op_array->type == ZEND_USER_FUNCTION) {
+						if ((op_array->scope != ce
+						 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
+						  && (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
+						   || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
+						   || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
+						   || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE)) {
 							void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
 
 							if (jit_extension) {
