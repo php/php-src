@@ -874,11 +874,13 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 
 		if (interactive) {
-#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
-			printf("Interactive shell\n\n");
-#else
-			printf("Interactive mode enabled\n\n");
-#endif
+			if (cli_shell_callbacks.cli_shell_run) {
+				printf("Interactive shell\n\n");
+			} else {
+				printf("Interactive mode enabled\n\n");
+				/* Treat as non-interactive apart from the stdin input */
+				interactive = false;
+			}
 			fflush(stdout);
 		}
 
@@ -963,7 +965,7 @@ do_repeat:
 				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			}
 
-			if (interactive && cli_shell_callbacks.cli_shell_run) {
+			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
 			} else {
 				php_execute_script(&file_handle);
