@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   . Enable process renaming on macOS. (devnexen)
   . Added pm.max_spawn_rate option to configure max spawn child processes rate.
     (Paulius Sapragonas)
+  . Fixed bug #65800 (Events port mechanism). (psumbera)
 
 - FTP:
   . Convert resource<ftp> to object \FTP\Connection. (Sara)
