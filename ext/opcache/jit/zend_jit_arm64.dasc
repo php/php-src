@@ -8262,7 +8262,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			|	sub REG2w, REG2w, TMP1w
 		}
 		|	sxtw REG2, REG2w
-		|	sub FCARG1x, FCARG1x, REG2, lsl #5
+		|	sub FCARG1x, FCARG1x, REG2, lsl #4
 		|1:
 	}
 
