@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
 
+- PDO_ODBC:
+  . Fixed bug #44643 (bound parameters ignore explicit type definitions). (cmb)
+
 - PDO_pgsql:
   . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
     PDO::PARAM_STR). (Matteo)
