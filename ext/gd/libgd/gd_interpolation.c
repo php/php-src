@@ -58,7 +58,7 @@ TODO:
 #include <string.h>
 #include <math.h>
 
-#include <gd.h>
+#include "gd.h"
 #include "gdhelpers.h"
 
 #ifdef _MSC_VER
