@@ -215,10 +215,8 @@ static bool zend_is_commutative(zend_uchar opcode)
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
-#if defined(__x86_64__) || defined(i386)
 # include "jit/zend_jit_gdb.c"
-#endif
-#include "jit/zend_jit_perf_dump.c"
+# include "jit/zend_jit_perf_dump.c"
 #endif
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"

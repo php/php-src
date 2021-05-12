@@ -21,7 +21,7 @@
 */
 
 
-#if defined(__x86_64__) || defined(i386)
+#if defined(__x86_64__) || defined(i386) || defined(__aarch64__)
 
 #define HAVE_GDB
 
@@ -93,7 +93,9 @@ enum {
 	DW_REG_8, DW_REG_9, DW_REG_10, DW_REG_11,
 	DW_REG_12, DW_REG_13, DW_REG_14, DW_REG_15,
 	DW_REG_RA,
-	/* TODO: ARM supports? */
+#elif defined(__aarch64__)
+	DW_REG_SP = 31,
+	DW_REG_RA = 30,
 #else
 #error "Unsupported target architecture"
 #endif
@@ -161,6 +163,8 @@ static const zend_elf_header zend_elfhdr_template = {
 	.machine     = 3,
 #elif defined(__x86_64__)
 	.machine     = 62,
+#elif defined(__aarch64__)
+	.machine     = 183,
 #else
 # error "Unsupported target architecture"
 #endif
@@ -328,6 +332,9 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
 #elif defined(__x86_64__)
 		DB(DW_CFA_advance_loc|4);            /* sub $0x8,%rsp */
 		DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
+#elif defined(__aarch64__)
+		DB(DW_CFA_advance_loc|1);            /* Only an approximation. */
+		DB(DW_CFA_def_cfa_offset); DUV(32);  /* Aligned stack frame size. */
 #else
 # error "Unsupported target architecture"
 #endif
@@ -493,4 +500,4 @@ static void zend_jit_gdb_init(void)
 #endif
 }
 
-#endif /* defined(__x86_64__) || defined(i386) */
+#endif /* defined(__x86_64__) || defined(i386) || defined(__aarch64__) */
