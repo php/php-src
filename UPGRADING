@@ -277,6 +277,12 @@ PHP 8.1 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . Using -a without the readline extension will now result in an error.
+    Previously, -a without readline had the same behavior as calling php without
+    any arguments, apart from printing an additional "Interactive mode enabled"
+    message. This mode was not, in fact, interactive.
+
 ========================================
 4. Deprecated Functionality
 ========================================

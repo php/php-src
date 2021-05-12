@@ -488,11 +488,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
-#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
-				"  -a               Run as interactive shell\n"
-#else
-				"  -a               Run interactively\n"
-#endif
+				"  -a               Run as interactive shell (requires readline extension)\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No configuration (ini) files will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -694,6 +690,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			switch (c) {
 
 			case 'a':	/* interactive mode */
+				if (!cli_shell_callbacks.cli_shell_run) {
+					param_error = "Interactive shell (-a) requires the readline extension.\n";
+					break;
+				}
 				if (!interactive) {
 					if (behavior != PHP_MODE_STANDARD) {
 						param_error = param_mode_conflict;
@@ -874,13 +874,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 
 		if (interactive) {
-			if (cli_shell_callbacks.cli_shell_run) {
-				printf("Interactive shell\n\n");
-			} else {
-				printf("Interactive mode enabled\n\n");
-				/* Treat as non-interactive apart from the stdin input */
-				interactive = false;
-			}
+			printf("Interactive shell\n\n");
 			fflush(stdout);
 		}
 
