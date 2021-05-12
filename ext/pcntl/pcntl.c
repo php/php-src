@@ -1386,7 +1386,7 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
-void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer)
+static void pcntl_signal_dispatch_tick_function(int dummy_int, ZEND_ATTRIBUTE_UNUSED void *dummy_pointer)
 {
 	return pcntl_signal_dispatch();
 }
