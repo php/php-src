@@ -46,8 +46,8 @@ local action_names = {
   "SETLABEL", "REL_A",
   -- action arg (1 byte) or int arg, 2 buffer pos (link, offset):
   "REL_LG", "REL_PC",
-  -- action arg (1 byte) or ptrdiff_t arg, 1 buffer pos (link):
-  "IMM_LG", "IMM_LG64", "IMM_PC", "IMM_PC64",
+  -- action arg (1 byte) or int arg, 1 buffer pos (link):
+  "IMM_LG", "IMM_PC",
   -- action arg (1 byte) or int arg, 1 buffer pos (offset):
   "LABEL_LG", "LABEL_PC",
   -- action arg (1 byte), 1 buffer pos (offset):
@@ -438,16 +438,6 @@ local function wputlabel(aprefix, imm, num)
   end
 end
 
--- Put action for label arg (IMM_LG64, IMM_PC64, REL_LG, REL_PC).
-local function wputlabel64(aprefix, imm, num)
-  if type(imm) == "number" then
-    waction("IMM_LG64", nil, num);
-    wputxb(imm)
-  else
-    waction("IMM_PC64", imm, num)
-  end
-end
-
 -- Put signed byte or arg.
 local function wputsbarg(n)
   if type(n) == "number" then
@@ -479,26 +469,6 @@ local function wputwarg(n)
   else waction("IMM_W", n) end
 end
 
--- Put signed or unsigned qword or arg.
-local function wputqarg(n)
-  local tn = type(n)
-  if tn == "number" then
-    wputb(band(n, 255))
-    wputb(band(shr(n, 8), 255))
-    wputb(band(shr(n, 16), 255))
-    wputb(band(shr(n, 24), 255))
-    wputb(band(shr(n, 32), 255))
-    wputb(band(shr(n, 40), 255))
-    wputb(band(shr(n, 48), 255))
-    wputb(shr(n, 56))
-  elseif tn == "table" then
-    wputlabel64("IMM_", n[1], 1)
-  else
-    waction("IMM_D", format("(unsigned int)(%s)", n))
-    waction("IMM_D", format("(unsigned int)((%s)>>32)", n))
-  end
-end
-
 -- Put signed or unsigned dword or arg.
 local function wputdarg(n)
   local tn = type(n)
@@ -511,6 +481,22 @@ local function wputdarg(n)
     wputlabel("IMM_", n[1], 1)
   else
     waction("IMM_D", n)
+  end
+end
+
+-- Put signed or unsigned qword or arg.
+local function wputqarg(n)
+  local tn = type(n)
+  if tn == "number" then -- This is only used for numbers from -2^31..2^32-1.
+    wputb(band(n, 255))
+    wputb(band(shr(n, 8), 255))
+    wputb(band(shr(n, 16), 255))
+    wputb(shr(n, 24))
+    local sign = n < 0 and 255 or 0
+    wputb(sign); wputb(sign); wputb(sign); wputb(sign)
+  else
+    waction("IMM_D", format("(unsigned int)(%s)", n))
+    waction("IMM_D", format("(unsigned int)((unsigned long long)(%s)>>32)", n))
   end
 end
 
@@ -693,10 +679,16 @@ local function opmodestr(op, args)
 end
 
 -- Convert number to valid integer or nil.
-local function toint(expr)
+local function toint(expr, isqword)
   local n = tonumber(expr)
   if n then
-    if n % 1 ~= 0 or n < -2147483648 or n > 4294967295 then
+    if n % 1 ~= 0 then
+      werror("not an integer number `"..expr.."'")
+    elseif isqword then
+      if n < -2147483648 or n > 2147483647 then
+	n = nil -- Handle it as an expression to avoid precision loss.
+      end
+    elseif n < -2147483648 or n > 4294967295 then
       werror("bad integer number `"..expr.."'")
     end
     return n
@@ -779,7 +771,7 @@ local function rtexpr(expr)
 end
 
 -- Parse operand and return { mode, opsize, reg, xreg, xsc, disp, imm }.
-local function parseoperand(param)
+local function parseoperand(param, isqword)
   local t = {}
 
   local expr = param
@@ -867,7 +859,7 @@ local function parseoperand(param)
       t.disp = dispexpr(tailx)
     else
       -- imm or opsize*imm
-      local imm = toint(expr)
+      local imm = toint(expr, isqword)
       if not imm and sub(expr, 1, 1) == "*" and t.opsize then
 	imm = toint(sub(expr, 2))
 	if imm then
@@ -1982,7 +1974,7 @@ local function dopattern(pat, args, sz, op, needrex)
 	local a = args[narg]
 	narg = narg + 1
 	local mode, imm = a.mode, a.imm
-	if mode == "iJ" and not match("iIJ", c) then
+	if mode == "iJ" and not match(x64 and "J" or "iIJ", c) then
 	  werror("bad operand size for label")
 	end
 	if c == "S" then
@@ -2174,24 +2166,18 @@ end
 local function op_data(params)
   if not params then return "imm..." end
   local sz = sub(params.op, 2, 2)
-  if sz == "a" then sz = addrsize end
+  if sz == "l" then sz = "d" elseif sz == "a" then sz = addrsize end
   for _,p in ipairs(params) do
-    local a = parseoperand(p)
+    local a = parseoperand(p, sz == "q")
     if sub(a.mode, 1, 1) ~= "i" or (a.opsize and a.opsize ~= sz) then
       werror("bad mode or size in `"..p.."'")
     end
     if a.mode == "iJ" then
-      if sz == 'q' then
-        wputlabel64("IMM_", a.imm, 1)
-      else
-        wputlabel("IMM_", a.imm, 1)
-      end
+      wputlabel("IMM_", a.imm, 1)
+    elseif sz == "q" then
+      wputqarg(a.imm)
     else
-      if sz == 'q' then
-        wputqarg(a.imm)
-      else
-        wputszarg(sz, a.imm)
-      end
+      wputszarg(sz, a.imm)
     end
     if secpos+2 > maxsecpos then wflush() end
   end
@@ -2201,7 +2187,11 @@ map_op[".byte_*"] = op_data
 map_op[".sbyte_*"] = op_data
 map_op[".word_*"] = op_data
 map_op[".dword_*"] = op_data
+map_op[".qword_*"] = op_data
 map_op[".aword_*"] = op_data
+map_op[".long_*"] = op_data
+map_op[".quad_*"] = op_data
+map_op[".addr_*"] = op_data
 
 ------------------------------------------------------------------------------
 
