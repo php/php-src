@@ -21,9 +21,9 @@ enum {
   /* The following actions need a buffer position. */
   DASM_ALIGN, DASM_REL_LG, DASM_LABEL_LG,
   /* The following actions also have an argument. */
-  DASM_REL_PC, DASM_LABEL_PC,
+  DASM_REL_PC, DASM_LABEL_PC, DASM_REL_A,
   DASM_IMM, DASM_IMM6, DASM_IMM12, DASM_IMM13W, DASM_IMM13X, DASM_IMML,
-  DASM_VREG,
+  DASM_IMMV, DASM_VREG,
   DASM__MAX
 };
 
@@ -249,7 +249,7 @@ void dasm_put(Dst_DECL, int start, ...)
 	n = (ins & 255); CK(n < D->maxsection, RANGE_SEC);
 	D->section = &D->sections[n]; goto stop;
       case DASM_ESC: p++; ofs += 4; break;
-      case DASM_REL_EXT: break;
+      case DASM_REL_EXT: if ((ins & 0x8000)) ofs += 8; break;
       case DASM_ALIGN: ofs += (ins & 255); b[pos++] = ofs; break;
       case DASM_REL_LG:
 	n = (ins & 2047) - 10; pl = D->lglabels + n;
@@ -270,6 +270,11 @@ void dasm_put(Dst_DECL, int start, ...)
 	  *pl = pos;
 	}
 	pos++;
+	if ((ins & 0x8000)) ofs += 8;
+	break;
+      case DASM_REL_A:
+	b[pos++] = n;
+	b[pos++] = va_arg(ap, int);
 	break;
       case DASM_LABEL_LG:
 	pl = D->lglabels + (ins & 2047) - 10; CKPL(lg, LG); goto putlabel;
@@ -321,6 +326,10 @@ void dasm_put(Dst_DECL, int start, ...)
 	b[pos++] = n;
 	break;
 	}
+      case DASM_IMMV:
+	ofs += 4;
+	b[pos++] = n;
+	break;
       case DASM_VREG:
 	CK(n < 32, RANGE_VREG);
 	b[pos++] = n;
@@ -381,8 +390,8 @@ int dasm_link(Dst_DECL, size_t *szp)
 	case DASM_REL_LG: case DASM_REL_PC: pos++; break;
 	case DASM_LABEL_LG: case DASM_LABEL_PC: b[pos++] += ofs; break;
 	case DASM_IMM: case DASM_IMM6: case DASM_IMM12: case DASM_IMM13W:
-	case DASM_IMML: case DASM_VREG: pos++; break;
-	case DASM_IMM13X: pos += 2; break;
+	case DASM_IMML: case DASM_IMMV: case DASM_VREG: pos++; break;
+	case DASM_IMM13X: case DASM_REL_A: pos += 2; break;
 	}
       }
       stop: (void)0;
@@ -433,7 +442,9 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_REL_LG:
 	  if (n < 0) {
-	    n = (int)((ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp + 4);
+	    ptrdiff_t na = (ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp + 4;
+	    n = (int)na;
+	    CK((ptrdiff_t)n == na, RANGE_REL);
 	    goto patchrel;
 	  }
 	  /* fallthrough */
@@ -455,8 +466,18 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  } else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
 	    CK((n & 3) == 0 && ((n+0x00008000) >> 16) == 0, RANGE_REL);
 	    cp[-1] |= ((n << 3) & 0x0007ffe0);
+	  } else if ((ins & 0x8000)) {  /* absolute */
+	    cp[0] = (unsigned int)((ptrdiff_t)cp - 4 + n);
+	    cp[1] = (unsigned int)(((ptrdiff_t)cp - 4 + n) >> 32);
+	    cp += 2;
 	  }
 	  break;
+	case DASM_REL_A: {
+	  ptrdiff_t na = (((ptrdiff_t)(*b++) << 32) | (unsigned int)n) - (ptrdiff_t)cp + 4;
+	  n = (int)na;
+	  CK((ptrdiff_t)n == na, RANGE_REL);
+	  goto patchrel;
+	}
 	case DASM_LABEL_LG:
 	  ins &= 2047; if (ins >= 20) D->globals[ins-10] = (void *)(base + n);
 	  break;
@@ -482,6 +503,9 @@ int dasm_encode(Dst_DECL, void *buffer)
 	    ((n << (10-scale)) | 0x01000000) : ((n & 511) << 12);
 	  break;
 	  }
+	case DASM_IMMV:
+	  *cp++ = n;
+	  break;
 	case DASM_VREG:
 	  cp[-1] |= (n & 0x1f) << (ins & 0x1f);
 	  break;
