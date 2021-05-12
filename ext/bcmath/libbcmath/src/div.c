@@ -43,11 +43,7 @@
    placed into RESULT.  It is written so that NUM and RESULT can be
    the same pointers.  */
 
-static void
-_one_mult (num, size, digit, result)
-     unsigned char *num;
-     int size, digit;
-     unsigned char *result;
+static void _one_mult (unsigned char *num, int size, int digit, unsigned char *result)
 {
   int carry, value;
   unsigned char *nptr, *rptr;
