@@ -234,7 +234,9 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 		}
 	}
 #elif defined(__aarch64__)
-	if (cs_insn_group(cs, insn, ARM64_GRP_JUMP)) {
+	if (cs_insn_group(cs, insn, ARM64_GRP_JUMP)
+	 || insn->id == ARM64_INS_BL
+	 || insn->id == ARM64_INS_ADR) {
 		for (i = 0; i < insn->detail->arm64.op_count; i++) {
 			if (insn->detail->arm64.operands[i].type == ARM64_OP_IMM)
 				return insn->detail->arm64.operands[i].imm;
