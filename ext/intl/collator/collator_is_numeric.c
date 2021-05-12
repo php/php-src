@@ -110,16 +110,13 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
  *
  * Ignores `locale' stuff.
  */
-static zend_long collator_u_strtol(nptr, endptr, base)
-	const UChar *nptr;
-	UChar **endptr;
-	register int base;
+static zend_long collator_u_strtol(const UChar *nptr, UChar **endptr, int base)
 {
-	register const UChar *s = nptr;
-	register zend_ulong acc;
-	register UChar c;
-	register zend_ulong cutoff;
-	register int neg = 0, any, cutlim;
+	const UChar *s = nptr;
+	zend_ulong acc;
+	UChar c;
+	zend_ulong cutoff;
+	int neg = 0, any, cutlim;
 
 	if (s == NULL) {
 		errno = ERANGE;
