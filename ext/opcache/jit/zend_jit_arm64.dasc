@@ -156,7 +156,7 @@ static size_t tsrm_ls_cache_tcb_offset = 0;
  * type information. Disabling this option allows testing some JIT handlers in the
  * presence of try/catch blocks, which prevent SSA construction. */
 #ifndef PROFITABILITY_CHECKS
-# define PROFITABILITY_CHECKS 0 // TODO: temporary disabled for better test coverage
+# define PROFITABILITY_CHECKS 1
 #endif
 
 |.type EX, zend_execute_data, FP
