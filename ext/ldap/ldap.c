@@ -1572,7 +1572,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
-	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
+	int num_attribs = 0, ret = 1, i, ldap_errno, argcount = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
@@ -1779,15 +1779,15 @@ cleanup_parallel:
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		errno = ldap_search_ext_s(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
+		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
 
-		if (errno != LDAP_SUCCESS
-			&& errno != LDAP_SIZELIMIT_EXCEEDED
+		if (ldap_errno != LDAP_SUCCESS
+			&& ldap_errno != LDAP_SIZELIMIT_EXCEEDED
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
-			&& errno != LDAP_ADMINLIMIT_EXCEEDED
+			&& ldap_errno != LDAP_ADMINLIMIT_EXCEEDED
 #endif
 #ifdef LDAP_REFERRAL
-			&& errno != LDAP_REFERRAL
+			&& ldap_errno != LDAP_REFERRAL
 #endif
 		) {
 			/* ldap_res should be freed regardless of return value of ldap_search_ext_s()
@@ -1795,14 +1795,14 @@ cleanup_parallel:
 			if (ldap_res != NULL) {
 				ldap_msgfree(ldap_res);
 			}
-			php_error_docref(NULL, E_WARNING, "Search: %s", ldap_err2string(errno));
+			php_error_docref(NULL, E_WARNING, "Search: %s", ldap_err2string(ldap_errno));
 			ret = 0;
 		} else {
-			if (errno == LDAP_SIZELIMIT_EXCEEDED) {
+			if (ldap_errno == LDAP_SIZELIMIT_EXCEEDED) {
 				php_error_docref(NULL, E_WARNING, "Partial search results returned: Sizelimit exceeded");
 			}
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
-			else if (errno == LDAP_ADMINLIMIT_EXCEEDED) {
+			else if (ldap_errno == LDAP_ADMINLIMIT_EXCEEDED) {
 				php_error_docref(NULL, E_WARNING, "Partial search results returned: Adminlimit exceeded");
 			}
 #endif
@@ -3038,7 +3038,7 @@ PHP_FUNCTION(ldap_compare)
 	size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
-	int errno;
+	int ldap_errno;
 	struct berval lvalue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osss|a!", &link, ldap_link_ce, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
@@ -3059,9 +3059,9 @@ PHP_FUNCTION(ldap_compare)
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
-	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
+	ldap_errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
 
-	switch (errno) {
+	switch (ldap_errno) {
 		case LDAP_COMPARE_TRUE:
 			RETVAL_TRUE;
 			break;
@@ -3071,7 +3071,7 @@ PHP_FUNCTION(ldap_compare)
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(errno));
+			php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(ldap_errno));
 			RETVAL_LONG(-1);
 	}
 
