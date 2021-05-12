@@ -89,7 +89,8 @@ static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
 #else
 static void pcntl_signal_handler(int);
 #endif
-static void pcntl_signal_dispatch();
+static void pcntl_signal_dispatch(void);
+static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
 void php_register_signal_constants(INIT_FUNC_ARGS)
@@ -424,7 +425,7 @@ static PHP_GINIT_FUNCTION(pcntl)
 
 PHP_RINIT_FUNCTION(pcntl)
 {
-	php_add_tick_function(pcntl_signal_dispatch, NULL);
+	php_add_tick_function(pcntl_signal_dispatch_tick_function, NULL);
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
@@ -1383,6 +1384,11 @@ void pcntl_signal_dispatch()
 
 	/* return signal mask to previous state */
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
+}
+
+static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer)
+{
+	return pcntl_signal_dispatch();
 }
 
 /* {{{ Enable/disable asynchronous signal handling and return the old setting. */
