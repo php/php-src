@@ -7,6 +7,7 @@ if (!extension_loaded('pdo_firebird')) print 'skip'; ?>
 # magic auto-configuration
 
 $config = array(
+	'ENV' => ['LSAN_OPTIONS' => 'detect_leaks=0'],
 	'TESTS' => 'ext/pdo/tests'
 );
 	
