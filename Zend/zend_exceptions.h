@@ -68,6 +68,7 @@ extern ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *exception, int severity);
+ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main);
 
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void);
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void);

@@ -19,8 +19,8 @@ eval("foo();");
 echo "Done\n";
 ?>
 --EXPECTF--
-#0  boo() called at [%s:%d]
-#1  bar() called at [%s:%d]
-#2  foo() called at [%s(%d) : eval()'d code:1]
-#3  eval() called at [%s:%d]
+#0 %s(%d): boo()
+#1 %s(%d): bar()
+#2 %s(%d) : eval()'d code(1): foo()
+#3 %s(%d): eval()
 Done
