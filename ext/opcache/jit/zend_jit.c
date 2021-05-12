@@ -116,7 +116,7 @@ static const void *zend_jit_func_trace_counter_handler = NULL;
 static const void *zend_jit_ret_trace_counter_handler = NULL;
 static const void *zend_jit_loop_trace_counter_handler = NULL;
 
-static void ZEND_FASTCALL zend_runtime_jit(void);
+static int ZEND_FASTCALL zend_runtime_jit(void);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
@@ -3632,7 +3632,7 @@ jit_failure:
 }
 
 /* Run-time JIT handler */
-static void ZEND_FASTCALL zend_runtime_jit(void)
+static int ZEND_FASTCALL zend_runtime_jit(void)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
@@ -3664,6 +3664,7 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 	zend_shared_alloc_unlock();
 
 	/* JIT-ed code is going to be called by VM */
+	return 0;
 }
 
 void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
