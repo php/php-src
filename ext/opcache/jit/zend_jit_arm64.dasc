@@ -2313,24 +2313,24 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	stp d20, d21, [sp, #-16]!
 	|	stp d18, d19, [sp, #-16]!
 	|	stp d16, d17, [sp, #-16]!
-	|	stp d14, d15, [sp, #-16]!
-	|	stp d12, d13, [sp, #-16]!
-	|	stp d10, d11, [sp, #-16]!
-	|	stp d8, d9, [sp, #-16]!
-	|	stp d6, d7, [sp, #-16]!
+	|	//stp d14, d15, [sp, #-16]!     // we don't use preserved registers yet
+	|	//stp d12, d13, [sp, #-16]!
+	|	//stp d10, d11, [sp, #-16]!
+	|	//stp d8, d9, [sp, #-16]!
+	|	stp d6, d7, [sp, #(-16*5)]!
 	|	stp d4, d5, [sp, #-16]!
 	|	stp d2, d3, [sp, #-16]!
 	|	stp d0, d1, [sp, #-16]!
 	|
-	|	str x30, [sp, #-16]!            // x31 can be omitted
-	|	stp x28, x29, [sp, #-16]!
-	|	stp x26, x27, [sp, #-16]!
-	|	stp x24, x25, [sp, #-16]!
-	|	stp x22, x23, [sp, #-16]!
-	|	stp x20, x21, [sp, #-16]!
-	|	stp x18, x19, [sp, #-16]!
-	|	stp x16, x17, [sp, #-16]!
-	|	stp x14, x15, [sp, #-16]!
+	|	//str x30, [sp, #-16]!          // we don't use callee-saved registers yet (x31 can be omitted)
+	|	stp x28, x29, [sp, #(-16*2)]!   // we have to store RX (x28)
+	|	//stp x26, x27, [sp, #-16]!     // we don't use callee-saved registers yet
+	|	//stp x24, x25, [sp, #-16]!
+	|	//stp x22, x23, [sp, #-16]!
+	|	//stp x20, x21, [sp, #-16]!
+	|	//stp x18, x19, [sp, #-16]!
+	|	//stp x16, x17, [sp, #-16]!     // we don't need temporary registers
+	|	stp x14, x15, [sp, #-(16*7)]!
 	|	stp x12, x13, [sp, #-16]!
 	|	stp x10, x11, [sp, #-16]!
 	|	stp x8, x9, [sp, #-16]!
@@ -2339,7 +2339,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	stp x2, x3, [sp, #-16]!
 	|	stp x0, x1, [sp, #-16]!
 	|
-	|	ldr FCARG1w, [sp, #(32 * 16)]   // exit_num = POP
+	|	mov FCARG1w, TMP1w              // exit_num
 	|	mov FCARG2x, sp
 	|
 	| 	// EX(opline) = opline
@@ -2347,7 +2347,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	// zend_jit_trace_exit(trace_num, exit_num)
 	|	EXT_CALL zend_jit_trace_exit, REG0
 	|
-	|	add sp, sp, #(33 * 16)          // including the pre-allocated 16 bytes
+	|	add sp, sp, #(32 * 16)          // restore sp
 	|
 
 	|	tst RETVALw, RETVALw
@@ -2442,25 +2442,26 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 }
 
 /* Keep 32 exit points in a single code block */
-#define ZEND_JIT_EXIT_POINTS_SPACING   12 // mov + strb + b = bytes
+#define ZEND_JIT_EXIT_POINTS_SPACING    4 // bl = bytes
 #define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 
 static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 {
 	uint32_t i;
 
-	for (i = 0; i < ZEND_JIT_EXIT_POINTS_PER_GROUP - 1; i++) {
-		|	mov TMP1w, #i
-		|	strb TMP1w, [sp, #-16]!
-		|	b >1
-	}
-	|	mov TMP1w, #i
-	|	strb TMP1w, [sp, #-16]!
+	|	bl >2
 	|1:
-	|	ldrb TMP1w, [sp]
-	|	ADD_SUB_32_WITH_CONST add, TMP1w, TMP1w, n, TMP2w
-	|	str TMP1w, [sp]
-	|	b ->trace_exit
+	for (i = 1; i < ZEND_JIT_EXIT_POINTS_PER_GROUP; i++) {
+		|	bl >2
+	}
+	|2:
+	|	adr TMP1, <1
+	|	sub TMP1, lr, TMP1
+	|	lsr TMP1, TMP1, #2
+	if (n) {
+		|	ADD_SUB_32_WITH_CONST add, TMP1w, TMP1w, n, TMP2w
+	}
+	|	b ->trace_exit // pass exit_num in TMP1w
 
 	return 1;
 }
