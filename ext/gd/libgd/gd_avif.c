@@ -198,7 +198,7 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 
 // avif.h says this is optional, but it seemed easy to implement.
 static void destroyAvifIO(struct avifIO *io) {
-	avifFree(io);
+	gdFree(io);
 }
 
 /* Set up an avifIO object.
