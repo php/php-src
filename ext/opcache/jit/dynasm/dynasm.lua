@@ -10,9 +10,9 @@
 local _info = {
   name =	"DynASM",
   description =	"A dynamic assembler for code generation engines",
-  version =	"1.4.0",
-  vernum =	 10400,
-  release =	"2015-10-18",
+  version =	"1.5.0",
+  vernum =	 10500,
+  release =	"2021-05-02",
   author =	"Mike Pall",
   url =		"https://luajit.org/dynasm.html",
   license =	"MIT",
