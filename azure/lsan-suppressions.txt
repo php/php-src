@@ -1,2 +1,1 @@
 leak:acommon::DictInfoList::elements
-leak:isc_attach_database
