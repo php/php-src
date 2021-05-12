@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug #81015 (Opcache optimization assumes wrong part of ternary
     operator in if-condition). (Nikita)
 
+- PDO_ODBC:
+  . Fixed bug #44643 (bound parameters ignore explicit type definitions). (cmb)
+
 - PDO_pgsql:
   . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
     PDO::PARAM_STR). (Matteo)
