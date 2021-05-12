@@ -2,6 +2,8 @@
 PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 

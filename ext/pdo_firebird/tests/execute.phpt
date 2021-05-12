@@ -2,6 +2,8 @@
 PDO_Firebird: prepare/execute/binding
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 	require("testdb.inc");

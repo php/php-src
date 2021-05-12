@@ -2,6 +2,8 @@
 PDO_Firebird: bug 73087 segfault binding blob parameter
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';
