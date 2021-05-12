@@ -198,8 +198,8 @@ void whiteSpace_collapse(xmlChar* str);
 xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
 zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data);
 
-void encode_finish();
-void encode_reset_ns();
+void encode_finish(void);
+void encode_reset_ns(void);
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
 
 encodePtr get_conversion(int encode);

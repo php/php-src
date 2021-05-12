@@ -965,14 +965,14 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
-static void init_unmatched_null_pair() {
+static void init_unmatched_null_pair(void) {
 	zval val1, val2;
 	ZVAL_NULL(&val1);
 	ZVAL_LONG(&val2, -1);
 	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
 }
 
-static void init_unmatched_empty_pair() {
+static void init_unmatched_empty_pair(void) {
 	zval val1, val2;
 	ZVAL_EMPTY_STRING(&val1);
 	ZVAL_LONG(&val2, -1);

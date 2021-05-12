@@ -20,8 +20,8 @@
 BEGIN_EXTERN_C()
 #include "crypt_freesec.h"
 
-void php_init_crypt_r();
-void php_shutdown_crypt_r();
+void php_init_crypt_r(void);
+void php_shutdown_crypt_r(void);
 
 extern void _crypt_extended_init_r(void);
 

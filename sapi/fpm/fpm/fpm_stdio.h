@@ -7,10 +7,10 @@
 
 #define STREAM_SET_MSG_PREFIX_FMT "[pool %s] child %d said into %s: "
 
-int fpm_stdio_init_main();
-int fpm_stdio_init_final();
+int fpm_stdio_init_main(void);
+int fpm_stdio_init_final(void);
 int fpm_stdio_init_child(struct fpm_worker_pool_s *wp);
-int fpm_stdio_flush_child();
+int fpm_stdio_flush_child(void);
 int fpm_stdio_prepare_pipes(struct fpm_child_s *child);
 void fpm_stdio_child_use_pipes(struct fpm_child_s *child);
 int fpm_stdio_parent_use_pipes(struct fpm_child_s *child);

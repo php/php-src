@@ -264,7 +264,7 @@ PHPDBG_PRINT(func) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_print_opcodes_main() {
+void phpdbg_print_opcodes_main(void) {
 	phpdbg_out("function name: (null)\n");
 	phpdbg_print_function_helper((zend_function *) PHPDBG_G(ops));
 }

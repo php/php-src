@@ -89,7 +89,7 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 	return s.s;
 }
 
-void phpdbg_print_cur_frame_info() {
+void phpdbg_print_cur_frame_info(void) {
 	const char *file_chr = zend_get_executed_filename();
 	zend_string *file = zend_string_init(file_chr, strlen(file_chr), 0);
 

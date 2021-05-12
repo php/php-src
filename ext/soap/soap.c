@@ -247,7 +247,7 @@ PHP_INI_END()
 
 static HashTable defEnc, defEncIndex, defEncNs;
 
-static void php_soap_prepare_globals()
+static void php_soap_prepare_globals(void)
 {
 	int i;
 	const encode* enc;

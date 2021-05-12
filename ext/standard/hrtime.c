@@ -48,7 +48,7 @@ static double _timer_scale = .0;
 #define NANO_IN_SEC 1000000000
 /* }}} */
 
-static int _timer_init()
+static int _timer_init(void)
 {/*{{{*/
 #if PHP_HRTIME_PLATFORM_WINDOWS
 

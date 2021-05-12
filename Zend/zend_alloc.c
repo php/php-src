@@ -2201,7 +2201,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 #if ZEND_MM_CUSTOM
 static void *tracked_malloc(size_t size);
-static void tracked_free_all();
+static void tracked_free_all(void);
 #endif
 
 void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)

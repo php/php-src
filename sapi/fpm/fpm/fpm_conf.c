@@ -593,7 +593,7 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 }
 /* }}} */
 
-static void *fpm_worker_pool_config_alloc() /* {{{ */
+static void *fpm_worker_pool_config_alloc(void) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -795,7 +795,7 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 }
 /* }}} */
 
-static int fpm_conf_process_all_pools() /* {{{ */
+static int fpm_conf_process_all_pools(void) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp, *wp2;
 
@@ -1659,7 +1659,7 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 }
 /* }}} */
 
-static void fpm_conf_dump() /* {{{ */
+static void fpm_conf_dump(void) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 

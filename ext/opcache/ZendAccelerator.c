@@ -4136,7 +4136,7 @@ static zend_class_entry *preload_load_prop_type(zend_property_info *prop, zend_s
 	return ce;
 }
 
-static void preload_ensure_classes_loadable() {
+static void preload_ensure_classes_loadable(void) {
 	/* Run this in a loop, because additional classes may be loaded while updating constants etc. */
 	uint32_t checked_classes_idx = 0;
 	while (1) {
@@ -4902,8 +4902,8 @@ static int accel_finish_startup(void)
 		int rc;
 		int orig_error_reporting;
 
-		int (*orig_activate)() = sapi_module.activate;
-		int (*orig_deactivate)() = sapi_module.deactivate;
+		int (*orig_activate)(void) = sapi_module.activate;
+		int (*orig_deactivate)(void) = sapi_module.deactivate;
 		void (*orig_register_server_variables)(zval *track_vars_array) = sapi_module.register_server_variables;
 		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
 		int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;

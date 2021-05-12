@@ -513,7 +513,7 @@ static void php_session_save_current_state(int write) /* {{{ */
 }
 /* }}} */
 
-static void php_session_normalize_vars() /* {{{ */
+static void php_session_normalize_vars(void) /* {{{ */
 {
 	PS_ENCODE_VARS;
 
@@ -1938,7 +1938,7 @@ PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-static int save_handler_check_session() {
+static int save_handler_check_session(void) {
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed when a session is active");
 		return FAILURE;

@@ -2352,7 +2352,7 @@ static int check_variance_obligation(zval *zv) {
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static void load_delayed_classes() {
+static void load_delayed_classes(void) {
 	HashTable *delayed_autoloads = CG(delayed_autoloads);
 	zend_string *name;
 

@@ -1425,7 +1425,7 @@ next:
 	return count;
 }
 
-static void zend_get_gc_buffer_release();
+static void zend_get_gc_buffer_release(void);
 
 ZEND_API int zend_gc_collect_cycles(void)
 {

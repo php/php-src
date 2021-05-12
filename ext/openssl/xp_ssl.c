@@ -116,7 +116,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
 
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
-extern int php_openssl_get_ssl_stream_data_index();
+extern int php_openssl_get_ssl_stream_data_index(void);
 static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b);
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);

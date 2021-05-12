@@ -1298,7 +1298,7 @@ static bool is_generator_compatible_class_type(zend_string *name) {
 		|| zend_string_equals_literal_ci(name, "Generator");
 }
 
-static void zend_mark_function_as_generator() /* {{{ */
+static void zend_mark_function_as_generator(void) /* {{{ */
 {
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR,
@@ -1508,7 +1508,7 @@ static bool zend_try_ct_eval_const(zval *zv, zend_string *name, bool is_fully_qu
 }
 /* }}} */
 
-static inline bool zend_is_scope_known() /* {{{ */
+static inline bool zend_is_scope_known(void) /* {{{ */
 {
 	if (!CG(active_op_array)) {
 		/* This can only happen when evaluating a default value string. */
@@ -2327,7 +2327,7 @@ static void zend_short_circuiting_mark_inner(zend_ast *ast) {
 	}
 }
 
-static uint32_t zend_short_circuiting_checkpoint()
+static uint32_t zend_short_circuiting_checkpoint(void)
 {
 	return zend_stack_count(&CG(short_circuiting_opnums));
 }
@@ -2754,7 +2754,7 @@ static bool is_global_var_fetch(zend_ast *ast)
 	return ast->kind == ZEND_AST_DIM && is_globals_fetch(ast->child[0]);
 }
 
-static bool this_guaranteed_exists() /* {{{ */
+static bool this_guaranteed_exists(void) /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
 	/* Instance methods always have a $this.

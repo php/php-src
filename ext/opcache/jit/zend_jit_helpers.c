@@ -18,7 +18,7 @@
 
 #include "Zend/zend_API.h"
 
-static ZEND_COLD void undef_result_after_exception() {
+static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
 	ZEND_ASSERT(EG(exception));
 	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {

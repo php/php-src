@@ -26,7 +26,7 @@
 #include <string.h>
 
 static int fpm_event_poll_init(int max);
-static int fpm_event_poll_clean();
+static int fpm_event_poll_clean(void);
 static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_poll_add(struct fpm_event_s *ev);
 static int fpm_event_poll_remove(struct fpm_event_s *ev);
@@ -50,7 +50,7 @@ static int next_free_slot = 0;
 /*
  * return the module configuration
  */
-struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_poll_module(void) /* {{{ */
 {
 #ifdef HAVE_POLL
 	return &poll_module;

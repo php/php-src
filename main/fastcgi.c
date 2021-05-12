@@ -200,9 +200,9 @@ typedef struct _fcgi_hash {
 typedef struct _fcgi_req_hook 	fcgi_req_hook;
 
 struct _fcgi_req_hook {
-	void(*on_accept)();
-	void(*on_read)();
-	void(*on_close)();
+	void(*on_accept)(void);
+	void(*on_read)(void);
+	void(*on_close)(void);
 };
 
 struct _fcgi_request {
@@ -875,11 +875,11 @@ void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
-static void fcgi_hook_dummy() {
+static void fcgi_hook_dummy(void) {
 	return;
 }
 
-fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)())
+fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
 {
 	fcgi_request *req = calloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
@@ -1324,7 +1324,7 @@ int fcgi_is_closed(fcgi_request *req)
 	return (req->fd < 0);
 }
 
-static int fcgi_is_allowed() {
+static int fcgi_is_allowed(void) {
 	int i;
 
 	if (client_sa.sa.sa_family == AF_UNIX) {

@@ -38,7 +38,7 @@ static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_alloc() /* {{{ */
+static struct fpm_child_s *fpm_child_alloc(void) /* {{{ */
 {
 	struct fpm_child_s *ret;
 

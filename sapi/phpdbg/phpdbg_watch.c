@@ -719,7 +719,7 @@ void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {
 	phpdbg_free_watch_element_tree(element);
 }
 
-void phpdbg_dequeue_elements_for_recreation() {
+void phpdbg_dequeue_elements_for_recreation(void) {
 	phpdbg_watch_element *element;
 
 	ZEND_HASH_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {

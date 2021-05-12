@@ -20,6 +20,6 @@
 #include "../fpm_config.h"
 #include "../fpm_events.h"
 
-struct fpm_event_module_s *fpm_event_poll_module();
+struct fpm_event_module_s *fpm_event_poll_module(void);
 
 #endif /* FPM_EVENTS_POLL_H */

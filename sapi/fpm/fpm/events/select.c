@@ -53,7 +53,7 @@ static fd_set fds;
 /*
  * return the module configuration
  */
-struct fpm_event_module_s *fpm_event_select_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_select_module(void) /* {{{ */
 {
 #ifdef HAVE_SELECT
 	return &select_module;

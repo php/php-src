@@ -47,7 +47,7 @@ static int pfd = -1;
 
 #endif /* HAVE_PORT */
 
-struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_port_module(void) /* {{{ */
 {
 #ifdef HAVE_PORT
 	return &port_module;

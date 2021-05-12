@@ -1277,7 +1277,7 @@ static zend_result exit_nesting(char closing)
 	return SUCCESS;
 }
 
-static zend_result check_nesting_at_end()
+static zend_result check_nesting_at_end(void)
 {
 	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
 		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));

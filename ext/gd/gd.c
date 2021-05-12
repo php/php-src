@@ -135,7 +135,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
-static gdIOCtx *create_output_context();
+static gdIOCtx *create_output_context(void);
 static int _php_image_type(char data[12]);
 
 /* output streaming (formerly gd_ctx.c) */
@@ -215,7 +215,7 @@ void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
 }
 
-static void php_gd_object_minit_helper()
+static void php_gd_object_minit_helper(void)
 {
 	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;

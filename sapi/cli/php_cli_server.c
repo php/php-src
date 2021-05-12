@@ -275,7 +275,7 @@ static void char_ptr_dtor_p(zval *zv) /* {{{ */
 	pefree(Z_PTR_P(zv), 1);
 } /* }}} */
 
-static char *get_last_error() /* {{{ */
+static char *get_last_error(void) /* {{{ */
 {
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
@@ -1102,7 +1102,7 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 } /* }}} */
 
 #if HAVE_UNISTD_H
-static int php_cli_is_output_tty() /* {{{ */
+static int php_cli_is_output_tty(void) /* {{{ */
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
 		php_cli_output_is_tty = isatty(STDOUT_FILENO);

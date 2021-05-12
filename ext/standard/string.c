@@ -3648,7 +3648,7 @@ typedef void (*php_stripslashes_func_t)(zend_string *);
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_addslashes_func_t resolve_addslashes() {
+static php_addslashes_func_t resolve_addslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
 	}
@@ -3657,7 +3657,7 @@ static php_addslashes_func_t resolve_addslashes() {
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_stripslashes_func_t resolve_stripslashes() {
+static php_stripslashes_func_t resolve_stripslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
 	}

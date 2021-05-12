@@ -1137,7 +1137,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
-static void clear_last_error() {
+static void clear_last_error(void) {
 	if (PG(last_error_message)) {
 		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
