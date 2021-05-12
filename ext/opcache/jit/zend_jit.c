@@ -4407,7 +4407,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 ZEND_EXT_API void zend_jit_shutdown(void)
 {
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_SIZE) {
-		fprintf(stderr, "\nJIT memory usage: %td\n", (char*)*dasm_ptr - (char*)dasm_buf);
+		fprintf(stderr, "\nJIT memory usage: %td\n", (ptrdiff_t)((char*)*dasm_ptr - (char*)dasm_buf));
 	}
 
 #ifdef HAVE_OPROFILE
