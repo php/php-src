@@ -69,21 +69,18 @@
 |.define ZREG_FPR1,   ZREG_V1
 
 // Temporaries, not preserved across calls
-|.define TMP1,    x11
-|.define TMP1w,   w11
-|.define TMP2,    x12
-|.define TMP2w,   w12
-|.define TMP3,    x13
-|.define TMP3w,   w13
-|.define TMP4,    x14
-|.define TMP4w,   w14
+|.define TMP1,    x15
+|.define TMP1w,   w15
+|.define TMP2,    x16
+|.define TMP2w,   w16
+|.define TMP3,    x17
+|.define TMP3w,   w17
 |.define FPTMP,   v16
 |.define FPTMPd,  d16
 
-|.define ZREG_TMP1,   ZREG_X11
-|.define ZREG_TMP2,   ZREG_X12
-|.define ZREG_TMP3,   ZREG_X13
-|.define ZREG_TMP4,   ZREG_X14
+|.define ZREG_TMP1,   ZREG_X15
+|.define ZREG_TMP2,   ZREG_X16
+|.define ZREG_TMP3,   ZREG_X17
 |.define ZREG_FPTMP,  ZREG_V16
 
 |.define HYBRID_SPAD, #32     // padding for stack alignment
