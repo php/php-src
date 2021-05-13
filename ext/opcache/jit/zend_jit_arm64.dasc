@@ -15017,6 +15017,133 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 	return regset;
 }
 
+static size_t dasm_venners_size = 0;
+void **dasm_labels_veneers = NULL;
+
+static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, uint32_t *cp, ptrdiff_t offset)
+{
+	void *veneer;
+	ptrdiff_t na;
+	int n, m;
+
+	/* try to reuse veneers for global labels */
+	if ((ins >> 16) == DASM_REL_LG
+	 && *(b-1) < 0
+	 && dasm_labels_veneers[-*(b-1)]) {
+
+		veneer = dasm_labels_veneers[-*(b-1)];
+		na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+		n = (int)na;
+
+		/* check if we can jump to veneer */
+		if ((ptrdiff_t)n != na) {
+			/* pass */
+		} else if (!(ins & 0xf800)) {  /* B, BL */
+			if ((n & 3) == 0 && ((n+0x08000000) >> 28) == 0) {
+				return n;
+			}
+		} else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
+			if ((n & 3) == 0 && ((n+0x00100000) >> 21) == 0) {
+				return n;
+			}
+		} else if ((ins & 0x3000) == 0x2000) {  /* ADR */
+			/* pass */
+		} else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
+			/* pass */
+		} else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
+			if ((n & 3) == 0 && ((n+0x00008000) >> 16) == 0) {
+				return n;
+			}
+		}
+	}
+
+	veneer = (char*)buffer + (Dst->codesize + dasm_venners_size);
+
+	if (veneer > dasm_end) {
+		return 0; /* jit_buffer_size overflow */
+	}
+
+	na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+	n = (int)na;
+
+	/* check if we can jump to veneer */
+	if ((ptrdiff_t)n != na) {
+		ZEND_ASSERT(0);
+		return 0;
+	} else if (!(ins & 0xf800)) {  /* B, BL */
+		if ((n & 3) != 0 || ((n+0x08000000) >> 28) != 0) {
+			ZEND_ASSERT(0);
+			return 0;
+		}
+	} else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
+		if ((n & 3) != 0 || ((n+0x00100000) >> 21) != 0) {
+			ZEND_ASSERT(0);
+			return 0;
+		}
+	} else if ((ins & 0x3000) == 0x2000) {  /* ADR */
+		ZEND_ASSERT(0);
+		return 0;
+	} else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
+		ZEND_ASSERT(0);
+		return 0;
+	} else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
+		if ((n & 3) != 0 || ((n+0x00008000) >> 16) != 0) {
+			ZEND_ASSERT(0);
+			return 0;
+		}
+	} else if ((ins & 0x8000)) {  /* absolute */
+		ZEND_ASSERT(0);
+		return 0;
+	} else {
+		ZEND_ASSERT(0);
+		return 0;
+	}
+
+	// TODO: support for long veneers (above 128MB) ???
+
+	/* check if we can use B to jump from veneer */
+	na = (ptrdiff_t)cp + offset - (ptrdiff_t)veneer - 4;
+	m = (int)na;
+	if ((ptrdiff_t)m != na) {
+		ZEND_ASSERT(0);
+		return 0;
+	} else if ((m & 3) != 0 || ((m+0x08000000) >> 28) != 0) {
+		ZEND_ASSERT(0);
+		return 0;
+	}
+
+	/* generate B instruction */
+	*(uint32_t*)veneer = 0x14000000 | ((m >> 2) & 0x03ffffff);
+	dasm_venners_size += 4;
+
+	if ((ins >> 16) == DASM_REL_LG
+	 && *(b-1) < 0) {
+		/* reuse this veneer for the future jumps to global label */
+		dasm_labels_veneers[-*(b-1)] = veneer;
+		/* Dst->globals[*(b-1)] = veneer; */
+
+#ifdef HAVE_DISASM
+	    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
+			const char *name = zend_jit_disasm_find_symbol((ptrdiff_t)cp + offset - 4, &offset);
+
+			if (name && !offset) {
+				if (strstr(name, "@veneer") == NULL) {
+					char *new_name;
+
+					zend_spprintf(&new_name, 0, "%s@veneer", name);
+					zend_jit_disasm_add_symbol(new_name, (uint64_t)(uintptr_t)veneer, 4);
+					efree(new_name);
+				} else {
+					zend_jit_disasm_add_symbol(name, (uint64_t)(uintptr_t)veneer, 4);
+				}
+			}
+		}
+#endif
+	}
+
+	return n;
+}
+
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
