@@ -507,6 +507,25 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 
 	memset(ssa, 0, sizeof(zend_ssa));
 	ssa->cfg.blocks_count = 1;
+
+	if (JIT_G(opt_level) == ZEND_JIT_LEVEL_INLINE) {
+		zend_cfg cfg;
+		void *checkpoint = zend_arena_checkpoint(CG(arena));
+
+		if (zend_jit_build_cfg(op_array, &cfg) == SUCCESS) {
+			ssa->cfg.flags = cfg.flags;
+		} else{
+			ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+		}
+
+		/* TODO: move this to zend_cfg.c ? */
+		if (!op_array->function_name) {
+			ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+		}
+
+		zend_arena_release(&CG(arena), checkpoint);
+	}
+
 	return ssa;
 }
 
