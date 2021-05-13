@@ -88,7 +88,11 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 				dbh->is_persistent);
 
 		} else {
-			einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+			if (S && S->stmt) {
+				einfo->errmsg = pestrdup(mysql_stmt_error(S->stmt), dbh->is_persistent);
+			} else {
+				einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+			}
 		}
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
