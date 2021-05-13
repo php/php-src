@@ -870,22 +870,31 @@ PHP_FUNCTION(unpack)
 			RETURN_FALSE;
 		}
 
+
 		/* Do actual unpacking */
 		for (i = 0; i != repetitions; i++ ) {
-			/* Space for name + number, safe as namelen is ensured <= 200 */
-			char name_buffer[256];
-
-			char* real_name;
-			size_t real_name_length;
+			zend_string* real_name;
+			zval val;
+			char buffer[32];
 
 			if (repetitions == 1 && namelen > 0) {
 				/* Use a part of the formatarg argument directly as the name. */
-				real_name_length = namelen;
-				real_name = name;
+				real_name = zend_string_init_fast(name, namelen);
+
 			} else {
 				/* Need to add the 1-based element number to the name */
-				real_name_length = snprintf(name_buffer, sizeof(name_buffer), "%.*s%d", namelen, name, i + 1);
-				real_name = name_buffer;
+
+				/* hardcoded case for small-ish number of repetitions */
+				if ((i+1) < 100) {
+					buffer[0] = '0' + (i+1) / 10;
+					buffer[1] = '0' + (i+1) % 10;
+					int digits = (i+1) < 10 ? 1 : 2;
+					real_name = zend_string_concat2(name, namelen, buffer + 2 - digits, digits);
+
+				} else {
+					int digits = snprintf(buffer, sizeof(buffer), "%d", i+1);
+					real_name = zend_string_concat2(name, namelen, buffer, digits);
+				}
 			}
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
@@ -907,7 +916,8 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						add_assoc_stringl_ex(return_value, real_name, real_name_length, &input[inputpos], len);
+						ZVAL_STRINGL(&val, &input[inputpos], len);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					case 'A': {
@@ -933,7 +943,8 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl_ex(return_value, real_name, real_name_length, &input[inputpos], len + 1);
+						ZVAL_STRINGL(&val, &input[inputpos], len + 1);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
@@ -957,7 +968,8 @@ PHP_FUNCTION(unpack)
 						}
 						len = s;
 
-						add_assoc_stringl_ex(return_value, real_name, real_name_length, &input[inputpos], len);
+						ZVAL_STRINGL(&val, &input[inputpos], len);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1000,7 +1012,9 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZSTR_VAL(buf)[len] = '\0';
-						add_assoc_str_ex(return_value, real_name, real_name_length, buf);
+
+						ZVAL_STR(&val, buf);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1008,7 +1022,9 @@ PHP_FUNCTION(unpack)
 					case 'C': { /* unsigned */
 						uint8_t x = input[inputpos];
 						zend_long v = (type == 'c') ? (int8_t) x : x;
-						add_assoc_long_ex(return_value, real_name, real_name_length, v);
+
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1027,7 +1043,8 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long_ex(return_value, real_name, real_name_length, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1035,7 +1052,9 @@ PHP_FUNCTION(unpack)
 					case 'I': { /* unsigned integer, machine size, machine endian */
 						unsigned int x = *((unaligned_uint*) &input[inputpos]);
 						zend_long v = (type == 'i') ? (int) x : x;
-						add_assoc_long_ex(return_value, real_name, real_name_length, v);
+
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1054,7 +1073,8 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long_ex(return_value, real_name, real_name_length, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 
 						break;
 					}
@@ -1075,7 +1095,8 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long_ex(return_value, real_name, real_name_length, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 #endif
@@ -1094,7 +1115,8 @@ PHP_FUNCTION(unpack)
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
 
-						add_assoc_double_ex(return_value, real_name, real_name_length, (double)v);
+						ZVAL_DOUBLE(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1111,7 +1133,9 @@ PHP_FUNCTION(unpack)
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(double));
 						}
-						add_assoc_double_ex(return_value, real_name, real_name_length, v);
+
+						ZVAL_DOUBLE(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1140,6 +1164,8 @@ PHP_FUNCTION(unpack)
 						i = repetitions - 1;	/* Done, break out of for loop */
 						break;
 				}
+
+				zend_string_release(real_name);
 
 				inputpos += size;
 				if (inputpos < 0) {
