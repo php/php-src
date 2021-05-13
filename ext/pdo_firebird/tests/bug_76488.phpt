@@ -2,6 +2,8 @@
 PDO_Firebird: Bug #76488 Memory leak when fetching a BLOB field
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';

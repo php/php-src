@@ -5,6 +5,8 @@ FB payload server satisfies connection attempt
 if (!extension_loaded('pdo_firebird')) die("skip pdo_firebird extension not available");
 if (!extension_loaded('sockets')) die("skip sockets extension not available");
 ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require_once "payload_server.inc";
