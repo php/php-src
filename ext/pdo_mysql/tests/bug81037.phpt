@@ -12,6 +12,8 @@ MySQLPDOTest::skip();
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 $pdo = MySQLPDOTest::factory();
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 $sql = "SELECT `foo` FROM `bar` WHERE `foo` = :par";
 $stmt = $pdo->prepare($sql);
