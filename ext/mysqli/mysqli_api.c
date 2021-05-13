@@ -79,7 +79,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 		*p_copy++ = '/';
 		*p_copy++ = '*';
 		while (1) {
-			register char v = *p_orig;
+			char v = *p_orig;
 			if (v == 0) {
 				break;
 			}

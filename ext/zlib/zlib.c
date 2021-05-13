@@ -612,7 +612,7 @@ PHP_FUNCTION(gzfile)
 	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
-	register int i = 0;
+	int i = 0;
 	zend_long use_include_path = 0;
 	php_stream *stream;
 

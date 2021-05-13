@@ -459,7 +459,7 @@ static int php_htoi(char *s)
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
-	register unsigned char c;
+	unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
 	zend_string *start;

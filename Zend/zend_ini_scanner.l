@@ -305,7 +305,7 @@ zend_result zend_ini_prepare_string_for_scanning(char *str, int scanner_mode)
 /* {{{ zend_ini_escape_string() */
 static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_type)
 {
-	register char *s, *t;
+	char *s, *t;
 	char *end;
 
 	zend_ini_copy_value(lval, str, len);

@@ -85,7 +85,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 						   size_t min_width, size_t max_width, char padding,
 						   size_t alignment, size_t len, int neg, int expprec, int always_sign)
 {
-	register size_t npad;
+	size_t npad;
 	size_t req_size;
 	size_t copy_len;
 	size_t m_width;
@@ -143,8 +143,8 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register zend_ulong magn, nmagn;
-	register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
+	zend_ulong magn, nmagn;
+	unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
 	PRINTF_DEBUG(("sprintf: appendint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment));
@@ -187,8 +187,8 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 					   size_t width, char padding, size_t alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register zend_ulong magn, nmagn;
-	register unsigned int i = NUM_BUF_SIZE - 1;
+	zend_ulong magn, nmagn;
+	unsigned int i = NUM_BUF_SIZE - 1;
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment));
@@ -326,9 +326,9 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 const char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register zend_ulong num;
-	register zend_ulong  i = NUM_BUF_SIZE - 1;
-	register int andbits = (1 << n) - 1;
+	zend_ulong num;
+	zend_ulong  i = NUM_BUF_SIZE - 1;
+	int andbits = (1 << n) - 1;
 
 	PRINTF_DEBUG(("sprintf: append2n(%x, %x, %x, %d, %d, '%c', %d, %d, %x)\n",
 				  *buffer, pos, &ZSTR_LEN(*buffer), number, width, padding, alignment, n,
@@ -355,8 +355,8 @@ inline static int
 php_sprintf_getnumber(char **buffer, size_t *len)
 {
 	char *endptr;
-	register zend_long num = ZEND_STRTOL(*buffer, &endptr, 10);
-	register size_t i;
+	zend_long num = ZEND_STRTOL(*buffer, &endptr, 10);
+	size_t i;
 
 	if (endptr != NULL) {
 		i = (endptr - *buffer);

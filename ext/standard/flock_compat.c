@@ -162,10 +162,10 @@ PHPAPI int php_flock(int fd, int operation)
 int inet_aton(const char *cp, struct in_addr *ap)
 {
     int dots = 0;
-    register unsigned long acc = 0, addr = 0;
+    unsigned long acc = 0, addr = 0;
 
     do {
-        register char cc = *cp;
+        char cc = *cp;
 
         switch (cc) {
         case '0':
