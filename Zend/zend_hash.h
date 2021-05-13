@@ -1556,8 +1556,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 /* Check if an array is a list */
 static zend_always_inline bool zend_array_is_list(zend_array *array)
 {
-	zend_long expected_idx = 0;
-	zend_long num_idx;
+	zend_ulong expected_idx = 0;
+	zend_ulong num_idx;
 	zend_string* str_idx;
 	/* Empty arrays are lists */
 	if (zend_hash_num_elements(array) == 0) {
