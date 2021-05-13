@@ -873,29 +873,6 @@ PHP_FUNCTION(unpack)
 
 		/* Do actual unpacking */
 		for (i = 0; i != repetitions; i++ ) {
-			zend_string* real_name;
-			zval val;
-			char buffer[32];
-
-			if (repetitions == 1 && namelen > 0) {
-				/* Use a part of the formatarg argument directly as the name. */
-				real_name = zend_string_init_fast(name, namelen);
-
-			} else {
-				/* Need to add the 1-based element number to the name */
-
-				/* hardcoded case for small-ish number of repetitions */
-				if ((i+1) < 100) {
-					buffer[0] = '0' + (i+1) / 10;
-					buffer[1] = '0' + (i+1) % 10;
-					int digits = (i+1) < 10 ? 1 : 2;
-					real_name = zend_string_concat2(name, namelen, buffer + 2 - digits, digits);
-
-				} else {
-					int digits = snprintf(buffer, sizeof(buffer), "%d", i+1);
-					real_name = zend_string_concat2(name, namelen, buffer, digits);
-				}
-			}
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
@@ -904,6 +881,22 @@ PHP_FUNCTION(unpack)
 			}
 
 			if ((inputpos + size) <= inputlen) {
+
+				zend_string* real_name;
+				zval val;
+
+				if (repetitions == 1 && namelen > 0) {
+					/* Use a part of the formatarg argument directly as the name. */
+					real_name = zend_string_init_fast(name, namelen);
+
+				} else {
+					/* Need to add the 1-based element number to the name */
+					char buf[MAX_LENGTH_OF_LONG + 1];
+					char *res = zend_print_ulong_to_buf(buf + sizeof(buf) - 1, i+1);
+					size_t digits = buf + sizeof(buf) - 1 - res;
+					real_name = zend_string_concat2(name, namelen, res, digits);
+				}
+
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
