@@ -209,6 +209,8 @@ static bool zend_is_commutative(zend_uchar opcode)
 #if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 #include "dynasm/dasm_x86.h"
 #elif defined(__aarch64__)
+static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, uint32_t *cp, ptrdiff_t offset);
+#define DASM_ADD_VENEER zend_jit_add_veneer
 #include "dynasm/dasm_arm64.h"
 #endif
 
@@ -408,6 +410,10 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		return NULL;
 	}
 
+#ifdef __aarch64__
+	dasm_venners_size = 0;
+#endif
+
 	ret = dasm_encode(dasm_state, *dasm_ptr);
 	if (ret != DASM_S_OK) {
 #if ZEND_DEBUG
@@ -415,6 +421,10 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 #endif
 		return NULL;
 	}
+
+#ifdef __aarch64__
+	size += dasm_venners_size;
+#endif
 
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
@@ -4396,8 +4406,14 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 		return FAILURE;
 	}
 
-	/* save JIT buffer pos */
 	zend_jit_unprotect();
+#ifdef __aarch64__
+	/* reserve space for global labels veneers */
+	dasm_labels_veneers = *dasm_ptr;
+	*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
+	memset(dasm_labels_veneers, 0, sizeof(void*) * zend_lb_MAX);
+#endif
+	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
 	zend_jit_protect();
 
