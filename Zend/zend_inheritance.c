@@ -1636,7 +1636,14 @@ static bool do_inherit_constant_check(HashTable *child_constants_table, zend_cla
 
 	if (zv != NULL) {
 		old_constant = (zend_class_constant*)Z_PTR_P(zv);
-		if (old_constant->ce != parent_constant->ce) {
+
+		if ((ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
+				ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name), ZSTR_VAL(iface->name), ZSTR_VAL(name)
+			);
+		}
+
+		if (old_constant->ce != parent_constant->ce && old_constant->ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface->name));
 		}
 		return 0;
