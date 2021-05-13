@@ -404,6 +404,15 @@ int dasm_link(Dst_DECL, size_t *szp)
   return DASM_S_OK;
 }
 
+#ifdef DASM_ADD_VENEER
+#define CK_REL(x, o) \
+  do { if (!(x) && !(n = DASM_ADD_VENEER(D, buffer, ins, b, cp, o))) \
+    return DASM_S_RANGE_REL|(p-D->actionlist-1); \
+  } while (0)
+#else
+#define CK_REL(x, o) CK(x, RANGE_REL)
+#endif
+
 #ifdef DASM_CHECKS
 #define CK(x, st) \
   do { if (!(x)) return DASM_S_##st|(p-D->actionlist-1); } while (0)
@@ -444,7 +453,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  if (n < 0) {
 	    ptrdiff_t na = (ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp + 4;
 	    n = (int)na;
-	    CK((ptrdiff_t)n == na, RANGE_REL);
+	    CK_REL((ptrdiff_t)n == na, na);
 	    goto patchrel;
 	  }
 	  /* fallthrough */
@@ -453,18 +462,18 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  n = *DASM_POS2PTR(D, n) - (int)((char *)cp - base) + 4;
 	patchrel:
 	  if (!(ins & 0xf800)) {  /* B, BL */
-	    CK((n & 3) == 0 && ((n+0x08000000) >> 28) == 0, RANGE_REL);
+	    CK_REL((n & 3) == 0 && ((n+0x08000000) >> 28) == 0, n);
 	    cp[-1] |= ((n >> 2) & 0x03ffffff);
 	  } else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
-	    CK((n & 3) == 0 && ((n+0x00100000) >> 21) == 0, RANGE_REL);
+	    CK_REL((n & 3) == 0 && ((n+0x00100000) >> 21) == 0, n);
 	    cp[-1] |= ((n << 3) & 0x00ffffe0);
 	  } else if ((ins & 0x3000) == 0x2000) {  /* ADR */
-	    CK(((n+0x00100000) >> 21) == 0, RANGE_REL);
+	    CK_REL(((n+0x00100000) >> 21) == 0, n);
 	    cp[-1] |= ((n << 3) & 0x00ffffe0) | ((n & 3) << 29);
 	  } else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
 	    cp[-1] |= ((n >> 9) & 0x00ffffe0) | (((n >> 12) & 3) << 29);
 	  } else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
-	    CK((n & 3) == 0 && ((n+0x00008000) >> 16) == 0, RANGE_REL);
+	    CK_REL((n & 3) == 0 && ((n+0x00008000) >> 16) == 0, n);
 	    cp[-1] |= ((n << 3) & 0x0007ffe0);
 	  } else if ((ins & 0x8000)) {  /* absolute */
 	    cp[0] = (unsigned int)((ptrdiff_t)cp - 4 + n);
@@ -475,7 +484,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	case DASM_REL_A: {
 	  ptrdiff_t na = (((ptrdiff_t)(*b++) << 32) | (unsigned int)n) - (ptrdiff_t)cp + 4;
 	  n = (int)na;
-	  CK((ptrdiff_t)n == na, RANGE_REL);
+	  CK_REL((ptrdiff_t)n == na, na);
 	  goto patchrel;
 	}
 	case DASM_LABEL_LG:
