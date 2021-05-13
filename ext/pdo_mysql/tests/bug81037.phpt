@@ -14,8 +14,9 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+MySQLPDOTest::createTestTable($pdo);
 
-$sql = "SELECT `foo` FROM `bar` WHERE `foo` = :par";
+$sql = "SELECT id FROM test WHERE label = :par";
 $stmt = $pdo->prepare($sql);
 try {
     $stmt->execute();
