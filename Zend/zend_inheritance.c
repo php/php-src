@@ -869,10 +869,10 @@ static void ZEND_COLD emit_incompatible_method_error(
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype), ZSTR_VAL(unresolved_class));
 	} else if (status == INHERITANCE_WARNING) {
 		zend_attribute *return_type_will_change_attribute = zend_get_attribute_str(
-    		child->common.attributes,
-    		"returntypewillchange",
-    		sizeof("returntypewillchange")-1
-    	);
+			child->common.attributes,
+			"returntypewillchange",
+			sizeof("returntypewillchange")-1
+		);
 
 		if (!return_type_will_change_attribute) {
 			zend_error_at(E_DEPRECATED, NULL, func_lineno(child),

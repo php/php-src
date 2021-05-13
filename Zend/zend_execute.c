@@ -1294,19 +1294,18 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 static bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
 	zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
-	if (!ZEND_ARG_TYPE_IS_TENTATIVE(ret_info)) {
-		if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
-			if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
-				zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
-				return 0;
-			}
-			return 1;
-		}
 
-		if (UNEXPECTED(!zend_check_type(&ret_info->type, ret, /* cache_slot */ NULL, NULL, 1, /* is_internal */ 1))) {
-			zend_verify_internal_return_error(zf, ret);
+	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
+		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
+			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
 			return 0;
 		}
+		return 1;
+	}
+
+	if (UNEXPECTED(!zend_check_type(&ret_info->type, ret, /* cache_slot */ NULL, NULL, 1, /* is_internal */ 1))) {
+		zend_verify_internal_return_error(zf, ret);
+		return 0;
 	}
 
 	return 1;

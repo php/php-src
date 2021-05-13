@@ -1446,9 +1446,7 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
 				func_info->call_map = zend_build_call_map(&ctx.arena, func_info, call_graph.op_arrays[i]);
-				if ((call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-					!ZEND_ARG_TYPE_IS_TENTATIVE(&((zend_function *) call_graph.op_arrays[i])->common.arg_info[-1])
-				) {
+				if (call_graph.op_arrays[i]->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 					zend_init_func_return_info(call_graph.op_arrays[i], script, &func_info->return_info);
 				}
 			}

@@ -56,13 +56,6 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	}
 }
 
-void validate_return_type_will_change_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
-{
-	if (target != ZEND_ATTRIBUTE_TARGET_METHOD) {
-		zend_error(E_COMPILE_ERROR, "Only methods can be marked with #[ReturnTypeWillChange]");
-	}
-}
-
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -293,8 +286,7 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
-	attr = zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
-	attr->validator = validate_return_type_will_change_attribute;
+	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
 }
 
 void zend_attributes_shutdown(void)

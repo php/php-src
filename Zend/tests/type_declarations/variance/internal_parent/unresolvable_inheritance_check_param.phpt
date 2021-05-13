@@ -1,5 +1,5 @@
 --TEST--
-Internal class as parent
+Test unresolvable inheritance check due to unavailable parameter type when the parent has a tentative return type.
 --FILE--
 <?php
 

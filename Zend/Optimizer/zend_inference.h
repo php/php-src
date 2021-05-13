@@ -271,7 +271,7 @@ ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret);
 uint32_t zend_get_return_info_from_signature_only(
 		const zend_function *func, const zend_script *script,
-		zend_class_entry **ce, bool *ce_is_instanceof);
+		zend_class_entry **ce, bool *ce_is_instanceof, bool use_tentative_return_info);
 void zend_func_return_info(const zend_op_array   *op_array,
                            const zend_script     *script,
                            int                    recursive,
