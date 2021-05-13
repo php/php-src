@@ -73,7 +73,7 @@
 |.define TMP1w,   w15
 |.define TMP2,    x16
 |.define TMP2w,   w16
-|.define TMP3,    x17
+|.define TMP3,    x17 // TODO: remember about hard-coded: mrs TMP3, tpidr_el0
 |.define TMP3w,   w17
 |.define FPTMP,   v16
 |.define FPTMPd,  d16
@@ -440,8 +440,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro LOAD_TSRM_CACHE, reg
-|	//.byte 0x4d, 0xd0, 0x3b, 0xd5 // TODO: hard-coded: mrs TMP3, tpidr_el0
-|	.long 0xd53bd04d // TODO: hard-coded: mrs TMP3, tpidr_el0
+|	.long 0xd53bd051 // TODO: hard-coded: mrs TMP3, tpidr_el0
 ||	ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= LDR_STR_PIMM64);
 |	ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
 |.endmacro
