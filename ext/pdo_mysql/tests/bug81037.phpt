@@ -11,7 +11,7 @@ MySQLPDOTest::skip();
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
-$db = MySQLPDOTest::factory();
+$pdo = MySQLPDOTest::factory();
 
 $sql = "SELECT `foo` FROM `bar` WHERE `foo` = :par";
 $stmt = $pdo->prepare($sql);
