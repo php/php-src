@@ -2,6 +2,8 @@
 Bug #80521 (Parameters with underscores no longer recognized)
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';

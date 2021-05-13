@@ -2,6 +2,8 @@
 Bug #64037 Firebird return wrong value for numeric field
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 

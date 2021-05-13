@@ -2,6 +2,8 @@
 Bug #62024 Cannot insert second row with null using parametrized query (Firebird PDO)
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 
