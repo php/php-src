@@ -176,6 +176,9 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/noreturn_type
   . Added support for fibers.
     RFC: https://wiki.php.net/rfc/fibers
+  . File uploads now provide an additional full_path key, which contains the
+    full path (rather than just the basename) of the uploaded file. This is
+    intended for use in conjunction with "upload webkitdirectory".
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
