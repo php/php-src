@@ -57,13 +57,23 @@
 
 #include "gd_compat.h"
 
-#include <gd.h>
-#include <gd_errors.h>
-#include <gdfontt.h>  /* 1 Tiny font */
-#include <gdfonts.h>  /* 2 Small font */
-#include <gdfontmb.h> /* 3 Medium bold font */
-#include <gdfontl.h>  /* 4 Large font */
-#include <gdfontg.h>  /* 5 Giant font */
+#ifdef HAVE_GD_BUNDLED
+# include "libgd/gd.h"
+# include "libgd/gd_errors.h"
+# include "libgd/gdfontt.h"  /* 1 Tiny font */
+# include "libgd/gdfonts.h"  /* 2 Small font */
+# include "libgd/gdfontmb.h" /* 3 Medium bold font */
+# include "libgd/gdfontl.h"  /* 4 Large font */
+# include "libgd/gdfontg.h"  /* 5 Giant font */
+#else
+# include <gd.h>
+# include <gd_errors.h>
+# include <gdfontt.h>  /* 1 Tiny font */
+# include <gdfonts.h>  /* 2 Small font */
+# include <gdfontmb.h> /* 3 Medium bold font */
+# include <gdfontl.h>  /* 4 Large font */
+# include <gdfontg.h>  /* 5 Giant font */
+#endif
 
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 # include <ft2build.h>
