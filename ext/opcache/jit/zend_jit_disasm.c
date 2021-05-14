@@ -448,13 +448,13 @@ static int zend_jit_disasm(const char    *name,
 
 # ifdef HAVE_CAPSTONE_ITER
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
-			fprintf(stderr, "    "ZEND_XLONG_FMT":", insn->address);
+			fprintf(stderr, "    %" PRIx64 ":", insn->address);
 		}
 		fprintf(stderr, "\t%s ", insn->mnemonic);
 		p = insn->op_str;
 # else
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
-			fprintf(stderr, "    "ZEND_XLONG_FMT":", insn[i].address);
+			fprintf(stderr, "    %" PRIx64 ":", insn[i].address);
 		}
 		fprintf(stderr, "\t%s ", insn[i].mnemonic);
 		p = insn[i].op_str;
@@ -556,7 +556,7 @@ static int zend_jit_disasm(const char    *name,
 			}
 		}
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
-			fprintf(stderr, "    "ZEND_XLONG_FMT":", ud_insn_off(&ud));
+			fprintf(stderr, "    %" PRIx64 ":", ud_insn_off(&ud));
 		}
 		fprintf(stderr, "\t%s\n", ud_insn_asm(&ud));
 	}
