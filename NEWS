@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #81015 (Opcache optimization assumes wrong part of ternary
     operator in if-condition). (Nikita)
 
+- PDO_MySQL:
+  . Fixed bug #81037 PDO discards error message text from prepared statement. (Kamil Tekiela)
+
 - PDO_ODBC:
   . Fixed bug #44643 (bound parameters ignore explicit type definitions). (cmb)
 
