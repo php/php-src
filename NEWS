@@ -92,7 +92,8 @@ PHP                                                                        NEWS
     fetching a BLOB). (Nikita)
 
 . PDO MySQL:
-  . Fixed bug#80908 (PDO::lastInsertId() return wrong). (matt)
+  . Fixed bug #80908 (PDO::lastInsertId() return wrong). (matt)
+  . Fixed bug #81037 PDO discards error message text from prepared statement. (Kamil Tekiela)
 
 . PDO ODBC:
   . Implement PDO_ATTR_SERVER_VERSION and PDO_ATTR_SERVER_INFO for
