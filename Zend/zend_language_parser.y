@@ -607,8 +607,8 @@ enum_backing_type:
 ;
 
 enum_case:
-		T_CASE identifier enum_case_expr ';'
-			{ $$ = zend_ast_create(ZEND_AST_ENUM_CASE, $2, $3, NULL); }
+		T_CASE backup_doc_comment identifier enum_case_expr ';'
+			{ $$ = zend_ast_create(ZEND_AST_ENUM_CASE, $3, $4, ($2 ? zend_ast_create_zval_from_str($2) : NULL), NULL); }
 ;
 
 enum_case_expr:
