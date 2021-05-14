@@ -15389,7 +15389,10 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
 			op1_info = OP1_INFO();
-			return opline->op1_type == IS_CV && !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - MAY_BE_LONG));
+			op2_info = OP1_DEF_INFO();
+			return opline->op1_type == IS_CV
+				&& !(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - MAY_BE_LONG))
+				&& (op2_info & MAY_BE_LONG);
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
