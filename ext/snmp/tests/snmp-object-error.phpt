@@ -75,7 +75,7 @@ $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries)
 var_dump($session->max_oids);
 try {
     $session->max_oids = "ttt";
-} catch (\ValueError $e) {
+} catch (TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
@@ -103,6 +103,6 @@ Closing session
 bool(true)
 Invalid or uninitialized SNMP object
 NULL
-max_oids must be greater than 0 or null
-max_oids must be greater than 0 or null
+Cannot assign string to property SNMP::$max_oids of type ?int
+SNMP::$max_oids must be greater than 0 or null
 NULL

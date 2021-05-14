@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 08192d87d2ac5d35092cfcf4a2cdcc50f7ec4ada */
+ * Stub hash: 5258c5796aca15e369dd72c0a8ed4dc1df31ce9d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_snmpget, 0, 3, stdClass, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -248,6 +248,54 @@ static zend_class_entry *register_class_SNMP(void)
 
 	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_info_default_value;
+	ZVAL_UNDEF(&property_info_default_value);
+	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, 1);
+	zend_declare_typed_property(class_entry, property_info_name, &property_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_info_name);
+
+	zval property_max_oids_default_value;
+	ZVAL_UNDEF(&property_max_oids_default_value);
+	zend_string *property_max_oids_name = zend_string_init("max_oids", sizeof("max_oids") - 1, 1);
+	zend_declare_typed_property(class_entry, property_max_oids_name, &property_max_oids_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_max_oids_name);
+
+	zval property_valueretrieval_default_value;
+	ZVAL_UNDEF(&property_valueretrieval_default_value);
+	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, 1);
+	zend_declare_typed_property(class_entry, property_valueretrieval_name, &property_valueretrieval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_valueretrieval_name);
+
+	zval property_quick_print_default_value;
+	ZVAL_UNDEF(&property_quick_print_default_value);
+	zend_string *property_quick_print_name = zend_string_init("quick_print", sizeof("quick_print") - 1, 1);
+	zend_declare_typed_property(class_entry, property_quick_print_name, &property_quick_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_quick_print_name);
+
+	zval property_enum_print_default_value;
+	ZVAL_UNDEF(&property_enum_print_default_value);
+	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enum_print_name, &property_enum_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_enum_print_name);
+
+	zval property_oid_output_format_default_value;
+	ZVAL_UNDEF(&property_oid_output_format_default_value);
+	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", sizeof("oid_output_format") - 1, 1);
+	zend_declare_typed_property(class_entry, property_oid_output_format_name, &property_oid_output_format_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_oid_output_format_name);
+
+	zval property_oid_increasing_check_default_value;
+	ZVAL_UNDEF(&property_oid_increasing_check_default_value);
+	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, 1);
+	zend_declare_typed_property(class_entry, property_oid_increasing_check_name, &property_oid_increasing_check_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_oid_increasing_check_name);
+
+	zval property_exceptions_enabled_default_value;
+	ZVAL_UNDEF(&property_exceptions_enabled_default_value);
+	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", sizeof("exceptions_enabled") - 1, 1);
+	zend_declare_typed_property(class_entry, property_exceptions_enabled_name, &property_exceptions_enabled_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_exceptions_enabled_name);
 
 	return class_entry;
 }
