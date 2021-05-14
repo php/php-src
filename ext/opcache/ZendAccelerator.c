@@ -1426,7 +1426,7 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used + 64);
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
-#elif ZEND_MM_ALIGNMENT < 8
+#elif defined(ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT)
 	/* Align to 8-byte boundary */
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used + 8);
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
@@ -2371,7 +2371,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 
 	zend_shared_alloc_clear_xlat_table();
 
-#if ZEND_MM_ALIGNMENT < 8
+#ifdef ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
 	ZCG(mem) = zend_shared_alloc(size + 8);
 #else
@@ -2385,7 +2385,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		return NULL;
 	}
 
-#if ZEND_MM_ALIGNMENT < 8
+#ifdef ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
 #endif
