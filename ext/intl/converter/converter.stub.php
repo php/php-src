@@ -6,63 +6,63 @@ class UConverter
 {
     public function __construct(?string $destination_encoding = null, ?string $source_encoding = null) {}
 
-    /** @return string|false */
-    public function convert(string $str, bool $reverse = false) {}
+    /** @tentative-return-type */
+    public function convert(string $str, bool $reverse = false): string|false {}
 
     /**
      * @param int $error
-     * @return string|int|array|null
+     * @tentative-return-type
      */
-    public function fromUCallback(int $reason, array $source, int $codePoint, &$error) {}
+    public function fromUCallback(int $reason, array $source, int $codePoint, &$error): string|int|array|null {}
 
-    /** @return array|false|null */
-    public static function getAliases(string $name) {}
+    /** @tentative-return-type */
+    public static function getAliases(string $name): array|false|null {}
 
-    /** @return array */
-    public static function getAvailable() {}
+    /** @tentative-return-type */
+    public static function getAvailable(): array {}
 
-    /** @return string|false|null */
-    public function getDestinationEncoding() {}
+    /** @tentative-return-type */
+    public function getDestinationEncoding(): string|false|null {}
 
-    /** @return int|false|null */
-    public function getDestinationType() {}
+    /** @tentative-return-type */
+    public function getDestinationType(): int|false|null {}
 
-    /** @return int */
-    public function getErrorCode() {}
+    /** @tentative-return-type */
+    public function getErrorCode(): int {}
 
-    /** @return string|null */
-    public function getErrorMessage() {}
+    /** @tentative-return-type */
+    public function getErrorMessage(): ?string {}
 
-    /** @return string|false|null */
-    public function getSourceEncoding() {}
+    /** @tentative-return-type */
+    public function getSourceEncoding(): string|false|null {}
 
-    /** @return int|false|null */
-    public function getSourceType() {}
+    /** @tentative-return-type */
+    public function getSourceType(): int|false|null {}
 
-    /** @return array|null */
-    public static function getStandards() {}
+    /** @tentative-return-type */
+    public static function getStandards(): ?array {}
 
-    /** @return string|false|null */
-    public function getSubstChars() {}
+    /** @tentative-return-type */
+    public function getSubstChars(): string|false|null {}
 
-    /** @return string */
-    public static function reasonText(int $reason) {}
+    /** @tentative-return-type */
+    public static function reasonText(int $reason): string {}
 
-    /** @return bool */
-    public function setDestinationEncoding(string $encoding) {}
+    /** @tentative-return-type */
+    public function setDestinationEncoding(string $encoding): bool {}
 
-    /** @return bool */
-    public function setSourceEncoding(string $encoding) {}
+    /** @tentative-return-type */
+    public function setSourceEncoding(string $encoding): bool {}
 
-    /** @return bool */
-    public function setSubstChars(string $chars) {}
+    /** @tentative-return-type */
+    public function setSubstChars(string $chars): bool {}
 
     /**
      * @param int $error
-     * @return string|int|array|null
+     * @tentative-return-type
      */
-    public function toUCallback(int $reason, string $source, string $codeUnits, &$error) {}
+    public function toUCallback(int $reason, string $source, string $codeUnits, &$error): string|int|array|null {}
 
-    /** @return string|false */
-    public static function transcode(string $str, string $toEncoding, string $fromEncoding, ?array $options = null) {}
+    /** @tentative-return-type */
+    public static function transcode(string $str, string $toEncoding, string $fromEncoding, ?array $options = null): string|false {}
 }
