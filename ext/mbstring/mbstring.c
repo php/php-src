@@ -357,7 +357,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 			return FAILURE;
 		}
 
-		if (strcasecmp(ZSTR_VAL(encoding_str), "auto") == 0) {
+		if (zend_string_equals_literal_ci(encoding_str, "auto")) {
 			if (!included_auto) {
 				const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 				const size_t identify_list_size = MBSTRG(default_detect_order_list_size);

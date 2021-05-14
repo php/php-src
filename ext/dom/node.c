@@ -603,7 +603,7 @@ int dom_node_prefix_read(dom_object *obj, zval *retval)
 
 int dom_node_prefix_write(dom_object *obj, zval *newval)
 {
-	zend_string *str;
+	zend_string *prefix_str;
 	xmlNode *nodep, *nsnode = NULL;
 	xmlNsPtr ns = NULL, curns;
 	char *strURI;
@@ -627,17 +627,17 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			str = zval_try_get_string(newval);
-			if (UNEXPECTED(!str)) {
+			prefix_str = zval_try_get_string(newval);
+			if (UNEXPECTED(!prefix_str)) {
 				return FAILURE;
 			}
 
-			prefix = ZSTR_VAL(str);
+			prefix = ZSTR_VAL(prefix_str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
 				if (strURI == NULL ||
-					(!strcmp(prefix, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
-					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp(prefix, "xmlns") &&
+					(zend_string_equals_literal(prefix_str, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
+					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix_str, "xmlns") &&
 					 strcmp(strURI, (char *) DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp((char *) nodep->name, "xmlns"))) {
 					ns = NULL;
@@ -656,14 +656,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release_ex(str, 0);
+					zend_string_release_ex(prefix_str, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release_ex(str, 0);
+			zend_string_release_ex(prefix_str, 0);
 			break;
 		default:
 			break;
