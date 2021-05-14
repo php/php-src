@@ -156,9 +156,6 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO(name, class_name, allow_null) \
 	ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX2(name, 0, -1, class_name, allow_null, 0)
 
-#define ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO(name, class_name, allow_null) \
-	ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX2(name, 0, -1, class_name, allow_null, 1)
-
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX2(name, return_reference, required_num_args, type, is_tentative_return_type) \
 	static const zend_internal_arg_info name[] = { \
 		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_INIT_MASK(type | _ZEND_ARG_INFO_FLAGS(return_reference, 0, is_tentative_return_type)), NULL },
@@ -191,9 +188,6 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(name, type, allow_null) \
 	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX2(name, 0, -1, type, allow_null, 0)
-
-#define ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO(name, type, allow_null) \
-	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX2(name, 0, -1, type, allow_null, 1)
 
 #define ZEND_BEGIN_ARG_INFO_EX(name, _unused, return_reference, required_num_args)	\
 	static const zend_internal_arg_info name[] = { \
