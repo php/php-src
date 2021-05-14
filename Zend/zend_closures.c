@@ -28,11 +28,6 @@
 #include "zend_globals.h"
 #include "zend_closures_arginfo.h"
 
-#define ZEND_CLOSURE_PRINT_NAME "Closure object"
-
-#define ZEND_CLOSURE_PROPERTY_ERROR() \
-	zend_throw_error(NULL, "Closure object cannot have properties")
-
 typedef struct _zend_closure {
 	zend_object       std;
 	zend_function     func;
@@ -442,42 +437,6 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
-{
-	ZEND_CLOSURE_PROPERTY_ERROR();
-	return &EG(uninitialized_zval);
-}
-/* }}} */
-
-static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
-{
-	ZEND_CLOSURE_PROPERTY_ERROR();
-	return &EG(error_zval);
-}
-/* }}} */
-
-static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
-{
-	ZEND_CLOSURE_PROPERTY_ERROR();
-	return NULL;
-}
-/* }}} */
-
-static ZEND_COLD int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
-{
-	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
-		ZEND_CLOSURE_PROPERTY_ERROR();
-	}
-	return 0;
-}
-/* }}} */
-
-static ZEND_COLD void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
-{
-	ZEND_CLOSURE_PROPERTY_ERROR();
-}
-/* }}} */
-
 static void zend_closure_free_storage(zend_object *object) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;
@@ -645,11 +604,6 @@ void zend_register_closure_ce(void) /* {{{ */
 	closure_handlers.free_obj = zend_closure_free_storage;
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
-	closure_handlers.write_property = zend_closure_write_property;
-	closure_handlers.read_property = zend_closure_read_property;
-	closure_handlers.get_property_ptr_ptr = zend_closure_get_property_ptr_ptr;
-	closure_handlers.has_property = zend_closure_has_property;
-	closure_handlers.unset_property = zend_closure_unset_property;
 	closure_handlers.compare = zend_closure_compare;
 	closure_handlers.clone_obj = zend_closure_clone;
 	closure_handlers.get_debug_info = zend_closure_get_debug_info;
