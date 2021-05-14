@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #80901 (Info leak in ftp extension). (cmb)
   . Fixed bug #79100 (Wrong FTP error messages). (cmb)
 
+- GD:
+  . Fixed bug #81032 (GD install is affected by external libgd installation).
+    (Flavio Heleno, cmb)
+
 - MBString:
   . Fixed bug #81011 (mb_convert_encoding removes references from arrays). (cmb)
 
