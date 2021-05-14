@@ -2201,8 +2201,8 @@ simple_list:
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			APPEND_DEFAULT_VALUE(2);
 		case ZEND_AST_ENUM_CASE:
-			if (ast->child[2]) {
-				zend_ast_export_attributes(str, ast->child[2], indent, 1);
+			if (ast->child[3]) {
+				zend_ast_export_attributes(str, ast->child[3], indent, 1);
 			}
 			smart_str_appends(str, "case ");
 			zend_ast_export_name(str, ast->child[0], 0, indent);
@@ -2329,13 +2329,11 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 		ast->child[2] = attr;
 		break;
 	case ZEND_AST_PARAM:
+	case ZEND_AST_ENUM_CASE:
 		ast->child[3] = attr;
 		break;
 	case ZEND_AST_CLASS_CONST_GROUP:
 		ast->child[1] = attr;
-		break;
-	case ZEND_AST_ENUM_CASE:
-		ast->child[2] = attr;
 		break;
 	EMPTY_SWITCH_DEFAULT_CASE()
 	}
