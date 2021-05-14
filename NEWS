@@ -29,7 +29,8 @@ PHP                                                                        NEWS
   . Fixed bug #80460 (ODBC doesn't account for SQL_NO_TOTAL indicator). (cmb)
 
 - PDO_MySQL:
-  . Fixed bug #81037 PDO discards error message text from prepared statement. (Kamil Tekiela)
+  . Fixed bug #81037 (PDO discards error message text from prepared 
+    statement). (Kamil Tekiela)
 
 - PDO_ODBC:
   . Fixed bug #44643 (bound parameters ignore explicit type definitions). (cmb)
