@@ -587,6 +587,9 @@ struct _pdo_stmt_t {
 	/* not always meaningful */
 	zend_long row_count;
 
+	/* last insert id */
+	zend_long last_insert_id;
+
 	/* used to hold the statement's current query */
 	zend_string *query_string;
 
