@@ -1500,8 +1500,8 @@ PHP_FUNCTION(preg_match_all)
 /* {{{ preg_get_backref */
 static int preg_get_backref(char **str, int *backref)
 {
-	register char in_brace = 0;
-	register char *walk = *str;
+	char in_brace = 0;
+	char *walk = *str;
 
 	if (walk[1] == 0)
 		return 0;

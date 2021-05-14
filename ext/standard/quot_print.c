@@ -49,10 +49,10 @@ static char php_hex2int(int c) /* {{{ */
 
 PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t length, int replace_us_by_ws) /* {{{ */
 {
-	register size_t i;
-	register unsigned const char *p1;
-	register unsigned char *p2;
-	register unsigned int h_nbl, l_nbl;
+	size_t i;
+	unsigned const char *p1;
+	unsigned char *p2;
+	unsigned int h_nbl, l_nbl;
 
 	size_t decoded_len, buf_size;
 	zend_string *retval;

@@ -2731,7 +2731,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compar
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx)
 {
-	register const char *tmp = key;
+	const char *tmp = key;
 
 	const char *end = key + length;
 

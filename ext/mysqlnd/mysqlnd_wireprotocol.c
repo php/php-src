@@ -91,7 +91,7 @@ static enum_mysqlnd_collected_stats packet_type_to_statistic_packet_count[PROT_L
 zend_ulong
 php_mysqlnd_net_field_length(const zend_uchar **packet)
 {
-	register const zend_uchar *p= (const zend_uchar *)*packet;
+	const zend_uchar *p= (const zend_uchar *)*packet;
 
 	if (*p < 251) {
 		(*packet)++;
@@ -121,7 +121,7 @@ php_mysqlnd_net_field_length(const zend_uchar **packet)
 uint64_t
 php_mysqlnd_net_field_length_ll(const zend_uchar **packet)
 {
-	register const zend_uchar *p = (zend_uchar *)*packet;
+	const zend_uchar *p = (zend_uchar *)*packet;
 
 	if (*p < 251) {
 		(*packet)++;
@@ -639,7 +639,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 static enum_func_status
 php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	register MYSQLND_PACKET_AUTH_RESPONSE * packet= (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
+	MYSQLND_PACKET_AUTH_RESPONSE * packet= (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
 	MYSQLND_ERROR_INFO * error_info = conn->error_info;
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_VIO * vio = conn->vio;
@@ -802,7 +802,7 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 static enum_func_status
 php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	register MYSQLND_PACKET_OK *packet= (MYSQLND_PACKET_OK *) _packet;
+	MYSQLND_PACKET_OK *packet= (MYSQLND_PACKET_OK *) _packet;
 	MYSQLND_ERROR_INFO * error_info = conn->error_info;
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_VIO * vio = conn->vio;

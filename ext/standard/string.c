@@ -1367,7 +1367,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 
 	while (c < e) {
 		if (islower(*c)) {
-			register unsigned char *r;
+			unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 			if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1432,7 +1432,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 
 		while (c < e) {
 			if (isupper(*c)) {
-				register unsigned char *r;
+				unsigned char *r;
 				zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 				if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1764,8 +1764,8 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 /* {{{ php_strspn */
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p = s1, *spanp;
-	register char c = *p;
+	const char *p = s1, *spanp;
+	char c = *p;
 
 cont:
 	for (spanp = s2; p != s1_end && spanp != s2_end;) {
@@ -1781,8 +1781,8 @@ cont:
 /* {{{ php_strcspn */
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p, *spanp;
-	register char c = *s1;
+	const char *p, *spanp;
+	char c = *s1;
 
 	for (p = s1;;) {
 		spanp = s2;
@@ -2667,8 +2667,8 @@ PHP_FUNCTION(ucwords)
 {
 	zend_string *str;
 	char *delims = " \t\r\n\f\v";
-	register char *r;
-	register const char *r_end;
+	char *r;
+	const char *r_end;
 	size_t delims_len = 6;
 	char mask[256];
 

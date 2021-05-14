@@ -722,7 +722,7 @@ PHP_FUNCTION(file)
 	char *filename;
 	size_t filename_len;
 	char *p, *s, *e;
-	register int i = 0;
+	int i = 0;
 	char eol_marker = '\n';
 	zend_long flags = 0;
 	bool use_include_path;

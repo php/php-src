@@ -4232,7 +4232,7 @@ MBSTRING_API size_t php_mb_mbchar_bytes(const char *s)
 /* {{{ MBSTRING_API char *php_mb_safe_strrchr_ex() */
 MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
-	register const char *p = s;
+	const char *p = s;
 	char *last=NULL;
 
 	if (nbytes == (size_t)-1) {
@@ -4252,8 +4252,8 @@ MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t 
 			++p;
 		}
 	} else {
-		register size_t bcnt = nbytes;
-		register size_t nbytes_char;
+		size_t bcnt = nbytes;
+		size_t nbytes_char;
 		while (bcnt > 0) {
 			if ((unsigned char)*p == (unsigned char)c) {
 				last = (char *)p;

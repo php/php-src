@@ -688,7 +688,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 /* {{{ php_strip_url_passwd */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
-	register char *p, *url_start;
+	char *p, *url_start;
 
 	if (url == NULL) {
 		return "";

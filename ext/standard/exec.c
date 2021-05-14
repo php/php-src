@@ -281,7 +281,7 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 {
-	register size_t x, y;
+	size_t x, y;
 	size_t l = strlen(str);
 	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;

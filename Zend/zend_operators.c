@@ -2683,13 +2683,13 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 
 ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length) /* {{{ */
 {
-	register const unsigned char *p = (const unsigned char*)source;
-	register const unsigned char *end = p + length;
+	const unsigned char *p = (const unsigned char*)source;
+	const unsigned char *end = p + length;
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
 			char *res = (char*)emalloc(length + 1);
-			register unsigned char *r;
+			unsigned char *r;
 
 			if (p != (const unsigned char*)source) {
 				memcpy(res, source, p - (const unsigned char*)source);
@@ -3280,8 +3280,8 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
-	register size_t i;
-	register const char *p;
+	size_t i;
+	const char *p;
 
 	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;
@@ -3314,8 +3314,8 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
-	register size_t i;
-	register const char *p;
+	size_t i;
+	const char *p;
 
 	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;

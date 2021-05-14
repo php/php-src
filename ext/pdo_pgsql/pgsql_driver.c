@@ -37,7 +37,7 @@
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	register int i = strlen(message)-1;
+	size_t i = strlen(message)-1;
 	char *tmp;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
