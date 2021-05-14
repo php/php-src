@@ -739,24 +739,24 @@ PHP_FUNCTION(unpack)
 	while (formatlen-- > 0) {
 		char type = *(format++);
 		char c;
-		int arg = 1, argb;
+		int repetitions = 1, argb;
 		char *name;
 		int namelen;
-		int size=0;
+		int size = 0;
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
 			c = *format;
 
 			if (c >= '0' && c <= '9') {
-				arg = atoi(format);
+				repetitions = atoi(format);
 
 				while (formatlen > 0 && *format >= '0' && *format <= '9') {
 					format++;
 					formatlen--;
 				}
 			} else if (c == '*') {
-				arg = -1;
+				repetitions = -1;
 				format++;
 				formatlen--;
 			}
@@ -764,7 +764,7 @@ PHP_FUNCTION(unpack)
 
 		/* Get of new value in array */
 		name = format;
-		argb = arg;
+		argb = repetitions;
 
 		while (formatlen > 0 && *format != '/') {
 			formatlen--;
@@ -780,9 +780,9 @@ PHP_FUNCTION(unpack)
 			/* Never use any input */
 			case 'X':
 				size = -1;
-				if (arg < 0) {
+				if (repetitions < 0) {
 					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", type);
-					arg = 1;
+					repetitions = 1;
 				}
 				break;
 
@@ -793,14 +793,14 @@ PHP_FUNCTION(unpack)
 			case 'a':
 			case 'A':
 			case 'Z':
-				size = arg;
-				arg = 1;
+				size = repetitions;
+				repetitions = 1;
 				break;
 
 			case 'h':
 			case 'H':
-				size = (arg > 0) ? (arg + (arg % 2)) / 2 : arg;
-				arg = 1;
+				size = (repetitions > 0) ? (repetitions + (repetitions % 2)) / 2 : repetitions;
+				repetitions = 1;
 				break;
 
 			/* Use 1 byte of input */
@@ -870,18 +870,9 @@ PHP_FUNCTION(unpack)
 			RETURN_FALSE;
 		}
 
-		/* Do actual unpacking */
-		for (i = 0; i != arg; i++ ) {
-			/* Space for name + number, safe as namelen is ensured <= 200 */
-			char n[256];
 
-			if (arg != 1 || namelen == 0) {
-				/* Need to add element number to name */
-				snprintf(n, sizeof(n), "%.*s%d", namelen, name, i + 1);
-			} else {
-				/* Truncate name to next format code or end of string */
-				snprintf(n, sizeof(n), "%.*s", namelen, name);
-			}
+		/* Do actual unpacking */
+		for (i = 0; i != repetitions; i++ ) {
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
@@ -890,6 +881,22 @@ PHP_FUNCTION(unpack)
 			}
 
 			if ((inputpos + size) <= inputlen) {
+
+				zend_string* real_name;
+				zval val;
+
+				if (repetitions == 1 && namelen > 0) {
+					/* Use a part of the formatarg argument directly as the name. */
+					real_name = zend_string_init_fast(name, namelen);
+
+				} else {
+					/* Need to add the 1-based element number to the name */
+					char buf[MAX_LENGTH_OF_LONG + 1];
+					char *res = zend_print_ulong_to_buf(buf + sizeof(buf) - 1, i+1);
+					size_t digits = buf + sizeof(buf) - 1 - res;
+					real_name = zend_string_concat2(name, namelen, res, digits);
+				}
+
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
@@ -902,7 +909,8 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len);
+						ZVAL_STRINGL(&val, &input[inputpos], len);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					case 'A': {
@@ -928,7 +936,8 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len + 1);
+						ZVAL_STRINGL(&val, &input[inputpos], len + 1);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
@@ -952,7 +961,8 @@ PHP_FUNCTION(unpack)
 						}
 						len = s;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len);
+						ZVAL_STRINGL(&val, &input[inputpos], len);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -995,7 +1005,9 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZSTR_VAL(buf)[len] = '\0';
-						add_assoc_str(return_value, n, buf);
+
+						ZVAL_STR(&val, buf);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1003,7 +1015,9 @@ PHP_FUNCTION(unpack)
 					case 'C': { /* unsigned */
 						uint8_t x = input[inputpos];
 						zend_long v = (type == 'c') ? (int8_t) x : x;
-						add_assoc_long(return_value, n, v);
+
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1022,7 +1036,8 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long(return_value, n, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1030,7 +1045,9 @@ PHP_FUNCTION(unpack)
 					case 'I': { /* unsigned integer, machine size, machine endian */
 						unsigned int x = *((unaligned_uint*) &input[inputpos]);
 						zend_long v = (type == 'i') ? (int) x : x;
-						add_assoc_long(return_value, n, v);
+
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1049,7 +1066,9 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long(return_value, n, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
+
 						break;
 					}
 
@@ -1069,7 +1088,8 @@ PHP_FUNCTION(unpack)
 							v = x;
 						}
 
-						add_assoc_long(return_value, n, v);
+						ZVAL_LONG(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 #endif
@@ -1088,7 +1108,8 @@ PHP_FUNCTION(unpack)
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
 
-						add_assoc_double(return_value, n, (double)v);
+						ZVAL_DOUBLE(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1105,7 +1126,9 @@ PHP_FUNCTION(unpack)
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(double));
 						}
-						add_assoc_double(return_value, n, v);
+
+						ZVAL_DOUBLE(&val, v);
+						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1116,24 +1139,26 @@ PHP_FUNCTION(unpack)
 					case 'X':
 						if (inputpos < size) {
 							inputpos = -size;
-							i = arg - 1;		/* Break out of for loop */
+							i = repetitions - 1;		/* Break out of for loop */
 
-							if (arg >= 0) {
+							if (repetitions >= 0) {
 								php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
 						break;
 
 					case '@':
-						if (arg <= inputlen) {
-							inputpos = arg;
+						if (repetitions <= inputlen) {
+							inputpos = repetitions;
 						} else {
 							php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 						}
 
-						i = arg - 1;	/* Done, break out of for loop */
+						i = repetitions - 1;	/* Done, break out of for loop */
 						break;
 				}
+
+				zend_string_release(real_name);
 
 				inputpos += size;
 				if (inputpos < 0) {
@@ -1142,7 +1167,7 @@ PHP_FUNCTION(unpack)
 					}
 					inputpos = 0;
 				}
-			} else if (arg < 0) {
+			} else if (repetitions < 0) {
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
