@@ -29,6 +29,12 @@ try {
 }
 
 try {
+    $session->max_oids += 1;
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
     $session->valueretrieval = [];
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";

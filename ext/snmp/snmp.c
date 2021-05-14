@@ -1667,15 +1667,11 @@ zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, v
 }
 /* }}} */
 
-/* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
-   Generic object property writer */
+/* {{{ Generic object property writer */
 zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	php_snmp_object *obj;
-	php_snmp_prop_handler *hnd;
-
-	obj = php_snmp_fetch_object(object);
-	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
+	php_snmp_object *obj = php_snmp_fetch_object(object);
+	php_snmp_prop_handler *hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd) {
 		if (!hnd->write_func) {
@@ -1772,6 +1768,16 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 	return obj->zo.properties;
 }
 /* }}} */
+
+static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	php_snmp_prop_handler *hnd = zend_hash_find_ptr(&php_snmp_properties, name);
+	if (hnd == NULL) {
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	}
+
+	return NULL;
+}
 
 /* {{{ */
 static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
@@ -1967,6 +1973,7 @@ PHP_MINIT_FUNCTION(snmp)
 	memcpy(&php_snmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_snmp_object_handlers.read_property = php_snmp_read_property;
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
+	php_snmp_object_handlers.get_property_ptr_ptr = php_snmp_get_property_ptr_ptr;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
 	php_snmp_object_handlers.get_properties = php_snmp_get_properties;
 	php_snmp_object_handlers.get_gc = php_snmp_get_gc;
