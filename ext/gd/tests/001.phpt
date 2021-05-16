@@ -1,5 +1,7 @@
 --TEST--
 imagecreatefrompng() and empty/missing file
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php if (!function_exists("imagecreatefrompng")) print "skip"; ?>
 --FILE--

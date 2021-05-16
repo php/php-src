@@ -1,8 +1,9 @@
 --TEST--
 Testing null byte injection in imagejpeg
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
 if (!isset($support['JPEG Support']) || $support['JPEG Support'] === false) {
     print 'skip jpeg support not available';

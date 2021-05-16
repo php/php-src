@@ -1,11 +1,9 @@
 --TEST--
 Test imagecolorstotal() function : basic functionality
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-
 if(!function_exists('imagecolorstotal') || !function_exists('imagecreatefromgif')) {
     die('skip imagecolorstotal and imagecreatefromgif functions not available in this build');
 }

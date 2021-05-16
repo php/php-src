@@ -1,10 +1,9 @@
 --TEST--
 Test gd_info() function : variation - Checking all the values in returned array
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
 if(!function_exists('gd_info')) {
     die('skip gd_info function is not available');
 }

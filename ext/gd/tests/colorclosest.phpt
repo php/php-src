@@ -1,9 +1,7 @@
 --TEST--
 imageclosest
---SKIPIF--
-<?php
-        if (!function_exists('imagecolorclosest')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

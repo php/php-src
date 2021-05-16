@@ -2,9 +2,10 @@
 Bug #77272 (imagescale() may return image resource on failure)
 --INI--
 memory_limit=-1
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
