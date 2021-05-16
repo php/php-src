@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fcf44ef4bf450893668a69e587ced9fb686e69a4 */
+ * Stub hash: 0a6aa0355b33ac4739210ac7ee58fbc1d306ab37 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -13,7 +13,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_equ
 	ZEND_ARG_OBJ_INFO(0, other, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_fieldDifference, 0, 2, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_fieldDifference, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
 ZEND_END_ARG_INFO()

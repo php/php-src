@@ -23,7 +23,7 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_field_difference
      */
-    public function fieldDifference(float $timestamp, int $field): int {}
+    public function fieldDifference(float $timestamp, int $field): int|false {}
 
     /**
      * @tentative-return-type

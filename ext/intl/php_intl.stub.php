@@ -39,7 +39,7 @@ function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
 function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
 
-function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int {}
+function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
 function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int {}
 

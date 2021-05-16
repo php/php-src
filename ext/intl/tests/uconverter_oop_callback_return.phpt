@@ -13,6 +13,8 @@ class MyConverter extends UConverter {
       case "\x82": return ord('b');
       case "\x83": return array('c');
     }
+
+    return null;
   }
 
   /**
@@ -26,6 +28,8 @@ class MyConverter extends UConverter {
       case 0x00F3: return array("C");
       case 0x00F4: return NULL;
     }
+
+    return null;
   }
 
 }
