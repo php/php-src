@@ -1,8 +1,9 @@
 --TEST--
 Bug #77479 (imagewbmp() segfaults with very large image)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --INI--

@@ -1,9 +1,7 @@
 --TEST--
 Bug #27582 (ImageFillToBorder() on alphablending image looses alpha on fill color)
---SKIPIF--
-<?php
-        if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $dest = dirname(realpath(__FILE__)) . '/bug27582.png';

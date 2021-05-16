@@ -1,9 +1,7 @@
 --TEST--
  #72337	segfault in imagescale with new dimensions being <=0)
---SKIPIF--
-<?php
-        if (!function_exists('imagescale')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(1, 1);

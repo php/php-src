@@ -1,9 +1,7 @@
 --TEST--
 imagecolorexact
---SKIPIF--
-<?php
-        if (!function_exists('imagecolorexact')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

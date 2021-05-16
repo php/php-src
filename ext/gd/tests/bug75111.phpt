@@ -1,9 +1,7 @@
 --TEST--
 Bug #75111 (Memory disclosure or DoS via crafted .bmp image)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 // craft BMP image

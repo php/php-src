@@ -1,11 +1,7 @@
 --TEST--
 Checks that GdImage instances cannot be cloned
---SKIPIF--
-<?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

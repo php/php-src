@@ -1,9 +1,7 @@
 --TEST--
 imagetypes
---SKIPIF--
-<?php
-        if (!function_exists('imagetypes')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $flags = imagetypes();

@@ -1,9 +1,7 @@
 --TEST--
 Bug #73213 (Integer overflow in imageline() with antialiasing)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';

@@ -1,9 +1,7 @@
 --TEST--
 Set and get image resolution of PNG images
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_png.png';
