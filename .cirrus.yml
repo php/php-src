@@ -10,6 +10,7 @@ task:
   install_script:
     #- sed -i -e 's/quarterly/latest/g' /etc/pkg/FreeBSD.conf
     #- pkg upgrade -y
+    - kldload accf_http
     - pkg install -y autoconf bison gmake re2c icu libiconv png freetype2 enchant2 bzip2 krb5 t1lib gmp tidyp libsodium libzip libxml2 libxslt openssl oniguruma pkgconf webp
   script:
     - ./buildconf -f
