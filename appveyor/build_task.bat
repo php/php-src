@@ -51,7 +51,7 @@ if %errorlevel% neq 0 exit /b 3
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
+set EXT_EXCLUDE_FROM_TEST=bz2,exif,fileinfo,ffi,ftp,gmp,imap,ldap,oci8_12c,pdo_firebird,pdo_oci,snmp,soap,sodium,sqlite3,tidy
 if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 set CFLAGS=/W1 /WX
