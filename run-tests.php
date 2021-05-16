@@ -860,9 +860,22 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
     @unlink($info_file);
 
-    // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    // load list of enabled and loadable extensions
+    save_text($info_file, <<<'PHP'
+        <?php
+        echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions()));
+        $ext_dir = ini_get("extension_dir");
+        foreach (scandir($ext_dir) as $file) {
+            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                continue;
+            }
+            $ext = $matches[1];
+            if (!extension_loaded($ext) && @dl($file)) {
+                echo ",", $ext;
+            }
+        }
+        ?>
+    PHP);
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
