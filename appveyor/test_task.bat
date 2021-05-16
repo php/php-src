@@ -102,6 +102,6 @@ nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set
 
 set EXIT_CODE=%errorlevel%
 
-powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\junit.out.xml')"
+appveyor PushArtifact %TEST_PHP_JUNIT%
 
 exit /b %EXIT_CODE%
