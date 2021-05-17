@@ -66,8 +66,11 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 		) {
 			continue;
 		}
+		if (property_info->flags & ZEND_ACC_STATIC) {
+			continue;
+		}
 		// FIXME: File/line number for traits?
-		zend_error_noreturn(E_COMPILE_ERROR, "Enum \"%s\" may not include properties",
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum \"%s\" may not include instance properties",
 			ZSTR_VAL(ce->name));
 	} ZEND_HASH_FOREACH_END();
 }
@@ -212,7 +215,7 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
-		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
+		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);
 	}
 }
 

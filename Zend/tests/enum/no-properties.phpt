@@ -1,5 +1,5 @@
 --TEST--
-Enum disallows properties
+Enum disallows instance properties
 --FILE--
 <?php
 
@@ -9,4 +9,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enums may not include properties in %s on line %d
+Fatal error: Enums may not include instance properties in %s on line %d

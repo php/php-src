@@ -7159,8 +7159,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include properties");
 	}
 
-	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Enums may not include properties");
+	if ((ce->ce_flags & ZEND_ACC_ENUM) && !(flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Enums may not include instance properties");
 	}
 
 	if (flags & ZEND_ACC_ABSTRACT) {
