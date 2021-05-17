@@ -278,7 +278,6 @@ int main()
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
 ], [], [
   dnl Cross compilation needs something here.
-  LIBZEND_MM_ALIGN=8
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, 8, [ ])
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, 3, [ ])
 ])
