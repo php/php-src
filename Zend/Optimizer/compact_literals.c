@@ -112,6 +112,41 @@ static uint32_t add_static_slot(HashTable     *hash,
 	return ret;
 }
 
+static zend_string *create_str_cache_key(zval *literal, uint32_t flags)
+{
+	ZEND_ASSERT(Z_TYPE_P(literal) == IS_STRING);
+	uint32_t num_related = LITERAL_NUM_RELATED(flags);
+	if (num_related == 1) {
+		return zend_string_copy(Z_STR_P(literal));
+	}
+	if ((flags & LITERAL_KIND_MASK) == LITERAL_VALUE) {
+		/* Don't merge LITERAL_VALUE that has related literals */
+		return NULL;
+	}
+
+	/* Concatenate all the related literals for the cache key. */
+	zend_string *key;
+	if (num_related == 2) {
+		ZEND_ASSERT(Z_TYPE_P(literal + 1) == IS_STRING);
+		key = zend_string_concat2(
+			Z_STRVAL_P(literal), Z_STRLEN_P(literal),
+			Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1));
+	} else if (num_related == 3) {
+		ZEND_ASSERT(Z_TYPE_P(literal + 1) == IS_STRING && Z_TYPE_P(literal + 2) == IS_STRING);
+		key = zend_string_concat3(
+			Z_STRVAL_P(literal), Z_STRLEN_P(literal),
+			Z_STRVAL_P(literal + 1), Z_STRLEN_P(literal + 1),
+			Z_STRVAL_P(literal + 2), Z_STRLEN_P(literal + 2));
+	} else {
+		ZEND_ASSERT(0 && "Currently not needed");
+	}
+
+	/* Add a bias to the hash so we can distinguish keys
+	 * that would otherwise be the same after concatenation. */
+	ZSTR_H(key) = zend_string_hash_val(key) + num_related - 1;
+	return key;
+}
+
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
@@ -403,16 +438,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case IS_STRING: {
-					if (LITERAL_NUM_RELATED(info[i].flags) == 1) {
-						key = zend_string_copy(Z_STR(op_array->literals[i]));
-					} else if ((info[i].flags & LITERAL_KIND_MASK) != LITERAL_VALUE) {
-						key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
-						ZSTR_H(key) = ZSTR_HASH(Z_STR(op_array->literals[i])) +
-							LITERAL_NUM_RELATED(info[i].flags) - 1;
-					} else {
-						/* Don't merge LITERAL_VALUE that has related literals */
-						key = NULL;
-					}
+					key = create_str_cache_key(&op_array->literals[i], info[i].flags);
 					if (key && (pos = zend_hash_find(&hash, key)) != NULL &&
 					    Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) == IS_STRING &&
 					    LITERAL_NUM_RELATED(info[i].flags) == LITERAL_NUM_RELATED(info[Z_LVAL_P(pos)].flags) &&
