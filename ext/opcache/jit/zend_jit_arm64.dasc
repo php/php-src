@@ -3858,7 +3858,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		} else {
 			result_reg = Z_REG(res_addr);
 		}
-	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr)) {
+	} else if (Z_MODE(op1_addr) == IS_REG && Z_LAST_USE(op1_addr) && !may_overflow) {
 		result_reg = Z_REG(op1_addr);
 	} else if (Z_REG(res_addr) != ZREG_REG0) {
 		result_reg = ZREG_REG0;
