@@ -283,21 +283,26 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym->info = ELFSYM_INFO(ELFSYM_BIND_GLOBAL, ELFSYM_TYPE_FUNC);
 }
 
+typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
+typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
+typedef ZEND_SET_ALIGNED(1, uintptr_t unaligned_uintptr_t);
+
 #define SECTALIGN(p, a) \
 	  ((p) = (uint8_t *)(((uintptr_t)(p) + ((a)-1)) & ~(uintptr_t)((a)-1)))
 
 /* Shortcuts to generate DWARF structures. */
 #define DB(x)       (*p++ = (x))
 #define DI8(x)      (*(int8_t *)p = (x), p++)
-#define DU16(x)     (*(uint16_t *)p = (x), p += 2)
-#define DU32(x)     (*(uint32_t *)p = (x), p += 4)
-#define DADDR(x)    (*(uintptr_t *)p = (x), p += sizeof(uintptr_t))
+#define DU16(x)     (*(unaligned_uint16_t *)p = (x), p += 2)
+#define DU32(x)     (*(unaligned_uint32_t *)p = (x), p += 4)
+#define DADDR(x)    (*(unaligned_uintptr_t *)p = (x), p += sizeof(uintptr_t))
 #define DUV(x)      (ctx->p = p, zend_gdbjit_uleb128(ctx, (x)), p = ctx->p)
 #define DSV(x)      (ctx->p = p, zend_gdbjit_sleb128(ctx, (x)), p = ctx->p)
 #define DSTR(str)   (ctx->p = p, zend_gdbjit_strz(ctx, (str)), p = ctx->p)
 #define DALIGNNOP(s)    while ((uintptr_t)p & ((s)-1)) *p++ = DW_CFA_nop
 #define DSECT(name, stmt) \
-	{ uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
+	{ unaligned_uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
 		*szp_##name = (uint32_t)((p-(uint8_t *)szp_##name)-4); }
 
 static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
