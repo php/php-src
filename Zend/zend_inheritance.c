@@ -2960,6 +2960,10 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		orig_linking_class = CG(current_linking_class);
 		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
+		if (is_cacheable) {
+			zend_begin_record_errors();
+		}
+
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
 		if (parent_ce && parent_ce->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent_ce);
@@ -2972,6 +2976,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		ce->ce_flags |= ZEND_ACC_LINKED;
 
 		CG(current_linking_class) = orig_linking_class;
+		EG(record_errors) = false;
 
 		if (is_cacheable) {
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
