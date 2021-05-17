@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #81015 (Opcache optimization assumes wrong part of ternary
     operator in if-condition). (Nikita)
+  . Fixed bug #81046 (Literal compaction merges non-equal related literals).
+    (Nikita)
 
 - PDO_MySQL:
   . Fixed bug #81037 (PDO discards error message text from prepared 
