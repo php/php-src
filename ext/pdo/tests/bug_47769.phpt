@@ -17,10 +17,12 @@ class test extends PDO
         echo "this is a private method.\n";
     }
 
-    public function quote($str, $paramtype = NULL) {
+    public function quote($str, $paramtype = NULL): string|false {
         $this->isProtected();
         $this->isPrivate();
         print $str ."\n";
+
+        return $str;
     }
 }
 

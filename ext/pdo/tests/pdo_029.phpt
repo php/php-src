@@ -34,10 +34,10 @@ class PDOStatementX extends PDOStatement
         echo __METHOD__ . "()\n";
     }
 
-    function execute($params = array())
+    function execute($params = array()): bool
     {
         echo __METHOD__ . "()\n";
-        parent::execute();
+        return parent::execute();
     }
 }
 
@@ -48,7 +48,7 @@ class PDODatabase extends PDO
         echo __METHOD__ . "()\n";
     }
 
-    function query($sql, ...$rest)
+    function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
         $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
