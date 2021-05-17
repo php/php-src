@@ -138,11 +138,11 @@ array(1) {
 }
 Unbuffered...
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050  in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050 Row retrieval was canceled by mysql_stmt_close() call in %s on line %d
 array(0) {
 }
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050  in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050 Row retrieval was canceled by mysql_stmt_close() call in %s on line %d
 array(0) {
 }
 array(1) {
