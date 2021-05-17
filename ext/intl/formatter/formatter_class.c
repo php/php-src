@@ -64,6 +64,8 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
 	zend_object *new_obj;
 
 	nfo = php_intl_number_format_fetch_object(object);
+	intl_error_reset(INTL_DATA_ERROR_P(nfo));
+
 	new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
 	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */

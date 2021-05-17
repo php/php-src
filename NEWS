@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #81032 (GD install is affected by external libgd installation).
     (Flavio Heleno, cmb)
 
+- Intl:
+  . Fixed bug #81019 (Unable to clone NumberFormatter after failed parse()).
+    (Nikita)
+
 - MBString:
   . Fixed bug #81011 (mb_convert_encoding removes references from arrays). (cmb)
 
