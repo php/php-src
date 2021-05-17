@@ -32,4 +32,4 @@ require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
-SQLSTATE[HY000]: General error: 2031 No data supplied for parameters in prepared statement
+SQLSTATE[HY093]: Invalid parameter number
