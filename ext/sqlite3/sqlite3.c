@@ -546,7 +546,6 @@ PHP_METHOD(SQLite3, query)
 	zval *object = ZEND_THIS;
 	zval stmt;
 	zend_string *sql;
-	char *errtext = NULL;
 	int return_code;
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -558,15 +557,6 @@ PHP_METHOD(SQLite3, query)
 
 	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
-	}
-
-	/* If there was no return value then just execute the query */
-	if (!USED_RET()) {
-		if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
-			php_sqlite3_error(db_obj, "%s", errtext);
-			sqlite3_free(errtext);
-		}
-		return;
 	}
 
 	object_init_ex(&stmt, php_sqlite3_stmt_entry);
@@ -658,7 +648,6 @@ PHP_METHOD(SQLite3, querySingle)
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
 	zend_string *sql;
-	char *errtext = NULL;
 	int return_code;
 	bool entire_row = 0;
 	sqlite3_stmt *stmt;
@@ -672,15 +661,6 @@ PHP_METHOD(SQLite3, querySingle)
 
 	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
-	}
-
-	/* If there was no return value then just execute the query */
-	if (!USED_RET()) {
-		if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
-			php_sqlite3_error(db_obj, "%s", errtext);
-			sqlite3_free(errtext);
-		}
-		return;
 	}
 
 	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &stmt, NULL);
@@ -1953,11 +1933,6 @@ PHP_METHOD(SQLite3Result, fetchArray)
 	ret = sqlite3_step(result_obj->stmt_obj->stmt);
 	switch (ret) {
 		case SQLITE_ROW:
-			/* If there was no return value then just skip fetching */
-			if (!USED_RET()) {
-				return;
-			}
-
 			array_init(return_value);
 
 			for (i = 0; i < sqlite3_data_count(result_obj->stmt_obj->stmt); i++) {
