@@ -668,14 +668,13 @@ static inheritance_status zend_do_perform_implementation_check(
 	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		/* Removing a return type is not valid, unless the parent return type is tentative. */
 		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			if (ZEND_ARG_TYPE_IS_TENTATIVE(&proto->common.arg_info[-1])) {
-				if (status == INHERITANCE_SUCCESS) {
-					emit_incompatible_method_error(fe, fe_scope, proto, proto_scope, INHERITANCE_WARNING);
-				}
-				return status;
-			} else {
+			if (!ZEND_ARG_TYPE_IS_TENTATIVE(&proto->common.arg_info[-1])) {
 				return INHERITANCE_ERROR;
 			}
+			if (status == INHERITANCE_SUCCESS) {
+				return INHERITANCE_WARNING;
+			}
+			return status;
 		}
 
 		local_status = zend_perform_covariant_type_check(
