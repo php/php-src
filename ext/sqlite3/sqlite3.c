@@ -566,7 +566,7 @@ PHP_METHOD(SQLite3, query)
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
-		return;
+		RETURN_FALSE;
 	}
 
 	object_init_ex(&stmt, php_sqlite3_stmt_entry);
@@ -680,7 +680,7 @@ PHP_METHOD(SQLite3, querySingle)
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
-		return;
+		RETURN_FALSE;
 	}
 
 	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &stmt, NULL);
@@ -1955,7 +1955,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
 			if (!USED_RET()) {
-				return;
+				RETURN_FALSE;
 			}
 
 			array_init(return_value);
