@@ -70,17 +70,17 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + 1];
+	static char newname[MAXPATHLEN + 1 + ACCEL_UNAME_ID_LEN + 1 + 20 + 1 + ACCEL_SYSTEM_ID_LEN + 1];
 	char *p = newname;
 	p += strlcpy(newname, name, MAXPATHLEN + 1);
 	*(p++) = '@';
-	memcpy(p, accel_uname_id, 32);
-	p += 32;
+	memcpy(p, accel_uname_id, ACCEL_UNAME_ID_LEN);
+	p += ACCEL_UNAME_ID_LEN;
 	*(p++) = '@';
 	p += strlcpy(p, sapi_module.name, 21);
 	*(p++) = '@';
-	memcpy(p, accel_system_id, 32);
-	p += 32;
+	memcpy(p, accel_system_id, ACCEL_SYSTEM_ID_LEN);
+	p += ACCEL_SYSTEM_ID_LEN;
 	*(p++) = '\0';
 	ZEND_ASSERT(p - newname <= sizeof(newname));
 

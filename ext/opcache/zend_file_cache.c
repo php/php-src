@@ -810,7 +810,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_persistent_script *new_script;
 
 	memcpy(info->magic, "OPCACHE", 8);
-	memcpy(info->system_id, accel_system_id, 32);
+	memcpy(info->system_id, accel_system_id, ACCEL_SYSTEM_ID_LEN);
 	info->mem_size = script->size;
 	info->str_size = 0;
 	info->script_offset = (char*)script - (char*)script->mem;
@@ -836,48 +836,48 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 
 #ifndef ZEND_WIN32
 	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
+	filename = emalloc(len + ACCEL_SYSTEM_ID_LEN + 1 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
-	memcpy(filename + len + 1, accel_system_id, 32);
-	memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
-	memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
+	memcpy(filename + len + 1, accel_system_id, ACCEL_SYSTEM_ID_LEN);
+	memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 1, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
+	memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 1 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 #else
 	len = strlen(ZCG(accel_directives).file_cache);
 
-	filename = emalloc(len + 33 + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
+	filename = emalloc(len + ACCEL_UNAME_ID_LEN + 1 + ACCEL_SYSTEM_ID_LEN + 1 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '\\';
-	memcpy(filename + 1 + len, accel_uname_id, 32);
-	len += 1 + 32;
+	memcpy(filename + 1 + len, accel_uname_id, ACCEL_UNAME_ID_LEN);
+	len += 1 + ACCEL_UNAME_ID_LEN;
 	filename[len] = '\\';
 
-	memcpy(filename + len + 1, accel_system_id, 32);
+	memcpy(filename + len + 1, accel_system_id, ACCEL_SYSTEM_ID_LEN);
 
 	if (ZSTR_LEN(script_path) >= 7 && ':' == ZSTR_VAL(script_path)[4] && '/' == ZSTR_VAL(script_path)[5]  && '/' == ZSTR_VAL(script_path)[6]) {
 		/* phar:// or file:// */
-		*(filename + len + 33) = '\\';
-		memcpy(filename + len + 34, ZSTR_VAL(script_path), 4);
+		*(filename + len + ACCEL_SYSTEM_ID_LEN + 1) = '\\';
+		memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 2, ZSTR_VAL(script_path), 4);
 		if (ZSTR_LEN(script_path) - 7 >= 2 && ':' == ZSTR_VAL(script_path)[8]) {
-			*(filename + len + 38) = '\\';
-			*(filename + len + 39) = ZSTR_VAL(script_path)[7];
-			memcpy(filename + len + 40, ZSTR_VAL(script_path) + 9, ZSTR_LEN(script_path) - 9);
-			memcpy(filename + len + 40 + ZSTR_LEN(script_path) - 9, SUFFIX, sizeof(SUFFIX));
+			*(filename + len + ACCEL_SYSTEM_ID_LEN + 6) = '\\';
+			*(filename + len + ACCEL_SYSTEM_ID_LEN + 7) = ZSTR_VAL(script_path)[7];
+			memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 8, ZSTR_VAL(script_path) + 9, ZSTR_LEN(script_path) - 9);
+			memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 8 + ZSTR_LEN(script_path) - 9, SUFFIX, sizeof(SUFFIX));
 		} else {
-			memcpy(filename + len + 38, ZSTR_VAL(script_path) + 7, ZSTR_LEN(script_path) - 7);
-			memcpy(filename + len + 38 + ZSTR_LEN(script_path) - 7, SUFFIX, sizeof(SUFFIX));
+			memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 6, ZSTR_VAL(script_path) + 7, ZSTR_LEN(script_path) - 7);
+			memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 6 + ZSTR_LEN(script_path) - 7, SUFFIX, sizeof(SUFFIX));
 		}
 	} else if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
 		/* local fs */
-		*(filename + len + 33) = '\\';
-		*(filename + len + 34) = ZSTR_VAL(script_path)[0];
-		memcpy(filename + len + 35, ZSTR_VAL(script_path) + 2, ZSTR_LEN(script_path) - 2);
-		memcpy(filename + len + 35 + ZSTR_LEN(script_path) - 2, SUFFIX, sizeof(SUFFIX));
+		*(filename + len + ACCEL_SYSTEM_ID_LEN + 1) = '\\';
+		*(filename + len + ACCEL_SYSTEM_ID_LEN + 2) = ZSTR_VAL(script_path)[0];
+		memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 3, ZSTR_VAL(script_path) + 2, ZSTR_LEN(script_path) - 2);
+		memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 3 + ZSTR_LEN(script_path) - 2, SUFFIX, sizeof(SUFFIX));
 	} else {
 		/* network path */
-		memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
-		memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
+		memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 1, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
+		memcpy(filename + len + ACCEL_SYSTEM_ID_LEN + 1 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 	}
 #endif
 
@@ -1563,7 +1563,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		efree(filename);
 		return NULL;
 	}
-	if (memcmp(info.system_id, accel_system_id, 32) != 0) {
+	if (memcmp(info.system_id, accel_system_id, ACCEL_SYSTEM_ID_LEN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);

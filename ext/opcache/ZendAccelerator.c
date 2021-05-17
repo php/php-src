@@ -114,9 +114,9 @@ ZEND_TSRMLS_CACHE_DEFINE()
 zend_accel_shared_globals *accel_shared_globals = NULL;
 
 /* true globals, no need for thread safety */
-char accel_system_id[32];
+char accel_system_id[ACCEL_SYSTEM_ID_LEN];
 #ifdef ZEND_WIN32
-char accel_uname_id[32];
+char accel_uname_id[ACCEL_UNAME_ID_LEN];
 #endif
 zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
