@@ -8238,8 +8238,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || Z_TYPE_P(op) == IS_DOUBLE
-		|| (Z_TYPE_P(op) == IS_STRING && is_numeric_str_function(Z_STR_P(op), NULL, NULL) != IS_LONG));
+		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || Z_TYPE_P(op) == IS_DOUBLE);
 	}
 
 	return 0;
