@@ -18,7 +18,7 @@ var_dump(call_user_func(array('foo', 'teste')));
 
 ?>
 --EXPECTF--
-Deprecated: Required parameter $b follows optional parameter $a in %s on line %d
+Deprecated: Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
 string(1) "x"
 array(1) {
   [0]=>

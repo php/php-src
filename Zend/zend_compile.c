@@ -6466,7 +6466,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
-	zend_string *optional_param = NULL;
 
 	if (return_type_ast || fallback_return_type) {
 		/* Use op_array->arg_info[-1] for return type */
@@ -6487,6 +6486,17 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			return;
 		}
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
+	}
+
+	/* Find last required parameter number for deprecation message. */
+	uint32_t last_required_param = (uint32_t) -1;
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *param_ast = list->child[i];
+		zend_ast *default_ast_ptr = param_ast->child[2];
+		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
+		if (!default_ast_ptr && !is_variadic) {
+			last_required_param = i;
+		}
 	}
 
 	for (i = 0; i < list->children; ++i) {
@@ -6544,23 +6554,30 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast_ptr);
 			CG(compiler_options) = cops;
 
-			if (!optional_param) {
+			if (last_required_param != (uint32_t) -1 && i < last_required_param) {
 				/* Ignore parameters of the form "Type $param = null".
 				 * This is the PHP 5 style way of writing "?Type $param", so allow it for now. */
 				bool is_implicit_nullable =
 					type_ast && Z_TYPE(default_node.u.constant) == IS_NULL;
 				if (!is_implicit_nullable) {
-					optional_param = name;
+					zend_ast *required_param_ast = list->child[last_required_param];
+					zend_error(E_DEPRECATED,
+						"Optional parameter $%s declared before required parameter $%s "
+						"is implicitly treated as a required parameter",
+						ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
 				}
+
+				/* Regardless of whether we issue a deprecation, convert this parameter into
+				 * a required parameter without a default value. This ensures that it cannot be
+				 * used as an optional parameter even with named parameters. */
+				opcode = ZEND_RECV;
+				default_node.op_type = IS_UNUSED;
+				zval_ptr_dtor(&default_node.u.constant);
 			}
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
 			op_array->required_num_args = i + 1;
-			if (optional_param) {
-				zend_error(E_DEPRECATED, "Required parameter $%s follows optional parameter $%s",
-					ZSTR_VAL(name), ZSTR_VAL(optional_param));
-			}
 		}
 
 		arg_info = &arg_infos[i];
