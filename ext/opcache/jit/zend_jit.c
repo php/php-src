@@ -94,10 +94,12 @@ zend_jit_globals jit_globals;
 typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(dasm_State **Dst);
+	uint32_t offset;
+	uint32_t adjustment;
 } zend_jit_stub;
 
-#define JIT_STUB(name) \
-	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
+#define JIT_STUB(name, offset, adjustment) \
+	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, offset, adjustment}
 
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
@@ -348,7 +350,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
                                   const zend_op           *rt_opline,
                                   zend_lifetime_interval **ra,
                                   const char              *name,
-                                  uint32_t                 trace_num)
+                                  uint32_t                 trace_num,
+                                  uint32_t                 sp_offset,
+                                  uint32_t                 sp_adjustment)
 {
 	size_t size;
 	int ret;
@@ -507,7 +511,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 					name,
 					op_array,
 					entry,
-					size);
+					size,
+					sp_adj[sp_offset],
+					sp_adj[sp_adjustment]);
 		}
 	}
 #endif
@@ -3547,7 +3553,8 @@ done:
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL, 0);
+	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL, 0,
+		(zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) ? SP_ADJ_VM : SP_ADJ_RET, SP_ADJ_JIT);
 	if (!handler) {
 		goto jit_failure;
 	}
@@ -4103,7 +4110,8 @@ static int zend_jit_make_stubs(void)
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
-		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name, 0)) {
+		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name, 0,
+				zend_jit_stubs[i].offset, zend_jit_stubs[i].adjustment)) {
 			return 0;
 		}
 	}

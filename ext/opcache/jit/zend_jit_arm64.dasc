@@ -83,10 +83,21 @@
 |.define ZREG_TMP3,   ZREG_X17
 |.define ZREG_FPTMP,  ZREG_V16
 
-|.define HYBRID_SPAD, #32     // padding for stack alignment
+|.define HYBRID_SPAD, 32     // padding for stack alignment
 
 #define TMP_ZVAL_OFFSET 16
 #define DASM_ALIGNMENT  16
+
+typedef enum _sp_adj_kind {
+	SP_ADJ_NONE,
+	SP_ADJ_RET,
+	SP_ADJ_VM,
+	SP_ADJ_JIT,
+	SP_ADJ_ASSIGN,
+	SP_ADJ_LAST
+} sp_adj_kind;
+
+static int sp_adj[SP_ADJ_LAST];
 
 /* Encoding of immediate. TODO: shift mode may be supported in the near future. */
 #define MAX_IMM12       0xfff          // maximum value for imm12
@@ -196,13 +207,13 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 |.macro ADD_HYBRID_SPAD
 ||#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-|	add sp, sp, HYBRID_SPAD
+|	add sp, sp, # HYBRID_SPAD
 ||#endif
 |.endmacro
 
 |.macro SUB_HYBRID_SPAD
 ||#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-|	sub sp, sp, HYBRID_SPAD
+|	sub sp, sp, # HYBRID_SPAD
 ||#endif
 |.endmacro
 
@@ -2592,42 +2603,42 @@ static int zend_jit_assign_cv_stub(dasm_State **Dst)
 }
 
 static const zend_jit_stub zend_jit_stubs[] = {
-	JIT_STUB(interrupt_handler),
-	JIT_STUB(exception_handler),
-	JIT_STUB(exception_handler_undef),
-	JIT_STUB(leave_function),
-	JIT_STUB(leave_throw),
-	JIT_STUB(icall_throw),
-	JIT_STUB(throw_cannot_pass_by_ref),
-	JIT_STUB(undefined_offset),
-	JIT_STUB(undefined_index),
-	JIT_STUB(cannot_add_element),
-	JIT_STUB(undefined_offset_ex),
-	JIT_STUB(undefined_index_ex),
-	JIT_STUB(cannot_add_element_ex),
-	JIT_STUB(undefined_function),
-	JIT_STUB(negative_shift),
-	JIT_STUB(mod_by_zero),
-	JIT_STUB(invalid_this),
-	JIT_STUB(trace_halt),
-	JIT_STUB(trace_exit),
-	JIT_STUB(trace_escape),
-	JIT_STUB(hybrid_runtime_jit),
-	JIT_STUB(hybrid_profile_jit),
-	JIT_STUB(hybrid_hot_code),
-	JIT_STUB(hybrid_func_hot_counter),
-	JIT_STUB(hybrid_loop_hot_counter),
-	JIT_STUB(hybrid_hot_trace),
-	JIT_STUB(hybrid_func_trace_counter),
-	JIT_STUB(hybrid_ret_trace_counter),
-	JIT_STUB(hybrid_loop_trace_counter),
-	JIT_STUB(assign_const),
-	JIT_STUB(assign_tmp),
-	JIT_STUB(assign_var),
-	JIT_STUB(assign_cv_noref),
-	JIT_STUB(assign_cv),
+	JIT_STUB(interrupt_handler, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(exception_handler, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(exception_handler_undef, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(leave_function, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(leave_throw, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(icall_throw, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(throw_cannot_pass_by_ref, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(undefined_offset, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(undefined_index, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(cannot_add_element, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(undefined_offset_ex, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(undefined_index_ex, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(cannot_add_element_ex, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(undefined_function, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(negative_shift, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(mod_by_zero, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(invalid_this, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(trace_halt, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(trace_exit, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(trace_escape, SP_ADJ_JIT, SP_ADJ_NONE),
+	JIT_STUB(hybrid_runtime_jit, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_profile_jit, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_hot_code, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_func_hot_counter, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_loop_hot_counter, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_hot_trace, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_func_trace_counter, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_ret_trace_counter, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(hybrid_loop_trace_counter, SP_ADJ_VM, SP_ADJ_NONE),
+	JIT_STUB(assign_const, SP_ADJ_RET, SP_ADJ_ASSIGN),
+	JIT_STUB(assign_tmp, SP_ADJ_RET, SP_ADJ_ASSIGN),
+	JIT_STUB(assign_var, SP_ADJ_RET, SP_ADJ_ASSIGN),
+	JIT_STUB(assign_cv_noref, SP_ADJ_RET, SP_ADJ_ASSIGN),
+	JIT_STUB(assign_cv, SP_ADJ_RET, SP_ADJ_ASSIGN),
 #ifdef CONTEXT_THREADED_JIT
-	JIT_STUB(context_threaded_call),
+	JIT_STUB(context_threaded_call, SP_ADJ_NONE, SP_ADJ_NONE),
 #endif
 };
 
@@ -2635,6 +2646,66 @@ static const zend_jit_stub zend_jit_stubs[] = {
 extern uint32_t _tls_index;
 extern char *_tls_start;
 extern char *_tls_end;
+#endif
+
+#ifdef HAVE_GDB
+# if 0
+typedef struct _Unwind_Context _Unwind_Context;
+typedef int (*_Unwind_Trace_Fn)(_Unwind_Context *, void *);
+extern int _Unwind_Backtrace(_Unwind_Trace_Fn, void *);
+extern uintptr_t _Unwind_GetCFA(_Unwind_Context *);
+
+typedef struct _zend_jit_unwind_arg {
+	int cnt;
+	uintptr_t cfa[3];
+} zend_jit_unwind_arg;
+
+static int zend_jit_unwind_cb(_Unwind_Context *ctx, void *a)
+{
+	zend_jit_unwind_arg *arg = (zend_jit_unwind_arg*)a;
+	arg->cfa[arg->cnt] = _Unwind_GetCFA(ctx);
+	arg->cnt++;
+	if (arg->cnt == 3) {
+		return 5; // _URC_END_OF_STACK
+	}
+	return 0; // _URC_NO_REASON;
+}
+
+static void ZEND_FASTCALL zend_jit_touch_vm_stack_data(void *vm_stack_data)
+{
+	zend_jit_unwind_arg arg;
+
+	memset(&arg, 0, sizeof(arg));
+	_Unwind_Backtrace(zend_jit_unwind_cb, &arg);
+	if (arg.cnt == 3) {
+		sp_adj[SP_ADJ_VM] = arg.cfa[2] - arg.cfa[1];
+	}
+}
+# else
+static void ZEND_FASTCALL zend_jit_touch_vm_stack_data(void *vm_stack_data)
+{
+	uintptr_t ret;
+
+	__asm__ (
+		"ldr %0, [x29]\n\t"
+		"sub %0 ,%0, x29"
+		: "=r"(ret));
+
+	sp_adj[SP_ADJ_VM] = ret;
+}
+# endif
+
+extern void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data);
+
+static zend_never_inline void zend_jit_set_sp_adj_vm(void)
+{
+	void (ZEND_FASTCALL *orig_zend_touch_vm_stack_data)(void *);
+
+	orig_zend_touch_vm_stack_data = zend_touch_vm_stack_data;
+	zend_touch_vm_stack_data = zend_jit_touch_vm_stack_data;
+	execute_ex(NULL);                                        // set sp_adj[SP_ADJ_VM]
+	zend_touch_vm_stack_data = orig_zend_touch_vm_stack_data;
+}
 #endif
 
 static int zend_jit_setup(void)
@@ -2753,6 +2824,24 @@ static int zend_jit_setup(void)
 # endif
 #endif
 
+    memset(sp_adj, 0, sizeof(sp_adj));
+#ifdef HAVE_GDB
+	sp_adj[SP_ADJ_RET] = 0;
+	sp_adj[SP_ADJ_ASSIGN] = 32;
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		zend_jit_set_sp_adj_vm();                                // set sp_adj[SP_ADJ_VM]
+#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_VM] + HYBRID_SPAD; // sub r4, HYBRID_SPAD
+#else
+		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_VM];
+#endif
+	} else if (GCC_GLOBAL_REGS) {
+		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_RET] + SPAD;       // sub r4, SPAD
+	} else {
+		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_RET] + NR_SPAD;    // sub r4, NR_SPAD
+	}
+#endif
+
 	return SUCCESS;
 }
 
@@ -2780,8 +2869,10 @@ static int zend_jit_prologue(dasm_State **Dst)
 		|	SUB_HYBRID_SPAD
 	} else if (GCC_GLOBAL_REGS) {
 		|	stp x29, x30, [sp, # -SPAD]!    // stack alignment
+		|//	mov x29, sp
 	} else {
 		|	stp x29, x30, [sp, # -NR_SPAD]! // stack alignment
+		|//	mov	x29, sp
 		|	stp FP, RX, T2                  // save FP and IP
 		|	mov FP, FCARG1x
 	}
