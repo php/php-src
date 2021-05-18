@@ -28,10 +28,10 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
-#include "zend_jit_x86.h"
-#elif defined(__aarch64__)
-#include "zend_jit_arm64.h"
+#if ZEND_JIT_TARGET_X86
+# include "zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "zend_jit_arm64.h"
 #endif
 
 #include "zend_jit_internal.h"

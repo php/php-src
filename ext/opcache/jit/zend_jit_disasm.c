@@ -23,7 +23,7 @@
 # define HAVE_DISASM 1
 # include <capstone/capstone.h>
 # define HAVE_CAPSTONE_ITER 1
-#else
+#elif ZEND_JIT_TARGET_X86
 # define HAVE_DISASM 1
 # define DISASM_INTEL_SYNTAX 0
 
@@ -37,6 +37,8 @@
 # endif
 # include "jit/libudis86/udis86.c"
 #endif /* HAVE_CAPSTONE */
+
+#ifdef HAVE_DISASM
 
 static void zend_jit_disasm_add_symbol(const char *name,
                                        uint64_t    addr,
@@ -225,7 +227,7 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 {
 	unsigned int i;
 
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
+#if ZEND_JIT_TARGET_X86
 	if (cs_insn_group(cs, insn, X86_GRP_JUMP)) {
 		for (i = 0; i < insn->detail->x86.op_count; i++) {
 			if (insn->detail->x86.operands[i].type == X86_OP_IMM) {
@@ -233,7 +235,7 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 			}
 		}
 	}
-#elif defined(__aarch64__)
+#elif ZEND_JIT_TARGET_ARM64
 	if (cs_insn_group(cs, insn, ARM64_GRP_JUMP)
 	 || insn->id == ARM64_INS_BL
 	 || insn->id == ARM64_INS_ADR) {
@@ -321,7 +323,7 @@ static int zend_jit_disasm(const char    *name,
 #endif
 
 #ifdef HAVE_CAPSTONE
-# if defined(__x86_64__) || defined(_WIN64) || defined(ZEND_WIN32)
+# if ZEND_JIT_TARGET_X86
 	if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK)
 		return 0;
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
@@ -330,7 +332,7 @@ static int zend_jit_disasm(const char    *name,
 #  else
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
 #  endif
-# elif defined(__aarch64__)
+# elif ZEND_JIT_TARGET_ARM64
 	if (cs_open(CS_ARCH_ARM64, CS_MODE_ARM, &cs) != CS_ERR_OK)
 		return 0;
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
@@ -768,3 +770,5 @@ static void zend_jit_disasm_shutdown(void)
 		JIT_G(symbols) = NULL;
 	}
 }
+
+#endif /* HAVE_DISASM */

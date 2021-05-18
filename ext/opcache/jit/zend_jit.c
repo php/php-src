@@ -39,12 +39,10 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
-#include "jit/zend_jit_x86.h"
-#elif defined (__aarch64__)
-#include "jit/zend_jit_arm64.h"
-#else
-#error "JIT not supported on this platform"
+#if ZEND_JIT_TARGET_X86
+# include "jit/zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "jit/zend_jit_arm64.h"
 #endif
 
 #include "jit/zend_jit_internal.h"
@@ -206,12 +204,12 @@ static bool zend_is_commutative(zend_uchar opcode)
 #define OP2_RANGE()      OP_RANGE(ssa_op, op2)
 #define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
 
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
-#include "dynasm/dasm_x86.h"
-#elif defined(__aarch64__)
+#if ZEND_JIT_TARGET_X86
+# include "dynasm/dasm_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
 static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, uint32_t *cp, ptrdiff_t offset);
-#define DASM_ADD_VENEER zend_jit_add_veneer
-#include "dynasm/dasm_arm64.h"
+# define DASM_ADD_VENEER zend_jit_add_veneer
+# include "dynasm/dasm_arm64.h"
 #endif
 
 #include "jit/zend_jit_helpers.c"
@@ -224,11 +222,11 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 # include "jit/zend_jit_oprofile.c"
 #endif
 
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
-#include "jit/zend_jit_vtune.c"
-#include "jit/zend_jit_x86.c"
-#elif defined(__aarch64__)
-#include "jit/zend_jit_arm64.c"
+#if ZEND_JIT_TARGET_X86
+# include "jit/zend_jit_vtune.c"
+# include "jit/zend_jit_x86.c"
+#elif ZEND_JIT_TARGET_ARM64
+# include "jit/zend_jit_arm64.c"
 #endif
 
 #if _WIN32
@@ -410,7 +408,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		return NULL;
 	}
 
-#ifdef __aarch64__
+#if ZEND_JIT_TARGET_ARM64
 	dasm_venners_size = 0;
 #endif
 
@@ -422,7 +420,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		return NULL;
 	}
 
-#ifdef __aarch64__
+#if ZEND_JIT_TARGET_ARM64
 	size += dasm_venners_size;
 #endif
 
@@ -4407,7 +4405,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	}
 
 	zend_jit_unprotect();
-#ifdef __aarch64__
+#if ZEND_JIT_TARGET_ARM64
 	/* reserve space for global labels veneers */
 	dasm_labels_veneers = *dasm_ptr;
 	*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;

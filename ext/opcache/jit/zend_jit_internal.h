@@ -727,7 +727,7 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 
 /* Instruction cache flush */
 #ifndef JIT_CACHE_FLUSH
-#  if defined (__aarch64__)
+#  if ZEND_JIT_TARGET_ARM64
 #    if ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_builtin(__builtin___clear_cache))
 #      define JIT_CACHE_FLUSH(from, to) __builtin___clear_cache((char*)(from), (char*)(to))
 #    else
