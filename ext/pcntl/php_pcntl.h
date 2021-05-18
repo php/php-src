@@ -33,45 +33,6 @@ PHP_RINIT_FUNCTION(pcntl);
 PHP_RSHUTDOWN_FUNCTION(pcntl);
 PHP_MINFO_FUNCTION(pcntl);
 
-PHP_FUNCTION(pcntl_alarm);
-PHP_FUNCTION(pcntl_fork);
-PHP_FUNCTION(pcntl_waitpid);
-PHP_FUNCTION(pcntl_wait);
-PHP_FUNCTION(pcntl_wifexited);
-PHP_FUNCTION(pcntl_wifstopped);
-PHP_FUNCTION(pcntl_wifsignaled);
-#ifdef HAVE_WCONTINUED
-PHP_FUNCTION(pcntl_wifcontinued);
-#endif
-PHP_FUNCTION(pcntl_wexitstatus);
-PHP_FUNCTION(pcntl_wtermsig);
-PHP_FUNCTION(pcntl_wstopsig);
-PHP_FUNCTION(pcntl_signal);
-PHP_FUNCTION(pcntl_signal_get_handler);
-PHP_FUNCTION(pcntl_signal_dispatch);
-PHP_FUNCTION(pcntl_get_last_error);
-PHP_FUNCTION(pcntl_strerror);
-#ifdef HAVE_SIGPROCMASK
-PHP_FUNCTION(pcntl_sigprocmask);
-#endif
-#ifdef HAVE_STRUCT_SIGINFO_T
-# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
-PHP_FUNCTION(pcntl_sigwaitinfo);
-PHP_FUNCTION(pcntl_sigtimedwait);
-# endif
-#endif
-PHP_FUNCTION(pcntl_exec);
-#ifdef HAVE_GETPRIORITY
-PHP_FUNCTION(pcntl_getpriority);
-#endif
-#ifdef HAVE_SETPRIORITY
-PHP_FUNCTION(pcntl_setpriority);
-#endif
-PHP_FUNCTION(pcntl_async_signals);
-#ifdef HAVE_UNSHARE
-PHP_FUNCTION(pcntl_unshare);
-#endif
-
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
 	zend_long signo;
