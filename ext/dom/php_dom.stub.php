@@ -93,7 +93,7 @@ class DOMNode
     public function replaceChild(DOMNode $node, DOMNode $child) {}
 }
 
-class DOMNameSpaceNode
+class DOMNameSpaceNode extends DOMNode
 {
 }
 

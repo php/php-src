@@ -608,7 +608,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_node_prop_handlers, "textContent", sizeof("textContent")-1, dom_node_text_content_read, dom_node_text_content_write);
 	zend_hash_add_ptr(&classes, dom_node_class_entry->name, &dom_node_prop_handlers);
 
-	dom_namespace_node_class_entry = register_class_DOMNameSpaceNode();
+	dom_namespace_node_class_entry = register_class_DOMNameSpaceNode(dom_node_class_entry);
 	dom_namespace_node_class_entry->create_object = dom_objects_new;
 
 	zend_hash_init(&dom_namespace_node_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
