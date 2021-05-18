@@ -119,24 +119,25 @@ constant_binary_op:
 				} else if (opline->extended_value == ZEND_MOD
 				 || opline->extended_value == ZEND_SL
 				 || opline->extended_value == ZEND_SR) {
-					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
+					zval *op2 = &ZEND_OP2_LITERAL(opline);
+					if (Z_TYPE_P(op2) != IS_LONG) {
 						/* Don't optimize if it should produce an incompatible float to int error */
 						// TODO There must be a better way
-						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE
-							&& !zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP2_LITERAL(opline))),
-								Z_DVAL(ZEND_OP2_LITERAL(opline)))) {
+						if (Z_TYPE_P(op2) == IS_DOUBLE
+							&& !zend_is_long_compatible(
+								Z_DVAL_P(op2), zend_dval_to_lval(Z_DVAL_P(op2)))) {
 							break;
 						}
 						/* don't optimize if it should produce a runtime numeric string error */
-						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
+						if (Z_TYPE_P(op2) == IS_STRING) {
 							double dval = 0;
-							zend_uchar is_num = is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)),
-								Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, &dval, /* allow_errors */ false);
-							if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(zend_dval_to_lval(dval), dval))) {
+							zend_uchar is_num = is_numeric_string(Z_STRVAL_P(op2),
+								Z_STRLEN_P(op2), NULL, &dval, /* allow_errors */ false);
+							if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
 								break;
 							}
 						}
-						convert_to_long(&ZEND_OP2_LITERAL(opline));
+						convert_to_long(op2);
 					}
 				} else if (opline->extended_value == ZEND_CONCAT) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
