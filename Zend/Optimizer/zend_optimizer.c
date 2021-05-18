@@ -50,19 +50,12 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 
 int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
 {
-	binary_op_type binary_op = get_binary_op(opcode);
-	int er, ret;
-
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
 	}
 
-	er = EG(error_reporting);
-	EG(error_reporting) = 0;
-	ret = binary_op(result, op1, op2);
-	EG(error_reporting) = er;
-
-	return ret;
+	binary_op_type binary_op = get_binary_op(opcode);
+	return binary_op(result, op1, op2);
 }
 /* }}} */
 
