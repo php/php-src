@@ -411,8 +411,8 @@ static inheritance_status zend_perform_intersection_covariant_class_type_check(
 	bool have_unresolved = false;
 	zend_type *single_type;
 
-	/* Traverse the list of child types and check if it is either a subtype
-	 * of one of the parent types OR is not in the parent type list */
+	/* Traverse the list of child types and check that at least one is
+	 * a subtype of the parent type being checked */
 	ZEND_TYPE_FOREACH(fe_type, single_type) {
 		zend_class_entry *fe_ce;
 		zend_string *fe_class_name = NULL;
@@ -431,7 +431,7 @@ static inheritance_status zend_perform_intersection_covariant_class_type_check(
 			fe_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type */
-			ZEND_ASSERT(0 && "This shouldn't happen yet");
+			ZEND_UNREACHABLE();
 			continue;
 		}
 
@@ -544,7 +544,7 @@ static inheritance_status zend_is_single_type_subtype_intersection(
 			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type cannot be part a subtype of an intersection type */
-			ZEND_ASSERT(0 && "This shouldn't happen yet");
+			ZEND_UNREACHABLE();
 			continue;
 		}
 
@@ -624,7 +624,7 @@ static inheritance_status zend_perform_covariant_type_check(
 	bool all_success = true;
 
 	/* If the child type is an intersection type then we need to loop over
-	 * the parents firstFor intersection types loop over the parent types first
+	 * the parents first. For intersection types, loop over the parent types first
 	 * as the child can add types, however none of them can be a supertype of
 	 * a parent type. */
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
@@ -641,7 +641,7 @@ static inheritance_status zend_perform_covariant_type_check(
 				proto_class_name = proto_ce->name;
 			} else {
 				/* standard type */
-				ZEND_ASSERT(0 && "This shouldn't happen yet");
+				ZEND_UNREACHABLE();
 				continue;
 			}
 

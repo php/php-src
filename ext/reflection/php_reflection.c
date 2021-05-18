@@ -1320,7 +1320,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 }
 /* }}} */
 
-typedef enum reflection_type_kind {
+typedef enum {
 	NAMED_TYPE = 0,
 	UNION_TYPE = 1,
 	INTERSECTION_TYPE = 2
