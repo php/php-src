@@ -15,16 +15,16 @@ Test posix_getpwuid() function : basic functionality
 
 ?>
 ===DONE====
---EXPECTREGEX--
+--EXPECTF--
 Basic test of POSIX getpwuid
 Array
-\(
-    \[name\] => [^\r\n]+
-    \[passwd\] => [^\r\n]+
-    \[uid\] => [0-9]+
-    \[gid\] => [0-9]+
-    \[gecos\] => [^\r\n]*
-    \[dir\] => [^\r\n]+
-    \[shell\] => [^\r\n]+
-\)
+(
+    [name] => %s
+    [passwd] => %S
+    [uid] => %d
+    [gid] => %d
+    [gecos] => %S
+    [dir] => %s
+    [shell] => %s
+)
 ===DONE====
