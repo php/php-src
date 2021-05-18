@@ -31,10 +31,10 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     /** @return array|false */
     public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true) {}
 
-    /** @return SimpleXMLIterator|null */
+    /** @return SimpleXMLElement|null */
     public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
-    /** @return SimpleXMLIterator|null */
+    /** @return SimpleXMLElement|null */
     public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
     public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = "", bool $isPrefix = false) {}
@@ -71,7 +71,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     /** @return bool */
     public function hasChildren() {}
 
-    /** @return SimpleXMLElement|null */
+    /** @return SimpleXMLIterator|null */
     public function getChildren() {}
 }
 
