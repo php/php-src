@@ -657,18 +657,7 @@ PHP_FUNCTION(spl_object_id)
 
 PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
 {
-	intptr_t hash_handle, hash_handlers;
-
-	if (!SPL_G(hash_mask_init)) {
-		SPL_G(hash_mask_handle)   = (intptr_t)(php_mt_rand() >> 1);
-		SPL_G(hash_mask_handlers) = (intptr_t)(php_mt_rand() >> 1);
-		SPL_G(hash_mask_init) = 1;
-	}
-
-	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)obj->handle;
-	hash_handlers = SPL_G(hash_mask_handlers);
-
-	return strpprintf(32, "%016zx%016zx", hash_handle, hash_handlers);
+	return strpprintf(32, "%016zx0000000000000000", (intptr_t)obj->handle);
 }
 /* }}} */
 
@@ -736,7 +725,6 @@ PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	SPL_G(autoload_extensions) = NULL;
 	SPL_G(autoload_functions) = NULL;
-	SPL_G(hash_mask_init) = 0;
 	return SUCCESS;
 } /* }}} */
 
@@ -750,9 +738,6 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 		zend_hash_destroy(SPL_G(autoload_functions));
 		FREE_HASHTABLE(SPL_G(autoload_functions));
 		SPL_G(autoload_functions) = NULL;
-	}
-	if (SPL_G(hash_mask_init)) {
-		SPL_G(hash_mask_init) = 0;
 	}
 	return SUCCESS;
 } /* }}} */
