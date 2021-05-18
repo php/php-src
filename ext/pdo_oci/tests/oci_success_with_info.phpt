@@ -43,6 +43,17 @@ SQL
     );
 }
 
+function triggerCompilationError(PDO $conn): void {
+    $conn->exec(<<<'SQL'
+CREATE OR REPLACE FUNCTION BUG77120(INT A) RETURN INT
+AS
+BEGIN
+    RETURN 0;
+END;
+SQL
+    );
+}
+
 require __DIR__ . '/../../pdo/tests/pdo_test.inc';
 
 $conn = connectAsAdmin();
@@ -66,6 +77,14 @@ $conn = connectAsAdmin();
 dropUser($conn);
 dropProfile($conn);
 
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+triggerCompilationError($conn);
+var_dump($conn->errorInfo());
+
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+triggerCompilationError($conn);
+var_dump($conn->errorInfo());
+
 ?>
 --EXPECTF--
 array(3) {
@@ -75,5 +94,23 @@ array(3) {
   int(28002)
   [2]=>
   string(%d) "OCISessionBegin: OCI_SUCCESS_WITH_INFO: ORA-28002: %s
+ (%s:%d)"
+}
+array(3) {
+  [0]=>
+  string(5) "HY000"
+  [1]=>
+  int(24344)
+  [2]=>
+  string(%d) "OCIStmtExecute: OCI_SUCCESS_WITH_INFO: ORA-24344: %s
+ (%s:%d)"
+}
+array(3) {
+  [0]=>
+  string(5) "HY000"
+  [1]=>
+  int(24344)
+  [2]=>
+  string(%d) "OCIStmtExecute: OCI_SUCCESS_WITH_INFO: ORA-24344: %s
  (%s:%d)"
 }
