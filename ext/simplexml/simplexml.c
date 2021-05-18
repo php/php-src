@@ -2005,7 +2005,8 @@ PHP_METHOD(SimpleXMLElement, current)
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
-		return; /* return NULL */
+		zend_throw_error(NULL, "Iterator not initialized or already consumed");
+		RETURN_THROWS();
 	}
 
 	data = &sxe->iter.data;
@@ -2025,16 +2026,18 @@ PHP_METHOD(SimpleXMLElement, key)
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Iterator not initialized or already consumed");
+		RETURN_THROWS();
 	}
 
 	intern = Z_SXEOBJ_P(&sxe->iter.data);
-	if (intern != NULL && intern->node != NULL) {
-		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
-		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
+	if (intern == NULL || intern->node == NULL) {
+		zend_throw_error(NULL, "Iterator not initialized or already consumed");
+		RETURN_THROWS();
 	}
 
-	RETURN_FALSE;
+	curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
+	RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
 }
 /* }}} */
 
