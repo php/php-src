@@ -45,10 +45,6 @@ PHP                                                                        NEWS
 - PDO_ODBC:
   . Fixed bug #44643 (bound parameters ignore explicit type definitions). (cmb)
 
-- PDO_pgsql:
-  . Reverted bug fix for #80892 (PDO::PARAM_INT is treated the same as
-    PDO::PARAM_STR). (Matteo)
-
 - pgsql:
   . Fixed php_pgsql_fd_cast() wrt. php_stream_can_cast(). (cmb)
 
