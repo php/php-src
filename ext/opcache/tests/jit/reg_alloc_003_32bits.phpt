@@ -2,7 +2,7 @@
 Register Alloction 003: Reuse temporary register
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --INI--
 opcache.enable=1
@@ -23,5 +23,6 @@ function test($char_code) {
 }
 echo test(65), "\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
 correct

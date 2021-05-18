@@ -62,17 +62,56 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
+		/* Don't optimize if float/float-string to int conversion is not compatible */
+		case ZEND_MOD:
+		case ZEND_SL:
+		case ZEND_SR:
+			if (opline->op1_type == IS_CONST &&
+				opline->op2_type == IS_CONST) {
+				if ((Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_DOUBLE &&
+						!zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP1_LITERAL(opline))),
+						Z_DVAL(ZEND_OP1_LITERAL(opline))))
+					|| (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
+                       	!zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP2_LITERAL(opline))),
+                       	Z_DVAL(ZEND_OP2_LITERAL(opline))))
+				) {
+					break;
+				}
+				/* don't optimize if it should produce a runtime numeric string error */
+				if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
+					double dval = 0;
+					zend_uchar is_num = is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)),
+						Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, &dval, /* allow_errors */ false);
+					if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(zend_dval_to_lval(dval), dval))) {
+						break;
+					}
+				}
+				goto constant_binary_op;
+			}
+			break;
+		/* Don't optimize if float to int conversion is not compatible */
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+			if (opline->op1_type == IS_CONST &&
+				opline->op2_type == IS_CONST) {
+				if ((Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_DOUBLE &&
+						!zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP1_LITERAL(opline))),
+						Z_DVAL(ZEND_OP1_LITERAL(opline))))
+					|| (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
+                       	!zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP2_LITERAL(opline))),
+                       	Z_DVAL(ZEND_OP2_LITERAL(opline))))
+				) {
+					break;
+				}
+				goto constant_binary_op;
+			}
+			break;
 		case ZEND_ADD:
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_DIV:
 		case ZEND_POW:
-		case ZEND_MOD:
-		case ZEND_SL:
-		case ZEND_SR:
-		case ZEND_BW_OR:
-		case ZEND_BW_AND:
-		case ZEND_BW_XOR:
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
@@ -120,11 +159,23 @@ constant_binary_op:
 				 || opline->extended_value == ZEND_SL
 				 || opline->extended_value == ZEND_SR) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						/* don't optimize if it should produce a runtime numeric string error */
-						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
-							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
-							convert_to_long(&ZEND_OP2_LITERAL(opline));
+						/* Don't optimize if it should produce an incompatible float to int error */
+						// TODO There must be a better way
+						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE
+							&& !zend_is_long_compatible(zend_dval_to_lval(Z_DVAL(ZEND_OP2_LITERAL(opline))),
+								Z_DVAL(ZEND_OP2_LITERAL(opline)))) {
+							break;
 						}
+						/* don't optimize if it should produce a runtime numeric string error */
+						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
+							double dval = 0;
+							zend_uchar is_num = is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)),
+								Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, &dval, /* allow_errors */ false);
+							if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(zend_dval_to_lval(dval), dval))) {
+								break;
+							}
+						}
+						convert_to_long(&ZEND_OP2_LITERAL(opline));
 					}
 				} else if (opline->extended_value == ZEND_CONCAT) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
@@ -154,6 +205,31 @@ constant_binary_op:
 			break;
 
 		case ZEND_BW_NOT:
+			if (opline->op1_type == IS_CONST) {
+				/* unary operation on constant operand */
+				zval result;
+
+				/* Don't optimize if it should produce an incompatible float to int error */
+				// TODO There must be a better way
+				if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_DOUBLE
+					&& !zend_is_long_compatible(zend_dval_to_lval(
+						Z_DVAL(ZEND_OP1_LITERAL(opline))), Z_DVAL(ZEND_OP1_LITERAL(opline))
+					)
+				) {
+					break;
+				}
+
+				if (zend_optimizer_eval_unary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+					literal_dtor(&ZEND_OP1_LITERAL(opline));
+					if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_TMP_VAR, opline->result.var, &result)) {
+						MAKE_NOP(opline);
+					} else {
+						opline->opcode = ZEND_QM_ASSIGN;
+						zend_optimizer_update_op1_const(op_array, opline, &result);
+					}
+				}
+			}
+			break;
 		case ZEND_BOOL_NOT:
 			if (opline->op1_type == IS_CONST) {
 				/* unary operation on constant operand */
