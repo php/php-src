@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1c292af8bd32226f740bc1df947acbc162d56448 */
+ * Stub hash: 6cc8d65814e0a45d71cdf765533e85353e749051 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -7,18 +7,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, posted_filename, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_getFilename, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_getFilename, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CURLFile_getMimeType arginfo_class_CURLFile_getFilename
 
 #define arginfo_class_CURLFile_getPostFilename arginfo_class_CURLFile_getFilename
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setMimeType, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_setMimeType, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, mime_type, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, posted_filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
