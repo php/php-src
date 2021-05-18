@@ -247,7 +247,6 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
 	zval tmp, storage;
-	zend_string *md5str;
 	zend_string *zname;
 	HashTable *debug_info;
 
@@ -259,7 +258,6 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 	array_init(&storage);
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-		md5str = php_spl_object_hash(element->obj);
 		array_init(&tmp);
 		/* Incrementing the refcount of obj and inf would confuse the garbage collector.
 		 * Prefer to null the destructor */
@@ -268,8 +266,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 		ZVAL_OBJ(&obj, element->obj);
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &obj);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
-		zend_hash_update(Z_ARRVAL(storage), md5str, &tmp);
-		zend_string_release_ex(md5str, 0);
+		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();
 
 	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
