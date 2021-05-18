@@ -80,13 +80,13 @@ interface SessionHandlerInterface
     /** @return bool */
     public function destroy(string $id);
 
-    /** @return int|bool */
+    /** @return int|false */
     public function gc(int $max_lifetime);
 }
 
 interface SessionIdInterface
 {
-    /** @return string */
+    /** @return string|false */
     public function create_sid();
 }
 
@@ -116,9 +116,9 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     /** @return bool */
     public function destroy(string $id) {}
 
-    /** @return int|bool */
+    /** @return int|false */
     public function gc(int $max_lifetime) {}
 
-    /** @return string */
+    /** @return string|false */
     public function create_sid() {}
 }
