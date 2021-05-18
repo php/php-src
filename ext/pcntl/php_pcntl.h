@@ -48,6 +48,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	int last_error;
 	volatile char pending_signals;
 	bool async_signals;
+	unsigned num_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #if defined(ZTS) && defined(COMPILE_DL_PCNTL)

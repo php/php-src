@@ -47,11 +47,7 @@
 #endif
 
 #ifndef NSIG
-# ifdef SIGRTMAX
-#  define NSIG (SIGRTMAX + 1)
-# else
-#  define NSIG 32
-# endif
+# define NSIG 32
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -430,6 +426,14 @@ PHP_RINIT_FUNCTION(pcntl)
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
 	PCNTL_G(last_error) = 0;
+	PCNTL_G(num_signals) = NSIG;
+#ifdef SIGRTMAX
+	/* At least FreeBSD reports an incorrecrt NSIG that does not include realtime signals.
+	 * As SIGRTMAX may be a dynamic value, adjust the value in INIT. */
+	if (NSIG < SIGRTMAX + 1) {
+		PCNTL_G(num_signals) = SIGRTMAX + 1;
+	}
+#endif
 	return SUCCESS;
 }
 
@@ -900,8 +904,8 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	if (signo >= NSIG) {
-		zend_argument_value_error(1, "must be less than %d", NSIG);
+	if (signo >= PCNTL_G(num_signals)) {
+		zend_argument_value_error(1, "must be less than %d", PCNTL_G(num_signals));
 		RETURN_THROWS();
 	}
 
@@ -909,7 +913,7 @@ PHP_FUNCTION(pcntl_signal)
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
 		int i;
-		for (i = 0; i < NSIG; i++) {
+		for (i = 0; i < PCNTL_G(num_signals); i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
@@ -1037,7 +1041,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			RETURN_THROWS();
 		}
 
-		for (signo = 1; signo < NSIG; ++signo) {
+		for (signo = 1; signo < PCNTL_G(num_signals); ++signo) {
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
 			}
