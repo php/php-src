@@ -27,6 +27,10 @@
 #define DEFAULT_SHORT_OPEN_TAG "1"
 
 /* Platform-Specific Configuration. Should not be changed. */
+/* Alignment for Zend memory allocator */
+#define ZEND_MM_ALIGNMENT (size_t)8
+#define ZEND_MM_ALIGNMENT_LOG2 (size_t)3
+#define ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT 0
 #define PHP_SIGCHILD 0
 #define HAVE_GETSERVBYNAME 1
 #define HAVE_GETSERVBYPORT 1

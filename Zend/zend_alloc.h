@@ -26,16 +26,8 @@
 #include "../TSRM/TSRM.h"
 #include "zend.h"
 
-#ifndef CONFIG_ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT (size_t)8
-# define ZEND_MM_ALIGNMENT_LOG2 (size_t)3
-#elif ZEND_MM_ALIGNMENT < 4
-# define ZEND_MM_ALIGNMENT (size_t)4
-# define ZEND_MM_ALIGNMENT_LOG2 (size_t)2
-# define ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT 1
-#else
-# define ZEND_MM_ALIGNMENT (size_t)CONFIG_ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT_LOG2 (size_t)CONFIG_ZEND_MM_ALIGNMENT_LOG2
+#ifndef ZEND_MM_ALIGNMENT
+# error "ZENF_MM_ALIGNMENT was not defined during configure"
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
