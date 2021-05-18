@@ -21,8 +21,6 @@
 */
 
 
-#if defined(__x86_64__) || defined(i386) || defined(__aarch64__)
-
 #define HAVE_GDB
 
 #include "zend_elf.h"
@@ -504,5 +502,3 @@ static void zend_jit_gdb_init(void)
 	}
 #endif
 }
-
-#endif /* defined(__x86_64__) || defined(i386) || defined(__aarch64__) */
