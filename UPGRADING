@@ -185,6 +185,8 @@ PHP 8.1 UPGRADE NOTES
   . File uploads now provide an additional full_path key, which contains the
     full path (rather than just the basename) of the uploaded file. This is
     intended for use in conjunction with "upload webkitdirectory".
+  . It is now allowed to specify named arguments after an argument unpack, e.g.
+    foo(...$args, named: $arg).
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
