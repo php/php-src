@@ -21,6 +21,8 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
+#include "zend_bitset.h"
+
 /* Register Set */
 #define ZEND_REGSET_EMPTY 0
 
@@ -743,10 +745,10 @@ static zend_always_inline bool zend_long_is_power_of_two(zend_long x)
 	return (x > 0) && !(x & (x - 1));
 }
 
-static zend_always_inline uint32_t zend_long_floor_log2(uint64_t x)
+static zend_always_inline uint32_t zend_long_floor_log2(zend_long x)
 {
 	ZEND_ASSERT(zend_long_is_power_of_two(x));
-	return __builtin_ctzll(x);
+	return zend_ulong_ntz(x);
 }
 
 /* from http://aggregate.org/MAGIC/ */
