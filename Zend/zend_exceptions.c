@@ -600,29 +600,13 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 }
 /* }}} */
 
-/* {{{ Obtain the backtrace for the exception as a string (instead of an array) */
-ZEND_METHOD(Exception, getTraceAsString)
-{
-	zval *trace, *frame, rv;
+ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main) {
 	zend_ulong index;
-	zval *object;
-	zend_class_entry *base_ce;
-	smart_str str = {0};
+	zval *frame;
 	uint32_t num = 0;
+	smart_str str = {0};
 
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	object = ZEND_THIS;
-	base_ce = i_get_exception_base(Z_OBJ_P(object));
-
-	trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	/* Type should be guaranteed by property type. */
-	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(trace, index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
 			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
@@ -631,12 +615,33 @@ ZEND_METHOD(Exception, getTraceAsString)
 		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
 	} ZEND_HASH_FOREACH_END();
 
-	smart_str_appendc(&str, '#');
-	smart_str_append_long(&str, num);
-	smart_str_appends(&str, " {main}");
-	smart_str_0(&str);
+	if (include_main) {
+		smart_str_appendc(&str, '#');
+		smart_str_append_long(&str, num);
+		smart_str_appends(&str, " {main}");
+	}
 
-	RETURN_NEW_STR(str.s);
+	smart_str_0(&str);
+	return str.s ? str.s : ZSTR_EMPTY_ALLOC();
+}
+
+/* {{{ Obtain the backtrace for the exception as a string (instead of an array) */
+ZEND_METHOD(Exception, getTraceAsString)
+{
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval *object = ZEND_THIS;
+	zend_class_entry *base_ce = i_get_exception_base(Z_OBJ_P(object));
+	zval rv;
+	zval *trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	/* Type should be guaranteed by property type. */
+	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
+	RETURN_NEW_STR(zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true));
 }
 /* }}} */
 
