@@ -17,7 +17,7 @@ EOF;
 
 class SXETest extends SimpleXMLIterator
 {
-    function count()
+    function count(): int
     {
         echo __METHOD__ . "\n";
         return parent::count();
