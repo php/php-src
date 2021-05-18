@@ -8,8 +8,8 @@ class ReflectionException extends Exception
 
 class Reflection
 {
-    /** @return string[] */
-    public static function getModifierNames(int $modifiers) {}
+    /** @tentative-return-type */
+    public static function getModifierNames(int $modifiers): array {}
 }
 
 interface Reflector extends Stringable
@@ -23,88 +23,87 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
 
-    /** @return bool */
-    public function inNamespace() {}
+    /** @tentative-return-type */
+    public function inNamespace(): bool {}
 
-    /** @return bool */
-    public function isClosure() {}
+    /** @tentative-return-type */
+    public function isClosure(): bool {}
 
-    /** @return bool */
-    public function isDeprecated() {}
+    /** @tentative-return-type */
+    public function isDeprecated(): bool {}
 
-    /** @return bool */
-    public function isInternal() {}
+    /** @tentative-return-type */
+    public function isInternal(): bool {}
 
-    /** @return bool */
-    public function isUserDefined() {}
+    /** @tentative-return-type */
+    public function isUserDefined(): bool {}
 
-    /** @return bool */
-    public function isGenerator() {}
+    /** @tentative-return-type */
+    public function isGenerator(): bool {}
 
-    /** @return bool */
-    public function isVariadic() {}
+    /** @tentative-return-type */
+    public function isVariadic(): bool {}
 
-    /** @return object|null */
-    public function getClosureThis() {}
+    /** @tentative-return-type */
+    public function getClosureThis(): ?object {}
 
-    /** @return ReflectionClass|null */
-    public function getClosureScopeClass() {}
+    /** @tentative-return-type */
+    public function getClosureScopeClass(): ?ReflectionClass {}
 
     public function getClosureUsedVariables() : array {}
 
-    /** @return string|false */
-    public function getDocComment() {}
+    /** @tentative-return-type */
+    public function getDocComment(): string|false {}
 
-    /** @return int|false */
-    public function getEndLine() {}
+    /** @tentative-return-type */
+    public function getEndLine(): int|false {}
 
-    /** @return ReflectionExtension|null */
-    public function getExtension() {}
+    /** @tentative-return-type */
+    public function getExtension(): ?ReflectionExtension {}
 
-    /** @return string|false */
-    public function getExtensionName() {}
+    /** @tentative-return-type */
+    public function getExtensionName(): string|false {}
 
-    /** @return string|false */
-    public function getFileName() {}
+    /** @tentative-return-type */
+    public function getFileName(): string|false {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return string */
-    public function getNamespaceName() {}
+    /** @tentative-return-type */
+    public function getNamespaceName(): string {}
 
-    /** @return int */
-    public function getNumberOfParameters() {}
+    /** @tentative-return-type */
+    public function getNumberOfParameters(): int {}
 
-    /** @return int */
-    public function getNumberOfRequiredParameters() {}
+    /** @tentative-return-type */
+    public function getNumberOfRequiredParameters(): int {}
 
-    /** @return ReflectionParameter[] */
-    public function getParameters() {}
+    /** @tentative-return-type */
+    public function getParameters(): array {}
 
-    /** @return string */
-    public function getShortName() {}
+    /** @tentative-return-type */
+    public function getShortName(): string {}
 
-    /** @return int|false */
-    public function getStartLine() {}
+    /** @tentative-return-type */
+    public function getStartLine(): int|false {}
 
-    /** @return array */
-    public function getStaticVariables() {}
+    /** @tentative-return-type */
+    public function getStaticVariables(): array {}
 
-    /** @return bool */
-    public function returnsReference() {}
+    /** @tentative-return-type */
+    public function returnsReference(): bool {}
 
-    /** @return bool */
-    public function hasReturnType() {}
+    /** @tentative-return-type */
+    public function hasReturnType(): bool {}
 
-    /** @return ReflectionType|null */
-    public function getReturnType() {}
+    /** @tentative-return-type */
+    public function getReturnType(): ?ReflectionType {}
 
     public function hasTentativeReturnType(): bool {}
 
     public function getTentativeReturnType(): ?ReflectionType {}
 
-    /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -115,42 +114,42 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function __toString(): string {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @deprecated ReflectionFunction can no longer be constructed for disabled functions
      */
-    public function isDisabled() {}
+    public function isDisabled(): bool {}
 
-    /** @return mixed */
-    public function invoke(mixed ...$args) {}
+    /** @tentative-return-type */
+    public function invoke(mixed ...$args): mixed {}
 
-    /** @return mixed */
-    public function invokeArgs(array $args) {}
+    /** @tentative-return-type */
+    public function invokeArgs(array $args): mixed {}
 
-    /** @return Closure */
-    public function getClosure() {}
+    /** @tentative-return-type */
+    public function getClosure(): Closure {}
 }
 
 final class ReflectionGenerator
 {
     public function __construct(Generator $generator) {}
 
-    /** @return int */
-    public function getExecutingLine() {}
+    /** @tentative-return-type */
+    public function getExecutingLine(): int {}
 
-    /** @return string */
-    public function getExecutingFile() {}
+    /** @tentative-return-type */
+    public function getExecutingFile(): string {}
 
-    /** @return array */
-    public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT) {}
+    /** @tentative-return-type */
+    public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 
-    /** @return ReflectionFunctionAbstract */
-    public function getFunction() {}
+    /** @tentative-return-type */
+    public function getFunction(): ReflectionFunctionAbstract {}
 
-    /** @return object|null */
-    public function getThis() {}
+    /** @tentative-return-type */
+    public function getThis(): ?object {}
 
-    /** @return Generator */
-    public function getExecutingGenerator() {}
+    /** @tentative-return-type */
+    public function getExecutingGenerator(): Generator {}
 }
 
 class ReflectionMethod extends ReflectionFunctionAbstract
@@ -161,50 +160,50 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     public function __toString(): string {}
 
-    /** @return bool */
-    public function isPublic() {}
+    /** @tentative-return-type */
+    public function isPublic(): bool {}
 
-    /** @return bool */
-    public function isPrivate() {}
+    /** @tentative-return-type */
+    public function isPrivate(): bool {}
 
-    /** @return bool */
-    public function isProtected() {}
+    /** @tentative-return-type */
+    public function isProtected(): bool {}
 
-    /** @return bool */
-    public function isAbstract() {}
+    /** @tentative-return-type */
+    public function isAbstract(): bool {}
 
-    /** @return bool */
-    public function isFinal() {}
+    /** @tentative-return-type */
+    public function isFinal(): bool {}
 
-    /** @return bool */
-    public function isStatic() {}
+    /** @tentative-return-type */
+    public function isStatic(): bool {}
 
-    /** @return bool */
-    public function isConstructor() {}
+    /** @tentative-return-type */
+    public function isConstructor(): bool {}
 
-    /** @return bool */
-    public function isDestructor() {}
+    /** @tentative-return-type */
+    public function isDestructor(): bool {}
 
-    /** @return Closure */
-    public function getClosure(?object $object = null) {}
+    /** @tentative-return-type */
+    public function getClosure(?object $object = null): Closure {}
 
-    /** @return int */
-    public function getModifiers() {}
+    /** @tentative-return-type */
+    public function getModifiers(): int {}
 
-    /** @return mixed */
-    public function invoke(?object $object, mixed ...$args) {}
+    /** @tentative-return-type */
+    public function invoke(?object $object, mixed ...$args): mixed {}
 
-    /** @return mixed */
-    public function invokeArgs(?object $object, array $args) {}
+    /** @tentative-return-type */
+    public function invokeArgs(?object $object, array $args): mixed {}
 
-    /** @return ReflectionClass */
-    public function getDeclaringClass() {}
+    /** @tentative-return-type */
+    public function getDeclaringClass(): ReflectionClass {}
 
-    /** @return ReflectionMethod */
-    public function getPrototype() {}
+    /** @tentative-return-type */
+    public function getPrototype(): ReflectionMethod {}
 
-    /** @return void */
-    public function setAccessible(bool $accessible) {}
+    /** @tentative-return-type */
+    public function setAccessible(bool $accessible): void {}
 }
 
 class ReflectionClass implements Reflector
@@ -217,162 +216,162 @@ class ReflectionClass implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return bool */
-    public function isInternal() {}
+    /** @tentative-return-type */
+    public function isInternal(): bool {}
 
-    /** @return bool */
-    public function isUserDefined() {}
+    /** @tentative-return-type */
+    public function isUserDefined(): bool {}
 
-    /** @return bool */
-    public function isAnonymous() {}
+    /** @tentative-return-type */
+    public function isAnonymous(): bool {}
 
-    /** @return bool */
-    public function isInstantiable() {}
+    /** @tentative-return-type */
+    public function isInstantiable(): bool {}
 
-    /** @return bool */
-    public function isCloneable() {}
+    /** @tentative-return-type */
+    public function isCloneable(): bool {}
 
-    /** @return string|false */
-    public function getFileName() {}
+    /** @tentative-return-type */
+    public function getFileName(): string|false {}
 
-    /** @return int|false */
-    public function getStartLine() {}
+    /** @tentative-return-type */
+    public function getStartLine(): int|false {}
 
-    /** @return int|false */
-    public function getEndLine() {}
+    /** @tentative-return-type */
+    public function getEndLine(): int|false {}
 
-    /** @return string|false */
-    public function getDocComment() {}
+    /** @tentative-return-type */
+    public function getDocComment(): string|false {}
 
-    /** @return ReflectionMethod|null */
-    public function getConstructor() {}
+    /** @tentative-return-type */
+    public function getConstructor(): ?ReflectionMethod {}
 
-    /** @return bool */
-    public function hasMethod(string $name) {}
+    /** @tentative-return-type */
+    public function hasMethod(string $name): bool {}
 
-    /** @return ReflectionMethod */
-    public function getMethod(string $name) {}
+    /** @tentative-return-type */
+    public function getMethod(string $name): ReflectionMethod {}
 
-    /** @return ReflectionMethod[] */
-    public function getMethods(?int $filter = null) {}
+    /** @tentative-return-type */
+    public function getMethods(?int $filter = null): array {}
 
-    /** @return bool */
-    public function hasProperty(string $name) {}
+    /** @tentative-return-type */
+    public function hasProperty(string $name): bool {}
 
-    /** @return ReflectionProperty */
-    public function getProperty(string $name) {}
+    /** @tentative-return-type */
+    public function getProperty(string $name): ReflectionProperty {}
 
-    /** @return ReflectionProperty[] */
-    public function getProperties(?int $filter = null) {}
+    /** @tentative-return-type */
+    public function getProperties(?int $filter = null): array {}
 
-    /** @return bool */
-    public function hasConstant(string $name) {}
+    /** @tentative-return-type */
+    public function hasConstant(string $name): bool {}
 
-    /** @return array */
-    public function getConstants(?int $filter = null) {}
+    /** @tentative-return-type */
+    public function getConstants(?int $filter = null): array {}
 
-    /** @return ReflectionClassConstant[] */
-    public function getReflectionConstants(?int $filter = null) {}
+    /** @tentative-return-type */
+    public function getReflectionConstants(?int $filter = null): array {}
 
-    /** @return mixed */
-    public function getConstant(string $name) {}
+    /** @tentative-return-type */
+    public function getConstant(string $name): mixed {}
 
-    /** @return ReflectionClassConstant|false */
-    public function getReflectionConstant(string $name) {}
+    /** @tentative-return-type */
+    public function getReflectionConstant(string $name): ReflectionClassConstant|false {}
 
-    /** @return ReflectionClass[] */
-    public function getInterfaces() {}
+    /** @tentative-return-type */
+    public function getInterfaces(): array {}
 
-    /** @return string[] */
-    public function getInterfaceNames() {}
+    /** @tentative-return-type */
+    public function getInterfaceNames(): array {}
 
-    /** @return bool */
-    public function isInterface() {}
+    /** @tentative-return-type */
+    public function isInterface(): bool {}
 
-    /** @return ReflectionClass[] */
-    public function getTraits() {}
+    /** @tentative-return-type */
+    public function getTraits(): array {}
 
-    /** @return string[] */
-    public function getTraitNames() {}
+    /** @tentative-return-type */
+    public function getTraitNames(): array {}
 
-    /** @return string[] */
-    public function getTraitAliases() {}
+    /** @tentative-return-type */
+    public function getTraitAliases(): array {}
 
-    /** @return bool */
-    public function isTrait() {}
+    /** @tentative-return-type */
+    public function isTrait(): bool {}
 
     public function isEnum(): bool {}
 
-    /** @return bool */
-    public function isAbstract() {}
+    /** @tentative-return-type */
+    public function isAbstract(): bool {}
 
-    /** @return bool */
-    public function isFinal() {}
+    /** @tentative-return-type */
+    public function isFinal(): bool {}
 
-    /** @return int */
-    public function getModifiers() {}
+    /** @tentative-return-type */
+    public function getModifiers(): int {}
 
-    /** @return bool */
-    public function isInstance(object $object) {}
+    /** @tentative-return-type */
+    public function isInstance(object $object): bool {}
 
-    /** @return object */
-    public function newInstance(mixed ...$args) {}
+    /** @tentative-return-type */
+    public function newInstance(mixed ...$args): object {}
 
-    /** @return object */
-    public function newInstanceWithoutConstructor() {}
+    /** @tentative-return-type */
+    public function newInstanceWithoutConstructor(): object {}
 
-    /** @return object */
-    public function newInstanceArgs(array $args = []) {}
+    /** @tentative-return-type */
+    public function newInstanceArgs(array $args = []): ?object {}
 
-    /** @return ReflectionClass|false */
-    public function getParentClass() {}
+    /** @tentative-return-type */
+    public function getParentClass(): ReflectionClass|false {}
 
-    /** @return bool */
-    public function isSubclassOf(ReflectionClass|string $class) {}
+    /** @tentative-return-type */
+    public function isSubclassOf(ReflectionClass|string $class): bool {}
 
-    /** @return array|null */
-    public function getStaticProperties() {}
+    /** @tentative-return-type */
+    public function getStaticProperties(): ?array {}
 
-    /** @return mixed */
-    public function getStaticPropertyValue(string $name, mixed $default = UNKNOWN) {}
+    /** @tentative-return-type */
+    public function getStaticPropertyValue(string $name, mixed $default = UNKNOWN): mixed {}
 
-    /** @return void */
-    public function setStaticPropertyValue(string $name, mixed $value) {}
+    /** @tentative-return-type */
+    public function setStaticPropertyValue(string $name, mixed $value): void {}
 
-    /** @return array */
-    public function getDefaultProperties() {}
+    /** @tentative-return-type */
+    public function getDefaultProperties(): array {}
 
-    /** @return bool */
-    public function isIterable() {}
+    /** @tentative-return-type */
+    public function isIterable(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias ReflectionClass::isIterable
      */
-    public function isIterateable() {}
+    public function isIterateable(): bool {}
 
-    /** @return bool */
-    public function implementsInterface(ReflectionClass|string $interface) {}
+    /** @tentative-return-type */
+    public function implementsInterface(ReflectionClass|string $interface): bool {}
 
-    /** @return ReflectionExtension|null */
-    public function getExtension() {}
+    /** @tentative-return-type */
+    public function getExtension(): ?ReflectionExtension {}
 
-    /** @return string|false */
-    public function getExtensionName() {}
+    /** @tentative-return-type */
+    public function getExtensionName(): string|false {}
 
-    /** @return bool */
-    public function inNamespace() {}
+    /** @tentative-return-type */
+    public function inNamespace(): bool {}
 
-    /** @return string */
-    public function getNamespaceName() {}
+    /** @tentative-return-type */
+    public function getNamespaceName(): string {}
 
-    /** @return string */
-    public function getShortName() {}
+    /** @tentative-return-type */
+    public function getShortName(): string {}
 
-    /** @return ReflectionAttribute[] */
+    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -393,59 +392,59 @@ class ReflectionProperty implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return mixed */
-    public function getValue(?object $object = null) {}
+    /** @tentative-return-type */
+    public function getValue(?object $object = null): mixed {}
 
-    /** @return void */
-    public function setValue(mixed $objectOrValue, mixed $value = UNKNOWN) {}
+    /** @tentative-return-type */
+    public function setValue(mixed $objectOrValue, mixed $value = UNKNOWN): void {}
 
-    /** @return bool */
-    public function isInitialized(?object $object = null) {}
+    /** @tentative-return-type */
+    public function isInitialized(?object $object = null): bool {}
 
-    /** @return bool */
-    public function isPublic() {}
+    /** @tentative-return-type */
+    public function isPublic(): bool {}
 
-    /** @return bool */
-    public function isPrivate() {}
+    /** @tentative-return-type */
+    public function isPrivate(): bool {}
 
-    /** @return bool */
-    public function isProtected() {}
+    /** @tentative-return-type */
+    public function isProtected(): bool {}
 
-    /** @return bool */
-    public function isStatic() {}
+    /** @tentative-return-type */
+    public function isStatic(): bool {}
 
-    /** @return bool */
-    public function isDefault() {}
+    /** @tentative-return-type */
+    public function isDefault(): bool {}
 
     public function isPromoted(): bool {}
 
-    /** @return int */
-    public function getModifiers() {}
+    /** @tentative-return-type */
+    public function getModifiers(): int {}
 
-    /** @return ReflectionClass */
-    public function getDeclaringClass() {}
+    /** @tentative-return-type */
+    public function getDeclaringClass(): ReflectionClass {}
 
-    /** @return string|false */
-    public function getDocComment() {}
+    /** @tentative-return-type */
+    public function getDocComment(): string|false {}
 
-    /** @return void */
-    public function setAccessible(bool $accessible) {}
+    /** @tentative-return-type */
+    public function setAccessible(bool $accessible): void {}
 
-    /** @return ReflectionType|null */
-    public function getType() {}
+    /** @tentative-return-type */
+    public function getType(): ?ReflectionType {}
 
-    /** @return bool */
-    public function hasType() {}
+    /** @tentative-return-type */
+    public function hasType(): bool {}
 
     public function hasDefaultValue(): bool {}
 
-    /** @return mixed */
-    public function getDefaultValue() {}
+    /** @tentative-return-type */
+    public function getDefaultValue(): mixed {}
 
-    /** @return ReflectionAttribute[] */
+    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -461,31 +460,31 @@ class ReflectionClassConstant implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return mixed */
-    public function getValue() {}
+    /** @tentative-return-type */
+    public function getValue(): mixed {}
 
-    /** @return bool */
-    public function isPublic() {}
+    /** @tentative-return-type */
+    public function isPublic(): bool {}
 
-    /** @return bool */
-    public function isPrivate() {}
+    /** @tentative-return-type */
+    public function isPrivate(): bool {}
 
-    /** @return bool */
-    public function isProtected() {}
+    /** @tentative-return-type */
+    public function isProtected(): bool {}
 
-    /** @return int */
-    public function getModifiers() {}
+    /** @tentative-return-type */
+    public function getModifiers(): int {}
 
-    /** @return ReflectionClass */
-    public function getDeclaringClass() {}
+    /** @tentative-return-type */
+    public function getDeclaringClass(): ReflectionClass {}
 
-    /** @return string|false */
-    public function getDocComment() {}
+    /** @tentative-return-type */
+    public function getDocComment(): string|false {}
 
-    /** @return ReflectionAttribute[] */
+    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
@@ -503,72 +502,72 @@ class ReflectionParameter implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return bool */
-    public function isPassedByReference() {}
+    /** @tentative-return-type */
+    public function isPassedByReference(): bool {}
 
-    /** @return bool */
-    public function canBePassedByValue() {}
+    /** @tentative-return-type */
+    public function canBePassedByValue(): bool {}
 
-    /** @return ReflectionFunctionAbstract */
-    public function getDeclaringFunction() {}
+    /** @tentative-return-type */
+    public function getDeclaringFunction(): ReflectionFunctionAbstract {}
 
-    /** @return ReflectionClass|null */
-    public function getDeclaringClass() {}
-
-    /**
-     * @return ReflectionClass|null
-     * @deprecated Use ReflectionParameter::getType() instead
-     */
-    public function getClass() {}
-
-    /** @return bool */
-    public function hasType() {}
-
-    /** @return ReflectionType|null */
-    public function getType() {}
+    /** @tentative-return-type */
+    public function getDeclaringClass(): ?ReflectionClass {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @deprecated Use ReflectionParameter::getType() instead
      */
-    public function isArray() {}
+    public function getClass(): ?ReflectionClass {}
+
+    /** @tentative-return-type */
+    public function hasType(): bool {}
+
+    /** @tentative-return-type */
+    public function getType(): ?ReflectionType {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @deprecated Use ReflectionParameter::getType() instead
      */
-    public function isCallable() {}
+    public function isArray(): bool {}
 
-    /** @return bool */
-    public function allowsNull() {}
+    /**
+     * @tentative-return-type
+     * @deprecated Use ReflectionParameter::getType() instead
+     */
+    public function isCallable(): bool {}
 
-    /** @return int */
-    public function getPosition() {}
+    /** @tentative-return-type */
+    public function allowsNull(): bool {}
 
-    /** @return bool */
-    public function isOptional() {}
+    /** @tentative-return-type */
+    public function getPosition(): int {}
 
-    /** @return bool */
-    public function isDefaultValueAvailable() {}
+    /** @tentative-return-type */
+    public function isOptional(): bool {}
 
-    /** @return mixed */
-    public function getDefaultValue() {}
+    /** @tentative-return-type */
+    public function isDefaultValueAvailable(): bool {}
 
-    /** @return bool */
-    public function isDefaultValueConstant() {}
+    /** @tentative-return-type */
+    public function getDefaultValue(): mixed {}
 
-    /** @return string|null */
-    public function getDefaultValueConstantName() {}
+    /** @tentative-return-type */
+    public function isDefaultValueConstant(): bool {}
 
-    /** @return bool */
-    public function isVariadic() {}
+    /** @tentative-return-type */
+    public function getDefaultValueConstantName(): ?string {}
+
+    /** @tentative-return-type */
+    public function isVariadic(): bool {}
 
     public function isPromoted(): bool {}
 
-    /** @return ReflectionAttribute[] */
+    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -577,19 +576,19 @@ abstract class ReflectionType implements Stringable
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
 
-    /** @return bool */
-    public function allowsNull() {}
+    /** @tentative-return-type */
+    public function allowsNull(): bool {}
 
     public function __toString(): string {}
 }
 
 class ReflectionNamedType extends ReflectionType
 {
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return bool */
-    public function isBuiltin() {}
+    /** @tentative-return-type */
+    public function isBuiltin(): bool {}
 }
 
 class ReflectionUnionType extends ReflectionType
@@ -608,38 +607,38 @@ class ReflectionExtension implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return string|null */
-    public function getVersion() {}
+    /** @tentative-return-type */
+    public function getVersion(): ?string {}
 
-    /** @return ReflectionFunction[] */
-    public function getFunctions() {}
+    /** @tentative-return-type */
+    public function getFunctions(): array {}
 
-    /** @return array */
-    public function getConstants() {}
+    /** @tentative-return-type */
+    public function getConstants(): array {}
 
-    /** @return array */
-    public function getINIEntries() {}
+    /** @tentative-return-type */
+    public function getINIEntries(): array {}
 
-    /** @return ReflectionClass[] */
-    public function getClasses() {}
+    /** @tentative-return-type */
+    public function getClasses(): array {}
 
-    /** @return string[] */
-    public function getClassNames() {}
+    /** @tentative-return-type */
+    public function getClassNames(): array {}
 
-    /** @return array */
-    public function getDependencies() {}
+    /** @tentative-return-type */
+    public function getDependencies(): array {}
 
-    /** @return void */
-    public function info() {}
+    /** @tentative-return-type */
+    public function info(): void {}
 
-    /** @return bool */
-    public function isPersistent() {}
+    /** @tentative-return-type */
+    public function isPersistent(): bool {}
 
-    /** @return bool */
-    public function isTemporary() {}
+    /** @tentative-return-type */
+    public function isTemporary(): bool {}
 }
 
 class ReflectionZendExtension implements Reflector
@@ -653,20 +652,20 @@ class ReflectionZendExtension implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
-    /** @return string */
-    public function getVersion() {}
+    /** @tentative-return-type */
+    public function getVersion(): string {}
 
-    /** @return string */
-    public function getAuthor() {}
+    /** @tentative-return-type */
+    public function getAuthor(): string {}
 
-    /** @return string */
-    public function getURL() {}
+    /** @tentative-return-type */
+    public function getURL(): string {}
 
-    /** @return string */
-    public function getCopyright() {}
+    /** @tentative-return-type */
+    public function getCopyright(): string {}
 }
 
 final class ReflectionReference
@@ -702,7 +701,6 @@ final class ReflectionEnum extends ReflectionClass
 
     public function getCase(string $name): ReflectionEnumUnitCase {}
 
-    /** @return ReflectionEnumUnitCase[] */
     public function getCases(): array {}
 
     public function isBacked(): bool {}
