@@ -5331,7 +5331,7 @@ PHP_FUNCTION(count_chars)
 		}
 	}
 
-	if (mymode >= 3 && mymode <= 4) {
+	if (mymode == 3 || mymode == 4) {
 		RETURN_STRINGL(retstr, retlen);
 	}
 }
