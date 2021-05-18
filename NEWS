@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.20
+?? ??? ????, PHP 7.4.21
+
+
+
+03 Jun 2021, PHP 7.4.20
 
 - Core:
   . Fixed bug #80929 (Method name corruption related to repeated calls to
