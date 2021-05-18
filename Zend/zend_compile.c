@@ -6558,7 +6558,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				/* Ignore parameters of the form "Type $param = null".
 				 * This is the PHP 5 style way of writing "?Type $param", so allow it for now. */
 				bool is_implicit_nullable =
-					type_ast && Z_TYPE(default_node.u.constant) == IS_NULL;
+					type_ast && !(type_ast->attr & ZEND_TYPE_NULLABLE)
+					&& Z_TYPE(default_node.u.constant) == IS_NULL;
 				if (!is_implicit_nullable) {
 					zend_ast *required_param_ast = list->child[last_required_param];
 					zend_error(E_DEPRECATED,
