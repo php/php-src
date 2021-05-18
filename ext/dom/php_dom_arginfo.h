@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7278d11a4af54d320aa33103396abc9b4f4d15e6 */
+ * Stub hash: da7dc3118b701446f39e1b3375600923b3a1202e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
