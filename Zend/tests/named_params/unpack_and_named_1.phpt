@@ -22,6 +22,11 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+try {
+    test2(...[1, 'b' => 2], b: 20);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
@@ -49,4 +54,5 @@ int(1)
 int(2)
 int(3)
 int(40)
+Named parameter $b overwrites previous argument
 Named parameter $b overwrites previous argument
