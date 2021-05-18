@@ -10,7 +10,7 @@ function simplexml_import_dom(SimpleXMLElement|DOMNode $node, ?string $class_nam
 
 class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
-    /** @return array|false */
+    /** @return array|null|false */
     public function xpath(string $expression) {}
 
     /** @return bool */
@@ -31,18 +31,18 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     /** @return array|false */
     public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true) {}
 
-    /** @return SimpleXMLIterator */
+    /** @return SimpleXMLElement|null */
     public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
-    /** @return SimpleXMLIterator */
+    /** @return SimpleXMLElement|null */
     public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
 
     public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = "", bool $isPrefix = false) {}
 
-    /** @return SimpleXMLElement */
+    /** @return SimpleXMLElement|null */
     public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null) {}
 
-    /** @return SimpleXMLElement */
+    /** @return SimpleXMLElement|null */
     public function addAttribute(string $qualifiedName, ?string $value = null, ?string $namespace = null) {}
 
     /** @return string */
