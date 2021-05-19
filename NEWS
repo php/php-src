@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.7
+?? ??? 2021, PHP 8.0.8
+
+- Standard:
+  . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
+    (cmb)
+
+03 Jun 2021, PHP 8.0.7
 
 - Core:
   . Fixed bug #80960 (opendir() warning wrong info when failed on Windows).
@@ -51,10 +57,6 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
-
-- Standard:
-  . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
-    (cmb)
 
 - XMLReader:
   . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
