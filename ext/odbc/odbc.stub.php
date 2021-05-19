@@ -2,353 +2,353 @@
 
 /** @generate-class-entries */
 
-/**
- * @var string
- * @cvalue PHP_ODBC_TYPE
- */
-const ODBC_TYPE = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_ODBC_BINMODE_PASSTHRU
- */
-const ODBC_BINMODE_PASSTHRU = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_ODBC_BINMODE_RETURN
- */
-const ODBC_BINMODE_RETURN = UNKNOWN;
-/**
- * @var int
- * @cvalue PHP_ODBC_BINMODE_CONVERT
- */
-const ODBC_BINMODE_CONVERT = UNKNOWN;
+namespace ODBC {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    class Connection
+    {
+    }
 
-/* Define Constants for options. These Constants are defined in <sqlext.h> */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    class Result
+    {
+    }
+}
 
-/**
- * @var int
- * @cvalue SQL_ODBC_CURSORS
- */
-const SQL_ODBC_CURSORS = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CUR_USE_DRIVER
- */
-const SQL_CUR_USE_DRIVER = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CUR_USE_IF_NEEDED
- */
-const SQL_CUR_USE_IF_NEEDED = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CUR_USE_ODBC
- */
-const SQL_CUR_USE_ODBC = UNKNOWN;
+namespace {
+    /**
+     * @var string
+     * @cvalue PHP_ODBC_TYPE
+     */
+    const ODBC_TYPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_ODBC_BINMODE_PASSTHRU
+     */
+    const ODBC_BINMODE_PASSTHRU = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_ODBC_BINMODE_RETURN
+     */
+    const ODBC_BINMODE_RETURN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_ODBC_BINMODE_CONVERT
+     */
+    const ODBC_BINMODE_CONVERT = UNKNOWN;
 
-/**
- * @var int
- * @cvalue SQL_CONCURRENCY
- */
-const SQL_CONCURRENCY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CONCUR_READ_ONLY
- */
-const SQL_CONCUR_READ_ONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CONCUR_LOCK
- */
-const SQL_CONCUR_LOCK = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CONCUR_ROWVER
- */
-const SQL_CONCUR_ROWVER = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CONCUR_VALUES
- */
-const SQL_CONCUR_VALUES = UNKNOWN;
+    /* Define Constants for options. These Constants are defined in <sqlext.h> */
 
-/**
- * @var int
- * @cvalue SQL_CURSOR_TYPE
- */
-const SQL_CURSOR_TYPE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CURSOR_FORWARD_ONLY
- */
-const SQL_CURSOR_FORWARD_ONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CURSOR_KEYSET_DRIVEN
- */
-const SQL_CURSOR_KEYSET_DRIVEN = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CURSOR_DYNAMIC
- */
-const SQL_CURSOR_DYNAMIC = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_CURSOR_STATIC
- */
-const SQL_CURSOR_STATIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_ODBC_CURSORS
+     */
+    const SQL_ODBC_CURSORS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CUR_USE_DRIVER
+     */
+    const SQL_CUR_USE_DRIVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CUR_USE_IF_NEEDED
+     */
+    const SQL_CUR_USE_IF_NEEDED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CUR_USE_ODBC
+     */
+    const SQL_CUR_USE_ODBC = UNKNOWN;
 
-/**
- * @var int
- * @cvalue SQL_KEYSET_SIZE
- */
-const SQL_KEYSET_SIZE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CONCURRENCY
+     */
+    const SQL_CONCURRENCY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CONCUR_READ_ONLY
+     */
+    const SQL_CONCUR_READ_ONLY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CONCUR_LOCK
+     */
+    const SQL_CONCUR_LOCK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CONCUR_ROWVER
+     */
+    const SQL_CONCUR_ROWVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CONCUR_VALUES
+     */
+    const SQL_CONCUR_VALUES = UNKNOWN;
 
-/* these are for the Data Source type */
+    /**
+     * @var int
+     * @cvalue SQL_CURSOR_TYPE
+     */
+    const SQL_CURSOR_TYPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CURSOR_FORWARD_ONLY
+     */
+    const SQL_CURSOR_FORWARD_ONLY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CURSOR_KEYSET_DRIVEN
+     */
+    const SQL_CURSOR_KEYSET_DRIVEN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CURSOR_DYNAMIC
+     */
+    const SQL_CURSOR_DYNAMIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_CURSOR_STATIC
+     */
+    const SQL_CURSOR_STATIC = UNKNOWN;
 
-/**
- * @var int
- * @cvalue SQL_FETCH_FIRST
- */
-const SQL_FETCH_FIRST = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_FETCH_NEXT
- */
-const SQL_FETCH_NEXT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_KEYSET_SIZE
+     */
+    const SQL_KEYSET_SIZE = UNKNOWN;
 
-/* register the standard data types */
+    /* these are for the Data Source type */
 
-/**
- * @var int
- * @cvalue SQL_CHAR
- */
-const SQL_CHAR = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_VARCHAR
- */
-const SQL_VARCHAR = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_LONGVARCHAR
- */
-const SQL_LONGVARCHAR = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_DECIMAL
- */
-const SQL_DECIMAL = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_NUMERIC
- */
-const SQL_NUMERIC = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_BIT
- */
-const SQL_BIT = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_TINYINT
- */
-const SQL_TINYINT = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_SMALLINT
- */
-const SQL_SMALLINT = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_INTEGER
- */
-const SQL_INTEGER = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_BIGINT
- */
-const SQL_BIGINT = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_REAL
- */
-const SQL_REAL = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_FLOAT
- */
-const SQL_FLOAT = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_DOUBLE
- */
-const SQL_DOUBLE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_BINARY
- */
-const SQL_BINARY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_VARBINARY
- */
-const SQL_VARBINARY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_LONGVARBINARY
- */
-const SQL_LONGVARBINARY = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_DATE
- */
-const SQL_DATE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_TIME
- */
-const SQL_TIME = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_TIMESTAMP
- */
-const SQL_TIMESTAMP = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_FETCH_FIRST
+     */
+    const SQL_FETCH_FIRST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_FETCH_NEXT
+     */
+    const SQL_FETCH_NEXT = UNKNOWN;
 
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
-/**
- * @var int
- * @cvalue SQL_TYPE_DATE
- */
-const SQL_TYPE_DATE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_TYPE_TIME
- */
-const SQL_TYPE_TIME = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_TYPE_TIMESTAMP
- */
-const SQL_TYPE_TIMESTAMP = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_WCHAR
- */
-const SQL_WCHAR = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_WVARCHAR
- */
-const SQL_WVARCHAR = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_WLONGVARCHAR
- */
-const SQL_WLONGVARCHAR = UNKNOWN;
+    /* register the standard data types */
 
-/* SQLSpecialColumns values */
+    /**
+     * @var int
+     * @cvalue SQL_CHAR
+     */
+    const SQL_CHAR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_VARCHAR
+     */
+    const SQL_VARCHAR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_LONGVARCHAR
+     */
+    const SQL_LONGVARCHAR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_DECIMAL
+     */
+    const SQL_DECIMAL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_NUMERIC
+     */
+    const SQL_NUMERIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_BIT
+     */
+    const SQL_BIT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_TINYINT
+     */
+    const SQL_TINYINT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_SMALLINT
+     */
+    const SQL_SMALLINT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_INTEGER
+     */
+    const SQL_INTEGER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_BIGINT
+     */
+    const SQL_BIGINT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_REAL
+     */
+    const SQL_REAL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_FLOAT
+     */
+    const SQL_FLOAT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_DOUBLE
+     */
+    const SQL_DOUBLE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_BINARY
+     */
+    const SQL_BINARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_VARBINARY
+     */
+    const SQL_VARBINARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_LONGVARBINARY
+     */
+    const SQL_LONGVARBINARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_DATE
+     */
+    const SQL_DATE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_TIME
+     */
+    const SQL_TIME = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_TIMESTAMP
+     */
+    const SQL_TIMESTAMP = UNKNOWN;
 
-/**
- * @var int
- * @cvalue SQL_BEST_ROWID
- */
-const SQL_BEST_ROWID = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_ROWVER
- */
-const SQL_ROWVER = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_SCOPE_CURROW
- */
-const SQL_SCOPE_CURROW = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_SCOPE_TRANSACTION
- */
-const SQL_SCOPE_TRANSACTION = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_SCOPE_SESSION
- */
-const SQL_SCOPE_SESSION = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_NO_NULLS
- */
-const SQL_NO_NULLS = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_NULLABLE
- */
-const SQL_NULLABLE = UNKNOWN;
+    #if (defined(ODBCVER) && (ODBCVER >= 0x0300))
+    /**
+     * @var int
+     * @cvalue SQL_TYPE_DATE
+     */
+    const SQL_TYPE_DATE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_TYPE_TIME
+     */
+    const SQL_TYPE_TIME = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_TYPE_TIMESTAMP
+     */
+    const SQL_TYPE_TIMESTAMP = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_WCHAR
+     */
+    const SQL_WCHAR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_WVARCHAR
+     */
+    const SQL_WVARCHAR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_WLONGVARCHAR
+     */
+    const SQL_WLONGVARCHAR = UNKNOWN;
 
-/* SQLStatistics values */
+    /* SQLSpecialColumns values */
 
-/**
- * @var int
- * @cvalue SQL_INDEX_UNIQUE
- */
-const SQL_INDEX_UNIQUE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_INDEX_ALL
- */
-const SQL_INDEX_ALL = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_ENSURE
- */
-const SQL_ENSURE = UNKNOWN;
-/**
- * @var int
- * @cvalue SQL_QUICK
- */
-const SQL_QUICK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_BEST_ROWID
+     */
+    const SQL_BEST_ROWID = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_ROWVER
+     */
+    const SQL_ROWVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_SCOPE_CURROW
+     */
+    const SQL_SCOPE_CURROW = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_SCOPE_TRANSACTION
+     */
+    const SQL_SCOPE_TRANSACTION = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_SCOPE_SESSION
+     */
+    const SQL_SCOPE_SESSION = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_NO_NULLS
+     */
+    const SQL_NO_NULLS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_NULLABLE
+     */
+    const SQL_NULLABLE = UNKNOWN;
 
-#endif
+    /* SQLStatistics values */
 
+    /**
+     * @var int
+     * @cvalue SQL_INDEX_UNIQUE
+     */
+    const SQL_INDEX_UNIQUE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_INDEX_ALL
+     */
+    const SQL_INDEX_ALL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_ENSURE
+     */
+    const SQL_ENSURE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SQL_QUICK
+     */
+    const SQL_QUICK = UNKNOWN;
 
+    #endif
 
-function odbc_close_all(): void {}
+    function odbc_close_all(): void {}
 
-/** @param resource $statement */
-function odbc_binmode($statement, int $mode): true {}
+    function odbc_binmode(ODBC\Result $statement, int $mode): true {}
 
-/** @param resource $statement */
-function odbc_longreadlen($statement, int $length): true {}
+    function odbc_longreadlen(ODBC\Result $statement, int $length): true {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_prepare($odbc, string $query) {}
+    function odbc_prepare(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
 
-/** @param resource $statement */
-function odbc_execute($statement, array $params = []): bool {}
+    function odbc_execute(ODBC\Result $statement, array $params = []): bool {}
 
-/** @param resource $statement */
-function odbc_cursor($statement): string|false {}
+    function odbc_cursor(ODBC\Result $statement): string|false {}
 
-#ifdef HAVE_SQLDATASOURCES
-/** @param resource $odbc */
-function odbc_data_source($odbc, int $fetch_type): array|null|false {}
-#endif
+    #ifdef HAVE_SQLDATASOURCES
+    function odbc_data_source(ODBC\Connection $odbc, int $fetch_type): array|null|false {}
+    #endif
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_exec($odbc, string $query) {}
+    function odbc_exec(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- * @alias odbc_exec
- */
-function odbc_do($odbc, string $query) {}
+    /** @alias odbc_exec */
+    function odbc_do(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 /** @param resource $statement */
@@ -364,158 +364,85 @@ function odbc_fetch_array($statement, ?int $row = null): array|false {}
  */
 function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
 
-/** @param resource $statement */
-function odbc_fetch_row($statement, ?int $row = null): bool {}
+    function odbc_fetch_row(ODBC\Result $statement, ?int $row = null): bool {}
 
-/** @param resource $statement */
-function odbc_result($statement, string|int $field): string|bool|null {}
+    function odbc_result(ODBC\Result $statement, string|int $field): string|bool|null {}
 
-/**
- * @param resource $statement
- * @deprecated
- */
-function odbc_result_all($statement, string $format = ""): int|false {}
+    /** @deprecated */
+    function odbc_result_all(ODBC\Result $statement, string $format = ""): int|false {}
 
-/** @param resource $statement */
-function odbc_free_result($statement): true {}
+    function odbc_free_result(ODBC\Result $statement): true {}
 
-/**
- * @return resource|false
- */
-function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+    function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
 
-/**
- * @return resource|false
- */
-function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+    function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
 
-/** @param resource $odbc */
-function odbc_close($odbc): void {}
+    function odbc_close(ODBC\Connection $odbc): void {}
 
-/** @param resource $statement */
-function odbc_num_rows($statement): int {}
+    function odbc_num_rows(ODBC\Result $statement): int {}
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-/** @param resource $statement */
-function odbc_next_result($statement): bool {}
-#endif
+    #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
+    function odbc_next_result(ODBC\Result $statement): bool {}
+    #endif
 
-/** @param resource $statement */
-function odbc_num_fields($statement): int {}
+    function odbc_num_fields(ODBC\Result $statement): int {}
 
-/** @param resource $statement */
-function odbc_field_name($statement, int $field): string|false {}
+    function odbc_field_name(ODBC\Result $statement, int $field): string|false {}
 
-/** @param resource $statement */
-function odbc_field_type($statement, int $field): string|false {}
+    function odbc_field_type(ODBC\Result $statement, int $field): string|false {}
 
-/** @param resource $statement */
-function odbc_field_len($statement, int $field): int|false {}
+    function odbc_field_len(ODBC\Result $statement, int $field): int|false {}
 
-/**
- * @param resource $statement
- * @alias odbc_field_len
- */
-function odbc_field_precision($statement, int $field): int|false {}
+    /** @alias odbc_field_len */
+    function odbc_field_precision(ODBC\Result $statement, int $field): int|false {}
 
-/** @param resource $statement */
-function odbc_field_scale($statement, int $field): int|false {}
+    function odbc_field_scale(ODBC\Result $statement, int $field): int|false {}
 
-/** @param resource $statement */
-function odbc_field_num($statement, string $field): int|false {}
+    function odbc_field_num(ODBC\Result $statement, string $field): int|false {}
 
-/** @param resource $odbc */
-function odbc_autocommit($odbc, ?bool $enable = null): int|bool {}
+    function odbc_autocommit(ODBC\Connection $odbc, ?bool $enable = null): int|bool {}
 
-/** @param resource $odbc */
-function odbc_commit($odbc): bool {}
+    function odbc_commit(ODBC\Connection $odbc): bool {}
 
-/** @param resource $odbc */
-function odbc_rollback($odbc): bool {}
+    function odbc_rollback(ODBC\Connection $odbc): bool {}
 
-/** @param resource|null $odbc */
-function odbc_error($odbc = null): string {}
+    function odbc_error(?ODBC\Connection $odbc = null): string {}
 
-/** @param resource|null $odbc */
-function odbc_errormsg($odbc = null): string {}
+    function odbc_errormsg(?ODBC\Connection $odbc = null): string {}
 
-/** @param resource $odbc */
-function odbc_setoption($odbc, int $which, int $option, int $value): bool {}
+    function odbc_setoption(ODBC\Connection|ODBC\Result $odbc, int $which, int $option, int $value): bool {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_tables($odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $types = null) {}
+    function odbc_tables(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $types = null): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_columns($odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $column = null) {}
+    function odbc_columns(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $column = null): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_gettypeinfo($odbc, int $data_type = 0) {}
+    function odbc_gettypeinfo(ODBC\Connection $odbc, int $data_type = 0): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_primarykeys($odbc, ?string $catalog, string $schema, string $table) {}
+    function odbc_primarykeys(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table): ODBC\Result|false {}
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_procedurecolumns($odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null, ?string $column = null) {}
+    #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
+    function odbc_procedurecolumns(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null, ?string $column = null): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_procedures($odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null) {}
+    function odbc_procedures(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_foreignkeys($odbc, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table) {}
-#endif
+    function odbc_foreignkeys(ODBC\Connection $odbc, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table): ODBC\Result|false {}
+    #endif
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_specialcolumns($odbc, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable) {}
+    function odbc_specialcolumns(ODBC\Connection $odbc, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_statistics($odbc, ?string $catalog, string $schema, string $table, int $unique, int $accuracy) {}
+    function odbc_statistics(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table, int $unique, int $accuracy): ODBC\Result|false {}
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_tableprivileges($odbc, ?string $catalog, string $schema, string $table) {}
+    #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
+    function odbc_tableprivileges(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table): ODBC\Result|false {}
 
-/**
- * @param resource $odbc
- * @return resource|false
- */
-function odbc_columnprivileges($odbc, ?string $catalog, string $schema, string $table, string $column) {}
-#endif
+    function odbc_columnprivileges(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table, string $column): ODBC\Result|false {}
+    #endif
 
-/* odbc_utils.c */
+    /* odbc_utils.c */
 
-function odbc_connection_string_is_quoted(string $str): bool {}
+    function odbc_connection_string_is_quoted(string $str): bool {}
 
-function odbc_connection_string_should_quote(string $str): bool {}
+    function odbc_connection_string_should_quote(string $str): bool {}
 
-function odbc_connection_string_quote(string $str): string {}
+    function odbc_connection_string_quote(string $str): string {}
+}
