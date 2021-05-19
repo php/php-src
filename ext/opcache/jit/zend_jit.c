@@ -4416,8 +4416,8 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 #if ZEND_JIT_TARGET_ARM64
 	/* reserve space for global labels veneers */
 	dasm_labels_veneers = *dasm_ptr;
-	*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
-	memset(dasm_labels_veneers, 0, sizeof(void*) * zend_lb_MAX);
+	*dasm_ptr = (void**)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT);
+	memset(dasm_labels_veneers, 0, sizeof(void*) * ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT));
 #endif
 	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
