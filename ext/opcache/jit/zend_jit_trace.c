@@ -3631,7 +3631,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	op_array_ssa = &jit_extension->func_info.ssa;
 
-	dasm_growpc(&dasm_state, 1); /* trace needs just one global label for loop */
+	dasm_growpc(&dasm_state, 2); /* =>0: loop header */
+	                             /* =>1: end of code */
 
 	zend_jit_align_func(&dasm_state);
 	if (!parent_trace) {
@@ -6383,6 +6384,10 @@ done:
 	}
 
 	if (ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
+		goto jit_failure;
+	}
+
+	if (!zend_jit_trace_end(&dasm_state, t)) {
 		goto jit_failure;
 	}
 

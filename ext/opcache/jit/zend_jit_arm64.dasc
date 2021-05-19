@@ -2971,28 +2971,34 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 	return 1;
 }
 
+static int zend_jit_trace_end(dasm_State **Dst, zend_jit_trace_info *t)
+{
+	|.cold_code
+	|=>1: // end of the code
+	|.code
+	return 1;
+}
+
 static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size, const void *from_addr, const void *to_addr)
 {
 	int ret = 0;
 	uint8_t *p, *end;
-	size_t code_size = size;
 	ptrdiff_t delta;
 
 	if (jmp_table_size) {
-		const void **jmp_slot = (const void **)((char*)code + size);
+		const void **jmp_slot = (const void **)((char*)code + ZEND_MM_ALIGNED_SIZE_EX(size, sizeof(void*)));
 
-		code_size -= jmp_table_size * sizeof(void*);
 		do {
-			jmp_slot--;
 			if (*jmp_slot == from_addr) {
 				*jmp_slot = to_addr;
 				ret++;
 			}
+			jmp_slot++;
 		} while (--jmp_table_size);
 	}
 
 	p = (uint8_t*)code;
-	end = p + code_size;
+	end = p + size;
 	while (p < end) {
 		uint32_t *ins_ptr = (uint32_t*)p;
 		uint32_t ins = *ins_ptr;

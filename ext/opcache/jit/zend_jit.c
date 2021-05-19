@@ -435,7 +435,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	JIT_CACHE_FLUSH(entry, entry + size);
 
 	if (trace_num) {
-		zend_jit_trace_add_code(entry, size);
+		zend_jit_trace_add_code(entry, dasm_getpclabel(dasm_state, 1));
 	}
 
 	if (op_array && ssa) {
