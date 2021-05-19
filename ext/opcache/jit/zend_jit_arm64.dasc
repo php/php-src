@@ -110,6 +110,8 @@ static int sp_adj[SP_ADJ_LAST];
 #define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
 
 #define B_IMM           (1<<27)        // signed imm26 * 4
+#define ADR_IMM         (1<<20)        // signed imm21
+#define ADRP_IMM        (1LL<<32)      // signed imm21 * 4096
 
 static bool arm64_may_use_b(const void *addr)
 {
@@ -119,6 +121,30 @@ static bool arm64_may_use_b(const void *addr)
 		return (((char*)addr - (char*)dasm_buf) < B_IMM);
 	} else if (addr < dasm_buf) {
 		return (((char*)dasm_end - (char*)addr) < B_IMM);
+	}
+	return 0;
+}
+
+static bool arm64_may_use_adr(const void *addr)
+{
+	if (addr >= dasm_buf && addr < dasm_end) {
+		return (((char*)dasm_end - (char*)dasm_buf) < ADR_IMM);
+	} else if (addr >= dasm_end) {
+		return (((char*)addr - (char*)dasm_buf) < ADR_IMM);
+	} else if (addr < dasm_buf) {
+		return (((char*)dasm_end - (char*)addr) < ADR_IMM);
+	}
+	return 0;
+}
+
+static bool arm64_may_use_adrp(const void *addr)
+{
+	if (addr >= dasm_buf && addr < dasm_end) {
+		return (((char*)dasm_end - (char*)dasm_buf) < ADRP_IMM);
+	} else if (addr >= dasm_end) {
+		return (((char*)addr - (char*)dasm_buf) < ADRP_IMM);
+	} else if (addr < dasm_buf) {
+		return (((char*)dasm_end - (char*)addr) < ADRP_IMM);
 	}
 	return 0;
 }
@@ -223,6 +249,13 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |		mov reg, xzr
 ||	} else if (((uintptr_t)(addr)) <= MOVZ_IMM) {
 | 		movz reg, #((uint64_t)(addr))
+||	} else if (arm64_may_use_adr((void*)(addr))) {
+|		adr reg, &addr
+||	} else if (arm64_may_use_adrp((void*)(addr))) {
+|		adrp reg, &(((uintptr_t)(addr)))
+||		if (((uintptr_t)(addr)) & 0xfff) {
+|			add reg, reg, #(((uintptr_t)(addr)) & 0xfff)
+||		}
 ||	} else if ((uintptr_t)(addr) & 0xffff) {
 |		movz reg, #((uintptr_t)(addr) & 0xffff)
 ||		if (((uintptr_t)(addr) >> 16) & 0xffff) {
