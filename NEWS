@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed bug #80933 (SplFileObject::DROP_NEW_LINE is broken for NUL and CR).
     (cmb, Nikita)
 
+- Standard:
+  . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
+    (cmb)
+
 - XMLReader:
   . Fixed bug #73246 (XMLReader: encoding length not checked). (cmb)
 
