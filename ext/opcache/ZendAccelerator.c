@@ -4451,6 +4451,8 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	return new_persistent_script;
 }
 
+static zend_result preload_autoload(zend_string *filename);
+
 static void preload_load(void)
 {
 	/* Load into process tables */
@@ -4494,6 +4496,8 @@ static void preload_load(void)
 		memset((void **) ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + old_map_ptr_last, 0,
 			(CG(map_ptr_last) - old_map_ptr_last) * sizeof(void *));
 	}
+
+	zend_preload_autoload = preload_autoload;
 }
 
 static zend_result preload_autoload(zend_string *filename)
@@ -4847,8 +4851,6 @@ static int accel_preload(const char *config, bool in_child)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
-
-		zend_preload_autoload = preload_autoload;
 	} else {
 		CG(map_ptr_last) = orig_map_ptr_last;
 	}
