@@ -61,8 +61,7 @@ class DOMNode
     /** @readonly */
     public string $nodeName;
 
-    /** @var string|null */
-    public $nodeValue;
+    public ?string $nodeValue;
 
     /** @readonly */
     public int $nodeType;
@@ -94,8 +93,7 @@ class DOMNode
     /** @readonly */
     public ?string $namespaceURI;
 
-    /** @var string */
-    public $prefix = "";
+    public string $prefix;
 
     /** @readonly */
     public ?string $localName;
@@ -103,8 +101,7 @@ class DOMNode
     /** @readonly */
     public ?string $baseURI;
 
-    /** @var string */
-    public $textContent = "";
+    public string $textContent;
 
     /** @return DOMNode|false */
     public function appendChild(DOMNode $node) {}
@@ -415,29 +412,22 @@ class DOMDocument extends DOMNode implements DOMParentNode
      */
     public ?string $actualEncoding;
 
-    /** @var string|null */
-    public $encoding;
+    public ?string $encoding;
 
     /** @readonly */
     public ?string $xmlEncoding;
 
-    /** @var bool */
-    public $standalone = false;
+    public bool $standalone;
 
-    /** @var bool */
-    public $xmlStandalone = false;
+    public bool $xmlStandalone;
 
-    /** @var string|null */
-    public $version;
+    public ?string $version;
 
-    /** @var string|null */
-    public $xmlVersion;
+    public ?string $xmlVersion;
 
-    /** @var bool */
-    public $strictErrorChecking = false;
+    public bool $strictErrorChecking;
 
-    /** @var string|null */
-    public $documentURI;
+    public ?string $documentURI;
 
     /**
      * @readonly
@@ -445,23 +435,17 @@ class DOMDocument extends DOMNode implements DOMParentNode
      */
     public mixed $config = null;
 
-    /** @var bool */
-    public $formatOutput = false;
+    public bool $formatOutput;
 
-    /** @var bool */
-    public $validateOnParse = false;
+    public bool $validateOnParse;
 
-    /** @var bool */
-    public $resolveExternals = false;
+    public bool $resolveExternals;
 
-    /** @var bool */
-    public $preserveWhiteSpace = false;
+    public bool $preserveWhiteSpace;
 
-    /** @var bool */
-    public $recover = false;
+    public bool $recover;
 
-    /** @var bool */
-    public $substituteEntities = false;
+    public bool $substituteEntities;
 
     /** @readonly */
     public ?DOMElement $firstElementChild;
@@ -580,7 +564,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
 
 final class DOMException extends Exception
 {
-    /** @var int */
+    /** @var int Intentionally left untyped */
     public $code = 0;
 }
 
@@ -664,8 +648,7 @@ class DOMProcessingInstruction extends DOMNode
     /** @readonly */
     public string $target;
 
-    /** @var string */
-    public $data = "";
+    public string $data;
 
     public function __construct(string $name, string $value = "") {}
 }
@@ -676,8 +659,7 @@ class DOMXPath
     /** @readonly */
     public DOMDocument $document;
 
-    /** @var bool */
-    public $registerNodeNamespaces = false;
+    public bool $registerNodeNamespaces;
 
     public function __construct(DOMDocument $document, bool $registerNodeNS = true) {}
 

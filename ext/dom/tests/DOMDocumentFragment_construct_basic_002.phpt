@@ -12,11 +12,5 @@ $fragment->__construct();
 var_dump($fragment);
 ?>
 --EXPECT--
-object(DOMDocumentFragment)#1 (3) {
-  ["nodeValue"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["textContent"]=>
-  string(0) ""
+object(DOMDocumentFragment)#1 (0) {
 }

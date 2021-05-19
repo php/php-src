@@ -265,47 +265,28 @@ PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj)
 }
 /* }}} end php_dom_object_get_data */
 
-/* {{{ dom_read_na */
-static int dom_read_na(dom_object *obj, zval *retval)
-{
-	zend_throw_error(NULL, "Cannot read property");
-	return FAILURE;
-}
-/* }}} */
-
-/* {{{ dom_write_na */
-static int dom_write_na(dom_object *obj, zval *newval)
-{
-	zend_throw_error(NULL, "Cannot write property");
-	return FAILURE;
-}
-/* }}} */
-
-/* {{{ dom_register_prop_handler */
 static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_t name_len, dom_read_t read_func, dom_write_t write_func)
 {
 	dom_prop_handler hnd;
 	zend_string *str;
 
-	hnd.read_func = read_func ? read_func : dom_read_na;
-	hnd.write_func = write_func ? write_func : dom_write_na;
+	hnd.read_func = read_func;
+	hnd.write_func = write_func;
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
 	zend_string_release_ex(str, 1);
 }
-/* }}} */
 
-static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
+static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
-	zval *retval = NULL;
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, name)) {
-		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
-	return retval;
+
+	return NULL;
 }
-/* }}} */
 
 /* {{{ dom_read_property */
 zval *dom_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
@@ -337,7 +318,6 @@ zval *dom_read_property(zend_object *object, zend_string *name, int type, void *
 }
 /* }}} */
 
-/* {{{ dom_write_property */
 zval *dom_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
@@ -346,15 +326,32 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
+
 	if (hnd) {
-		hnd->write_func(obj, value);
-	} else {
-		value = zend_std_write_property(object, name, value, cache_slot);
+		if (!hnd->write_func) {
+			zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			return &EG(error_zval);
+		}
+
+		zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
+		if (prop && ZEND_TYPE_IS_SET(prop->type)) {
+			zval tmp;
+			ZVAL_COPY(&tmp, value);
+			if (!zend_verify_property_type(prop, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+				zval_ptr_dtor(&tmp);
+				return &EG(error_zval);
+			}
+			hnd->write_func(obj, &tmp);
+			zval_ptr_dtor(&tmp);
+		} else {
+			hnd->write_func(obj, value);
+		}
+
+		return value;
 	}
 
-	return value;
+	return zend_std_write_property(object, name, value, cache_slot);
 }
-/* }}} */
 
 /* {{{ dom_property_exists */
 static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
