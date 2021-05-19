@@ -50963,12 +50963,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 #else
 	zend_execute_data *execute_data = ex;
 #endif
-#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-	memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);
-	if (zend_touch_vm_stack_data) {
-		zend_touch_vm_stack_data(&vm_stack_data);
-	}
-#endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	if (UNEXPECTED(execute_data == NULL)) {
@@ -54431,6 +54425,12 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 		zend_handlers_count = sizeof(labels) / sizeof(void*);
 		memset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));
 		hybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+		memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);
+#endif
+		if (zend_touch_vm_stack_data) {
+			zend_touch_vm_stack_data(&vm_stack_data);
+		}
 		goto HYBRID_HALT_LABEL;
 	}
 #endif

@@ -86,7 +86,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 	zend_jit_trace_exit_group_stub(&dasm_state, n);
 
 	sprintf(name, "jit$$trace_exit_%d", n);
-	entry = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, 0);
+	entry = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, 0, SP_ADJ_JIT, SP_ADJ_NONE);
 	dasm_free(&dasm_state);
 
 #ifdef HAVE_DISASM
@@ -6386,7 +6386,9 @@ done:
 		goto jit_failure;
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, ZSTR_VAL(name), ZEND_JIT_TRACE_NUM);
+	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, ZSTR_VAL(name), ZEND_JIT_TRACE_NUM,
+		parent_trace ? SP_ADJ_JIT : ((zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) ? SP_ADJ_VM : SP_ADJ_RET),
+		parent_trace ? SP_ADJ_NONE : SP_ADJ_JIT);
 
 	if (handler) {
 		if (p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL) {
@@ -6518,7 +6520,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	zend_jit_trace_return(&dasm_state, original_handler);
 
-	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, ZEND_JIT_TRACE_NUM);
+	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, ZEND_JIT_TRACE_NUM, SP_ADJ_JIT, SP_ADJ_NONE);
 
 jit_failure:
 	dasm_free(&dasm_state);
