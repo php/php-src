@@ -202,6 +202,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print(" => ");
 			}
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
