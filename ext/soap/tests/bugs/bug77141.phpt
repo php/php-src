@@ -4,7 +4,14 @@ Bug #77141 (Signedness issue in SOAP when precision=-1)
 soap
 --FILE--
 <?php
-$soap = new \SoapClient(
+class MySoapClient extends SoapClient {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0) {
+        echo $request, "\n";
+        return '';
+    }
+}
+
+$soap = new MySoapClient(
     null,
     array(
         'location' => "http://localhost/soap.php",
@@ -16,7 +23,6 @@ $soap = new \SoapClient(
 );
 ini_set('precision', -1);
 $soap->call(1.1);
-echo $soap->__getLastRequest();
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

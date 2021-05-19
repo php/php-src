@@ -1,11 +1,18 @@
 --TEST--
-Bug #31422 (No Error-Logging on SoapServer-Side)
+Bug #31755 (Cannot create SOAP header in no namespace)
 --EXTENSIONS--
 soap
 --FILE--
 <?php
-$client=new SOAPClient(null, array('location' => 'http://localhost',
-'uri' => 'myNS', 'exceptions' => false, 'trace' => true));
+class MySoapClient extends SoapClient {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0) {
+        echo $request, "\n";
+        return '';
+    }
+}
+$client = new MySoapClient(null, array(
+    'location' => 'http://localhost', 'uri' => 'myNS', 'exceptions' => false
+));
 
 try {
     new SOAPHeader('', 'foo', 'bar');
