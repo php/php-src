@@ -109,16 +109,16 @@ static int sp_adj[SP_ADJ_LAST];
 #define LDR_STR_PIMM32  (MAX_IMM12*4)  // ldr/str insn for 32-bit register: pimm is imm12 * 4
 #define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
 
-#define B_IMM26         (1<<27)        // signed imm26 * 4
+#define B_IMM           (1<<27)        // signed imm26 * 4
 
 static bool arm64_may_use_b(const void *addr)
 {
 	if (addr >= dasm_buf && addr < dasm_end) {
-		return (((char*)dasm_end - (char*)dasm_buf) < B_IMM26);
+		return (((char*)dasm_end - (char*)dasm_buf) < B_IMM);
 	} else if (addr >= dasm_end) {
-		return (((char*)addr - (char*)dasm_buf) < B_IMM26);
+		return (((char*)addr - (char*)dasm_buf) < B_IMM);
 	} else if (addr < dasm_buf) {
-		return (((char*)dasm_end - (char*)addr) < B_IMM26);
+		return (((char*)dasm_end - (char*)addr) < B_IMM);
 	}
 	return 0;
 }
