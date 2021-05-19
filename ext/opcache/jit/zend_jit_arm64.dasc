@@ -513,8 +513,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 // Store the value from a register 'op' into memory 'addr'
 |.macro MEM_STORE, str_ins, op, addr, tmp_reg
-|	LOAD_ADDR tmp_reg, addr
-|	str_ins op, [tmp_reg]
+||	if (((uintptr_t)(addr)) > MOVZ_IMM && arm64_may_use_adr((void*)(addr))) {
+|		adr tmp_reg, &addr
+|		str_ins op, [tmp_reg]
+||	} else if (((uintptr_t)(addr)) > MOVZ_IMM && arm64_may_use_adrp((void*)(addr))) {
+|		adrp tmp_reg, &(((uintptr_t)(addr)))
+|		str_ins op, [tmp_reg, #(((uintptr_t)(addr)) & 0xfff)]
+||	} else {
+|		LOAD_ADDR tmp_reg, addr
+|		str_ins op, [tmp_reg]
+||	}
 |.endmacro
 
 // 'op' is 64-bit register
@@ -548,8 +556,16 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 // Load the value from memory 'addr' into a register 'op'
 |.macro MEM_LOAD, ldr_ins, op, addr, tmp_reg
-|	LOAD_ADDR tmp_reg, addr
-|	ldr_ins op, [tmp_reg]
+||	if (((uintptr_t)(addr)) > MOVZ_IMM && arm64_may_use_adr((void*)(addr))) {
+|		adr tmp_reg, &addr
+|		ldr_ins op, [tmp_reg]
+||	} else if (((uintptr_t)(addr)) > MOVZ_IMM && arm64_may_use_adrp((void*)(addr))) {
+|		adrp tmp_reg, &(((uintptr_t)(addr)))
+|		ldr_ins op, [tmp_reg, #(((uintptr_t)(addr)) & 0xfff)]
+||	} else {
+|		LOAD_ADDR tmp_reg, addr
+|		ldr_ins op, [tmp_reg]
+||	}
 |.endmacro
 
 |.macro MEM_LOAD_ZTS, ldr_ins, op, struct, field, tmp_reg
@@ -830,8 +846,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 // Operand1 is from 'reg', and operand2 is from 'addr'.
 |.macro DOUBLE_CMP, reg, addr, tmp_reg, fp_tmp_reg
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|		LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
-|		ldr Rd(fp_tmp_reg-ZREG_V0), [Rx(tmp_reg)]
+|		MEM_LOAD ldr, Rd(fp_tmp_reg-ZREG_V0), Z_ZV(addr), Rx(tmp_reg)
 |		fcmp Rd(reg-ZREG_V0), Rd(fp_tmp_reg-ZREG_V0)
 ||	} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |		SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(fp_tmp_reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
@@ -1064,8 +1079,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 |.macro GET_ZVAL_DVAL, reg, addr, tmp_reg
 ||	if (Z_MODE(addr) != IS_REG || reg != Z_REG(addr)) {
 ||		if (Z_MODE(addr) == IS_CONST_ZVAL) {
-|			LOAD_ADDR Rx(tmp_reg), Z_ZV(addr)
-|			ldr Rd(reg-ZREG_V0), [Rx(tmp_reg)]
+|			MEM_LOAD ldr, Rd(reg-ZREG_V0), Z_ZV(addr), Rx(tmp_reg)
 ||		} else if (Z_MODE(addr) == IS_MEM_ZVAL) {
 |			SAFE_MEM_ACC_WITH_UOFFSET ldr, Rd(reg-ZREG_V0), Rx(Z_REG(addr)), Z_OFFSET(addr), Rx(tmp_reg)
 ||		} else if (Z_MODE(addr) == IS_REG) {
@@ -1080,8 +1094,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	if (Z_TYPE_P(zv) > IS_TRUE) {
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : fp_tmp_reg;
-|			LOAD_ADDR Rx(tmp_reg1), zv
-|			ldr Rd(dst_reg-ZREG_V0), [Rx(tmp_reg1)]
+|			MEM_LOAD ldr, Rd(dst_reg-ZREG_V0), zv, Rx(tmp_reg1)
 |			SET_ZVAL_DVAL dst_addr, dst_reg, tmp_reg2
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : fp_tmp_reg;
@@ -1111,8 +1124,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ?
 ||				Z_REG(dst_addr) : ((Z_MODE(res_addr) == IS_REG) ? Z_MODE(res_addr) : fp_tmp_reg);
-|			LOAD_ADDR Rx(tmp_reg1), zv
-|			ldr Rd(dst_reg-ZREG_V0), [Rx(tmp_reg1)]
+|			MEM_LOAD ldr, Rd(dst_reg-ZREG_V0), zv, Rx(tmp_reg1)
 |			SET_ZVAL_DVAL dst_addr, dst_reg, tmp_reg2
 |			SET_ZVAL_DVAL res_addr, dst_reg, tmp_reg2
 ||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
