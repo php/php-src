@@ -134,6 +134,29 @@ static const void *zend_jit_trace_get_exit_addr(uint32_t n)
 		((n % ZEND_JIT_EXIT_POINTS_PER_GROUP) * ZEND_JIT_EXIT_POINTS_SPACING));
 }
 
+#if ZEND_JIT_TARGET_ARM64
+static zend_jit_trace_info *zend_jit_get_current_trace_info(void)
+{
+	return &zend_jit_traces[ZEND_JIT_TRACE_NUM];
+}
+
+static uint32_t zend_jit_trace_find_exit_point(const void* addr)
+{
+	uint32_t n = ZEND_JIT_EXIT_NUM / ZEND_JIT_EXIT_POINTS_PER_GROUP;
+	uint32_t i;
+
+	for (i = 0; i < n; i++) {
+		if ((const char*)addr >= (const char*)zend_jit_exit_groups[i]
+			&& (const char*)addr < (const char*)zend_jit_exit_groups[i] +
+				(ZEND_JIT_EXIT_POINTS_PER_GROUP * ZEND_JIT_EXIT_POINTS_SPACING)) {
+			return (i * ZEND_JIT_EXIT_POINTS_PER_GROUP) +
+				 ((const char*)addr - (const char*)zend_jit_exit_groups[i]) / ZEND_JIT_EXIT_POINTS_SPACING;
+		}
+	}
+	return (uint32_t)-1;
+}
+#endif
+
 static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags)
 {
 	zend_jit_trace_info *t = &zend_jit_traces[ZEND_JIT_TRACE_NUM];

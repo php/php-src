@@ -2973,7 +2973,15 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 
 static int zend_jit_trace_end(dasm_State **Dst, zend_jit_trace_info *t)
 {
+	uint32_t i;
+	const void *exit_addr;
+
+	/* Emit veneers table for exit points (B instruction for each exit number) */
 	|.cold_code
+	for (i = 0; i < t->exit_count; i++) {
+		exit_addr = zend_jit_trace_get_exit_addr(i);
+		|	b &exit_addr
+	}
 	|=>1: // end of the code
 	|.code
 	return 1;
@@ -2983,6 +2991,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 {
 	int ret = 0;
 	uint8_t *p, *end;
+	const void *veneer = NULL;
 	ptrdiff_t delta;
 
 	if (jmp_table_size) {
@@ -2997,11 +3006,15 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 		} while (--jmp_table_size);
 	}
 
-	p = (uint8_t*)code;
-	end = p + size;
-	while (p < end) {
-		uint32_t *ins_ptr = (uint32_t*)p;
-		uint32_t ins = *ins_ptr;
+	end = (uint8_t*)code;
+	p = end + size;
+	while (p >= end) {
+		uint32_t *ins_ptr;
+		uint32_t ins;
+
+		p -= 4;
+		ins_ptr = (uint32_t*)p;
+		ins = *ins_ptr;
 		if ((ins & 0xfc000000u) == 0x14000000u) {
 			// B (imm26:0..25)
 			delta = (uint32_t*)from_addr - ins_ptr;
@@ -3012,6 +3025,9 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 				}
 				*ins_ptr = (ins & 0xfc000000u) | ((uint32_t)delta & 0x03ffffffu);
 				ret++;
+				if (!veneer) {
+					veneer = p;
+				}
 			}
 		} else if ((ins & 0xff000000u) == 0x54000000u ||
 		           (ins & 0x7e000000u) == 0x34000000u) {
@@ -3020,7 +3036,14 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 			if (((ins ^ ((uint32_t)delta << 5)) & 0x00ffffe0u) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x40000) >> 19) != 0) {
-					abort(); // brnach target out of range
+					if (veneer) {
+						delta = (uint32_t*)veneer - ins_ptr;
+						if (((delta + 0x40000) >> 19) != 0) {
+							abort(); // brnach target out of range
+						}
+					} else {
+						abort(); // brnach target out of range
+					}
 				}
 				*ins_ptr = (ins & 0xff00001fu) | (((uint32_t)delta & 0x7ffffu) << 5);
 				ret++;
@@ -3031,13 +3054,19 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 			if (((ins ^ ((uint32_t)delta << 5)) & 0x0007ffe0u) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x2000) >> 14) != 0) {
-					abort(); // brnach target out of range
+					if (veneer) {
+						delta = (uint32_t*)veneer - ins_ptr;
+						if (((delta + 0x2000) >> 14) != 0) {
+							abort(); // brnach target out of range
+						}
+					} else {
+						abort(); // brnach target out of range
+					}
 				}
 				*ins_ptr = (ins & 0xfff8001fu) | (((uint32_t)delta & 0x3fffu) << 5);
 				ret++;
 			}
 		}
-		p += 4;
 	}
 
 	JIT_CACHE_FLUSH(code, (char*)code + size);
@@ -15090,6 +15119,55 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 			/* pass */
 		} else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
 			if ((n & 3) == 0 && ((n+0x00008000) >> 16) == 0) {
+				return n;
+			}
+		}
+	} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && (ins >> 16) == DASM_REL_A) {
+		ptrdiff_t addr = (((ptrdiff_t)(*(b-1))) << 32) | (unsigned int)(*(b-2));
+
+		if ((void*)addr >= dasm_buf && (void*)addr < dasm_end) {
+			uint32_t exit_point = zend_jit_trace_find_exit_point((void*)addr);
+			zend_jit_trace_info *t = zend_jit_get_current_trace_info();
+
+			if (exit_point != (uint32_t)-1) {
+				/* Use exit points table */
+
+				ZEND_ASSERT(exit_point < t->exit_count);
+
+				veneer = (char*)buffer + dasm_getpclabel(&Dst, 1) - (t->exit_count - exit_point) * 4;
+				na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+				n = (int)na;
+
+				/* check if we can jump to veneer */
+				if ((ptrdiff_t)n != na) {
+					ZEND_ASSERT(0);
+					return 0;
+				} else if (!(ins & 0xf800)) {  /* B, BL */
+					if ((n & 3) != 0 || ((n+0x08000000) >> 28) != 0) {
+						ZEND_ASSERT(0);
+						return 0;
+					}
+				} else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
+					if ((n & 3) != 0 || ((n+0x00100000) >> 21) != 0) {
+						ZEND_ASSERT(0);
+						return 0;
+					}
+				} else if ((ins & 0x3000) == 0x2000) {  /* ADR */
+					ZEND_ASSERT(0);
+					return 0;
+				} else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
+					ZEND_ASSERT(0);
+					return 0;
+				} else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
+					if ((n & 3) != 0 || ((n+0x00008000) >> 16) != 0) {
+						ZEND_ASSERT(0);
+						return 0;
+					}
+				} else {
+					ZEND_ASSERT(0);
+					return 0;
+				}
 				return n;
 			}
 		}
