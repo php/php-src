@@ -207,6 +207,10 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			path_tmp[path_len - 1] = '\0';
 #endif
 		}
+		if (*path_tmp == '\0') {
+			/* Do not pass an empty string to realpath(), as this will resolve to CWD. */
+			break;
+		}
 		nesting_level++;
 	}
 
