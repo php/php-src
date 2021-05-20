@@ -853,6 +853,7 @@ return_type:
 argument_list:
 		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create(ZEND_AST_CALLABLE_CONVERT); }
 ;
 
 non_empty_argument_list:

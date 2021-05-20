@@ -3674,14 +3674,29 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 }
 /* }}} */
 
-void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
-	uint32_t arg_count;
-	bool may_have_extra_named_args;
 
-	arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
+	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		opline = &CG(active_op_array)->opcodes[opnum_init];
+		opline->extended_value = 0;
+
+		if (opline->opcode == ZEND_NEW) {
+		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
+		}
+
+		if (opline->opcode == ZEND_INIT_FCALL) {
+			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
+		}
+
+		zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		return true;
+	}
+
+	bool may_have_extra_named_args;
+	uint32_t arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
 
 	zend_do_extended_fcall_begin();
 
@@ -3697,6 +3712,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
 	zend_do_extended_fcall_end();
+	return false;
 }
 /* }}} */
 
@@ -4406,6 +4422,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
+	bool is_callable_convert = args_ast->kind == ZEND_AST_CALLABLE_CONVERT;
 
 	znode name_node;
 
@@ -4418,7 +4435,8 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 	{
 		bool runtime_resolution = zend_compile_function_name(&name_node, name_ast);
 		if (runtime_resolution) {
-			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")) {
+			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
+					&& !is_callable_convert) {
 				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast);
@@ -4437,7 +4455,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 
 		/* Special assert() handling should apply independently of compiler flags. */
-		if (fbc && zend_string_equals_literal(lcname, "assert")) {
+		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
 			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc);
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
@@ -4454,7 +4472,8 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			return;
 		}
 
-		if (zend_try_compile_special_func(result, lcname,
+		if (!is_callable_convert &&
+		    zend_try_compile_special_func(result, lcname,
 				zend_ast_get_list(args_ast), fbc, type) == SUCCESS
 		) {
 			zend_string_release_ex(lcname, 0);
@@ -4483,6 +4502,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	zend_op *opline;
 	zend_function *fbc = NULL;
 	bool nullsafe = ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL;
+	uint32_t short_circuiting_checkpoint = zend_short_circuiting_checkpoint();
 
 	if (is_this_fetch(obj_ast)) {
 		if (this_guaranteed_exists()) {
@@ -4531,7 +4551,12 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 	}
 
-	zend_compile_call_common(result, args_ast, fbc);
+	if (zend_compile_call_common(result, args_ast, fbc)) {
+		if (short_circuiting_checkpoint != zend_short_circuiting_checkpoint()) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot combine nullsafe operator with Closure creation");
+		}
+	}
 }
 /* }}} */
 
@@ -6437,6 +6462,13 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 			ZEND_ASSERT(group->child[i]->kind == ZEND_AST_ATTRIBUTE);
 
 			zend_ast *el = group->child[i];
+
+			if (el->child[1] &&
+			    el->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+			    zend_error_noreturn(E_COMPILE_ERROR,
+			        "Cannot create Closure as attribute argument");
+			}
+
 			zend_string *name = zend_resolve_class_name_ast(el->child[0]);
 			zend_ast_list *args = el->child[1] ? zend_ast_get_list(el->child[1]) : NULL;
 

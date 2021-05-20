@@ -518,7 +518,8 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 
 int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)obj;
+	zend_closure *closure = (zend_closure*)obj;
+
 	*fptr_ptr = &closure->func;
 	*ce_ptr = closure->called_scope;
 
@@ -775,6 +776,43 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
 }
 /* }}} */
+
+void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {{{ */
+	zval instance;
+	zend_internal_function trampoline;
+	zend_function *mptr = call->func;
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		RETURN_OBJ(ZEND_CLOSURE_OBJECT(mptr));
+	}
+
+	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+		if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS) &&
+			(Z_OBJCE(call->This) == zend_ce_closure)
+			&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
+	        zend_free_trampoline(mptr);
+	        RETURN_OBJ_COPY(Z_OBJ(call->This));
+	    }
+
+		memset(&trampoline, 0, sizeof(zend_internal_function));
+		trampoline.type = ZEND_INTERNAL_FUNCTION;
+		trampoline.fn_flags = mptr->common.fn_flags & ZEND_ACC_STATIC;
+		trampoline.handler = zend_closure_call_magic;
+		trampoline.function_name = mptr->common.function_name;
+		trampoline.scope = mptr->common.scope;
+
+		zend_free_trampoline(mptr);
+		mptr = (zend_function *) &trampoline;
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS) {
+		ZVAL_OBJ(&instance, Z_OBJ(call->This));
+
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE(instance), &instance);
+	} else {
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_CE(call->This), NULL);
+	}
+} /* }}} */
 
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
 {

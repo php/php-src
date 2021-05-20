@@ -188,6 +188,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
 				call--;
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
@@ -216,7 +217,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
-					 && call_stack[call].try_inline) {
+							&& call_stack[call].try_inline
+							&& opline->opcode != ZEND_CALLABLE_CONVERT) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
 					}
 				}

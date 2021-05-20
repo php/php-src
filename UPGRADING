@@ -197,6 +197,10 @@ PHP 8.1 UPGRADE NOTES
     default values, static variable and global constant initializers, as well
     as attribute arguments.
     RFC: https://wiki.php.net/rfc/new_in_initializers
+  . Closures for callables can now be created using the syntax `myFunc(...)`,
+    which is the same as `Closure::fromCallable('myFunc')`. Yes, the `...` is
+    part of the syntax, not an omission.
+    RFC: https://wiki.php.net/rfc/first_class_callable_syntax
   . File uploads now provide an additional full_path key, which contains the
     full path (rather than just the basename) of the uploaded file. This is
     intended for use in conjunction with "upload webkitdirectory".

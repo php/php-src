@@ -21,6 +21,7 @@
 #include "zend_inference.h"
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
+#include "zend_closures.h"
 #include "zend_worklist.h"
 #include "zend_optimizer_internal.h"
 
@@ -3503,6 +3504,10 @@ static zend_always_inline int _zend_update_type_info(
 					UPDATE_SSA_OBJ_TYPE(ce, ce_is_instanceof, ssa_op->result_def);
 				}
 			}
+			break;
+		case ZEND_CALLABLE_CONVERT:
+			UPDATE_SSA_TYPE(MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN, ssa_op->result_def);
+			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_CONSTANT:
 		case ZEND_FETCH_CLASS_CONSTANT:
