@@ -4,23 +4,23 @@ First Class Callable from Magic
 <?php
 class Foo {
     public function __call($method, $args) {
-        return "OK CALL\n";
+        return $method;
     }
     
     public static function __callStatic($method, $args) {
-        return "OK CALL STATIC\n";
+        return $method;
     }
 }
 
 $foo = new Foo;
-$bar = $foo->anything(...);
+$bar = $foo->anythingInstance(...);
 
-echo $bar();
+echo $bar() . PHP_EOL;
 
-$qux = Foo::anything(...);
+$qux = Foo::anythingStatic(...);
 
 echo $qux();
 ?>
 --EXPECT--
-OK CALL
-OK CALL STATIC
+anythingInstance
+anythingStatic
