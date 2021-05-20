@@ -3678,25 +3678,39 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 {
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
-	uint32_t arg_count;
-	bool may_have_extra_named_args;
 
-	arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
+	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
+		bool may_have_extra_named_args;
+		uint32_t arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
 
-	zend_do_extended_fcall_begin();
+		zend_do_extended_fcall_begin();
 
-	opline = &CG(active_op_array)->opcodes[opnum_init];
-	opline->extended_value = arg_count;
+		opline = &CG(active_op_array)->opcodes[opnum_init];
+		opline->extended_value = arg_count;
 
-	if (opline->opcode == ZEND_INIT_FCALL) {
-		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
+		if (opline->opcode == ZEND_INIT_FCALL) {
+			opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
+		}
+
+		opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
+		if (may_have_extra_named_args) {
+			opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
+		}
+		zend_do_extended_fcall_end();
+	} else {
+		opline = &CG(active_op_array)->opcodes[opnum_init];
+		opline->extended_value = 0;
+
+		if (opline->opcode == ZEND_NEW) {
+		    zend_error_noreturn(E_COMPILE_ERROR, "cannot create Closure from call to constructor");
+		}
+
+		if (opline->opcode == ZEND_INIT_FCALL) {
+			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
+		}
+
+		opline = zend_emit_op(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
 	}
-
-	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
-	if (may_have_extra_named_args) {
-		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
-	}
-	zend_do_extended_fcall_end();
 }
 /* }}} */
 
@@ -4437,7 +4451,8 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 
 		/* Special assert() handling should apply independently of compiler flags. */
-		if (fbc && zend_string_equals_literal(lcname, "assert")) {
+		if ((args_ast->kind != ZEND_AST_CALLABLE_CONVERT) &&
+		    fbc && zend_string_equals_literal(lcname, "assert")) {
 			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc);
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
@@ -4454,7 +4469,8 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			return;
 		}
 
-		if (zend_try_compile_special_func(result, lcname,
+		if ((args_ast->kind != ZEND_AST_CALLABLE_CONVERT) &&
+		    zend_try_compile_special_func(result, lcname,
 				zend_ast_get_list(args_ast), fbc, type) == SUCCESS
 		) {
 			zend_string_release_ex(lcname, 0);
