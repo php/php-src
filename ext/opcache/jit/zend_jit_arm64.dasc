@@ -617,7 +617,8 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 // The computation result is stored back to memory 'addr'. 'op' can be either imm12 or register.
 // For constant case, it should be guaranteed that 'op' can be represented by imm12 before using this macro.
 |.macro MEM_LOAD_OP_STORE, mem_ins, ldr_ins, str_ins, op, addr, tmp_reg1, tmp_reg2
-|	MEM_LOAD ldr_ins, tmp_reg1, addr, tmp_reg2
+|	LOAD_ADDR tmp_reg2, addr
+|	ldr_ins, tmp_reg1, [tmp_reg2]
 |	mem_ins tmp_reg1, tmp_reg1, op
 |	str_ins tmp_reg1, [tmp_reg2]
 |.endmacro
