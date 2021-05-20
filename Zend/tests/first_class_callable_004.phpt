@@ -4,7 +4,7 @@ First Class Callable from Private Scope
 <?php
 class Foo {
     private function method() {
-        return "OK";
+        return __METHOD__;
     }
     
     public function bar()  {
@@ -18,4 +18,4 @@ $bar = $foo->bar(...);
 echo ($bar())();
 ?>
 --EXPECT--
-OK
+Foo::method
