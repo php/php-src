@@ -808,7 +808,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS) {
 		ZVAL_OBJ(&instance, Z_OBJ(call->This));
 
-		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, &instance);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE(instance), &instance);
 	} else {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_CE(call->This), NULL);
 	}

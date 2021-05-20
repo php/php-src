@@ -3702,7 +3702,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 		opline->extended_value = 0;
 
 		if (opline->opcode == ZEND_NEW) {
-		    zend_error_noreturn(E_COMPILE_ERROR, "cannot create Closure from call to constructor");
+		    zend_error_noreturn(E_COMPILE_ERROR, "cannot create Closure for new expression");
 		}
 
 		if (opline->opcode == ZEND_INIT_FCALL) {

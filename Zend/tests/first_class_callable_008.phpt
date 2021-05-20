@@ -9,4 +9,4 @@ class Foo {
 new Foo(...);
 ?>
 --EXPECTF--
-Fatal error: cannot create Closure from call to constructor in %s on line 6
+Fatal error: cannot create Closure for new expression in %s on line 6
