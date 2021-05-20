@@ -1824,7 +1824,7 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 	|->exception_handler_undef:
 	|	MEM_OP2_2_ZTS mov, r0, aword, executor_globals, opline_before_exception, r0
 	|	test byte OP:r0->result_type, (IS_TMP_VAR|IS_VAR)
-	|	jnz >1
+	|	jz >1
 	|	mov eax, dword OP:r0->result.var
 	|	SET_Z_TYPE_INFO FP + r0, IS_UNDEF
 	|1:
