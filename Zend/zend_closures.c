@@ -810,7 +810,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, &instance);
 	} else {
-		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_CE(call->This), NULL);
 	}
 } /* }}} */
 
