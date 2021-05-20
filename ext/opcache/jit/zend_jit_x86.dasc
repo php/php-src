@@ -15290,8 +15290,9 @@ static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zen
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_CASE:
-		case ZEND_RETURN:
 			return 1;
+		case ZEND_RETURN:
+			return (op_array->type != ZEND_EVAL_CODE && op_array->function_name);
 		case ZEND_ASSIGN:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
