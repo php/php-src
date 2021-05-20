@@ -324,8 +324,13 @@ static int zend_jit_disasm(const char    *name,
 
 #ifdef HAVE_CAPSTONE
 # if ZEND_JIT_TARGET_X86
+#  if defined(__x86_64__) || defined(_WIN64)
 	if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK)
 		return 0;
+#  else
+	if (cs_open(CS_ARCH_X86, CS_MODE_32, &cs) != CS_ERR_OK)
+		return 0;
+#  endif
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
 #  if DISASM_INTEL_SYNTAX
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
@@ -337,15 +342,6 @@ static int zend_jit_disasm(const char    *name,
 		return 0;
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
-# else
-	if (cs_open(CS_ARCH_X86, CS_MODE_32, &cs) != CS_ERR_OK)
-		return 0;
-	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
-#  if DISASM_INTEL_SYNTAX
-	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
-#  else
-	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
-#  endif
 # endif
 #else
 	ud_init(&ud);
