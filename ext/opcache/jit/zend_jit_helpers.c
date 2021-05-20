@@ -1088,6 +1088,12 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (UNEXPECTED(result)) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
