@@ -255,6 +255,17 @@ case $host_alias in
     ;;
 esac
 
+dnl Detect musl libc
+AC_MSG_CHECKING([whether we are using musl libc])
+if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
+then
+  AC_MSG_RESULT(yes)
+  CPPFLAGS="$CPPFLAGS -D__MUSL__"
+else
+  AC_MSG_RESULT(no)
+fi
+
+
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
 
