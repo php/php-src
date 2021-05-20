@@ -483,10 +483,80 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
+#ifdef __APPLE__
+|.macro SAVE_REGS
+|	sub sp, sp, #(16*21)
+|
+|	stp d30, d31, [sp]
+|	stp d28, d29, [sp, #16]
+|	stp d26, d27, [sp, #(16*2)]
+|	stp d24, d25, [sp, #(16*3)]
+|	stp d22, d23, [sp, #(16*4)]
+|	stp d20, d21, [sp, #(16*5)]
+|	stp d18, d19, [sp, #(16*6)]
+|	stp d16, d17, [sp, #(16*7)]
+|	// Callee-saved registers, d8 to d15, can be omitted.
+|	stp d6, d7, [sp, #(16*8)]
+|	stp d4, d5, [sp, #(16*9)]
+|	stp d2, d3, [sp, #(16*10)]
+|	stp d0, d1, [sp, #(16*11)]
+|
+|	stp x29, x30, [sp, #(16*12)]
+|	// Callee-saved registers, x19 to x28, can be omitted.
+|	// Temporary registers TMP1 to TMP3, i.e. x15 to 17, can be omitted.
+|	stp x14, x18, [sp, #(16*13)]
+|	stp x12, x13, [sp, #(16*14)]
+|	stp x10, x11, [sp, #(16*15)]
+|	stp x8, x9, [sp, #(16*16)]
+|	stp x6, x7, [sp, #(16*17)]
+|	stp x4, x5, [sp, #(16*18)]
+|	stp x2, x3, [sp, #(16*19)]
+|	stp x0, x1, [sp, #(16*20)]
+|.endmacro
+
+|.macro RESTORE_REGS
+|	ldp d30, d31, [sp]
+|	ldp d28, d29, [sp, #16]
+|	ldp d26, d27, [sp, #(16*2)]
+|	ldp d24, d25, [sp, #(16*3)]
+|	ldp d22, d23, [sp, #(16*4)]
+|	ldp d20, d21, [sp, #(16*5)]
+|	ldp d18, d19, [sp, #(16*6)]
+|	ldp d16, d17, [sp, #(16*7)]
+|	// Callee-saved registers, d8 to d15, can be omitted.
+|	ldp d6, d7, [sp, #(16*8)]
+|	ldp d4, d5, [sp, #(16*9)]
+|	ldp d2, d3, [sp, #(16*10)]
+|	ldp d0, d1, [sp, #(16*11)]
+|
+|	ldp x29, x30, [sp, #(16*12)]
+|	// Callee-saved registers, x19 to x28, can be omitted.
+|	// Temporary registers TMP1 to TMP3, i.e. x15 to 17, can be omitted.
+|	ldp x14, x18, [sp, #(16*13)]
+|	ldp x12, x13, [sp, #(16*14)]
+|	ldp x10, x11, [sp, #(16*15)]
+|	ldp x8, x9, [sp, #(16*16)]
+|	ldp x6, x7, [sp, #(16*17)]
+|	ldp x4, x5, [sp, #(16*18)]
+|	ldp x2, x3, [sp, #(16*19)]
+|	ldp x0, x1, [sp, #(16*20)]
+|
+|	add sp, sp, #(16*21)
+|.endmacro
+#endif
+
 |.macro LOAD_TSRM_CACHE, reg
+||#ifdef __APPLE__
+|	SAVE_REGS
+|	EXT_CALL tsrm_get_ls_cache, TMP3
+|	mov TMP3, x0
+|	RESTORE_REGS     // TMP3 is not in this list
+|	mov reg, TMP3
+||#else
 |	.long 0xd53bd051 // TODO: hard-coded: mrs TMP3, tpidr_el0
 ||	ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= LDR_STR_PIMM64);
 |	ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
+||#endif
 |.endmacro
 
 |.macro LOAD_ADDR_ZTS, reg, struct, field
@@ -2788,7 +2858,7 @@ static int zend_jit_setup(void)
 {
 	allowed_opt_flags = 0;
 
-#if ZTS
+#if ZTS && !defined(__APPLE__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
 #endif
