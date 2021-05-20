@@ -787,13 +787,13 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 	}
 
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-	    if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS && Z_OBJCE(call->This) == zend_ce_closure
-	        && zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
+		if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS) &&
+			(Z_OBJCE(call->This) == zend_ce_closure)
+			&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
 	        zend_free_trampoline(mptr);
 	        RETURN_OBJ_COPY(Z_OBJ(call->This));
 	    }
-	    
-		
+
 		memset(&trampoline, 0, sizeof(zend_internal_function));
 		trampoline.type = ZEND_INTERNAL_FUNCTION;
 		trampoline.fn_flags = mptr->common.fn_flags & ZEND_ACC_STATIC;
