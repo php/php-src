@@ -3702,7 +3702,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 		opline->extended_value = 0;
 
 		if (opline->opcode == ZEND_NEW) {
-		    zend_error_noreturn(E_COMPILE_ERROR, "cannot create Closure for new expression");
+		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
 		if (opline->opcode == ZEND_INIT_FCALL) {
@@ -6453,6 +6453,13 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 			ZEND_ASSERT(group->child[i]->kind == ZEND_AST_ATTRIBUTE);
 
 			zend_ast *el = group->child[i];
+
+			if (el->child[1] &&
+			    el->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+			    zend_error_noreturn(E_COMPILE_ERROR,
+			        "Cannot create Closure as attribute argument");
+			}
+
 			zend_string *name = zend_resolve_class_name_ast(el->child[0]);
 			zend_ast_list *args = el->child[1] ? zend_ast_get_list(el->child[1]) : NULL;
 
