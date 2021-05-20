@@ -336,11 +336,16 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx, uint32_t sp_offset, uint32
 		DB(DW_CFA_def_cfa_offset); DUV(sp_offset);
 #if defined(__aarch64__)
 		if (sp_offset) {
-			DB(DW_CFA_offset|DW_REG_X29); DUV(sp_offset / sizeof(uintptr_t));
-			DB(DW_CFA_offset|DW_REG_RA); DUV((sp_offset / sizeof(uintptr_t)) - 1);
+			if (sp_adjustment && sp_adjustment < sp_offset) {
+				DB(DW_CFA_offset|DW_REG_X29); DUV(sp_adjustment / sizeof(uintptr_t));
+				DB(DW_CFA_offset|DW_REG_RA); DUV((sp_adjustment / sizeof(uintptr_t)) - 1);
+			} else {
+				DB(DW_CFA_offset|DW_REG_X29); DUV(sp_offset / sizeof(uintptr_t));
+				DB(DW_CFA_offset|DW_REG_RA); DUV((sp_offset / sizeof(uintptr_t)) - 1);
+			}
 		}
 #endif
-		if (sp_adjustment && sp_offset != sp_adjustment) {
+		if (sp_adjustment && sp_adjustment > sp_offset) {
 			DB(DW_CFA_advance_loc|1); DB(DW_CFA_def_cfa_offset); DUV(sp_adjustment);
 #if defined(__aarch64__)
 			if (!sp_offset) {
