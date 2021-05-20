@@ -1189,6 +1189,11 @@ mysqli.default_pw =
 ; Allow or prevent reconnect
 mysqli.reconnect = Off
 
+; If this option is enabled, closing a persistent connection will rollback
+; any pending transactions of this connection, before it is put back
+; into the persistent connection pool.
+;mysqli.rollback_on_cached_plink = Off
+
 [mysqlnd]
 ; Enable / Disable collection of general statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
