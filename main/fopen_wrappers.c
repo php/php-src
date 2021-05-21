@@ -110,11 +110,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 			*end = '\0';
 			end++;
 		}
-#ifndef PHP_WIN32
-		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || ptr[2] == DEFAULT_SLASH)) {
-#else
-		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || ptr[2] == DEFAULT_SLASH || ptr[2] == '/')) {
-#endif
+		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || IS_SLASH(ptr[2]))) {
 			/* Don't allow paths with a leading .. path component to be set at runtime */
 			efree(pathbuf);
 			return FAILURE;
