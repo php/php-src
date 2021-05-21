@@ -39,7 +39,7 @@ Link: </style.css>; rel=preload; as=style
 
 HTTP/1.1 302 Found
 Host: localhost
-Date: Fri, 21 May 2021 13:25:48 GMT
+Date: %s
 Connection: close
 Location: http://example.com/
 Content-type: text/html; charset=UTF-8
