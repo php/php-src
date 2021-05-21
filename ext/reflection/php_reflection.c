@@ -1694,9 +1694,9 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 
 		zend_op *opline = ops->opcodes + ops->num_args;
 
-		while (opline->opcode == ZEND_BIND_STATIC) {
+		for (; (opline->opcode == ZEND_BIND_STATIC) ||
+		       (opline->opcode == ZEND_EXT_STMT); opline++)  {
 			if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
-				opline++;
 				continue;
 			}
 
@@ -1705,11 +1705,10 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 				(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
             if (Z_ISUNDEF(bucket->val)) {
-                opline++;
-                continue;
+				continue;
             }
 
-			zend_hash_add(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
 			Z_TRY_ADDREF(bucket->val);
 			opline++;
 		}
