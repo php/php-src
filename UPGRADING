@@ -345,6 +345,9 @@ PHP 8.1 UPGRADE NOTES
   . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
     RFC: https://wiki.php.net/rfc/is_list
 
+- Reflection:
+  . Added ReflectionFunctionAbstract::getClosureUsedVariables
+
 - Standard:
   . Added fsync() and fdatasync(), which instruct the operating system to
     flush its buffers to physical storage.
