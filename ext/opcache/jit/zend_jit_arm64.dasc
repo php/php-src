@@ -1839,7 +1839,7 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 	|	MEM_LOAD_ZTS ldr, REG0, executor_globals, opline_before_exception, REG0
 	|	ldrb TMP1w, OP:REG0->result_type
 	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
-	|	be >1
+	|	beq >1
 	|	ldr REG0w, OP:REG0->result.var
 	|	add REG0, REG0, FP
 	|	SET_Z_TYPE_INFO REG0, IS_UNDEF, TMP1w
