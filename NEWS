@@ -112,6 +112,9 @@ PHP                                                                        NEWS
   . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)
   . Convert resource<pspell config> to object \PSpell\Config. (Sara)
 
+- Reflection:
+  . Implement ReflectionFunctionAbstract::getClosureUsedVariables (krakjoe)
+
 - Sodium:
   . Added the XChaCha20 stream cipher functions. (P.I.E. Security Team)
   . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
