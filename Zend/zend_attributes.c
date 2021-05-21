@@ -241,24 +241,25 @@ static void free_internal_attribute(zval *v)
 
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)
 {
-	zend_internal_attribute *attr;
+	zend_internal_attribute *internal_attr;
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {
 		zend_error_noreturn(E_ERROR, "Only internal classes can be registered as compiler attribute");
 	}
 
-	attr = pemalloc(sizeof(zend_internal_attribute), 1);
-	attr->ce = ce;
-	attr->flags = flags;
-	attr->validator = NULL;
+	internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
+	internal_attr->ce = ce;
+	internal_attr->flags = flags;
+	internal_attr->validator = NULL;
 
 	zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
 
-	zend_hash_update_ptr(&internal_attributes, lcname, attr);
-	zend_add_class_attribute(ce, zend_ce_attribute->name, 0);
+	zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
+	zend_attribute *attr = zend_add_class_attribute(ce, zend_ce_attribute->name, 1);
+	ZVAL_LONG(&attr->args[0].value, flags);
 	zend_string_release(lcname);
 
-	return attr;
+	return internal_attr;
 }
 
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname)
