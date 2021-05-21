@@ -1664,6 +1664,59 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 }
 /* }}} */
 
+/* {{{ Returns an associative array containing the closures lexical scope variables */
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
+{
+	reflection_object *intern;
+	const zend_function *closure_func;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT();
+
+	array_init(return_value);
+	if (!Z_ISUNDEF(intern->obj)) {
+		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+		if (closure_func == NULL ||
+			closure_func->type != ZEND_USER_FUNCTION ||
+			closure_func->op_array.static_variables == NULL) {
+			return;
+		}
+
+		const zend_op_array *ops = &closure_func->op_array;
+
+		HashTable *static_variables =
+			ZEND_MAP_PTR_GET(ops->static_variables_ptr);
+
+		if (!static_variables) {
+			return;
+		}
+		
+		zend_op *opline = ops->opcodes + ops->num_args;
+
+		while (opline->opcode == ZEND_BIND_STATIC) {
+			if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
+				opline++;
+				continue;
+			}
+
+			Bucket *bucket = (Bucket*)
+				(((char*)static_variables->arData) +
+				(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
+
+            if (Z_ISUNDEF(bucket->val)) {
+                opline++;
+                continue;
+            }
+
+			zend_hash_add(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
+			Z_TRY_ADDREF(bucket->val);
+			opline++;
+		}
+	}
+} /* }}} */
+
 /* {{{ Returns a dynamically created closure for the function */
 ZEND_METHOD(ReflectionFunction, getClosure)
 {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b2b52d4f891a594ccfcbcc0edeec97a9e0f80e6 */
+ * Stub hash: aeaae39d65c0df8ffc3ec2814619c31990b3acff */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -26,6 +26,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionFunctionAbstract_getClosureThis arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionFunctionAbstract_getClosureScopeClass arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionFunctionAbstract_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -557,6 +559,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, isGenerator);
 ZEND_METHOD(ReflectionFunctionAbstract, isVariadic);
 ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis);
 ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass);
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables);
 ZEND_METHOD(ReflectionFunctionAbstract, getDocComment);
 ZEND_METHOD(ReflectionFunctionAbstract, getEndLine);
 ZEND_METHOD(ReflectionFunctionAbstract, getExtension);
@@ -795,6 +798,7 @@ static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
 	ZEND_ME(ReflectionFunctionAbstract, isVariadic, arginfo_class_ReflectionFunctionAbstract_isVariadic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getClosureThis, arginfo_class_ReflectionFunctionAbstract_getClosureThis, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getClosureScopeClass, arginfo_class_ReflectionFunctionAbstract_getClosureScopeClass, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getClosureUsedVariables, arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getDocComment, arginfo_class_ReflectionFunctionAbstract_getDocComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getEndLine, arginfo_class_ReflectionFunctionAbstract_getEndLine, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getExtension, arginfo_class_ReflectionFunctionAbstract_getExtension, ZEND_ACC_PUBLIC)
