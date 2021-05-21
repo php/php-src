@@ -1694,8 +1694,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 
 		zend_op *opline = ops->opcodes + ops->num_args;
 
-		for (; (opline->opcode == ZEND_BIND_STATIC) ||
-		       (opline->opcode == ZEND_EXT_STMT); opline++)  {
+		for (; opline->opcode == ZEND_BIND_STATIC; opline++)  {
 			if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 				continue;
 			}
