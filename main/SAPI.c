@@ -821,7 +821,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 }
 
 
-SAPI_API int sapi_send_headers(void)
+SAPI_API int sapi_send_headers(bool last_headers)
 {
 	int retval;
 	int ret = FAILURE;
@@ -833,7 +833,7 @@ SAPI_API int sapi_send_headers(void)
 	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
-	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
+	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers && last_headers) {
 	    uint32_t len = 0;
 		char *default_mimetype = get_default_content_type(0, &len);
 
@@ -863,7 +863,7 @@ SAPI_API int sapi_send_headers(void)
 		zval_ptr_dtor(&cb);
 	}
 
-	SG(headers_sent) = 1;
+	SG(headers_sent) = last_headers;
 
 	if (sapi_module.send_headers) {
 		retval = sapi_module.send_headers(&SG(sapi_headers));

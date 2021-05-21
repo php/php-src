@@ -175,7 +175,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			efree((void *) ctr.line);
 
-			if (FAILURE == sapi_send_headers()) {
+			if (FAILURE == sapi_send_headers(/* last_headers */ true)) {
 				zend_bailout();
 			}
 
@@ -300,7 +300,7 @@ static void phar_do_403(char *entry, size_t entry_len) /* {{{ */
 	ctr.line_len = sizeof("HTTP/1.0 403 Access Denied")-1;
 	ctr.line = "HTTP/1.0 403 Access Denied";
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-	sapi_send_headers();
+	sapi_send_headers(/* last_headers */ true);
 	PHPWRITE("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ", sizeof("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ") - 1);
 	PHPWRITE("Access Denied</h1>\n </body>\n</html>", sizeof("Access Denied</h1>\n </body>\n</html>") - 1);
 }
@@ -324,7 +324,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 	ctr.line_len = sizeof("HTTP/1.0 404 Not Found")-1;
 	ctr.line = "HTTP/1.0 404 Not Found";
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-	sapi_send_headers();
+	sapi_send_headers(/* last_headers */ true);
 	PHPWRITE("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
 	PHPWRITE("Not Found</h1>\n </body>\n</html>",  sizeof("Not Found</h1>\n </body>\n</html>") - 1);
 }
@@ -783,7 +783,7 @@ cleanup_fail:
 			}
 
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-			sapi_send_headers();
+			sapi_send_headers(/* last_headers */ true);
 			efree((void *) ctr.line);
 			zend_bailout();
 		}

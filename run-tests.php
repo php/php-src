@@ -2513,7 +2513,7 @@ COMMAND $cmd
     $headers = [];
 
     if (!empty($uses_cgi) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
-        $output = trim($match[2]);
+        $output = str_replace("\r\n", "\n", trim($match[2]));
         $rh = preg_split("/[\n\r]+/", $match[1]);
 
         foreach ($rh as $line) {

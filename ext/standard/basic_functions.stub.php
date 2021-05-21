@@ -520,6 +520,8 @@ function headers_sent(&$filename = null, &$line = null): bool {}
 
 function headers_list(): array {}
 
+function headers_send_early_and_clear(): bool {}
+
 /* {{{ html.c */
 
 function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}

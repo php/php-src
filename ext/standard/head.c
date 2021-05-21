@@ -69,7 +69,7 @@ PHP_FUNCTION(header_remove)
 
 PHPAPI int php_header(void)
 {
-	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
+	if (sapi_send_headers(/* last_headers */ true) == FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
 	} else {
 		return 1; /* allow output */
@@ -383,3 +383,21 @@ PHP_FUNCTION(http_response_code)
 	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
 /* }}} */
+
+PHP_FUNCTION(headers_send_early_and_clear)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (SG(headers_sent)) {
+		php_error_docref(NULL, E_WARNING, "Headers already sent");
+		RETURN_FALSE;
+	}
+
+	if (sapi_send_headers(/* last_header */ false) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	zend_llist_clean(&SG(sapi_headers).headers);
+	SG(sapi_headers).http_response_code = 200;
+	RETURN_TRUE;
+}

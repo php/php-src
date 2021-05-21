@@ -181,7 +181,7 @@ SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len,
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
-SAPI_API int sapi_send_headers(void);
+SAPI_API int sapi_send_headers(bool last_headers);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
