@@ -235,11 +235,13 @@ static inline bool may_have_side_effects(
 			return 0;
 		case ZEND_BIND_STATIC:
 			if (op_array->static_variables) {
-				/* explicit bind static is effectively prologue of closure so
-				   report it has side effects like RECV, RECV_INIT */
-				if ((opline->extended_value & ZEND_BIND_EXPLICIT)) {
+				/* Implicit and Explicit bind static is effectively prologue of closure so
+				   report it has side effects like RECV, RECV_INIT; This allows us to
+				   reflect on the closure and discover used variable at runtime */
+				if ((opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 					return 1;
 				}
+
 				if ((opline->extended_value & ZEND_BIND_REF) != 0) {
 					zval *value =
 						(zval*)((char*)op_array->static_variables->arData +
