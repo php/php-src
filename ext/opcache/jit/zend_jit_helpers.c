@@ -2015,6 +2015,17 @@ static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const
 
 static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, const char *property_name)
 {
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+
+	if (Z_TYPE_P(container) == IS_UNDEF && opline->op1_type == IS_CV) {
+		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
+
+		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	}
+	if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
 	zend_throw_error(NULL,
 		"Attempt to increment/decrement property \"%s\" on %s",
 		property_name, zend_zval_type_name(container));
