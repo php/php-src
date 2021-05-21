@@ -19,8 +19,6 @@ $two = 2;
 
 $function = function() use ($one, $two) {
     static $three = 3;
-
-    return [$one, $two];
 };
 
 $reflector = new ReflectionFunction($function);
@@ -35,8 +33,6 @@ var_dump($reflector->getClosureUsedVariables());
 
 $function = function() use (&$one) {
     static $three = 3;
-
-    return $one;
 };
 
 $reflector = new ReflectionFunction($function);
