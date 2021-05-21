@@ -739,22 +739,30 @@ PHP_FUNCTION(unpack)
 	while (formatlen-- > 0) {
 		char type = *(format++);
 		char c;
-		int repetitions = 1, argb;
 		char *name;
 		int namelen;
-		int size = 0;
+		int size = 0;        /* how much input is consumed by one unit of data (can be -1 for X pattern) */
+		int repetitions = 1; /* how many units of data are consumed (-1 for infinite amount) */
+		int argb;
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
 			c = *format;
 
 			if (c >= '0' && c <= '9') {
-				repetitions = atoi(format);
+				char *end;
+				long int reps = strtol(format, &end, 10);
 
-				while (formatlen > 0 && *format >= '0' && *format <= '9') {
-					format++;
-					formatlen--;
+				if (reps > INT_MAX) { /* LONG_MAX on overflow */
+					php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
+					zend_array_destroy(Z_ARR_P(return_value));
+					RETURN_FALSE;
 				}
+
+				repetitions = reps;
+				formatlen -= (end - format);
+				format = end;
+
 			} else if (c == '*') {
 				repetitions = -1;
 				format++;
@@ -773,8 +781,10 @@ PHP_FUNCTION(unpack)
 
 		namelen = format - name;
 
-		if (namelen > 200)
-			namelen = 200;
+		if (formatlen > 0) {
+			formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
+			format++;
+		}
 
 		switch ((int) type) {
 			/* Never use any input */
@@ -864,13 +874,6 @@ PHP_FUNCTION(unpack)
 				RETURN_THROWS();
 		}
 
-		if (size != 0 && size != -1 && size < 0) {
-			php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-			zend_array_destroy(Z_ARR_P(return_value));
-			RETURN_FALSE;
-		}
-
-
 		/* Do actual unpacking */
 		for (i = 0; i != repetitions; i++ ) {
 
@@ -880,8 +883,17 @@ PHP_FUNCTION(unpack)
 				RETURN_FALSE;
 			}
 
-			if ((inputpos + size) <= inputlen) {
+			if ((inputpos + size) > inputlen) {
+				if (repetitions < 0) {
+					/* Reached end of input for '*' repeater */
+					break;
+				} else {
+					php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
+					zend_array_destroy(Z_ARR_P(return_value));
+					RETURN_FALSE;
+				}
 
+			} else {
 				zend_string* real_name;
 				zval val;
 
@@ -1161,25 +1173,14 @@ PHP_FUNCTION(unpack)
 				zend_string_release(real_name);
 
 				inputpos += size;
+
 				if (inputpos < 0) {
 					if (size != -1) { /* only print warning if not working with * */
 						php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 					}
 					inputpos = 0;
 				}
-			} else if (repetitions < 0) {
-				/* Reached end of input for '*' repeater */
-				break;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
-				zend_array_destroy(Z_ARR_P(return_value));
-				RETURN_FALSE;
 			}
-		}
-
-		if (formatlen > 0) {
-			formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
-			format++;
 		}
 	}
 }
