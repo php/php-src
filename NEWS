@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81068 (Double free in realpath_cache_clean()). (Dimitry Andric)
+  . Fixed bug #76359 (open_basedir bypass through adding ".."). (cmb)
 
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
