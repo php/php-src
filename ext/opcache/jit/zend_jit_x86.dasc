@@ -12034,6 +12034,9 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
 			|	jg >7
 		}
+		if (Z_REG(op1_addr) != ZREG_FP) {
+			|	mov T1, Ra(Z_REG(op1_addr)) // save
+		}
 		if ((op1_info & MAY_BE_UNDEF)
 		 && opline->opcode == ZEND_FETCH_DIM_RW) {
 			if (op1_info & (MAY_BE_NULL|MAY_BE_FALSE)) {
@@ -12045,9 +12048,6 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 			|1:
 		}
 		|	// ZVAL_ARR(container, zend_new_array(8));
-		if (Z_REG(op1_addr) != ZREG_FP) {
-			|	mov T1, Ra(Z_REG(op1_addr)) // save
-		}
 		|	EXT_CALL _zend_new_array_0, r0
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), T1 // restore
