@@ -21095,7 +21095,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_LEXICAL_SPEC_TMP_CV_HANDL
 		}
 	} else {
 		var = EX_VAR(opline->op2.var);
-		if (UNEXPECTED(Z_ISUNDEF_P(var)) && !(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
+		if (UNEXPECTED(Z_ISUNDEF_P(var)) && !(opline->extended_value & ZEND_BIND_IMPLICIT)) {
 			SAVE_OPLINE();
 			var = ZVAL_UNDEFINED_OP2();
 			if (UNEXPECTED(EG(exception))) {

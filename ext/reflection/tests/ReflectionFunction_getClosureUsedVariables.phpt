@@ -37,6 +37,8 @@ $function = function() use (&$one) {
 $reflector = new ReflectionFunction($function);
 
 var_dump($reflector->getClosureUsedVariables());
+
+$function = function() use($undef) {}
 ?>
 --EXPECT--
 array(0) {

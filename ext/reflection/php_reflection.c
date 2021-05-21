@@ -1686,13 +1686,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 
 		const zend_op_array *ops = &closure_func->op_array;
 
-		HashTable *static_variables =
-			ZEND_MAP_PTR_GET(ops->static_variables_ptr);
+		HashTable *static_variables = ZEND_MAP_PTR_GET(ops->static_variables_ptr);
 
 		if (!static_variables) {
 			return;
 		}
-		
+
 		zend_op *opline = ops->opcodes + ops->num_args;
 
 		while (opline->opcode == ZEND_BIND_STATIC) {
