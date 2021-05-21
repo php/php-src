@@ -1703,9 +1703,9 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 				(((char*)static_variables->arData) +
 				(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
-            if (Z_ISUNDEF(bucket->val)) {
+			if (Z_ISUNDEF(bucket->val)) {
 				continue;
-            }
+			}
 
 			zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
 			Z_TRY_ADDREF(bucket->val);
