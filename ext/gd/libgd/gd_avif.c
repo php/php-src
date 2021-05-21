@@ -27,7 +27,6 @@
 		SPEED_DEFAULT:
 			AVIF_SPEED_DEFAULT is simply the default encoding speed of the AV1 codec.
 			This could be as slow as 0. So we use 6, which is currently considered to be a fine default.
-
 */
 
 #define CHROMA_SUBSAMPLING_DEFAULT AVIF_PIXEL_FORMAT_YUV420
