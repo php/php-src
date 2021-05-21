@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.21
 
+- Core:
+  . Fixed bug #81068 (Double free in realpath_cache_clean()). (Dimitry Andric)
+
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
     (cmb)

@@ -156,9 +156,25 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g) /* {{{ */
 }
 /* }}} */
 
+static void realpath_cache_clean_helper(uint32_t max_entries, realpath_cache_bucket **cache, zend_long *cache_size)
+{
+	uint32_t i;
+
+	for (i = 0; i < max_entries; i++) {
+		realpath_cache_bucket *p = cache[i];
+		while (p != NULL) {
+			realpath_cache_bucket *r = p;
+			p = p->next;
+			free(r);
+		}
+		cache[i] = NULL;
+	}
+	*cache_size = 0;
+}
+
 static void cwd_globals_dtor(virtual_cwd_globals *cwd_g) /* {{{ */
 {
-	realpath_cache_clean();
+	realpath_cache_clean_helper(sizeof(cwd_g->realpath_cache)/sizeof(cwd_g->realpath_cache[0]), cwd_g->realpath_cache, &cwd_g->realpath_cache_size);
 }
 /* }}} */
 
@@ -346,18 +362,7 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 
 CWD_API void realpath_cache_clean(void) /* {{{ */
 {
-	uint32_t i;
-
-	for (i = 0; i < sizeof(CWDG(realpath_cache))/sizeof(CWDG(realpath_cache)[0]); i++) {
-		realpath_cache_bucket *p = CWDG(realpath_cache)[i];
-		while (p != NULL) {
-			realpath_cache_bucket *r = p;
-			p = p->next;
-			free(r);
-		}
-		CWDG(realpath_cache)[i] = NULL;
-	}
-	CWDG(realpath_cache_size) = 0;
+	realpath_cache_clean_helper(sizeof(CWDG(realpath_cache))/sizeof(CWDG(realpath_cache)[0]), CWDG(realpath_cache), &CWDG(realpath_cache_size));
 }
 /* }}} */
 
