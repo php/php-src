@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aeaae39d65c0df8ffc3ec2814619c31990b3acff */
+ * Stub hash: 0e99b3dabead95a356ea4ffb16d99a3e939e9869 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -27,7 +27,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunctionAbstract_getClosureScopeClass arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-#define arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables arginfo_class_ReflectionFunctionAbstract_inNamespace
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunctionAbstract_getDocComment arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -426,8 +427,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionNamedType_isBuiltin arginfo_class_ReflectionFunctionAbstract_inNamespace
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionUnionType_getTypes, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionUnionType_getTypes arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 #define arginfo_class_ReflectionExtension___clone arginfo_class_ReflectionFunctionAbstract___clone
 
@@ -491,7 +491,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionAttribute_isRepeated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-#define arginfo_class_ReflectionAttribute_getArguments arginfo_class_ReflectionUnionType_getTypes
+#define arginfo_class_ReflectionAttribute_getArguments arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionAttribute_newInstance, 0, 0, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
@@ -510,7 +510,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionEnum_getCase, 0, 
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionEnum_getCases arginfo_class_ReflectionUnionType_getTypes
+#define arginfo_class_ReflectionEnum_getCases arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 #define arginfo_class_ReflectionEnum_isBacked arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
