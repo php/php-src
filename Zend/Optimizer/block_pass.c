@@ -967,14 +967,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			continue;
 		}
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
-			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-				/* Only keep the FREE for the loop var */
-				ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
-						|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
-				len += b->len = 1;
-				continue;
-			}
-
 			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
