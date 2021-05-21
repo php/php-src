@@ -8678,7 +8678,7 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 	}
 
 	zend_closure_bind_var_ex(closure,
-		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)), var);
+		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)), var);
 	ZEND_VM_NEXT_OPCODE();
 }
 
