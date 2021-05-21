@@ -1710,7 +1710,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 
 			zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
 			Z_TRY_ADDREF(bucket->val);
-			opline++;
 		}
 	}
 } /* }}} */
