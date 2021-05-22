@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
     (cmb)
+  . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
+    (krakjoe)
 
 03 Jun 2021, PHP 8.0.7
 

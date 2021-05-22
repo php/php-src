@@ -950,9 +950,9 @@ ZEND_FUNCTION(method_exists)
 		func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
 		if (func != NULL) {
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				/* Returns true to the fake Closure's __invoke */
+				/* Returns true for the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
-					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
+					&& zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME));
 
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);
@@ -960,6 +960,12 @@ ZEND_FUNCTION(method_exists)
 			}
 			RETURN_TRUE;
 		}
+	} else {
+	    /* Returns true for fake Closure::__invoke */
+	    if (ce == zend_ce_closure
+	        && zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME)) {
+	        RETURN_TRUE;
+	    }
 	}
 	RETURN_FALSE;
 }
