@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9d5e78ef2ea4e8bda025f9a9e7f0e07d2e9db702 */
+ * Stub hash: 03981bac1d9aef20ccf0adf36f75496c3da8e605 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -67,7 +67,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SimpleXMLElement_addChild, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SimpleXMLElement_addAttribute arginfo_class_SimpleXMLElement_addChild
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SimpleXMLElement_addAttribute, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SimpleXMLElement_getName, 0, 0, 0)
 ZEND_END_ARG_INFO()
