@@ -415,6 +415,7 @@ static char *_readline_command_generator(const char *text, int state)
 		zend_hash_move_forward(myht);
 
 		convert_to_string(entry);
+
 		if (strncmp (Z_STRVAL_P(entry), text, strlen(text)) == 0) {
 			return (strdup(Z_STRVAL_P(entry)));
 		}
@@ -452,12 +453,12 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {
-				matches = malloc(sizeof(char *) * 2);
+				/* libedit will read matches[2] */
+				matches = calloc(sizeof(char *), 3);
 				if (!matches) {
 					return NULL;
 				}
 				matches[0] = strdup("");
-				matches[1] = NULL;
 			}
 		}
 	}
