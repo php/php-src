@@ -258,6 +258,64 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 }
 
+/* {{{ Returns true if property is initialized */
+PHP_FUNCTION(is_initialized)
+{
+	zval *scope;
+	zend_string *property;
+	zend_class_entry *type;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(scope)
+		Z_PARAM_STR(property)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(scope) != IS_OBJECT && Z_TYPE_P(scope) != IS_STRING) {
+		zend_argument_value_error(1, "must be an object or string");
+		return;
+	}
+
+	if (Z_TYPE_P(scope) != IS_OBJECT) {
+		type = zend_lookup_class_ex(Z_STR_P(scope), NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+
+		if (!type) {
+			zend_argument_value_error(1, "must be the name of a loaded class");
+			return;
+		}
+	} else {
+		type = Z_OBJCE_P(scope);
+	}
+
+	zend_property_info *info = zend_get_property_info(type, property, 1);
+
+	if (!info || (info == ZEND_WRONG_PROPERTY_INFO) || !ZEND_TYPE_IS_SET(info->type)) {
+		zend_argument_value_error(2, "must be the name of an accessible typed property");
+		return;
+	}
+
+	zval *value;
+
+	if (info->flags & ZEND_ACC_STATIC) {
+		zval *table = CE_STATIC_MEMBERS(type);
+
+		if (!table) {
+			RETURN_FALSE;
+		}
+
+		value = &table[info->offset];
+	} else {
+		if (Z_TYPE_P(scope) != IS_OBJECT) {
+			zend_argument_value_error(1, "must be an object for instance property");
+			return;
+		}
+
+		value = &Z_OBJ_P(scope)->properties_table[OBJ_PROP_TO_NUM(info->offset)];
+	}
+
+	RETURN_BOOL(!Z_ISUNDEF_P(value));
+}
+/* }}} */
+
 
 /* {{{ Returns true if variable is null
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */

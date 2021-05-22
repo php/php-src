@@ -1393,6 +1393,8 @@ function boolval(mixed $value): bool {}
 
 function strval(mixed $value): string {}
 
+function is_initialized(object|string $scope, string $property) : bool {}
+
 function is_null(mixed $value): bool {}
 
 function is_resource(mixed $value): bool {}

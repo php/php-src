@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 810b8bfbdf037702fcaec2ff81998c2bc2cefae8 */
+ * Stub hash: 7c42ef97e5b15aa768594897d96eb7c941c486b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2062,6 +2062,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strval arginfo_gettype
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_initialized, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_MASK(0, scope, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, property, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_is_null arginfo_boolval
 
 #define arginfo_is_resource arginfo_boolval
@@ -2786,6 +2791,7 @@ ZEND_FUNCTION(intval);
 ZEND_FUNCTION(floatval);
 ZEND_FUNCTION(boolval);
 ZEND_FUNCTION(strval);
+ZEND_FUNCTION(is_initialized);
 ZEND_FUNCTION(is_null);
 ZEND_FUNCTION(is_resource);
 ZEND_FUNCTION(is_bool);
@@ -3436,6 +3442,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(doubleval, floatval, arginfo_doubleval)
 	ZEND_FE(boolval, arginfo_boolval)
 	ZEND_FE(strval, arginfo_strval)
+	ZEND_FE(is_initialized, arginfo_is_initialized)
 	ZEND_FE(is_null, arginfo_is_null)
 	ZEND_FE(is_resource, arginfo_is_resource)
 	ZEND_FE(is_bool, arginfo_is_bool)
