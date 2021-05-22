@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #80761 (PDO uses too much memory). (Nikita)
 
+- readline:
+  . Fixed bug #72998 (invalid read in readline completion). (krakjoe)
+
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
     (cmb)
