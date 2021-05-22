@@ -4,8 +4,7 @@ libxml_disable_entity_loader()
 <?php
 if (!extension_loaded('libxml')) die('skip libxml extension not available');
 if (!extension_loaded('dom')) die('skip dom extension not available');
-if (LIBXML_VERSION >= 20912) die('skip For libxml2 < 2.9.12 only');
-?>
+if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
 --FILE--
 <?php
 
@@ -35,12 +34,10 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
+
+Deprecated: Function libxml_disable_entity_loader() is deprecated in %s on line %d
 bool(false)
 
 Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "%s" in %s on line %d
-
-Warning: DOMDocument::loadXML(): Failure to process entity xxe in Entity, line: %d in %s on line %d
-
-Warning: DOMDocument::loadXML(): Entity 'xxe' not defined in Entity, line: %d in %s on line %d
 bool(true)
 Done
