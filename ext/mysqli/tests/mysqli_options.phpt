@@ -104,6 +104,19 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$link = mysqli_init();
+
+// test for error reporting
+try {
+    mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "foobar");
+} catch (mysqli_sql_exception $e) {
+    echo $e->getMessage() . "\n";
+}
+
+// invalid options do not generate errors
+mysqli_options($link, -1, "Invalid option");
+
 print "done!";
 ?>
 --EXPECTF--
@@ -133,4 +146,5 @@ bool(true)
 bool(false)
 Link closed
 mysqli object is already closed
+Unknown character set
 done!
