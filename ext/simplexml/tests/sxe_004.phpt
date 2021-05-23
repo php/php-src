@@ -50,7 +50,7 @@ class SXETest extends SimpleXMLIterator
         echo __METHOD__ . "\n";
         return parent::current();
     }
-    function key(): string|false
+    function key(): string
     {
         echo __METHOD__ . "\n";
         return parent::key();

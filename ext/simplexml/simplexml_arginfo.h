@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 646e5f3b2c3a0d1c389f17e51213432a5adf02d9 */
+ * Stub hash: 2adc13ce6717fe2255ea7d9a3df56eeb8838d61d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -88,17 +88,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_valid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_current, 0, 0, SimpleXMLElement, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_current, 0, 0, SimpleXMLElement, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SimpleXMLElement_key, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_SimpleXMLElement_key arginfo_class_SimpleXMLElement_getName
 
 #define arginfo_class_SimpleXMLElement_next arginfo_class_SimpleXMLElement_rewind
 
 #define arginfo_class_SimpleXMLElement_hasChildren arginfo_class_SimpleXMLElement_valid
 
-#define arginfo_class_SimpleXMLElement_getChildren arginfo_class_SimpleXMLElement_current
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_getChildren, 0, 0, SimpleXMLElement, 1)
+ZEND_END_ARG_INFO()
 
 
 ZEND_FUNCTION(simplexml_load_file);

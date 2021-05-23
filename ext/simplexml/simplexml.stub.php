@@ -60,10 +60,10 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function valid(): bool {}
 
     /** @tentative-return-type */
-    public function current(): ?SimpleXMLElement {}
+    public function current(): SimpleXMLElement {}
 
     /** @tentative-return-type */
-    public function key(): string|false {}
+    public function key(): string {}
 
     /** @tentative-return-type */
     public function next(): void {}
