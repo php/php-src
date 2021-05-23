@@ -226,6 +226,12 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_END_MODULE_GLOBALS(module_name)		\
 	} zend_##module_name##_globals;
 
+#define ZEND_BEGIN_NATIVE_MODULE_GLOBALS(module_name) \
+    ZEND_TLS struct _zend_##module_name##_globals {
+#define ZEND_END_NATIVE_MODULE_GLOBALS(module_name) \
+    } zend_##module_name##_globals
+#define ZEND_NATIVE_MODULE_GLOBALS_ACCESSOR(module_name, v) zend_##module_name##_globals.v
+
 #ifdef ZTS
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
