@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a53aa5d7eafd82e0b0adf0b220f0a548e4ac2a84 */
+ * Stub hash: 6d0c2e29e9626c161b33baa2b987e9f8f8441669 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -441,8 +441,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetclip, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x1, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, x2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, x2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y2, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
