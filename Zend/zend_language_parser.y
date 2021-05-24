@@ -321,7 +321,7 @@ namespace_declaration_name:
 	|	T_NAME_QUALIFIED						{ $$ = $1; }
 ;
 
-/* Name usable in "use" declarations (loading separator forbidden). */
+/* Name usable in "use" declarations (leading separator forbidden). */
 namespace_name:
 		T_STRING								{ $$ = $1; }
 	|	T_NAME_QUALIFIED						{ $$ = $1; }
