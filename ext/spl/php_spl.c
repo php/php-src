@@ -39,15 +39,22 @@
 #include "ext/standard/php_mt_rand.h"
 #include "main/snprintf.h"
 
-ZEND_BEGIN_NATIVE_MODULE_GLOBALS(spl)
+ZEND_BEGIN_MODULE_GLOBALS(spl)
 	zend_string *autoload_extensions;
 	HashTable   *autoload_functions;
-ZEND_END_NATIVE_MODULE_GLOBALS(spl) = {
-    NULL, NULL
-};
+ZEND_END_MODULE_GLOBALS(spl);
+
+ZEND_DECLARE_NATIVE_MODULE_GLOBALS(spl);
 
 #define SPL_G(v) ZEND_NATIVE_MODULE_GLOBALS_ACCESSOR(spl, v)
 
+/* {{{ PHP_NATIVE_GINIT_FUNCTION */
+static PHP_NATIVE_GINIT_FUNCTION(spl)
+{
+       SPL_G(autoload_extensions) = NULL;
+       SPL_G(autoload_functions) = NULL;
+}
+/* }}} */
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
 
 static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
@@ -748,6 +755,10 @@ zend_module_entry spl_module_entry = {
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
 	PHP_SPL_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_NATIVE_MODULE_GLOBALS(spl),
+	PHP_GINIT(spl),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */

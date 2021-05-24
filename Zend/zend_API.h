@@ -214,7 +214,9 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	zend_result ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
 #define ZEND_MODULE_INFO_D(module)			ZEND_COLD void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
+#define ZEND_NATIVE_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(void *__unused)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
+#define ZEND_NATIVE_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(void *__unused)
 
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
@@ -225,12 +227,6 @@ typedef struct _zend_fcall_info_cache {
 	typedef struct _zend_##module_name##_globals {
 #define ZEND_END_MODULE_GLOBALS(module_name)		\
 	} zend_##module_name##_globals;
-
-#define ZEND_BEGIN_NATIVE_MODULE_GLOBALS(module_name) \
-    ZEND_TLS struct _zend_##module_name##_globals {
-#define ZEND_END_NATIVE_MODULE_GLOBALS(module_name) \
-    } zend_##module_name##_globals
-#define ZEND_NATIVE_MODULE_GLOBALS_ACCESSOR(module_name, v) zend_##module_name##_globals.v
 
 #ifdef ZTS
 
@@ -259,6 +255,12 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_GLOBALS_BULK(module_name) (&module_name##_globals)
 
 #endif
+
+#define ZEND_DECLARE_NATIVE_MODULE_GLOBALS(module_name) \
+    ZEND_TLS zend_##module_name##_globals module_name##_globals
+#define ZEND_INIT_NATIVE_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor) \
+    globals_ctor(&module_name##_globals);
+#define ZEND_NATIVE_MODULE_GLOBALS_ACCESSOR(module_name, v) module_name##_globals.v
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) \
 	INIT_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions)
@@ -857,7 +859,9 @@ END_EXTERN_C()
 #define ZEND_RSHUTDOWN_FUNCTION		ZEND_MODULE_DEACTIVATE_D
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
+#define ZEND_NATIVE_GINIT_FUNCTION  ZEND_NATIVE_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
+#define ZEND_NATIVE_GSHUTDOWN_FUNCTION ZEND_NATIVE_MODULE_GLOBALS_DTOR_D
 
 /* May modify arg in-place. Will free arg in failure case (and take ownership in success case).
  * Prefer using the ZEND_TRY_ASSIGN_* macros over these APIs. */

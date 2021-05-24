@@ -2147,6 +2147,14 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 			module->globals_ctor(module->globals_ptr);
 		}
 #endif
+	} else if (module->globals_ctor) {
+#ifdef ZTS
+        if (module->globals_id_ptr == &__zend_native_module_globals) {
+#else
+        if (module->globals_ptr == &__zend_native_module_globals) {
+#endif
+            module->globals_ctor(NULL);
+        }
 	}
 	if (module->module_startup_func) {
 		EG(current_module) = module;
@@ -2913,6 +2921,14 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 			module->globals_dtor(module->globals_ptr);
 		}
 #endif
+	} else if (module->globals_dtor) {
+#ifdef ZTS
+        if (module->globals_id_ptr == &__zend_native_module_globals) {
+#else
+        if (module->globals_ptr == &__zend_native_module_globals) {
+#endif
+            module->globals_dtor(NULL);
+        }
 	}
 
 	module->module_started=0;
