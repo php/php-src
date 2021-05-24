@@ -258,8 +258,6 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_DECLARE_NATIVE_MODULE_GLOBALS(module_name) \
     ZEND_TLS zend_##module_name##_globals module_name##_globals
-#define ZEND_INIT_NATIVE_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor) \
-    globals_ctor(&module_name##_globals);
 #define ZEND_NATIVE_MODULE_GLOBALS_ACCESSOR(module_name, v) module_name##_globals.v
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) \
