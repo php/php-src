@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.8
 
+- Core:
+  . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
+    (krakjoe)
+
 - Opcache:
   . Fixed bug #80968 (JIT segfault with return from required file). (Dmitry)
 
