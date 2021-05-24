@@ -516,8 +516,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		zval *var;
 		zend_string *key;
-		HashTable *static_variables =
-			zend_array_dup(ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr));
+		HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 
 		array_init(&val);
 
@@ -527,6 +526,11 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {
 				ZVAL_STRING(&copy, "<constant ast>");
 			} else {
+				if (Z_OPT_REFCOUNTED_P(var)) {
+					if (Z_ISREF_P(var) && Z_REFCOUNT_P(var) == 1) {
+						var = Z_REFVAL_P(var);
+					}
+				}
 				ZVAL_COPY(&copy, var);
 			}
 
@@ -538,7 +542,6 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 		} else {
 			zval_ptr_dtor(&val);
 		}
-		zend_array_release(static_variables);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
