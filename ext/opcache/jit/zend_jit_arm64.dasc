@@ -6104,7 +6104,6 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 				|	LOAD_ADDR CARG3, binary_op
 				|	SET_EX_OPLINE opline, REG0
 				|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
-				zend_jit_check_exception(Dst);
 				|	b >9
 				|.code
 				|1:
@@ -6171,9 +6170,6 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 		|	LOAD_ZVAL_ADDR CARG3, op3_addr
 		|	LOAD_ADDR CARG4, binary_op
 		|	EXT_CALL zend_jit_assign_dim_op_helper, REG0
-		if (!zend_jit_check_exception(Dst)) {
-			return 0;
-		}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|	b >9 // END
@@ -6181,8 +6177,27 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 		}
 	}
 
+	if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_ARRAY
+	 && (op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) == 0
+	 && (op1_data_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+		|.cold_code
+	}
+
 	|9:
+	|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+	if (may_throw) {
+		zend_jit_check_exception(Dst);
+	}
+
+	if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_ARRAY
+	 && (op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) == 0
+	 && (op1_data_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+		|	b >9
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|.code
+		|9:
+	}
 
 	return 1;
 }
