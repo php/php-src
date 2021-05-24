@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6d0c2e29e9626c161b33baa2b987e9f8f8441669 */
+ * Stub hash: 4db5a04f57436fffff4d34f4e44db7b7fdc39874 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -81,9 +81,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocatealpha, 0, 5, M
 	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorresolvealpha arginfo_imagecolorallocatealpha
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorresolvealpha, 0, 5, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosestalpha arginfo_imagecolorallocatealpha
+#define arginfo_imagecolorclosestalpha arginfo_imagecolorresolvealpha
 
 #define arginfo_imagecolorexactalpha arginfo_imagecolorallocatealpha
 
@@ -276,18 +282,23 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorat, 0, 3, MAY_BE_LONG|
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosest arginfo_imagecolorallocate
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorclosest, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosesthwb arginfo_imagecolorallocate
+#define arginfo_imagecolorclosesthwb arginfo_imagecolorclosest
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolordeallocate, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorresolve arginfo_imagecolorallocate
+#define arginfo_imagecolorresolve arginfo_imagecolorclosest
 
-#define arginfo_imagecolorexact arginfo_imagecolorallocate
+#define arginfo_imagecolorexact arginfo_imagecolorclosest
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, _IS_BOOL, 1)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)

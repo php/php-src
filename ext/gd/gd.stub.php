@@ -37,9 +37,9 @@ function imagelayereffect(GdImage $image, int $effect): bool {}
 
 function imagecolorallocatealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
 
-function imagecolorresolvealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
+function imagecolorresolvealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
-function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
+function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
 function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
 
@@ -142,15 +142,15 @@ function imagepalettecopy(GdImage $dst, GdImage $src): void {}
 
 function imagecolorat(GdImage $image, int $x, int $y): int|false {}
 
-function imagecolorclosest(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorclosest(GdImage $image, int $red, int $green, int $blue): int {}
 
-function imagecolorclosesthwb(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorclosesthwb(GdImage $image, int $red, int $green, int $blue): int {}
 
 function imagecolordeallocate(GdImage $image, int $color): bool {}
 
-function imagecolorresolve(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorresolve(GdImage $image, int $red, int $green, int $blue): int {}
 
-function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int {}
 
 function imagecolorset(GdImage $image, int $color, int $red, int $green, int $blue, int $alpha = 0): ?bool {}
 
