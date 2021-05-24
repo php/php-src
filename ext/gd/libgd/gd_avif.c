@@ -359,15 +359,7 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 		goto cleanup;
 
 	if (!isAvifSrgbImage(decoder->image))
-<<<<<<< HEAD
-<<<<<<< HEAD
 		zend_error(E_WARNING, "Image's color profile is not sRGB");
-=======
-		gd_error_ex(LOG_WARNING, "Image's color profile is not sRGB");
->>>>>>> d6dfd6b992 (Incremental commit)
-=======
-		zend_error(E_WARNING, "Image's color profile is not sRGB");
->>>>>>> bc3489e29b (Change gd includes to quotes instead of angle brackets)
 
 	// Set up the avifRGBImage, and convert it from YUV to an 8-bit RGB image.
 	// (While AVIF image pixel depth can be 8, 10, or 12 bits, GD truecolor images are 8-bit.)
@@ -467,13 +459,6 @@ void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed)
 	avifResult result;
 	avifRGBImage rgb;
 	avifRWData avifOutput = AVIF_DATA_EMPTY;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	avifBool failed = AVIF_FALSE;
->>>>>>> d6dfd6b992 (Incremental commit)
-=======
->>>>>>> bc3489e29b (Change gd includes to quotes instead of angle brackets)
 	avifBool lossless = quality == 100;
 	avifEncoder *encoder = NULL;
 
@@ -582,24 +567,10 @@ void gdImageAvifEx(gdImagePtr im, FILE *outFile, int quality, int speed)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bc3489e29b (Change gd includes to quotes instead of angle brackets)
 	if (out != NULL) {
 		gdImageAvifCtx(im, out, quality, speed);
 		out->gd_free(out);
 	}
-<<<<<<< HEAD
-=======
-	if (out == NULL)
-		return;
-
-	gdImageAvifCtx(im, out, quality, speed);
-	out->gd_free(out);
->>>>>>> d6dfd6b992 (Incremental commit)
-=======
->>>>>>> bc3489e29b (Change gd includes to quotes instead of angle brackets)
 }
 
 void gdImageAvif(gdImagePtr im, FILE *outFile)
@@ -616,20 +587,8 @@ void * gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed)
 		return NULL;
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	gdImageAvifCtx(im, out, quality, speed);
 	rv = gdDPExtractData(out, size);
-=======
-	if (gdImageAvifCtx(im, out, quality, speed))
-		rv = NULL;
-	else
-		rv = gdDPExtractData(out, size);
->>>>>>> d6dfd6b992 (Incremental commit)
-=======
-	gdImageAvifCtx(im, out, quality, speed);
-	rv = gdDPExtractData(out, size);
->>>>>>> bc3489e29b (Change gd includes to quotes instead of angle brackets)
 
 	out->gd_free(out);
 	return rv;
