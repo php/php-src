@@ -755,7 +755,7 @@ zend_module_entry spl_module_entry = {
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
 	PHP_SPL_VERSION,
-	ZEND_NATIVE_MODULE_GLOBALS,
+	PHP_NATIVE_MODULE_GLOBALS,
 	PHP_GINIT(spl),
 	NULL,
 	NULL,
