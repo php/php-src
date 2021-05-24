@@ -29,7 +29,6 @@ jobs:
             --with-pdo-sqlite \
             --without-pear \
             --enable-gd \
-            --with-avif \
             --with-jpeg \
             --with-webp \
             --with-freetype \
