@@ -2140,6 +2140,7 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 
 	/* Initialize module globals */
 	if (module->globals_size) {
+		/* Module uses legacy globals */
 #ifdef ZTS
 		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
 #else
@@ -2148,13 +2149,8 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 		}
 #endif
 	} else if (module->globals_ctor) {
-#ifdef ZTS
-        if (module->globals_id_ptr == &__zend_native_module_globals) {
-#else
-        if (module->globals_ptr == &__zend_native_module_globals) {
-#endif
-            module->globals_ctor(NULL);
-        }
+		/* Module uses native globals */
+		module->globals_ctor(NULL);
 	}
 	if (module->module_startup_func) {
 		EG(current_module) = module;
@@ -2912,6 +2908,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 
 	/* Deinitialize module globals */
 	if (module->globals_size) {
+		/* Module uses legacy globals */
 #ifdef ZTS
 		if (*module->globals_id_ptr) {
 			ts_free_id(*module->globals_id_ptr);
@@ -2922,13 +2919,8 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		}
 #endif
 	} else if (module->globals_dtor) {
-#ifdef ZTS
-        if (module->globals_id_ptr == &__zend_native_module_globals) {
-#else
-        if (module->globals_ptr == &__zend_native_module_globals) {
-#endif
-            module->globals_dtor(NULL);
-        }
+		/* Module uses native globals */
+		module->globals_dtor(NULL);
 	}
 
 	module->module_started=0;

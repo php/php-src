@@ -56,9 +56,7 @@
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals
 #endif
 
-static const int __zend_native_module_globals = -1;
-
-#define ZEND_NATIVE_MODULE_GLOBALS(module_name) 0, (void*) &__zend_native_module_globals
+#define ZEND_NATIVE_MODULE_GLOBALS 0, NULL
 
 #define STANDARD_MODULE_PROPERTIES \
 	NO_MODULE_GLOBALS, NULL, STANDARD_MODULE_PROPERTIES_EX

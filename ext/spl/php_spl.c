@@ -51,8 +51,8 @@ ZEND_DECLARE_NATIVE_MODULE_GLOBALS(spl);
 /* {{{ PHP_NATIVE_GINIT_FUNCTION */
 static PHP_NATIVE_GINIT_FUNCTION(spl)
 {
-       SPL_G(autoload_extensions) = NULL;
-       SPL_G(autoload_functions) = NULL;
+	SPL_G(autoload_extensions) = NULL;
+	SPL_G(autoload_functions) = NULL;
 }
 /* }}} */
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
@@ -755,7 +755,7 @@ zend_module_entry spl_module_entry = {
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
 	PHP_SPL_VERSION,
-	PHP_NATIVE_MODULE_GLOBALS(spl),
+	ZEND_NATIVE_MODULE_GLOBALS,
 	PHP_GINIT(spl),
 	NULL,
 	NULL,
