@@ -214,9 +214,9 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	zend_result ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
 #define ZEND_MODULE_INFO_D(module)			ZEND_COLD void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
-#define ZEND_NATIVE_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(void *__unused)
+#define ZEND_NATIVE_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(void* not_used)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
-#define ZEND_NATIVE_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(void *__unused)
+#define ZEND_NATIVE_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(void* not_used)
 
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
