@@ -760,6 +760,9 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GD_JPG
 	F1("imagecreatefromjpeg",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
+#ifdef HAVE_GD_AVIF
+	F1("imagecreatefromavif",					MAY_BE_FALSE | MAY_BE_OBJECT),
+#endif
 #ifdef HAVE_GD_PNG
 	F1("imagecreatefrompng",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
