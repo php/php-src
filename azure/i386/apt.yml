@@ -44,6 +44,5 @@ steps:
                               libffi-dev:i386 \
                               libfreetype6-dev:i386 \
                               libsodium-dev:i386 \
-                              libavif-dev:i386 \
                               ${{ parameters.packages }}
     displayName: 'APT'

@@ -17,7 +17,6 @@ steps:
         --enable-intl \
         --without-pear \
         --enable-gd \
-        --with-avif \
         --with-jpeg \
         --with-webp \
         --with-freetype \
