@@ -526,10 +526,8 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {
 				ZVAL_STRING(&copy, "<constant ast>");
 			} else {
-				if (Z_OPT_REFCOUNTED_P(var)) {
-					if (Z_ISREF_P(var) && Z_REFCOUNT_P(var) == 1) {
-						var = Z_REFVAL_P(var);
-					}
+				if (Z_ISREF_P(var) && Z_REFCOUNT_P(var) == 1) {
+					var = Z_REFVAL_P(var);
 				}
 				ZVAL_COPY(&copy, var);
 			}
