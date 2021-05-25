@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     the method is private). (Nikita)
   . Implemented FR #77372 (Relative file path is removed from uploaded file).
     (Björn Tantau)
+  . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
+    (krakjoe)
  
  - Standard:
   . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
