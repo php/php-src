@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     the method is private). (Nikita)
   . Implemented FR #77372 (Relative file path is removed from uploaded file).
     (Björn Tantau)
+ 
+ - Standard:
+  . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
+    (krakjoe)
 
 - Date:
   . Fixed bug #52480 (Incorrect difference using DateInterval) (Derick)
