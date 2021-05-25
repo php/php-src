@@ -845,12 +845,9 @@ PHP_METHOD(XMLReader, open)
 
 	id = getThis();
 	if (id != NULL) {
-		if (! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry)) {
-			id = NULL;
-		} else {
-			intern = Z_XMLREADER_P(id);
-			xmlreader_free_resources(intern);
-		}
+		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry));
+		intern = Z_XMLREADER_P(id);
+		xmlreader_free_resources(intern);
 	}
 
 	if (!source_len) {
@@ -1025,10 +1022,8 @@ PHP_METHOD(XMLReader, XML)
 	}
 
 	id = getThis();
-	if (id != NULL && ! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry)) {
-		id = NULL;
-	}
 	if (id != NULL) {
+		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry));
 		intern = Z_XMLREADER_P(id);
 		xmlreader_free_resources(intern);
 	}
