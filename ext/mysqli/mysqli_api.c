@@ -1771,11 +1771,15 @@ PHP_FUNCTION(mysqli_options)
 	}
 	switch (expected_type) {
 		case IS_STRING:
-			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_P(mysql_value));
+			if ((ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_P(mysql_value)))) {
+				MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+			}
 			break;
 		case IS_LONG:
 			l_value = Z_LVAL_P(mysql_value);
-			ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value);
+			if ((ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value))) {
+				MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+			}
 			break;
 		default:
 			ret = 1;
