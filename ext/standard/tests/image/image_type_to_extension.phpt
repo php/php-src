@@ -24,7 +24,7 @@ image_type_to_extension()
         "IMAGETYPE_JPEG2000" => IMAGETYPE_JPEG2000,
         "IMAGETYPE_XBM"      => IMAGETYPE_XBM,
         "IMAGETYPE_WEBP"     => IMAGETYPE_WEBP,
-		"IMAGETYPE_AVIF"     => IMAGETYPE_AVIF,
+        "IMAGETYPE_AVIF"     => IMAGETYPE_AVIF,
     );
     foreach($constants as $name => $constant) {
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
