@@ -32,6 +32,9 @@
 # ifdef HAVE_SHM_MMAP_ANON
 #  define USE_MMAP      1
 # endif
+# ifdef HAVE_SHM_IPC
+#  define USE_SHM      1
+# endif
 #elif defined(__linux__) || defined(_AIX)
 # ifdef HAVE_SHM_MMAP_POSIX
 #  define USE_SHM_OPEN  1
