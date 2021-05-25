@@ -176,7 +176,7 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 	if (!ctx->seek(ctx, offset))
 		return AVIF_RESULT_IO_ERROR;
 
-	dataBuf = gdMalloc(size);
+	dataBuf = avifAlloc(size);
 	if (!dataBuf) {
 		zend_error(E_ERROR, "avif error - couldn't allocate memory");
 		return AVIF_RESULT_UNKNOWN_ERROR;
@@ -186,7 +186,7 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 	// If getBuf() returns a negative value, that means there was an error.
 	int charsRead = ctx->getBuf(ctx, dataBuf, size);
 	if (charsRead < 0) {
-		gdFree(dataBuf);
+		avifFree(dataBuf);
 		return AVIF_RESULT_IO_ERROR;
 	}
 
