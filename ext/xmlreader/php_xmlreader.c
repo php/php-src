@@ -330,23 +330,21 @@ void xmlreader_objects_clone(void *object, void **object_clone)
 
 /* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
-	if (intern) {
-		if (intern->input) {
-			xmlFreeParserInputBuffer(intern->input);
-			intern->input = NULL;
-		}
-
-		if (intern->ptr) {
-			xmlFreeTextReader(intern->ptr);
-			intern->ptr = NULL;
-		}
-#ifdef LIBXML_SCHEMAS_ENABLED
-		if (intern->schema) {
-			xmlRelaxNGFree((xmlRelaxNGPtr) intern->schema);
-			intern->schema = NULL;
-		}
-#endif
+	if (intern->input) {
+		xmlFreeParserInputBuffer(intern->input);
+		intern->input = NULL;
 	}
+
+	if (intern->ptr) {
+		xmlFreeTextReader(intern->ptr);
+		intern->ptr = NULL;
+	}
+#ifdef LIBXML_SCHEMAS_ENABLED
+	if (intern->schema) {
+		xmlRelaxNGFree((xmlRelaxNGPtr) intern->schema);
+		intern->schema = NULL;
+	}
+#endif
 }
 /* }}} */
 
@@ -396,7 +394,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retchar = (char *)internal_function(intern->ptr, (const unsigned char *)name);
 	}
 	if (retchar) {
@@ -422,7 +420,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = internal_function(intern->ptr);
 		if (retval == 1) {
 			RETURN_TRUE;
@@ -450,7 +448,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retchar = (char *)internal_function(intern->ptr);
 	}
 	if (retchar) {
@@ -485,7 +483,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		if (source) {
 			schema =  _xmlreader_get_relaxNG(source, source_len, type, NULL, NULL);
 			if (schema) {
@@ -562,7 +560,7 @@ PHP_METHOD(XMLReader, getAttributeNo)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retchar = (char *)xmlTextReaderGetAttributeNo(intern->ptr, attr_pos);
 	}
 	if (retchar) {
@@ -597,7 +595,7 @@ PHP_METHOD(XMLReader, getAttributeNs)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retchar = (char *)xmlTextReaderGetAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 	}
 	if (retchar) {
@@ -622,7 +620,7 @@ PHP_METHOD(XMLReader, getParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderGetParserProp(intern->ptr,property);
 	}
 	if (retval == -1) {
@@ -671,7 +669,7 @@ PHP_METHOD(XMLReader, moveToAttribute)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttribute(intern->ptr, (xmlChar *)name);
 		if (retval == 1) {
 			RETURN_TRUE;
@@ -698,7 +696,7 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttributeNo(intern->ptr, attr_pos);
 		if (retval == 1) {
 			RETURN_TRUE;
@@ -736,7 +734,7 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 		if (retval == 1) {
 			RETURN_TRUE;
@@ -781,7 +779,7 @@ PHP_METHOD(XMLReader, read)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
-	if (intern == NULL || intern->ptr == NULL) {
+	if (!intern->ptr) {
 		zend_throw_error(NULL, "Data must be loaded before reading");
 		RETURN_THROWS();
 	}
@@ -810,7 +808,7 @@ PHP_METHOD(XMLReader, next)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
-	if (intern != NULL && intern->ptr != NULL) {
+	if (intern->ptr) {
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
 			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
@@ -940,7 +938,7 @@ PHP_METHOD(XMLReader, setSchema)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
 
 		if (retval == 0) {
@@ -977,7 +975,7 @@ PHP_METHOD(XMLReader, setParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
 	}
 	if (retval == -1) {
@@ -1120,7 +1118,7 @@ PHP_METHOD(XMLReader, expand)
 
 	intern = Z_XMLREADER_P(id);
 
-	if (intern && intern->ptr) {
+	if (intern->ptr) {
 		node = xmlTextReaderExpand(intern->ptr);
 
 		if (node == NULL) {
