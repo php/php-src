@@ -192,7 +192,7 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 
 	out->data = dataBuf;
 	out->size = charsRead;
-	return charsRead == size ? AVIF_RESULT_OK : AVIF_RESULT_TRUNCATED_DATA;
+	return AVIF_RESULT_OK;
 }
 
 // avif.h says this is optional, but it seemed easy to implement.
