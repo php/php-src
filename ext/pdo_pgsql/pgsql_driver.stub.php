@@ -30,4 +30,10 @@ class PDO_PGSql_Ext {
 
     /** @return int */
     public function pgsqlGetPid() {}
+
+    /**
+     * @param callable|null $callback
+     * @return bool
+     */
+    public function pgsqlSetNoticeCallback($callback) {}
 }
