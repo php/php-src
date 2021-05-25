@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
     (krakjoe)
+  . Fixed bug #81068 (Double free in realpath_cache_clean()). (Dimitry Andric)
 
 - Opcache:
   . Fixed bug #80968 (JIT segfault with return from required file). (Dmitry)
