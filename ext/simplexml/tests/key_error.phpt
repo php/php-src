@@ -14,6 +14,12 @@ EOF;
 
 $sxe = simplexml_load_string($xml);
 
+try {
+    $sxe->key();
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 foreach($sxe as $name => $data) {
     var_dump($name);
 }
@@ -26,5 +32,6 @@ try {
 
 ?>
 --EXPECT--
+Iterator not initialized or already consumed
 string(4) "elem"
-Iterator has already been consumed!
+Iterator not initialized or already consumed
