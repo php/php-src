@@ -546,6 +546,7 @@ PHP_METHOD(SQLite3, query)
 	zval *object = ZEND_THIS;
 	zval stmt;
 	zend_string *sql;
+	char *errtext = NULL;
 	int return_code;
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -556,6 +557,15 @@ PHP_METHOD(SQLite3, query)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (!ZSTR_LEN(sql)) {
+		RETURN_FALSE;
+	}
+
+	/* If there was no return value then just execute the query */
+	if (!USED_RET()) {
+		if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
+			php_sqlite3_error(db_obj, "%s", errtext);
+			sqlite3_free(errtext);
+		}
 		RETURN_FALSE;
 	}
 
