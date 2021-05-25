@@ -1600,6 +1600,7 @@ PHP_FUNCTION(imagecreatefromstring)
 			RETURN_FALSE;
 #endif
 
+		case PHP_GDIMG_TYPE_AVIF:
 #ifdef HAVE_GD_AVIF
 			im = _php_image_create_from_string(data, "AVIF", gdImageCreateFromAvifCtx);
 			break;
