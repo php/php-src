@@ -50,15 +50,15 @@ static zend_object_handlers zend_fiber_handlers;
 
 static zend_function zend_fiber_function = { ZEND_INTERNAL_FUNCTION };
 
-typedef void *zend_fcontext_t;
+typedef void *fcontext_t;
 
-typedef struct _zend_transfer_t {
-	zend_fcontext_t context;
+typedef struct _transfer_t {
+	fcontext_t context;
 	void *data;
-} zend_transfer_t;
+} transfer_t;
 
-extern zend_fcontext_t make_fcontext(void *sp, size_t size, void (*fn)(zend_transfer_t));
-extern zend_transfer_t jump_fcontext(zend_fcontext_t to, void *vp);
+extern fcontext_t make_fcontext(void *sp, size_t size, void (*fn)(transfer_t));
+extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
@@ -180,7 +180,7 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	stack->pointer = NULL;
 }
 
-static ZEND_NORETURN void zend_fiber_trampoline(zend_transfer_t transfer)
+static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 {
 	zend_fiber_context *context = transfer.data;
 
@@ -239,7 +239,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	__sanitizer_start_switch_fiber(&fake_stack, to->stack.pointer, to->stack.size);
 #endif
 
-	zend_transfer_t transfer = jump_fcontext(to->self, to);
+	transfer_t transfer = jump_fcontext(to->self, to);
 
 #ifdef __SANITIZE_ADDRESS__
 	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
@@ -257,7 +257,7 @@ ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current)
 	__sanitizer_start_switch_fiber(&fake_stack, current->stack.prior_pointer, current->stack.prior_size);
 #endif
 
-	zend_transfer_t transfer = jump_fcontext(current->caller, NULL);
+	transfer_t transfer = jump_fcontext(current->caller, NULL);
 
 #ifdef __SANITIZE_ADDRESS__
 	__sanitizer_finish_switch_fiber(fake_stack, &current->stack.prior_pointer, &current->stack.prior_size);
