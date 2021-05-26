@@ -110,7 +110,7 @@ class mysqli
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
-    ): mysqli|null|false {}
+    ): bool {}
 
     /**
      * @tentative-return-type

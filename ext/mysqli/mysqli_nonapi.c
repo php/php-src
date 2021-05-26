@@ -361,11 +361,8 @@ end:
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
 	}
-	if (!is_real_connect) {
-		return;
-	} else {
-		RETURN_TRUE;
-	}
+
+	RETURN_TRUE;
 
 err:
 	if (mysql->hash_key) {
