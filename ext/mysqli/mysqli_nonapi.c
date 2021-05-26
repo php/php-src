@@ -355,15 +355,18 @@ end:
 
 	mysql->multi_query = 0;
 
-	if (!object) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
-	} else {
+	if (object) {
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
-	}
-
-	if (!in_ctor) {
 		RETURN_TRUE;
+	} else {
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
+		if (is_real_connect) {
+			zval_ptr_dtor(return_value);
+			RETURN_TRUE;
+		} else {
+			return;
+		}
 	}
 
 err:
