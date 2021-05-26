@@ -54,7 +54,7 @@ class mysqli
     public function commit(int $flags = 0, ?string $name = null) {}
 
     /**
-     * @return mysqli|null|false
+     * @return bool|null
      * @alias mysqli_connect
      * @no-verify
      */
