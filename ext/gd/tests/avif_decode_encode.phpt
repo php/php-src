@@ -59,6 +59,7 @@ gd
         echo $success ? "ok\n" : "failed\n";
     }
 ?>
+
 --EXPECT--
 Decoding AVIF image: ok
 Default AVIF encoding: ok
