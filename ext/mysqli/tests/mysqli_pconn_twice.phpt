@@ -52,15 +52,15 @@ mysqli.max_links=-1
 
     mysqli_close($link);
 
-    if (NULL !== ($tmp = $link->connect($host, $user, $passwd, $db, $port, $socket)))
-        printf("[013] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = $link->connect($host, $user, $passwd, $db, $port, $socket)))
+        printf("[013] Expecting true got %s/%s\n", gettype($tmp), $tmp);
 
     if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[014] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
 
-    if (NULL !== ($tmp = $link->connect($host, $user, $passwd, $db, $port, $socket)))
-        printf("[015] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+    if (true !== ($tmp = $link->connect($host, $user, $passwd, $db, $port, $socket)))
+        printf("[015] Expecting true got %s/%s\n", gettype($tmp), $tmp);
 
     print "done!";
 ?>

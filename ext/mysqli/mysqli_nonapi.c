@@ -355,16 +355,13 @@ end:
 
 	mysql->multi_query = 0;
 
-	if (!object) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
-	} else {
+	if (object) {
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
-	}
-	if (!is_real_connect) {
-		return;
-	} else {
 		RETURN_TRUE;
+	} else {
+		MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_link_class_entry);
+		return;
 	}
 
 err:
@@ -759,7 +756,7 @@ PHP_FUNCTION(mysqli_query)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -993,7 +990,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -1018,7 +1015,7 @@ PHP_FUNCTION(mysqli_stmt_get_result)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 #endif
@@ -1049,7 +1046,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 }
 /* }}} */
 
@@ -1075,7 +1072,7 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 }
 /* }}} */
 

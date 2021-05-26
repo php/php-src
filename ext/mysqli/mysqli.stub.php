@@ -63,43 +63,43 @@ class mysqli
     ) {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_autocommit
      */
-    public function autocommit(bool $enable) {}
+    public function autocommit(bool $enable): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_begin_transaction
      */
-    public function begin_transaction(int $flags = 0, ?string $name = null) {}
+    public function begin_transaction(int $flags = 0, ?string $name = null): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_change_user
      */
-    public function change_user(string $username, string $password, ?string $database) {}
+    public function change_user(string $username, string $password, ?string $database): bool {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias mysqli_character_set_name
      */
-    public function character_set_name() {}
+    public function character_set_name(): string {}
 
     /**
      * @return bool
      * @alias mysqli_close
      */
-    public function close() {}
+    public function close() {} // TODO make return type void
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_commit
      */
-    public function commit(int $flags = 0, ?string $name = null) {}
+    public function commit(int $flags = 0, ?string $name = null): bool {}
 
     /**
-     * @return bool|null
+     * @tentative-return-type
      * @alias mysqli_connect
      * @no-verify
      */
@@ -110,111 +110,109 @@ class mysqli
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
-    ) {}
+    ): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_dump_debug_info
      */
-    public function dump_debug_info() {}
+    public function dump_debug_info(): bool {}
 
     /**
      * @return bool
      * @alias mysqli_debug
      * @no-verify Should really be a static method
      */
-    public function debug(string $options) {}
+    public function debug(string $options) {} // TODO make return type void
 
     /**
-     * @return object|null
+     * @tentative-return-type
      * @alias mysqli_get_charset
      */
-    public function get_charset() {}
+    public function get_charset(): ?object {}
 
     /**
-     * @return string|null
+     * @tentative-return-type
      * @alias mysqli_get_client_info
      * @deprecated 8.1.0
      */
-    public function get_client_info() {}
+    public function get_client_info(): string {}
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
-     * @return array
+     * @tentative-return-type
      * @alias mysqli_get_connection_stats
      */
-    public function get_connection_stats() {}
+    public function get_connection_stats(): array {}
 #endif
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias mysqli_get_server_info
      */
-    public function get_server_info() {}
+    public function get_server_info(): string {}
 
     /**
-     * @return mysqli_warning|false
+     * @tentative-return-type
      * @alias mysqli_get_warnings
      */
-    public function get_warnings() {}
+    public function get_warnings(): mysqli_warning|false {}
 
-    /**
-     * @return null|false
-     */
+    /** @return bool|null */
     public function init() {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_kill
      */
-    public function kill(int $process_id) {}
+    public function kill(int $process_id): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_multi_query
      */
-    public function multi_query(string $query) {}
+    public function multi_query(string $query): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_more_results
      */
-    public function more_results() {}
+    public function more_results(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_next_result
      */
-    public function next_result() {}
+    public function next_result(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_ping
      */
-    public function ping() {}
+    public function ping(): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias mysqli_poll
      */
-    public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0) {}
+    public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
 #endif
 
     /**
-     * @return mysqli_stmt|false
+     * @tentative-return-type
      * @alias mysqli_prepare
      */
-    public function prepare(string $query) {}
+    public function prepare(string $query): mysqli_stmt|false {}
 
     /**
-     * @return mysqli_result|bool
+     * @tentative-return-type
      * @alias mysqli_query
      */
-    public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT) {}
+    public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_real_connect
      */
     public function real_connect(
@@ -225,77 +223,77 @@ class mysqli
         ?int $port = null,
         ?string $socket = null,
         int $flags = 0
-    ) {}
+    ): bool {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias mysqli_real_escape_string
      */
-    public function real_escape_string(string $string) {}
+    public function real_escape_string(string $string): string {}
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
-     * @return mysqli_result|bool
+     * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
-    public function reap_async_query() {}
+    public function reap_async_query(): mysqli_result|bool {}
 #endif
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias mysqli_real_escape_string
      */
-    public function escape_string(string $string) {}
+    public function escape_string(string $string): string {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_real_query
      */
-    public function real_query(string $query) {}
+    public function real_query(string $query): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_release_savepoint
      */
-    public function release_savepoint(string $name) {}
+    public function release_savepoint(string $name): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_rollback
      */
-    public function rollback(int $flags = 0, ?string $name = null) {}
+    public function rollback(int $flags = 0, ?string $name = null): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_savepoint
      */
-    public function savepoint(string $name) {}
+    public function savepoint(string $name): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_select_db
      */
-    public function select_db(string $database) {}
+    public function select_db(string $database): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_set_charset
      */
-    public function set_charset(string $charset) {}
+    public function set_charset(string $charset): bool {}
 
     /**
      * @param string|int $value
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_options
      */
-    public function options(int $option, $value) {}
+    public function options(int $option, $value): bool {}
 
     /**
      * @param string|int $value
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_options
      */
-    public function set_opt(int $option, $value) {}
+    public function set_opt(int $option, $value): bool {}
 
     /**
      * @return bool
@@ -307,43 +305,43 @@ class mysqli
         ?string $ca_certificate,
         ?string $ca_path,
         ?string $cipher_algos
-    ) {}
+    ) {} // TODO make return type void
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias mysqli_stat
      */
-    public function stat() {}
+    public function stat(): string|false {}
 
     /**
-     * @return mysqli_stmt|false
+     * @tentative-return-type
      * @alias mysqli_stmt_init
      */
-    public function stmt_init() {}
+    public function stmt_init(): mysqli_stmt|false {}
 
     /**
-     * @return mysqli_result|false
+     * @tentative-return-type
      * @alias mysqli_store_result
      */
-    public function store_result(int $mode = 0) {}
+    public function store_result(int $mode = 0): mysqli_result|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_thread_safe
      */
-    public function thread_safe() {}
+    public function thread_safe(): bool {}
 
     /**
-     * @return mysqli_result|false
+     * @tentative-return-type
      * @alias mysqli_use_result
      */
-    public function use_result() {}
+    public function use_result(): mysqli_result|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_refresh
      */
-    public function refresh(int $flags) {}
+    public function refresh(int $flags): bool {}
 }
 
 class mysqli_result implements IteratorAggregate
@@ -361,89 +359,87 @@ class mysqli_result implements IteratorAggregate
     public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias mysqli_free_result
      */
-    public function close() {}
+    public function close(): void {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias mysqli_free_result
      */
-    public function free() {}
+    public function free(): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_data_seek
      */
-    public function data_seek(int $offset) {}
+    public function data_seek(int $offset): bool {}
 
     /**
-     * @return object|false
+     * @tentative-return-type
      * @alias mysqli_fetch_field
      */
-    public function fetch_field() {}
+    public function fetch_field(): object|false {}
 
     /**
-     * @return array
+     * @tentative-return-type
      * @alias mysqli_fetch_fields
      */
-    public function fetch_fields() {}
+    public function fetch_fields(): array {}
 
     /**
-     * @return object|false
+     * @tentative-return-type
      * @alias mysqli_fetch_field_direct
      */
-    public function fetch_field_direct(int $index) {}
+    public function fetch_field_direct(int $index): object|false {}
 
     /**
-     * @return array
+     * @tentative-return-type
      * @alias mysqli_fetch_all
      */
-    public function fetch_all(int $mode = MYSQLI_NUM) {}
+    public function fetch_all(int $mode = MYSQLI_NUM): array {}
 
     /**
-     * @return array|null|false
+     * @tentative-return-type
      * @alias mysqli_fetch_array
      */
-    public function fetch_array(int $mode = MYSQLI_BOTH) {}
+    public function fetch_array(int $mode = MYSQLI_BOTH): array|null|false {}
 
     /**
-     * @return array|null|false
+     * @tentative-return-type
      * @alias mysqli_fetch_assoc
      */
-    public function fetch_assoc() {}
+    public function fetch_assoc(): array|null|false {}
 
     /**
-     * @return object|null|false
+     * @tentative-return-type
      * @alias mysqli_fetch_object
      */
-    public function fetch_object(string $class = "stdClass", array $constructor_args = []) {}
+    public function fetch_object(string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
     /**
-     * @return array|null|false
+     * @tentative-return-type
      * @alias mysqli_fetch_row
      */
-    public function fetch_row() {}
+    public function fetch_row(): array|null|false {}
 
-    /**
-     * @alias mysqli_fetch_column
-     */
+    /** @alias mysqli_fetch_column */
     public function fetch_column(int $column = 0): null|int|float|string|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_field_seek
      */
-    public function field_seek(int $index) {}
+    public function field_seek(int $index): bool {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias mysqli_free_result
      */
-    public function free_result() {}
+    public function free_result(): void {}
 
-    public function getIterator(): Iterator;
+    public function getIterator(): Iterator {}
 }
 
 class mysqli_stmt
@@ -471,121 +467,121 @@ class mysqli_stmt
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias mysqli_stmt_attr_get
      */
-    public function attr_get(int $attribute) {}
+    public function attr_get(int $attribute): int {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_attr_set
      */
-    public function attr_set(int $attribute, int $value) {}
+    public function attr_set(int $attribute, int $value): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_bind_param
      */
-    public function bind_param(string $types, mixed &...$vars) {}
+    public function bind_param(string $types, mixed &...$vars): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_bind_result
      */
-    public function bind_result(mixed &...$vars) {}
+    public function bind_result(mixed &...$vars): bool {}
 
     /**
      * @return bool
      * @alias mysqli_stmt_close
      */
-    public function close() {}
+    public function close() {} // TODO make return type void
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias mysqli_stmt_data_seek
      */
-    public function data_seek(int $offset) {}
+    public function data_seek(int $offset): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_execute
      */
-    public function execute(?array $params = null) {}
+    public function execute(?array $params = null): bool {}
 
     /**
-     * @return bool|null
+     * @tentative-return-type
      * @alias mysqli_stmt_fetch
      */
-    public function fetch() {}
+    public function fetch(): bool|null {}
 
     /**
-     * @return mysqli_warning|false
+     * @tentative-return-type
      * @alias mysqli_stmt_get_warnings
      */
-    public function get_warnings() {}
+    public function get_warnings(): mysqli_warning|false {}
 
     /**
-     * @return mysqli_result|false
+     * @tentative-return-type
      * @alias mysqli_stmt_result_metadata
      */
-    public function result_metadata() {}
+    public function result_metadata(): mysqli_result|false {}
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_more_results
      */
-    public function more_results() {}
+    public function more_results(): bool {}
 #endif
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_next_result
      */
-    public function next_result() {}
+    public function next_result(): bool {}
 
     /**
-     * @return int|string
+     * @tentative-return-type
      * @alias mysqli_stmt_num_rows
      */
-    public function num_rows() {}
+    public function num_rows(): int|string {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_send_long_data
      */
-    public function send_long_data(int $param_num, string $data) {}
+    public function send_long_data(int $param_num, string $data): bool {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias mysqli_stmt_free_result
      */
-    public function free_result() {}
+    public function free_result(): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_reset
      */
-    public function reset() {}
+    public function reset(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_prepare
      */
-    public function prepare(string $query) {}
+    public function prepare(string $query): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias mysqli_stmt_store_result
      */
-    public function store_result() {}
+    public function store_result(): bool {}
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
-     * @return mysqli_result|false
+     * @tentative-return-type
      * @alias mysqli_stmt_get_result
      */
-    public function get_result() {}
+    public function get_result(): mysqli_result|false {}
 #endif
 }
 
