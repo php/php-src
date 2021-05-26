@@ -467,10 +467,10 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMCdataSection|false */
     public function createCDATASection(string $data) {}
 
-    /** @return DOMComment|false */
+    /** @return DOMComment */
     public function createComment(string $data) {}
 
-    /** @return DOMDocumentFragment|false */
+    /** @return DOMDocumentFragment */
     public function createDocumentFragment() {}
 
     /** @return DOMElement|false */
@@ -485,7 +485,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMProcessingInstruction|false */
     public function createProcessingInstruction(string $target, string $data = "") {}
 
-    /** @return DOMText|false */
+    /** @return DOMText */
     public function createTextNode(string $data) {}
 
     /** @return DOMElement|null */
