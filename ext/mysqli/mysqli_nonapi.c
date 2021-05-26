@@ -361,12 +361,7 @@ end:
 		RETURN_TRUE;
 	} else {
 		MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_link_class_entry);
-		if (is_real_connect) {
-			zval_ptr_dtor(return_value);
-			RETURN_TRUE;
-		} else {
-			return;
-		}
+		return;
 	}
 
 err:
