@@ -27,7 +27,6 @@ class PDOStatement implements IteratorAggregate
     /** @tentative-return-type */
     public function errorCode(): ?string {}
 
-    /** @return array */
     /** @tentative-return-type */
     public function errorInfo(): array {}
 
