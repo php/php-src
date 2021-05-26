@@ -506,6 +506,10 @@ int dom_document_config_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+ZEND_NORETURN static void php_dom_fatal_libxml_error(void) {
+	zend_error_noreturn(E_ERROR, "Libxml error: Likely out of memory");
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since:
 */
@@ -533,7 +537,7 @@ PHP_METHOD(DOMDocument, createElement)
 
 	node = xmlNewDocNode(docp, NULL, (xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -558,9 +562,9 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	node =  xmlNewDocFragment(docp);
+	node = xmlNewDocFragment(docp);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -589,7 +593,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 
 	node = xmlNewDocText(docp, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -618,7 +622,7 @@ PHP_METHOD(DOMDocument, createComment)
 
 	node = xmlNewDocComment(docp, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -647,7 +651,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 
 	node = xmlNewCDataBlock(docp, (xmlChar *) value, value_len);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -681,7 +685,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 
 	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	node->doc = docp;
@@ -717,7 +721,7 @@ PHP_METHOD(DOMDocument, createAttribute)
 
 	node = xmlNewDocProp(docp, (xmlChar *) name, NULL);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);
@@ -752,7 +756,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 
 	node = xmlNewReference(docp, (xmlChar *) name);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_fatal_libxml_error();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);
