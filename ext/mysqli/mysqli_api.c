@@ -1506,7 +1506,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 
 	if (!is_method) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
+		MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_link_class_entry);
 	} else {
 		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
 	}
@@ -1887,7 +1887,7 @@ PHP_FUNCTION(mysqli_prepare)
 
 	/* change status */
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
 }
 /* }}} */
 
@@ -2432,7 +2432,7 @@ PHP_FUNCTION(mysqli_stmt_init)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 	mysqli_resource->ptr = (void *)stmt;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
 }
 /* }}} */
 
@@ -2480,7 +2480,7 @@ PHP_FUNCTION(mysqli_stmt_result_metadata)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -2569,7 +2569,7 @@ PHP_FUNCTION(mysqli_store_result)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -2623,7 +2623,7 @@ PHP_FUNCTION(mysqli_use_result)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
