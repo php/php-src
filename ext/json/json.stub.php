@@ -12,8 +12,8 @@ function json_last_error_msg(): string {}
 
 interface JsonSerializable
 {
-    /** @return mixed */
-    public function jsonSerialize();
+    /** @tentative-return-type */
+    public function jsonSerialize(): mixed;
 }
 
 class JsonException extends Exception
