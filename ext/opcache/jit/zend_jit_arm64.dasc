@@ -1738,8 +1738,8 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//EG(vm_interrupt) = 0;
 	|	MEM_STORE_8_ZTS strb, wzr, executor_globals, vm_interrupt, TMP1
 	|	//if (EG(timed_out)) {
-	|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, timed_out, TMP1
-	|	cbz REG0w, >1
+	|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, timed_out, TMP1
+	|	cbz TMP1w, >1
 	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, TMP1
 	|1:
@@ -2439,8 +2439,8 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	LOAD_IP
 
 	|	// check for interrupt (try to avoid this ???)
-	|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-	|	cbnz REG0w, ->interrupt_handler
+	|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+	|	cbnz TMP1w, ->interrupt_handler
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	ADD_HYBRID_SPAD
@@ -2878,8 +2878,8 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void *timeout_exit_addr)
 {
 	if (timeout_exit_addr) {
-		|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-		|	cbz REG0w, =>loop_label
+		|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+		|	cbz TMP1w, =>loop_label
 		|	b &timeout_exit_addr
 	} else {
 		|	b =>loop_label
@@ -2889,16 +2889,16 @@ static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void 
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-	|	cbnz REG0, ->exception_handler
+	|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+	|	cbnz TMP1, ->exception_handler
 	return 1;
 }
 
 static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op *opline)
 {
 	if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbnz REG0, ->exception_handler_undef
+		|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+		|	cbnz TMP1, ->exception_handler_undef
 		return 1;
 	}
 	return zend_jit_check_exception(Dst);
@@ -2908,8 +2908,12 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 {
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
-	// In the x86 implementation, this clause would be conducted if ZTS is enabled or the addressing mode is 64-bit.
-	{
+#if ZTS
+	if (1) {
+#else
+	if (1) {  /* TODO: Conservative in ARM */
+	// if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(jit_trace_num)))) {
+#endif
 		/* assignment to EG(jit_trace_num) shouldn't clober CPU register used by deoptimizer */
 		if (parent) {
 			int i;
@@ -3096,8 +3100,8 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 
 	if (timeout_exit_addr) {
 		/* Check timeout for links to LOOP */
-		|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-		|	cbz REG0w, &link_addr
+		|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+		|	cbz TMP1w, &link_addr
 		|	b &timeout_exit_addr
 	} else {
 		|	b &link_addr
@@ -3206,8 +3210,8 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 	if (may_throw
 	 && opline->opcode != ZEND_RETURN
 	 && opline->opcode != ZEND_RETURN_BY_REF) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbnz REG0, ->exception_handler
+		|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+		|	cbnz TMP1, ->exception_handler
 	}
 
 	while (trace->op != ZEND_JIT_TRACE_VM && trace->op != ZEND_JIT_TRACE_END) {
@@ -5526,8 +5530,8 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 	}
 	if (check_exception) {
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbz REG0, >8  // END OF zend_jit_assign_to_variable()
+		|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+		|	cbz TMP1, >8  // END OF zend_jit_assign_to_variable()
 		|	b ->exception_handler
 	} else {
 		|	b >8
@@ -5684,8 +5688,8 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			|	ZVAL_DTOR_FUNC var_info, opline, TMP1
 			if (in_cold || (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0)) {
 				if (check_exception) {
-					|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-					|	cbz REG0, >8
+					|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+					|	cbz TMP1, >8
 					|	b ->exception_handler
 				} else {
 					|	b >8
@@ -8053,8 +8057,8 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 			|3:
 		}
 		if (may_throw) {
-			|	MEM_LOAD_64_ZTS ldr, REG1, executor_globals, exception, TMP1
-			|	cbnz REG1, ->exception_handler_undef
+			|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+			|	cbnz TMP1, ->exception_handler_undef
 		}
 
 		if (set_bool) {
@@ -8332,7 +8336,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			if (func
 			 && op_array == &func->op_array
 			 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
-			 && (sizeof(void*) != 8 || IS_SIGNED_32BIT(func))) {
+			 && IS_SIGNED_32BIT(func)) {
 				|	LOAD_ADDR TMP1, func
 				|	str TMP1, EX:RX->func
 			} else {
@@ -8509,7 +8513,10 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
 		/* recursive call */
-		|	ldr REG0, EX->func
+		if (!(func->op_array.fn_flags & ZEND_ACC_IMMUTABLE) ||
+		    !IS_SIGNED_32BIT(func)) {
+			|	ldr REG0, EX->func
+		}
 	} else {
 		|	// if (CACHED_PTR(opline->result.num))
 		|	ldr REG0, EX->run_time_cache
@@ -8756,12 +8763,12 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		     !func->common.function_name)) {
 			const zend_op *opcodes = func->op_array.opcodes;
 
-			|   LOAD_ADDR TMP1, opcodes
+			|	LOAD_ADDR TMP1, opcodes
 			|	ldr TMP2, [REG0, #offsetof(zend_op_array, opcodes)]
 			|	cmp TMP2, TMP1
 			|	bne &exit_addr
 		} else {
-			|   LOAD_ADDR TMP1, func
+			|	LOAD_ADDR TMP1, func
 			|	cmp REG0, TMP1
 			|	bne &exit_addr
 		}
@@ -9454,8 +9461,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbnz REG0, ->icall_throw_handler
+		|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+		|	cbnz TMP1, ->icall_throw_handler
 
 		// TODO: Can we avoid checking for interrupts after each call ???
 		if (trace && last_valid_opline != opline) {
@@ -10548,8 +10555,8 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 			 && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
 				/* exception might be thrown during destruction of unused return value */
 				|	// if (EG(exception))
-				|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-				|	cbnz REG0, ->leave_throw_handler
+				|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+				|	cbnz TMP1, ->leave_throw_handler
 			}
 			do {
 				trace++;
@@ -10582,16 +10589,16 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 				  && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))
 				 && (!JIT_G(current_frame) || TRACE_FRAME_IS_RETURN_VALUE_UNUSED(JIT_G(current_frame))))) {
 			|	// if (EG(exception))
-			|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-			|	cbnz REG0, ->leave_throw_handler
+			|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
+			|	cbnz TMP1, ->leave_throw_handler
 		}
 
 		return 1;
 	} else {
 		|	// if (EG(exception))
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
+		|	MEM_LOAD_64_ZTS ldr, TMP1, executor_globals, exception, TMP1
 		|	LOAD_IP
-		|	cbnz REG0, ->leave_throw_handler
+		|	cbnz TMP1, ->leave_throw_handler
 		|	// opline = EX(opline) + 1
 		|	ADD_IP_WITH_CONST sizeof(zend_op), TMP1
 	}
@@ -14477,8 +14484,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					    (ssa_op->op1_use != current_var || !last_use)) {
 						ZEND_REGSET_INCL(regset, ZREG_REG0);
 					}
-					if (sizeof(void*) == 8
-					 && !IS_SIGNED_32BIT(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)) - 1)) {
+					if (1) { /* TODO: Conservative in ARM */
+					// if (sizeof(void*) == 8
+					//  && !IS_SIGNED_32BIT(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)) - 1)) {
 						if (!ZEND_REGSET_IN(regset, ZREG_REG0)) {
 							ZEND_REGSET_INCL(regset, ZREG_REG0);
 						} else {
@@ -14570,34 +14578,6 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 		 && (JIT_G(current_trace)[ZEND_JIT_TRACE_START_REC_SIZE].info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 			ZEND_REGSET_INCL(regset, ZREG_REG0);
 			ZEND_REGSET_INCL(regset, ZREG_REG1);
-		}
-	}
-
-	/* %r0 is used to check EG(vm_interrupt) */
-	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-		if (ssa_op == ssa->ops
-		 && (JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_LOOP ||
-			 JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL)) {
-#if ZTS
-			ZEND_REGSET_INCL(regset, ZREG_REG0);
-#else
-			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
-				ZEND_REGSET_INCL(regset, ZREG_REG0);
-			}
-#endif
-		}
-	} else  {
-		uint32_t b = ssa->cfg.map[ssa_op - ssa->ops];
-
-		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
-		 && ssa->cfg.blocks[b].start == ssa_op - ssa->ops) {
-#if ZTS
-			ZEND_REGSET_INCL(regset, ZREG_REG0);
-#else
-			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
-				ZEND_REGSET_INCL(regset, ZREG_REG0);
-			}
-#endif
 		}
 	}
 
