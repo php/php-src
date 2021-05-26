@@ -87,7 +87,7 @@ class mysqli
     public function get_charset() {}
 
     /**
-     * @return string|null
+     * @return string
      * @alias mysqli_get_client_info
      */
     public function get_client_info() {}
@@ -601,7 +601,7 @@ function mysqli_get_client_stats(): array {}
 
 function mysqli_get_charset(mysqli $mysql): ?object {}
 
-function mysqli_get_client_info(?mysqli $mysql = null): ?string {}
+function mysqli_get_client_info(?mysqli $mysql = null): string {}
 
 function mysqli_get_client_version(): int {}
 
