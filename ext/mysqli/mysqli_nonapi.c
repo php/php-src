@@ -86,7 +86,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 			RETURN_THROWS();
 		}
 
-		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) {
+		if (object) {
+			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 			mysqli_resource = (Z_MYSQLI_P(object))->ptr;
 			if (mysqli_resource && mysqli_resource->ptr) {
 				mysql = (MY_MYSQL*) mysqli_resource->ptr;
@@ -354,9 +355,10 @@ end:
 
 	mysql->multi_query = 0;
 
-	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) {
+	if (!object) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
 	} else {
+		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
 	}
 	if (!is_real_connect) {
