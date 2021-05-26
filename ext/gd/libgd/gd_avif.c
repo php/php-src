@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "gd.h"
+#include "gd_errors.h"
 #include "gdhelpers.h"
 #include "gd_intern.h"
 
@@ -141,7 +142,7 @@ static avifBool isAvifSrgbImage(avifImage *avifIm) {
 */
 static avifBool isAvifError(avifResult result, const char *msg) {
 	if (result != AVIF_RESULT_OK) {
-		zend_error(E_ERROR, "avif error - %s: %s", msg, avifResultToString(result));
+		gd_error("avif error - %s: %s", msg, avifResultToString(result));
 		return AVIF_TRUE;
 	}
 
@@ -178,7 +179,7 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 
 	dataBuf = avifAlloc(size);
 	if (!dataBuf) {
-		zend_error(E_ERROR, "avif error - couldn't allocate memory");
+		gd_error("avif error - couldn't allocate memory");
 		return AVIF_RESULT_UNKNOWN_ERROR;
 	}
 
@@ -343,7 +344,7 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 
 	io = createAvifIOFromCtx(ctx);
 	if (!io) {
-		zend_error(E_ERROR, "avif error - Could not allocate memory");
+		gd_error("avif error - Could not allocate memory");
 		goto cleanup;
 	}
 
@@ -359,7 +360,7 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 		goto cleanup;
 
 	if (!isAvifSrgbImage(decoder->image))
-		zend_error(E_WARNING, "Image's color profile is not sRGB");
+		gd_error_ex(GD_NOTICE, "Image's color profile is not sRGB");
 
 	// Set up the avifRGBImage, and convert it from YUV to an 8-bit RGB image.
 	// (While AVIF image pixel depth can be 8, 10, or 12 bits, GD truecolor images are 8-bit.)
@@ -373,7 +374,7 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 
 	im = gdImageCreateTrueColor(decoder->image->width, decoder->image->height);
 	if (!im) {
-		zend_error(E_ERROR, "avif error - Could not create GD truecolor image");
+		gd_error("avif error - Could not create GD truecolor image");
 		goto cleanup;
 	}
 
@@ -470,17 +471,17 @@ void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed)
 		return;
 
 	if (!gdImageTrueColor(im)) {
-		zend_error(E_ERROR, "avif doesn't support palette images");
+		gd_error("avif error - avif doesn't support palette images");
 		return;
 	}
 
 	if (!gdImageSX(im) || !gdImageSY(im)) {
-		zend_error(E_ERROR, "image dimensions must not be zero");
+		gd_error("avif error - image dimensions must not be zero");
 		return;
 	}
 
 	if (overflow2(gdImageSX(im), gdImageSY(im))) {
-		zend_error(E_ERROR, "image dimensions are too large");
+		gd_error("avif error - image dimensions are too large");
 		return;
 	}
 
