@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5a2483f099fbebc795747e3b51402b2194020743 */
+ * Stub hash: b801127d89f2a392476c71bef16f43c78d82dfd7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -33,7 +33,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_commit arginfo_mysqli_begin_transaction
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_connect, 0, 0, mysqli, MAY_BE_NULL|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_connect, 0, 0, mysqli, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hostname, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
