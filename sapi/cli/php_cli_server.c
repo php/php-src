@@ -524,7 +524,7 @@ static void sapi_cli_server_flush(void *server_context) /* {{{ */
 	}
 
 	if (!SG(headers_sent)) {
-		sapi_send_headers();
+		sapi_send_headers(/* last_headers */ true);
 		SG(headers_sent) = 1;
 	}
 } /* }}} */

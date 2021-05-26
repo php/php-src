@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 810b8bfbdf037702fcaec2ff81998c2bc2cefae8 */
+ * Stub hash: f09f8df1b2704720615642414ea106471b139e33 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -769,6 +769,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_headers_sent, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_headers_list arginfo_ob_list_handlers
+
+#define arginfo_headers_send_early_and_clear arginfo_ob_flush
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_htmlspecialchars, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -2445,6 +2447,7 @@ ZEND_FUNCTION(setcookie);
 ZEND_FUNCTION(http_response_code);
 ZEND_FUNCTION(headers_sent);
 ZEND_FUNCTION(headers_list);
+ZEND_FUNCTION(headers_send_early_and_clear);
 ZEND_FUNCTION(htmlspecialchars);
 ZEND_FUNCTION(htmlspecialchars_decode);
 ZEND_FUNCTION(html_entity_decode);
@@ -3080,6 +3083,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(http_response_code, arginfo_http_response_code)
 	ZEND_FE(headers_sent, arginfo_headers_sent)
 	ZEND_FE(headers_list, arginfo_headers_list)
+	ZEND_FE(headers_send_early_and_clear, arginfo_headers_send_early_and_clear)
 	ZEND_FE(htmlspecialchars, arginfo_htmlspecialchars)
 	ZEND_FE(htmlspecialchars_decode, arginfo_htmlspecialchars_decode)
 	ZEND_FE(html_entity_decode, arginfo_html_entity_decode)

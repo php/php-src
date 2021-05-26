@@ -295,7 +295,7 @@ php_apache_sapi_flush(void *server_context)
 
 	r = ctx->r;
 
-	sapi_send_headers();
+	sapi_send_headers(/* last_headers */ true);
 
 	r->status = SG(sapi_headers).http_response_code;
 	SG(headers_sent) = 1;
