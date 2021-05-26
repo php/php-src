@@ -13,9 +13,11 @@ gd
 ?>
 --FILE--
 <?php
-    $cwd = __DIR__;
-    $infile = $cwd . '/girl.avif';
-    $outfile = $cwd . '/test.avif';
+
+    require_once __DIR__ . '/similarity.inc';
+
+    $infile = __DIR__  . '/girl.avif';
+    $outfile = __DIR__  . '/test.avif';
 
     echo 'Decoding AVIF image: ';
     $img = imagecreatefromavif($infile);
@@ -39,7 +41,19 @@ gd
     echo 'Encoding AVIF with illegal speed: ';
     echo_status(imageavif($img, $outfile, 70, 1234));
 
+    echo 'Encoding AVIF losslessly... ';
+    echo_status(imageavif($img, $outfile, 100, 0));
+
+    echo "Decoding the AVIF we just wrote...\n";
+    $img_from_avif = imagecreatefromavif($outfile);
+
+    // Note we could also forgive a certain number of pixel differences.
+    // With the current test image, we just didn't need to.
+    echo 'How many pixels are different in the two images? ';
+    print_r(calc_image_dissimilarity($img, $img_from_avif));
+
     unlink($outfile);
+
 
     function echo_status($success) {
         echo $success ? "ok\n" : "failed\n";
@@ -53,3 +67,6 @@ Encoding AVIF at quality 70 with speed 5: ok
 Encoding AVIF with default quality: ok
 Encoding AVIF with illegal quality: ok
 Encoding AVIF with illegal speed: ok
+Encoding AVIF losslessly... ok
+Decoding the AVIF we just wrote...
+How many pixels are different in the two images? 0
