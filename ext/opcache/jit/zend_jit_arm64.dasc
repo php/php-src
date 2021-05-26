@@ -885,8 +885,7 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 // Convert the LONG value 'lval' into DOUBLE type, and move it into 'reg'
 |.macro DOUBLE_GET_LONG, reg, lval, tmp_reg
 ||	if (lval == 0) {
-|		mov Rx(tmp_reg), xzr
-|		fmov Rd(reg-ZREG_V0), Rx(tmp_reg)
+|		fmov Rd(reg-ZREG_V0), xzr  // TODO: "movi d0, #0" is not recognized by DynASM/arm64
 ||	} else {
 |		LOAD_64BIT_VAL Rx(tmp_reg), lval
 |		scvtf Rd(reg-ZREG_V0), Rx(tmp_reg)
@@ -8084,8 +8083,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		|	mov TMP1, xzr
-		|	fmov FPR0, TMP1
+		|	fmov FPR0, xzr  // TODO: "movi d0, #0" is not recognized by DynASM/arm64
 		|	DOUBLE_CMP ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 		if (set_bool) {
