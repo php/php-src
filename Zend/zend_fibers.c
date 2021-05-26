@@ -448,16 +448,11 @@ static void zend_fiber_object_free(zend_object *object)
 ZEND_API zend_fiber *zend_fiber_create(const zend_fcall_info *fci, const zend_fcall_info_cache *fci_cache)
 {
 	zend_fiber *fiber = (zend_fiber *) zend_fiber_object_create(zend_ce_fiber);
-	zval object;
 
 	fiber->fci = *fci;
 	fiber->fci_cache = *fci_cache;
 
 	Z_TRY_ADDREF(fiber->fci.function_name);
-
-	ZVAL_OBJ(&object, &fiber->std);
-	GC_ADDREF(&fiber->std);
-	zval_ptr_dtor(&object);
 
 	return fiber;
 }
@@ -474,7 +469,7 @@ ZEND_METHOD(Fiber, __construct)
 	Z_TRY_ADDREF(fiber->fci.function_name);
 }
 
-ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_count, zend_array *named_params, INTERNAL_FUNCTION_PARAMETERS)
+ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_count, zend_array *named_params, zval *return_value)
 {
 	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
@@ -511,10 +506,10 @@ ZEND_METHOD(Fiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fiber_start(fiber, params, param_count, named_params, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_start(fiber, params, param_count, named_params, return_value);
 }
 
-ZEND_API void zend_fiber_suspend(zval *value, INTERNAL_FUNCTION_PARAMETERS)
+ZEND_API void zend_fiber_suspend(zval *value, zval *return_value)
 {
 	zend_fiber *fiber = EG(current_fiber);
 
@@ -536,7 +531,7 @@ ZEND_API void zend_fiber_suspend(zval *value, INTERNAL_FUNCTION_PARAMETERS)
 		ZVAL_NULL(&fiber->value);
 	}
 
-	fiber->execute_data = execute_data;
+	fiber->execute_data = EG(current_execute_data);
 	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 	fiber->stack_bottom->prev_execute_data = NULL;
 
@@ -571,10 +566,10 @@ ZEND_METHOD(Fiber, suspend)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fiber_suspend(value, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_suspend(value, return_value);
 }
 
-ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, INTERNAL_FUNCTION_PARAMETERS)
+ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value)
 {
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
@@ -588,7 +583,7 @@ ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, INTERNAL_FUNCTIO
 	}
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
-	fiber->stack_bottom->prev_execute_data = execute_data;
+	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	zend_fiber_switch_to(fiber);
 
@@ -612,10 +607,10 @@ ZEND_METHOD(Fiber, resume)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	zend_fiber_resume(fiber, value, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_resume(fiber, value, return_value);
 }
 
-ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, INTERNAL_FUNCTION_PARAMETERS)
+ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value)
 {
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
@@ -626,7 +621,7 @@ ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, INTERNAL_FUNC
 	fiber->exception = exception;
 
 	fiber->status = ZEND_FIBER_STATUS_RUNNING;
-	fiber->stack_bottom->prev_execute_data = execute_data;
+	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	zend_fiber_switch_to(fiber);
 
@@ -649,7 +644,7 @@ ZEND_METHOD(Fiber, throw)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	zend_fiber_throw(fiber, exception, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_throw(fiber, exception, return_value);
 }
 
 ZEND_METHOD(Fiber, isStarted)
