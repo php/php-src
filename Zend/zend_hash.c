@@ -150,6 +150,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), 1);
 	} else if (EXPECTED(ht->nTableSize == HT_MIN_SIZE)) {
+		/* Use specialized API with constant allocation amount for a particularly common case. */
 		data = emalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_MIN_MASK));
 	} else {
 		data = emalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK));
