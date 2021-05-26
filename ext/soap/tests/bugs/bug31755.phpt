@@ -5,7 +5,7 @@ soap
 --FILE--
 <?php
 class MySoapClient extends SoapClient {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0) {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0): string {
         echo $request, "\n";
         return '';
     }
