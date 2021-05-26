@@ -362,7 +362,9 @@ end:
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
 	}
 
-	RETURN_TRUE;
+	if (!in_ctor) {
+		RETURN_TRUE;
+	}
 
 err:
 	if (mysql->hash_key) {

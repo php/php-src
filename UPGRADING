@@ -100,6 +100,7 @@ PHP 8.1 UPGRADE NOTES
   . Classes extending mysqli_stmt::execute() will be required to specify the
     additional parameter now.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
+  . mysqli::connect() will now return true instead of null on success.
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
