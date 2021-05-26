@@ -562,7 +562,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (S->stmt) {
-		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || fetched_anything == FALSE) {
+		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || !fetched_anything) {
 			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
 		}

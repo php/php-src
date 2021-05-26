@@ -71,7 +71,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 {
 	char * ret = NULL;
 	if (name) {
-		bool warned = FALSE;
+		bool warned = false;
 		const char * p_orig = name;
 		char * p_copy;
 		p_copy = ret = emalloc(strlen(name) + 1 + 2 + 2 + 1); /* space, open, close, NullS */
@@ -92,9 +92,9 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name)
 				v == '=')
 			{
 				*p_copy++ = v;
-			} else if (warned == FALSE) {
+			} else if (!warned) {
 				php_error_docref(NULL, E_WARNING, "Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, \"\\\", \"-\", \"_\", and \"=\" characters");
-				warned = TRUE;
+				warned = true;
 			}
 			++p_orig;
 		}
@@ -585,7 +585,7 @@ PHP_FUNCTION(mysqli_change_user)
 #endif
 
 #ifdef MYSQLI_USE_MYSQLND
-	rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, FALSE, (size_t) password_len);
+	rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, false, (size_t) password_len);
 #else
 	rc = mysql_change_user(mysql->mysql, user, password, dbname);
 #endif
@@ -644,7 +644,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 
 				if (MyG(rollback_on_cached_plink) &&
 #ifndef MYSQLI_USE_MYSQLND
-					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, false, TRANS_COR_NO_OPT, NULL))
 #else
 					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
 #endif
@@ -657,7 +657,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 				MyG(num_active_persistent)--;
 			}
 		}
-		mysql->persistent = FALSE;
+		mysql->persistent = false;
 	}
 	mysql->mysql = NULL;
 
@@ -701,7 +701,7 @@ PHP_FUNCTION(mysqli_commit)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, true, flags, name)) {
 #else
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 #endif
@@ -1108,9 +1108,9 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (FAIL == mysqlnd_stmt_fetch(stmt->stmt, &fetched_anything)) {
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		RETURN_BOOL(FALSE);
-	} else if (fetched_anything == TRUE) {
-		RETURN_BOOL(TRUE);
+		RETURN_FALSE;
+	} else if (fetched_anything) {
+		RETURN_TRUE;
 	} else {
 		RETURN_NULL();
 	}
@@ -1351,7 +1351,7 @@ PHP_FUNCTION(mysqli_free_result)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	mysqli_free_result(result, FALSE);
+	mysqli_free_result(result, false);
 	MYSQLI_CLEAR_RESOURCE(mysql_result);
 }
 /* }}} */
@@ -1494,7 +1494,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 	  We create always persistent, as if the user want to connect
 	  to p:somehost, we can't convert the handle then
 	*/
-	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, TRUE)))
+	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, true)))
 #endif
 	{
 		efree(mysql);
@@ -1516,7 +1516,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, bool is_method)
 /* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init)
 {
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -1849,7 +1849,7 @@ PHP_FUNCTION(mysqli_prepare)
 			mysql->mysql->data->error_info->error_list.tail = NULL;
 			mysql->mysql->data->error_info->error_list.count = 0;
 #endif
-			mysqli_stmt_close(stmt->stmt, FALSE);
+			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 
 			/* restore error messages */
@@ -1894,7 +1894,7 @@ PHP_FUNCTION(mysqli_prepare)
 /* {{{ Open a connection to a mysql server */
 PHP_FUNCTION(mysqli_real_connect)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE, FALSE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, false);
 }
 /* }}} */
 
@@ -1967,7 +1967,7 @@ PHP_FUNCTION(mysqli_rollback)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, flags, name)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, false, flags, name)) {
 #else
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 #endif
@@ -2036,7 +2036,7 @@ PHP_FUNCTION(mysqli_stmt_close)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	mysqli_stmt_close(stmt->stmt, FALSE);
+	mysqli_stmt_close(stmt->stmt, false);
 	stmt->stmt = NULL;
 	php_clear_stmt_bind(stmt);
 	MYSQLI_CLEAR_RESOURCE(mysql_stmt);

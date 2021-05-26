@@ -26,14 +26,6 @@
 #undef LIST
 #endif
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 #ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"

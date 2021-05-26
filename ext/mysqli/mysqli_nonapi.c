@@ -56,11 +56,11 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 						*ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL,
 						*ssl_cipher = NULL;
 	size_t				hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	bool			persistent = FALSE, ssl = FALSE;
+	bool			persistent = false, ssl = false;
 	zend_long			port = 0, flags = 0;
 	bool           port_is_null = 1;
 	zend_string			*hash_key = NULL;
-	bool			new_connection = FALSE;
+	bool			new_connection = false;
 	zend_resource		*le;
 	mysqli_plist_entry *plist = NULL;
 	bool			self_alloced = 0;
@@ -148,7 +148,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 		if (!MyG(allow_persistent)) {
 			php_error_docref(NULL, E_WARNING, "Persistent connections are disabled. Downgrading to normal");
 		} else {
-			mysql->persistent = persistent = TRUE;
+			mysql->persistent = persistent = true;
 
 			hash_key = strpprintf(0, "mysqli_%s_%s" ZEND_LONG_FMT "%s%s%s", SAFE_STR(hostname), SAFE_STR(socket),
 								port, SAFE_STR(username), SAFE_STR(dbname),
@@ -192,7 +192,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 #ifdef MYSQLI_USE_MYSQLND
 								if (mysql->mysql->data->vio->data->ssl) {
 									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
-									ssl = TRUE;
+									ssl = true;
 
 									ssl_key = mysql->mysql->data->vio->data->options.ssl_key ? estrdup(mysql->mysql->data->vio->data->options.ssl_key) : NULL;
 									ssl_cert = mysql->mysql->data->vio->data->options.ssl_cert ? estrdup(mysql->mysql->data->vio->data->options.ssl_cert) : NULL;
@@ -207,7 +207,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 										|| mysql->mysql->options.ssl_capath
 										|| mysql->mysql->options.ssl_cipher) {
 									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
-									ssl = TRUE;
+									ssl = true;
 
 									ssl_key = mysql->mysql->options.ssl_key ? estrdup(mysql->mysql->options.ssl_key) : NULL;
 									ssl_cert = mysql->mysql->options.ssl_cert ? estrdup(mysql->mysql->options.ssl_cert) : NULL;
@@ -250,7 +250,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 #endif
 			goto err;
 		}
-		new_connection = TRUE;
+		new_connection = true;
 	}
 
 #ifndef MYSQLI_USE_MYSQLND
@@ -371,7 +371,7 @@ err:
 	if (mysql->hash_key) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
-		mysql->persistent = FALSE;
+		mysql->persistent = false;
 	}
 	if (!is_real_connect && self_alloced) {
 		efree(mysql);
@@ -382,19 +382,19 @@ err:
 /* {{{ Open a connection to a mysql server */
 PHP_FUNCTION(mysqli_connect)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, FALSE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, false);
 }
 /* }}} */
 
 PHP_METHOD(mysqli, __construct)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, true);
 }
 
 /* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_METHOD(mysqli, init)
 {
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
@@ -1273,7 +1273,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	}
 
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_savepoint_libmysql(mysql->mysql, name, FALSE)) {
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, false)) {
 #else
 	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
 #endif
@@ -1300,7 +1300,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 		RETURN_THROWS();
 	}
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, true)) {
 #else
 	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {
 #endif
