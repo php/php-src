@@ -3,7 +3,7 @@ Bug #80268 (loadHTML() truncates at NUL bytes)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-if (LIBXML_VERSION >= 20912) die('skip For libxml2 < 2.9.12 only');
+if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
 ?>
 --FILE--
 <?php
@@ -22,6 +22,9 @@ var_dump(strpos($html, '<p>foo</p>') !== false);
 <?php
 unlink(__DIR__ . '/80268.html');
 ?>
---EXPECT--
-bool(true)
-bool(true)
+--EXPECTF--
+Warning: DOMDocument::loadHTML(): Char 0x0 out of allowed range in Entity, line: 1 in %s on line %d
+bool(false)
+
+Warning: DOMDocument::loadHTMLFile(): Char 0x0 out of allowed range in %s on line %d
+bool(false)
