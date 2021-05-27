@@ -955,19 +955,31 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
    Set the security protocol in the snmpv3 session */
 static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
 {
+#ifndef NETSNMP_DISABLE_DES
 	if (!strcasecmp(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+	} else
+#endif
 #ifdef HAVE_AES
-	} else if (!strcasecmp(prot, "AES128") || !strcasecmp(prot, "AES")) {
+	if (!strcasecmp(prot, "AES128") || !strcasecmp(prot, "AES")) {
 		s->securityPrivProto = usmAESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
+	} else
 #endif
-	} else {
+	{
 #ifdef HAVE_AES
+#ifndef NETSNMP_DISABLE_DES
 		zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
 #else
+		zend_value_error("Security protocol must be one of \"AES128\", or \"AES\"");
+#endif
+#else
+#ifndef NETSNMP_DISABLE_DES
 		zend_value_error("Security protocol must be \"DES\"");
+#else
+		zend_value_error("No security protocol supported");
+#endif
 #endif
 		return (-1);
 	}
