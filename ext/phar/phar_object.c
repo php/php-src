@@ -4544,8 +4544,8 @@ PHP_METHOD(PharFileInfo, isCompressed)
 		case PHAR_ENT_COMPRESSED_BZ2:
 			RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSED_BZ2);
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-				"Unknown compression type specified"); \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4568,8 +4568,8 @@ PHP_METHOD(PharFileInfo, getCRC32)
 	if (entry_obj->entry->is_crc_checked) {
 		RETURN_LONG(entry_obj->entry->crc32);
 	} else {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Phar entry was not CRC checked"); \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Phar entry was not CRC checked");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4957,8 +4957,8 @@ PHP_METHOD(PharFileInfo, compress)
 			entry_obj->entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-				"Unknown compression type specified"); \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			RETURN_THROWS();
 	}
 
 	entry_obj->entry->phar->is_modified = 1;
