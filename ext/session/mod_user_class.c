@@ -19,16 +19,6 @@
 
 #define PS_SANITY_CHECK						\
 	if (PS(session_status) != php_session_active) { \
-		php_error_docref(NULL, E_WARNING, "Session is not active"); \
-		RETURN_FALSE; \
-	} \
-	if (PS(default_mod) == NULL) { \
-		zend_throw_error(NULL, "Cannot call default session handler"); \
-		RETURN_THROWS(); \
-	}
-
-#define PS_SANITY_CHECK_THROW				\
-	if (PS(session_status) != php_session_active) { \
 		zend_throw_error(NULL, "Session is not active"); \
 		RETURN_THROWS(); \
 	} \
@@ -172,7 +162,7 @@ PHP_METHOD(SessionHandler, create_sid)
 	    RETURN_THROWS();
 	}
 
-	PS_SANITY_CHECK_THROW;
+	PS_SANITY_CHECK;
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
 
