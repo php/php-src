@@ -6173,8 +6173,8 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 		|	EXT_CALL zend_jit_assign_dim_op_helper, REG0
 
 		|9:
-		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
-		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
 			zend_jit_check_exception(Dst);
 		}
@@ -6187,8 +6187,8 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 		|.cold_code
 		|9:
-		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
-		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
 			zend_jit_check_exception(Dst);
 		}
