@@ -1205,6 +1205,21 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 }
 /* }}} */
 
+ZEND_API size_t zend_get_page_size(void)
+{
+#ifdef _WIN32
+	SYSTEM_INFO system_info;
+	GetSystemInfo(&system_info);
+	return system_info.dwPageSize;
+#elif defined(__FreeBSD__)
+	/* This returns the value obtained from
+	 * the auxv vector, avoiding a syscall. */
+	return getpagesize();
+#else
+	return (size_t) sysconf(_SC_PAGESIZE);
+#endif
+}
+
 ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ */
 {
 	char *new_info;

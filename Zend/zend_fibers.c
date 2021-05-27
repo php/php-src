@@ -90,27 +90,25 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 # define ZEND_FIBER_STACK_FLAGS (MAP_PRIVATE | MAP_ANON)
 #endif
 
-
-
-static size_t zend_fiber_page_size()
+static size_t zend_fiber_get_page_size(void)
 {
-#if _POSIX_MAPPED_FILES
-	static size_t page_size;
+	static size_t page_size = 0;
 
 	if (!page_size) {
-		page_size = sysconf(_SC_PAGESIZE);
+		page_size = zend_get_page_size();
+		if (!page_size || (page_size & (page_size - 1))) {
+			/* anyway, we have to return a valid result */
+			page_size = ZEND_FIBER_DEFAULT_PAGE_SIZE;
+		}
 	}
 
 	return page_size;
-#else
-	return ZEND_FIBER_DEFAULT_PAGE_SIZE;
-#endif
 }
 
 static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 {
 	void *pointer;
-	const size_t page_size = zend_fiber_page_size();
+	const size_t page_size = zend_fiber_get_page_size();
 
 	ZEND_ASSERT(size >= page_size + ZEND_FIBER_GUARD_PAGES * page_size);
 
@@ -167,7 +165,7 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	VALGRIND_STACK_DEREGISTER(stack->valgrind);
 #endif
 
-	const size_t page_size = zend_fiber_page_size();
+	const size_t page_size = zend_fiber_get_page_size();
 
 	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
 
