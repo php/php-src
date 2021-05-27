@@ -1207,7 +1207,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 /* }}} */
 END_EXTERN_C()
 
-ZEND_API size_t zend_getpagesize(void)
+ZEND_API size_t zend_get_page_size(void)
 {
 #ifdef _WIN32
 	SYSTEM_INFO system_info;

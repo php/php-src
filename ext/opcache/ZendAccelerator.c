@@ -3171,7 +3171,7 @@ static zend_result accel_post_startup(void)
 		 && zend_jit_check_support() == SUCCESS) {
 			size_t page_size;
 
-			page_size = zend_getpagesize();
+			page_size = zend_get_page_size();
 			if (!page_size && (page_size & (page_size - 1))) {
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
 				abort();
