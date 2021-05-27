@@ -808,11 +808,11 @@ try_again:
 }
 /* }}} */
 
-ZEND_API void zend_incompatible_double_to_long_error(double d)
+ZEND_API void ZEND_COLD zend_incompatible_double_to_long_error(double d)
 {
 	zend_error_unchecked(E_DEPRECATED, "Implicit conversion from non-compatible float %.*H to int", -1, d);
 }
-ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s)
+ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string *s)
 {
 	zend_error(E_DEPRECATED, "Implicit conversion from non-compatible float-string \"%s\" to int", ZSTR_VAL(s));
 }
