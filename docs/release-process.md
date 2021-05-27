@@ -143,7 +143,7 @@ explained at the end of this document in
 
     Note: Remember to update the sha256 checksum information.
 
- 2. Skip this step for non stable releases after GA of minor or major versions
+ 2. Skip this step for non-stable releases after GA of minor or major versions
     (e.g. announce 7.4.0RC1, but not 7.4.1RC1):
 
     Add a short notice to web-php stating that there is a new release, and
@@ -433,7 +433,7 @@ branch:
  1. Email systems@php.net to get setup for access to downloads.php.net and to be added
     to the release-managers@ distribution list.
     
- 2. Request membership to the Release Managers group on github.
+ 2. Request membership to the Release Managers group on GitHub.
 
  3. Create a GPG key for your @php.net address and publish it by editing
     `include/gpg-keys.inc` in the `web-php` repository, adding the output of
