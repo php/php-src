@@ -64,11 +64,7 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 	unary_op_type unary_op = get_unary_op(opcode);
 
 	if (unary_op) {
-		if (opcode == ZEND_BW_NOT
-		 && Z_TYPE_P(op1) != IS_LONG
-		 && Z_TYPE_P(op1) != IS_DOUBLE
-		 && Z_TYPE_P(op1) != IS_STRING) {
-			/* produces "Unsupported operand types" exception */
+		if (zend_unary_op_produces_error(opcode, op1)) {
 			return FAILURE;
 		}
 		return unary_op(result, op1);

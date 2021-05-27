@@ -1163,5 +1163,6 @@ END_EXTERN_C()
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2);
+ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op);
 
 #endif /* ZEND_COMPILE_H */
