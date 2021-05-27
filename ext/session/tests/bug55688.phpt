@@ -9,7 +9,12 @@ session.save_handler=files
 <?php
 ini_set('session.save_handler', 'files');
 $x = new SessionHandler;
-$x->gc(1);
+
+try {
+    $x->gc(1);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: SessionHandler::gc(): Session is not active in %s on line %d
+--EXPECT--
+Session is not active

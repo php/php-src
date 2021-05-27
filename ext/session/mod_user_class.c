@@ -19,8 +19,8 @@
 
 #define PS_SANITY_CHECK						\
 	if (PS(session_status) != php_session_active) { \
-		php_error_docref(NULL, E_WARNING, "Session is not active"); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Session is not active"); \
+		RETURN_THROWS(); \
 	} \
 	if (PS(default_mod) == NULL) { \
 		zend_throw_error(NULL, "Cannot call default session handler"); \
