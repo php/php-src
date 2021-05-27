@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #81090 (Typed property performance degradation with .= operator).
     (Nikita)
 
+- OpenSSL:
+  . Fixed bug #76694 (native Windows cert verification uses CN as sever name).
+    (cmb)
+
 - Standard:
   . Fixed bug #81048 (phpinfo(INFO_VARIABLES) "Array to string conversion").
     (cmb)
