@@ -1189,7 +1189,6 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 }
 /* }}} */
 
-BEGIN_EXTERN_C()
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
 
@@ -1205,7 +1204,6 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 	LONGJMP(*EG(bailout), FAILURE);
 }
 /* }}} */
-END_EXTERN_C()
 
 ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ */
 {
@@ -1298,7 +1296,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 }
 /* }}} */
 
-BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(zend_long message, const void *data) /* {{{ */
 {
 	if (zend_message_dispatcher_p) {
@@ -1306,7 +1303,6 @@ ZEND_API void zend_message_dispatcher(zend_long message, const void *data) /* {{
 	}
 }
 /* }}} */
-END_EXTERN_C()
 
 ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 {
