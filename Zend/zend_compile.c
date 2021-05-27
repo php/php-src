@@ -8156,6 +8156,27 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+ZEND_API bool zend_is_op_long_compatible(zval *op)
+{
+	/* This is handled before */
+	ZEND_ASSERT(Z_TYPE_P(op) != IS_ARRAY);
+
+	if (Z_TYPE_P(op) == IS_DOUBLE
+		&& !zend_is_long_compatible(Z_DVAL_P(op), zend_dval_to_lval(Z_DVAL_P(op)))) {
+		return false;
+	}
+
+	if (Z_TYPE_P(op) == IS_STRING) {
+		double dval = 0;
+		zend_uchar is_num = is_numeric_str_function(Z_STR_P(op), NULL, &dval);
+		if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if ((opcode == ZEND_CONCAT || opcode == ZEND_FAST_CONCAT)) {
@@ -8210,13 +8231,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op
 	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
 	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
 			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR || opcode == ZEND_MOD) {
-		if (Z_TYPE_P(op1) == IS_DOUBLE || Z_TYPE_P(op2) == IS_DOUBLE) {
-			return true;
-		}
-		if ((Z_TYPE_P(op1) == IS_STRING && is_numeric_str_function(Z_STR_P(op1), NULL, NULL) != IS_LONG)
-			|| (Z_TYPE_P(op2) == IS_STRING && is_numeric_str_function(Z_STR_P(op2), NULL, NULL) != IS_LONG)) {
-			return true;
-		}
+		return (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2));
 	}
 
 	return 0;
@@ -8238,7 +8253,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || Z_TYPE_P(op) == IS_DOUBLE);
+		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || !zend_is_op_long_compatible(op));
 	}
 
 	return 0;

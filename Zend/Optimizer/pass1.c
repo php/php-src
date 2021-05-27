@@ -121,21 +121,8 @@ constant_binary_op:
 				 || opline->extended_value == ZEND_SR) {
 					zval *op2 = &ZEND_OP2_LITERAL(opline);
 					if (Z_TYPE_P(op2) != IS_LONG) {
-						/* Don't optimize if it should produce an incompatible float to int error */
-						// TODO There must be a better way
-						if (Z_TYPE_P(op2) == IS_DOUBLE
-							&& !zend_is_long_compatible(
-								Z_DVAL_P(op2), zend_dval_to_lval(Z_DVAL_P(op2)))) {
+						if (!zend_is_op_long_compatible(op2)) {
 							break;
-						}
-						/* don't optimize if it should produce a runtime numeric string error */
-						if (Z_TYPE_P(op2) == IS_STRING) {
-							double dval = 0;
-							zend_uchar is_num = is_numeric_string(Z_STRVAL_P(op2),
-								Z_STRLEN_P(op2), NULL, &dval, /* allow_errors */ false);
-							if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
-								break;
-							}
 						}
 						convert_to_long(op2);
 					}
