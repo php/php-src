@@ -42,7 +42,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return Phar|null */
     public function convertToExecutable(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
-    /** @return Phar|null */
+    /** @return PharData|null */
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /** @return bool */
@@ -229,14 +229,16 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function decompressFiles() {}
 
     /**
-     * @return Phar|null
+     * @return PharData|null
      * @implementation-alias Phar::compress
+     * @no-verify
      */
     public function compress(int $compression, ?string $extension = null) {}
 
     /**
-     * @return Phar|null
+     * @return PharData|null
      * @implementation-alias Phar::decompress
+     * @no-verify
      */
     public function decompress(?string $extension = null) {}
 
@@ -247,7 +249,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     public function convertToExecutable(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /**
-     * @return Phar|null
+     * @return PharData|null
      * @implementation-alias Phar::convertToData
      */
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null) {}
