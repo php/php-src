@@ -26,11 +26,11 @@ class MySession extends SessionHandler {
         echo "(#$this->num) finish called $id\n";
         $this->shutdown();
     }
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         echo "(#$this->num) writing $id = $data\n";
         return parent::write($id, $data);
     }
-    public function close() {
+    public function close(): bool {
         $id = session_id();
         echo "(#$this->num) closing $id\n";
         return parent::close();
