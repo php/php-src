@@ -1359,10 +1359,9 @@ PHP_METHOD(Phar, __destruct)
 struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
-	char *b;
+	zend_string *base;
 	zval *ret;
 	php_stream *fp;
-	uint32_t l;
 	int count;
 };
 
@@ -1371,12 +1370,12 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zval *value;
 	bool close_fp = 1;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	size_t str_key_len, base_len = p_obj->l;
+	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t fname_len;
 	size_t contents_len;
-	char *fname, *error = NULL, *base = p_obj->b, *save = NULL, *temp = NULL;
+	char *fname, *error = NULL, *base = ZSTR_VAL(p_obj->base), *save = NULL, *temp = NULL;
 	zend_string *opened;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
@@ -1686,14 +1685,13 @@ after_open_fp:
  */
 PHP_METHOD(Phar, buildFromDirectory)
 {
-	char *dir, *error;
-	size_t dir_len;
+	char *error;
 	bool apply_reg = 0;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
-	zend_string *regex = NULL;
+	zend_string *dir, *regex = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|S", &dir, &dir_len, &regex) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|S", &dir, &regex) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1705,23 +1703,18 @@ PHP_METHOD(Phar, buildFromDirectory)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(dir_len)) {
-		RETURN_FALSE;
-	}
-
 	if (SUCCESS != object_init_ex(&iter, spl_ce_RecursiveDirectoryIterator)) {
 		zval_ptr_dtor(&iter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	ZVAL_STRINGL(&arg, dir, dir_len);
+	ZVAL_STR(&arg, dir);
 	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
 	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
 		Z_OBJ(iter), NULL, &arg, &arg2);
 
-	zval_ptr_dtor(&arg);
 	if (EG(exception)) {
 		zval_ptr_dtor(&iter);
 		RETURN_THROWS();
@@ -1764,8 +1757,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	pass.c = apply_reg ? Z_OBJCE(regexiter) : Z_OBJCE(iteriter);
 	pass.p = phar_obj;
-	pass.b = dir;
-	pass.l = (uint32_t)dir_len;
+	pass.base = dir;
 	pass.count = 0;
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
@@ -1822,11 +1814,10 @@ PHP_METHOD(Phar, buildFromIterator)
 {
 	zval *obj;
 	char *error;
-	size_t base_len = 0;
-	char *base = NULL;
+	zend_string *base = ZSTR_EMPTY_ALLOC();
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &obj, zend_ce_traversable, &base, &base_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &obj, zend_ce_traversable, &base) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1838,10 +1829,6 @@ PHP_METHOD(Phar, buildFromIterator)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(base_len)) {
-		RETURN_FALSE;
-	}
-
 	if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
@@ -1851,8 +1838,7 @@ PHP_METHOD(Phar, buildFromIterator)
 
 	pass.c = Z_OBJCE_P(obj);
 	pass.p = phar_obj;
-	pass.b = base;
-	pass.l = (uint32_t)base_len;
+	pass.base = base;
 	pass.ret = return_value;
 	pass.count = 0;
 	pass.fp = php_stream_fopen_tmpfile();
