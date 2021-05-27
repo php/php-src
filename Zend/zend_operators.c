@@ -837,8 +837,6 @@ try_again:
 			if (UNEXPECTED(is_strict)) {
 				if (!zend_is_long_compatible(dval, lval)) {
 					zend_incompatible_double_to_long_error(dval);
-					// TODO Need to handle this here?
-					//if (UNEXPECTED(EG(exception))) {}
 				}
 			}
 			return lval;
@@ -863,8 +861,6 @@ try_again:
 					if (UNEXPECTED(is_strict)) {
 						if (!zend_is_long_compatible(dval, lval)) {
 							zend_incompatible_string_to_long_error(Z_STR_P(op));
-							// TODO Need to handle this here?
-							//if (UNEXPECTED(EG(exception))) {}
 						}
 					}
 					return lval;
@@ -1499,10 +1495,17 @@ try_again:
 		case IS_LONG:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
 			return SUCCESS;
-		case IS_DOUBLE:
-			// TODO Handle manually in case deprecation notice promoted to Exception?
-			ZVAL_LONG(result, ~zend_dval_to_lval_safe(Z_DVAL_P(op1)));
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op1));
+			if (!zend_is_long_compatible(Z_DVAL_P(op1), lval)) {
+				zend_incompatible_double_to_long_error(Z_DVAL_P(op1));
+				if (EG(exception)) {
+					return FAILURE;
+				}
+			}
+			ZVAL_LONG(result, ~lval);
 			return SUCCESS;
+		}
 		case IS_STRING: {
 			size_t i;
 
