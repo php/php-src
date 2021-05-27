@@ -33,7 +33,7 @@
 # include <valgrind/valgrind.h>
 #endif
 
-#ifndef PHP_WIN32
+#ifndef ZEND_WIN32
 # include <unistd.h>
 # include <sys/mman.h>
 # include <limits.h>
@@ -117,7 +117,7 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 	stack->size = (size + page_size - 1) / page_size * page_size;
 	const size_t msize = stack->size + ZEND_FIBER_GUARD_PAGES * page_size;
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	pointer = VirtualAlloc(0, msize, MEM_COMMIT, PAGE_READWRITE);
 
 	if (!pointer) {
@@ -171,7 +171,7 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 
 	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	VirtualFree(pointer, 0, MEM_RELEASE);
 #else
 	munmap(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
