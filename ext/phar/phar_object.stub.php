@@ -22,10 +22,10 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function addFromString(string $localName, string $contents): void {}
 
     /** @tentative-return-type */
-    public function buildFromDirectory(string $directory, string $pattern = ""): array|false {} // TODO Remove false?
+    public function buildFromDirectory(string $directory, string $pattern = ""): array {}
 
     /** @tentative-return-type */
-    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null): array|false {} // TODO Remove false?
+    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null): array {}
 
     /** @tentative-return-type */
     public function compressFiles(int $compression): void {}
@@ -211,13 +211,13 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::buildFromDirectory
      */
-    public function buildFromDirectory(string $directory, string $pattern = ""): array|false {}
+    public function buildFromDirectory(string $directory, string $pattern = ""): array {}
 
     /**
      * @tentative-return-type
      * @implementation-alias Phar::buildFromIterator
      */
-    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null): array|false {}
+    public function buildFromIterator(Traversable $iterator, ?string $baseDirectory = null): array {}
 
     /**
      * @tentative-return-type
