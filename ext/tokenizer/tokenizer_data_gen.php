@@ -1,7 +1,7 @@
 <?php
 
 $rootDir = __DIR__ . '/../..';
-$infile = $rootDir . '/Zend/zend_language_parser.h';
+$infile = $rootDir . '/Zend/zend_language_parser.y';
 $outfile = $rootDir . '/ext/tokenizer/tokenizer_data.c';
 
 if (!file_exists($infile)) {
@@ -49,7 +49,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 CODE;
 
 $incontent = file_get_contents($infile);
-preg_match_all('(^    (?<token_name>T_.*?)\b)m', $incontent, $matches);
+preg_match_all('(^%token.*\b(?<token_name>T_.*?)\b)m', $incontent, $matches);
 
 foreach ($matches['token_name'] as $tokenName) {
     if ($tokenName === 'T_NOELSE' || $tokenName === 'T_ERROR') {
