@@ -80,7 +80,7 @@ interface SessionHandlerInterface
     /** @return bool */
     public function destroy(string $id);
 
-    /** @return int|bool */
+    /** @return int|false */
     public function gc(int $max_lifetime);
 }
 
@@ -116,7 +116,7 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     /** @return bool */
     public function destroy(string $id) {}
 
-    /** @return int|bool */
+    /** @return int|false */
     public function gc(int $max_lifetime) {}
 
     /** @return string */
