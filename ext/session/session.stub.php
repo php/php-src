@@ -86,7 +86,7 @@ interface SessionHandlerInterface
 
 interface SessionIdInterface
 {
-    /** @return string|false */
+    /** @return string */
     public function create_sid();
 }
 
@@ -119,6 +119,6 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
     /** @return int|false */
     public function gc(int $max_lifetime) {}
 
-    /** @return string|false */
+    /** @return string */
     public function create_sid() {}
 }

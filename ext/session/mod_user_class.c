@@ -27,6 +27,16 @@
 		RETURN_THROWS(); \
 	}
 
+#define PS_SANITY_CHECK_THROW				\
+	if (PS(session_status) != php_session_active) { \
+		zend_throw_error(NULL, "Session is not active"); \
+		RETURN_THROWS(); \
+	} \
+	if (PS(default_mod) == NULL) { \
+		zend_throw_error(NULL, "Cannot call default session handler"); \
+		RETURN_THROWS(); \
+	}
+
 #define PS_SANITY_CHECK_IS_OPEN				\
 	PS_SANITY_CHECK; \
 	if (!PS(mod_user_is_open)) {			\
@@ -162,7 +172,7 @@ PHP_METHOD(SessionHandler, create_sid)
 	    RETURN_THROWS();
 	}
 
-	PS_SANITY_CHECK;
+	PS_SANITY_CHECK_THROW;
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
 
