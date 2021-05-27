@@ -2116,6 +2116,7 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval z_copy;
 
+	ZVAL_DEREF(zptr);
 	binary_op(&z_copy, zptr, value);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(zptr);
@@ -2198,6 +2199,7 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(&tmp, var_ptr);
 
 	increment_function(var_ptr);
@@ -2220,6 +2222,7 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(&tmp, var_ptr);
 
 	decrement_function(var_ptr);
@@ -2246,6 +2249,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_typed_prop(zval *var_ptr, zend_proper
 		result = &tmp;
 	}
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(result, var_ptr);
 
 	increment_function(var_ptr);
@@ -2276,6 +2280,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_typed_prop(zval *var_ptr, zend_proper
 		result = &tmp;
 	}
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(result, var_ptr);
 
 	decrement_function(var_ptr);
@@ -2301,6 +2306,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_prope
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(result, var_ptr);
 
 	increment_function(var_ptr);
@@ -2321,6 +2327,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_prope
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 
+	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY(result, var_ptr);
 
 	decrement_function(var_ptr);
