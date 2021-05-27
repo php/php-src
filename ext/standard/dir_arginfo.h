@@ -1,12 +1,13 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1fd5cc5147c7272006e59d63d68c12caec84589f */
+ * Stub hash: e3d46788bb18dc90a0922e5738442b2932dd53f6 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Directory_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Directory_rewind arginfo_class_Directory_close
 
-#define arginfo_class_Directory_read arginfo_class_Directory_close
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Directory_read, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 
 ZEND_FUNCTION(closedir);

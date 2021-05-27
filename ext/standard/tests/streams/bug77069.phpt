@@ -5,7 +5,7 @@ Bug #77069 (stream filter loses final block of data)
 class MyFilter extends php_user_filter {
     private $data = '';
 
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing): int {
         $return = PSFS_FEED_ME;
 
         // While input data is available, continue to read it.
