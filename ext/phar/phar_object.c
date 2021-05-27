@@ -1686,13 +1686,14 @@ after_open_fp:
  */
 PHP_METHOD(Phar, buildFromDirectory)
 {
-	char *dir, *error, *regex = NULL;
-	size_t dir_len, regex_len = 0;
+	char *dir, *error;
+	size_t dir_len;
 	bool apply_reg = 0;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
+	zend_string *regex = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s", &dir, &dir_len, &regex, &regex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|S", &dir, &dir_len, &regex) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1744,7 +1745,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	zval_ptr_dtor(&iter);
 
-	if (regex_len > 0) {
+	if (regex && ZSTR_LEN(regex) > 0) {
 		apply_reg = 1;
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
@@ -1754,11 +1755,9 @@ PHP_METHOD(Phar, buildFromDirectory)
 			RETURN_THROWS();
 		}
 
-		ZVAL_STRINGL(&arg2, regex, regex_len);
-
+		ZVAL_STR(&arg2, regex);
 		zend_call_known_instance_method_with_2_params(spl_ce_RegexIterator->constructor,
 			Z_OBJ(regexiter), NULL, &iteriter, &arg2);
-		zval_ptr_dtor(&arg2);
 	}
 
 	array_init(return_value);
