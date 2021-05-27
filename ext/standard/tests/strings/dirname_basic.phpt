@@ -145,5 +145,5 @@ string\(1\) "(\\|\/)"
 string\(1\) "."
 
 --Iteration 29 --
-string\(8\) "(\\|\/)foo\x00bar"
+string\(8\) "(\\|\/)foo\\0bar"
 Done

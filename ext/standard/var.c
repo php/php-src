@@ -36,13 +36,28 @@ struct php_serialize_data {
 
 #define COMMON (is_ref ? "&" : "")
 
+static void php_print_escaped(zend_string *str) {
+	/* Escape null bytes in strings.
+	 * This does not use php_addcslashes(), because that function formats null bytes as \000. */
+	const char *p = ZSTR_VAL(str);
+	const char *e = p + ZSTR_LEN(str);
+	while (p < e) {
+		const char *p2 = p;
+		while (p2 < e && *p2 != '\0') p2++;
+		if (p != p2) PHPWRITE(p, p2 - p);
+		if (p2 == e) break;
+		PHPWRITE("\\0", 2);
+		p = p2 + 1;
+	}
+}
+
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
-		PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
+		php_print_escaped(key);
 		php_printf("\"]=>\n");
 	}
 	php_var_dump(zv, level + 2);
@@ -67,7 +82,7 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 			}
 		} else {
 			php_printf("\"");
-			PHPWRITE(ZSTR_VAL(key), ZSTR_LEN(key));
+			php_print_escaped(key);
 			php_printf("\"");
 		}
 		ZEND_PUTS("]=>\n");
@@ -118,7 +133,7 @@ again:
 			break;
 		case IS_STRING:
 			php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
-			PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
+			php_print_escaped(Z_STR_P(struc));
 			PUTS("\"\n");
 			break;
 		case IS_ARRAY:

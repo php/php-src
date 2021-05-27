@@ -10,13 +10,13 @@ var_dump(
     unpack("A4", "foo\0\rbar\0 \t\r\n")
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "foo  "
 string(4) "fooo"
 string(4) "foo "
 array(1) {
   [1]=>
-  string(8) "foo%c%cbar"
+  string(8) "foo\0bar"
 }
 array(1) {
   [1]=>

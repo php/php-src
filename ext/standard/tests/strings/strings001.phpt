@@ -6,6 +6,6 @@ $s = "alabala nica".chr(0)."turska panica";
 var_dump(strstr($s, "nic"));
 var_dump(strrchr($s," nic"));
 ?>
---EXPECTREGEX--
-string\(18\) \"nica\x00turska panica\"
-string\(7\) \" panica\"
+--EXPECT--
+string(18) "nica\0turska panica"
+string(7) " panica"

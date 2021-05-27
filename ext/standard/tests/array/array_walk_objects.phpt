@@ -32,14 +32,14 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 string(3) "foo"
 string(3) "bar"
 string(3) "bar"
-string(13) "%r\0%rtest%r\0%rvar_pri"
+string(13) "\0test\0var_pri"
 string(12) "test_private"
-string(10) "%r\0%r*%r\0%rvar_pro"
+string(10) "\0*\0var_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"

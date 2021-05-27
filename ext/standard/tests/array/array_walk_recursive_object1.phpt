@@ -34,9 +34,9 @@ var_dump( array_walk_recursive($input, "callback", 1));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : object functionality ***
-string(18) "%r\0%rMyClass%r\0%rpri_value"
+string(18) "\0MyClass\0pri_value"
 int(10)
 int(1)
 
@@ -44,7 +44,7 @@ string(9) "pub_value"
 int(10)
 int(1)
 
-string(12) "%r\0%r*%r\0%rpro_value"
+string(12) "\0*\0pro_value"
 int(10)
 int(1)
 

@@ -10,16 +10,16 @@ var_dump(unpack("a*", "str\0\0"));
 --EXPECTF--
 array(1) {
   [1]=>
-  string(4) "str%c"
+  string(4) "str\0"
 }
 array(1) {
   [1]=>
-  string(5) "str%c%c"
+  string(5) "str\0\0"
 }
 
 Warning: unpack(): Type a: not enough input, need 6, have 5 in %s on line %d
 bool(false)
 array(1) {
   [1]=>
-  string(5) "str%c%c"
+  string(5) "str\0\0"
 }

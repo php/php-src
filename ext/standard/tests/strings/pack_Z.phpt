@@ -20,10 +20,10 @@ var_dump(
 --EXPECTF--
 Warning: unpack(): Type Z: not enough input, need 2, have 1 in %s on line %d
 string(0) ""
-string(5) "foo%c%c"
-string(4) "foo%c"
-string(4) "foo%c"
-string(4) "foo%c"
+string(5) "foo\0\0"
+string(4) "foo\0"
+string(4) "foo\0"
+string(4) "foo\0"
 array(1) {
   [1]=>
   string(3) "foo"

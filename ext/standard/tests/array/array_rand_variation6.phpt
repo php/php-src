@@ -65,34 +65,34 @@ echo "Done";
 \*\*\* Testing array_rand\(\) : with keys of input array as heredoc strings \*\*\*
 
 -- with default parameters --
-string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
 
 -- with num_req = 1 --
-string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
 
 -- with num_req = 3 --
 array\(3\) {
   \[0\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[1\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[2\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
 }
 
 -- with num_req = 6 --
 array\(6\) {
   \[0\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[1\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[2\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[3\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[4\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
   \[5\]=>
-  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \\0 0-9  ]*"
 }
 Done
