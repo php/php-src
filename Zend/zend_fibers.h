@@ -92,9 +92,16 @@ static const zend_uchar ZEND_FIBER_STATUS_BAILOUT   = 0x20;
 
 static const zend_uchar ZEND_FIBER_STATUS_FINISHED  = 0x2c;
 
+/* These functions create and manipulate a Fiber object, allowing any internal function to start, resume, or suspend a fiber. */
+ZEND_API zend_fiber *zend_fiber_create(const zend_fcall_info *fci, const zend_fcall_info_cache *fci_cache);
+ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_count, zend_array *named_params, zval *return_value);
+ZEND_API void zend_fiber_suspend(zval *value, zval *return_value);
+ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value);
+ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value);
+
+/* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
 ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
 
