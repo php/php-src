@@ -877,6 +877,10 @@ static void ZEND_COLD emit_incompatible_method_error(
 			zend_error_at(E_DEPRECATED, NULL, func_lineno(child),
 				"Declaration of %s should be compatible with %s",
 				ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
+			if (EG(exception)) {
+				zend_exception_uncaught_error(
+					"During inheritance of %s", ZSTR_VAL(parent_scope->name));
+			}
 		}
 	} else {
 		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
@@ -2454,14 +2458,8 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	 || ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
 	  && CG(unlinked_uses)
 	  && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce) == SUCCESS)) {
-		zend_string *exception_str;
-		zval exception_zv;
-		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
-		ZVAL_OBJ_COPY(&exception_zv, EG(exception));
-		zend_clear_exception();
-		exception_str = zval_get_string(&exception_zv);
-		zend_error_noreturn(E_ERROR,
-			"During inheritance of %s with variance dependencies: Uncaught %s", ZSTR_VAL(ce->name), ZSTR_VAL(exception_str));
+		zend_exception_uncaught_error(
+			"During inheritance of %s with variance dependencies", ZSTR_VAL(ce->name));
 	}
 }
 

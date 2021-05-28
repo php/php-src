@@ -968,6 +968,22 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 }
 /* }}} */
 
+ZEND_NORETURN void zend_exception_uncaught_error(const char *format, ...) {
+	va_list va;
+	va_start(va, format);
+	zend_string *prefix = zend_vstrpprintf(0, format, va);
+	va_end(va);
+
+	ZEND_ASSERT(EG(exception));
+	zval exception_zv;
+	ZVAL_OBJ_COPY(&exception_zv, EG(exception));
+	zend_clear_exception();
+
+	zend_string *exception_str = zval_get_string(&exception_zv);
+	zend_error_noreturn(E_ERROR,
+		"%s: Uncaught %s", ZSTR_VAL(prefix), ZSTR_VAL(exception_str));
+}
+
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
 	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
