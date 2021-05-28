@@ -25,6 +25,15 @@
 
 BEGIN_EXTERN_C()
 
+#define ZEND_FIBER_C_STACK_ALIGNMENT (4 * 1024)
+#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (ZEND_FIBER_C_STACK_ALIGNMENT * (sizeof(void *) * 64))
+#define ZEND_FIBER_MIN_C_STACK_SIZE (128 * 1024)
+#define ZEND_FIBER_MAX_C_STACK_SIZE (16 * 1024 * 1024)
+
+#define ZEND_FIBER_DEFAULT_VM_STACK_SIZE (sizeof(zval) * 1024)
+
+#define ZEND_FIBER_GUARD_PAGES 1
+
 void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
 
@@ -104,12 +113,6 @@ ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fib
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
-
-#define ZEND_FIBER_GUARD_PAGES 1
-
-#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
-
-#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
 
 END_EXTERN_C()
 

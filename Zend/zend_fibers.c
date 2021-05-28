@@ -76,8 +76,6 @@ typedef struct _transfer_t {
 extern fcontext_t make_fcontext(void *sp, size_t size, void (*fn)(transfer_t));
 extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 
-#define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
-
 #define ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, trace_num, bailout) do { \
 	stack = EG(vm_stack); \
 	stack->top = EG(vm_stack_top); \
@@ -108,7 +106,7 @@ static size_t zend_fiber_get_page_size(void)
 		page_size = zend_get_page_size();
 		if (!page_size || (page_size & (page_size - 1))) {
 			/* anyway, we have to return a valid result */
-			page_size = ZEND_FIBER_DEFAULT_PAGE_SIZE;
+			page_size = ZEND_FIBER_C_STACK_ALIGNMENT;
 		}
 	}
 
@@ -352,11 +350,11 @@ static void ZEND_STACK_ALIGNED zend_fiber_execute(zend_fiber_context *context)
 	EG(vm_stack) = NULL;
 
 	zend_first_try {
-		zend_vm_stack stack = zend_fiber_vm_stack_alloc(ZEND_FIBER_VM_STACK_SIZE);
+		zend_vm_stack stack = zend_fiber_vm_stack_alloc(ZEND_FIBER_DEFAULT_VM_STACK_SIZE);
 		EG(vm_stack) = stack;
 		EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
 		EG(vm_stack_end) = stack->end;
-		EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
+		EG(vm_stack_page_size) = ZEND_FIBER_DEFAULT_VM_STACK_SIZE;
 
 		fiber->execute_data = (zend_execute_data *) stack->top;
 		fiber->stack_bottom = fiber->execute_data;

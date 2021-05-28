@@ -177,11 +177,25 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
+	zend_long size;
+
 	if (new_value) {
-		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		size = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		if (size == 0) {
+			size = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
+		} else if (size < ZEND_FIBER_MIN_C_STACK_SIZE) {
+			size = ZEND_FIBER_MIN_C_STACK_SIZE;
+		} else if (size > ZEND_FIBER_MAX_C_STACK_SIZE) {
+			size = ZEND_FIBER_MAX_C_STACK_SIZE;
+		} else {
+			size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_FIBER_C_STACK_ALIGNMENT);
+		}
 	} else {
-		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
+		size = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
+
+	EG(fiber_stack_size) = size;
+
 	return SUCCESS;
 }
 /* }}} */
