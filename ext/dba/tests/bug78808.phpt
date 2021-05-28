@@ -2,7 +2,6 @@
 Bug #78808 ([LMDB] MDB_MAP_FULL: Environment mapsize limit reached)
 --SKIPIF--
 <?php
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 $handler = 'lmdb';
 require_once __DIR__ .'/skipif.inc';
 ?>
