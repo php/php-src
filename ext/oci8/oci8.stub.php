@@ -250,7 +250,7 @@ function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, i
 function ocifetchstatement($statement, &$output, int $offset = 0, int $limit = -1, int $flags = 0): int {}
 
 /** @param resource $statement */
-function oci_fetch_object($statement, int $mode = PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS): stdClass|false {}
+function oci_fetch_object($statement, int $mode = OCI_ASSOC|OCI_RETURN_NULLS): stdClass|false {}
 
 /** @param resource $statement */
 function oci_fetch_row($statement): array|false {}
@@ -259,7 +259,7 @@ function oci_fetch_row($statement): array|false {}
 function oci_fetch_assoc($statement): array|false {}
 
 /** @param resource $statement */
-function oci_fetch_array($statement, int $mode = PHP_OCI_BOTH | PHP_OCI_RETURN_NULLS): array|false {}
+function oci_fetch_array($statement, int $mode = OCI_BOTH|OCI_RETURN_NULLS): array|false {}
 
 /** @param resource $statement */
 function oci_free_statement($statement): bool {}
