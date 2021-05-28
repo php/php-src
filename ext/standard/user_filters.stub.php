@@ -11,13 +11,13 @@ class php_user_filter
      * @param resource $in
      * @param resource $out
      * @param int $consumed
-     * @return int
+     * @tentative-return-type
      */
-    public function filter($in, $out, &$consumed, bool $closing) {}
+    public function filter($in, $out, &$consumed, bool $closing): int {}
 
-    /** @return bool */
-    public function onCreate() {}
+    /** @tentative-return-type */
+    public function onCreate(): bool {}
 
-    /** @return void */
-    public function onClose() {}
+    /** @tentative-return-type */
+    public function onClose(): void {}
 }

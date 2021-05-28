@@ -1,17 +1,18 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 849ca9dc7aa120c1162f75aa43d85049276486a6 */
+ * Stub hash: 13972748dca10a1c291f952b4c24ca73441ba880 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_filter, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
 	ZEND_ARG_INFO(0, out)
 	ZEND_ARG_INFO(1, consumed)
 	ZEND_ARG_TYPE_INFO(0, closing, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_onCreate, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_onCreate, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_php_user_filter_onClose arginfo_class_php_user_filter_onCreate
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_onClose, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(php_user_filter, filter);
