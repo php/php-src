@@ -48,7 +48,7 @@ ob_end_flush();
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
-2 deleted
+1 deleted
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
