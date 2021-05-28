@@ -2,9 +2,9 @@
 
 /** @generate-class-entries */
 
-function snmpget(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+function snmpget(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-function snmpgetnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+function snmpgetnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
 function snmpwalk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
@@ -26,9 +26,9 @@ function snmp_set_oid_output_format(int $format): bool {}
 /** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $format): bool {}
 
-function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-function snmp2_getnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+function snmp2_getnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
 function snmp2_walk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
@@ -40,13 +40,13 @@ function snmp3_get(
     string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
-    array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+    array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
 function snmp3_getnext(
     string $hostname, string $security_name, string $security_level,
     string $auth_protocol, string $auth_passphrase,
     string $privacy_protocol, string $privacy_passphrase,
-    array|string $object_id, int $timeout = -1, int $retries = -1): stdClass|array|string|bool {}
+    array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
 function snmp3_walk(
     string $hostname, string $security_name, string $security_level,
@@ -97,10 +97,10 @@ class SNMP
         string $contextName = "", string $contextEngineId = ""): bool {}
 
     /** @tentative-return-type */
-    public function get(array|string $objectId, bool $preserveKeys = false): array|string|false {}
+    public function get(array|string $objectId, bool $preserveKeys = false): mixed {}
 
     /** @tentative-return-type */
-    public function getnext(array|string $objectId): array|string|false {}
+    public function getnext(array|string $objectId): mixed {}
 
     /** @tentative-return-type */
     public function walk(array|string $objectId, bool $suffixAsKey = false, int $maxRepetitions = -1, int $nonRepeaters = -1): array|false {}
