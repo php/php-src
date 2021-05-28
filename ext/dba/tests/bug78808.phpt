@@ -10,9 +10,10 @@ require_once __DIR__ .'/skipif.inc';
 <?php
 $handler = 'lmdb';
 require_once __DIR__ .'/test.inc';
+$value = str_repeat('*', 0x10000);
 $lmdb_h = dba_open($db_filename, 'c', 'lmdb', 0644, 5*1048576);
-for ($i = 0; $i < 50000; $i++) {
-    dba_insert('key' . $i, 'value '. $i, $lmdb_h);
+for ($i = 0; $i < 50; $i++) {
+    dba_insert('key' . $i, $value, $lmdb_h);
 }
 dba_close($lmdb_h);
 echo "done\n";
