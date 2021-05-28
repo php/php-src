@@ -21,7 +21,7 @@ class MySession7_Foo {
 
 class MySession7 extends SessionHandler {
     public $foo;
-    public function close() {
+    public function close(): bool {
         var_dump($this->foo);
         @var_dump($GLOBALS['bar']);
         return parent::close();

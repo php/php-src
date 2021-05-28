@@ -29,7 +29,7 @@ function write($id, $session_data) {
     undefined_function();
 }
 
-function destroy($id) {
+function destroy($id): bool {
     return true;
 }
 
