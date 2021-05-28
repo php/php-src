@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e3443a72d951a32015cf1324f5234dc7c50fb2fa */
+ * Stub hash: caa419a313bfcbf14e179e6f9fc2270b432175b0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -223,7 +223,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_oci_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, statement)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_OCI_ASSOC | PHP_OCI_RETURN_NULLS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "OCI_ASSOC | OCI_RETURN_NULLS")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_fetch_row, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -234,7 +234,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_oci_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, statement)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_OCI_BOTH | PHP_OCI_RETURN_NULLS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "OCI_BOTH | OCI_RETURN_NULLS")
 ZEND_END_ARG_INFO()
 
 #define arginfo_oci_free_statement arginfo_oci_cancel
