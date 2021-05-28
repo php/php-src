@@ -37,6 +37,22 @@
 # include <unistd.h>
 # include <sys/mman.h>
 # include <limits.h>
+
+# if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+#  define MAP_ANONYMOUS MAP_ANON
+# endif
+
+/* FreeBSD require a first (i.e. addr) argument of mmap(2) is not NULL
+ * if MAP_STACK is passed.
+ * http://www.FreeBSD.org/cgi/query-pr.cgi?pr=158755 */
+# if !defined(MAP_STACK) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#  undef MAP_STACK
+#  define MAP_STACK 0
+# endif
+
+# ifndef MAP_FAILED
+#  define MAP_FAILED ((void * ) -1)
+# endif
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
@@ -84,12 +100,6 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 	EG(bailout) = bailout; \
 } while (0)
 
-#if defined(MAP_STACK) && !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
-# define ZEND_FIBER_STACK_FLAGS (MAP_PRIVATE | MAP_ANON | MAP_STACK)
-#else
-# define ZEND_FIBER_STACK_FLAGS (MAP_PRIVATE | MAP_ANON)
-#endif
-
 static size_t zend_fiber_get_page_size(void)
 {
 	static size_t page_size = 0;
@@ -119,6 +129,10 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 	pointer = VirtualAlloc(0, msize, MEM_COMMIT, PAGE_READWRITE);
 
 	if (!pointer) {
+		DWORD err = GetLastError();
+		char *errmsg = php_win32_error_to_msg(err);
+		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: VirtualAlloc failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
+		php_win32_error_msg_free(errmsg);
 		return false;
 	}
 
@@ -126,19 +140,25 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 	DWORD protect;
 
 	if (!VirtualProtect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PAGE_READWRITE | PAGE_GUARD, &protect)) {
+		DWORD err = GetLastError();
+		char *errmsg = php_win32_error_to_msg(err);
+		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
+		php_win32_error_msg_free(errmsg);
 		VirtualFree(pointer, 0, MEM_RELEASE);
 		return false;
 	}
 # endif
 #else
-	pointer = mmap(NULL, msize, PROT_READ | PROT_WRITE, ZEND_FIBER_STACK_FLAGS, -1, 0);
+	pointer = mmap(NULL, msize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
 
 	if (pointer == MAP_FAILED) {
+		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: mmap failed: %s (%d)", strerror(errno), errno);
 		return false;
 	}
 
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
+		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: mmap failed: %s (%d)", strerror(errno), errno);
 		munmap(pointer, msize);
 		return false;
 	}
@@ -211,12 +231,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_co
 	void *stack = (void *) ((uintptr_t) context->stack.pointer + context->stack.size);
 
 	context->self = make_fcontext(stack, context->stack.size, zend_fiber_trampoline);
-
-	if (UNEXPECTED(!context->self)) {
-		zend_fiber_stack_free(&context->stack);
-		return false;
-	}
-
+	ZEND_ASSERT(context->self != NULL && "make_fcontext() never returns NULL");
 	context->function = coroutine;
 	context->caller = NULL;
 
@@ -479,7 +494,6 @@ ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_c
 	fiber->fci.named_params = named_params;
 
 	if (!zend_fiber_init_context(&fiber->context, zend_fiber_execute, EG(fiber_stack_size))) {
-		zend_throw_exception(NULL, "Could not create fiber context", 0);
 		RETURN_THROWS();
 	}
 
