@@ -2627,6 +2627,7 @@ COMMAND $cmd
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
+            $wanted_re = str_replace('%0', '\x00', $wanted_re);
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
