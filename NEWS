@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #81068 (Double free in realpath_cache_clean()). (Dimitry Andric)
   . Fixed bug #76359 (open_basedir bypass through adding ".."). (cmb)
 
+- OCI8:
+  . Fixed bug #81088 (error in regression test for oci_fetch_object() and
+    oci_fetch_array()). (Máté)
+
 - Opcache:
   . Fixed bug #81051 (Broken property type handling after incrementing
     reference). (Dmitry)
@@ -61,7 +65,7 @@ PHP                                                                        NEWS
     (Nikita)
 
 - PDO_MySQL:
-  . Fixed bug #81037 (PDO discards error message text from prepared 
+  . Fixed bug #81037 (PDO discards error message text from prepared
     statement). (Kamil Tekiela)
 
 - PDO_ODBC:
