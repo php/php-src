@@ -10541,7 +10541,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 				zval retval;
 
 				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				// TODO Should this use zval_get_long_ex(&retval, /* is_strict */ false);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -17796,7 +17795,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 				zval retval;
 
 				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				// TODO Should this use zval_get_long_ex(&retval, /* is_strict */ false);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -47559,7 +47557,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 				zval retval;
 
 				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				// TODO Should this use zval_get_long_ex(&retval, /* is_strict */ false);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;

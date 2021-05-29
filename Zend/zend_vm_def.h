@@ -9041,7 +9041,6 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 				zval retval;
 
 				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				// TODO Should this use zval_get_long_ex(&retval, /* is_strict */ false);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
