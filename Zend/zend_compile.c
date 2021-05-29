@@ -8158,8 +8158,9 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 
 ZEND_API bool zend_is_op_long_compatible(zval *op)
 {
-	/* This is handled before */
-	ZEND_ASSERT(Z_TYPE_P(op) != IS_ARRAY);
+	if (Z_TYPE_P(op) == IS_ARRAY) {
+		return false;
+	}
 
 	if (Z_TYPE_P(op) == IS_DOUBLE
 		&& !zend_is_long_compatible(Z_DVAL_P(op), zend_dval_to_lval(Z_DVAL_P(op)))) {
@@ -8253,7 +8254,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return (Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY || !zend_is_op_long_compatible(op));
+		return (Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op));
 	}
 
 	return 0;
