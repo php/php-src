@@ -4,7 +4,6 @@ void openssl_free_key ( resource $key_identifier );
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (!extension_loaded("openssl"))
     die("skip");
 if (!@openssl_pkey_new())
