@@ -8232,7 +8232,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op
 	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
 	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
 			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR || opcode == ZEND_MOD) {
-		return (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2));
+		return !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2);
 	}
 
 	return 0;
@@ -8254,7 +8254,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return (Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op));
+		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 
 	return 0;
