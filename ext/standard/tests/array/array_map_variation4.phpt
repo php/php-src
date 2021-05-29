@@ -53,7 +53,7 @@ $arrays = array (
 
        // array with mixed values
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-              $fp => 'resource', 133 => "int", 444.432 => "float",
+              $fp => 'resource', 133 => "int",
               @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -73,8 +73,6 @@ echo "Done";
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 444.432 to int in %s on line %d
 -- Iteration 1 --
 array(0) {
 }
@@ -137,7 +135,7 @@ array(2) {
   string(8) "resource"
 }
 -- Iteration 9 --
-array(7) {
+array(6) {
   ["hello"]=>
   int(1)
   ["fruit"]=>
@@ -146,8 +144,6 @@ array(7) {
   string(8) "resource"
   [133]=>
   string(3) "int"
-  [444]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>

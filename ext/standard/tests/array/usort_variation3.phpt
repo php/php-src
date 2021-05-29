@@ -37,7 +37,7 @@ EOT3;
 $array_arg = array(
   // numeric keys
   -2 => 9,
-  8.9 => 8,
+  8 => 8,
   012 => 7,
   0x34 => 6,
 
@@ -69,10 +69,8 @@ var_dump( usort($array_arg, 'cmp_function') );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
-
-Deprecated: Implicit conversion from non-compatible float 8.9 to int in %s on line %d
 bool(true)
 
 -- Sorted array after usort() function call --

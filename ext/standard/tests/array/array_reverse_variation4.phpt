@@ -48,7 +48,7 @@ $arrays = array (
        array(@$unset_var => "hello", $fp => 'resource'),
 
        // array with mixed values
-/*11*/ array('hello' => 1, "fruit" => 2.2, $fp => 'resource', 133 => "int", 444.432 => "float", @$unset_var => "unset", $heredoc => "heredoc")
+/*11*/ array('hello' => 1, "fruit" => 2.2, $fp => 'resource', 133 => "int", @$unset_var => "unset", $heredoc => "heredoc")
 );
 
 // loop through the various elements of $arrays to test array_reverse()
@@ -77,8 +77,6 @@ echo "Done";
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float 444.432 to int in %s on line %d
 -- Iteration 1 --
 - default argument -
 array(0) {
@@ -275,16 +273,14 @@ array(2) {
 }
 -- Iteration 9 --
 - default argument -
-array(7) {
+array(6) {
   ["Hello world"]=>
   string(7) "heredoc"
   [""]=>
   string(5) "unset"
   [0]=>
-  string(5) "float"
-  [1]=>
   string(3) "int"
-  [2]=>
+  [1]=>
   string(8) "resource"
   ["fruit"]=>
   float(2.2)
@@ -292,13 +288,11 @@ array(7) {
   int(1)
 }
 - $preserve keys = true -
-array(7) {
+array(6) {
   ["Hello world"]=>
   string(7) "heredoc"
   [""]=>
   string(5) "unset"
-  [444]=>
-  string(5) "float"
   [133]=>
   string(3) "int"
   [5]=>
@@ -309,16 +303,14 @@ array(7) {
   int(1)
 }
 - $preserve_keys = false -
-array(7) {
+array(6) {
   ["Hello world"]=>
   string(7) "heredoc"
   [""]=>
   string(5) "unset"
   [0]=>
-  string(5) "float"
-  [1]=>
   string(3) "int"
-  [2]=>
+  [1]=>
   string(8) "resource"
   ["fruit"]=>
   float(2.2)
