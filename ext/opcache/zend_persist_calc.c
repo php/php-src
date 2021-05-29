@@ -246,7 +246,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		uint32_t num_args = op_array->num_args;
 		uint32_t i;
 
-		num_args = op_array->num_args;
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
