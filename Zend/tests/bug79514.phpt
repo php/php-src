@@ -1,5 +1,9 @@
 --TEST--
 Bug #79514 (Memory leaks while including unexistent file)
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 $mem1 = memory_get_usage(true);
