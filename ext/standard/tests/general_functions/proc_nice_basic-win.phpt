@@ -13,7 +13,7 @@ if (PHP_SAPI != 'cli') {
 }
 
 if (getenv('SKIP_SLOW_TESTS')) {
-	doe('skip: Slow test');
+	die('skip: Slow test');
 }
 ?>
 --FILE--
