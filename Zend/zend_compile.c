@@ -9258,9 +9258,8 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 {
-	zend_ast *class_ast = ast->child[0];
-	zend_ast *const_ast = ast->child[1];
-
+	zend_ast *class_ast;
+	zend_ast *const_ast;
 	znode class_node, const_node;
 	zend_op *opline;
 
