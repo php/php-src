@@ -78,7 +78,7 @@ class IntlDateFormatter
      * @tentative-return-type
      * @alias datefmt_set_timezone
      */
-    public function setTimeZone($timezone): ?bool {}
+    public function setTimeZone($timezone): ?bool {} // TODO return true on success
 
     /**
      * @tentative-return-type

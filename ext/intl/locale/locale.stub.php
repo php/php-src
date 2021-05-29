@@ -11,10 +11,10 @@ class Locale
     public static function getDefault(): string {}
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias locale_set_default
      */
-    public static function setDefault(string $locale): bool {}
+    public static function setDefault(string $locale) {} // TODO make return type void
 
     /**
      * @tentative-return-type

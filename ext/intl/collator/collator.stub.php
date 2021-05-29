@@ -55,10 +55,10 @@ class Collator
     public function getStrength(): int {}
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias collator_set_strength
      */
-    public function setStrength(int $strength): bool {}
+    public function setStrength(int $strength) {} // TODO make return type void
 
     /**
      * @tentative-return-type

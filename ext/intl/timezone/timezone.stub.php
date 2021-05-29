@@ -90,7 +90,7 @@ class IntlTimeZone
      * @tentative-return-type
      * @alias intltz_get_id
      */
-    public function getID():  string|false {}
+    public function getID(): string|false {}
 
     /**
      * @param int $rawOffset

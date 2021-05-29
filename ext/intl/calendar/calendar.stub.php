@@ -44,10 +44,10 @@ class IntlCalendar
     public function before(IntlCalendar $other): bool {}
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_clear
      */
-    public function clear(?int $field = null): bool {}
+    public function clear(?int $field = null) {} // TODO make return type void
 
     /**
      * @tentative-return-type
@@ -59,19 +59,19 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get
      */
-    public function get(int $field): int {}
+    public function get(int $field): int|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_actual_maximum
      */
-    public function getActualMaximum(int $field): int {}
+    public function getActualMaximum(int $field): int|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_actual_minimum
      */
-    public function getActualMinimum(int $field): int {}
+    public function getActualMinimum(int $field): int|false {}
 
     /**
      * @tentative-return-type
@@ -83,7 +83,7 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get_day_of_week_type
      */
-    public function getDayOfWeekType(int $dayOfWeek): int {}
+    public function getDayOfWeekType(int $dayOfWeek): int|false {}
 
     /**
      * @tentative-return-type
@@ -101,13 +101,13 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get_first_day_of_week
      */
-    public function getFirstDayOfWeek(): int {}
+    public function getFirstDayOfWeek(): int|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_greatest_minimum
      */
-    public function getGreatestMinimum(int $field): int {}
+    public function getGreatestMinimum(int $field): int|false {}
 
     /**
      * @tentative-return-type
@@ -119,37 +119,37 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get_least_maximum
      */
-    public function getLeastMaximum(int $field): int {}
+    public function getLeastMaximum(int $field): int|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_locale
      */
-    public function getLocale(int $type): string {}
+    public function getLocale(int $type): string|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_maximum
      */
-    public function getMaximum(int $field): int {}
+    public function getMaximum(int $field): int|false {}
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_minimal_days_in_first_week
      */
-    public function getMinimalDaysInFirstWeek(): int {}
+    public function getMinimalDaysInFirstWeek(): int|false {}
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set_minimal_days_in_first_week
      */
-    public function setMinimalDaysInFirstWeek(int $days): bool {}
+    public function setMinimalDaysInFirstWeek(int $days) {} // TODO make return void
 
     /**
      * @tentative-return-type
      * @alias intlcal_get_minimum
      */
-    public function getMinimum(int $field): int {}
+    public function getMinimum(int $field): int|false {}
 
     /**
      * @tentative-return-type
@@ -173,7 +173,7 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get_time
      */
-    public function getTime(): float {}
+    public function getTime(): float|false {}
 
     /**
      * @tentative-return-type
@@ -191,7 +191,7 @@ class IntlCalendar
      * @tentative-return-type
      * @alias intlcal_get_weekend_transition
      */
-    public function getWeekendTransition(int $dayOfWeek): int {}
+    public function getWeekendTransition(int $dayOfWeek): int|false {}
 
     /**
      * @tentative-return-type
@@ -230,34 +230,34 @@ class IntlCalendar
     public function isSet(int $field): bool {}
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set
      */
-    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set_first_day_of_week
      */
-    public function setFirstDayOfWeek(int $dayOfWeek): bool {}
+    public function setFirstDayOfWeek(int $dayOfWeek) {} // TODO make return type void
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set_lenient
      */
-    public function setLenient(bool $lenient): bool {}
+    public function setLenient(bool $lenient) {} // TODO make return type void
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set_repeated_wall_time_option
      */
-    public function setRepeatedWallTimeOption(int $option): bool {}
+    public function setRepeatedWallTimeOption(int $option) {} // TODO make return type void
 
     /**
-     * @tentative-return-type
+     * @return bool
      * @alias intlcal_set_skipped_wall_time_option
      */
-    public function setSkippedWallTimeOption(int $option): bool {}
+    public function setSkippedWallTimeOption(int $option) {} // TODO make return type void
 
     /**
      * @tentative-return-type

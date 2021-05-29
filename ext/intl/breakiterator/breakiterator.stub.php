@@ -37,10 +37,10 @@ class IntlBreakIterator implements IteratorAggregate
     public function getErrorCode(): int {}
 
     /** @tentative-return-type */
-    public function getErrorMessage(): string|false {}
+    public function getErrorMessage(): string {}
 
     /** @tentative-return-type */
-    public function getLocale(int $type): string {}
+    public function getLocale(int $type): string|false {}
 
     /** @tentative-return-type */
     public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL): IntlPartsIterator {}
@@ -64,7 +64,7 @@ class IntlBreakIterator implements IteratorAggregate
     public function previous(): int {}
 
     /** @tentative-return-type */
-    public function setText(string $text): ?bool {}
+    public function setText(string $text): ?bool {} // TODO return false instead of null in case of failure
 
     public function getIterator(): Iterator {}
 }

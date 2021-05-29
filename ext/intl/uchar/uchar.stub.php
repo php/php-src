@@ -23,19 +23,19 @@ class IntlChar
     public static function charMirror(int|string $codepoint): int|string|null {}
 
     /** @tentative-return-type */
-    public static function charName(int|string $codepoint, int $type = IntlChar::UNICODE_CHAR_NAME): string|null {}
+    public static function charName(int|string $codepoint, int $type = IntlChar::UNICODE_CHAR_NAME): ?string {}
 
     /** @tentative-return-type */
-    public static function charType(int|string $codepoint): int|null {}
+    public static function charType(int|string $codepoint): ?int {}
 
     /** @tentative-return-type */
-    public static function chr(int|string $codepoint): string|null {}
+    public static function chr(int|string $codepoint): ?string {}
 
     /** @tentative-return-type */
     public static function digit(int|string $codepoint, int $base = 10): int|false|null {}
 
     /** @tentative-return-type */
-    public static function enumCharNames(int|string $start, int|string $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME): bool|null {}
+    public static function enumCharNames(int|string $start, int|string $end, callable $callback, int $type = IntlChar::UNICODE_CHAR_NAME): ?bool {} // TODO return values just don't make sense
 
     /** @tentative-return-type */
     public static function enumCharTypes(callable $callback): void {}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: daf5f958f14948b1a9e928aa54bfab2ea3de27e6 */
+ * Stub hash: 4baf9586ab91f37facc865cf1b3aa6a87e5d732d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -37,7 +37,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_getStrength, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_setStrength, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_setStrength, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, strength, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

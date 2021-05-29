@@ -8,7 +8,7 @@ class Normalizer
      * @tentative-return-type
      * @alias normalizer_normalize
      */
-    public static function normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
+    public static function normalize(string $string, int $form = Normalizer::FORM_C): string|false|null {}
 
     /**
      * @tentative-return-type

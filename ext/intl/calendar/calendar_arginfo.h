@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0a6aa0355b33ac4739210ac7ee58fbc1d306ab37 */
+ * Stub hash: 1f47fca82af35929e8cbcb9b2b9979c4c03f658c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -27,7 +27,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_before arginfo_class_IntlCalendar_equals
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_clear, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_clear, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, field, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -36,7 +36,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlCalendar_from
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_get, 0, 1, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_get, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -47,7 +47,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getAvailableLocales, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getDayOfWeekType, 0, 1, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_getDayOfWeekType, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, dayOfWeek, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -57,8 +57,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_getErrorMessage, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getFirstDayOfWeek, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_IntlCalendar_getFirstDayOfWeek arginfo_class_IntlCalendar_getErrorCode
 
 #define arginfo_class_IntlCalendar_getGreatestMinimum arginfo_class_IntlCalendar_get
 
@@ -70,15 +69,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_getLeastMaximum arginfo_class_IntlCalendar_get
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getLocale, 0, 1, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_getLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_getMaximum arginfo_class_IntlCalendar_get
 
-#define arginfo_class_IntlCalendar_getMinimalDaysInFirstWeek arginfo_class_IntlCalendar_getFirstDayOfWeek
+#define arginfo_class_IntlCalendar_getMinimalDaysInFirstWeek arginfo_class_IntlCalendar_getErrorCode
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setMinimalDaysInFirstWeek, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setMinimalDaysInFirstWeek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -87,11 +86,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getNow, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlCalendar_getRepeatedWallTimeOption arginfo_class_IntlCalendar_getFirstDayOfWeek
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_getRepeatedWallTimeOption, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlCalendar_getSkippedWallTimeOption arginfo_class_IntlCalendar_getFirstDayOfWeek
+#define arginfo_class_IntlCalendar_getSkippedWallTimeOption arginfo_class_IntlCalendar_getRepeatedWallTimeOption
 
-#define arginfo_class_IntlCalendar_getTime arginfo_class_IntlCalendar_getNow
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlCalendar_getTime, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlCalendar_getTimeZone, 0, 0, IntlTimeZone, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -121,7 +122,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_isS
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_set, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_set, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
@@ -130,15 +131,15 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_set
 	ZEND_ARG_TYPE_INFO(0, second, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setFirstDayOfWeek, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setFirstDayOfWeek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dayOfWeek, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setLenient, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setLenient, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, lenient, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setRepeatedWallTimeOption, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setRepeatedWallTimeOption, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
