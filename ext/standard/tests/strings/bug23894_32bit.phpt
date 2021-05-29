@@ -12,11 +12,8 @@ var_dump($test, bin2hex($test));
 $test = sprintf("% 13u", $a);
 var_dump($test, bin2hex($test));
 ?>
---EXPECTF--
-Deprecated: Implicit conversion from non-compatible float -12.3456 to int in %s on line %d
+--EXPECT--
 string(4) "-012"
 string(8) "2d303132"
-
-Deprecated: Implicit conversion from non-compatible float -12.3456 to int in %s on line %d
 string(13) "   4294967284"
 string(26) "20202034323934393637323834"

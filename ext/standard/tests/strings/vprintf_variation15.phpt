@@ -45,7 +45,7 @@ foreach($formats as $format) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
@@ -53,15 +53,11 @@ string(22) ""1234567" "342391" "0""
 int(22)
 
 -- Iteration 2 --
-string(%d) "
-Deprecated: Implicit conversion from non-compatible float 12345678900 to int in %s on line %d
-"3755744308" "1234" "12345""
+string(27) ""3755744308" "1234" "12345""
 int(27)
 
 -- Iteration 3 --
-string(%d) "
-Deprecated: Implicit conversion from non-compatible float 101234567000 to int in %s on line %d
- "   1234000" "2450319192" "120""
+string(32) ""    1234000" "2450319192" "120""
 int(32)
 
 -- Iteration 4 --

@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 
-$int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
+$int_numbers = array( 0, 1, -1, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
 $data_file = __DIR__ . '/fprintf_variation_003_64bit.txt';
@@ -29,18 +29,12 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECTF--
-Deprecated: Implicit conversion from non-compatible float 2.7 to int in %s on line %d
-
-Deprecated: Implicit conversion from non-compatible float -2.7 to int in %s on line %d
-
+--EXPECT--
 *** Testing fprintf() with binary ***
 
 0
 1
 1111111111111111111111111111111111111111111111111111111111111111
-10
-1111111111111111111111111111111111111111111111111111111111111110
 1011001000000100111010101
 1111111111111111111111111111111111111110100110111111011000101011
 10011010010

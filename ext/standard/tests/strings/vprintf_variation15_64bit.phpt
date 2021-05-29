@@ -17,7 +17,7 @@ echo "*** Testing vprintf() : unsigned formats and unsigned values ***\n";
 $formats = [
   '"%u" "%+u" "%-u"',
   '"%lu" "%4u" "%-4u"',
-  ' "%10.4u" "%-10.4u" "%.4u"',
+  '"%10.4u" "%-10.4u" "%.4u"',
   '"%\'#2u "%\'2u" "%\'$2u" "%\'_2u"',
   '"%3$u" "%4$u" "%1$u" "%2$u"',
 ];
@@ -45,7 +45,7 @@ foreach($formats as $format) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
@@ -57,10 +57,8 @@ string(28) ""12345678900" "1234" "12345""
 int(28)
 
 -- Iteration 3 --
-string(%d) "
-Deprecated: Implicit conversion from non-compatible float 1.0E+21 to int in %s on line %d
- "   1234000" "3875820019684212736" "120""
-int(41)
+string(40) ""   1234000" "3875820019684212736" "120""
+int(40)
 
 -- Iteration 4 --
 string(17) ""#1 "0" "$0" "10""
