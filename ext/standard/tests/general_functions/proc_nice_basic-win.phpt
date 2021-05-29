@@ -9,7 +9,7 @@ if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 }
 
 if (getenv('SKIP_SLOW_TESTS')) {
-    doe('skip: Slow test');
+    die('skip: Slow test');
 }
 ?>
 --FILE--
