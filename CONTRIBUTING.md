@@ -2,7 +2,7 @@
 
 Anybody who programs in PHP can be a contributing member of the community that
 develops and deploys it; the task of deploying PHP, documentation and associated
-websites is a never ending one. With every release, or release candidate comes a
+websites is a never-ending one. With every release or release candidate comes a
 wave of work, which takes a lot of organization and co-ordination.
 
 You don't need any special access to download, build, debug and begin submitting
@@ -85,7 +85,7 @@ for additional notes on the best way to approach submitting an RFC.
 
 ## Writing tests
 
-We love getting new tests! PHP is a huge project and improving code coverage is
+We love getting new tests! PHP is a huge project and improving test coverage is
 a huge win for every PHP user.
 
 [Our QA site includes a page detailing how to write test cases.](https://qa.php.net/write-test.php)
@@ -255,14 +255,14 @@ included.
 
 - Read [Coding standards](/CODING_STANDARDS.md) before you start working.
 - Update git source just before running your final `diff` and before testing.
-- Add in-line comments and/or have external documentation ready. Use only
+- Add inline comments and/or have external documentation ready. Use only
   `/* */` style comments, not `//`.
 - Create test scripts for use with `make test`.
 - Run `make test` to check your change doesn't break other features.
 - Rebuild PHP with `--enable-debug` which will show some kinds of memory errors
   and check the PHP and web server error logs after running your PHP tests.
 - Rebuild PHP with `--enable-zts` to check your change compiles and operates
-  correctly in a thread safe PHP.
+  correctly in a thread-safe PHP.
 - Review the change once more just before submitting it.
 
 ## What happens after submitting contribution?
@@ -270,7 +270,7 @@ included.
 If your change is easy to review and obviously has no side-effects, it might be
 committed relatively quickly.
 
-Because PHP is a volunteer-driven effort more complex changes will require
+Because PHP is a volunteer-driven effort, more complex changes will require
 patience on your side. If you do not receive feedback in a few days, consider
 bumping. Before doing this think about these questions:
 
@@ -278,7 +278,7 @@ bumping. Before doing this think about these questions:
 - Did I review the mailing list archives to see if these kind of changes had
   been discussed before?
 - Did I explain my change clearly?
-- Is my change too hard to review? Because of what factors?
+- Is my change too hard to review? If so, why?
 
 ## What happens when your contribution is applied?
 
