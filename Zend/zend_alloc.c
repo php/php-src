@@ -2661,9 +2661,6 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
-	if (memory_limit < ZEND_MM_CHUNK_SIZE) {
-		memory_limit = ZEND_MM_CHUNK_SIZE;
-	}
 	if (UNEXPECTED(memory_limit < AG(mm_heap)->real_size)) {
 		return FAILURE;
 	}
