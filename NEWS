@@ -93,6 +93,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
 
+- PCRE:
+  . Bundled PCRE2 is 10.37.
+
 - PDO:
   . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
     fetching a BLOB). (Nikita)
