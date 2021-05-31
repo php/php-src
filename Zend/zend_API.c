@@ -482,6 +482,15 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest)
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
+	} else if (Z_TYPE_P(arg) == IS_OBJECT) {
+		zend_object *zobj = Z_OBJ_P(arg);
+		zval obj;
+		if (zobj->handlers->cast_object(zobj, &obj, IS_LONG) == FAILURE) {
+			return 0;
+		}
+		OBJ_RELEASE(zobj);
+		ZVAL_COPY_VALUE(arg, &obj);
+		*dest = Z_LVAL_P(arg);
 	} else {
 		return 0;
 	}
@@ -520,6 +529,15 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) 
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1.0;
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		zend_object *zobj = Z_OBJ_P(arg);
+		zval obj;
+		if (zobj->handlers->cast_object(zobj, &obj, IS_DOUBLE) == FAILURE) {
+			return 0;
+		}
+		OBJ_RELEASE(zobj);
+		ZVAL_COPY_VALUE(arg, &obj);
+		*dest = Z_DVAL_P(arg);
 	} else {
 		return 0;
 	}
@@ -561,6 +579,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
 		ZVAL_LONG(arg, 1);
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		zend_object *zobj = Z_OBJ_P(arg);
+		zval obj;
+		if (zobj->handlers->cast_object(zobj, &obj, _IS_NUMBER) == FAILURE) {
+			return 0;
+		}
+		OBJ_RELEASE(zobj);
+		ZVAL_COPY_VALUE(arg, &obj);
 	} else {
 		return 0;
 	}
