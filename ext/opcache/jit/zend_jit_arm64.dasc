@@ -184,6 +184,14 @@ const char* zend_reg_name[] = {
 
 #if ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
+# ifdef __APPLE__
+struct TLVDescriptor {
+	void*       (*thunk)(struct TLVDescriptor*);
+	uint64_t    key;
+	uint64_t    offset;
+};
+typedef struct TLVDescriptor TLVDescriptor;
+# endif
 #endif
 
 /* By default avoid JITing inline handlers if it does not seem profitable due to lack of
@@ -483,10 +491,27 @@ static int logical_immediate_p (uint64_t value, uint32_t reg_size)
 ||	}
 |.endmacro
 
+// Safe memory load/store with an unsigned 64-bit offset.
+|.macro SAFE_MEM_ACC_WITH_64_UOFFSET, ldr_str_ins, op, base_reg, offset, tmp_reg
+||	if (((uintptr_t)(offset)) > LDR_STR_PIMM64) {
+|		LOAD_64BIT_VAL tmp_reg, offset
+|		ldr_str_ins op, [base_reg, tmp_reg]
+||	} else {
+|		ldr_str_ins op, [base_reg, #(offset)]
+||	}
+|.endmacro
+
 |.macro LOAD_TSRM_CACHE, reg
+||#ifdef __APPLE__
+|	.long 0xd53bd071 // TODO: hard-coded: mrs TMP3, tpidrro_el0
+|	and TMP3, TMP3, #0xfffffffffffffff8
+|	SAFE_MEM_ACC_WITH_64_UOFFSET ldr, TMP3, TMP3, (((TLVDescriptor*)tsrm_ls_cache_tcb_offset)->key << 3), TMP1
+|	SAFE_MEM_ACC_WITH_64_UOFFSET ldr, reg, TMP3, (((TLVDescriptor*)tsrm_ls_cache_tcb_offset)->offset), TMP1
+||#else
 |	.long 0xd53bd051 // TODO: hard-coded: mrs TMP3, tpidr_el0
 ||	ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= LDR_STR_PIMM64);
 |	ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
+||#endif
 |.endmacro
 
 |.macro LOAD_ADDR_ZTS, reg, struct, field

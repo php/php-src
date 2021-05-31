@@ -4055,8 +4055,12 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
+  /* TODO: EXEC+WRITE is not supported in macOS. Removing EXEC is still buggy as
+   * other threads, which are executing the JITed code, would crash anyway. */
+# ifndef __APPLE__
 		/* Another thread may be executing JITed code. */
 		opts |= PROT_EXEC;
+# endif
 #endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
