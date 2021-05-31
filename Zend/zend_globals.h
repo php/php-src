@@ -155,14 +155,14 @@ struct _zend_executor_globals {
 
 	HashTable included_files;	/* files already included */
 
+	HashTable *function_table;	/* function symbol table */
+	HashTable *class_table;		/* class table */
+	HashTable *zend_constants;	/* constants table */
+
 	JMP_BUF *bailout;
 
 	int error_reporting;
 	int exit_status;
-
-	HashTable *function_table;	/* function symbol table */
-	HashTable *class_table;		/* class table */
-	HashTable *zend_constants;	/* constants table */
 
 	zval          *vm_stack_top;
 	zval          *vm_stack_end;
@@ -170,9 +170,10 @@ struct _zend_executor_globals {
 	size_t         vm_stack_page_size;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
+
+	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	zend_long precision;
 
@@ -250,11 +251,14 @@ struct _zend_executor_globals {
 
 	zend_get_gc_buffer get_gc_buffer;
 
+	/* Main fiber. */
+	zend_fiber *main_fiber;
 	/* Active fiber, NULL when in main thread. */
 	zend_fiber *current_fiber;
-
 	/* Default fiber C stack size. */
 	zend_long fiber_stack_size;
+	/* Exception thrown from the other fiber */
+	zend_object *fiber_exception;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
 	 * in addition to being processed as usual. */

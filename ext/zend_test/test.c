@@ -411,41 +411,29 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 	}
 }
 
-static void fiber_address_observer(zend_fiber *from, zend_fiber *to)
+static void fiber_observer(zend_fiber *from, zend_fiber *to)
 {
-	if (ZT_G(observer_fiber_switch)) {
-		php_printf("<!-- switching from fiber %p to %p -->\n", from, to);
+	if (!ZT_G(observer_fiber_switch)) {
+		return;
 	}
-}
-
-static void fiber_enter_observer(zend_fiber *from, zend_fiber *to)
-{
-	if (ZT_G(observer_fiber_switch)) {
-		if (to) {
-			if (to->status == ZEND_FIBER_STATUS_INIT) {
-				php_printf("<init '%p'>\n", to);
-			} else if (to->status == ZEND_FIBER_STATUS_RUNNING && (!from || from->status == ZEND_FIBER_STATUS_RUNNING)) {
-				php_printf("<resume '%p'>\n", to);
-			} else if (to->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-				php_printf("<destroying '%p'>\n", to);
-			}
+	php_printf("<!-- switching from fiber %p to %p -->\n", from != EG(main_fiber) ? from : 0, to != EG(main_fiber) ? to : 0);
+	if (to->status == ZEND_FIBER_STATUS_INIT) {
+		php_printf("<init '%p'>\n", to);
+	} else if (to->status == ZEND_FIBER_STATUS_SUSPENDED) {
+		if (!(to->flags & ZEND_FIBER_FLAG_DESTROYED)) {
+			php_printf("<resume '%p'>\n", to);
+		} else {
+			php_printf("<destroying '%p'>\n", to);
 		}
-	}
-}
-
-static void fiber_suspend_observer(zend_fiber *from, zend_fiber *to)
-{
-	if (ZT_G(observer_fiber_switch)) {
-		if (from) {
-			if (from->status == ZEND_FIBER_STATUS_SUSPENDED) {
-				php_printf("<suspend '%p'>\n", from);
-			} else if (from->status == ZEND_FIBER_STATUS_RETURNED) {
-				php_printf("<returned '%p'>\n", from);
-			} else if (from->status == ZEND_FIBER_STATUS_THREW) {
-				php_printf("<threw '%p'>\n", from);
-			} else if (from->status == ZEND_FIBER_STATUS_SHUTDOWN) {
-				php_printf("<destroyed '%p'>\n", from);
-			}
+	} else if (to->status == ZEND_FIBER_STATUS_RUNNING) {
+		if (from->status != ZEND_FIBER_STATUS_DEAD) {
+			php_printf("<suspend '%p'>\n", from);
+		} else if (from->flags & ZEND_FIBER_FLAG_THREW) {
+			php_printf("<threw '%p'>\n", from);
+		} else if (from->flags & ZEND_FIBER_FLAG_DESTROYED) {
+			php_printf("<destroyed '%p'>\n", from);
+		} else {
+			php_printf("<returned '%p'>\n", from);
 		}
 	}
 }
@@ -498,9 +486,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	if (ZT_G(observer_enabled)) {
-		zend_observer_fiber_switch_register(fiber_address_observer);
-		zend_observer_fiber_switch_register(fiber_enter_observer);
-		zend_observer_fiber_switch_register(fiber_suspend_observer);
+		zend_observer_fiber_switch_register(fiber_observer);
 	}
 
 	return SUCCESS;

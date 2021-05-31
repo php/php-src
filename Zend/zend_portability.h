@@ -107,6 +107,8 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
+#define ZEND_STATIC_ASSERT(c) void zend_static_assert(int static_assert_failed[1 - 2 * !(c)])
+
 #if ZEND_DEBUG
 # define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); ZEND_ASSUME(0);} while (0)
 #else

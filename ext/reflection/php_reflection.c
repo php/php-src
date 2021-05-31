@@ -6873,7 +6873,7 @@ ZEND_METHOD(ReflectionFiber, getFiber)
 }
 
 #define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
-		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status & ZEND_FIBER_STATUS_FINISHED) { \
+		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status == ZEND_FIBER_STATUS_DEAD) { \
 			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
 			RETURN_THROWS(); \
 		} \
@@ -6892,18 +6892,18 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	prev_execute_data = fiber->stack_bottom->prev_execute_data;
-	fiber->stack_bottom->prev_execute_data = NULL;
+	prev_execute_data = fiber->execute_data->prev_execute_data;
+	fiber->execute_data->prev_execute_data = NULL;
 
 	if (EG(current_fiber) != fiber) {
 		// No need to replace current execute data if within the current fiber.
-		EG(current_execute_data) = fiber->execute_data;
+		EG(current_execute_data) = fiber->executor->current_execute_data;
 	}
 
 	zend_fetch_debug_backtrace(return_value, 0, options, 0);
 
 	EG(current_execute_data) = execute_data; // Restore original execute data.
-	fiber->stack_bottom->prev_execute_data = prev_execute_data; // Restore prev execute data on fiber stack.
+	fiber->execute_data->prev_execute_data = prev_execute_data; // Restore prev execute data on fiber stack.
 }
 
 ZEND_METHOD(ReflectionFiber, getExecutingLine)
@@ -6918,7 +6918,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 	if (EG(current_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
-		prev_execute_data = fiber->execute_data->prev_execute_data;
+		prev_execute_data = fiber->executor->current_execute_data->prev_execute_data;
 	}
 
 	RETURN_LONG(prev_execute_data->opline->lineno);
@@ -6936,7 +6936,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 	if (EG(current_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
-		prev_execute_data = fiber->execute_data->prev_execute_data;
+		prev_execute_data = fiber->executor->current_execute_data->prev_execute_data;
 	}
 
 	RETURN_STR_COPY(prev_execute_data->func->op_array.filename);
@@ -6948,8 +6948,8 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (fiber == NULL || fiber->status & ZEND_FIBER_STATUS_FINISHED) {
-		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+	if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_DEAD) {
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated");
 		RETURN_THROWS();
 	}
 
