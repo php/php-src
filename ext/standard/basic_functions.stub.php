@@ -1522,4 +1522,6 @@ function all(iterable $iterable, ?callable $callback = null): bool {}
 
 function none(iterable $iterable, ?callable $callback = null): bool {}
 
+function reduce(iterable $iterable, callable $callback, mixed $initial = null): mixed {}
+
 }

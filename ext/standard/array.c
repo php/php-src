@@ -5731,36 +5731,11 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
-/* {{{ Iteratively reduce the array to a single value via the callback. */
-PHP_FUNCTION(array_reduce)
+static zend_always_inline void php_array_reduce(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
 {
-	zval *input;
 	zval args[2];
 	zval *operand;
 	zval retval;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	zval *initial = NULL;
-	HashTable *htbl;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ARRAY(input)
-		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(initial)
-	ZEND_PARSE_PARAMETERS_END();
-
-
-	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_COPY(return_value, initial);
-	} else {
-		ZVAL_NULL(return_value);
-	}
-
-	/* (zval **)input points to an element of argument stack
-	 * the base pointer of which is subject to change.
-	 * thus we need to keep the pointer to the hashtable for safety */
-	htbl = Z_ARRVAL_P(input);
 
 	if (zend_hash_num_elements(htbl) == 0) {
 		return;
@@ -5787,6 +5762,69 @@ PHP_FUNCTION(array_reduce)
 			RETURN_NULL();
 		}
 	} ZEND_HASH_FOREACH_END();
+}
+
+typedef struct {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval args[2];
+} traversable_reduce_data;
+
+static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) /* {{{ */
+{
+	traversable_reduce_data *reduce_data = puser;
+	zend_fcall_info *fci = &reduce_data->fci;
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(*fci));
+
+	zval *operand = iter->funcs->get_current_data(iter);
+	ZVAL_COPY_VALUE(&fci->params[0], fci->retval);
+	ZVAL_COPY(&fci->params[1], operand);
+	ZVAL_NULL(fci->retval);
+	int result = zend_call_function(&reduce_data->fci, &reduce_data->fcc);
+	zval_ptr_dtor(operand);
+	zval_ptr_dtor(&fci->params[0]);
+	if (UNEXPECTED(result == FAILURE || EG(exception))) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static zend_always_inline void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
+{
+	zval args[2];
+	traversable_reduce_data reduce_data;
+	reduce_data.fci = fci;
+	reduce_data.fci.retval = return_value;
+	reduce_data.fci.param_count = 2;
+	reduce_data.fci.params = args;
+	reduce_data.fcc = fci_cache;
+
+	spl_iterator_apply(obj, php_traversable_reduce_elem, (void*)&reduce_data);
+}
+/* }}} */
+
+/* {{{ Iteratively reduce the array to a single value via the callback. */
+PHP_FUNCTION(array_reduce)
+{
+	zval *input;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zval *initial = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ARRAY(input)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(initial)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() > 2) {
+		ZVAL_COPY(return_value, initial);
+	} else {
+		ZVAL_NULL(return_value);
+	}
+
+	php_array_reduce(Z_ARRVAL_P(input), fci, fci_cache, return_value);
 }
 /* }}} */
 
@@ -6344,5 +6382,40 @@ PHP_FUNCTION(any)
 PHP_FUNCTION(none)
 {
 	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 1);
+}
+/* }}} */
+
+/* {{{ Reduces values */
+PHP_FUNCTION(reduce)
+{
+	zval *input;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zval *initial = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ITERABLE(input)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(initial)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() > 2) {
+		ZVAL_COPY(return_value, initial);
+	} else {
+		ZVAL_NULL(return_value);
+	}
+
+	switch (Z_TYPE_P(input)) {
+		case IS_ARRAY:
+			php_array_reduce(Z_ARRVAL_P(input), fci, fci_cache, return_value);
+			return;
+		case IS_OBJECT: {
+			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(input), zend_ce_traversable));
+			php_traversable_reduce(input, fci, fci_cache, return_value);
+			return;
+		}
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
 }
 /* }}} */
