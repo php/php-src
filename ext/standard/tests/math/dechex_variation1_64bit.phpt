@@ -16,8 +16,8 @@ $inputs = [
        1,
        12345,
        -2345,
-       4294967295,  // largest decimal
-       4294967296,
+       18446744073709551615,  // largest decimal
+       18446744073709551616,
 
        // float data
 /* 7*/ 12.3456789000e10,
@@ -61,10 +61,10 @@ string(4) "3039"
 string(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-string(8) "ffffffff"
+dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-string(9) "100000000"
+dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(10) "1cbe991a08"

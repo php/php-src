@@ -16,8 +16,8 @@ $inputs = [
        1,
        12345,
        -2345,
-       4294967295,  // largest decimal
-       4294967296,
+       18446744073709551615,  // largest decimal
+       18446744073709551616,
 
        // float data
 /* 7*/ 12.3456789000e10,
@@ -61,10 +61,10 @@ string(14) "11000000111001"
 string(64) "1111111111111111111111111111111111111111111111111111011011010111"
 
 -- Iteration 5 --
-string(32) "11111111111111111111111111111111"
+decbin(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-string(33) "100000000000000000000000000000000"
+decbin(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(37) "1110010111110100110010001101000001000"
