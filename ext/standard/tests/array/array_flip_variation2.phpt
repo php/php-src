@@ -28,7 +28,6 @@ $input = array(
   // numeric keys
   1 => 'int_key', // expected: value will be replaced by 'bool_key3'
   -2 => 'negative_key',
-  8.9 => 'float_key',
   012 => 'octal_key',
   0x34 => 'hex_key',
 
@@ -65,15 +64,13 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_flip() : different keys for 'input' array argument ***
-array(14) {
+array(13) {
   ["bool_key4"]=>
   int(0)
   ["bool_key3"]=>
   int(1)
   ["negative_key"]=>
   int(-2)
-  ["float_key"]=>
-  int(8)
   ["octal_key"]=>
   int(10)
   ["hex_key"]=>
