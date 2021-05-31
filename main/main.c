@@ -1235,6 +1235,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_lineno) = error_lineno;
 	}
 
+	if (zend_alloc_in_memory_limit_error_reporting()) {
+		php_output_discard_all();
+	}
+
 	/* display/log the error if necessary */
 	if (display && ((EG(error_reporting) & type) || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
@@ -1783,19 +1787,7 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
-
-		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-			(size_t)PG(memory_limit) < zend_memory_usage(1)
-		) {
-			send_buffer = 0;
-		}
-
-		if (!send_buffer) {
-			php_output_discard_all();
-		} else {
-			php_output_end_all();
-		}
+		php_output_end_all();
 	} zend_end_try();
 
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */

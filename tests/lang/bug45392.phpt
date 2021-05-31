@@ -1,9 +1,5 @@
 --TEST--
 Bug #45392 (ob_start()/ob_end_clean() and memory_limit)
---INI--
-display_errors=stderr
---XFAIL--
-The issue has not yet been resolved.
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {
@@ -22,4 +18,5 @@ ob_end_clean();
 ?>
 --EXPECTF--
 2
+
 Fatal error: Allowed memory size of %d bytes exhausted%s

@@ -2669,6 +2669,15 @@ ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 	return SUCCESS;
 }
 
+ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void)
+{
+#if ZEND_MM_LIMIT
+	return AG(mm_heap)->overflow;
+#else
+	return false;
+#endif
+}
+
 ZEND_API size_t zend_memory_usage(bool real_usage)
 {
 #if ZEND_MM_STAT
