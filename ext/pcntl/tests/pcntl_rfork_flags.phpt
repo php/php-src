@@ -1,5 +1,5 @@
 --TEST--
-Test function pcntl_rfork() with no wait flag.
+Test function pcntl_rfork() with RFCFDG and RFFDG flags.
 --SKIPIF--
 <?php
 	if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
@@ -8,17 +8,24 @@ Test function pcntl_rfork() with no wait flag.
 ?>
 --FILE--
 <?php
-echo "*** Test by with child not reporting to the parent ***\n";
-
-$pid = pcntl_rfork(RFNOWAIT|RFTSIGZMB,SIGUSR1);
+echo "\n*** Test with RFFDG and RFCFDG flags ***\n";
+$pid = pcntl_rfork(RFFDG);
 if ($pid > 0) {
-	var_dump($pid);
+	pcntl_wait($status);
+  var_dump($pid);
 } else {
 	var_dump($pid);
-  sleep(2); // as the child does not wait so we see its "pid"
+  exit;
+}
+
+$pid = pcntl_rfork(RFCFDG);
+if ($pid > 0) {
+  pcntl_wait($status);
+  var_dump($pid);
 }
 ?>
 --EXPECTF--
-*** Test by with child not reporting to the parent ***
-int(%d)
+*** Test with RFFDG and RFCFDG flags ***
 int(0)
+int(%d)
+int(%d)

@@ -357,12 +357,6 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef RFLINUXTHPN
 	REGISTER_LONG_CONSTANT("RFLINUXTHPN",	RFLINUXTHPN, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef RFMEM
-	REGISTER_LONG_CONSTANT("RFMEM",	RFMEM, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RFSIGSHARE
-	REGISTER_LONG_CONSTANT("RFSIGSHARE",	RFSIGSHARE, CONST_CS | CONST_PERSISTENT);
-#endif
 #ifdef RFTSIGZMB
 	REGISTER_LONG_CONSTANT("RFTSIGZMB",	RFTSIGZMB, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -1515,11 +1509,24 @@ PHP_FUNCTION(pcntl_rfork)
 
   /* This is a flag to use with great caution in general, preferably not within PHP */
   if ((flags & RFMEM) != 0) {
-    flags &= ~RFMEM;
+    zend_argument_value_error(1, "must not include RFMEM value, not allowed within this context");
+    RETURN_THROWS();
+  }
+
+  if ((flags & RFSIGSHARE) != 0) {
+    zend_argument_value_error(1, "must not include RFSIGSHARE value, not allowed within this context");
+    RETURN_THROWS();
+  }
+
+  if ((flags & (RFFDG | RFCFDG)) == (RFFDG | RFCFDG)) {
+    zend_argument_value_error(1, "must not include both RFFDG and RFCFDG, because these flags are mutually exclusive");
+    RETURN_THROWS();
   }
 
   /* A new pid is required */
-  flags |= RFPROC;
+  if (!(flags & (RFPROC))) {
+    flags |= RFPROC;
+  }
 
   if ((flags & RFTSIGZMB) != 0) {
     flags |= RFTSIGFLAGS(csignal);
@@ -1530,9 +1537,6 @@ PHP_FUNCTION(pcntl_rfork)
   if (pid == -1) {
     PCNTL_G(last_error) = errno;
     switch (errno) {
-      case EINVAL:
-        php_error_docref(NULL, E_WARNING, "RFFDG and RFCFDG modes are mutually exclusive");
-        break;
       case EAGAIN:
         php_error_docref(NULL, E_WARNING, "Maximum process creations limit reached\n");
         break;
