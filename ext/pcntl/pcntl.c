@@ -1499,7 +1499,7 @@ PHP_FUNCTION(pcntl_unshare)
 #endif
 
 #ifdef HAVE_RFORK
-/* {{{ proto bool pcntl_rfork([int flags|custom signal)
+/* {{{ proto bool pcntl_rfork(int flags [, int signal])
    More control over the process creation is given over fork/vfork. */
 PHP_FUNCTION(pcntl_rfork)
 {
