@@ -1407,7 +1407,7 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 }
 
-static void call_custom_pass(zend_script *script, void *ctx) {
+static void zend_optimizer_call_custom_pass(zend_script *script, void *ctx) {
 	for (int i = 0; i < custom_pass.last_pass; i++) {
 		custom_pass.pass[i](script, ctx);
 	}
@@ -1552,7 +1552,7 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
-	call_custom_pass(script, &ctx);
+	zend_optimizer_call_custom_pass(script, &ctx);
 
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 			(ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
@@ -1567,7 +1567,7 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	return 1;
 }
 
-ZEND_API int zend_optimize_register_custom_pass(zend_script_func_t pass)
+ZEND_API int zend_optimizer_register_custom_pass(zend_script_func_t pass)
 {
 	if (custom_pass.last_pass < 256 && pass) {
 		custom_pass.pass[custom_pass.last_pass++] = pass;
@@ -1575,7 +1575,7 @@ ZEND_API int zend_optimize_register_custom_pass(zend_script_func_t pass)
 	return custom_pass.last_pass;
 }
 
-ZEND_API void zend_optimize_clean_custom_pass()
+ZEND_API void zend_optimizer_clean_custom_pass()
 {
 	custom_pass.last_pass = 0;
 }
