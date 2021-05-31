@@ -10,7 +10,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Söther Bakken <ssb@php.net>                             |
+   | Author: Stig S�ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -634,14 +634,15 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 				case 'd':
 					php_sprintf_appendint(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment, always_sign);
+										  zval_get_long(tmp),
+										  width, padding, alignment,
+										  always_sign);
 					break;
 
 				case 'u':
 					php_sprintf_appenduint(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment);
+										  zval_get_long(tmp),
+										  width, padding, alignment);
 					break;
 
 				case 'e':
@@ -662,31 +663,35 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 				case 'c':
 					php_sprintf_appendchar(&result, &outpos,
-						(char) zval_get_long_ex(tmp, /* is_strict */ false));
+										(char) zval_get_long(tmp));
 					break;
 
 				case 'o':
 					php_sprintf_append2n(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment, 3, hexchars, expprec);
+										 zval_get_long(tmp),
+										 width, padding, alignment, 3,
+										 hexchars, expprec);
 					break;
 
 				case 'x':
 					php_sprintf_append2n(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment, 4, hexchars, expprec);
+										 zval_get_long(tmp),
+										 width, padding, alignment, 4,
+										 hexchars, expprec);
 					break;
 
 				case 'X':
 					php_sprintf_append2n(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment, 4, HEXCHARS, expprec);
+										 zval_get_long(tmp),
+										 width, padding, alignment, 4,
+										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
 					php_sprintf_append2n(&result, &outpos,
-						zval_get_long_ex(tmp, /* is_strict */ false),
-						width, padding, alignment, 1, hexchars, expprec);
+										 zval_get_long(tmp),
+										 width, padding, alignment, 1,
+										 hexchars, expprec);
 					break;
 
 				case '%':
