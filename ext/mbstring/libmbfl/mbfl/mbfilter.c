@@ -1484,7 +1484,6 @@ mbfl_ja_jp_hantozen(
 	mbfl_convert_filter *encoder = NULL;
 	mbfl_convert_filter *tl_filter = NULL;
 	mbfl_convert_filter *next_filter = NULL;
-	mbfl_filt_tl_jisx0201_jisx0208_param *param = NULL;
 
 	mbfl_memory_device_init(&device, string->len, 0);
 	mbfl_string_init(result);
@@ -1500,20 +1499,16 @@ mbfl_ja_jp_hantozen(
 	}
 	next_filter = decoder;
 
-	param = emalloc(sizeof(mbfl_filt_tl_jisx0201_jisx0208_param));
-	param->mode = mode;
-
 	tl_filter = mbfl_convert_filter_new2(
 		&vtbl_tl_jisx0201_jisx0208,
 		(int(*)(int, void*))next_filter->filter_function,
 		(flush_function_t)next_filter->filter_flush,
 		next_filter);
 	if (tl_filter == NULL) {
-		efree(param);
 		goto out;
 	}
 
-	tl_filter->opaque = param;
+	tl_filter->opaque = (void*)((intptr_t)mode);
 	next_filter = tl_filter;
 
 	encoder = mbfl_convert_filter_new(
@@ -1542,9 +1537,6 @@ mbfl_ja_jp_hantozen(
 	result = mbfl_memory_device_result(&device, result);
 out:
 	if (tl_filter != NULL) {
-		if (tl_filter->opaque != NULL) {
-			efree(tl_filter->opaque);
-		}
 		mbfl_convert_filter_delete(tl_filter);
 	}
 

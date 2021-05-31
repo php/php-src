@@ -20,7 +20,6 @@ $names_arr = array(
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
-  "NULL" => NULL,
   "\"\"" => "",
   "\" \"" => " ",
   "\\0" => "\0",
@@ -56,9 +55,6 @@ Warning: file_get_contents(1): Failed to open stream: No such file or directory 
 bool(false)
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
-
--- Filename: NULL --
 ValueError: Path cannot be empty
 
 -- Filename: "" --

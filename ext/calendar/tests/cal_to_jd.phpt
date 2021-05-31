@@ -1,7 +1,7 @@
 --TEST--
 cal_to_jd()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 echo cal_to_jd(CAL_GREGORIAN, 8, 26, 74), "\n";

@@ -7,8 +7,8 @@ opcache.file_update_protection=0
 opcache.validate_timestamps=0
 opcache.file_cache_only=0
 opcache.revalidate_path=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -32,7 +32,7 @@ file_put_contents(__DIR__ . "/bug74596_2.php", "ok\n");
 
 class ufilter extends php_user_filter
 {
-    function filter($in, $out, &$consumed, $closing)
+    function filter($in, $out, &$consumed, $closing): int
     {
         include_once __DIR__ . "/bug74596_1.php";
         while ($bucket = stream_bucket_make_writeable($in)) {

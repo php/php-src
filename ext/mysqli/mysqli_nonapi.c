@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -56,11 +56,11 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 						*ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL,
 						*ssl_cipher = NULL;
 	size_t				hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	bool			persistent = FALSE, ssl = FALSE;
+	bool			persistent = false, ssl = false;
 	zend_long			port = 0, flags = 0;
 	bool           port_is_null = 1;
 	zend_string			*hash_key = NULL;
-	bool			new_connection = FALSE;
+	bool			new_connection = false;
 	zend_resource		*le;
 	mysqli_plist_entry *plist = NULL;
 	bool			self_alloced = 0;
@@ -86,7 +86,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 			RETURN_THROWS();
 		}
 
-		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) {
+		if (object) {
+			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 			mysqli_resource = (Z_MYSQLI_P(object))->ptr;
 			if (mysqli_resource && mysqli_resource->ptr) {
 				mysql = (MY_MYSQL*) mysqli_resource->ptr;
@@ -147,7 +148,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 		if (!MyG(allow_persistent)) {
 			php_error_docref(NULL, E_WARNING, "Persistent connections are disabled. Downgrading to normal");
 		} else {
-			mysql->persistent = persistent = TRUE;
+			mysql->persistent = persistent = true;
 
 			hash_key = strpprintf(0, "mysqli_%s_%s" ZEND_LONG_FMT "%s%s%s", SAFE_STR(hostname), SAFE_STR(socket),
 								port, SAFE_STR(username), SAFE_STR(dbname),
@@ -191,7 +192,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 #ifdef MYSQLI_USE_MYSQLND
 								if (mysql->mysql->data->vio->data->ssl) {
 									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
-									ssl = TRUE;
+									ssl = true;
 
 									ssl_key = mysql->mysql->data->vio->data->options.ssl_key ? estrdup(mysql->mysql->data->vio->data->options.ssl_key) : NULL;
 									ssl_cert = mysql->mysql->data->vio->data->options.ssl_cert ? estrdup(mysql->mysql->data->vio->data->options.ssl_cert) : NULL;
@@ -206,7 +207,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 										|| mysql->mysql->options.ssl_capath
 										|| mysql->mysql->options.ssl_cipher) {
 									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
-									ssl = TRUE;
+									ssl = true;
 
 									ssl_key = mysql->mysql->options.ssl_key ? estrdup(mysql->mysql->options.ssl_key) : NULL;
 									ssl_cert = mysql->mysql->options.ssl_cert ? estrdup(mysql->mysql->options.ssl_cert) : NULL;
@@ -249,7 +250,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 #endif
 			goto err;
 		}
-		new_connection = TRUE;
+		new_connection = true;
 	}
 
 #ifndef MYSQLI_USE_MYSQLND
@@ -332,6 +333,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	unsigned int allow_local_infile = MyG(allow_local_infile);
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
 
+#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+	if (MyG(local_infile_directory) && !php_check_open_basedir(MyG(local_infile_directory))) {
+		mysql_options(mysql->mysql, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, MyG(local_infile_directory));
+	}
+#endif
+
 end:
 	if (!mysqli_resource) {
 		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -348,22 +355,20 @@ end:
 
 	mysql->multi_query = 0;
 
-	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
-	} else {
+	if (object) {
+		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry));
 		(Z_MYSQLI_P(object))->ptr = mysqli_resource;
-	}
-	if (!is_real_connect) {
-		return;
-	} else {
 		RETURN_TRUE;
+	} else {
+		MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_link_class_entry);
+		return;
 	}
 
 err:
 	if (mysql->hash_key) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
-		mysql->persistent = FALSE;
+		mysql->persistent = false;
 	}
 	if (!is_real_connect && self_alloced) {
 		efree(mysql);
@@ -374,19 +379,19 @@ err:
 /* {{{ Open a connection to a mysql server */
 PHP_FUNCTION(mysqli_connect)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, FALSE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, false);
 }
 /* }}} */
 
 PHP_METHOD(mysqli, __construct)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, true);
 }
 
 /* {{{ Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_METHOD(mysqli, init)
 {
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
@@ -430,6 +435,39 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
+/* {{{ Fetch a column from the result row  */
+PHP_FUNCTION(mysqli_fetch_column)
+{
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	zval 			row_array;
+	zend_long		col_no = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &col_no) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES*, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+
+	if (col_no < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	if (col_no >= mysql_num_fields(result)) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
+		RETURN_THROWS();
+	}
+
+	php_mysqli_fetch_into_hash_aux(&row_array, result, MYSQLI_NUM);
+	if (Z_TYPE(row_array) != IS_ARRAY) {
+		zval_ptr_dtor_nogc(&row_array);
+		RETURN_FALSE;
+	}
+
+	ZVAL_COPY(return_value, zend_hash_index_find(Z_ARR(row_array), col_no));
+	zval_ptr_dtor_nogc(&row_array);
+}
+/* }}} */
+
 /* {{{ Fetches all result rows as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_all)
 {
@@ -443,8 +481,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (!mode || (mode & ~MYSQLI_BOTH)) {
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_FETCH_NUM, "
-		                 "MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");
 		RETURN_THROWS();
 	}
 
@@ -719,7 +756,7 @@ PHP_FUNCTION(mysqli_query)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -953,7 +990,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
@@ -978,7 +1015,7 @@ PHP_FUNCTION(mysqli_stmt_get_result)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 #endif
@@ -1009,7 +1046,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 }
 /* }}} */
 
@@ -1035,7 +1072,7 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 }
 /* }}} */
 
@@ -1233,7 +1270,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	}
 
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_savepoint_libmysql(mysql->mysql, name, FALSE)) {
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, false)) {
 #else
 	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
 #endif
@@ -1260,7 +1297,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 		RETURN_THROWS();
 	}
 #ifndef MYSQLI_USE_MYSQLND
-	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, true)) {
 #else
 	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {
 #endif

@@ -1,7 +1,7 @@
 --TEST--
 simplexml_load_file()
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
     $simple = simplexml_load_file(__DIR__."/book.xml");

@@ -31,13 +31,13 @@ $it2 = new RecursiveCallbackFilterIterator($it, function($elem) use(&$it2) {
 // Cache
 $it = new ArrayIterator();
 $it2 = new CachingIterator($it, CachingIterator::FULL_CACHE);
-$it2[] = $it2;
+$it2['x'] = $it2;
 $it2->next();
 
 // Recursive cache
 $it = new RecursiveArrayIterator();
 $it2 = new RecursiveCachingIterator($it, CachingIterator::FULL_CACHE);
-$it2[] = $it2;
+$it2['x'] = $it2;
 $it2->next();
 
 // Append

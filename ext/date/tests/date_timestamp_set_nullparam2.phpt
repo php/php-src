@@ -13,7 +13,8 @@ $dtms021 = date_create();
 
 var_dump(date_timestamp_set($dtms021, null));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: date_timestamp_set(): Passing null to parameter #2 ($timestamp) of type int is deprecated in %s on line %d
 object(DateTime)#1 (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"

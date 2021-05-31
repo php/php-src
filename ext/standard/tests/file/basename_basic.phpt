@@ -56,7 +56,6 @@ $file_paths = array (
   /* empty paths */
   "",
   '',
-  NULL,
 );
 
 foreach ($file_paths as $file_path) {
@@ -96,6 +95,5 @@ string(1) "0"
 string(1) "0"
 string(1) " "
 string(1) " "
-string(0) ""
 string(0) ""
 string(0) ""

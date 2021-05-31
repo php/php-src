@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -189,7 +189,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 
 	/*
 	 * This loop is needed because ap_get_brigade() can return us partial data
-	 * which would cause premature termination of request read. Therefor we
+	 * which would cause premature termination of request read. Therefore we
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
@@ -675,7 +675,7 @@ zend_first_try {
 		/*
 		 * check if coming due to ErrorDocument
 		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
-		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
+		 * during processing of the request by PHP during POST processing. Therefore we need to re-use the exiting
 		 * PHP instance to handle the request rather then creating a new one.
 		*/
 		if (parent_req && parent_req->status != HTTP_OK && parent_req->status != 413 && strcmp(r->protocol, "INCLUDED")) {
@@ -699,12 +699,14 @@ zend_first_try {
 	} else {
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, (char *) r->filename);
+		zfd.primary_script = 1;
 
 		if (!parent_req) {
 			php_execute_script(&zfd);
 		} else {
 			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
 		}
+		zend_destroy_file_handle(&zfd);
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
 			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));

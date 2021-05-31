@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -23,7 +23,6 @@
  * - optimize series of JMPs
  */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -261,7 +260,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						/*       is not used on the following path and             */
 						/*       should be used once on the branch path.           */
 						/*                                                         */
-						/*       The pattern works well only if jums processed in  */
+						/*       The pattern works well only if jumps processed in */
 						/*       direct order, otherwise it breaks JMPZ_EX         */
 						/*       sequences too early.                              */
 						opline->result.var = target->result.var;

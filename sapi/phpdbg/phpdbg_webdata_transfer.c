@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,14 +17,6 @@
 #include "phpdbg_webdata_transfer.h"
 #include "ext/standard/php_var.h"
 
-static int phpdbg_is_auto_global(char *name, int len) {
-	int ret;
-	zend_string *str = zend_string_init(name, len, 0);
-	ret = zend_is_auto_global(str);
-	zend_string_free(str);
-	return ret;
-}
-
 PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 	zval array;
 	HashTable *ht;
@@ -35,11 +27,10 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 
 	/* fetch superglobals */
 	{
-		phpdbg_is_auto_global(ZEND_STRL("GLOBALS"));
 		/* might be JIT */
-		phpdbg_is_auto_global(ZEND_STRL("_ENV"));
-		phpdbg_is_auto_global(ZEND_STRL("_SERVER"));
-		phpdbg_is_auto_global(ZEND_STRL("_REQUEST"));
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
+		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST));
 		array_init(&zv[1]);
 		zend_hash_copy(Z_ARRVAL(zv[1]), &EG(symbol_table), NULL);
 		Z_ARRVAL(zv[1])->pDestructor = NULL; /* we're operating on a copy! Don't double free zvals */

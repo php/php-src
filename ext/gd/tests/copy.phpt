@@ -1,9 +1,7 @@
 --TEST--
 imagecopy
---SKIPIF--
-<?php
-        if (!function_exists('imagecopy')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

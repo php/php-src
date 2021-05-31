@@ -22,6 +22,7 @@
 
 #include "zend.h"
 #include "zend_compile.h"
+#include "zend_fibers.h"
 
 BEGIN_EXTERN_C()
 
@@ -72,10 +73,15 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 
 ZEND_API void zend_observer_fcall_end_all(void);
 
-typedef void (*zend_observer_error_cb)(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+typedef void (*zend_observer_error_cb)(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
-void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
+
+typedef void (*zend_observer_fiber_switch_handler)(zend_fiber *from, zend_fiber *to);
+
+ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler);
+void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to);
 
 END_EXTERN_C()
 

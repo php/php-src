@@ -1,8 +1,9 @@
 --TEST--
 Bug #55797: Integer overflow in SdnToGregorian leads to segfault (in optimized builds)
+--EXTENSIONS--
+calendar
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (PHP_INT_SIZE != 4) {
         die("skip this test is for 32bit platform only");
 }

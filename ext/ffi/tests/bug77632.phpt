@@ -1,8 +1,9 @@
 --TEST--
 Bug #77632 (FFI Segfaults When Called With Variadics)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 try {
     $libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
 } catch (Throwable $_) {

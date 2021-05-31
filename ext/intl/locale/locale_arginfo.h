@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4135dc9df49d3fe20275d49bad428a2e3e0a8752 */
+ * Stub hash: 6b873a68045fb5cf75e23991a3c77aa01a8893ee */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -98,3 +98,13 @@ static const zend_function_entry class_Locale_methods[] = {
 	ZEND_ME_MAPPING(acceptFromHttp, locale_accept_from_http, arginfo_class_Locale_acceptFromHttp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Locale(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Locale", class_Locale_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

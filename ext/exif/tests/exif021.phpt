@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD and GPS data in Motorola byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
@@ -1618,7 +1618,7 @@ array(34) {
   ["Copyright"]=>
   string(12) "Eric Stewart"
   ["GPSVersion"]=>
-  string(4) "  "
+  string(4) "%0%0"
   ["GPSLatitudeRef"]=>
   string(1) "N"
   ["GPSLatitude"]=>
@@ -1642,7 +1642,7 @@ array(34) {
     string(3) "0/1"
   }
   ["GPSAltitudeRef"]=>
-  string(1) " "
+  string(1) "%0"
   ["GPSAltitude"]=>
   string(5) "295/1"
   ["GPSTimeStamp"]=>

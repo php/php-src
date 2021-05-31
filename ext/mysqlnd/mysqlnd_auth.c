@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -648,7 +648,11 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 	if (passwd && passwd_len) {
 		ret = (zend_uchar*) zend_strndup(passwd, passwd_len);
 	}
-	*auth_data_len = passwd_len;
+	/*
+	  Trailing null required. bug#78680
+	  https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_authentication_methods_clear_text_password.html
+	*/
+	*auth_data_len = passwd_len + 1;
 
 	return ret;
 }

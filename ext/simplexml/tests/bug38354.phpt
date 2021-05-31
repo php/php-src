@@ -1,7 +1,7 @@
 --TEST--
 Bug #38354 (Unwanted reformatting of XML when using AsXML)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

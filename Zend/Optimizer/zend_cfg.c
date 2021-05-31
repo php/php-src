@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,13 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
 #include "zend_worklist.h"
 #include "zend_optimizer.h"
 #include "zend_optimizer_internal.h"
+#include "zend_sort.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {
@@ -301,6 +301,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
@@ -314,6 +315,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
 				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				ZEND_FALLTHROUGH;
 			case ZEND_GENERATOR_CREATE:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
@@ -514,6 +516,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_EXIT:
 			case ZEND_THROW:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				break;
 			case ZEND_JMP:
 				block->successors_count = 1;

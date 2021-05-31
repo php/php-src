@@ -107,6 +107,18 @@ ArgumentCountError: NumberFormatter::create() expects at least 2 arguments, 0 gi
 Error: NumberFormatter object is already constructed in %s on line %d
 'U_ZERO_ERROR'
 
+Deprecated: NumberFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+
+Deprecated: numfmt_create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+
 IntlException: Constructor failed in %s on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'

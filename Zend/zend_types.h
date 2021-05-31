@@ -138,13 +138,14 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
-#define _ZEND_TYPE_MASK ((1u << 24) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
+#define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_CE_BIT   (1u << 22)
-#define _ZEND_TYPE_LIST_BIT (1u << 21)
+#define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_CE_BIT   (1u << 23)
+#define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
+/* TODO: bit 21 is not used */
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Type mask excluding the flags above. */
@@ -323,7 +324,6 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
-		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
 		uint32_t     constant_flags;       /* constant flags */
 		uint32_t     extra;                /* not further specified */
@@ -538,6 +538,7 @@ struct _zend_ast_ref {
 #define IS_VOID						14
 #define IS_STATIC					15
 #define IS_MIXED					16
+#define IS_NEVER					17
 
 /* internal types */
 #define IS_INDIRECT             	12
@@ -546,8 +547,8 @@ struct _zend_ast_ref {
 #define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					17
-#define _IS_NUMBER					18
+#define _IS_BOOL					18
+#define _IS_NUMBER					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -586,9 +587,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
-#define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
-#define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
-
 #define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
 #define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
 
@@ -613,6 +611,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
 #define GC_TRY_ADDREF(p)			zend_gc_try_addref(&(p)->gc)
+#define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
@@ -694,6 +693,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
+#define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
@@ -709,6 +709,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
+
+/* Fast class cache */
+#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+#define ZSTR_GET_CE_CACHE(s) \
+	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(GC_REFCOUNT(s)))
+#define ZSTR_SET_CE_CACHE(s, ce) do { \
+		*((zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(GC_REFCOUNT(s))) = ce; \
+	} while (0)
 
 /* Recursion protection macros must be used only for arrays and objects */
 #define GC_IS_RECURSIVE(p) \
@@ -1168,6 +1176,13 @@ static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
 	}
 }
 
+static zend_always_inline void zend_gc_try_delref(zend_refcounted_h *p) {
+	if (!(p->u.type_info & GC_IMMUTABLE)) {
+		ZEND_RC_MOD_CHECK(p);
+		--p->refcount;
+	}
+}
+
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
 	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
@@ -1339,9 +1354,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			zend_string *_str = Z_STR_P(_zv);			\
 			ZEND_ASSERT(Z_REFCOUNTED_P(_zv));			\
 			ZEND_ASSERT(!ZSTR_IS_INTERNED(_str));		\
-			Z_DELREF_P(_zv);							\
 			ZVAL_NEW_STR(_zv, zend_string_init(			\
 				ZSTR_VAL(_str),	ZSTR_LEN(_str), 0));	\
+			GC_DELREF(_str);							\
 		}												\
 	} while (0)
 
@@ -1349,10 +1364,8 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		zval *__zv = (zv);								\
 		zend_array *_arr = Z_ARR_P(__zv);				\
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
-			if (Z_REFCOUNTED_P(__zv)) {					\
-				GC_DELREF(_arr);						\
-			}											\
 			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
+			GC_TRY_DELREF(_arr);						\
 		}												\
 	} while (0)
 

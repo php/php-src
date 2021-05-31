@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -165,6 +165,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 					node->ns = NULL;
 				}
 				node->type = XML_ELEMENT_NODE;
+				ZEND_FALLTHROUGH;
 			default:
 				xmlFreeNode(node);
 		}
@@ -188,9 +189,10 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					php_libxml_node_free_list((xmlNodePtr) node->properties);
 					break;
 				case XML_ATTRIBUTE_NODE:
-						if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-							xmlRemoveID(node->doc, (xmlAttrPtr) node);
-						}
+					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+						xmlRemoveID(node->doc, (xmlAttrPtr) node);
+					}
+					ZEND_FALLTHROUGH;
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
@@ -359,6 +361,54 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 
 	if (context == NULL) {
 		return(NULL);
+	}
+
+	/* Check if there's been an external transport protocol with an encoding information */
+	if (enc == XML_CHAR_ENCODING_NONE) {
+		php_stream *s  = (php_stream *) context;
+
+		if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
+			zval *header;
+
+			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
+				const char buf[] = "Content-Type:";
+				if (Z_TYPE_P(header) == IS_STRING &&
+						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
+					char *needle = estrdup("charset=");
+					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
+					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), sizeof("charset=")-1);
+
+					if (encoding) {
+						char *end;
+
+						encoding += sizeof("charset=")-1;
+						if (*encoding == '"') {
+							encoding++;
+						}
+						end = strchr(encoding, ';');
+						if (end == NULL) {
+							end = encoding + strlen(encoding);
+						}
+						end--; /* end == encoding-1 isn't a buffer underrun */
+						while (*end == ' ' || *end == '\t') {
+							end--;
+						}
+						if (*end == '"') {
+							end--;
+						}
+						if (encoding >= end) continue;
+						*(end+1) = '\0';
+						enc = xmlParseCharEncoding(encoding);
+						if (enc <= XML_CHAR_ENCODING_NONE) {
+							enc = XML_CHAR_ENCODING_NONE;
+						}
+					}
+					efree(haystack);
+					efree(needle);
+					break; /* found content-type */
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 
 	/* Allocate the Input buffer front-end. */
@@ -1080,7 +1130,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 /* {{{ Common functions shared by extensions */
 int php_libxml_xmlCheckUTF8(const unsigned char *s)
 {
-	int i;
+	size_t i;
 	unsigned char c;
 
 	for (i = 0; (c = s[i++]);) {

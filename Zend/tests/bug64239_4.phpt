@@ -25,7 +25,7 @@ C::Bmethod();
 C::t2method();
 ?>
 --EXPECTF--
-#0  A::Bmethod() called at [%sbug64239_4.php:%d]
-#0  A::t2method() called at [%sbug64239_4.php:%d]
-#0  C::Bmethod() called at [%sbug64239_4.php:%d]
-#0  A::t2method() called at [%sbug64239_4.php:%d]
+#0 %s(%d): A::Bmethod()
+#0 %s(%d): A::t2method()
+#0 %s(%d): C::Bmethod()
+#0 %s(%d): A::t2method()

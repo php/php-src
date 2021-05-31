@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -44,13 +44,9 @@ PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
-	zend_class_entry ce;
+	php_json_serializable_ce = register_class_JsonSerializable();
 
-	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
-	php_json_serializable_ce = zend_register_internal_interface(&ce);
-
-	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
-	php_json_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	php_json_exception_ce = register_class_JsonException(zend_ce_exception);
 
 	/* options for json_encode */
 	PHP_JSON_REGISTER_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG);
@@ -191,6 +187,8 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 			return "The decoded property name is invalid";
 		case PHP_JSON_ERROR_UTF16:
 			return "Single unpaired UTF-16 surrogate in unicode escape";
+		case PHP_JSON_ERROR_NON_BACKED_ENUM:
+			return "Non-backed enums have no default serialization";
 		default:
 			return "Unknown error";
 	}

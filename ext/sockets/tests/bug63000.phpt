@@ -5,6 +5,9 @@ Bug #63000: Multicast on OSX
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
+if (str_contains(PHP_OS, 'FreeBSD')) {
+    die('skip option not supported on FreeBSD');
+}
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);

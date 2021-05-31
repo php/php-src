@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -55,7 +55,7 @@ int dom_document_doctype_read(dom_object *obj, zval *retval)
 	xmlDtdPtr dtdptr;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -95,7 +95,7 @@ int dom_document_document_element_read(dom_object *obj, zval *retval)
 	xmlNode *root;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -121,7 +121,7 @@ int dom_document_encoding_read(dom_object *obj, zval *retval)
 	char *encoding;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -143,7 +143,7 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 	xmlCharEncodingHandlerPtr handler;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -183,7 +183,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -197,7 +197,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval)
 	zend_long standalone;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -220,7 +220,7 @@ int dom_document_version_read(dom_object *obj, zval *retval)
 	char *version;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -241,7 +241,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -452,7 +452,7 @@ int dom_document_document_uri_read(dom_object *obj, zval *retval)
 	char *url;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -472,7 +472,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -986,7 +986,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 	xmlChar *local, *nsuri;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -995,7 +995,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
-	nsuri = xmlCharStrndup(uri, uri_len);
+	nsuri = xmlCharStrndup(uri ? uri : "", uri_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
 }
 /* }}} end dom_document_get_elements_by_tag_name_ns */

@@ -2,11 +2,10 @@
 Test imagecolorstotal() function : basic functionality
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
-    }
     if (!function_exists("imagecolorstotal")) {
         die("skip imagecolorstotal() not available.");
     }

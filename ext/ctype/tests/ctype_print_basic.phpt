@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_print() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 echo "*** Testing ctype_print() : basic functionality ***\n";

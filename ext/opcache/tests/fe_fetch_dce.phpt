@@ -4,6 +4,8 @@ Incorrect DCE with FE_FETCH
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

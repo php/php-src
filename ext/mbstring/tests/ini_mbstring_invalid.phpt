@@ -10,7 +10,6 @@ mbstring.http_input=UTF-8,HTTP_INPUT,ASCII
 mbstring.http_output=HTTP_OUTPUT
 mbstring.http_output_conv_mimetypes=UNKNOWN_MIME_TYPE_OUTPUT
 mbstring.substitute_character=U+3000,NON_EXISTING_CHARACTER,JIS+7E7E
-mbstring.func_overload=BOOL_OVERLOAD
 mbstring.encoding_translation=BOOL_TRANSLATION
 mbstring.strict_detection=BOOL_STRICT_DETECTION
 --FILE--

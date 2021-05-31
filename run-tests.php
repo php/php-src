@@ -25,10 +25,16 @@
 
 /* $Id$ */
 
+/* Temporary variables while this file is being refactored. */
+/** @var ?JUnit */
+$junit = null;
+
+/* End temporary variables. */
+
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
  *
- * Minimum required PHP version: 7.1.0
+ * Minimum required PHP version: 7.4.0
  */
 
 function show_usage(): void
@@ -156,6 +162,10 @@ function main(): void
     global $workers, $workerID;
     global $context_line_count;
 
+    // Temporary for the duration of refactoring
+    /** @var JUnit */
+    global $junit;
+
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
 
     $workerID = 0;
@@ -247,7 +257,7 @@ function main(): void
         $DETAILED = 0;
     }
 
-    junit_init();
+    $junit = new JUnit($environment, $workerID);
 
     if (getenv('SHOW_ONLY_GROUPS')) {
         $SHOW_ONLY_GROUPS = explode(",", getenv('SHOW_ONLY_GROUPS'));
@@ -286,7 +296,6 @@ function main(): void
         'precision=14',
         'serialize_precision=-1',
         'memory_limit=128M',
-        'log_errors_max_len=0',
         'opcache.fast_shutdown=0',
         'opcache.file_update_protection=0',
         'opcache.revalidate_freq=0',
@@ -340,7 +349,7 @@ function main(): void
     if (function_exists('sapi_windows_vt100_support') && !sapi_windows_vt100_support(STDOUT, true)) {
         $colorize = false;
     }
-    if (array_key_exists('NO_COLOR', $_ENV)) {
+    if (array_key_exists('NO_COLOR', $environment)) {
         $colorize = false;
     }
     $selected_tests = false;
@@ -772,9 +781,9 @@ function main(): void
         save_or_mail_results();
     }
 
-    junit_save_xml();
+    $junit->saveXML();
     if (getenv('REPORT_EXIT_STATUS') !== '0' && getenv('REPORT_EXIT_STATUS') !== 'no' &&
-            ($sum_results['FAILED'] || $sum_results['LEAKED'])) {
+            ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
         exit(1);
     }
 }
@@ -851,9 +860,22 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
     @unlink($info_file);
 
-    // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    // load list of enabled and loadable extensions
+    save_text($info_file, <<<'PHP'
+        <?php
+        echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions()));
+        $ext_dir = ini_get("extension_dir");
+        foreach (scandir($ext_dir) as $file) {
+            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                continue;
+            }
+            $ext = $matches[1];
+            if (!extension_loaded($ext) && @dl($file)) {
+                echo ",", $ext;
+            }
+        }
+        ?>
+    PHP);
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -861,7 +883,6 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
         'xdebug' => ['xdebug.mode=off'],
-        'mbstring' => ['mbstring.func_overload=0'],
     ];
 
     foreach ($info_params_ex as $ext => $ini_overwrites_ex) {
@@ -1280,6 +1301,9 @@ function system_with_timeout(
     }
     if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
         $data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
+    } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
+        // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
+        $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
     }
 
     proc_close($proc);
@@ -1364,6 +1388,8 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
 {
     global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
+    global $junit;
+
     // The PHP binary running run-tests.php, and run-tests.php itself
     // This PHP executable is *not* necessarily the same as the tested version
     $thisPHP = PHP_BINARY;
@@ -1371,10 +1397,6 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
 
     $workerProcs = [];
     $workerSocks = [];
-
-    echo "=====================================================================\n";
-    echo "========= WELCOME TO THE FUTURE: run-tests PARALLEL EDITION =========\n";
-    echo "=====================================================================\n";
 
     // Each test may specify a list of conflict keys. While a test that conflicts with
     // key K is running, no other test that conflicts with K may run. Conflict keys are
@@ -1442,11 +1464,11 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
     $startTime = microtime(true);
     for ($i = 1; $i <= $workers; $i++) {
         $proc = proc_open(
-            $thisPHP . ' ' . escapeshellarg($thisScript),
+            [$thisPHP, $thisScript],
             [], // Inherit our stdin, stdout and stderr
             $pipes,
             null,
-            $_ENV + [
+            $GLOBALS['environment'] + [
                 "TEST_PHP_WORKER" => $i,
                 "TEST_PHP_URI" => $sockUri,
             ],
@@ -1562,9 +1584,7 @@ escape:
                                     }
                                 }
                             }
-                            if (junit_enabled()) {
-                                junit_merge_results($message["junit"]);
-                            }
+                            $junit->mergeResults($message["junit"]);
                             // no break
                         case "ready":
                             // Schedule sequential tests only once we are down to one worker.
@@ -1704,6 +1724,8 @@ function run_worker(): void
 {
     global $workerID, $workerSock;
 
+    global $junit;
+
     $sockUri = getenv("TEST_PHP_URI");
 
     $workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
@@ -1750,9 +1772,9 @@ function run_worker(): void
                 run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
                 send_message($workerSock, [
                     "type" => "tests_finished",
-                    "junit" => junit_enabled() ? $GLOBALS['JUNIT'] : null,
+                    "junit" => $junit->isEnabled() ? $junit : null,
                 ]);
-                junit_init();
+                $junit->clear();
                 break;
             default:
                 send_message($workerSock, [
@@ -1789,9 +1811,11 @@ function show_file_block(string $file, string $block, ?string $section = null): 
 }
 
 function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+    global $junit;
+
     show_result('SKIP', $tested, $tested_file, "reason: $reason");
-    junit_init_suite(junit_get_suitename_for($shortname));
-    junit_mark_test_as('SKIP', $shortname, $tested, 0, $reason);
+    $junit->initSuite($junit->getSuiteName($shortname));
+    $junit->markTestAs('SKIP', $shortname, $tested, 0, $reason);
     return 'SKIPPED';
 }
 
@@ -1814,6 +1838,16 @@ function run_test(string $php, $file, array $env): string
     global $num_repeats;
     // Parallel testing
     global $workerID;
+
+    // Temporary
+    /** @var JUnit */
+    global $junit;
+
+    static $skipCache;
+    if (!$skipCache) {
+        $skipCache = new SkipCache($cfg['keep']['skip']);
+    }
+
     $temp_filenames = null;
     $org_file = $file;
 
@@ -1836,141 +1870,36 @@ TEST $file
 ";
     }
 
-    // Load the sections of the test file.
-    $section_text = ['TEST' => ''];
-
-    $fp = fopen($file, "rb") or error("Cannot open test file: $file");
-
-    $bork_info = null;
-
-    if (!feof($fp)) {
-        $line = fgets($fp);
-
-        if ($line === false) {
-            $bork_info = "cannot read test";
-        }
-    } else {
-        $bork_info = "empty test [$file]";
-    }
-    if ($bork_info === null && strncmp('--TEST--', $line, 8)) {
-        $bork_info = "tests must start with --TEST-- [$file]";
-    }
-
-    $section = 'TEST';
-    $secfile = false;
-    $secdone = false;
-
-    while (!feof($fp)) {
-        $line = fgets($fp);
-
-        if ($line === false) {
-            break;
-        }
-
-        // Match the beginning of a section.
-        if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
-            $section = (string) $r[1];
-
-            if (isset($section_text[$section]) && $section_text[$section]) {
-                $bork_info = "duplicated $section section";
-            }
-
-            // check for unknown sections
-            if (!in_array($section, [
-                'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
-                'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
-                'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
-                'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
-                'INI', 'ENV', 'EXTENSIONS',
-                'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
-                'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
-            ])) {
-                $bork_info = 'Unknown section "' . $section . '"';
-            }
-
-            $section_text[$section] = '';
-            $secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
-            $secdone = false;
-            continue;
-        }
-
-        // Add to the section text.
-        if (!$secdone) {
-            $section_text[$section] .= $line;
-        }
-
-        // End of actual test?
-        if ($secfile && preg_match('/^===DONE===\s*$/', $line)) {
-            $secdone = true;
-        }
-    }
-
     $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
     $tested_file = $shortname;
-    $tested = trim($section_text['TEST']);
 
-    // the redirect section allows a set of tests to be reused outside of
-    // a given test dir
-    if ($bork_info === null) {
-        if (isset($section_text['REDIRECTTEST'])) {
-            if ($IN_REDIRECT) {
-                $bork_info = "Can't redirect a test from within a redirected test";
-            }
-        } else {
-            if (!isset($section_text['PHPDBG']) && isset($section_text['FILE']) + isset($section_text['FILEEOF']) + isset($section_text['FILE_EXTERNAL']) != 1) {
-                $bork_info = "missing section --FILE--";
-            }
-
-            if (isset($section_text['FILEEOF'])) {
-                $section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
-                unset($section_text['FILEEOF']);
-            }
-
-            if ($num_repeats > 1 && isset($section_text['FILE_EXTERNAL'])) {
-                return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
-            }
-
-            foreach (['FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX'] as $prefix) {
-                $key = $prefix . '_EXTERNAL';
-
-                if (isset($section_text[$key])) {
-                    // don't allow tests to retrieve files from anywhere but this subdirectory
-                    $section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
-
-                    if (file_exists($section_text[$key])) {
-                        $section_text[$prefix] = file_get_contents($section_text[$key]);
-                        unset($section_text[$key]);
-                    } else {
-                        $bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
-                    }
-                }
-            }
-
-            if ((isset($section_text['EXPECT']) + isset($section_text['EXPECTF']) + isset($section_text['EXPECTREGEX'])) != 1) {
-                $bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
-            }
-        }
-    }
-    fclose($fp);
-
-    if ($bork_info !== null) {
-        show_result("BORK", $bork_info, $tested_file);
+    try {
+        $test = new TestFile($file, (bool)$IN_REDIRECT);
+    } catch (BorkageException $ex) {
+        show_result("BORK", $ex->getMessage(), $tested_file);
         $PHP_FAILED_TESTS['BORKED'][] = [
             'name' => $file,
             'test_name' => '',
             'output' => '',
             'diff' => '',
-            'info' => "$bork_info [$file]",
+            'info' => "{$ex->getMessage()} [$file]",
         ];
 
-        junit_mark_test_as('BORK', $shortname, $tested_file, 0, $bork_info);
+        $junit->markTestAs('BORK', $shortname, $tested_file, 0, $ex->getMessage());
         return 'BORKED';
     }
 
-    if (isset($section_text['CAPTURE_STDIO'])) {
-        $captureStdIn = stripos($section_text['CAPTURE_STDIO'], 'STDIN') !== false;
-        $captureStdOut = stripos($section_text['CAPTURE_STDIO'], 'STDOUT') !== false;
-        $captureStdErr = stripos($section_text['CAPTURE_STDIO'], 'STDERR') !== false;
+    $tested = $test->getName();
+
+    if ($num_repeats > 1 && $test->hasSection('FILE_EXTERNAL')) {
+        return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
+    }
+
+    if ($test->hasSection('CAPTURE_STDIO')) {
+        $capture = $test->getSection('CAPTURE_STDIO');
+        $captureStdIn = stripos($capture, 'STDIN') !== false;
+        $captureStdOut = stripos($capture, 'STDOUT') !== false;
+        $captureStdErr = stripos($capture, 'STDERR') !== false;
     } else {
         $captureStdIn = true;
         $captureStdOut = true;
@@ -1983,7 +1912,7 @@ TEST $file
     }
 
     /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
-    if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
+    if ($test->isCGI()) {
         if (!$php_cgi) {
             return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
@@ -1996,11 +1925,7 @@ TEST $file
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
     $extra_options = '';
-    if (array_key_exists('PHPDBG', $section_text)) {
-        if (!isset($section_text['STDIN'])) {
-            $section_text['STDIN'] = $section_text['PHPDBG'] . "\n";
-        }
-
+    if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
             $php = $phpdbg . ' -qIb';
 
@@ -2016,13 +1941,13 @@ TEST $file
     }
 
     if ($num_repeats > 1) {
-        if (array_key_exists('CLEAN', $section_text)) {
+        if ($test->hasSection('CLEAN')) {
             return skip_test($tested, $tested_file, $shortname, 'Test with CLEAN might not be repeatable');
         }
-        if (array_key_exists('STDIN', $section_text)) {
+        if ($test->hasSection('STDIN')) {
             return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
         }
-        if (array_key_exists('CAPTURE_STDIO', $section_text)) {
+        if ($test->hasSection('CAPTURE_STDIO')) {
             return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
         }
     }
@@ -2069,8 +1994,8 @@ TEST $file
             mkdir(dirname($copy_file), 0777, true) or error("Cannot create output directory - " . dirname($copy_file));
         }
 
-        if (isset($section_text['FILE'])) {
-            save_text($copy_file, $section_text['FILE']);
+        if ($test->hasSection('FILE')) {
+            save_text($copy_file, $test->getSection('FILE'));
         }
 
         $temp_filenames = [
@@ -2088,7 +2013,7 @@ TEST $file
     }
 
     if (is_array($IN_REDIRECT)) {
-        $tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']);
+        $tested = $IN_REDIRECT['prefix'] . ' ' . $tested;
         $tested_file = $tmp_relative_file;
         $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $tested_file);
     }
@@ -2119,8 +2044,8 @@ TEST $file
     $env['CONTENT_LENGTH'] = '';
     $env['TZ'] = '';
 
-    if (!empty($section_text['ENV'])) {
-        foreach (explode("\n", trim($section_text['ENV'])) as $e) {
+    if ($test->sectionNotEmpty('ENV')) {
+        foreach (explode("\n", $test->getSection('ENV')) as $e) {
             $e = explode('=', trim($e), 2);
 
             if (!empty($e[0]) && isset($e[1])) {
@@ -2133,22 +2058,32 @@ TEST $file
     $ini_settings = $workerID ? ['opcache.cache_id' => "worker$workerID"] : [];
 
     // Additional required extensions
-    if (array_key_exists('EXTENSIONS', $section_text)) {
+    if ($test->hasSection('EXTENSIONS')) {
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        $ext_dir = `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-        $extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-        $loaded = explode(",", `$php $pass_options $extra_options $ext_params $no_file_cache -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
+        $missing = [];
         foreach ($extensions as $req_ext) {
-            if (!in_array($req_ext, $loaded)) {
-                if ($req_ext == 'opcache') {
-                    $ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+            if (!in_array(strtolower($req_ext), $loaded)) {
+                if ($req_ext == 'opcache' || $req_ext == 'xdebug') {
+                    $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ini_settings['zend_extension'][] = $ext_file;
                 } else {
-                    $ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
+                    $ini_settings['extension'][] = $ext_file;
+                }
+                if (!is_readable($ext_file)) {
+                    $missing[] = $req_ext;
                 }
             }
+        }
+        if ($missing) {
+            $message = 'Required extension' . (count($missing) > 1 ? 's' : '')
+                . ' missing: ' . implode(', ', $missing);
+            return skip_test($tested, $tested_file, $shortname, $message);
         }
     }
 
@@ -2176,12 +2111,12 @@ TEST $file
 
     // Any special ini settings
     // these may overwrite the test defaults...
-    if (array_key_exists('INI', $section_text)) {
-        $section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
-        $section_text['INI'] = str_replace('{TMP}', sys_get_temp_dir(), $section_text['INI']);
+    if ($test->hasSection('INI')) {
+        $ini = str_replace('{PWD}', dirname($file), $test->getSection('INI'));
+        $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
-        $section_text['INI'] = preg_replace('/{MAIL:(\S+)}/', $replacement, $section_text['INI']);
-        settings2array(preg_split("/[\n\r]+/", $section_text['INI']), $ini_settings);
+        $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
+        settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
         if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
             return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
@@ -2196,97 +2131,89 @@ TEST $file
     $info = '';
     $warn = false;
 
-    if (array_key_exists('SKIPIF', $section_text)) {
-        if (trim($section_text['SKIPIF'])) {
-            show_file_block('skip', $section_text['SKIPIF']);
-            save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
-            $extra = !IS_WINDOWS ?
-                "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
+    if ($test->sectionNotEmpty('SKIPIF')) {
+        show_file_block('skip', $test->getSection('SKIPIF'));
+        $extra = !IS_WINDOWS ?
+            "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
-            if ($valgrind) {
-                $env['USE_ZEND_ALLOC'] = '0';
-                $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
+        if ($valgrind) {
+            $env['USE_ZEND_ALLOC'] = '0';
+            $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
+        }
+
+        $junit->startTimer($shortname);
+
+        $startTime = microtime(true);
+        $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
+        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
+
+        $time = microtime(true) - $startTime;
+        $junit->stopTimer($shortname);
+
+        if ($time > $slow_min_ms / 1000) {
+            $PHP_FAILED_TESTS['SLOW'][] = [
+                'name' => $file,
+                'test_name' => 'SKIPIF of ' . $tested . " [$tested_file]",
+                'output' => '',
+                'diff' => '',
+                'info' => $time,
+            ];
+        }
+
+        if (!$cfg['keep']['skip']) {
+            @unlink($test_skipif);
+        }
+
+        if (!strncasecmp('skip', $output, 4)) {
+            if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
+                show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
+            } else {
+                show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
             }
 
-            junit_start_timer($shortname);
+            $message = !empty($m[1]) ? $m[1] : '';
+            $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
+            return 'SKIPPED';
+        }
 
-            $startTime = microtime(true);
-            $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0 \"$test_skipif\"", $env);
-            $output = trim($output);
-            $time = microtime(true) - $startTime;
 
-            junit_finish_timer($shortname);
+        if (!strncasecmp('info', $output, 4) && preg_match('/^info\s*(.+)/i', $output, $m)) {
+            $info = " (info: $m[1])";
+        } elseif (!strncasecmp('warn', $output, 4) && preg_match('/^warn\s+(.+)/i', $output, $m)) {
+            $warn = true; /* only if there is a reason */
+            $info = " (warn: $m[1])";
+        } elseif (!strncasecmp('xfail', $output, 5)) {
+            // Pretend we have an XFAIL section
+            $test->setSection('XFAIL', ltrim(substr($output, 5)));
+        } elseif ($output !== '') {
+            show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
+            $PHP_FAILED_TESTS['BORKED'][] = [
+                'name' => $file,
+                'test_name' => '',
+                'output' => '',
+                'diff' => '',
+                'info' => "$output [$file]",
+            ];
 
-            if ($time > $slow_min_ms / 1000) {
-                $PHP_FAILED_TESTS['SLOW'][] = [
-                    'name' => $file,
-                    'test_name' => 'SKIPIF of ' . $tested . " [$tested_file]",
-                    'output' => '',
-                    'diff' => '',
-                    'info' => $time,
-                ];
-            }
-
-            if (!$cfg['keep']['skip']) {
-                @unlink($test_skipif);
-            }
-
-            if (!strncasecmp('skip', $output, 4)) {
-                if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
-                    show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
-                } else {
-                    show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
-                }
-
-                if (!$cfg['keep']['skip']) {
-                    @unlink($test_skipif);
-                }
-
-                $message = !empty($m[1]) ? $m[1] : '';
-                junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
-                return 'SKIPPED';
-            }
-
-            if (!strncasecmp('info', $output, 4) && preg_match('/^info\s*(.+)/i', $output, $m)) {
-                $info = " (info: $m[1])";
-            } elseif (!strncasecmp('warn', $output, 4) && preg_match('/^warn\s+(.+)/i', $output, $m)) {
-                $warn = true; /* only if there is a reason */
-                $info = " (warn: $m[1])";
-            } elseif (!strncasecmp('xfail', $output, 5)) {
-                // Pretend we have an XFAIL section
-                $section_text['XFAIL'] = ltrim(substr($output, 5));
-            } elseif ($output !== '') {
-                show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
-                $PHP_FAILED_TESTS['BORKED'][] = [
-                    'name' => $file,
-                    'test_name' => '',
-                    'output' => '',
-                    'diff' => '',
-                    'info' => "$output [$file]",
-                ];
-
-                junit_mark_test_as('BORK', $shortname, $tested, null, $output);
-                return 'BORKED';
-            }
+            $junit->markTestAs('BORK', $shortname, $tested, null, $output);
+            return 'BORKED';
         }
     }
 
-    if (!extension_loaded("zlib")
-        && (array_key_exists("GZIP_POST", $section_text)
-        || array_key_exists("DEFLATE_POST", $section_text))) {
+    if (!extension_loaded("zlib") && $test->hasAnySections("GZIP_POST", "DEFLATE_POST")) {
         $message = "ext/zlib required";
         show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
-        junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
+        $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
         return 'SKIPPED';
     }
 
-    if (isset($section_text['REDIRECTTEST'])) {
+    if ($test->hasSection('REDIRECTTEST')) {
         $test_files = [];
 
-        $IN_REDIRECT = eval($section_text['REDIRECTTEST']);
+        $IN_REDIRECT = eval($test->getSection('REDIRECTTEST'));
         $IN_REDIRECT['via'] = "via [$shortname]\n\t";
         $IN_REDIRECT['dir'] = realpath(dirname($file));
-        $IN_REDIRECT['prefix'] = trim($section_text['TEST']);
+        $IN_REDIRECT['prefix'] = $tested;
 
         if (!empty($IN_REDIRECT['TESTS'])) {
             if (is_array($org_file)) {
@@ -2316,7 +2243,7 @@ TEST $file
             // a redirected test never fails
             $IN_REDIRECT = false;
 
-            junit_mark_test_as('PASS', $shortname, $tested);
+            $junit->markTestAs('PASS', $shortname, $tested);
             return 'REDIR';
         } else {
             $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
@@ -2331,7 +2258,7 @@ TEST $file
         }
     }
 
-    if (is_array($org_file) || isset($section_text['REDIRECTTEST'])) {
+    if (is_array($org_file) || $test->hasSection('REDIRECTTEST')) {
         if (is_array($org_file)) {
             $file = $org_file[0];
         }
@@ -2346,21 +2273,21 @@ TEST $file
             'info' => "$bork_info [$file]",
         ];
 
-        junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
+        $junit->markTestAs('BORK', $shortname, $tested, null, $bork_info);
 
         return 'BORKED';
     }
 
     // We've satisfied the preconditions - run the test!
-    if (isset($section_text['FILE'])) {
-        show_file_block('php', $section_text['FILE'], 'TEST');
-        save_text($test_file, $section_text['FILE'], $temp_file);
+    if ($test->hasSection('FILE')) {
+        show_file_block('php', $test->getSection('FILE'), 'TEST');
+        save_text($test_file, $test->getSection('FILE'), $temp_file);
     } else {
         $test_file = $temp_file = "";
     }
 
-    if (array_key_exists('GET', $section_text)) {
-        $query_string = trim($section_text['GET']);
+    if ($test->hasSection('GET')) {
+        $query_string = trim($test->getSection('GET'));
     } else {
         $query_string = '';
     }
@@ -2376,13 +2303,13 @@ TEST $file
         $env['SCRIPT_FILENAME'] = $test_file;
     }
 
-    if (array_key_exists('COOKIE', $section_text)) {
-        $env['HTTP_COOKIE'] = trim($section_text['COOKIE']);
+    if ($test->hasSection('COOKIE')) {
+        $env['HTTP_COOKIE'] = trim($test->getSection('COOKIE'));
     } else {
         $env['HTTP_COOKIE'] = '';
     }
 
-    $args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
+    $args = $test->hasSection('ARGS') ? ' -- ' . $test->getSection('ARGS') : '';
 
     if ($preload && !empty($test_file)) {
         save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
@@ -2392,8 +2319,8 @@ TEST $file
         $pass_options .= " -d opcache.preload=" . $preload_filename;
     }
 
-    if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
-        $post = trim($section_text['POST_RAW']);
+    if ($test->sectionNotEmpty('POST_RAW')) {
+        $post = trim($test->getSection('POST_RAW'));
         $raw_lines = explode("\n", $post);
 
         $request = '';
@@ -2417,14 +2344,14 @@ TEST $file
         $env['REQUEST_METHOD'] = 'POST';
 
         if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+            $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
 
         save_text($tmp_post, $request);
         $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
-    } elseif (array_key_exists('PUT', $section_text) && !empty($section_text['PUT'])) {
-        $post = trim($section_text['PUT']);
+    } elseif ($test->sectionNotEmpty('PUT')) {
+        $post = trim($test->getSection('PUT'));
         $raw_lines = explode("\n", $post);
 
         $request = '';
@@ -2448,14 +2375,14 @@ TEST $file
         $env['REQUEST_METHOD'] = 'PUT';
 
         if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+            $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
 
         save_text($tmp_post, $request);
         $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
-    } elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
-        $post = trim($section_text['POST']);
+    } elseif ($test->sectionNotEmpty('POST')) {
+        $post = trim($test->getSection('POST'));
         $content_length = strlen($post);
         save_text($tmp_post, $post);
 
@@ -2469,8 +2396,8 @@ TEST $file
         }
 
         $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
-    } elseif (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
-        $post = trim($section_text['GZIP_POST']);
+    } elseif ($test->sectionNotEmpty('GZIP_POST')) {
+        $post = trim($test->getSection('GZIP_POST'));
         $post = gzencode($post, 9, FORCE_GZIP);
         $env['HTTP_CONTENT_ENCODING'] = 'gzip';
 
@@ -2482,8 +2409,8 @@ TEST $file
         $env['CONTENT_LENGTH'] = $content_length;
 
         $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
-    } elseif (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
-        $post = trim($section_text['DEFLATE_POST']);
+    } elseif ($test->sectionNotEmpty('DEFLATE_POST')) {
+        $post = trim($test->getSection('DEFLATE_POST'));
         $post = gzcompress($post, 9);
         $env['HTTP_CONTENT_ENCODING'] = 'deflate';
         save_text($tmp_post, $post);
@@ -2503,6 +2430,7 @@ TEST $file
         $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
+    $orig_cmd = $cmd;
     if ($valgrind) {
         $env['USE_ZEND_ALLOC'] = '0';
         $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
@@ -2524,13 +2452,14 @@ COMMAND $cmd
 ";
     }
 
-    junit_start_timer($shortname);
+    $junit->startTimer($shortname);
     $hrtime = hrtime();
     $startTime = $hrtime[0] * 1000000000 + $hrtime[1];
 
-    $out = system_with_timeout($cmd, $env, $section_text['STDIN'] ?? null, $captureStdIn, $captureStdOut, $captureStdErr);
+    $stdin = $test->hasSection('STDIN') ? $test->getSection('STDIN') : null;
+    $out = system_with_timeout($cmd, $env, $stdin, $captureStdIn, $captureStdOut, $captureStdErr);
 
-    junit_finish_timer($shortname);
+    $junit->stopTimer($shortname);
     $hrtime = hrtime();
     $time = $hrtime[0] * 1000000000 + $hrtime[1] - $startTime;
     if ($time >= $slow_min_ms * 1000000) {
@@ -2543,20 +2472,18 @@ COMMAND $cmd
         ];
     }
 
-    if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
-        if (trim($section_text['CLEAN'])) {
-            show_file_block('clean', $section_text['CLEAN']);
-            save_text($test_clean, trim($section_text['CLEAN']), $temp_clean);
+    if ($test->sectionNotEmpty('CLEAN') && (!$no_clean || $cfg['keep']['clean'])) {
+        show_file_block('clean', $test->getSection('CLEAN'));
+        save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
-            if (!$no_clean) {
-                $extra = !IS_WINDOWS ?
-                    "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-                system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
-            }
+        if (!$no_clean) {
+            $extra = !IS_WINDOWS ?
+                "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
+            system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+        }
 
-            if (!$cfg['keep']['clean']) {
-                @unlink($test_clean);
-            }
+        if (!$cfg['keep']['clean']) {
+            @unlink($test_clean);
         }
     }
 
@@ -2612,10 +2539,10 @@ COMMAND $cmd
 
     $failed_headers = false;
 
-    if (isset($section_text['EXPECTHEADERS'])) {
+    if ($test->hasSection('EXPECTHEADERS')) {
         $want = [];
         $wanted_headers = [];
-        $lines = preg_split("/[\n\r]+/", $section_text['EXPECTHEADERS']);
+        $lines = preg_split("/[\n\r]+/", $test->getSection('EXPECTHEADERS'));
 
         foreach ($lines as $line) {
             if (strpos($line, ':') !== false) {
@@ -2649,17 +2576,17 @@ COMMAND $cmd
         $output = trim(preg_replace("/\n?Warning: Can't preload [^\n]*\n?/", "", $output));
     }
 
-    if (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) {
-        if (isset($section_text['EXPECTF'])) {
-            $wanted = trim($section_text['EXPECTF']);
+    if ($test->hasAnySections('EXPECTF', 'EXPECTREGEX')) {
+        if ($test->hasSection('EXPECTF')) {
+            $wanted = trim($test->getSection('EXPECTF'));
         } else {
-            $wanted = trim($section_text['EXPECTREGEX']);
+            $wanted = trim($test->getSection('EXPECTREGEX'));
         }
 
         show_file_block('exp', $wanted);
         $wanted_re = preg_replace('/\r\n/', "\n", $wanted);
 
-        if (isset($section_text['EXPECTF'])) {
+        if ($test->hasSection('EXPECTF')) {
             // do preg_quote, but miss out any %r delimited sections
             $temp = "";
             $r = "%r";
@@ -2700,32 +2627,33 @@ COMMAND $cmd
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
+            $wanted_re = str_replace('%0', '\x00', $wanted_re);
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
         if (preg_match("/^$wanted_re\$/s", $output)) {
             $passed = true;
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
 
             if (!$leaked && !$failed_headers) {
-                if (isset($section_text['XFAIL'])) {
+                if ($test->hasSection('XFAIL')) {
                     $warn = true;
                     $info = " (warn: XFAIL section but test passes)";
-                } elseif (isset($section_text['XLEAK'])) {
+                } elseif ($test->hasSection('XLEAK')) {
                     $warn = true;
                     $info = " (warn: XLEAK section but test passes)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    junit_mark_test_as('PASS', $shortname, $tested);
+                    $junit->markTestAs('PASS', $shortname, $tested);
                     return 'PASSED';
                 }
             }
         }
     } else {
-        $wanted = trim($section_text['EXPECT']);
+        $wanted = trim($test->getSection('EXPECT'));
         $wanted = preg_replace('/\r\n/', "\n", $wanted);
         show_file_block('exp', $wanted);
 
@@ -2733,21 +2661,21 @@ COMMAND $cmd
         if (!strcmp($output, $wanted)) {
             $passed = true;
 
-            if (!$cfg['keep']['php']) {
+            if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
             }
             @unlink($tmp_post);
 
             if (!$leaked && !$failed_headers) {
-                if (isset($section_text['XFAIL'])) {
+                if ($test->hasSection('XFAIL')) {
                     $warn = true;
                     $info = " (warn: XFAIL section but test passes)";
-                } elseif (isset($section_text['XLEAK'])) {
+                } elseif ($test->hasSection('XLEAK')) {
                     $warn = true;
                     $info = " (warn: XLEAK section but test passes)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    junit_mark_test_as('PASS', $shortname, $tested);
+                    $junit->markTestAs('PASS', $shortname, $tested);
                     return 'PASSED';
                 }
             }
@@ -2768,7 +2696,7 @@ COMMAND $cmd
     }
 
     if ($leaked) {
-        $restype[] = isset($section_text['XLEAK']) ?
+        $restype[] = $test->hasSection('XLEAK') ?
                         'XLEAK' : 'LEAK';
     }
 
@@ -2777,12 +2705,12 @@ COMMAND $cmd
     }
 
     if (!$passed) {
-        if (isset($section_text['XFAIL'])) {
+        if ($test->hasSection('XFAIL')) {
             $restype[] = 'XFAIL';
-            $info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
-        } elseif (isset($section_text['XLEAK'])) {
+            $info = '  XFAIL REASON: ' . rtrim($test->getSection('XFAIL'));
+        } elseif ($test->hasSection('XLEAK')) {
             $restype[] = 'XLEAK';
-            $info = '  XLEAK REASON: ' . rtrim($section_text['XLEAK']);
+            $info = '  XLEAK REASON: ' . rtrim($test->getSection('XLEAK'));
         } else {
             $restype[] = 'FAIL';
         }
@@ -2810,32 +2738,6 @@ COMMAND $cmd
             error("Cannot create test diff - $diff_filename");
         }
 
-        // write .sh
-        if (strpos($log_format, 'S') !== false) {
-            $sh_script = <<<SH
-#!/bin/sh
-
-case "$1" in
-"gdb")
-    gdb --args {$cmd}
-    ;;
-"valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 ${cmd}
-    ;;
-"rr")
-    rr record $2 ${cmd}
-    ;;
-*)
-    {$cmd}
-    ;;
-esac
-SH;
-            if (file_put_contents($sh_filename, $sh_script) === false) {
-                error("Cannot create test shell script - $sh_filename");
-            }
-            chmod($sh_filename, 0755);
-        }
-
         // write .log
         if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, "
 ---- EXPECTED OUTPUT
@@ -2846,6 +2748,39 @@ $output
 ") === false) {
             error("Cannot create test log - $log_filename");
             error_report($file, $log_filename, $tested);
+        }
+    }
+
+    if (!$passed || $leaked) {
+        // write .sh
+        if (strpos($log_format, 'S') !== false) {
+            $env_lines = [];
+            foreach ($env as $env_var => $env_val) {
+                $env_lines[] = "export $env_var=" . escapeshellarg($env_val);
+            }
+            $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
+            $sh_script = <<<SH
+#!/bin/sh
+{$exported_environment}
+case "$1" in
+"gdb")
+    gdb --args {$orig_cmd}
+    ;;
+"valgrind")
+    USE_ZEND_ALLOC=0 valgrind $2 ${orig_cmd}
+    ;;
+"rr")
+    rr record $2 ${orig_cmd}
+    ;;
+*)
+    {$orig_cmd}
+    ;;
+esac
+SH;
+            if (file_put_contents($sh_filename, $sh_script) === false) {
+                error("Cannot create test shell script - $sh_filename");
+            }
+            chmod($sh_filename, 0755);
         }
     }
 
@@ -2867,7 +2802,7 @@ $output
 
     $diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
-    junit_mark_test_as($restype, $shortname, $tested, null, $info, $diff);
+    $junit->markTestAs($restype, $shortname, $tested, null, $info, $diff);
 
     return $restype[0] . 'ED';
 }
@@ -3363,7 +3298,7 @@ function clear_show_test(): void
     // Parallel testing
     global $workerID;
 
-    if (!$workerID) {
+    if (!$workerID && isset($line_length)) {
         // Write over the last line to avoid random trailing chars on next echo
         echo str_repeat(" ", $line_length), "\r";
     }
@@ -3394,6 +3329,7 @@ function show_result(
                 case 'FAIL':
                 case 'BORK':
                 case 'LEAK':
+                case 'LEAK&FAIL':
                     // Light Red
                     $color = "\e[1;31m{$result}\e[0m"; break;
                 default: // Yellow
@@ -3410,246 +3346,18 @@ function show_result(
 
 }
 
-function junit_init(): void
+class BorkageException extends Exception
 {
-    // Check whether a junit log is wanted.
-    global $workerID;
-    $JUNIT = getenv('TEST_PHP_JUNIT');
-    if (empty($JUNIT)) {
-        $GLOBALS['JUNIT'] = false;
-        return;
-    }
-    if ($workerID) {
-        $fp = null;
-    } elseif (!$fp = fopen($JUNIT, 'w')) {
-        error("Failed to open $JUNIT for writing.");
-    }
-    $GLOBALS['JUNIT'] = [
-        'fp' => $fp,
-        'name' => 'PHP',
-        'test_total' => 0,
-        'test_pass' => 0,
-        'test_fail' => 0,
-        'test_error' => 0,
-        'test_skip' => 0,
-        'test_warn' => 0,
-        'execution_time' => 0,
-        'suites' => [],
-        'files' => []
-    ];
 }
 
-function junit_save_xml(): void
+class JUnit
 {
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
+    private bool $enabled = true;
+    private $fp = null;
+    private array $suites = [];
+    private array $rootSuite = self::EMPTY_SUITE + ['name' => 'php'];
 
-    $xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>' . PHP_EOL;
-    $xml .= sprintf(
-        '<testsuites name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
-        $JUNIT['name'],
-        $JUNIT['test_total'],
-        $JUNIT['test_fail'],
-        $JUNIT['test_error'],
-        $JUNIT['test_skip'],
-        $JUNIT['execution_time']
-    );
-    $xml .= junit_get_suite_xml();
-    $xml .= '</testsuites>';
-    fwrite($JUNIT['fp'], $xml);
-}
-
-function junit_get_suite_xml(string $suite_name = ''): string
-{
-    global $JUNIT;
-
-    $result = "";
-
-    foreach ($JUNIT['suites'] as $suite_name => $suite) {
-        $result .= sprintf(
-            '<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
-            $suite['name'],
-            $suite['test_total'],
-            $suite['test_fail'],
-            $suite['test_error'],
-            $suite['test_skip'],
-            $suite['execution_time']
-        );
-
-        if (!empty($suite_name)) {
-            foreach ($suite['files'] as $file) {
-                $result .= $JUNIT['files'][$file]['xml'];
-            }
-        }
-
-        $result .= '</testsuite>' . PHP_EOL;
-    }
-
-    return $result;
-}
-
-function junit_enabled(): bool
-{
-    global $JUNIT;
-    return !empty($JUNIT);
-}
-
-/**
- * @param array|string $type
- */
-function junit_mark_test_as(
-    $type,
-    string $file_name,
-    string $test_name,
-    ?int $time = null,
-    string $message = '',
-    string $details = ''
-): void {
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    $suite = junit_get_suitename_for($file_name);
-
-    junit_suite_record($suite, 'test_total');
-
-    $time = $time ?? junit_get_timer($file_name);
-    junit_suite_record($suite, 'execution_time', $time);
-
-    $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
-    $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function (array $c): string {
-        return sprintf('[[0x%02x]]', ord($c[0]));
-    }, $escaped_details);
-    $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
-
-    $escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
-    $JUNIT['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
-
-    if (is_array($type)) {
-        $output_type = $type[0] . 'ED';
-        $temp = array_intersect(['XFAIL', 'XLEAK', 'FAIL', 'WARN'], $type);
-        $type = reset($temp);
-    } else {
-        $output_type = $type . 'ED';
-    }
-
-    if ('PASS' == $type || 'XFAIL' == $type || 'XLEAK' == $type) {
-        junit_suite_record($suite, 'test_pass');
-    } elseif ('BORK' == $type) {
-        junit_suite_record($suite, 'test_error');
-        $JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
-    } elseif ('SKIP' == $type) {
-        junit_suite_record($suite, 'test_skip');
-        $JUNIT['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
-    } elseif ('WARN' == $type) {
-        junit_suite_record($suite, 'test_warn');
-        $JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
-    } elseif ('FAIL' == $type) {
-        junit_suite_record($suite, 'test_fail');
-        $JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
-    } else {
-        junit_suite_record($suite, 'test_error');
-        $JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
-    }
-
-    $JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
-}
-
-function junit_suite_record(string $suite, string $param, int $value = 1): void
-{
-    global $JUNIT;
-
-    $JUNIT[$param] += $value;
-    $JUNIT['suites'][$suite][$param] += $value;
-}
-
-function junit_get_timer(string $file_name): int
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return 0;
-    }
-
-    if (isset($JUNIT['files'][$file_name]['total'])) {
-        return number_format($JUNIT['files'][$file_name]['total'], 4);
-    }
-
-    return 0;
-}
-
-function junit_start_timer(string $file_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    if (!isset($JUNIT['files'][$file_name]['start'])) {
-        $JUNIT['files'][$file_name]['start'] = microtime(true);
-
-        $suite = junit_get_suitename_for($file_name);
-        junit_init_suite($suite);
-        $JUNIT['suites'][$suite]['files'][$file_name] = $file_name;
-    }
-}
-
-function junit_get_suitename_for(string $file_name): string
-{
-    return junit_path_to_classname(dirname($file_name));
-}
-
-function junit_path_to_classname(string $file_name): string
-{
-    global $JUNIT;
-
-    if (!junit_enabled()) {
-        return '';
-    }
-
-    $ret = $JUNIT['name'];
-    $_tmp = [];
-
-    // lookup whether we're in the PHP source checkout
-    $max = 5;
-    if (is_file($file_name)) {
-        $dir = dirname(realpath($file_name));
-    } else {
-        $dir = realpath($file_name);
-    }
-    do {
-        array_unshift($_tmp, basename($dir));
-        $chk = $dir . DIRECTORY_SEPARATOR . "main" . DIRECTORY_SEPARATOR . "php_version.h";
-        $dir = dirname($dir);
-    } while (!file_exists($chk) && --$max > 0);
-    if (file_exists($chk)) {
-        if ($max) {
-            array_shift($_tmp);
-        }
-        foreach ($_tmp as $p) {
-            $ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
-        }
-        return $ret;
-    }
-
-    return $JUNIT['name'] . '.' . str_replace([DIRECTORY_SEPARATOR, '-'], '.', $file_name);
-}
-
-function junit_init_suite(string $suite_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
-    }
-
-    if (!empty($JUNIT['suites'][$suite_name])) {
-        return;
-    }
-
-    $JUNIT['suites'][$suite_name] = [
-        'name' => $suite_name,
+    private const EMPTY_SUITE = [
         'test_total' => 0,
         'test_pass' => 0,
         'test_fail' => 0,
@@ -3659,62 +3367,358 @@ function junit_init_suite(string $suite_name): void
         'files' => [],
         'execution_time' => 0,
     ];
-}
 
-function junit_finish_timer(string $file_name): void
-{
-    global $JUNIT;
-    if (!junit_enabled()) {
-        return;
+    public function __construct(array $env, int $workerID)
+    {
+        // Check whether a junit log is wanted.
+        $fileName = $env['TEST_PHP_JUNIT'] ?? null;
+        if (empty($fileName)) {
+            $this->enabled = false;
+            return;
+        }
+        if (!$workerID && !$this->fp = fopen($fileName, 'w')) {
+            throw new Exception("Failed to open $fileName for writing.");
+        }
     }
 
-    if (!isset($JUNIT['files'][$file_name]['start'])) {
-        error("Timer for $file_name was not started!");
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 
-    if (!isset($JUNIT['files'][$file_name]['total'])) {
-        $JUNIT['files'][$file_name]['total'] = 0;
+    public function clear(): void
+    {
+        $this->rootSuite = self::EMPTY_SUITE + ['name' => 'php'];
+        $this->suites = [];
     }
 
-    $start = $JUNIT['files'][$file_name]['start'];
-    $JUNIT['files'][$file_name]['total'] += microtime(true) - $start;
-    unset($JUNIT['files'][$file_name]['start']);
-}
-
-function junit_merge_results(array $junit): void
-{
-    global $JUNIT;
-    $JUNIT['test_total'] += $junit['test_total'];
-    $JUNIT['test_pass']  += $junit['test_pass'];
-    $JUNIT['test_fail']  += $junit['test_fail'];
-    $JUNIT['test_error'] += $junit['test_error'];
-    $JUNIT['test_skip']  += $junit['test_skip'];
-    $JUNIT['test_warn']  += $junit['test_warn'];
-    $JUNIT['execution_time'] += $junit['execution_time'];
-    $JUNIT['files'] += $junit['files'];
-    foreach ($junit['suites'] as $name => $suite) {
-        if (!isset($JUNIT['suites'][$name])) {
-            $JUNIT['suites'][$name] = $suite;
-            continue;
+    public function saveXML(): void
+    {
+        if (!$this->enabled) {
+            return;
         }
 
-        $SUITE =& $JUNIT['suites'][$name];
-        $SUITE['test_total'] += $suite['test_total'];
-        $SUITE['test_pass']  += $suite['test_pass'];
-        $SUITE['test_fail']  += $suite['test_fail'];
-        $SUITE['test_error'] += $suite['test_error'];
-        $SUITE['test_skip']  += $suite['test_skip'];
-        $SUITE['test_warn']  += $suite['test_warn'];
-        $SUITE['execution_time'] += $suite['execution_time'];
-        $SUITE['files'] += $suite['files'];
+        $xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>' . PHP_EOL;
+        $xml .= sprintf(
+            '<testsuites name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+            $this->rootSuite['name'],
+            $this->rootSuite['test_total'],
+            $this->rootSuite['test_fail'],
+            $this->rootSuite['test_error'],
+            $this->rootSuite['test_skip'],
+            $this->rootSuite['execution_time']
+        );
+        $xml .= $this->getSuitesXML();
+        $xml .= '</testsuites>';
+        fwrite($this->fp, $xml);
     }
+
+    private function getSuitesXML(string $suite_name = '')
+    {
+        // FIXME: $suite_name gets overwritten
+        $result = '';
+
+        foreach ($this->suites as $suite_name => $suite) {
+            $result .= sprintf(
+                '<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+                $suite['name'],
+                $suite['test_total'],
+                $suite['test_fail'],
+                $suite['test_error'],
+                $suite['test_skip'],
+                $suite['execution_time']
+            );
+
+            if (!empty($suite_name)) {
+                foreach ($suite['files'] as $file) {
+                    $result .= $this->rootSuite['files'][$file]['xml'];
+                }
+            }
+
+            $result .= '</testsuite>' . PHP_EOL;
+        }
+
+        return $result;
+    }
+
+    public function markTestAs(
+        $type,
+        string $file_name,
+        string $test_name,
+        ?int $time = null,
+        string $message = '',
+        string $details = ''
+    ): void {
+        if (!$this->enabled) {
+            return;
+        }
+
+        $suite = $this->getSuiteName($file_name);
+
+        $this->record($suite, 'test_total');
+
+        $time = $time ?? $this->getTimer($file_name);
+        $this->record($suite, 'execution_time', $time);
+
+        $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+        $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+            return sprintf('[[0x%02x]]', ord($c[0]));
+        }, $escaped_details);
+        $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        $escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
+        $this->rootSuite['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
+
+        if (is_array($type)) {
+            $output_type = $type[0] . 'ED';
+            $temp = array_intersect(['XFAIL', 'XLEAK', 'FAIL', 'WARN'], $type);
+            $type = reset($temp);
+        } else {
+            $output_type = $type . 'ED';
+        }
+
+        if ('PASS' == $type || 'XFAIL' == $type || 'XLEAK' == $type) {
+            $this->record($suite, 'test_pass');
+        } elseif ('BORK' == $type) {
+            $this->record($suite, 'test_error');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
+        } elseif ('SKIP' == $type) {
+            $this->record($suite, 'test_skip');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
+        } elseif ('WARN' == $type) {
+            $this->record($suite, 'test_warn');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
+        } elseif ('FAIL' == $type) {
+            $this->record($suite, 'test_fail');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
+        } else {
+            $this->record($suite, 'test_error');
+            $this->rootSuite['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
+        }
+
+        $this->rootSuite['files'][$file_name]['xml'] .= "</testcase>\n";
+    }
+
+    private function record(string $suite, string $param, $value = 1): void
+    {
+        $this->rootSuite[$param] += $value;
+        $this->suites[$suite][$param] += $value;
+    }
+
+    private function getTimer(string $file_name)
+    {
+        if (!$this->enabled) {
+            return 0;
+        }
+
+        if (isset($this->rootSuite['files'][$file_name]['total'])) {
+            return number_format($this->rootSuite['files'][$file_name]['total'], 4);
+        }
+
+        return 0;
+    }
+
+    public function startTimer(string $file_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['start'])) {
+            $this->rootSuite['files'][$file_name]['start'] = microtime(true);
+
+            $suite = $this->getSuiteName($file_name);
+            $this->initSuite($suite);
+            $this->suites[$suite]['files'][$file_name] = $file_name;
+        }
+    }
+
+    public function getSuiteName(string $file_name): string
+    {
+        return $this->pathToClassName(dirname($file_name));
+    }
+
+    private function pathToClassName(string $file_name): string
+    {
+        if (!$this->enabled) {
+            return '';
+        }
+
+        $ret = $this->rootSuite['name'];
+        $_tmp = [];
+
+        // lookup whether we're in the PHP source checkout
+        $max = 5;
+        if (is_file($file_name)) {
+            $dir = dirname(realpath($file_name));
+        } else {
+            $dir = realpath($file_name);
+        }
+        do {
+            array_unshift($_tmp, basename($dir));
+            $chk = $dir . DIRECTORY_SEPARATOR . "main" . DIRECTORY_SEPARATOR . "php_version.h";
+            $dir = dirname($dir);
+        } while (!file_exists($chk) && --$max > 0);
+        if (file_exists($chk)) {
+            if ($max) {
+                array_shift($_tmp);
+            }
+            foreach ($_tmp as $p) {
+                $ret .= "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+            }
+            return $ret;
+        }
+
+        return $this->rootSuite['name'] . '.' . str_replace([DIRECTORY_SEPARATOR, '-'], '.', $file_name);
+    }
+
+    public function initSuite(string $suite_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!empty($this->suites[$suite_name])) {
+            return;
+        }
+
+        $this->suites[$suite_name] = self::EMPTY_SUITE + ['name' => $suite_name];
+    }
+
+    public function stopTimer(string $file_name): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['start'])) {
+            throw new Exception("Timer for $file_name was not started!");
+        }
+
+        if (!isset($this->rootSuite['files'][$file_name]['total'])) {
+            $this->rootSuite['files'][$file_name]['total'] = 0;
+        }
+
+        $start = $this->rootSuite['files'][$file_name]['start'];
+        $this->rootSuite['files'][$file_name]['total'] += microtime(true) - $start;
+        unset($this->rootSuite['files'][$file_name]['start']);
+    }
+
+    public function mergeResults(?JUnit $other): void
+    {
+        if (!$this->enabled || !$other) {
+            return;
+        }
+
+        $this->mergeSuites($this->rootSuite, $other->rootSuite);
+        foreach ($other->suites as $name => $suite) {
+            if (!isset($this->suites[$name])) {
+                $this->suites[$name] = $suite;
+                continue;
+            }
+
+            $this->mergeSuites($this->suites[$name], $suite);
+        }
+    }
+
+    private function mergeSuites(array &$dest, array $source): void
+    {
+        $dest['test_total'] += $source['test_total'];
+        $dest['test_pass']  += $source['test_pass'];
+        $dest['test_fail']  += $source['test_fail'];
+        $dest['test_error'] += $source['test_error'];
+        $dest['test_skip']  += $source['test_skip'];
+        $dest['test_warn']  += $source['test_warn'];
+        $dest['execution_time'] += $source['execution_time'];
+        $dest['files'] += $source['files'];
+    }
+}
+
+class SkipCache
+{
+    private bool $keepFile;
+
+    private array $skips = [];
+    private array $extensions = [];
+
+    private int $hits = 0;
+    private int $misses = 0;
+    private int $extHits = 0;
+    private int $extMisses = 0;
+
+    public function __construct(bool $keepFile)
+    {
+        $this->keepFile = $keepFile;
+    }
+
+    public function checkSkip(string $php, string $code, string $checkFile, string $tempFile, array $env): string
+    {
+        // Extension tests frequently use something like <?php require 'skipif.inc';
+        // for skip checks. This forces us to cache per directory to avoid pollution.
+        $dir = dirname($checkFile);
+        $key = "$php => $dir";
+
+        if (isset($this->skips[$key][$code])) {
+            $this->hits++;
+            if ($this->keepFile) {
+                save_text($checkFile, $code, $tempFile);
+            }
+            return $this->skips[$key][$code];
+        }
+
+        save_text($checkFile, $code, $tempFile);
+        $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
+        if (strpos($result, 'nocache') !== 0) {
+            $this->skips[$key][$code] = $result;
+        } else {
+            $result = '';
+        }
+        $this->misses++;
+
+        if (!$this->keepFile) {
+            @unlink($checkFile);
+        }
+
+        return $result;
+    }
+
+    public function getExtensions(string $php): array
+    {
+        if (isset($this->extensions[$php])) {
+            $this->extHits++;
+            return $this->extensions[$php];
+        }
+
+        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
+        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extensions = array_map('strtolower', $extensions);
+        if (in_array('zend opcache', $extensions)) {
+            $extensions[] = 'opcache';
+        }
+
+        $result = [$extDir, $extensions];
+        $this->extensions[$php] = $result;
+        $this->extMisses++;
+
+        return $result;
+    }
+
+//    public function __destruct()
+//    {
+//        echo "Skips: {$this->hits} hits, {$this->misses} misses.\n";
+//        echo "Extensions: {$this->extHits} hits, {$this->extMisses} misses.\n";
+//        echo "Cache distribution:\n";
+//
+//        foreach ($this->skips as $php => $cache) {
+//            echo "$php: " . count($cache) . "\n";
+//        }
+//    }
 }
 
 class RuntestsValgrind
 {
     protected $version = '';
     protected $header = '';
-    protected $version_3_3_0 = false;
     protected $version_3_8_0 = false;
     protected $tool = null;
 
@@ -3744,7 +3748,6 @@ class RuntestsValgrind
         $this->version = $version;
         $this->header = sprintf(
             "%s (%s)", trim($header), $this->tool);
-        $this->version_3_3_0 = version_compare($version, '3.3.0', '>=');
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 
@@ -3757,12 +3760,208 @@ class RuntestsValgrind
 
         /* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
         if ($this->version_3_8_0) {
-            /* valgrind 3.3.0+ doesn't have --log-file-exactly option */
             return "$vcmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
-        } elseif ($this->version_3_3_0) {
-            return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+        }
+        return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+    }
+}
+
+class TestFile
+{
+    private string $fileName;
+
+    private array $sections = ['TEST' => ''];
+
+    private const ALLOWED_SECTIONS = [
+        'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
+        'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS',
+        'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+        'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
+        'INI', 'ENV', 'EXTENSIONS',
+        'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
+        'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+    ];
+
+    public function __construct(string $fileName, bool $inRedirect)
+    {
+        $this->fileName = $fileName;
+
+        $this->readFile();
+        $this->validateAndProcess($inRedirect);
+    }
+
+    public function hasSection(string $name): bool
+    {
+        return isset($this->sections[$name]);
+    }
+
+    public function hasAllSections(string ...$names): bool
+    {
+        foreach ($names as $section) {
+            if (!isset($this->sections[$section])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function hasAnySections(string ...$names): bool
+    {
+        foreach ($names as $section) {
+            if (isset($this->sections[$section])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function sectionNotEmpty(string $name): bool
+    {
+        return !empty($this->sections[$name]);
+    }
+
+    public function getSection(string $name): string
+    {
+        if (!isset($this->sections[$name])) {
+            throw new Exception("Section $name not found");
+        }
+        return $this->sections[$name];
+    }
+
+    public function getName(): string
+    {
+        return trim($this->getSection('TEST'));
+    }
+
+    public function isCGI(): bool
+    {
+        return $this->sectionNotEmpty('CGI')
+            || $this->sectionNotEmpty('GET')
+            || $this->sectionNotEmpty('POST')
+            || $this->sectionNotEmpty('GZIP_POST')
+            || $this->sectionNotEmpty('DEFLATE_POST')
+            || $this->sectionNotEmpty('POST_RAW')
+            || $this->sectionNotEmpty('PUT')
+            || $this->sectionNotEmpty('COOKIE')
+            || $this->sectionNotEmpty('EXPECTHEADERS');
+    }
+
+    /**
+     * TODO Refactor to make it not needed
+     */
+    public function setSection(string $name, string $value): void
+    {
+        $this->sections[$name] = $value;
+    }
+
+    /**
+     * Load the sections of the test file
+     */
+    private function readFile(): void
+    {
+        $fp = fopen($this->fileName, "rb") or error("Cannot open test file: {$this->fileName}");
+
+        if (!feof($fp)) {
+            $line = fgets($fp);
+
+            if ($line === false) {
+                throw new BorkageException("cannot read test");
+            }
         } else {
-            return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
+            throw new BorkageException("empty test [{$this->fileName}]");
+        }
+        if (strncmp('--TEST--', $line, 8)) {
+            throw new BorkageException("tests must start with --TEST-- [{$this->fileName}]");
+        }
+
+        $section = 'TEST';
+        $secfile = false;
+        $secdone = false;
+
+        while (!feof($fp)) {
+            $line = fgets($fp);
+
+            if ($line === false) {
+                break;
+            }
+
+            // Match the beginning of a section.
+            if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
+                $section = (string) $r[1];
+
+                if (isset($this->sections[$section]) && $this->sections[$section]) {
+                    throw new BorkageException("duplicated $section section");
+                }
+
+                // check for unknown sections
+                if (!in_array($section, self::ALLOWED_SECTIONS)) {
+                    throw new BorkageException('Unknown section "' . $section . '"');
+                }
+
+                $this->sections[$section] = '';
+                $secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
+                $secdone = false;
+                continue;
+            }
+
+            // Add to the section text.
+            if (!$secdone) {
+                $this->sections[$section] .= $line;
+            }
+
+            // End of actual test?
+            if ($secfile && preg_match('/^===DONE===\s*$/', $line)) {
+                $secdone = true;
+            }
+        }
+
+        fclose($fp);
+    }
+
+    private function validateAndProcess(bool $inRedirect): void
+    {
+        // the redirect section allows a set of tests to be reused outside of
+        // a given test dir
+        if ($this->hasSection('REDIRECTTEST')) {
+            if ($inRedirect) {
+                throw new BorkageException("Can't redirect a test from within a redirected test");
+            }
+            return;
+        }
+        if (!$this->hasSection('PHPDBG') && $this->hasSection('FILE') + $this->hasSection('FILEEOF') + $this->hasSection('FILE_EXTERNAL') != 1) {
+            throw new BorkageException("missing section --FILE--");
+        }
+
+        if ($this->hasSection('FILEEOF')) {
+            $this->sections['FILE'] = preg_replace("/[\r\n]+$/", '', $this->sections['FILEEOF']);
+            unset($this->sections['FILEEOF']);
+        }
+
+        foreach (['FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX'] as $prefix) {
+            // For grepping: FILE_EXTERNAL, EXPECT_EXTERNAL, EXPECTF_EXTERNAL, EXPECTREGEX_EXTERNAL
+            $key = $prefix . '_EXTERNAL';
+
+            if ($this->hasSection($key)) {
+                // don't allow tests to retrieve files from anywhere but this subdirectory
+                $dir = dirname($this->fileName);
+                $fileName = $dir . '/' . trim(str_replace('..', '', $this->getSection($key)));
+
+                if (file_exists($fileName)) {
+                    $this->sections[$prefix] = file_get_contents($fileName);
+                } else {
+                    throw new BorkageException("could not load --" . $key . "-- " . $dir . '/' . trim($fileName));
+                }
+            }
+        }
+
+        if (($this->hasSection('EXPECT') + $this->hasSection('EXPECTF') + $this->hasSection('EXPECTREGEX')) != 1) {
+            throw new BorkageException("missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--");
+        }
+
+        if ($this->hasSection('PHPDBG') && !$this->hasSection('STDIN')) {
+            $this->sections['STDIN'] = $this->sections['PHPDBG'] . "\n";
         }
     }
 }

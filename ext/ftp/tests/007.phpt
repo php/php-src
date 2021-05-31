@@ -3,10 +3,9 @@ FTP with bogus resource
 --CREDITS--
 Michael Paul da Rosa <michael [at] michaelpaul [dot] com [dot] br>
 PHP TestFest Dublin 2017
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 $ftp = tmpfile();
@@ -180,36 +179,36 @@ try {
 fclose($ftp);
 ?>
 --EXPECT--
-ftp_login(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_pwd(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_cdup(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_chdir(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_exec(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_raw(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_mkdir(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_rmdir(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_chmod(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_alloc(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nlist(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_rawlist(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_mlsd(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_systype(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_fget(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nb_fget(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_pasv(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_get(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nb_get(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nb_continue(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_fput(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nb_fput(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_put(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_append(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_nb_put(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_size(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_mdtm(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_rename(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_delete(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_site(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_close(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_set_option(): Argument #1 ($ftp) must be of type FTPConnection, resource given
-ftp_get_option(): Argument #1 ($ftp) must be of type FTPConnection, resource given
+ftp_login(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_pwd(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_cdup(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_chdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_exec(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_raw(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mkdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rmdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_chmod(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_alloc(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nlist(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rawlist(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mlsd(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_systype(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_fget(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_fget(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_pasv(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_get(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_get(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_continue(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_fput(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_fput(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_put(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_append(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_put(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_size(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mdtm(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rename(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_delete(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_site(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_close(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_set_option(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_get_option(): Argument #1 ($ftp) must be of type FTP\Connection, resource given

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -197,7 +197,7 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 
 int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp((char*)node->name, name) == 0) {
+	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = attr_find_ns(node);
 			if (nsPtr) {
@@ -213,7 +213,7 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 
 int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 {
-	if (name == NULL || strcmp((char*)node->name, name) == 0) {
+	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
 			if (nsPtr) {

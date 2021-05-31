@@ -505,6 +505,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
+	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
 	_(ZEND_STR_EVAL,                   "eval") \
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_REQUIRE,                "require") \
@@ -548,9 +549,19 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_CALLABLE,               "callable") \
 	_(ZEND_STR_ITERABLE,               "iterable") \
 	_(ZEND_STR_VOID,                   "void") \
+	_(ZEND_STR_NEVER,                  "never") \
 	_(ZEND_STR_FALSE,                  "false") \
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
+	_(ZEND_STR_SLEEP,                  "__sleep") \
+	_(ZEND_STR_WAKEUP,                 "__wakeup") \
+	_(ZEND_STR_CASES,                  "cases") \
+	_(ZEND_STR_FROM,                   "from") \
+	_(ZEND_STR_TRYFROM,                "tryFrom") \
+	_(ZEND_STR_TRYFROM_LOWERCASE,      "tryfrom") \
+	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
+	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
+	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
 
 
 typedef enum _zend_known_string_id {

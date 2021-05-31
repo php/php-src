@@ -33,7 +33,15 @@ function doCalls(ReflectionGenerator $ref) {
 
 ?>
 --EXPECTF--
-array(0) {
+array(1) {
+  [0]=>
+  array(2) {
+    ["function"]=>
+    string(9) "{closure}"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
 int(%d)
 string(%d) "%sReflectionGenerator_in_Generator.%s"
@@ -44,13 +52,21 @@ object(ReflectionFunction)#4 (1) {
   string(9) "{closure}"
 }
 NULL
-array(1) {
+array(2) {
   [0]=>
   array(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(%d)
+    ["function"]=>
+    string(9) "{closure}"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(2) {
     ["function"]=>
     string(9) "{closure}"
     ["args"]=>

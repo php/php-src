@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -129,7 +129,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 
 	for (;;) {
 		zval *entry;
-		int errno;
+		int mysqli_errno;
 
 		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row);
 		if (Z_TYPE(row) != IS_ARRAY) {
@@ -142,13 +142,13 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
-		errno = zval_get_long(entry);
+		mysqli_errno = zval_get_long(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
-		w = php_new_warning(entry, errno);
+		w = php_new_warning(entry, mysqli_errno);
 		/*
 		  Don't destroy entry, because the row destroy will decrease
 		  the refcounter. Decreased twice then mysqlnd_free_result()

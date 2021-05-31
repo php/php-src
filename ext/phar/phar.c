@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,7 +26,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len);
+static zend_string *(*phar_save_resolve_path)(zend_string *filename);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -55,18 +55,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (ZSTR_LEN(new_value) == 2 && !strcasecmp("on", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 3 && !strcasecmp("yes", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 4 && !strcasecmp("true", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else {
-		ini = (bool) atoi(ZSTR_VAL(new_value));
-	}
+	ini = zend_ini_parse_bool(new_value);
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
@@ -2558,6 +2547,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	smart_str main_metadata_str = {0};
 	int free_user_stub, free_fp = 1, free_ufp = 1;
 	int manifest_hack = 0;
+	php_stream *shared_cfp = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -2835,10 +2825,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			return EOF;
 		}
 
-		/* create new file that holds the compressed version */
+		/* create new file that holds the compressed versions */
 		/* work around inability to specify freedom in write and strictness
 		in read count */
-		entry->cfp = php_stream_fopen_tmpfile();
+		if (shared_cfp == NULL) {
+			shared_cfp = php_stream_fopen_tmpfile();
+		}
+		entry->cfp = shared_cfp;
 		if (!entry->cfp) {
 			if (error) {
 				spprintf(error, 0, "unable to create temporary file");
@@ -2847,8 +2840,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			return EOF;
+			goto cleanup;
 		}
+		/* for real phars, header_offset is unused; we misuse it here to store the offset in the temp file */
+		ZEND_ASSERT(entry->header_offset == 0);
+		entry->header_offset = php_stream_tell(entry->cfp);
 		php_stream_flush(file);
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
 			if (closeoldfile) {
@@ -2858,7 +2854,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 		if (SUCCESS != php_stream_copy_to_stream_ex(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
@@ -2869,15 +2865,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 		php_stream_filter_flush(filter, 1);
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
+		entry->compressed_filesize = ((uint32_t) php_stream_tell(entry->cfp)) - entry->header_offset;
 		/* generate crc on compressed file */
-		php_stream_rewind(entry->cfp);
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
@@ -2933,7 +2928,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			spprintf(error, 0, "unable to write manifest header of new phar \"%s\"", phar->fname);
 		}
 
-		return EOF;
+		goto cleanup;
 	}
 
 	phar->alias_len = restore_alias_len;
@@ -2954,7 +2949,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", phar->fname);
 		}
 
-		return EOF;
+		goto cleanup;
 	}
 	smart_str_free(&main_metadata_str);
 
@@ -2990,7 +2985,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 					spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
 				}
 			}
-			return EOF;
+			goto cleanup;
 		}
 
 		/* set the manifest meta-data:
@@ -3024,7 +3019,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 	} ZEND_HASH_FOREACH_END();
 	/* Hack - see bug #65028, add padding byte to the end of the manifest */
@@ -3040,7 +3035,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write manifest padding byte");
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 	}
 
@@ -3053,7 +3048,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 		if (entry->cfp) {
 			file = entry->cfp;
-			php_stream_rewind(file);
+			php_stream_seek(file, entry->header_offset, SEEK_SET);
 		} else {
 			file = phar_get_efp(entry, 0);
 			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
@@ -3064,7 +3059,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				if (error) {
 					spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 				}
-				return EOF;
+				goto cleanup;
 			}
 		}
 
@@ -3076,7 +3071,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", entry->filename, phar->fname);
 			}
-			return EOF;
+			goto cleanup;
 		}
 
 		/* this will have changed for all files that have either changed compression or been modified */
@@ -3093,14 +3088,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", entry->filename, phar->fname);
 			}
 
-			return EOF;
+			goto cleanup;
 		}
 
 		entry->is_modified = 0;
 
 		if (entry->cfp) {
-			php_stream_close(entry->cfp);
 			entry->cfp = NULL;
+			entry->header_offset = 0;
 		}
 
 		if (entry->fp_type == PHAR_MOD) {
@@ -3115,6 +3110,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			entry->fp_type = PHAR_FP;
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (shared_cfp != NULL) {
+		php_stream_close(shared_cfp);
+		shared_cfp = NULL;
+	}
 
 	/* append signature */
 	if (global_flags & PHAR_HDR_SIGNATURE) {
@@ -3246,6 +3246,19 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	}
 
 	return EOF;
+
+cleanup:
+	if (shared_cfp != NULL) {
+		php_stream_close(shared_cfp);
+	}
+	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+		if (entry->cfp) {
+			entry->cfp = NULL;
+			entry->header_offset = 0;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return EOF;
 }
 /* }}} */
 
@@ -3268,41 +3281,41 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 } /* }}} */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
-#define phar_orig_zend_open zend_stream_open_function
 
-static zend_string *phar_resolve_path(const char *filename, size_t filename_len)
+static zend_string *phar_resolve_path(zend_string *filename)
 {
-	return phar_find_in_include_path((char *) filename, filename_len, NULL);
+	zend_string *ret = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL);
+	if (!ret) {
+		ret = phar_save_resolve_path(filename);
+	}
+	return ret;
 }
 
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type) /* {{{ */
 {
 	zend_op_array *res;
-	char *name = NULL;
+	zend_string *name = NULL;
 	int failed;
 	phar_archive_data *phar;
 
 	if (!file_handle || !file_handle->filename) {
 		return phar_orig_compile_file(file_handle, type);
 	}
-	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
-		if (SUCCESS == phar_open_from_filename((char*)file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
+	if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
+		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
 			if (phar->is_zip || phar->is_tar) {
-				zend_file_handle f = *file_handle;
+				zend_file_handle f;
 
 				/* zip or tar-based phar */
-				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-				if (SUCCESS == phar_orig_zend_open((const char *)name, &f)) {
-
-					efree(name);
-					name = NULL;
-
+				name = zend_strpprintf(4096, "phar://%s/%s", ZSTR_VAL(file_handle->filename), ".phar/stub.php");
+				zend_stream_init_filename_ex(&f, name);
+				if (SUCCESS == zend_stream_open_function(&f)) {
+					zend_string_release(f.filename);
 					f.filename = file_handle->filename;
 					if (f.opened_path) {
-						efree(f.opened_path);
+						zend_string_release(f.opened_path);
 					}
 					f.opened_path = file_handle->opened_path;
-					f.free_filename = file_handle->free_filename;
 
 					switch (file_handle->type) {
 						case ZEND_HANDLE_STREAM:
@@ -3317,7 +3330,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 					*file_handle = f;
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
-				zend_file_handle_dtor(file_handle);
 				/* compressed phar */
 				file_handle->type = ZEND_HANDLE_STREAM;
 				/* we do our own reading directly from the phar, don't change the next line */
@@ -3343,7 +3355,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 	} zend_end_try();
 
 	if (name) {
-		efree(name);
+		zend_string_release(name);
 	}
 
 	if (failed) {

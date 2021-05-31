@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,	  |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -133,6 +133,8 @@ bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) 
 			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* key/val comparison */) != 0) {
 				return 2;
 			}
+			/* TODO: Is this intentional? */
+			ZEND_FALLTHROUGH;
 		case WATCH_ON_ZVAL:
 			return memcmp(oldPtr, newPtr, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */) != 0;
 		case WATCH_ON_HASHTABLE:
@@ -663,7 +665,7 @@ void phpdbg_queue_element_for_recreation(phpdbg_watch_element *element) {
 	}
 }
 
-bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *element) {
+bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *element) {
 	zval *zv;
 	HashTable *ht = HT_FROM_ZVP(parent);
 
@@ -688,7 +690,7 @@ bool phpdbg_try_readding_watch_element(zval *parent, phpdbg_watch_element *eleme
 				next = Z_REFVAL_P(next);
 			}
 
-			if (!phpdbg_try_readding_watch_element(next, element->child)) {
+			if (!phpdbg_try_re_adding_watch_element(next, element->child)) {
 				return 0;
 			}
 		} else if (phpdbg_check_watch_diff(WATCH_ON_ZVAL, &element->backup.zv, zv)) {
@@ -717,7 +719,7 @@ void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {
 	phpdbg_free_watch_element_tree(element);
 }
 
-void phpdbg_dequeue_elements_for_recreation() {
+void phpdbg_dequeue_elements_for_recreation(void) {
 	phpdbg_watch_element *element;
 
 	ZEND_HASH_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
@@ -734,7 +736,7 @@ void phpdbg_dequeue_elements_for_recreation() {
 			} else {
 				ZVAL_ARR(zv, element->parent_container);
 			}
-			if (!phpdbg_try_readding_watch_element(zv, element)) {
+			if (!phpdbg_try_re_adding_watch_element(zv, element)) {
 				phpdbg_automatic_dequeue_free(element);
 			}
 		} else {

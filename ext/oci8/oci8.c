@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -279,9 +279,6 @@ static PHP_GSHUTDOWN_FUNCTION(oci)
 
 PHP_MINIT_FUNCTION(oci)
 {
-	zend_class_entry oci_lob_class_entry;
-	zend_class_entry oci_coll_class_entry;
-
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
@@ -291,11 +288,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCILob", class_OCILob_methods);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCICollection", class_OCICollection_methods);
-
-	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
-	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);
+	oci_lob_class_entry_ptr = register_class_OCILob();
+	oci_coll_class_entry_ptr = register_class_OCICollection();
 
 /* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);

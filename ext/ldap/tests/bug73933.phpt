@@ -9,17 +9,16 @@ require_once('skipif.inc');
 /* We are assuming 3333 is not connectable */
 $ldap = ldap_connect('127.0.0.1', 3333);
 
-ldap_mod_replace($ldap, null, array(
+ldap_mod_replace($ldap, '', array(
     'lockoutTime' => array(0),
 ));
 
-ldap_modify_batch($ldap, null, array(    [
+ldap_modify_batch($ldap, '', array(    [
     "attrib"  => "mail",
     "modtype" => LDAP_MODIFY_BATCH_ADD,
     "values"  => [
         "test@example.com",
         "test-2@example.com", ]]));
-
 
 ldap_close($ldap);
 

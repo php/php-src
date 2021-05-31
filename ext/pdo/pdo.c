@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -59,14 +59,6 @@ PDO_API zend_class_entry *php_pdo_get_dbh_ce(void) /* {{{ */
 PDO_API zend_class_entry *php_pdo_get_exception(void) /* {{{ */
 {
 	return pdo_exception_ce;
-}
-/* }}} */
-
-PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
-{
-	char *dest = emalloc(len + 1);
-	zend_str_tolower_copy(dest, src, len);
-	return dest;
 }
 /* }}} */
 
@@ -248,66 +240,17 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 }
 /* }}} */
 
-/* TODO Refactor */
-static const char digit_vec[] = "0123456789";
-PDO_API zend_string *php_pdo_int64_to_str(int64_t i64) /* {{{ */
-{
-	char buffer[65];
-	char outbuf[65] = "";
-	register char *p;
-	zend_long long_val;
-	char *dst = outbuf;
-
-	if (i64 == 0) {
-		return ZSTR_CHAR('0');
-	}
-
-	if (i64 < 0) {
-		i64 = -i64;
-		*dst++ = '-';
-	}
-
-	p = &buffer[sizeof(buffer)-1];
-	*p = '\0';
-
-	while ((uint64_t)i64 > (uint64_t)ZEND_LONG_MAX) {
-		uint64_t quo = (uint64_t)i64 / (unsigned int)10;
-		unsigned int rem = (unsigned int)(i64 - quo*10U);
-		*--p = digit_vec[rem];
-		i64 = (int64_t)quo;
-	}
-	long_val = (zend_long)i64;
-	while (long_val != 0) {
-		zend_long quo = long_val / 10;
-		*--p = digit_vec[(unsigned int)(long_val - quo * 10)];
-		long_val = quo;
-	}
-	while ((*dst++ = *p++) != 0)
-		;
-	*dst = '\0';
-	return zend_string_init(outbuf, strlen(outbuf), 0);
-}
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)
 {
-	zend_class_entry ce;
-
-	if (FAILURE == pdo_sqlstate_init_error_table()) {
-		return FAILURE;
-	}
+	pdo_sqlstate_init_error_table();
 
 	zend_hash_init(&pdo_driver_hash, 0, NULL, NULL, 1);
 
 	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
-	INIT_CLASS_ENTRY(ce, "PDOException", class_PDOException_methods);
-
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException);
-
-	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC);
+	pdo_exception_ce = register_class_PDOException(spl_ce_RuntimeException);
 
 	pdo_dbh_init();
 	pdo_stmt_init();

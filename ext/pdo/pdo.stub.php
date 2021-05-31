@@ -1,11 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class PDOException extends RuntimeException
 {
-    /** @var array|null */
-    public $errorInfo;
+    public ?array $errorInfo = null;
 }
 
 function pdo_drivers(): array {}

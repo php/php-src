@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM PPC/PPC64 module.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 --
 -- Support for various extensions contributed by Caio Souza Oliveira.
@@ -11,9 +11,9 @@
 local _info = {
   arch =	"ppc",
   description =	"DynASM PPC module",
-  version =	"1.4.0",
-  vernum =	 10400,
-  release =	"2015-10-18",
+  version =	"1.5.0",
+  vernum =	 10500,
+  release =	"2021-05-02",
   author =	"Mike Pall",
   license =	"MIT",
 }
@@ -1722,9 +1722,9 @@ op_template = function(params, template, nparams)
     elseif p == "M" then
       op = op + parse_shiftmask(params[n], false); n = n + 1
     elseif p == "J" or p == "K" then
-      local mode, n, s = parse_label(params[n], false)
-      if p == "K" then n = n + 2048 end
-      waction("REL_"..mode, n, s, 1)
+      local mode, m, s = parse_label(params[n], false)
+      if p == "K" then m = m + 2048 end
+      waction("REL_"..mode, m, s, 1)
       n = n + 1
     elseif p == "0" then
       if band(shr(op, rs), 31) == 0 then werror("cannot use r0") end

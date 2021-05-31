@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -99,6 +99,7 @@ static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret)
 	switch (*str) {
 		case '-':
 			sign = 1;
+			ZEND_FALLTHROUGH;
 		case '+':
 			str++;
 		default:
@@ -627,7 +628,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
+		(url->host == NULL && (!zend_string_equals_literal(url->scheme, "mailto") && !zend_string_equals_literal(url->scheme, "news") && !zend_string_equals_literal(url->scheme, "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:
@@ -902,12 +903,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 						case 1: case 0:
 							break;
 						case 2:
-							if (!strcmp("::", Z_STRVAL_P(value))) {
+							if (zend_string_equals_literal(Z_STR_P(value), "::")) {
 								RETURN_VALIDATION_FAILED
 							}
 							break;
 						case 3:
-							if (!strcmp("::1", Z_STRVAL_P(value)) || !strcmp("5f:", Z_STRVAL_P(value))) {
+							if (zend_string_equals_literal(Z_STR_P(value), "::1") || zend_string_equals_literal(Z_STR_P(value), "5f:")) {
 								RETURN_VALIDATION_FAILED
 							}
 							break;

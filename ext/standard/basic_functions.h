@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -79,7 +79,7 @@ typedef struct _php_basic_globals {
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
-	char *CurrentStatFile, *CurrentLStatFile;
+	zend_string *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
 
 	/* mt_rand.c */
@@ -143,9 +143,8 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zval function_name;
-	zval *arguments;
-	int arg_count;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 } php_shutdown_function_entry;
 
 PHPAPI extern bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);

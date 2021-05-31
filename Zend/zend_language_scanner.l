@@ -118,7 +118,6 @@ do {																			\
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
-BEGIN_EXTERN_C()
 
 static void strip_underscores(char *str, size_t *len)
 {
@@ -295,16 +294,6 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	CG(ast_arena) = lex_state->ast_arena;
 
 	RESET_DOC_COMMENT();
-}
-
-ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
-{
-	zend_llist_del_element(&CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);
-	/* zend_file_handle_dtor() operates on the copy, so we have to NULLify the original here */
-	file_handle->opened_path = NULL;
-	if (file_handle->free_filename) {
-		file_handle->filename = NULL;
-	}
 }
 
 ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident)
@@ -542,17 +531,13 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
 		/* Still add it to open_files to make destroy_file_handle work */
 		zend_llist_add_element(&CG(open_files), file_handle);
+		file_handle->in_list = 1;
 		return FAILURE;
 	}
 
 	ZEND_ASSERT(!EG(exception) && "stream_fixup() should have failed");
 	zend_llist_add_element(&CG(open_files), file_handle);
-	if (file_handle->handle.stream.handle >= (void*)file_handle && file_handle->handle.stream.handle <= (void*)(file_handle+1)) {
-		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&CG(open_files));
-		size_t diff = (char*)file_handle->handle.stream.handle - (char*)file_handle;
-		fh->handle.stream.handle = (void*)(((char*)fh) + diff);
-		file_handle->handle.stream.handle = fh->handle.stream.handle;
-	}
+	file_handle->in_list = 1;
 
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
@@ -590,7 +575,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	if (file_handle->opened_path) {
 		compiled_filename = zend_string_copy(file_handle->opened_path);
 	} else {
-		compiled_filename = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
+		compiled_filename = zend_string_copy(file_handle->filename);
 	}
 
 	zend_set_compiled_filename(compiled_filename);
@@ -601,7 +586,6 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
-END_EXTERN_C()
 
 static zend_op_array *zend_compile(int type)
 {
@@ -636,6 +620,7 @@ static zend_op_array *zend_compile(int type)
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
 		op_array->line_end = last_lineno;
+		zend_init_static_variables_map_ptr(op_array);
 		pass_two(op_array);
 		zend_oparray_context_end(&original_oparray_context);
 		zend_file_context_end(&original_file_context);
@@ -660,9 +645,9 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 	if (open_file_for_scanning(file_handle)==FAILURE) {
 		if (!EG(exception)) {
 			if (type==ZEND_REQUIRE) {
-				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, ZSTR_VAL(file_handle->filename));
 			} else {
-				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, ZSTR_VAL(file_handle->filename));
 			}
 		}
 	} else {
@@ -709,23 +694,18 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 	return ast;
 }
 
-zend_op_array *compile_filename(int type, zval *filename)
+zend_op_array *compile_filename(int type, zend_string *filename)
 {
 	zend_file_handle file_handle;
-	zval tmp;
 	zend_op_array *retval;
 	zend_string *opened_path = NULL;
 
-	if (Z_TYPE_P(filename) != IS_STRING) {
-		ZVAL_STR(&tmp, zval_get_string(filename));
-		filename = &tmp;
-	}
-	zend_stream_init_filename(&file_handle, Z_STRVAL_P(filename));
+	zend_stream_init_filename_ex(&file_handle, filename);
 
 	retval = zend_compile_file(&file_handle, type);
 	if (retval && file_handle.handle.stream.handle) {
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = zend_string_copy(Z_STR_P(filename));
+			file_handle.opened_path = opened_path = zend_string_copy(filename);
 		}
 
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
@@ -736,9 +716,6 @@ zend_op_array *compile_filename(int type, zval *filename)
 	}
 	zend_destroy_file_handle(&file_handle);
 
-	if (UNEXPECTED(filename == &tmp)) {
-		zval_ptr_dtor(&tmp);
-	}
 	return retval;
 }
 
@@ -832,7 +809,6 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 }
 
 
-BEGIN_EXTERN_C()
 zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zend_lex_state original_lex_state;
@@ -842,6 +818,7 @@ zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *sy
 	zend_save_lexical_state(&original_lex_state);
 	if (open_file_for_scanning(&file_handle)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
+		zend_destroy_file_handle(&file_handle);
 		zend_restore_lexical_state(&original_lex_state);
 		return FAILURE;
 	}
@@ -925,7 +902,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 
 static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
 {
-	register char *s, *t;
+	char *s, *t;
 	char *end;
 
 	if (len <= 1) {
@@ -998,6 +975,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 						*t++ = *s;
 						break;
 					}
+					ZEND_FALLTHROUGH;
 				case '\\':
 				case '$':
 					*t++ = *s;
@@ -1296,7 +1274,7 @@ static zend_result exit_nesting(char closing)
 	return SUCCESS;
 }
 
-static zend_result check_nesting_at_end()
+static zend_result check_nesting_at_end(void)
 {
 	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
 		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
@@ -1548,6 +1526,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"trait" {
 	RETURN_TOKEN_WITH_IDENT(T_TRAIT);
+}
+
+/*
+ * The enum keyword must be followed by whitespace and another identifier.
+ * This avoids the BC break of using enum in classes, namespaces, functions and constants.
+ */
+<ST_IN_SCRIPTING>"enum"{WHITESPACE}("extends"|"implements") {
+	yyless(4);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
+}
+<ST_IN_SCRIPTING>"enum"{WHITESPACE}[a-zA-Z_\x80-\xff] {
+	yyless(4);
+	RETURN_TOKEN_WITH_IDENT(T_ENUM);
 }
 
 <ST_IN_SCRIPTING>"extends" {
@@ -2372,7 +2363,7 @@ inline_char_handler:
 					YYCURSOR--;
 					break;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2433,7 +2424,7 @@ inline_char_handler:
 
 
 <ST_IN_SCRIPTING>b?['] {
-	register char *s, *t;
+	char *s, *t;
 	char *end;
 	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 
@@ -2555,7 +2546,7 @@ skip_escape_conversion:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2792,7 +2783,7 @@ skip_escape_conversion:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2839,7 +2830,7 @@ double_quotes_scan_done:
 				if (YYCURSOR < YYLIMIT) {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2875,7 +2866,7 @@ double_quotes_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			case '\n':
 				indentation = spacing = 0;
 
@@ -2945,7 +2936,7 @@ double_quotes_scan_done:
 				if (YYCURSOR < YYLIMIT && *YYCURSOR != '\n' && *YYCURSOR != '\r') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
@@ -2999,7 +2990,7 @@ heredoc_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			case '\n':
 				indentation = spacing = 0;
 
@@ -3050,7 +3041,7 @@ heredoc_scan_done:
 
 					goto nowdoc_scan_done;
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}

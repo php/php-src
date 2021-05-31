@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -111,7 +111,7 @@ constant_binary_op:
 				 || opline->extended_value == ZEND_DIV
 				 || opline->extended_value == ZEND_POW) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-						/* don't optimise if it should produce a runtime numeric string error */
+						/* don't optimize if it should produce a runtime numeric string error */
 						if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
 							convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
 						}
@@ -120,7 +120,7 @@ constant_binary_op:
 				 || opline->extended_value == ZEND_SL
 				 || opline->extended_value == ZEND_SR) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						/* don't optimise if it should produce a runtime numeric string error */
+						/* don't optimize if it should produce a runtime numeric string error */
 						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
 							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
 							convert_to_long(&ZEND_OP2_LITERAL(opline));
@@ -235,8 +235,7 @@ constant_binary_op:
 			        Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 					/* for A::B */
 					if (op_array->scope &&
-						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						ZSTR_VAL(op_array->scope->name), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						zend_string_equals_ci(Z_STR(ZEND_OP1_LITERAL(opline)), op_array->scope->name)) {
 						ce = op_array->scope;
 					} else {
 						if ((ce = zend_hash_find_ptr(EG(class_table),
@@ -269,7 +268,7 @@ constant_binary_op:
 
 					if ((cc = zend_hash_find_ptr(&ce->constants_table,
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
-						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+						(ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							zend_ast *ast = Z_ASTVAL_P(c);
@@ -312,7 +311,7 @@ constant_binary_op:
 			}
 			if (send1_opline->opcode != ZEND_SEND_VAL ||
 			    send1_opline->op1_type != IS_CONST) {
-				/* don't colllect constants after unknown function call */
+				/* don't collect constants after unknown function call */
 				collect_constants = 0;
 				break;
 			}
@@ -324,7 +323,7 @@ constant_binary_op:
 				}
 				if (send1_opline->opcode != ZEND_SEND_VAL ||
 				    send1_opline->op1_type != IS_CONST) {
-					/* don't colllect constants after unknown function call */
+					/* don't collect constants after unknown function call */
 					collect_constants = 0;
 					break;
 				}
@@ -336,7 +335,7 @@ constant_binary_op:
 			if (init_opline->opcode != ZEND_INIT_FCALL ||
 			    init_opline->op2_type != IS_CONST ||
 			    Z_TYPE(ZEND_OP2_LITERAL(init_opline)) != IS_STRING) {
-				/* don't colllect constants after unknown function call */
+				/* don't collect constants after unknown function call */
 				collect_constants = 0;
 				break;
 			}
@@ -505,7 +504,7 @@ constant_binary_op:
 					break;
 				}
 			}
-			/* don't colllect constants after any other function call */
+			/* don't collect constants after any other function call */
 			collect_constants = 0;
 			break;
 		}
@@ -677,6 +676,7 @@ constant_binary_op:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
+		case ZEND_VERIFY_NEVER_TYPE:
 			collect_constants = 0;
 			break;
 		}

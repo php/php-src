@@ -1,7 +1,7 @@
 --TEST--
 SOAP typemap 10: SoapServer support for typemap's to_xml() (SoapFault)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

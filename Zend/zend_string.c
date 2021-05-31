@@ -324,6 +324,17 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 	}
 }
 
+/* Even if we don't build with valgrind support, include the symbol so that valgrind available
+ * only at runtime will not result in false positives. */
+#ifndef HAVE_VALGRIND
+# define I_REPLACE_SONAME_FNNAME_ZU(soname, fnname) _vgr00000ZU_ ## soname ## _ ## fnname
+#endif
+
+ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+{
+	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
+}
+
 #if defined(__GNUC__) && defined(__i386__)
 ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
@@ -362,36 +373,6 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *
 	return ret;
 }
 
-#ifdef HAVE_VALGRIND
-ZEND_API bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
-{
-	size_t len = ZSTR_LEN(s1);
-	char *ptr1 = ZSTR_VAL(s1);
-	char *ptr2 = ZSTR_VAL(s2);
-	zend_ulong ret;
-
-	__asm__ (
-		"test %1, %1\n\t"
-		"jnz .LL1%=\n\t"
-		"movl $0x1, %0\n\t"
-		"jmp .LL2%=\n\t"
-		".LL1%=:\n\t"
-		"cld\n\t"
-		"rep\n\t"
-		"cmpsb\n\t"
-		"sete %b0\n\t"
-		"movzbl %b0, %0\n\t"
-		".LL2%=:\n"
-		: "=a"(ret),
-		  "+c"(len),
-		  "+D"(ptr1),
-		  "+S"(ptr2)
-		:
-		: "cc");
-	return ret;
-}
-#endif
-
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
 ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
@@ -429,37 +410,6 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *
 		: "cc");
 	return ret;
 }
-
-#ifdef HAVE_VALGRIND
-ZEND_API bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
-{
-	size_t len = ZSTR_LEN(s1);
-	char *ptr1 = ZSTR_VAL(s1);
-	char *ptr2 = ZSTR_VAL(s2);
-	zend_ulong ret;
-
-	__asm__ (
-		"test %1, %1\n\t"
-		"jnz .LL1%=\n\t"
-		"movq $0x1, %0\n\t"
-		"jmp .LL2%=\n\t"
-		".LL1%=:\n\t"
-		"cld\n\t"
-		"rep\n\t"
-		"cmpsb\n\t"
-		"sete %b0\n\t"
-		"movzbq %b0, %0\n\t"
-		".LL2%=:\n"
-		: "=a"(ret),
-		  "+c"(len),
-		  "+D"(ptr1),
-		  "+S"(ptr2)
-		:
-		: "cc");
-	return ret;
-}
-#endif
-
 #endif
 
 ZEND_API zend_string *zend_string_concat2(

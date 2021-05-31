@@ -17,16 +17,16 @@ User Group: PHPSP #phptestfestbrasil
   var_dump($username == $info['name']);
 ?>
 ===DONE====
---EXPECTREGEX--
+--EXPECTF--
 Array
-\(
-    \[name\] => [^\r\n]+
-    \[passwd\] => [^\r\n]+
-    \[uid\] => [0-9]+
-    \[gid\] => [0-9]+
-    \[gecos\] => [^\r\n]*
-    \[dir\] => [^\r\n]+
-    \[shell\] => [^\r\n]+
-\)
-bool\(true\)
+(
+    [name] => %s
+    [passwd] => %S
+    [uid] => %d
+    [gid] => %d
+    [gecos] => %S
+    [dir] => %s
+    [shell] => %s
+)
+bool(true)
 ===DONE====

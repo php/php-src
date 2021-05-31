@@ -21,6 +21,8 @@ if (!(isset($matches[0]) &&
 --FILE--
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 

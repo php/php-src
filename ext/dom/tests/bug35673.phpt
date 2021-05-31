@@ -1,7 +1,7 @@
 --TEST--
 Bug #35673 (formatOutput does not work with saveHTML).
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

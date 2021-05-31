@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_close() function : error conditions
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 echo "*** Testing finfo_close() : error conditions ***\n";

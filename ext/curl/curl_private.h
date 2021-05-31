@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -90,6 +90,9 @@ struct _php_curl_send_headers {
 struct _php_curl_free {
 	zend_llist post;
 	zend_llist stream;
+#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
+	zend_llist buffers;
+#endif
 	HashTable *slist;
 };
 
@@ -152,8 +155,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
-void curl_multi_register_class(const zend_function_entry *method_entries);
-void curl_share_register_class(const zend_function_entry *method_entries);
+void curl_multi_register_handlers(void);
+void curl_share_register_handlers(void);
 void curlfile_register_class(void);
 int curl_cast_object(zend_object *obj, zval *result, int type);
 

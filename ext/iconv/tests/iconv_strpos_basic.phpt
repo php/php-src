@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_strpos() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -162,10 +162,10 @@ PHPAPI int php_flock(int fd, int operation)
 int inet_aton(const char *cp, struct in_addr *ap)
 {
     int dots = 0;
-    register unsigned long acc = 0, addr = 0;
+    unsigned long acc = 0, addr = 0;
 
     do {
-        register char cc = *cp;
+        char cc = *cp;
 
         switch (cc) {
         case '0':

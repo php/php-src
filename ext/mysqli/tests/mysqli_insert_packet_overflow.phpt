@@ -113,5 +113,12 @@ memory_limit=256M
 
     print "done!";
 ?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP TABLE test__mysqli_insert_packet_overflow');
+$link->close();
+?>
 --EXPECT--
 done!

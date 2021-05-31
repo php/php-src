@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function session_name(?string $name = null): string|false {}
 
@@ -65,60 +65,60 @@ function session_start(array $options = []): bool {}
 
 interface SessionHandlerInterface
 {
-    /** @return bool */
-    public function open(string $path, string $name);
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool;
 
-    /** @return bool */
-    public function close();
+    /** @tentative-return-type */
+    public function close(): bool;
 
-    /** @return string */
-    public function read(string $id);
+    /** @tentative-return-type */
+    public function read(string $id): string|false;
 
-    /** @return bool */
-    public function write(string $id, string $data);
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool;
 
-    /** @return bool */
-    public function destroy(string $id);
+    /** @tentative-return-type */
+    public function destroy(string $id): bool;
 
-    /** @return int|bool */
-    public function gc(int $max_lifetime);
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false;
 }
 
 interface SessionIdInterface
 {
-    /** @return string */
-    public function create_sid();
+    /** @tentative-return-type */
+    public function create_sid(): string;
 }
 
 interface SessionUpdateTimestampHandlerInterface
 {
-    /** @return bool */
-    public function validateId(string $id);
+    /** @tentative-return-type */
+    public function validateId(string $id): bool;
 
-    /** @return bool */
-    public function updateTimestamp(string $id, string $data);
+    /** @tentative-return-type */
+    public function updateTimestamp(string $id, string $data): bool;
 }
 
 class SessionHandler implements SessionHandlerInterface, SessionIdInterface
 {
-    /** @return bool */
-    public function open(string $path, string $name) {}
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool {}
 
-    /** @return bool */
-    public function close() {}
+    /** @tentative-return-type */
+    public function close(): bool {}
 
-    /** @return string */
-    public function read(string $id) {}
+    /** @tentative-return-type */
+    public function read(string $id): string|false {}
 
-    /** @return bool */
-    public function write(string $id, string $data) {}
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool {}
 
-    /** @return bool */
-    public function destroy(string $id) {}
+    /** @tentative-return-type */
+    public function destroy(string $id): bool {}
 
-    /** @return int|bool */
-    public function gc(int $max_lifetime) {}
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false {}
 
-    /** @return string */
-    public function create_sid() {}
+    /** @tentative-return-type */
+    public function create_sid(): string {}
 }

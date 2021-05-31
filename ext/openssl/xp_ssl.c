@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -116,7 +116,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
 
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
-extern int php_openssl_get_ssl_stream_data_index();
+extern int php_openssl_get_ssl_stream_data_index(void);
 static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b);
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
@@ -185,9 +185,9 @@ static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ 
 #define SERVER_GOOGLE "Server: GFE/"
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(stream->wrapperdata), tmp) {
-			if (strncasecmp(Z_STRVAL_P(tmp), SERVER_MICROSOFT_IIS, sizeof(SERVER_MICROSOFT_IIS)-1) == 0) {
+			if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_MICROSOFT_IIS)) {
 				return 1;
-			} else if (strncasecmp(Z_STRVAL_P(tmp), SERVER_GOOGLE, sizeof(SERVER_GOOGLE)-1) == 0) {
+			} else if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_GOOGLE)) {
 				return 1;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -238,8 +238,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 				break;
 			}
 
-
-			/* fall through */
+			ZEND_FALLTHROUGH;
 		default:
 			/* some other error */
 			ecode = ERR_get_error();
@@ -540,6 +539,7 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 					break;
 				}
 				/* not allowed, so fall through */
+				ZEND_FALLTHROUGH;
 			default:
 				php_error_docref(NULL, E_WARNING,
 						"Could not verify peer: code:%d %s",
@@ -907,7 +907,6 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 	} else {
 #ifdef PHP_WIN32
 		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 #else
 		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
 			php_error_docref(NULL, E_WARNING,

@@ -16,7 +16,7 @@ require 'ipv6_skipif.inc';
     $localhost = '::1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
         if (!$server) {
                 die('Unable to create AF_INET6 socket [server]');
         }
@@ -38,7 +38,7 @@ require 'ipv6_skipif.inc';
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
         if (!$client) {
                 die('Unable to create AF_INET6 socket [client]');
         }

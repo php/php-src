@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 510a58000a5473c4cbb33886f43b9f3050b3a36d */
+ * Stub hash: 9a733260823a95ba1ab987154e23d72b6210999d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
@@ -155,3 +155,46 @@ static const zend_function_entry class_SplMaxHeap_methods[] = {
 	ZEND_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplPriorityQueue", class_SplPriorityQueue_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SplHeap(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplHeap", class_SplHeap_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
+	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SplMinHeap(zend_class_entry *class_entry_SplHeap)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplMinHeap", class_SplMinHeap_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplHeap);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SplMaxHeap(zend_class_entry *class_entry_SplHeap)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SplMaxHeap", class_SplMaxHeap_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplHeap);
+
+	return class_entry;
+}

@@ -94,10 +94,10 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("connect.inc");
-    if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {
-        printf("[001] [%d] %s\n", $link->error, $link->errno);
-    }
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS p123');
+$link->close();
 ?>
 --EXPECT--
 string(4) "pre:"

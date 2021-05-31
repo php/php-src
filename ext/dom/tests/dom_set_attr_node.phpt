@@ -1,7 +1,7 @@
 --TEST--
 Test: setAttributeNode()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -40,6 +40,8 @@ object(DOMException)#%d (7) {
   string(20) "Wrong Document Error"
   ["string":"Exception":private]=>
   string(0) ""
+  ["code"]=>
+  int(4)
   ["file":protected]=>
   string(%d) "%sdom_set_attr_node.php"
   ["line":protected]=>
@@ -67,6 +69,4 @@ object(DOMException)#%d (7) {
   }
   ["previous":"Exception":private]=>
   NULL
-  ["code"]=>
-  int(4)
 }

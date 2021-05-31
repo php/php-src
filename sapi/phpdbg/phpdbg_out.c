@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -37,7 +37,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
  * XXX: this is a magic number; do not decrease it
  * Emax = 1023
  * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
+ * NUM_BUF_SIZE >= strlen("-") + Emax + strlen(".") + NDIG + strlen("E+1023") + 1;
  */
 #define NUM_BUF_SIZE        2048
 
@@ -305,6 +305,7 @@ static int format_converter(register buffy *odp, const char *fmt, bool escape_xm
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
+					ZEND_FALLTHROUGH;
 				default:
 					modifier = LM_STD;
 					break;
@@ -367,6 +368,7 @@ static int format_converter(register buffy *odp, const char *fmt, bool escape_xm
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
 					 */
+					ZEND_FALLTHROUGH;
 				case 'd':
 				case 'i':
 					/*
@@ -755,6 +757,7 @@ fmt_error:
 					 * Note that we can't point s inside fmt because the
 					 * unknown <char> could be preceded by width etc.
 					 */
+					ZEND_FALLTHROUGH;
 				default:
 					char_buf[0] = '%';
 					char_buf[1] = *fmt;

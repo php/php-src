@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -125,7 +125,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (!php_var_unserialize(&zv, (const unsigned char **) &msg, (unsigned char *) msg + len, &var_hash)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, arborting");
+		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, aborting");
 		return;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -136,7 +136,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("GLOBALS"))) && Z_TYPE_P(zvp) == IS_ARRAY) {
 		{
 			zval *srv;
-			if ((srv = zend_hash_str_find(Z_ARRVAL_P(zvp), ZEND_STRL("_SERVER"))) && Z_TYPE_P(srv) == IS_ARRAY) {
+			if ((srv = zend_hash_find(Z_ARRVAL_P(zvp), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) && Z_TYPE_P(srv) == IS_ARRAY) {
 				zval *script;
 				if ((script = zend_hash_str_find(Z_ARRVAL_P(srv), ZEND_STRL("SCRIPT_FILENAME"))) && Z_TYPE_P(script) == IS_STRING) {
 					phpdbg_param_t param;
@@ -175,12 +175,12 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 
 	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("cwd"))) && Z_TYPE_P(zvp) == IS_STRING) {
 		if (VCWD_CHDIR(Z_STRVAL_P(zvp)) == SUCCESS) {
-			if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentStatFile), strlen(BG(CurrentStatFile)))) {
-				efree(BG(CurrentStatFile));
+			if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentStatFile)), ZSTR_LEN(BG(CurrentStatFile)))) {
+				zend_string_release(BG(CurrentStatFile));
 				BG(CurrentStatFile) = NULL;
 			}
-			if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentLStatFile), strlen(BG(CurrentLStatFile)))) {
-				efree(BG(CurrentLStatFile));
+			if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(ZSTR_VAL(BG(CurrentLStatFile)), ZSTR_LEN(BG(CurrentLStatFile)))) {
+				zend_string_release(BG(CurrentLStatFile));
 				BG(CurrentLStatFile) = NULL;
 			}
 		}

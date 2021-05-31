@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_alnum() function : usage variations - different string values
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

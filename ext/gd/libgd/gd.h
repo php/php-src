@@ -372,9 +372,9 @@ gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
-const char * gdPngGetVersionString();
+const char * gdPngGetVersionString(void);
 
-const char * gdJpegGetVersionString();
+const char * gdJpegGetVersionString(void);
 
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
@@ -444,8 +444,8 @@ void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short 
  * use of any sort of threads in a module load / shutdown function
  * respectively.
  */
-void gdFontCacheMutexSetup();
-void gdFontCacheMutexShutdown();
+void gdFontCacheMutexSetup(void);
+void gdFontCacheMutexShutdown(void);
 
 /* 2.0.16: for thread-safe use of gdImageStringFT and friends,
  * call this before allowing any thread to call gdImageStringFT.

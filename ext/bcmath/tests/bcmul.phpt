@@ -1,7 +1,7 @@
 --TEST--
 bcmul() function
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --INI--
 bcmath.scale=0
 --FILE--

@@ -54,4 +54,5 @@ pg_close($db);
 
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql link%s)
+object(PgSql\Connection)#%d (0) {
+}

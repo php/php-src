@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -158,78 +158,30 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 			break;
 		}
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */
-		switch(ZSTR_LEN(key)) {
-			case sizeof("orig-date")-1:
-				if (!strncasecmp("orig-date", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("from")-1:
-				if (!strncasecmp("from", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("from", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("sender")-1:
-				if (!strncasecmp("sender", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("sender", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("reply-to")-1:
-				if (!strncasecmp("reply-to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("reply-to", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("to")-1: /* "to", "cc" */
-				if (!strncasecmp("to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					zend_value_error("The additional headers cannot contain the \"To\" header");
-					break;
-				}
-				if (!strncasecmp("cc", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("bcc")-1:
-				if (!strncasecmp("bcc", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("bcc", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("message-id")-1: /* "references" */
-				if (!strncasecmp("message-id", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
-				} else if (!strncasecmp("references", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("references", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("in-reply-to")-1:
-				if (!strncasecmp("in-reply-to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("in-reply-to", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("subject")-1:
-				if (!strncasecmp("subject", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					zend_value_error("The additional headers cannot contain the \"Subject\" header");
-					break;
-				}
-				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				break;
-			default:
-				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
+		if (zend_string_equals_literal_ci(key, "orig-date")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "from")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("from", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "sender")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("sender", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "reply-to")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("reply-to", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "to")) {
+			zend_value_error("The additional headers cannot contain the \"To\" header");
+		} else if (zend_string_equals_literal_ci(key, "cc")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "bcc")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("bcc", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "message-id")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "references")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("references", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "in-reply-to")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("in-reply-to", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "subject")) {
+			zend_value_error("The additional headers cannot contain the \"Subject\" header");
+		} else {
+			PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
 		}
 
 		if (EG(exception)) {

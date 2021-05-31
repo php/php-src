@@ -12,9 +12,9 @@ var_dump(decoct(umask()));
 chmod(__DIR__ . '/test79082/test79082-testfile', 0644);
 chmod(__DIR__ . '/test79082/test79082-testfile2', 0400);
 
-foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $mode => $ext) {
+foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $format => $ext) {
     clearstatcache();
-    $phar = new PharData(__DIR__ . '/test79082.' . $ext, null, null, $mode);
+    $phar = new PharData(__DIR__ . '/test79082.' . $ext, format: $format);
     $phar->buildFromIterator(new \RecursiveDirectoryIterator(__DIR__ . '/test79082', \FilesystemIterator::SKIP_DOTS), __DIR__ . '/test79082');
     $phar->extractTo(__DIR__);
     var_dump(decoct(stat(__DIR__ . '/test79082-testfile')['mode']));
@@ -22,9 +22,9 @@ foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $mode => $ext) {
     unlink(__DIR__ . '/test79082-testfile');
     unlink(__DIR__ . '/test79082-testfile2');
 }
-foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $mode => $ext) {
+foreach([Phar::TAR => 'tar', Phar::ZIP => 'zip'] as $format => $ext) {
     clearstatcache();
-    $phar = new PharData(__DIR__ . '/test79082-d.' . $ext, null, null, $mode);
+    $phar = new PharData(__DIR__ . '/test79082-d.' . $ext, format: $format);
     $phar->buildFromDirectory(__DIR__ . '/test79082');
     $phar->extractTo(__DIR__);
     var_dump(decoct(stat(__DIR__ . '/test79082-testfile')['mode']));

@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
 #include "zend_ssa.h"
@@ -101,7 +100,7 @@ static void zend_dump_class_fetch_type(uint32_t fetch_type)
 			break;
 	}
 	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-			fprintf(stderr, " (no-autolod)");
+			fprintf(stderr, " (no-autoload)");
 	}
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 			fprintf(stderr, " (silent)");
@@ -470,6 +469,9 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				break;
 			case IS_VOID:
 				fprintf(stderr, " (void)");
+				break;
+			case IS_NEVER:
+				fprintf(stderr, " (never)");
 				break;
 			default:
 				fprintf(stderr, " (\?\?\?)");
@@ -926,7 +928,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 	}
 	if (func_flags & ZEND_FUNC_IRREDUCIBLE) {
-		fprintf(stderr, ", irreducable");
+		fprintf(stderr, ", irreducible");
 	}
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");

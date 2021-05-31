@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -293,57 +293,85 @@ static int zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *s
 }
 /* }}} */
 
-static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
+static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t size)
 {
-	ffi_type *t = emalloc(sizeof(ffi_type) + sizeof(ffi_type*) * (zend_hash_num_elements(&type->record.fields) + 1));
-	int i;
 	zend_ffi_field *field;
 
-	t->size = type->size;
-	t->alignment = type->align;
-	t->type = FFI_TYPE_STRUCT;
-	t->elements = (ffi_type**)(t + 1);
-	i = 0;
 	ZEND_HASH_FOREACH_PTR(&type->record.fields, field) {
 		switch (ZEND_FFI_TYPE(field->type)->kind) {
 			case ZEND_FFI_TYPE_FLOAT:
-				t->elements[i] = &ffi_type_float;
+				t->elements[(*i)++] = &ffi_type_float;
 				break;
 			case ZEND_FFI_TYPE_DOUBLE:
-				t->elements[i] = &ffi_type_double;
+				t->elements[(*i)++] = &ffi_type_double;
 				break;
 #ifdef HAVE_LONG_DOUBLE
 			case ZEND_FFI_TYPE_LONGDOUBLE:
-				t->elements[i] = &ffi_type_longdouble;
+				t->elements[(*i)++] = &ffi_type_longdouble;
 				break;
 #endif
 			case ZEND_FFI_TYPE_SINT8:
 			case ZEND_FFI_TYPE_UINT8:
 			case ZEND_FFI_TYPE_BOOL:
 			case ZEND_FFI_TYPE_CHAR:
-				t->elements[i] = &ffi_type_uint8;
+				t->elements[(*i)++] = &ffi_type_uint8;
 				break;
 			case ZEND_FFI_TYPE_SINT16:
 			case ZEND_FFI_TYPE_UINT16:
-				t->elements[i] = &ffi_type_uint16;
+				t->elements[(*i)++] = &ffi_type_uint16;
 				break;
 			case ZEND_FFI_TYPE_SINT32:
 			case ZEND_FFI_TYPE_UINT32:
-				t->elements[i] = &ffi_type_uint32;
+				t->elements[(*i)++] = &ffi_type_uint32;
 				break;
 			case ZEND_FFI_TYPE_SINT64:
 			case ZEND_FFI_TYPE_UINT64:
-				t->elements[i] = &ffi_type_uint64;
+				t->elements[(*i)++] = &ffi_type_uint64;
 				break;
 			case ZEND_FFI_TYPE_POINTER:
-				t->elements[i] = &ffi_type_pointer;
+				t->elements[(*i)++] = &ffi_type_pointer;
 				break;
-			default:
-				efree(t);
-				return NULL;
+			case ZEND_FFI_TYPE_STRUCT: {
+				zend_ffi_type *field_type = ZEND_FFI_TYPE(field->type);
+				/* for unions we use only the first field */
+				int num_fields = !(field_type->attr & ZEND_FFI_ATTR_UNION) ?
+					zend_hash_num_elements(&field_type->record.fields) : 1;
+
+				if (num_fields > 1) {
+					size += sizeof(ffi_type*) * (num_fields - 1);
+					t = erealloc(t, size);
+					t->elements = (ffi_type**)(t + 1);
+				}
+				t = zend_ffi_face_struct_add_fields(t, field_type, i, size);
+				break;
 			}
-		i++;
+			default:
+				t->elements[(*i)++] = &ffi_type_void;
+				break;
+		}
+		if (type->attr & ZEND_FFI_ATTR_UNION) {
+			/* for unions we use only the first field */
+			break;
+		}
 	} ZEND_HASH_FOREACH_END();
+	return t;
+}
+
+static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
+{
+	/* for unions we use only the first field */
+	int num_fields = !(type->attr & ZEND_FFI_ATTR_UNION) ?
+		zend_hash_num_elements(&type->record.fields) : 1;
+	size_t size = sizeof(ffi_type) + sizeof(ffi_type*) * (num_fields + 1);
+	ffi_type *t = emalloc(size);
+	int i;
+
+	t->size = type->size;
+	t->alignment = type->align;
+	t->type = FFI_TYPE_STRUCT;
+	t->elements = (ffi_type**)(t + 1);
+	i = 0;
+	t = zend_ffi_face_struct_add_fields(t, type, &i, size);
 	t->elements[i] = NULL;
 	return t;
 }
@@ -391,11 +419,7 @@ again:
 			kind = type->enumeration.kind;
 			goto again;
 		case ZEND_FFI_TYPE_STRUCT:
-			if (!(type->attr & ZEND_FFI_ATTR_UNION)) {
-				ffi_type *t = zend_ffi_make_fake_struct_type(type);
-				return t;
-			}
-			break;
+			return zend_ffi_make_fake_struct_type(type);
 		default:
 			break;
 	}
@@ -2534,18 +2558,13 @@ again:
 			kind = type->enumeration.kind;
 			goto again;
 		case ZEND_FFI_TYPE_STRUCT:
-			if (!(type->attr & ZEND_FFI_ATTR_UNION)
-			 && Z_TYPE_P(arg) == IS_OBJECT && Z_OBJCE_P(arg) == zend_ffi_cdata_ce) {
+			if (Z_TYPE_P(arg) == IS_OBJECT && Z_OBJCE_P(arg) == zend_ffi_cdata_ce) {
 				zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(arg);
 
 				if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type))) {
-				    /* Create a fake structure type */
-					ffi_type *t = zend_ffi_make_fake_struct_type(type);
-					if (t) {
-						*pass_type = t;
-						arg_values[n] = cdata->ptr;
-						break;
-					}
+					*pass_type = zend_ffi_make_fake_struct_type(type);;
+					arg_values[n] = cdata->ptr;
+					break;
 				}
 			}
 			zend_ffi_pass_incompatible(arg, type, n, execute_data);
@@ -2598,7 +2617,7 @@ static int zend_ffi_pass_var_arg(zval *arg, ffi_type **pass_type, void **arg_val
 
 				return zend_ffi_pass_arg(arg, type, pass_type, arg_values, n, execute_data);
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_throw_error(zend_ffi_exception_ce, "Unsupported argument type");
 			return FAILURE;
@@ -4880,22 +4899,15 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(ffi)
 {
-	zend_class_entry ce;
-
 	REGISTER_INI_ENTRIES();
 
 	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0;
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "Exception", NULL);
-	zend_ffi_exception_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ffi_exception_ce = register_class_FFI_Exception(zend_ce_error);
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "ParserException", NULL);
-	zend_ffi_parser_exception_ce = zend_register_internal_class_ex(&ce, zend_ffi_exception_ce);
-	zend_ffi_parser_exception_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_parser_exception_ce = register_class_FFI_ParserException(zend_ffi_exception_ce);
 
-	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
-	zend_ffi_ce = zend_register_internal_class(&ce);
-	zend_ffi_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
 	zend_ffi_ce->serialize = zend_class_serialize_deny;
 	zend_ffi_ce->unserialize = zend_class_unserialize_deny;
@@ -4930,9 +4942,7 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "CData", NULL);
-	zend_ffi_cdata_ce = zend_register_internal_class(&ce);
-	zend_ffi_cdata_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
 	zend_ffi_cdata_ce->serialize = zend_class_serialize_deny;
@@ -5008,9 +5018,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_cdata_free_handlers.get_gc               = zend_fake_get_gc;
 
-	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", class_FFI_CType_methods);
-	zend_ffi_ctype_ce = zend_register_internal_class(&ce);
-	zend_ffi_ctype_ce->ce_flags |= ZEND_ACC_FINAL;
+	zend_ffi_ctype_ce = register_class_FFI_CType();
 	zend_ffi_ctype_ce->create_object = zend_ffi_ctype_new;
 	zend_ffi_ctype_ce->serialize = zend_class_serialize_deny;
 	zend_ffi_ctype_ce->unserialize = zend_class_unserialize_deny;

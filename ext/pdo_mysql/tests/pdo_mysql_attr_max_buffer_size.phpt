@@ -58,8 +58,12 @@ if (MySQLPDOTest::isPDOMySQLnd())
 
     try_buffer_size(1, -1);
     try_buffer_size(2, 1000);
-    try_buffer_size(3, NULL);
     try_buffer_size(4, 2000);
+    try {
+        try_buffer_size(3, NULL);
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
     print "done!";
 ?>
@@ -72,6 +76,6 @@ $db->exec('DROP TABLE IF EXISTS test');
 --EXPECTF--
 [001] id = 1, val = 0123456789... (length: %d)
 [002] id = 1, val = 0123456789... (length: 1000)
-[003] id = 1, val = 0123456789... (length: %d)
 [004] id = 1, val = 0123456789... (length: 2000)
+Attribute value must be of type int for selected attribute, null given
 done!

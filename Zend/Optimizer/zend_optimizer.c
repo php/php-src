@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,7 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -53,19 +52,12 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 
 int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
 {
-	binary_op_type binary_op = get_binary_op(opcode);
-	int er, ret;
-
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
 	}
 
-	er = EG(error_reporting);
-	EG(error_reporting) = 0;
-	ret = binary_op(result, op1, op2);
-	EG(error_reporting) = er;
-
-	return ret;
+	binary_op_type binary_op = get_binary_op(opcode);
+	return binary_op(result, op1, op2);
 }
 /* }}} */
 
@@ -74,11 +66,7 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 	unary_op_type unary_op = get_unary_op(opcode);
 
 	if (unary_op) {
-		if (opcode == ZEND_BW_NOT
-		 && Z_TYPE_P(op1) != IS_LONG
-		 && Z_TYPE_P(op1) != IS_DOUBLE
-		 && Z_TYPE_P(op1) != IS_STRING) {
-			/* produces "Unsupported operand types" exception */
+		if (zend_unary_op_produces_error(opcode, op1)) {
 			return FAILURE;
 		}
 		return unary_op(result, op1);
@@ -327,7 +315,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
 				opline->opcode = ZEND_FAST_CONCAT;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			break;
@@ -355,7 +343,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				(opline + 1)->op2.var == opline->result.var) {
 				return 0;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_INSTANCEOF:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
@@ -509,7 +497,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			if (opline->opcode == ZEND_CONCAT && opline->op1_type == IS_CONST) {
 				opline->opcode = ZEND_FAST_CONCAT;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			break;
@@ -676,7 +664,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 			break;
 		case ZEND_JMPZNZ:
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -722,7 +710,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 			break;
 		case ZEND_JMPZNZ:
 			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -1342,6 +1330,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 			zend_op *opline = call_info->caller_init_opline;
 
 			if (opline && call_info->callee_func && opline->opcode == ZEND_INIT_FCALL) {
+				ZEND_ASSERT(!call_info->is_prototype);
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
 			}
 			call_info = call_info->next_callee;
@@ -1369,16 +1358,24 @@ static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 
+static void zend_foreach_op_array_helper(
+		zend_op_array *op_array, zend_op_array_func_t func, void *context) {
+	func(op_array, context);
+	for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+		func(op_array->dynamic_func_defs[i], context);
+	}
+}
+
 void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context)
 {
 	zend_class_entry *ce;
 	zend_string *key;
 	zend_op_array *op_array;
 
-	func(&script->main_op_array, context);
+	zend_foreach_op_array_helper(&script->main_op_array, func, context);
 
 	ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
-		func(op_array, context);
+		zend_foreach_op_array_helper(op_array, func, context);
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
@@ -1389,7 +1386,7 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 			if (op_array->scope == ce
 					&& op_array->type == ZEND_USER_FUNCTION
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-				func(op_array, context);
+				zend_foreach_op_array_helper(op_array, func, context);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();

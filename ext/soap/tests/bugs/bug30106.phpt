@@ -1,7 +1,7 @@
 --TEST--
 Bug #30106 (SOAP cannot not parse 'ref' element. Causes Uncaught SoapFault exception)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled", 0);
@@ -19,7 +19,7 @@ class LocalSoapClient extends SoapClient {
         $this->server->addFunction("getContinentList");
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     echo $request;
     ob_start();
     $this->server->handle($request);

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -790,8 +790,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
 			zend_string_release(_k);
 		}
-		pcre2_set_character_tables(cctx, tables);
 	}
+	pcre2_set_character_tables(cctx, tables);
 
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
@@ -965,14 +965,14 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
-static void init_unmatched_null_pair() {
+static void init_unmatched_null_pair(void) {
 	zval val1, val2;
 	ZVAL_NULL(&val1);
 	ZVAL_LONG(&val2, -1);
 	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
 }
 
-static void init_unmatched_empty_pair() {
+static void init_unmatched_empty_pair(void) {
 	zval val1, val2;
 	ZVAL_EMPTY_STRING(&val1);
 	ZVAL_LONG(&val2, -1);
@@ -1500,8 +1500,8 @@ PHP_FUNCTION(preg_match_all)
 /* {{{ preg_get_backref */
 static int preg_get_backref(char **str, int *backref)
 {
-	register char in_brace = 0;
-	register char *walk = *str;
+	char in_brace = 0;
+	char *walk = *str;
 
 	if (walk[1] == 0)
 		return 0;
@@ -2640,6 +2640,10 @@ matched:
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
+				/* Get next piece if no limit or limit not yet reached and something matched*/
+				if (limit_val != -1 && limit_val <= 1) {
+					break;
+				}
 				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {

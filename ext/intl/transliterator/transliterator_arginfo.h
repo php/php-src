@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 41b9929a370a5f4c0f3ba0dd2c98e766a1941f0d */
+ * Stub hash: c34871965e0d58bb15beda1787b7cdd0754bb28f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -51,7 +51,7 @@ static const zend_function_entry class_Transliterator_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_Transliterator()
+static zend_class_entry *register_class_Transliterator(void)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -59,11 +59,10 @@ zend_class_entry *register_class_Transliterator()
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	zval property_id_default_value;
-	ZVAL_NULL(&property_id_default_value);
+	ZVAL_UNDEF(&property_id_default_value);
 	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
-	zend_declare_property_ex(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_id_name);
 
 	return class_entry;
 }
-

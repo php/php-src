@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6b162963bcceb90144fdd3165137fb567f916812 */
+ * Stub hash: ba77cee0a718bcbe7ac280f07a41f9e97a8e2246 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -228,6 +228,63 @@ static const zend_function_entry class_dotnet_methods[] = {
 };
 
 
+static const zend_function_entry class_com_safearray_proxy_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_com_exception_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_variant(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com(zend_class_entry *class_entry_variant)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_variant)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com_safearray_proxy(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", class_com_safearray_proxy_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com_exception(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com_exception", class_com_exception_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}

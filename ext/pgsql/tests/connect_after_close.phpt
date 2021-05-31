@@ -10,6 +10,7 @@ include('config.inc');
 $db1 = pg_connect($conn_str);
 unset($db1);
 var_dump(pg_close());
+
 $db2 = pg_connect($conn_str);
 unset($db2);
 var_dump(pg_close());

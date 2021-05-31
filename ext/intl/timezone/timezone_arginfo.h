@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: afd0e74b29d54cde9789787b924af9b43539a7f4 */
+ * Stub hash: 02045a0de09413796dd1ca7495b0b1beff14a074 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -152,3 +152,13 @@ static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_ME_MAPPING(useDaylightTime, intltz_use_daylight_time, arginfo_class_IntlTimeZone_useDaylightTime, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_IntlTimeZone(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlTimeZone", class_IntlTimeZone_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -1032,17 +1032,22 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		ZVAL_STR_COPY(&tmp, str);
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
-		do {
-			ZVAL_STRINGL_FAST(&tmp, p1, p2 - p1);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			p1 = p2 + ZSTR_LEN(delim);
-			p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
-		} while (p2 != NULL && --limit > 1);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			do {
+				ZEND_HASH_FILL_GROW();
+				ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, p2 - p1));
+				ZEND_HASH_FILL_NEXT();
+				p1 = p2 + ZSTR_LEN(delim);
+				p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+			} while (p2 != NULL && --limit > 1);
 
-		if (p1 <= endp) {
-			ZVAL_STRINGL(&tmp, p1, endp - p1);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-		}
+			if (p1 <= endp) {
+				ZEND_HASH_FILL_GROW();
+				ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, endp - p1));
+				ZEND_HASH_FILL_NEXT();
+			}
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
@@ -1362,7 +1367,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 
 	while (c < e) {
 		if (islower(*c)) {
-			register unsigned char *r;
+			unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 			if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1427,7 +1432,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 
 		while (c < e) {
 			if (isupper(*c)) {
-				register unsigned char *r;
+				unsigned char *r;
 				zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 				if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1462,69 +1467,130 @@ PHP_FUNCTION(strtolower)
 }
 /* }}} */
 
+#if defined(PHP_WIN32)
+static bool _is_basename_start(const char *start, const char *pos)
+{
+	if (pos - start >= 1
+     && *(pos-1) != '/'
+     && *(pos-1) != '\\') {
+		if (pos - start == 1) {
+			return 1;
+		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
+			return 1;
+		} else if (*(pos-2) == ':'
+			&& _is_basename_start(start, pos - 2)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+#endif
+
 /* {{{ php_basename */
 PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t suffix_len)
 {
-	/* State 0 is directly after a directory separator (or at the start of the string).
-	 * State 1 is everything else. */
-	int state = 0;
-	const char *basename_start = s;
-	const char *basename_end = s;
-	while (len > 0) {
-		int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
+	const char *basename_start;
+	const char *basename_end;
 
-		switch (inc_len) {
-			case 0:
-				goto quit_loop;
-			case 1:
+	if (CG(ascii_compatible_locale)) {
+		basename_end = s + len - 1;
+
+		/* Strip trailing slashes */
+		while (basename_end >= s
 #if defined(PHP_WIN32)
-				if (*s == '/' || *s == '\\') {
+			&& (*basename_end == '/'
+				|| *basename_end == '\\'
+				|| (*basename_end == ':'
+					&& _is_basename_start(s, basename_end)))) {
 #else
-				if (*s == '/') {
+			&& *basename_end == '/') {
 #endif
-					if (state == 1) {
-						state = 0;
-						basename_end = s;
-					}
-#if defined(PHP_WIN32)
-				/* Catch relative paths in c:file.txt style. They're not to confuse
-				   with the NTFS streams. This part ensures also, that no drive
-				   letter traversing happens. */
-				} else if ((*s == ':' && (s - basename_start == 1))) {
-					if (state == 0) {
-						basename_start = s;
-						state = 1;
-					} else {
-						basename_end = s;
-						state = 0;
-					}
-#endif
-				} else {
-					if (state == 0) {
-						basename_start = s;
-						state = 1;
-					}
-				}
-				break;
-			default:
-				if (inc_len < 0) {
-					/* If character is invalid, treat it like other non-significant characters. */
-					inc_len = 1;
-					php_mb_reset();
-				}
-				if (state == 0) {
-					basename_start = s;
-					state = 1;
-				}
-				break;
+			basename_end--;
 		}
-		s += inc_len;
-		len -= inc_len;
-	}
+		if (basename_end < s) {
+			return ZSTR_EMPTY_ALLOC();
+		}
+
+		/* Extract filename */
+		basename_start = basename_end;
+		basename_end++;
+		while (basename_start > s
+#if defined(PHP_WIN32)
+			&& *(basename_start-1) != '/'
+			&& *(basename_start-1) != '\\') {
+
+			if (*(basename_start-1) == ':' &&
+				_is_basename_start(s, basename_start - 1)) {
+				break;
+			}
+#else
+			&& *(basename_start-1) != '/') {
+#endif
+			basename_start--;
+		}
+	} else {
+		/* State 0 is directly after a directory separator (or at the start of the string).
+		 * State 1 is everything else. */
+		int state = 0;
+
+		basename_start = s;
+		basename_end = s;
+		while (len > 0) {
+			int inc_len = (*s == '\0' ? 1 : php_mblen(s, len));
+
+			switch (inc_len) {
+				case 0:
+					goto quit_loop;
+				case 1:
+#if defined(PHP_WIN32)
+					if (*s == '/' || *s == '\\') {
+#else
+					if (*s == '/') {
+#endif
+						if (state == 1) {
+							state = 0;
+							basename_end = s;
+						}
+#if defined(PHP_WIN32)
+					/* Catch relative paths in c:file.txt style. They're not to confuse
+					   with the NTFS streams. This part ensures also, that no drive
+					   letter traversing happens. */
+					} else if ((*s == ':' && (s - basename_start == 1))) {
+						if (state == 0) {
+							basename_start = s;
+							state = 1;
+						} else {
+							basename_end = s;
+							state = 0;
+						}
+#endif
+					} else {
+						if (state == 0) {
+							basename_start = s;
+							state = 1;
+						}
+					}
+					break;
+				default:
+					if (inc_len < 0) {
+						/* If character is invalid, treat it like other non-significant characters. */
+						inc_len = 1;
+						php_mb_reset();
+					}
+					if (state == 0) {
+						basename_start = s;
+						state = 1;
+					}
+					break;
+			}
+			s += inc_len;
+			len -= inc_len;
+		}
 
 quit_loop:
-	if (state == 1) {
-		basename_end = s;
+		if (state == 1) {
+			basename_end = s;
+		}
 	}
 
 	if (suffix != NULL && suffix_len < (size_t)(basename_end - basename_start) &&
@@ -1698,8 +1764,8 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 /* {{{ php_strspn */
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p = s1, *spanp;
-	register char c = *p;
+	const char *p = s1, *spanp;
+	char c = *p;
 
 cont:
 	for (spanp = s2; p != s1_end && spanp != s2_end;) {
@@ -1715,8 +1781,8 @@ cont:
 /* {{{ php_strcspn */
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p, *spanp;
-	register char c = *s1;
+	const char *p, *spanp;
+	char c = *s1;
 
 	for (p = s1;;) {
 		spanp = s2;
@@ -2177,7 +2243,7 @@ PHP_FUNCTION(substr)
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
-		if ((size_t)-f > ZSTR_LEN(str)) {
+		if (-(size_t)f > ZSTR_LEN(str)) {
 			f = 0;
 		} else {
 			f = (zend_long)ZSTR_LEN(str) + f;
@@ -2191,7 +2257,7 @@ PHP_FUNCTION(substr)
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
-			if ((size_t)(-l) > ZSTR_LEN(str) - (size_t)f) {
+			if (-(size_t)l > ZSTR_LEN(str) - (size_t)f) {
 				l = 0;
 			} else {
 				l = (zend_long)ZSTR_LEN(str) - f + l;
@@ -2490,7 +2556,7 @@ PHP_FUNCTION(quotemeta)
 			case '(':
 			case ')':
 				*q++ = '\\';
-				/* break is missing _intentionally_ */
+				ZEND_FALLTHROUGH;
 			default:
 				*q++ = c;
 		}
@@ -2601,8 +2667,8 @@ PHP_FUNCTION(ucwords)
 {
 	zend_string *str;
 	char *delims = " \t\r\n\f\v";
-	register char *r;
-	register const char *r_end;
+	char *r;
+	const char *r_end;
 	size_t delims_len = 6;
 	char mask[256];
 
@@ -2647,16 +2713,16 @@ PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *
 			}
 		}
 	} else {
-		unsigned char xlat[256], j = 0;
+		unsigned char xlat[256];
 
-		do { xlat[j] = j; } while (++j != 0);
+		memset(xlat, 0, sizeof(xlat));
 
 		for (i = 0; i < trlen; i++) {
-			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i] - str_from[i];
 		}
 
 		for (i = 0; i < len; i++) {
-			str[i] = xlat[(size_t)(unsigned char) str[i]];
+			str[i] += xlat[(size_t)(unsigned char) str[i]];
 		}
 	}
 
@@ -2681,41 +2747,38 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
 				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), i);
 				ZSTR_VAL(new_str)[i] = ch_to;
-				break;
+				i++;
+				for (; i < ZSTR_LEN(str); i++) {
+					ZSTR_VAL(new_str)[i] = (ZSTR_VAL(str)[i] != ch_from) ? ZSTR_VAL(str)[i] : ch_to;
+				}
+				ZSTR_VAL(new_str)[i] = 0;
+				return new_str;
 			}
 		}
-		for (; i < ZSTR_LEN(str); i++) {
-			ZSTR_VAL(new_str)[i] = (ZSTR_VAL(str)[i] != ch_from) ? ZSTR_VAL(str)[i] : ch_to;
-		}
 	} else {
-		unsigned char xlat[256], j = 0;
+		unsigned char xlat[256];
 
-		do { xlat[j] = j; } while (++j != 0);
+		memset(xlat, 0, sizeof(xlat));;
 
 		for (i = 0; i < trlen; i++) {
-			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i] - str_from[i];
 		}
 
 		for (i = 0; i < ZSTR_LEN(str); i++) {
-			if (ZSTR_VAL(str)[i] != xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]]) {
+			if (xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]]) {
 				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
 				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), i);
-				ZSTR_VAL(new_str)[i] = xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
-				break;
+				do {
+					ZSTR_VAL(new_str)[i] = ZSTR_VAL(str)[i] + xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
+					i++;
+				} while (i < ZSTR_LEN(str));
+				ZSTR_VAL(new_str)[i] = 0;
+				return new_str;
 			}
 		}
-
-		for (;i < ZSTR_LEN(str); i++) {
-			ZSTR_VAL(new_str)[i] = xlat[(size_t)(unsigned char) ZSTR_VAL(str)[i]];
-		}
 	}
 
-	if (!new_str) {
-		return zend_string_copy(str);
-	}
-
-	ZSTR_VAL(new_str)[ZSTR_LEN(new_str)] = 0;
-	return new_str;
+	return zend_string_copy(str);
 }
 /* }}} */
 
@@ -3482,7 +3545,7 @@ PHPAPI void php_stripcslashes(zend_string *str)
 						*target++=(char)strtol(numtmp, NULL, 16);
 						break;
 					}
-					/* break is left intentionally */
+					ZEND_FALLTHROUGH;
 				default:
 					i=0;
 					while (source < end && *source >= '0' && *source <= '7' && i<3) {
@@ -3585,7 +3648,7 @@ typedef void (*php_stripslashes_func_t)(zend_string *);
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_addslashes_func_t resolve_addslashes() {
+static php_addslashes_func_t resolve_addslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
 	}
@@ -3594,7 +3657,7 @@ static php_addslashes_func_t resolve_addslashes() {
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_stripslashes_func_t resolve_stripslashes() {
+static php_stripslashes_func_t resolve_stripslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
 	}
@@ -3749,7 +3812,7 @@ do_escape:
 			case '\"':
 			case '\\':
 				*target++ = '\\';
-				/* break is missing *intentionally* */
+				ZEND_FALLTHROUGH;
 			default:
 				*target++ = *source;
 				break;
@@ -3890,7 +3953,7 @@ do_escape:
 			case '\"':
 			case '\\':
 				*target++ = '\\';
-				/* break is missing *intentionally* */
+				ZEND_FALLTHROUGH;
 			default:
 				*target++ = *source;
 				break;
@@ -4511,7 +4574,7 @@ PHP_FUNCTION(nl2br)
 				if ((*tmp == '\r' && *(tmp+1) == '\n') || (*tmp == '\n' && *(tmp+1) == '\r')) {
 					*target++ = *tmp++;
 				}
-				/* lack of a break; is intentional */
+				ZEND_FALLTHROUGH;
 			default:
 				*target++ = *tmp;
 		}
@@ -4573,7 +4636,7 @@ PHP_FUNCTION(strip_tags)
 static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 	const char *retval;
 
-	if (!strcmp("0", ZSTR_VAL(loc))) {
+	if (zend_string_equals_literal(loc, "0")) {
 		loc = NULL;
 	} else {
 		if (ZSTR_LEN(loc) >= 255) {
@@ -4604,7 +4667,6 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 		retval = setlocale(cat, NULL);
 	}
 # endif
-	zend_update_current_locale();
 	if (!retval) {
 		return NULL;
 	}
@@ -4615,6 +4677,7 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 
 		BG(locale_changed) = 1;
 		if (cat == LC_CTYPE || cat == LC_ALL) {
+			zend_update_current_locale();
 			if (BG(ctype_string)) {
 				zend_string_release_ex(BG(ctype_string), 0);
 			}
@@ -4637,9 +4700,13 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 }
 
 static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
-	zend_string *loc_str = zval_try_get_string(loc_zv);
+	zend_string *tmp_loc_str;
+	zend_string *loc_str = zval_try_get_tmp_string(loc_zv, &tmp_loc_str);
+	if (UNEXPECTED(loc_str == NULL)) {
+		return NULL;
+	}
 	zend_string *result = try_setlocale_str(cat, loc_str);
-	zend_string_release_ex(loc_str, 0);
+	zend_tmp_string_release(tmp_loc_str);
 	return result;
 }
 
@@ -5264,7 +5331,7 @@ PHP_FUNCTION(count_chars)
 		}
 	}
 
-	if (mymode >= 3 && mymode <= 4) {
+	if (mymode == 3 || mymode == 4) {
 		RETURN_STRINGL(retstr, retlen);
 	}
 }

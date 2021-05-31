@@ -1,9 +1,7 @@
 --TEST--
 Bug #79247 (Garbage collecting variant objects segfaults)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 $keep = new variant(null);

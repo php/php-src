@@ -4,8 +4,8 @@ Bug #71127 (Define in auto_prepend_file is overwrite)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=0x7FFFBFFF
---SKIPIF--
-<?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $file = __DIR__ . "/bug71127.inc";

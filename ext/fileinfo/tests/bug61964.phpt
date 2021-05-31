@@ -1,7 +1,7 @@
 --TEST--
 Bug #61964 (finfo_open with directory cause invalid free)
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 

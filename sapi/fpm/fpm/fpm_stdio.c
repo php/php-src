@@ -42,7 +42,7 @@ int fpm_stdio_init_main() /* {{{ */
 }
 /* }}} */
 
-static inline int fpm_use_error_log() {  /* {{{ */
+static inline int fpm_use_error_log(void) {  /* {{{ */
 	/*
 	 * the error_log is NOT used when running in foreground
 	 * and from a tty (user looking at output).

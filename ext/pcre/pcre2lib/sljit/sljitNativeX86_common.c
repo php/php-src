@@ -506,7 +506,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	reverse_buf(compiler);
 
 	/* Second code generation pass. */
-	code = (sljit_u8*)SLJIT_MALLOC_EXEC(compiler->size);
+	code = (sljit_u8*)SLJIT_MALLOC_EXEC(compiler->size, compiler->exec_allocator_data);
 	PTR_FAIL_WITH_EXEC_IF(code);
 	buf = compiler->buf;
 
@@ -557,7 +557,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 					SLJIT_ASSERT(put_label->label);
 					put_label->addr = (sljit_uw)code_ptr;
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
-					code_ptr = generate_put_label_code(put_label, code_ptr, (sljit_uw)(SLJIT_ADD_EXEC_OFFSET(code, executable_offset) + put_label->label->size));
+					code_ptr = generate_put_label_code(put_label, code_ptr, (sljit_uw)SLJIT_ADD_EXEC_OFFSET(code, executable_offset) + put_label->label->size);
 #endif
 					put_label = put_label->next;
 					break;
@@ -629,7 +629,11 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	compiler->error = SLJIT_ERR_COMPILED;
 	compiler->executable_offset = executable_offset;
 	compiler->executable_size = code_ptr - code;
-	return (void*)(code + executable_offset);
+
+	code = (sljit_u8*)SLJIT_ADD_EXEC_OFFSET(code, executable_offset);
+
+	SLJIT_UPDATE_WX_FLAGS(code, (sljit_u8*)SLJIT_ADD_EXEC_OFFSET(code_ptr, executable_offset), 1);
+	return (void*)code;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
@@ -725,15 +729,16 @@ static SLJIT_INLINE sljit_s32 emit_endbranch(struct sljit_compiler *compiler)
 #else
 	*inst = 0xfa;
 #endif
-#else
+#else /* !SLJIT_CONFIG_X86_CET */
 	SLJIT_UNUSED_ARG(compiler);
-#endif
+#endif /* SLJIT_CONFIG_X86_CET */
 	return SLJIT_SUCCESS;
 }
 
+#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET) && defined (__SHSTK__)
+
 static SLJIT_INLINE sljit_s32 emit_rdssp(struct sljit_compiler *compiler, sljit_s32 reg)
 {
-#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
 	sljit_u8 *inst;
 	sljit_s32 size;
 
@@ -753,16 +758,11 @@ static SLJIT_INLINE sljit_s32 emit_rdssp(struct sljit_compiler *compiler, sljit_
 	*inst++ = 0x0f;
 	*inst++ = 0x1e;
 	*inst = (0x3 << 6) | (0x1 << 3) | (reg_map[reg] & 0x7);
-#else
-	SLJIT_UNUSED_ARG(compiler);
-	SLJIT_UNUSED_ARG(reg);
-#endif
 	return SLJIT_SUCCESS;
 }
 
 static SLJIT_INLINE sljit_s32 emit_incssp(struct sljit_compiler *compiler, sljit_s32 reg)
 {
-#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
 	sljit_u8 *inst;
 	sljit_s32 size;
 
@@ -782,29 +782,28 @@ static SLJIT_INLINE sljit_s32 emit_incssp(struct sljit_compiler *compiler, sljit
 	*inst++ = 0x0f;
 	*inst++ = 0xae;
 	*inst = (0x3 << 6) | (0x5 << 3) | (reg_map[reg] & 0x7);
-#else
-	SLJIT_UNUSED_ARG(compiler);
-	SLJIT_UNUSED_ARG(reg);
-#endif
 	return SLJIT_SUCCESS;
 }
 
+#endif /* SLJIT_CONFIG_X86_CET && __SHSTK__ */
+
 static SLJIT_INLINE sljit_s32 cpu_has_shadow_stack(void)
 {
-#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
+#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET) && defined (__SHSTK__)
 	return _get_ssp() != 0;
-#else
+#else /* !SLJIT_CONFIG_X86_CET || !__SHSTK__ */
 	return 0;
-#endif
+#endif /* SLJIT_CONFIG_X86_CET && __SHSTK__ */
 }
 
 static SLJIT_INLINE sljit_s32 adjust_shadow_stack(struct sljit_compiler *compiler,
 	sljit_s32 src, sljit_sw srcw, sljit_s32 base, sljit_sw disp)
 {
-#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET)
-	sljit_u8 *inst;
+#if (defined SLJIT_CONFIG_X86_CET && SLJIT_CONFIG_X86_CET) && defined (__SHSTK__)
+	sljit_u8 *inst, *jz_after_cmp_inst;
+	sljit_uw size_jz_after_cmp_inst;
 
-	sljit_s32 size_before_rdssp_inst = compiler->size;
+	sljit_uw size_before_rdssp_inst = compiler->size;
 
 	/* Generate "RDSSP TMP_REG1". */
 	FAIL_IF(emit_rdssp(compiler, TMP_REG1));
@@ -839,8 +838,8 @@ static SLJIT_INLINE sljit_s32 adjust_shadow_stack(struct sljit_compiler *compile
 	FAIL_IF(!inst);
 	INC_SIZE(2);
 	*inst++ = get_jump_code(SLJIT_EQUAL) - 0x10;
-	sljit_uw size_jz_after_cmp_inst = compiler->size;
-	sljit_u8 *jz_after_cmp_inst = inst;
+	size_jz_after_cmp_inst = compiler->size;
+	jz_after_cmp_inst = inst;
 
 #if (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 	/* REX_W is not necessary. */
@@ -860,13 +859,13 @@ static SLJIT_INLINE sljit_s32 adjust_shadow_stack(struct sljit_compiler *compile
 	*inst = size_before_rdssp_inst - compiler->size;
 
 	*jz_after_cmp_inst = compiler->size - size_jz_after_cmp_inst;
-#else /* SLJIT_CONFIG_X86_CET */
+#else /* !SLJIT_CONFIG_X86_CET || !__SHSTK__ */
 	SLJIT_UNUSED_ARG(compiler);
 	SLJIT_UNUSED_ARG(src);
 	SLJIT_UNUSED_ARG(srcw);
 	SLJIT_UNUSED_ARG(base);
 	SLJIT_UNUSED_ARG(disp);
-#endif /* SLJIT_CONFIG_X86_CET */
+#endif /* SLJIT_CONFIG_X86_CET && __SHSTK__ */
 	return SLJIT_SUCCESS;
 }
 
@@ -3123,15 +3122,21 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_put_label* sljit_emit_put_label(struct slj
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_target, sljit_sw executable_offset)
 {
 	SLJIT_UNUSED_ARG(executable_offset);
+
+	SLJIT_UPDATE_WX_FLAGS((void*)addr, (void*)(addr + sizeof(sljit_uw)), 0);
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_unaligned_store_sw((void*)addr, new_target - (addr + 4) - (sljit_uw)executable_offset);
 #else
 	sljit_unaligned_store_sw((void*)addr, (sljit_sw) new_target);
 #endif
+	SLJIT_UPDATE_WX_FLAGS((void*)addr, (void*)(addr + sizeof(sljit_uw)), 1);
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant, sljit_sw executable_offset)
 {
 	SLJIT_UNUSED_ARG(executable_offset);
+
+	SLJIT_UPDATE_WX_FLAGS((void*)addr, (void*)(addr + sizeof(sljit_sw)), 0);
 	sljit_unaligned_store_sw((void*)addr, new_constant);
+	SLJIT_UPDATE_WX_FLAGS((void*)addr, (void*)(addr + sizeof(sljit_sw)), 1);
 }

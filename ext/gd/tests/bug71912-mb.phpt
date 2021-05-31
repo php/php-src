@@ -1,8 +1,9 @@
 --TEST--
 Bug #71912 (libgd: signedness vulnerability)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-        if(!extension_loaded('gd')){ die('skip gd extension not available'); }
         if(!function_exists('imagecreatefromgd2')) die('skip imagecreatefromgd2() not available');
 ?>
 --FILE--

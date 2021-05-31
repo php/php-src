@@ -6,8 +6,8 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
 opcache.preload=
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 class A {
@@ -38,7 +38,7 @@ A::t:
 0003 ECHO T2
 0004 T2 = INSTANCEOF CV0($obj) string("self")
 0005 ECHO T2
-0006 V3 = FETCH_CLASS (no-autolod) (exception) CV1($c)
+0006 V3 = FETCH_CLASS (no-autoload) (silent) (exception) CV1($c)
 0007 T2 = INSTANCEOF CV0($obj) V3
 0008 ECHO T2
 0009 RETURN null

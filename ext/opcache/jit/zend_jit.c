@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -39,7 +39,12 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
-#include "jit/zend_jit_x86.h"
+#if ZEND_JIT_TARGET_X86
+# include "jit/zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "jit/zend_jit_arm64.h"
+#endif
+
 #include "jit/zend_jit_internal.h"
 
 #ifdef ZTS
@@ -87,10 +92,12 @@ zend_jit_globals jit_globals;
 typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(dasm_State **Dst);
+	uint32_t offset;
+	uint32_t adjustment;
 } zend_jit_stub;
 
-#define JIT_STUB(name) \
-	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub}
+#define JIT_STUB(name, offset, adjustment) \
+	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, offset, adjustment}
 
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
@@ -116,13 +123,18 @@ static const void *zend_jit_func_trace_counter_handler = NULL;
 static const void *zend_jit_ret_trace_counter_handler = NULL;
 static const void *zend_jit_loop_trace_counter_handler = NULL;
 
-static void ZEND_FASTCALL zend_runtime_jit(void);
+static int ZEND_FASTCALL zend_runtime_jit(void);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
 static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags);
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
+
+#if ZEND_JIT_TARGET_ARM64
+static zend_jit_trace_info *zend_jit_get_current_trace_info(void);
+static uint32_t zend_jit_trace_find_exit_point(const void* addr);
+#endif
 
 static bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {
@@ -188,11 +200,6 @@ static bool zend_is_commutative(zend_uchar opcode)
 		opcode == ZEND_BW_XOR;
 }
 
-static bool zend_long_is_power_of_two(zend_long x)
-{
-	return (x > 0) && !(x & (x - 1));
-}
-
 #define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
 	  ssa->var_info && \
@@ -204,19 +211,30 @@ static bool zend_long_is_power_of_two(zend_long x)
 #define OP2_RANGE()      OP_RANGE(ssa_op, op2)
 #define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
 
-#include "dynasm/dasm_x86.h"
+#if ZEND_JIT_TARGET_X86
+# include "dynasm/dasm_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, uint32_t *cp, ptrdiff_t offset);
+# define DASM_ADD_VENEER zend_jit_add_veneer
+# include "dynasm/dasm_arm64.h"
+#endif
+
 #include "jit/zend_jit_helpers.c"
-#include "jit/zend_jit_disasm_x86.c"
+#include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
-#include "jit/zend_jit_gdb.c"
-#include "jit/zend_jit_perf_dump.c"
+# include "jit/zend_jit_gdb.c"
+# include "jit/zend_jit_perf_dump.c"
 #endif
 #ifdef HAVE_OPROFILE
 # include "jit/zend_jit_oprofile.c"
 #endif
-#include "jit/zend_jit_vtune.c"
 
-#include "jit/zend_jit_x86.c"
+#if ZEND_JIT_TARGET_X86
+# include "jit/zend_jit_vtune.c"
+# include "jit/zend_jit_x86.c"
+#elif ZEND_JIT_TARGET_ARM64
+# include "jit/zend_jit_arm64.c"
+#endif
 
 #if _WIN32
 # include <Windows.h>
@@ -298,14 +316,31 @@ static void handle_dasm_error(int ret) {
 		case DASM_S_RANGE_PC:
 			fprintf(stderr, "DASM_S_RANGE_PC %d\n", ret & 0xffffffu);
 			break;
+#ifdef DASM_S_RANGE_VREG
 		case DASM_S_RANGE_VREG:
 			fprintf(stderr, "DASM_S_RANGE_VREG\n");
 			break;
+#endif
+#ifdef DASM_S_UNDEF_L
 		case DASM_S_UNDEF_L:
 			fprintf(stderr, "DASM_S_UNDEF_L\n");
 			break;
+#endif
+#ifdef DASM_S_UNDEF_LG
+		case DASM_S_UNDEF_LG:
+			fprintf(stderr, "DASM_S_UNDEF_LG\n");
+			break;
+#endif
+#ifdef DASM_S_RANGE_REL
+		case DASM_S_RANGE_REL:
+			fprintf(stderr, "DASM_S_RANGE_REL\n");
+			break;
+#endif
 		case DASM_S_UNDEF_PC:
 			fprintf(stderr, "DASM_S_UNDEF_PC\n");
+			break;
+		default:
+			fprintf(stderr, "DASM_S_%0x\n", ret & 0xff000000u);
 			break;
 	}
 	ZEND_UNREACHABLE();
@@ -318,7 +353,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
                                   const zend_op           *rt_opline,
                                   zend_lifetime_interval **ra,
                                   const char              *name,
-                                  uint32_t                 trace_num)
+                                  uint32_t                 trace_num,
+                                  uint32_t                 sp_offset,
+                                  uint32_t                 sp_adjustment)
 {
 	size_t size;
 	int ret;
@@ -380,6 +417,10 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		return NULL;
 	}
 
+#if ZEND_JIT_TARGET_ARM64
+	dasm_venners_size = 0;
+#endif
+
 	ret = dasm_encode(dasm_state, *dasm_ptr);
 	if (ret != DASM_S_OK) {
 #if ZEND_DEBUG
@@ -388,11 +429,18 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		return NULL;
 	}
 
+#if ZEND_JIT_TARGET_ARM64
+	size += dasm_venners_size;
+#endif
+
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
+	/* flush the hardware I-cache */
+	JIT_CACHE_FLUSH(entry, entry + size);
+
 	if (trace_num) {
-		zend_jit_trace_add_code(entry, size);
+		zend_jit_trace_add_code(entry, dasm_getpclabel(dasm_state, 1));
 	}
 
 	if (op_array && ssa) {
@@ -466,7 +514,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 					name,
 					op_array,
 					entry,
-					size);
+					size,
+					sp_adj[sp_offset],
+					sp_adj[sp_adjustment]);
 		}
 	}
 #endif
@@ -678,6 +728,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, c
 					ssa->var_info[res].range.underflow ||
 					ssa->var_info[res].range.overflow);
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			return 1;
 	}
@@ -1510,7 +1561,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 				if (!ZEND_REGSET_IN(*hints, it->reg) &&
 				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
 				    (!current->used_as_hint ||
-				     (it->reg != ZREG_R0 && it->reg != ZREG_R1 && it->reg != ZREG_XMM0 && it->reg != ZREG_XMM1))) {
+				     !ZEND_REGSET_IN(ZEND_REGSET_LOW_PRIORITY, it->reg))) {
 					hint = it->reg;
 				}
 			} else {
@@ -1640,10 +1691,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, const z
 	low_priority_regs = *hints;
 	if (current->used_as_hint) {
 		/* TODO: Avoid most often scratch registers. Find a better way ??? */
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_R1);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM0);
-		ZEND_REGSET_INCL(low_priority_regs, ZREG_XMM1);
+		low_priority_regs = ZEND_REGSET_UNION(low_priority_regs, ZEND_REGSET_LOW_PRIORITY);
 	}
 
 	ZEND_REGSET_FOREACH(available, i) {
@@ -2303,7 +2351,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (opline->result_type != IS_UNUSED) {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 							res_info = RES_INFO();
 							res_addr = RES_REG_ADDR();
 						} else {
@@ -2354,7 +2412,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								goto jit_failure;
 							}
 						} else {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 						}
 						if (!zend_jit_long_math(&dasm_state, opline,
 								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
@@ -2398,7 +2466,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								goto jit_failure;
 							}
 						} else {
-							res_use_info = RES_USE_INFO();
+							res_use_info = -1;
+
+							if (opline->result_type == IS_CV) {
+								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
+
+								if (Z_MODE(res_use_addr) != IS_REG
+								 || Z_LOAD(res_use_addr)
+								 || Z_STORE(res_use_addr)) {
+									res_use_info = RES_USE_INFO();
+								}
+							}
 						}
 						res_info = RES_INFO();
 						if (opline->opcode == ZEND_ADD &&
@@ -2679,6 +2757,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						} else {
 							op2_def_addr = op2_addr;
 						}
+						op1_info = OP1_INFO();
 						if (opline->result_type == IS_UNUSED) {
 							res_addr = 0;
 							res_info = -1;
@@ -2690,7 +2769,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							 && (i + 1) <= end
 							 && (opline+1)->opcode == ZEND_SEND_VAL
 							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var) {
+							 && (opline+1)->op1.var == opline->result.var
+							 && (!(op1_info & MAY_HAVE_DTOR) || !(op1_info & MAY_BE_RC1))) {
 								i++;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 								if (!zend_jit_reuse_ip(&dasm_state)) {
@@ -2699,7 +2779,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_assign(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(),
+								op1_info, OP1_REG_ADDR(),
 								OP1_DEF_INFO(), OP1_DEF_REG_ADDR(),
 								OP2_INFO(), op2_addr, op2_def_addr,
 								res_info, res_addr,
@@ -2800,7 +2880,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
@@ -2989,7 +3069,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 							goto done;
 						}
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
@@ -3210,6 +3290,15 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_COUNT:
+						op1_info = OP1_INFO();
+						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+							break;
+						}
+						if (!zend_jit_count(&dasm_state, opline, op1_info, OP1_REG_ADDR(), zend_may_throw(opline, ssa_op, op_array, ssa))) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_FETCH_THIS:
 						if (!zend_jit_fetch_this(&dasm_state, opline, op_array, 0)) {
 							goto jit_failure;
@@ -3385,7 +3474,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					}
-					/* break missing intentionally */
+					ZEND_FALLTHROUGH;
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
 				case ZEND_JMP_SET:
@@ -3469,7 +3558,8 @@ done:
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL, 0);
+	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL, 0,
+		(zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) ? SP_ADJ_VM : SP_ADJ_RET, SP_ADJ_JIT);
 	if (!handler) {
 		goto jit_failure;
 	}
@@ -3595,7 +3685,7 @@ jit_failure:
 }
 
 /* Run-time JIT handler */
-static void ZEND_FASTCALL zend_runtime_jit(void)
+static int ZEND_FASTCALL zend_runtime_jit(void)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
@@ -3627,6 +3717,7 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 	zend_shared_alloc_unlock();
 
 	/* JIT-ed code is going to be called by VM */
+	return 0;
 }
 
 void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
@@ -3964,8 +4055,12 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
+  /* TODO: EXEC+WRITE is not supported in macOS. Removing EXEC is still buggy as
+   * other threads, which are executing the JITed code, would crash anyway. */
+# ifndef __APPLE__
 		/* Another thread may be executing JITed code. */
 		opts |= PROT_EXEC;
+# endif
 #endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -4024,7 +4119,8 @@ static int zend_jit_make_stubs(void)
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
-		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name, 0)) {
+		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name, 0,
+				zend_jit_stubs[i].offset, zend_jit_stubs[i].adjustment)) {
 			return 0;
 		}
 	}
@@ -4198,11 +4294,19 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	}
 
 	for (i = 0; i <= 256; i++) {
-		if (zend_get_user_opcode_handler(i) != NULL) {
-			zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
-			JIT_G(enabled) = 0;
-			JIT_G(on) = 0;
-			return FAILURE;
+		switch (i) {
+			/* JIT has no effect on these opcodes */
+			case ZEND_BEGIN_SILENCE:
+			case ZEND_END_SILENCE:
+			case ZEND_EXIT:
+				break;
+			default:
+				if (zend_get_user_opcode_handler(i) != NULL) {
+					zend_error(E_WARNING, "JIT is incompatible with third party extensions that setup user opcode handlers. JIT disabled.");
+					JIT_G(enabled) = 0;
+					JIT_G(on) = 0;
+					return FAILURE;
+				}
 		}
 	}
 
@@ -4319,8 +4423,14 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 		return FAILURE;
 	}
 
-	/* save JIT buffer pos */
 	zend_jit_unprotect();
+#if ZEND_JIT_TARGET_ARM64
+	/* reserve space for global labels veneers */
+	dasm_labels_veneers = *dasm_ptr;
+	*dasm_ptr = (void**)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT);
+	memset(dasm_labels_veneers, 0, sizeof(void*) * ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT));
+#endif
+	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
 	zend_jit_protect();
 
@@ -4330,7 +4440,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 ZEND_EXT_API void zend_jit_shutdown(void)
 {
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_SIZE) {
-		fprintf(stderr, "\nJIT memory usage: %td\n", (char*)*dasm_ptr - (char*)dasm_buf);
+		fprintf(stderr, "\nJIT memory usage: %td\n", (ptrdiff_t)((char*)*dasm_ptr - (char*)dasm_buf));
 	}
 
 #ifdef HAVE_OPROFILE

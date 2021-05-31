@@ -1,8 +1,9 @@
 --TEST--
 Bug #79242 (COM error constants don't match com_exception codes)
+--EXTENSIONS--
+com_dotnet
 --SKIPIF--
 <?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
 ?>
 --FILE--

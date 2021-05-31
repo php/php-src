@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 18a92d3af801f11e5c3b90e5d272fd98b3515c40 */
+ * Stub hash: a0800bd27fe214cce7420e689e9d7b519a7b6835 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -270,3 +270,23 @@ static const zend_function_entry class_IntlGregorianCalendar_methods[] = {
 	ZEND_ME_MAPPING(isLeapYear, intlgregcal_is_leap_year, arginfo_class_IntlGregorianCalendar_isLeapYear, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_IntlCalendar(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlCalendar", class_IntlCalendar_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *class_entry_IntlCalendar)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", class_IntlGregorianCalendar_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlCalendar);
+
+	return class_entry;
+}

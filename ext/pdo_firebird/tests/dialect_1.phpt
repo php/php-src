@@ -6,6 +6,8 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
     die('skip: PDO_FIREBIRD_TEST_DSN must contain a string "dialect=1"');
 }
 ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
     require("testdb.inc");

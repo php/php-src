@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -68,7 +68,6 @@ struct _php_core_globals {
 	zend_uchar display_errors;
 	bool display_startup_errors;
 	bool log_errors;
-	zend_long      log_errors_max_len;
 	bool ignore_repeated_errors;
 	bool ignore_repeated_source;
 	bool report_memleaks;
@@ -134,7 +133,7 @@ struct _php_core_globals {
 
 	int last_error_type;
 	zend_string *last_error_message;
-	char *last_error_file;
+	zend_string *last_error_file;
 	int  last_error_lineno;
 
 	char *php_sys_temp_dir;

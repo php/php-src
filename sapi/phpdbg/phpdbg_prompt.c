@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -566,7 +566,8 @@ int phpdbg_compile(void) /* {{{ */
 		return FAILURE;
 	}
 
-	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
+	zend_stream_init_filename(&fh, PHPDBG_G(exec));
+	if (php_stream_open_for_zend_ex(&fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
 		CG(skip_shebang) = 1;
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
 		zend_destroy_file_handle(&fh);
@@ -581,7 +582,7 @@ int phpdbg_compile(void) /* {{{ */
 	} else {
 		phpdbg_error("compile", "type=\"openfailure\" context=\"%s\"", "Could not open file %s", PHPDBG_G(exec));
 	}
-
+	zend_destroy_file_handle(&fh);
 	return FAILURE;
 } /* }}} */
 
@@ -599,7 +600,7 @@ PHPDBG_COMMAND(continue) /* {{{ */
 	return PHPDBG_NEXT;
 } /* }}} */
 
-int phpdbg_skip_line_helper() /* {{{ */ {
+int phpdbg_skip_line_helper(void) /* {{{ */ {
 	zend_execute_data *ex = phpdbg_user_execute_data(EG(current_execute_data));
 	const zend_op_array *op_array = &ex->func->op_array;
 	const zend_op *opline = op_array->opcodes;
@@ -764,6 +765,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile() == FAILURE) {
 				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
+				EG(exit_status) = FAILURE;
 				goto out;
 			}
 		}
@@ -1636,7 +1638,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 	return ret;
 } /* }}} */
 
-static inline void list_code() {
+static inline void list_code(void) {
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
 		const char *file_char = zend_get_executed_filename();
 		zend_string *file = zend_string_init(file_char, strlen(file_char), 0);

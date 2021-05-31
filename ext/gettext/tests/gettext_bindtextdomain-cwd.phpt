@@ -8,6 +8,10 @@ if (!extension_loaded("gettext")) {
 if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
     die("skip en_US.UTF-8 locale not supported.");
 }
+if (getenv('SKIP_REPEAT')) {
+    die('skip gettext leaks global state across requests');
+}
+?>
 --FILE--
 <?php
 $base_dir = __DIR__;

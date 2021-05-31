@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -220,8 +220,10 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
+#ifndef HAVE_INET_NTOP
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
+#endif
 
 static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
@@ -432,10 +434,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-	zend_class_entry ce_socket;
-	INIT_CLASS_ENTRY(ce_socket, "Socket", class_Socket_methods);
-	socket_ce = zend_register_internal_class(&ce_socket);
-	socket_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	socket_ce = register_class_Socket();
 	socket_ce->create_object = socket_create_object;
 	socket_ce->serialize = zend_class_serialize_deny;
 	socket_ce->unserialize = zend_class_unserialize_deny;
@@ -446,11 +445,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
+	socket_object_handlers.compare = zend_objects_not_comparable;
 
-	zend_class_entry ce_address_info;
-	INIT_CLASS_ENTRY(ce_address_info, "AddressInfo", class_AddressInfo_methods);
-	address_info_ce = zend_register_internal_class(&ce_address_info);
-	address_info_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
 	address_info_ce->serialize = zend_class_serialize_deny;
 	address_info_ce->unserialize = zend_class_unserialize_deny;
@@ -460,6 +457,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
+	address_info_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
@@ -1076,10 +1074,12 @@ PHP_FUNCTION(socket_getsockname)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &addr, &port) == FAILURE) {
@@ -1100,8 +1100,8 @@ PHP_FUNCTION(socket_getsockname)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			ZEND_TRY_ASSIGN_REF_STRING(addr, addr6);
+			inet_ntop(AF_INET6, &sin6->sin6_addr,  addrbuf, sizeof(addrbuf));
+			ZEND_TRY_ASSIGN_REF_STRING(addr, addrbuf);
 
 			if (port != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin6->sin6_port));
@@ -1111,11 +1111,14 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (port != NULL) {
@@ -1148,10 +1151,12 @@ PHP_FUNCTION(socket_getpeername)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &arg2, &arg3) == FAILURE) {
@@ -1172,9 +1177,9 @@ PHP_FUNCTION(socket_getpeername)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
 
-			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr6);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, addrbuf);
 
 			if (arg3 != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(arg3, htons(sin6->sin6_port));
@@ -1185,11 +1190,14 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
@@ -1521,12 +1529,14 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in	sin;
 #if HAVE_IPV6
 	struct sockaddr_in6	sin6;
-	char				addr6[INET6_ADDRSTRLEN];
+#endif
+#ifdef HAVE_INET_NTOP
+	char				addrbuf[INET6_ADDRSTRLEN];
 #endif
 	socklen_t			slen;
 	int					retval;
 	zend_long				arg3, arg4;
-	char				*address;
+	const char			*address;
 	zend_string			*recv_buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozllz|z", &arg1, socket_ce, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
@@ -1584,7 +1594,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
+#ifdef HAVE_INET_NTOP
+			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			address = inet_ntoa(sin.sin_addr);
+#endif
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
@@ -1611,11 +1625,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			memset(addr6, 0, INET6_ADDRSTRLEN);
-			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
+			memset(addrbuf, 0, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_REF_STRING(arg5, addr6[0] ? addr6 : "::");
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, addrbuf[0] ? addrbuf : "::");
 			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif

@@ -1,7 +1,7 @@
 --TEST--
 Bug #47049 (SoapClient::__soapCall causes a segmentation fault)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -23,7 +23,7 @@ sprintf  offers the ability to make a lot of failures since it does not know
          the size of the buffer it uses. Therefore usage of sprintf often
          results in possible entries for buffer overrun attacks. So please
          use this version only if you are sure the call is safe. sprintf
-         always terminstes the buffer it writes to.
+         always terminates the buffer it writes to.
 
 snprintf knows the buffers size and will not write behind it. But you will
          have to use either a static buffer or allocate a dynamic buffer
@@ -41,7 +41,7 @@ slprintf same as snprintf with the difference that it actually returns the
 spprintf is the dynamical version of snprintf. It allocates the buffer in size
          as needed and allows a maximum setting as snprintf (turn this feature
          off by setting max_len to 0). spprintf is a little bit slower than
-         snprintf and offers possible memory leakes if you miss freeing the
+         snprintf and offers possible memory leaks if you miss freeing the
          buffer allocated by the function. Therefore this function should be
          used where either no maximum is known or the maximum is much bigger
          than normal size required. spprintf always terminates the buffer.

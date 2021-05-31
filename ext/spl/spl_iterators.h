@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,40 +21,32 @@
 #include "php_spl.h"
 #include "ext/pcre/php_pcre.h"
 
-#define spl_ce_Traversable   zend_ce_traversable
-#define spl_ce_Iterator      zend_ce_iterator
-#define spl_ce_Aggregate     zend_ce_aggregate
-#define spl_ce_ArrayAccess   zend_ce_arrayaccess
-#define spl_ce_Serializable  zend_ce_serializable
-#define spl_ce_Countable     zend_ce_countable
-#define spl_ce_Stringable    zend_ce_stringable
-
+extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
+extern PHPAPI zend_class_entry *spl_ce_CachingIterator;
+extern PHPAPI zend_class_entry *spl_ce_CallbackFilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
+extern PHPAPI zend_class_entry *spl_ce_FilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
+extern PHPAPI zend_class_entry *spl_ce_IteratorIterator;
+extern PHPAPI zend_class_entry *spl_ce_LimitIterator;
+extern PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
+extern PHPAPI zend_class_entry *spl_ce_OuterIterator;
+extern PHPAPI zend_class_entry *spl_ce_ParentIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveCachingIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveCallbackFilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveFilterIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
-extern PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
-extern PHPAPI zend_class_entry *spl_ce_FilterIterator;
-extern PHPAPI zend_class_entry *spl_ce_RecursiveFilterIterator;
-extern PHPAPI zend_class_entry *spl_ce_ParentIterator;
-extern PHPAPI zend_class_entry *spl_ce_SeekableIterator;
-extern PHPAPI zend_class_entry *spl_ce_LimitIterator;
-extern PHPAPI zend_class_entry *spl_ce_CachingIterator;
-extern PHPAPI zend_class_entry *spl_ce_RecursiveCachingIterator;
-extern PHPAPI zend_class_entry *spl_ce_OuterIterator;
-extern PHPAPI zend_class_entry *spl_ce_IteratorIterator;
-extern PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
-extern PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
-extern PHPAPI zend_class_entry *spl_ce_EmptyIterator;
-extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
-extern PHPAPI zend_class_entry *spl_ce_RegexIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
-extern PHPAPI zend_class_entry *spl_ce_CallbackFilterIterator;
-extern PHPAPI zend_class_entry *spl_ce_RecursiveCallbackFilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
+extern PHPAPI zend_class_entry *spl_ce_RegexIterator;
+extern PHPAPI zend_class_entry *spl_ce_SeekableIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
-PHP_FUNCTION(iterator_to_array);
-PHP_FUNCTION(iterator_count);
 PHP_FUNCTION(iterator_apply);
+PHP_FUNCTION(iterator_count);
+PHP_FUNCTION(iterator_to_array);
 
 typedef enum {
 	DIT_Default = 0,

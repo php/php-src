@@ -1,8 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class GdImage {}
+/** @strict-properties */
 final class GdFont {}
 
 function gd_info(): array {}
@@ -35,9 +37,9 @@ function imagelayereffect(GdImage $image, int $effect): bool {}
 
 function imagecolorallocatealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
 
-function imagecolorresolvealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
+function imagecolorresolvealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
-function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
+function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
 function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
 
@@ -123,9 +125,9 @@ function imagejpeg(GdImage $image, $file = null, int $quality = -1): bool {}
 /** @param resource|string|null $file */
 function imagewbmp(GdImage $image, $file = null, ?int $foreground_color = null): bool {}
 
-function imagegd(GdImage $image, string $file = UNKNOWN): bool {}
+function imagegd(GdImage $image, ?string $file = null): bool {}
 
-function imagegd2(GdImage $image, string $file = UNKNOWN, int $chunk_size = UNKNOWN, int $mode = UNKNOWN): bool {}
+function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = UNKNOWN, int $mode = UNKNOWN): bool {}
 
 #ifdef HAVE_GD_BMP
 /** @param resource|string|null $file */
@@ -140,15 +142,15 @@ function imagepalettecopy(GdImage $dst, GdImage $src): void {}
 
 function imagecolorat(GdImage $image, int $x, int $y): int|false {}
 
-function imagecolorclosest(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorclosest(GdImage $image, int $red, int $green, int $blue): int {}
 
-function imagecolorclosesthwb(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorclosesthwb(GdImage $image, int $red, int $green, int $blue): int {}
 
 function imagecolordeallocate(GdImage $image, int $color): bool {}
 
-function imagecolorresolve(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorresolve(GdImage $image, int $red, int $green, int $blue): int {}
 
-function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int|false {}
+function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int {}
 
 function imagecolorset(GdImage $image, int $color, int $red, int $green, int $blue, int $alpha = 0): ?bool {}
 
@@ -176,9 +178,9 @@ function imagefill(GdImage $image, int $x, int $y, int $color): bool {}
 
 function imagecolorstotal(GdImage $image): int {}
 
-function imagecolortransparent(GdImage $image, ?int $color = null): ?int {}
+function imagecolortransparent(GdImage $image, ?int $color = null): int {}
 
-function imageinterlace(GdImage $image, ?bool $enable = null): ?int {}
+function imageinterlace(GdImage $image, ?bool $enable = null): bool {}
 
 function imagepolygon(GdImage $image, array $points, int $num_points_or_color, ?int $color = null): bool {}
 
@@ -210,7 +212,7 @@ function imagesx(GdImage $image): int {}
 
 function imagesy(GdImage $image): int {}
 
-function imagesetclip(GdImage $image, int $x1, int $x2, int $y1, int $y2): bool {}
+function imagesetclip(GdImage $image, int $x1, int $y1, int $x2, int $y2): bool {}
 
 function imagegetclip(GdImage $image): array {}
 

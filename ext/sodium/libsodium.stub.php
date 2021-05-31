@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function sodium_crypto_aead_aes256gcm_is_available(): bool {}
 
@@ -52,11 +52,39 @@ function sodium_crypto_box_publickey(string $key_pair): string {}
 
 function sodium_crypto_box_publickey_from_secretkey(string $secret_key): string {}
 
-function sodium_crypto_box_seal(string $message, string $key_pair): string {}
+function sodium_crypto_box_seal(string $message, string $public_key): string {}
 
 function sodium_crypto_box_seal_open(string $ciphertext, string $key_pair): string|false {}
 
 function sodium_crypto_box_secretkey(string $key_pair): string {}
+
+#ifdef crypto_core_ristretto255_HASHBYTES
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string {}
+
+function sodium_crypto_core_ristretto255_from_hash(string $s): string {}
+
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool {}
+
+function sodium_crypto_core_ristretto255_random(): string {}
+
+function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_scalar_complement(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_invert(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_scalar_negate(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_random(): string {}
+
+function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string {}
+
+function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string {}
+
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string {}
+#endif
 
 function sodium_crypto_kx_keypair(): string {}
 
@@ -106,6 +134,12 @@ function sodium_crypto_pwhash_scryptsalsa208sha256_str_verify(string $hash, stri
 
 function sodium_crypto_scalarmult(string $n, string $p): string {}
 
+#ifdef crypto_core_ristretto255_HASHBYTES
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string {}
+
+function sodium_crypto_scalarmult_ristretto255_base(string $n): string {}
+#endif
+
 function sodium_crypto_secretbox(string $message, string $nonce, string $key): string {}
 
 function sodium_crypto_secretbox_keygen(): string {}
@@ -142,7 +176,7 @@ function sodium_crypto_sign_keypair(): string {}
 
 function sodium_crypto_sign_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-function sodium_crypto_sign_open(string $ciphertext, string $public_key): string|false {}
+function sodium_crypto_sign_open(string $signed_message, string $public_key): string|false {}
 
 function sodium_crypto_sign_publickey(string $key_pair): string {}
 
@@ -160,6 +194,14 @@ function sodium_crypto_stream_keygen(): string {}
 
 function sodium_crypto_stream_xor(string $message, string $nonce, string $key): string {}
 
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+function sodium_crypto_stream_xchacha20(int $length, string $nonce, string $key) : string {}
+
+function sodium_crypto_stream_xchacha20_keygen() : string {}
+
+function sodium_crypto_stream_xchacha20_xor(string $message, string $nonce, string $key) : string {}
+#endif
+
 function sodium_add(string &$string1, string $string2): void {}
 
 function sodium_compare(string $string1, string $string2): int {}
@@ -170,7 +212,7 @@ function sodium_memcmp(string $string1, string $string2): int {}
 
 function sodium_memzero(string &$string): void {}
 
-function sodium_pad(string $string, int $length): string {}
+function sodium_pad(string $string, int $block_size): string {}
 
 function sodium_unpad(string $string, int $block_size): string {}
 

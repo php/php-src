@@ -1,7 +1,7 @@
 --TEST--
 Bug #73746 (Method that returns string returns UNKNOWN:0 instead)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 namespace Core\Bundle\Service\Property\Room\Rooms;

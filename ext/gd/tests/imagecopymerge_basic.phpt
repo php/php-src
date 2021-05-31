@@ -6,10 +6,8 @@ Cleston Viel Vieira de Sousa <cleston [dot] vs [at] gmail [dot] com>
 
 Updated by Sean Fraaser <frasmage [at] gmail [dot] com>
 PHP[tek] 2017
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

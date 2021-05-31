@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +24,7 @@
 extern "C" {
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
-#include "breakiterator_arginfo.h"
+#include "breakiterator_iterators_arginfo.h"
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
@@ -287,12 +287,8 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
-	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			IntlIterator_ce_ptr);
+	IntlPartsIterator_ce_ptr = register_class_IntlPartsIterator(IntlIterator_ce_ptr);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;
 
 	memcpy(&IntlPartsIterator_handlers, &IntlIterator_handlers,

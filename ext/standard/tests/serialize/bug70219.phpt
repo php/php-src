@@ -29,7 +29,11 @@ for ($i = 0; $i < 5; $i++) {
 var_dump($data);
 ?>
 --EXPECTF--
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Warning: session_start(): Session cannot be started after headers have already been sent in %s on line %d
+
+Warning: session_decode(): Session data cannot be decoded when there is no active session in %s on line %d
 
 Notice: unserialize(): Error at offset 55 of 56 bytes in %s on line %d
 bool(false)

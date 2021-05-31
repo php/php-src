@@ -1,7 +1,7 @@
 --TEST--
 Bug #44648 (Attribute names not checked for well formedness)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

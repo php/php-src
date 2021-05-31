@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -129,6 +129,7 @@
 #define CR_PARAMS_NOT_BOUND		2031
 #define CR_INVALID_PARAMETER_NO	2034
 #define CR_INVALID_BUFFER_USE	2035
+#define CR_LOAD_DATA_LOCAL_INFILE_REJECTED 2068
 
 #define MYSQLND_EE_FILENOTFOUND	 7890
 
@@ -247,6 +248,7 @@ typedef enum mysqlnd_client_option
 	MYSQL_OPT_NET_BUFFER_LENGTH,
 	MYSQL_OPT_TLS_VERSION,
 	MYSQL_OPT_SSL_MODE,
+	MYSQL_OPT_LOAD_DATA_LOCAL_DIR,
 	MYSQLND_DEPRECATED_ENUM1 = 200,
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,
 	MYSQLND_OPT_NET_CMD_BUFFER_SIZE = 202,
@@ -366,10 +368,6 @@ typedef enum mysqlnd_server_option
 #define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
 #define IS_BLOB(n)		((n) & BLOB_FLAG)
 #define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
-
-
-/* see mysqlnd_charset.c for more information */
-#define MYSQLND_BINARY_CHARSET_NR	63
 
 
 /*

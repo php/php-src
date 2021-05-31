@@ -10,10 +10,6 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 
 echo "*** Testing escapeshellarg() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 abc
@@ -39,10 +35,6 @@ $inputs = array(
        1.234567E-2,
        .5,
 
-       // null data
-/*11*/ NULL,
-       null,
-
        // boolean data
 /*13*/ true,
        false,
@@ -52,13 +44,6 @@ $inputs = array(
        // empty data
 /*17*/ "",
        '',
-
-       // undefined data
-/*19*/ @$undefined_var,
-
-       // unset data
-/*20*/ @$unset_var,
-
 );
 
 // loop through each element of $inputs to check the behaviour of escapeshellarg()
@@ -103,7 +88,7 @@ string(12) "'0.01234567'"
 string(5) "'0.5'"
 
 -- Iteration 11 --
-string(2) "''"
+string(3) "'1'"
 
 -- Iteration 12 --
 string(2) "''"
@@ -115,19 +100,7 @@ string(3) "'1'"
 string(2) "''"
 
 -- Iteration 15 --
-string(3) "'1'"
+string(2) "''"
 
 -- Iteration 16 --
-string(2) "''"
-
--- Iteration 17 --
-string(2) "''"
-
--- Iteration 18 --
-string(2) "''"
-
--- Iteration 19 --
-string(2) "''"
-
--- Iteration 20 --
 string(2) "''"

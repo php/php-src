@@ -1,8 +1,9 @@
 --TEST--
 Bug #72512 gdImageTrueColorToPaletteBody allows arbitrary write/read access, var 1
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
     if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
         die("skip test requires GD 2.2.2 or higher");
     }

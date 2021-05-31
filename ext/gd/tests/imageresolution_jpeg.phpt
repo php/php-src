@@ -1,8 +1,9 @@
 --TEST--
 Set and get image resolution of JPEG images
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!(imagetypes() & IMG_JPEG)) die('skip JPEG support not available');
 ?>
 --FILE--

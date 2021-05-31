@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_dfg.h"
 #include "zend_ssa.h"
@@ -285,6 +284,14 @@ static void place_essa_pis(
 			default:
 				continue;
 		}
+
+		/* The following patterns all inspect the opline directly before the JMPZ opcode.
+		 * Make sure that it is part of the same block, otherwise it might not be a dominating
+		 * assignment. */
+		if (blocks[j].len == 1) {
+			continue;
+		}
+
 		if (opline->op1_type == IS_TMP_VAR &&
 		    ((opline-1)->opcode == ZEND_IS_EQUAL ||
 		     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
@@ -713,7 +720,7 @@ add_op1_def:
 			break;
 		case ZEND_ADD_ARRAY_ELEMENT:
 			ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_INIT_ARRAY:
 			if (((build_flags & ZEND_SSA_RC_INFERENCE)
 						|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))

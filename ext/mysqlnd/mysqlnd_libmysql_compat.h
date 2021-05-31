@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -37,7 +37,7 @@
 /* functions */
 #define mysql_affected_rows(r)			mysqlnd_affected_rows((r))
 #define mysql_autocommit(r,m)			mysqlnd_autocommit((r),(m))
-#define mysql_change_user(r,a,b,c)		mysqlnd_change_user((r), (a), (b), (c), FALSE)
+#define mysql_change_user(r,a,b,c)		mysqlnd_change_user((r), (a), (b), (c), false)
 #define mysql_character_set_name(c)		mysqlnd_character_set_name((c))
 #define mysql_close(r)					mysqlnd_close((r), MYSQLND_CLOSE_EXPLICIT)
 #define mysql_commit(r)					mysqlnd_commit((r), TRANS_COR_NO_OPT, NULL)
@@ -104,7 +104,7 @@
 #define mysql_options(c,a,v)			mysqlnd_options((c), (a), (v))
 #define mysql_options4(c,a,k,v)			mysqlnd_options4((c), (a), (k), (v))
 #define mysql_stmt_init(r)				mysqlnd_stmt_init((r))
-#define mysql_free_result(r)			mysqlnd_free_result((r), FALSE)
+#define mysql_free_result(r)			mysqlnd_free_result((r), false)
 #define mysql_store_result(r)			mysqlnd_store_result((r))
 #define mysql_use_result(r)				mysqlnd_use_result((r))
 #define mysql_async_store_result(r)		mysqlnd_async_store_result((r))

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -458,10 +458,6 @@ PHP_FUNCTION(stream_get_contents)
 		}
 	}
 
-	if (maxlen > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Argument #2 ($maxlength) is truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
-		maxlen = INT_MAX;
-	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {
 		RETURN_STR(contents);
 	} else {
@@ -749,6 +745,7 @@ PHP_FUNCTION(stream_select)
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
 	bool secnull;
+	bool usecnull = 1;
 	int set_count, max_set_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
@@ -757,7 +754,7 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
 		Z_PARAM_LONG_OR_NULL(sec, secnull)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(usec)
+		Z_PARAM_LONG_OR_NULL(usec, usecnull)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FD_ZERO(&rfds);
@@ -792,13 +789,22 @@ PHP_FUNCTION(stream_select)
 
 	PHP_SAFE_MAX_FD(max_fd, max_set_count);
 
+	if (secnull && !usecnull) {
+		if (usec == 0) {
+			php_error_docref(NULL, E_DEPRECATED, "Argument #5 ($microseconds) should be null instead of 0 when argument #4 ($seconds) is null");
+		} else {
+			zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
+			RETURN_THROWS();
+		}
+	}
+
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
 		if (sec < 0) {
 			zend_argument_value_error(4, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		} else if (usec < 0) {
-			zend_argument_value_error(4, "must be greater than or equal to 0");
+			zend_argument_value_error(5, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
 
@@ -1529,15 +1535,14 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 /* {{{ Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
-	char *filename;
-	size_t filename_len;
+	zend_string *filename;
 	zend_string *resolved_path;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resolved_path = zend_resolve_path(filename, filename_len);
+	resolved_path = zend_resolve_path(filename);
 
 	if (resolved_path) {
 		RETURN_STR(resolved_path);

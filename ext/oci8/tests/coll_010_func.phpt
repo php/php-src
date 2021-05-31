@@ -10,9 +10,9 @@ require(__DIR__.'/skipif.inc');
 
 require __DIR__."/connect.inc";
 
-$ora_sql = "DROP TYPE
-                        ".$type_name."
-           ";
+error_reporting(E_ALL ^ E_DEPRECATED);
+
+$ora_sql = "DROP TYPE ".$type_name;
 
 $statement = oci_parse($c,$ora_sql);
 @oci_execute($statement);

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -838,7 +838,11 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 
 PHP_MINIT_FUNCTION(spl_fixedarray)
 {
-	REGISTER_SPL_STD_CLASS_EX(SplFixedArray, spl_fixedarray_new, class_SplFixedArray_methods);
+	spl_ce_SplFixedArray = register_class_SplFixedArray(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable);
+	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
+	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
+	spl_ce_SplFixedArray->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
+
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplFixedArray.offset          = XtOffsetOf(spl_fixedarray_object, std);
@@ -852,13 +856,6 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
-
-	REGISTER_SPL_IMPLEMENTS(SplFixedArray, Aggregate);
-	REGISTER_SPL_IMPLEMENTS(SplFixedArray, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(SplFixedArray, Countable);
-
-	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
-	spl_ce_SplFixedArray->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
 	return SUCCESS;
 }

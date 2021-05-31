@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium stream
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);

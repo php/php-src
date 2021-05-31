@@ -12,7 +12,7 @@ if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
-$tbl = "tbl_bug75177";
+$tbl = "test";
 $pdo->query("DROP TABLE IF EXISTS $tbl");
 $pdo->query("CREATE TABLE $tbl (`bit` bit(8)) ENGINE=InnoDB");
 $pdo->query("INSERT INTO $tbl (`bit`) VALUES (1)");
@@ -31,6 +31,11 @@ foreach ($ret as $i) {
     var_dump($i["bit"]);
 }
 
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 int(1)

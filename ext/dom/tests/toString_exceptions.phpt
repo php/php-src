@@ -1,7 +1,7 @@
 --TEST--
 Handling of exceptions during __toString
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_upper() function : usage variations - different data types
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

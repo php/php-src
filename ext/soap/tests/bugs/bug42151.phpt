@@ -1,7 +1,7 @@
 --TEST--
 Bug #42151 (__destruct functions not called after catching a SoapFault exception)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class foo {

@@ -70,9 +70,11 @@ ZEND_API ZEND_COLD zend_result ZEND_FASTCALL zend_undefined_index_write(HashTabl
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
-		const zend_function *zf, const zend_arg_info *arg_info, int arg_num, zval *value);
+		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value);
 ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, zval *value);
+ZEND_API ZEND_COLD void zend_verify_never_error(
+		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_value_instanceof_static(zval *zv);
 
@@ -174,7 +176,7 @@ struct _zend_vm_stack {
 /*
  * In general in RELEASE build ZEND_ASSERT() must be zero-cost, but for some
  * reason, GCC generated worse code, performing CSE on assertion code and the
- * following "slow path" and moving memory read operatins from slow path into
+ * following "slow path" and moving memory read operations from slow path into
  * common header. This made a degradation for the fast path.
  * The following "#if ZEND_DEBUG" eliminates it.
  */

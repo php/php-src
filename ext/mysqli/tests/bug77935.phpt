@@ -31,6 +31,13 @@ while ($row = $result->fetch_assoc()) {
 }
 
 ?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS testSp');
+$link->close();
+?>
 --EXPECT--
 array(1) {
   [1]=>

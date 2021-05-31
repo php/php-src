@@ -4,7 +4,8 @@ PHP_ARG_WITH([pspell],
     [Include PSPELL support. GNU Aspell version 0.50.0 or higher required])])
 
 if test "$PHP_PSPELL" != "no"; then
-	PHP_NEW_EXTENSION(pspell, pspell.c, $ext_shared)
+	dnl Add -Wno-strict-prototypes as depends on user libs
+	PHP_NEW_EXTENSION(pspell, pspell.c, $ext_shared, , "-Wno-strict-prototypes")
 	if test "$PHP_PSPELL" != "yes"; then
 	    PSPELL_SEARCH_DIRS=$PHP_PSPELL
 	else

@@ -1,9 +1,7 @@
 --TEST--
 Bug #66502 (DOM document dangling reference)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die('skip requires ext/dom');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument('1.0', 'UTF-8');

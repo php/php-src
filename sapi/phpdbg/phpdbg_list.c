@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -241,9 +241,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	 * as it may invalidate the file handle. */
 	if (zend_stream_fixup(file, &bufptr, &len) == FAILURE) {
 		if (type == ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file->filename);
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, ZSTR_VAL(file->filename));
 		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, ZSTR_VAL(file->filename));
 		}
 		return NULL;
 	}
@@ -279,22 +279,19 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 }
 
 zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
-	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
+	zend_string *filename = file->opened_path ? file->opened_path : file->filename;
 	char resolved_path_buf[MAXPATHLEN];
 	zend_op_array *op_array;
 	phpdbg_file_source *dataptr;
 
-	if (VCWD_REALPATH(filename, resolved_path_buf)) {
-		filename = resolved_path_buf;
+	if (VCWD_REALPATH(ZSTR_VAL(filename), resolved_path_buf)) {
+		filename = zend_string_init(resolved_path_buf, strlen(resolved_path_buf), 0);
 
 		if (file->opened_path) {
 			zend_string_release(file->opened_path);
-			file->opened_path = zend_string_init(filename, strlen(filename), 0);
+			file->opened_path = filename;
 		} else {
-			if (file->free_filename) {
-				efree((char *) file->filename);
-			}
-			file->free_filename = 0;
+			zend_string_release(file->filename);
 			file->filename = filename;
 		}
 	}

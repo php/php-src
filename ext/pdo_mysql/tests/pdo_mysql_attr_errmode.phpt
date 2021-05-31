@@ -25,7 +25,6 @@ error_reporting=E_ALL
         echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
     }
     try {
-        /* This currently passes */
         $db->setAttribute(PDO::ATTR_ERRMODE, 'pdo');
     } catch (\Error $e) {
         echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
@@ -160,6 +159,7 @@ error_reporting=E_ALL
 --EXPECTF--
 TypeError: Attribute value must be of type int for selected attribute, array given
 TypeError: Attribute value must be of type int for selected attribute, stdClass given
+TypeError: Attribute value must be of type int for selected attribute, string given
 ValueError: Error mode must be one of the PDO::ERRMODE_* constants
 
 Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: %d You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '%s' at line %d in %s on line %d

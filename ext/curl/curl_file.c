@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -25,6 +25,7 @@
 #include "curl_file_arginfo.h"
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
+PHP_CURL_API zend_class_entry *curl_CURLStringFile_class;
 
 static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -120,9 +121,34 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
+ZEND_METHOD(CURLStringFile, __construct)
+{
+	zend_string *data, *postname, *mime = NULL;
+	zval *object;
+
+	object = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_START(2,3)
+		Z_PARAM_STR(data)
+		Z_PARAM_STR(postname)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(mime)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "data", sizeof("data") - 1, data);
+	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "postname", sizeof("postname")-1, postname);
+	if (mime) {
+		zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", sizeof("mime")-1, mime);
+	} else {
+		zend_update_property_string(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", sizeof("mime")-1, "application/octet-stream");
+	}
+}
+
 void curlfile_register_class(void)
 {
 	curl_CURLFile_class = register_class_CURLFile();
 	curl_CURLFile_class->serialize = zend_class_serialize_deny;
 	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;
+
+	curl_CURLStringFile_class = register_class_CURLStringFile();
 }

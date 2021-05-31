@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -28,6 +28,7 @@
 #include "zend_observer.h"
 #include "zend_smart_str.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "zend_fibers.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
@@ -39,7 +40,9 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_return_value;
 	int observer_show_init_backtrace;
 	int observer_show_opcode;
+	char *observer_show_opcode_in_user_handler;
 	int observer_nesting_depth;
+	int observer_fiber_switch;
 	int replace_zend_execute_ex;
 	int open_custom_pass;
 ZEND_END_MODULE_GLOBALS(zend_test)
@@ -53,6 +56,9 @@ static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
+static zend_class_entry *zend_test_ns_foo_class;
+static zend_class_entry *zend_test_ns2_foo_class;
+static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_object_handlers zend_test_class_handlers;
 
 static ZEND_FUNCTION(zend_test_func)
@@ -248,6 +254,12 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
 	object_properties_init(obj, class_type);
@@ -257,22 +269,25 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ 
 /* }}} */
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
-	zend_internal_function *fptr;
+    if (zend_string_equals_literal_ci(name, "test")) {
+	    zend_internal_function *fptr;
 
-	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = (zend_internal_function *) &EG(trampoline);
-	} else {
-		fptr = emalloc(sizeof(zend_internal_function));
-	}
-	memset(fptr, 0, sizeof(zend_internal_function));
-	fptr->type = ZEND_INTERNAL_FUNCTION;
-	fptr->num_args = 1;
-	fptr->scope = (*object)->ce;
-	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-	fptr->function_name = zend_string_copy(name);
-	fptr->handler = ZEND_FN(zend_test_func);
+	    if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		    fptr = (zend_internal_function *) &EG(trampoline);
+	    } else {
+		    fptr = emalloc(sizeof(zend_internal_function));
+	    }
+	    memset(fptr, 0, sizeof(zend_internal_function));
+	    fptr->type = ZEND_INTERNAL_FUNCTION;
+	    fptr->num_args = 1;
+	    fptr->scope = (*object)->ce;
+	    fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+	    fptr->function_name = zend_string_copy(name);
+	    fptr->handler = ZEND_FN(zend_test_func);
 
-	return (zend_function*)fptr;
+	    return (zend_function*)fptr;
+    }
+	return zend_std_get_method(object, name, key);
 }
 /* }}} */
 
@@ -322,6 +337,16 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic) {
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
 
+static ZEND_METHOD(_ZendTestClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
+}
+
+static ZEND_METHOD(_ZendTestChildClass, returnsThrowable) {
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_throw_error(NULL, "Dummy");
+}
+
 static ZEND_METHOD(_ZendTestTrait, testMethod) {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
@@ -335,6 +360,10 @@ static ZEND_METHOD(ZendTestNS2_Foo, method) {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method) {
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_output", "1", PHP_INI_SYSTEM, OnUpdateBool, observer_show_output, zend_zend_test_globals, zend_test_globals)
@@ -345,6 +374,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.observer.show_opcode_in_user_handler", "", PHP_INI_SYSTEM, OnUpdateString, observer_show_opcode_in_user_handler, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_switch", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_switch, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.open_custom_pass", "0", PHP_INI_SYSTEM, OnUpdateBool, open_custom_pass, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
@@ -357,6 +388,81 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 	old_zend_execute_ex(execute_data);
 }
 
+static int observer_show_opcode_in_user_handler(zend_execute_data *execute_data)
+{
+	if (ZT_G(observer_show_output)) {
+		php_printf("%*s<!-- opcode: '%s' in user handler -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
+	}
+
+	return ZEND_USER_OPCODE_DISPATCH;
+}
+
+static void observer_set_user_opcode_handler(const char *opcode_names, user_opcode_handler_t handler)
+{
+	const char *s = NULL, *e = opcode_names;
+
+	while (1) {
+		if (*e == ' ' || *e == ',' || *e == '\0') {
+			if (s) {
+				zend_uchar opcode = zend_get_opcode_id(s, e - s);
+				if (opcode <= ZEND_VM_LAST_OPCODE) {
+					zend_set_user_opcode_handler(opcode, handler);
+				} else {
+					zend_error(E_WARNING, "Invalid opcode name %.*s", (int) (e - s), e);
+				}
+				s = NULL;
+			}
+		} else {
+			if (!s) {
+				s = e;
+			}
+		}
+		if (*e == '\0') {
+			break;
+		}
+		e++;
+	}
+}
+
+static void fiber_address_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		php_printf("<!-- switching from fiber %p to %p -->\n", from, to);
+	}
+}
+
+static void fiber_enter_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		if (to) {
+			if (to->status == ZEND_FIBER_STATUS_INIT) {
+				php_printf("<init '%p'>\n", to);
+			} else if (to->status == ZEND_FIBER_STATUS_RUNNING && (!from || from->status == ZEND_FIBER_STATUS_RUNNING)) {
+				php_printf("<resume '%p'>\n", to);
+			} else if (to->status == ZEND_FIBER_STATUS_SHUTDOWN) {
+				php_printf("<destroying '%p'>\n", to);
+			}
+		}
+	}
+}
+
+static void fiber_suspend_observer(zend_fiber *from, zend_fiber *to)
+{
+	if (ZT_G(observer_fiber_switch)) {
+		if (from) {
+			if (from->status == ZEND_FIBER_STATUS_SUSPENDED) {
+				php_printf("<suspend '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_RETURNED) {
+				php_printf("<returned '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_THREW) {
+				php_printf("<threw '%p'>\n", from);
+			} else if (from->status == ZEND_FIBER_STATUS_SHUTDOWN) {
+				php_printf("<destroyed '%p'>\n", from);
+			}
+		}
+	}
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
@@ -365,21 +471,6 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
-
-	{
-		zend_string *name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
-		zend_string *class_name1 = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
-		zend_string *class_name2 = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
-		zend_type_list *type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
-		type_list->num_types = 2;
-		type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name1, 0, 0);
-		type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name2, 0, 0);
-		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
-		zval val;
-		ZVAL_NULL(&val);
-		zend_declare_typed_property(zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, type);
-		zend_string_release(name);
-	}
 
 	zend_test_child_class = register_class__ZendTestChildClass(zend_test_class);
 
@@ -395,6 +486,10 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_internal_attribute *attr = zend_internal_attribute_register(zend_test_attribute, ZEND_ATTRIBUTE_TARGET_ALL);
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
+
+	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
+	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
+	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
@@ -414,6 +509,16 @@ PHP_MINIT_FUNCTION(zend_test)
 	if (ZT_G(open_custom_pass)) {
 		zend_optimizer_register_custom_pass(pass1);
 		zend_optimizer_register_custom_pass(pass2);
+	}
+
+	if (ZT_G(observer_enabled) && ZT_G(observer_show_opcode_in_user_handler)) {
+		observer_set_user_opcode_handler(ZT_G(observer_show_opcode_in_user_handler), observer_show_opcode_in_user_handler);
+	}
+
+	if (ZT_G(observer_enabled)) {
+		zend_observer_fiber_switch_register(fiber_address_observer);
+		zend_observer_fiber_switch_register(fiber_enter_observer);
+		zend_observer_fiber_switch_register(fiber_suspend_observer);
 	}
 
 	return SUCCESS;
@@ -630,4 +735,18 @@ PHP_ZEND_TEST_API int *(*bug79177_cb)(void);
 void bug79177(void)
 {
 	bug79177_cb();
+}
+
+typedef struct bug80847_01 {
+	uint64_t b;
+	double c;
+} bug80847_01;
+typedef struct bug80847_02 {
+	bug80847_01 a;
+} bug80847_02;
+
+PHP_ZEND_TEST_API bug80847_02 ffi_bug80847(bug80847_02 s) {
+	s.a.b += 10;
+	s.a.c -= 10.0;
+    return s;
 }

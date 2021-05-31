@@ -1,8 +1,7 @@
 --TEST--
 Test finfo_file() function : regex rules
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc');
-?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 /**

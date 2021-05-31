@@ -21,7 +21,7 @@ $array_arg = array(
 /*3*/  array("float1" => 0.23, 'float2' => 1.34, "exp1" => 0e2, 'exp2' => 200e-2, "exp3" =>  10e0),
 
        // array with negative float values
-       array(-0.23 => -0.23, -1.34 => -1.34, -200e-2 => -200e-2, -30 => -30e0, -2147473649.80),
+       array(-0 => -0.23, -1 => -1.34, -200 => -200e-2, -30 => -30e0, -2147473649.80),
 
        // array with single and double quoted strings
 /*5*/  array('1' => 'one', "str1" => "123numbers", '' => 'hello\tworld', "" => "hello world\0", "12.34floatnum"),

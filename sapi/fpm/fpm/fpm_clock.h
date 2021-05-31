@@ -5,7 +5,7 @@
 
 #include <sys/time.h>
 
-int fpm_clock_init();
+int fpm_clock_init(void);
 int fpm_clock_get(struct timeval *tv);
 
 #endif

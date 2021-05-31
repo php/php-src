@@ -1,5 +1,7 @@
 --TEST--
 Cloning and serializing finfo is not supported
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 

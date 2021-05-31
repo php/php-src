@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 24: Send SOAP headers those were not received
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class TestHeader1 extends SoapHeader {

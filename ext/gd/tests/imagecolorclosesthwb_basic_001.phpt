@@ -1,11 +1,7 @@
 --TEST--
 Test imagecolorclosesthwb() basic functionality
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
-    }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
     // Create the size of image or blank image

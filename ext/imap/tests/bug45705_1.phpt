@@ -9,7 +9,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 
 $address = 'John Doe <john@example.com>';
 var_dump($address);
-imap_rfc822_parse_adrlist($address, null);
+imap_rfc822_parse_adrlist($address, '');
 var_dump($address);
 
 ?>

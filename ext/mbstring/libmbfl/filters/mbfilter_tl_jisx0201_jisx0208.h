@@ -70,12 +70,8 @@
 	MBFL_FILT_TL_ZEN2HAN_COMPAT1 | \
 	MBFL_FILT_TL_ZEN2HAN_COMPAT2)
 
-
-typedef struct _mbfl_filt_tl_jisx0201_jisx0208_param {
-	mbfl_convert_filter *next_filter;
-	int mode;
-} mbfl_filt_tl_jisx0201_jisx0208_param;
-
 extern const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208;
+
+int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode);
 
 #endif /* MBFILTER_TL_KANA_JISX0201_JISX0208_H */

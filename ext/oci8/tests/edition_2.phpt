@@ -27,6 +27,8 @@ if (!(isset($matches[0]) &&
 --FILE--
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 /* In 11.2, there can only be one child edition.  So this test will
  * fail to create the necessary editions if a child edition exists
  * already

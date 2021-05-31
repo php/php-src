@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -51,12 +51,9 @@ typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 struct st_mysqlnd_memory_pool
 {
 	zend_arena		*arena;
-	void			*last;
 	void            *checkpoint;
 
 	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
-	void*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size);
-	void	(*free_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr);
 };
 
 
@@ -231,6 +228,8 @@ typedef struct st_mysqlnd_session_options
 	unsigned int		max_allowed_packet;
 
 	bool	int_and_float_native;
+
+	char		*local_infile_directory;
 } MYSQLND_SESSION_OPTIONS;
 
 

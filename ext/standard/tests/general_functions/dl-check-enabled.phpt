@@ -1,6 +1,6 @@
 --TEST--
 dl() returns false when disabled via INI settings
-+--CREDITS--
+--CREDITS--
 Tom Van Herreweghe <tom@theanalogguy.be>
 User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--

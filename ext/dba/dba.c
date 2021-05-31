@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -637,7 +637,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				lock_flag = (hptr->flags & DBA_LOCK_ALL);
 				break;
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
@@ -863,9 +863,9 @@ restart:
 				bool close_both;
 
 				close_both = (info->fp != info->lock.fp);
-				php_stream_close(info->lock.fp);
+				php_stream_free(info->lock.fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				if (close_both) {
-					php_stream_close(info->fp);
+					php_stream_free(info->fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				}
 				info->fp = NULL;
 				info->lock.fp = NULL;

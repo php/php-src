@@ -47,7 +47,7 @@ class PDODatabaseX extends PDO
         $this->test2 = 22;
     }
 
-    function query($sql, ...$rest)
+    function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
         $stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
@@ -95,10 +95,10 @@ PDOStatementX::__destruct()
 PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
-  ["test1"]=>
-  int(1)
   ["queryString"]=>
   string(24) "SELECT val, id FROM test"
+  ["test1"]=>
+  int(1)
   ["test2"]=>
   int(22)
 }

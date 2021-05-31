@@ -8,6 +8,8 @@ require(__DIR__.'/skipif.inc');
 --FILE--
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE ".$type_name;

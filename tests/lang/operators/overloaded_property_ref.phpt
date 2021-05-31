@@ -1,5 +1,5 @@
 --TEST--
-Operators on overlaoded property reference
+Operators on overloaded property reference
 --FILE--
 <?php
 class C {

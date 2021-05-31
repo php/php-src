@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,15 +17,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
+#include "zend_API.h"
+#include "zend_exceptions.h"
+#include "zend_ini.h"
 #include "zend_type_info.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/scdf.h"
 #include "Optimizer/zend_dump.h"
-#include "ext/standard/php_string.h"
-#include "zend_exceptions.h"
 
 /* This implements sparse conditional constant propagation (SCCP) based on the SCDF framework. The
  * used value lattice is defined as follows:
@@ -575,9 +575,10 @@ static inline int ct_eval_add_array_unpack(zval *result, zval *array) {
 	SEPARATE_ARRAY(result);
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
 		if (key) {
-			return FAILURE;
+			value = zend_hash_update(Z_ARR_P(result), key, value);
+		} else {
+			value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		}
-		value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		if (!value) {
 			return FAILURE;
 		}
@@ -591,7 +592,7 @@ static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 		case IS_NULL:
 		case IS_FALSE:
 			array_init(result);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case IS_ARRAY:
 		case PARTIAL_ARRAY:
 			return ct_eval_add_array_elem(result, value, key);
@@ -694,7 +695,7 @@ static inline int ct_eval_assign_obj(zval *result, zval *value, zval *key) {
 		case IS_NULL:
 		case IS_FALSE:
 			empty_partial_object(result);
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case PARTIAL_OBJECT:
 			return ct_eval_add_obj_prop(result, value, key);
 		default:
@@ -787,6 +788,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "array_diff")
 		|| zend_string_equals_literal(name, "array_diff_assoc")
 		|| zend_string_equals_literal(name, "array_diff_key")
+		|| zend_string_equals_literal(name, "array_flip")
 		|| zend_string_equals_literal(name, "array_is_list")
 		|| zend_string_equals_literal(name, "array_key_exists")
 		|| zend_string_equals_literal(name, "array_keys")
@@ -803,6 +805,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 #endif
 		|| zend_string_equals_literal(name, "imagetypes")
 		|| zend_string_equals_literal(name, "in_array")
+		|| zend_string_equals_literal(name, "implode")
 		|| zend_string_equals_literal(name, "ltrim")
 		|| zend_string_equals_literal(name, "php_sapi_name")
 		|| zend_string_equals_literal(name, "php_uname")
@@ -827,41 +830,6 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		return true;
 	}
 
-	/* For the following functions we need to check arguments to prevent warnings during
-	 * evaluation. */
-	if (num_args == 1) {
-		if (zend_string_equals_literal(name, "array_flip")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return false;
-			}
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				/* Throws warning for non int/string values. */
-				if (Z_TYPE_P(entry) != IS_LONG && Z_TYPE_P(entry) != IS_STRING) {
-					return false;
-				}
-			} ZEND_HASH_FOREACH_END();
-			return true;
-		}
-		if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return false;
-			}
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-				/* May throw warning during conversion to string. */
-				if (Z_TYPE_P(entry) > IS_STRING) {
-					return false;
-				}
-			} ZEND_HASH_FOREACH_END();
-			return true;
-		}
-		return false;
-	}
-
 	if (num_args == 2) {
 		if (zend_string_equals_literal(name, "str_repeat")) {
 			/* Avoid creating overly large strings at compile-time. */
@@ -870,29 +838,6 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 				&& Z_TYPE_P(args[1]) == IS_LONG
 				&& zend_safe_address(Z_STRLEN_P(args[0]), Z_LVAL_P(args[1]), 0, &overflow) < 64 * 1024
 				&& !overflow;
-		} else if (zend_string_equals_literal(name, "implode")) {
-			zval *entry;
-
-			if ((Z_TYPE_P(args[0]) != IS_STRING || Z_TYPE_P(args[1]) != IS_ARRAY)
-					&& (Z_TYPE_P(args[0]) != IS_ARRAY || Z_TYPE_P(args[1]) != IS_STRING)) {
-				return false;
-			}
-
-			/* May throw warning during conversion to string. */
-			if (Z_TYPE_P(args[0]) == IS_ARRAY) {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[0]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return false;
-					}
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args[1]), entry) {
-					if (Z_TYPE_P(entry) > IS_STRING) {
-						return false;
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-			return true;
 		}
 		return false;
 	}
@@ -970,6 +915,10 @@ static inline int ct_eval_func_call(
 	execute_data->prev_execute_data = &dummy_frame;
 	EG(current_execute_data) = execute_data;
 
+	/* Enable suppression and counting of warnings. */
+	ZEND_ASSERT(EG(capture_warnings_during_sccp) == 0);
+	EG(capture_warnings_during_sccp) = 1;
+
 	EX(func) = func;
 	EX_NUM_ARGS() = num_args;
 	for (i = 0; i < num_args; i++) {
@@ -987,6 +936,12 @@ static inline int ct_eval_func_call(
 		zend_clear_exception();
 		retval = FAILURE;
 	}
+
+	if (EG(capture_warnings_during_sccp) > 1) {
+		zval_ptr_dtor(result);
+		retval = FAILURE;
+	}
+	EG(capture_warnings_during_sccp) = 0;
 
 	efree(execute_data);
 	EG(current_execute_data) = prev_execute_data;
@@ -1816,7 +1771,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			/* We're only interested in functions with up to three arguments right now */
-			if (call->num_args > 3 || call->send_unpack) {
+			if (call->num_args > 3 || call->send_unpack || call->is_prototype) {
 				SET_RESULT_BOT(result);
 				break;
 			}
@@ -1987,7 +1942,7 @@ static void sccp_mark_feasible_successors(
 				scdf_mark_edge_feasible(scdf, block_num, target);
 				return;
 			}
-			s = 0;
+			s = block->successors_count - 1;
 			break;
 		}
 		default:

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -250,6 +250,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
 		zend_hash_destroy(conn->options->connect_attr);
 		mnd_pefree(conn->options->connect_attr, pers);
 		conn->options->connect_attr = NULL;
+	}
+	if (conn->options->local_infile_directory) {
+		mnd_pefree(conn->options->local_infile_directory, pers);
+		conn->options->local_infile_directory = NULL;
 	}
 }
 /* }}} */
@@ -1241,7 +1245,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 			  Do nothing, the connection will be brutally closed
 			  and the server will catch it and free close from its side.
 			*/
-			/* Fall-through */
+			ZEND_FALLTHROUGH;
 		case CONN_ALLOCED:
 			/*
 			  Allocated but not connected or there was failure when trying
@@ -1250,7 +1254,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 			  Fall-through
 			*/
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-			/* Fall-through */
+			ZEND_FALLTHROUGH;
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
 			vio->data->m.close_stream(vio, conn->stats, conn->error_info);
@@ -1648,6 +1652,19 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
 			}
 			break;
+		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
+		{
+			if (conn->options->local_infile_directory) {
+				mnd_pefree(conn->options->local_infile_directory, conn->persistent);
+			}
+
+			if (!value || (*value == '\0')) {
+				conn->options->local_infile_directory = NULL;
+			} else {
+				conn->options->local_infile_directory = mnd_pestrdup(value, conn->persistent);
+			}
+			break;
+		}
 		case MYSQL_INIT_COMMAND:
 		{
 			char ** new_init_commands;

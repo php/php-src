@@ -28,15 +28,6 @@ array(1) {
   int(1)
 }
 object(myZip)#1 (%d) {
-  ["test":"myZip":private]=>
-  int(0)
-  ["testp"]=>
-  string(6) "foobar"
-  ["testarray":"myZip":private]=>
-  array(1) {
-    [0]=>
-    int(1)
-  }
   ["lastId"]=>
   int(-1)
   ["status"]=>
@@ -49,4 +40,13 @@ object(myZip)#1 (%d) {
   string(0) ""
   ["comment"]=>
   string(0) ""
+  ["test":"myZip":private]=>
+  int(0)
+  ["testp"]=>
+  string(6) "foobar"
+  ["testarray":"myZip":private]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
 }

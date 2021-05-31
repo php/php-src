@@ -103,10 +103,8 @@ Extension Community Library - [PECL](https://pecl.php.net).
 
 ## Contributing
 
-The PHP source code is located in the Git repository at
-[git.php.net](https://git.php.net). Contributions are most welcome by forking
-the [GitHub mirror repository](https://github.com/php/php-src) and sending a
-pull request.
+Contributions are most welcome by forking the
+[GitHub repository](https://github.com/php/php-src) and sending a pull request.
 
 Discussions are done on GitHub, but depending on the topic can also be relayed
 to the official PHP developer mailing list internals@lists.php.net.
@@ -127,9 +125,8 @@ ticket at [bugs.php.net](https://bugs.php.net) and reference the bug id using
     magic_quotes behavior and therefore should not raise a warning at any time.
     The patch removes this warning.
 
-Pull requests are not merged directly on GitHub. All PRs will be pulled and
-pushed through [git.php.net](https://git.php.net). See
-[Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details.
+See [Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details on the
+pull request workflow.
 
 ### Guidelines for contributors
 

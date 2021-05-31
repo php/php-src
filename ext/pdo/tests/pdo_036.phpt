@@ -15,9 +15,9 @@ var_dump($x);
 
 ?>
 --EXPECTF--
-object(PDOStatement)#%d (1) {
+object(PDOStatement)#%d (0) {
   ["queryString"]=>
-  NULL
+  uninitialized(string)
 }
 
 Fatal error: Uncaught PDOException: You may not create a PDORow manually in %spdo_036.php:8

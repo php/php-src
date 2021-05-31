@@ -11,9 +11,7 @@ end
 
 define ____executor_globals
 	if basic_functions_module.zts
-		if !$tsrm_ls
-			set $tsrm_ls = ts_resource_ex(0, 0)
-		end
+		set $tsrm_ls = _tsrm_ls_cache
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
 		set $eg_ptr = $eg

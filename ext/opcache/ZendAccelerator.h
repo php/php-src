@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -109,13 +109,6 @@ typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
-typedef struct _zend_recorded_warning {
-	int type;
-	uint32_t error_lineno;
-	zend_string *error_filename;
-	zend_string *error_message;
-} zend_recorded_warning;
-
 typedef struct _zend_persistent_script {
 	zend_script    script;
 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
@@ -125,12 +118,10 @@ typedef struct _zend_persistent_script {
 	bool      is_phar;
 	bool      empty;
 	uint32_t       num_warnings;
-	zend_recorded_warning **warnings;
+	zend_error_info **warnings;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
-	void          *arena_mem;              /* part that should be copied into process */
-	size_t         arena_size;
 
 	/* All entries that shouldn't be counted in the ADLER32
 	 * checksum must be declared in this struct
@@ -227,19 +218,13 @@ typedef struct _zend_accel_globals {
 #endif
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
-	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
-	bool               is_immutable_class;
-	/* Temporary storage for warnings before they are moved into persistent_script. */
-	bool               record_warnings;
-	uint32_t                num_warnings;
-	zend_recorded_warning **warnings;
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	int                     key_len;
-	char                    key[MAXPATHLEN * 8];
+	zend_string             key;
+	char                    _key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -321,17 +306,19 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
 int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
 int  validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  zend_accel_invalidate(const char *filename, size_t filename_len, bool force);
+int  zend_accel_invalidate(zend_string *filename, bool force);
 int  accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key(const char *path, size_t path_length, int *key_len);
+zend_string *accel_make_persistent_key(zend_string *path);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #define IS_ACCEL_INTERNED(str) \
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
+
+uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name, zend_class_entry *scope, bool have_xlat);
 
 /* memory write protection */
 #define SHM_PROTECT() \

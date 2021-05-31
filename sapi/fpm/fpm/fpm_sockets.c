@@ -39,6 +39,16 @@ static struct fpm_array_s sockets_list;
 
 enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
+static inline void fpm_sockets_get_env_name(char *envname, unsigned idx) /* {{{ */
+{
+	if (!idx) {
+		strcpy(envname, "FPM_SOCKETS");
+	} else {
+		sprintf(envname, "FPM_SOCKETS_%d", idx);
+	}
+}
+/* }}} */
+
 static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 {
 	unsigned i;
@@ -82,13 +92,11 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 	if (env_value) {
 		for (i = 0; i < socket_set_count; i++) {
-			if (!i) {
-				strcpy(envname, "FPM_SOCKETS");
-			} else {
-				sprintf(envname, "FPM_SOCKETS_%d", i);
-			}
+			fpm_sockets_get_env_name(envname, i);
 			setenv(envname, env_value + socket_set[i], 1);
 		}
+		fpm_sockets_get_env_name(envname, socket_set_count);
+		unsetenv(envname);
 		free(env_value);
 	}
 
@@ -222,7 +230,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (0 > fpm_unix_set_socket_premissions(wp, path)) {
+		if (0 > fpm_unix_set_socket_permissions(wp, path)) {
 			close(sock);
 			return -1;
 		}
@@ -373,7 +381,7 @@ int fpm_sockets_init_main() /* {{{ */
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
-	char sockname[32];
+	char envname[32];
 	char sockpath[256];
 	char *inherited;
 	struct listening_socket_s *ls;
@@ -384,12 +392,8 @@ int fpm_sockets_init_main() /* {{{ */
 
 	/* import inherited sockets */
 	for (i = 0; i < FPM_ENV_SOCKET_SET_MAX; i++) {
-		if (!i) {
-			strcpy(sockname, "FPM_SOCKETS");
-		} else {
-			sprintf(sockname, "FPM_SOCKETS_%d", i);
-		}
-		inherited = getenv(sockname);
+		fpm_sockets_get_env_name(envname, i);
+		inherited = getenv(envname);
 		if (!inherited) {
 			break;
 		}
@@ -434,7 +438,7 @@ int fpm_sockets_init_main() /* {{{ */
 				break;
 
 			case FPM_AF_UNIX :
-				if (0 > fpm_unix_resolve_socket_premissions(wp)) {
+				if (0 > fpm_unix_resolve_socket_permissions(wp)) {
 					return -1;
 				}
 				wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);

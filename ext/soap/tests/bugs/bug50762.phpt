@@ -1,7 +1,7 @@
 --TEST--
 Bug #50762 (in WSDL mode Soap Header handler function only being called if defined in WSDL)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class testSoap {
@@ -22,7 +22,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->setObject(new testSoap());
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

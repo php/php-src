@@ -42,6 +42,12 @@ try {
 var_dump($st->fetchAll());
 
 ?>
+--CLEAN--
+<?php
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+$pdo = MySQLPDOTest::factory();
+$pdo->query('DROP PROCEDURE IF EXISTS test_procedure_error_at_second');
+?>
 --EXPECTF--
 array(1) {
   [0]=>

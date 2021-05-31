@@ -1,15 +1,18 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class CurlHandle
 {
 }
 
+/** @strict-properties */
 final class CurlMultiHandle
 {
 }
 
+/** @strict-properties */
 final class CurlShareHandle
 {
 }

@@ -43,7 +43,7 @@ catch(Exception $e)
 
 ?>
 --EXPECT--
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::autoLoad() cannot be called statically
+spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::autoLoad() cannot be called statically
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)
 Exception: Unavailable

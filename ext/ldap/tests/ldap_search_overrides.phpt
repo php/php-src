@@ -20,7 +20,7 @@ ldap_set_option($link, LDAP_OPT_NETWORK_TIMEOUT, 44);
 
 insert_dummy_data($link, $base);
 var_dump(
-    $result = ldap_search($link, "$base", "(objectClass=person)", array(), null, 111, 22, LDAP_DEREF_NEVER),
+    $result = ldap_search($link, "$base", "(objectClass=person)", array(), 0, 111, 22, LDAP_DEREF_NEVER),
     ldap_get_entries($link, $result)
 );
 var_dump(
@@ -42,7 +42,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)

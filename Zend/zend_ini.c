@@ -485,9 +485,10 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 
 ZEND_API bool zend_ini_parse_bool(zend_string *str)
 {
-	if ((ZSTR_LEN(str) == 4 && strcasecmp(ZSTR_VAL(str), "true") == 0)
-	  || (ZSTR_LEN(str) == 3 && strcasecmp(ZSTR_VAL(str), "yes") == 0)
-	  || (ZSTR_LEN(str) == 2 && strcasecmp(ZSTR_VAL(str), "on") == 0)) {
+	if (zend_string_equals_literal_ci(str, "true")
+			|| zend_string_equals_literal_ci(str, "yes")
+			|| zend_string_equals_literal_ci(str, "on")
+	) {
 		return 1;
 	} else {
 		return atoi(ZSTR_VAL(str)) != 0;

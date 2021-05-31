@@ -2,6 +2,8 @@
 PDO_Firebird: Feature 72583 Fetch integers as php integers not as strings
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';

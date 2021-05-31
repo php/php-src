@@ -25,5 +25,5 @@ try {
 <?php exit(0); ?>
 --EXPECTF--
 before
-in catch: DirectoryIterator::__construct(c:\not\exists\here,c:\not\exists\here): %s (code: 3)
+in catch: DirectoryIterator::__construct(c:\not\exists\here): %s (code: 3)
 ==DONE==

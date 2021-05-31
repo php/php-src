@@ -117,5 +117,11 @@ if ($version < 50000)
 
     print "done!";
 ?>
+--CLEAN--
+<?php
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+$pdo = MySQLPDOTest::factory();
+$pdo->query('DROP PROCEDURE IF EXISTS p');
+?>
 --EXPECT--
 done!

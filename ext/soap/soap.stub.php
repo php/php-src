@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function use_soap_error_handler(bool $enable = true): bool {}
 
@@ -25,88 +25,88 @@ class SoapFault extends Exception
 
 class SoapVar
 {
-    public function __construct(mixed $data, ?int $encoding, string $typeName = "", string $typeNamespace = "", string $nodeName = "", string $nodeNamespace = "") {}
+    public function __construct(mixed $data, ?int $encoding, ?string $typeName = null, ?string $typeNamespace = null, ?string $nodeName = null, ?string $nodeNamespace = null) {}
 }
 
 class SoapServer
 {
     public function __construct(?string $wsdl, array $options = []) {}
 
-    /** @return void */
-    public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = "") {}
+    /** @tentative-return-type */
+    public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = ""): void {}
 
-    /** @return void */
-    public function addSoapHeader(SoapHeader $header) {}
+    /** @tentative-return-type */
+    public function addSoapHeader(SoapHeader $header): void {}
 
-    /** @return void */
-    public function setPersistence(int $mode) {}
+    /** @tentative-return-type */
+    public function setPersistence(int $mode): void {}
 
-    /** @return void */
-    public function setClass(string $class, mixed ...$args) {}
+    /** @tentative-return-type */
+    public function setClass(string $class, mixed ...$args): void {}
 
-    /** @return void */
-    public function setObject(object $object) {}
+    /** @tentative-return-type */
+    public function setObject(object $object): void {}
 
-    /** @return array */
-    public function getFunctions() {}
+    /** @tentative-return-type */
+    public function getFunctions(): array {}
 
     /**
      * @param array|string|int $functions
-     * @return void
+     * @tentative-return-type
      */
-    public function addFunction($functions) {}
+    public function addFunction($functions): void {}
 
-    /** @return void */
-    public function handle(?string $request = null) {}
+    /** @tentative-return-type */
+    public function handle(?string $request = null): void {}
 }
 
 class SoapClient
 {
     public function __construct(?string $wsdl, array $options = []) {}
 
-    /** @return mixed */
-    public function __call(string $name, array $args) {}
+    /** @tentative-return-type */
+    public function __call(string $name, array $args): mixed {}
 
     /**
      * @param SoapHeader|array|null $inputHeaders
      * @param array $outputHeaders
-     * @return mixed
+     * @tentative-return-type
      */
-    public function __soapCall(string $name, array $args, ?array $options = null, $inputHeaders = null, &$outputHeaders = null) {}
+    public function __soapCall(string $name, array $args, ?array $options = null, $inputHeaders = null, &$outputHeaders = null): mixed {}
 
-    /** @return array|null */
-    public function __getFunctions() {}
+    /** @tentative-return-type */
+    public function __getFunctions(): ?array {}
 
-    /** @return array|null */
-    public function __getTypes() {}
+    /** @tentative-return-type */
+    public function __getTypes(): ?array {}
 
-    /** @return string|null */
-    public function __getLastRequest() {}
+    /** @tentative-return-type */
+    public function __getLastRequest(): ?string {}
 
-    /** @return string|null */
-    public function __getLastResponse() {}
+    /** @tentative-return-type */
+    public function __getLastResponse(): ?string {}
 
-    /** @return string|null */
-    public function __getLastRequestHeaders() {}
+    /** @tentative-return-type */
+    public function __getLastRequestHeaders(): ?string {}
 
-    /** @return string|null */
-    public function __getLastResponseHeaders() {}
+    /** @tentative-return-type */
+    public function __getLastResponseHeaders(): ?string {}
 
-    /** @return string|null */
-    public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false) {}
+    /** @tentative-return-type */
+    public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string {}
 
-    /** @return void */
-    public function __setCookie(string $name, ?string $value = null) {}
+    /** @tentative-return-type */
+    public function __setCookie(string $name, ?string $value = null): void {}
 
-    /** @return array */
-    public function __getCookies() {}
+    /** @tentative-return-type */
+    public function __getCookies(): array {}
 
     /**
      * @param SoapHeader|array|null $headers
-     * @return bool
+     * @tentative-return-type
      */
-    public function __setSoapHeaders($headers = null) {}
+    public function __setSoapHeaders($headers = null): bool {}
 
-    /** @return string|null */
-    public function __setLocation(string $location = "") {}
+    /** @tentative-return-type */
+    public function __setLocation(?string $location = null): ?string {}
 }
