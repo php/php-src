@@ -363,8 +363,8 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef RFSIGSHARE
 	REGISTER_LONG_CONSTANT("RFSIGSHARE",	RFSIGSHARE, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef RFSIGZMB
-	REGISTER_LONG_CONSTANT("RFSIGSZMB",	RFSIGSZMB, CONST_CS | CONST_PERSISTENT);
+#ifdef RFTSIGZMB
+	REGISTER_LONG_CONSTANT("RFTSIGZMB",	RFTSIGZMB, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef RFTHREAD
 	REGISTER_LONG_CONSTANT("RFTHREAD",	RFTHREAD, CONST_CS | CONST_PERSISTENT);
@@ -1504,7 +1504,7 @@ PHP_FUNCTION(pcntl_unshare)
 PHP_FUNCTION(pcntl_rfork)
 {
   zend_long flags;
-  zend_long csignal;
+  zend_long csignal = 0;
   pid_t pid;
 
   ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1521,7 +1521,7 @@ PHP_FUNCTION(pcntl_rfork)
   /* A new pid is required */
   flags |= RFPROC;
 
-  if (ZEND_NUM_ARGS() == 2 && (flags & RFTSIGZMB) != 0) {
+  if ((flags & RFTSIGZMB) != 0) {
     flags |= RFTSIGFLAGS(csignal);
   }
 
