@@ -2019,11 +2019,13 @@ PHP_METHOD(PDOStatement, getIterator)
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	if (zend_string_equals_literal(name, "queryString")) {
-		zend_throw_error(NULL, "Property queryString is read only");
-		return value;
-	} else {
-		return zend_std_write_property(object, name, value, cache_slot);
+		zval *query_string = OBJ_PROP_NUM(object, 0);
+		if (!Z_ISUNDEF_P(query_string)) {
+			zend_throw_error(NULL, "Property queryString is read only");
+			return value;
+		}
 	}
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 
 static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
