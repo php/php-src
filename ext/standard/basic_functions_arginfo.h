@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1bbe2028d78f83db95e129acff83e14f57456f3e */
+ * Stub hash: 59dd3527ae66c463cb59b6cc20b41d7fbdcc0ff0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2225,6 +2225,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_iterable_all arginfo_iterable_any
 
+#define arginfo_iterable_none arginfo_iterable_any
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2848,6 +2850,7 @@ ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
 ZEND_FUNCTION(any);
 ZEND_FUNCTION(all);
+ZEND_FUNCTION(none);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3503,6 +3506,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_NS_FE("iterable", any, arginfo_iterable_any)
 	ZEND_NS_FE("iterable", all, arginfo_iterable_all)
+	ZEND_NS_FE("iterable", none, arginfo_iterable_none)
 	ZEND_FE_END
 };
 

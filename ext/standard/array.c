@@ -6195,7 +6195,7 @@ PHP_FUNCTION(array_combine)
 }
 /* }}} */
 
-static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, int stop_value) /* {{{ */
+static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, int stop_value, int negate) /* {{{ */
 {
 	zval args[1];
 	zend_bool have_callback = 0;
@@ -6204,7 +6204,7 @@ static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fca
 	int result;
 
 	if (zend_hash_num_elements(htbl) == 0) {
-		RETURN_BOOL(!stop_value);
+		RETURN_BOOL(!stop_value ^ negate);
 	}
 
 	if (ZEND_FCI_INITIALIZED(fci)) {
@@ -6229,16 +6229,16 @@ static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fca
 			zval_ptr_dtor(&retval);
 			/* The user-provided callback rarely returns refcounted values. */
 			if (retval_true == stop_value) {
-				RETURN_BOOL(stop_value);
+				RETURN_BOOL(stop_value ^ negate);
 			}
 		} else {
 			if (zend_is_true(operand) == stop_value) {
-				RETURN_BOOL(stop_value);
+				RETURN_BOOL(stop_value ^ negate);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	RETURN_BOOL(!stop_value);
+	RETURN_BOOL(!stop_value ^ negate);
 }
 /* }}} */
 
@@ -6289,7 +6289,7 @@ static int php_traversable_func_until(zend_object_iterator *iter, void *puser) /
 }
 /* }}} */
 
-static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value) /* {{{ */
+static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value, int negate) /* {{{ */
 {
 	zval *input;
 	zend_fcall_info fci = empty_fcall_info;
@@ -6303,7 +6303,7 @@ static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_val
 
 	switch (Z_TYPE_P(input)) {
 		case IS_ARRAY:
-			php_array_until(return_value, Z_ARRVAL_P(input), fci, fci_cache, stop_value);
+			php_array_until(return_value, Z_ARRVAL_P(input), fci, fci_cache, stop_value, negate);
 			return;
 		case IS_OBJECT: {
 			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(input), zend_ce_traversable));
@@ -6318,7 +6318,7 @@ static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_val
 			until_info.found = 0;
 
 			if (spl_iterator_apply(until_info.obj, php_traversable_func_until, (void*)&until_info) == SUCCESS && until_info.result == SUCCESS) {
-				RETURN_BOOL(!(until_info.found ^ stop_value));
+				RETURN_BOOL(!(until_info.found ^ stop_value ^ negate));
 			}
 			return;
 		}
@@ -6326,18 +6326,23 @@ static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_val
 	}
 }
 
-/* {{{ proto bool all(array input, ?callable predicate = null)
-   Determines whether the predicate holds for all elements in the array */
+/* Determines whether the predicate holds for all elements in the array */
 PHP_FUNCTION(all)
 {
-	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
-/* {{{ proto bool any(array input, ?callable predicate = null)
-   Determines whether the predicate holds for at least one element in the array */
+/* {{{ Determines whether the predicate holds for at least one element in the array */
 PHP_FUNCTION(any)
 {
-	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
+}
+/* }}} */
+
+/* {{{ Determines whether the predicate holds for no elements of the array */
+PHP_FUNCTION(none)
+{
+	php_iterable_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 1);
 }
 /* }}} */
