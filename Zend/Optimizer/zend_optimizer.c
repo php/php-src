@@ -1572,7 +1572,7 @@ ZEND_API int zend_optimizer_register_custom_pass(zend_script_func_t pass)
 	return custom_pass.last_pass;
 }
 
-ZEND_API void zend_optimizer_clean_custom_pass()
+ZEND_API void zend_optimizer_clean_custom_pass(void)
 {
 	custom_pass.last_pass = 0;
 }
