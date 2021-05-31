@@ -11,14 +11,11 @@ Test function pcntl_rfork() with no flag.
 echo "*** Test with no flags ***\n";
 
 $pid = pcntl_rfork(0);
-if ($pid > 0) {
-	pcntl_wait($status);
-	var_dump($pid);
-} else {
-	var_dump($pid);
+if ($pid == 0) {
+	echo "child";
+  exit;
 }
 ?>
 --EXPECTF--
 *** Test with no flags ***
-int(0)
-int(%d)
+child
