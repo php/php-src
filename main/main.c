@@ -272,7 +272,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	if (zend_set_memory_limit_ex(value) == FAILURE) {
+	if (zend_set_memory_limit(value) == FAILURE) {
 		zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
 		return FAILURE;
 	}
