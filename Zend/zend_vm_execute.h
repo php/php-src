@@ -2334,10 +2334,23 @@ send_array:
 		if (opline->op2_type != IS_UNUSED) {
 			/* We don't need to handle named params in this case,
 			 * because array_slice() is called with $preserve_keys == false. */
-			zval *op2 = get_zval_ptr(opline->op2_type, opline->op2, BP_VAR_R);
+			zval *op2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
-			zend_long len = zval_get_long(op2);
+			zend_long len;
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+				len = Z_LVAL_P(op2);
+			} else if (Z_TYPE_P(op2) == IS_NULL) {
+				len = count - skip;
+			} else if (EX_USES_STRICT_TYPES()
+					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
+				zend_type_error(
+					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
+					zend_zval_type_name(op2));
+				FREE_OP(opline->op2_type, opline->op2.var);
+				FREE_OP(opline->op1_type, opline->op1.var);
+				HANDLE_EXCEPTION();
+			}
 
 			if (len < 0) {
 				len += (zend_long)(count - skip);

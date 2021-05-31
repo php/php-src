@@ -5227,10 +5227,23 @@ ZEND_VM_C_LABEL(send_array):
 		if (OP2_TYPE != IS_UNUSED) {
 			/* We don't need to handle named params in this case,
 			 * because array_slice() is called with $preserve_keys == false. */
-			zval *op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			zval *op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
-			zend_long len = zval_get_long(op2);
+			zend_long len;
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+				len = Z_LVAL_P(op2);
+			} else if (Z_TYPE_P(op2) == IS_NULL) {
+				len = count - skip;
+			} else if (EX_USES_STRICT_TYPES()
+					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
+				zend_type_error(
+					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
+					zend_zval_type_name(op2));
+				FREE_OP2();
+				FREE_OP1();
+				HANDLE_EXCEPTION();
+			}
 
 			if (len < 0) {
 				len += (zend_long)(count - skip);
