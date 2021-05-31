@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 <?php
 
 $int_variation = array( "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" );
-$int_numbers = array( 0, 1, -1, 23333333, -23333333, "1234" );
+$int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
 $data_file = __DIR__ . '/fprintf_variation_008_64bit.txt';
@@ -36,6 +36,8 @@ unlink($data_file);
 0
 1
 ffffffffffffffff
+2
+fffffffffffffffe
 16409d5
 fffffffffe9bf62b
 4d2

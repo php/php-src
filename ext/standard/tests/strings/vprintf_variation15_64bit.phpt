@@ -14,13 +14,13 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
-$formats = [
-  '"%u" "%+u" "%-u"',
-  '"%lu" "%4u" "%-4u"',
-  '"%10.4u" "%-10.4u" "%.4u"',
-  '"%\'#2u "%\'2u" "%\'$2u" "%\'_2u"',
-  '"%3$u" "%4$u" "%1$u" "%2$u"',
-];
+$formats = array(
+  '%u %+u %-u',
+  '%lu %4u %-4u',
+  '%10.4u %-10.4u %.4u',
+  '%\'#2u %\'2u %\'$2u %\'_2u',
+  '%3$u %4$u %1$u %2$u'
+);
 
 // Arrays of unsigned values for the format defined in $format.
 // Each sub array contains unsigned values which correspond to each format string in $format
@@ -36,12 +36,11 @@ $args_array = array(
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-    echo "\n-- Iteration $counter --\n";
-    ob_start();
-    $bytes = vprintf($format, $args_array[$counter-1]);
-    var_dump(ob_get_clean());
-    var_dump($bytes);
-    $counter++;
+  echo "\n-- Iteration $counter --\n";
+  $result =  vprintf($format, $args_array[$counter-1]);
+  echo "\n";
+  var_dump($result);
+  $counter++;
 }
 
 ?>
@@ -49,21 +48,21 @@ foreach($formats as $format) {
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
-string(22) ""1234567" "342391" "0""
-int(22)
+1234567 342391 0
+int(16)
 
 -- Iteration 2 --
-string(28) ""12345678900" "1234" "12345""
-int(28)
+12345678900 1234 12345
+int(22)
 
 -- Iteration 3 --
-string(40) ""   1234000" "3875820019684212736" "120""
-int(40)
+   1234000 3875820019684212736 120
+int(34)
 
 -- Iteration 4 --
-string(17) ""#1 "0" "$0" "10""
-int(17)
+#1 0 $0 10
+int(10)
 
 -- Iteration 5 --
-string(15) ""1" "2" "3" "4""
-int(15)
+1 2 3 4
+int(7)

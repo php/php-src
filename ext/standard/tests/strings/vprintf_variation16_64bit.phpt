@@ -15,15 +15,23 @@ echo "*** Testing vprintf() : unsigned formats and signed & other types of value
 
 // defining array of unsigned formats
 $formats =
-    '"%u" "%+u" "%-u"
-    "%lu" "%4u" "%-4u"
-    "%10.4u" "%-10.4u" "%.4u"
-    "%\'#2u "%\'2u" "%\'$2u" "%\'_2u"
-    "%3$u" "%4$u" "%1$u" "%2$u"';
+    '%u %+u %-u
+    %lu %4u %-4u
+    %10.4u %-10.4u %.4u
+    %\'#2u %\'2u %\'$2u %\'_2u
+    %3$u %4$u %1$u %2$u';
 
 // Arrays of signed and other type of values for the format defined in $format.
 // Each sub array contains signed values which correspond to each format in $format
 $args_array = array(
+
+  // array of float values
+  array(+2.2, +.2, +10.2,
+        +123456.234, +123456.234, +1234.6789,
+        +2e10, +2e12, +22e+12,
+        +12345.780, +12.000000011111, -12.00000111111, -123456.234,
+        +3.33, +4.44, +1.11,-2.22 ),
+
   // array of strings
   array(" ", ' ', 'hello',
         '123hello', '-123hello', '+123hello',
@@ -51,12 +59,11 @@ $args_array = array(
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;
 foreach($args_array as $args) {
-    echo "\n-- Iteration $counter --\n";
-    ob_start();
-    $bytes = vprintf($formats, $args);
-    var_dump(ob_get_clean());
-    var_dump($bytes);
-    $counter++;
+  echo "\n-- Iteration $counter --\n";
+  $result = vprintf($formats, $args);
+  echo "\n";
+  var_dump($result);
+  $counter++;
 }
 
 ?>
@@ -64,25 +71,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-string(131) ""0" "0" "0"
-    "123" "18446744073709551493" "123 "
-    "         0" "0         " "0"
-    "1234 "0" "$0" "_0"
-    "0" "123" "0" "0""
-int(131)
+2 0 10
+    123456 123456 1234
+    20000000000 2000000000000 22000000000000
+    12345 12 18446744073709551604 18446744073709428160
+    10 123456 2 0
+int(147)
 
 -- Iteration 2 --
-string(109) ""1" "1" "1"
-    "1" "   1" "1   "
-    "         1" "1         " "1"
-    "#1 "1" "$1" "_1"
-    "1" "1" "1" "1""
-int(109)
+0 0 0
+    123 18446744073709551493 123 
+             0 0          0
+    1234 0 $0 _0
+    0 123 0 0
+int(98)
 
 -- Iteration 3 --
-string(109) ""1" "1" "0"
-    "1" "   0" "1   "
-    "         1" "1         " "0"
-    "#0 "1" "$1" "_0"
-    "0" "1" "1" "1""
-int(109)
+1 1 1
+    1    1 1   
+             1 1          1
+    #1 1 $1 _1
+    1 1 1 1
+int(76)
+
+-- Iteration 4 --
+1 1 0
+    1    0 1   
+             1 1          0
+    #0 1 $1 _0
+    0 1 1 1
+int(76)
