@@ -1918,6 +1918,13 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref(zend_reference *ref, z
 {
 	zval z_copy;
 
+	/* Make sure that in-place concatenation is used if the LHS is a string. */
+	if (binary_op == concat_function && Z_TYPE(ref->val) == IS_STRING) {
+		concat_function(&ref->val, &ref->val, val);
+		ZEND_ASSERT(Z_TYPE(ref->val) == IS_STRING && "Concat should return string");
+		return;
+	}
+
 	binary_op(&z_copy, &ref->val, val);
 	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 		zval_ptr_dtor(&ref->val);
@@ -2117,6 +2124,13 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 	zval z_copy;
 
 	ZVAL_DEREF(zptr);
+	/* Make sure that in-place concatenation is used if the LHS is a string. */
+	if (binary_op == concat_function && Z_TYPE_P(zptr) == IS_STRING) {
+		concat_function(zptr, zptr, value);
+		ZEND_ASSERT(Z_TYPE_P(zptr) == IS_STRING && "Concat should return string");
+		return;
+	}
+
 	binary_op(&z_copy, zptr, value);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(zptr);
