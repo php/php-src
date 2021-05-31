@@ -399,7 +399,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
@@ -464,7 +464,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
@@ -527,7 +527,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
@@ -594,7 +594,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
@@ -667,7 +667,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
@@ -736,7 +736,7 @@ try_again:
 			break;
 	}
 
-	return _zval_get_long_func(dim);
+	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
 static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
@@ -803,7 +803,7 @@ try_string_offset:
 				break;
 		}
 
-		offset = _zval_get_long_func(dim);
+		offset = zval_get_long_func(dim, /* is_strict */ false);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1282,7 +1282,7 @@ isset_str_offset:
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, false))) {
-				lval = zval_get_long(offset);
+				lval = zval_get_long_ex(offset, /* is_strict */ true);
 				goto isset_str_offset;
 			}
 		}

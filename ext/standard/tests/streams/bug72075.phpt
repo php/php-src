@@ -11,5 +11,6 @@ $dummy =& $r[0];
 
 print stream_select($r, $w, $e, 0.5);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from non-compatible float 0.5 to int in %s on line %d
 0

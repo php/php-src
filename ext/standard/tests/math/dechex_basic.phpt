@@ -25,14 +25,22 @@ foreach ($values as $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "a"
+
+Deprecated: Implicit conversion from non-compatible float 3950.5 to int in %s on line %d
 string(3) "f6e"
+
+Deprecated: Implicit conversion from non-compatible float 3950.5 to int in %s on line %d
 string(3) "f6e"
 string(1) "3"
 string(2) "5f"
 string(1) "a"
+
+Deprecated: Implicit conversion from non-compatible float-string "3950.5" to int in %s on line %d
 string(3) "f6e"
+
+Deprecated: Implicit conversion from non-compatible float-string "3.9505e3" to int in %s on line %d
 string(3) "f6e"
 string(2) "27"
 dechex(): Argument #1 ($num) must be of type int, string given

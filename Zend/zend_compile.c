@@ -8156,6 +8156,28 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+ZEND_API bool zend_is_op_long_compatible(zval *op)
+{
+	if (Z_TYPE_P(op) == IS_ARRAY) {
+		return false;
+	}
+
+	if (Z_TYPE_P(op) == IS_DOUBLE
+		&& !zend_is_long_compatible(Z_DVAL_P(op), zend_dval_to_lval(Z_DVAL_P(op)))) {
+		return false;
+	}
+
+	if (Z_TYPE_P(op) == IS_STRING) {
+		double dval = 0;
+		zend_uchar is_num = is_numeric_str_function(Z_STR_P(op), NULL, &dval);
+		if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if ((opcode == ZEND_CONCAT || opcode == ZEND_FAST_CONCAT)) {
@@ -8207,6 +8229,12 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op
 		return 1;
 	}
 
+	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
+	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
+			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR || opcode == ZEND_MOD) {
+		return !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2);
+	}
+
 	return 0;
 }
 /* }}} */
@@ -8226,7 +8254,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
-		return Z_TYPE_P(op) <= IS_TRUE || Z_TYPE_P(op) == IS_ARRAY;
+		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 
 	return 0;
@@ -8353,10 +8381,17 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 				case IS_STRING:
 					zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(key), value);
 					break;
-				case IS_DOUBLE:
-					zend_hash_index_update(Z_ARRVAL_P(result),
-						zend_dval_to_lval(Z_DVAL_P(key)), value);
+				case IS_DOUBLE: {
+					zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+					/* Incompatible float will generate an error, leave this to run-time */
+					if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
+						zval_ptr_dtor_nogc(value);
+						zval_ptr_dtor(result);
+						return 0;
+					}
+					zend_hash_index_update(Z_ARRVAL_P(result), lval, value);
 					break;
+				}
 				case IS_FALSE:
 					zend_hash_index_update(Z_ARRVAL_P(result), 0, value);
 					break;

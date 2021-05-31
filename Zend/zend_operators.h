@@ -122,6 +122,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 }
 #endif
 
+/* Used to convert a string float to integer during an (int) cast */
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
@@ -132,6 +133,22 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 	return (zend_long)d;
 }
 /* }}} */
+
+static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
+	return (double)l == d;
+}
+
+ZEND_API void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+
+static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
+{
+	zend_long l = zend_dval_to_lval(d);
+	if (!zend_is_long_compatible(d, l)) {
+		zend_incompatible_double_to_long_error(d);
+	}
+	return l;
+}
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
@@ -267,13 +284,16 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
-ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
 static zend_always_inline zend_long zval_get_long(zval *op) {
-	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, false);
+}
+static zend_always_inline zend_long zval_get_long_ex(zval *op, bool is_strict) {
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, is_strict);
 }
 static zend_always_inline double zval_get_double(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);

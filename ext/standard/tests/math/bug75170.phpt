@@ -22,7 +22,7 @@ $total = 10000;
 $max = 0x66666666;
 $halves[0] = $halves[1] = 0;
 for ($i = 0; $i < $total; $i++) {
-    $halves[mt_rand(0, $max - 1) / ($max / 2)]++;
+    $halves[(int) (mt_rand(0, $max - 1) / ($max / 2))]++;
 }
 printf("%.1f%% vs. %.1f%%\n", 100. * $halves[0] / $total, 100. * $halves[1] / $total);
 

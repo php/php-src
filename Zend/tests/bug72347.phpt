@@ -12,6 +12,7 @@ function test() : int {
 }
 var_dump(test());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
 float(1.5)
 int(1)

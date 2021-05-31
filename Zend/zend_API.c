@@ -503,7 +503,18 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			return 0;
 		} else {
-			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(arg));
+			if (UNEXPECTED(!zend_is_long_compatible(Z_DVAL_P(arg), lval))) {
+				/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+				if (arg_num != (uint32_t)-1) {
+					zend_incompatible_double_to_long_error(Z_DVAL_P(arg));
+				}
+				if (UNEXPECTED(EG(exception))) {
+					return 0;
+				}
+			}
+			*dest = lval;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
@@ -511,14 +522,27 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
+				zend_long lval;
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
 					return 0;
-				} else {
-					*dest = zend_dval_to_lval(d);
 				}
+
+				lval = zend_dval_to_lval(d);
+				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError */
+				if (UNEXPECTED(!zend_is_long_compatible(d, lval))) {
+					/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+					 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+					if (arg_num != (uint32_t)-1) {
+						zend_incompatible_string_to_long_error(Z_STR_P(arg));
+					}
+					if (UNEXPECTED(EG(exception))) {
+						return 0;
+					}
+				}
+				*dest = lval;
 			} else {
 				return 0;
 			}
@@ -1971,7 +1995,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), value);
+			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 			break;
 		default:
 			zend_type_error("Illegal offset type");

@@ -303,8 +303,17 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 			return 0;
 		case IS_TRUE:
 			return 1;
-		case IS_DOUBLE:
-			return zend_dval_to_lval(Z_DVAL_P(op));
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_P(op);
+			zend_long lval = zend_dval_to_lval(dval);
+			if (!zend_is_long_compatible(dval, lval)) {
+				zend_incompatible_double_to_long_error(dval);
+				if (UNEXPECTED(EG(exception))) {
+					*failed = 1;
+				}
+			}
+			return lval;
+		}
 		case IS_STRING:
 			{
 				zend_uchar type;
@@ -333,7 +342,14 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					 return zend_dval_to_lval_cap(dval);
+					lval = zend_dval_to_lval_cap(dval);
+					if (!zend_is_long_compatible(dval, lval)) {
+						zend_incompatible_string_to_long_error(Z_STR_P(op));
+						if (UNEXPECTED(EG(exception))) {
+							*failed = 1;
+						}
+					}
+					return lval;
 				}
 			}
 		case IS_OBJECT:
@@ -792,7 +808,16 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op) /* {{{ */
+ZEND_API void ZEND_COLD zend_incompatible_double_to_long_error(double d)
+{
+	zend_error_unchecked(E_DEPRECATED, "Implicit conversion from non-compatible float %.*H to int", -1, d);
+}
+ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string *s)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion from non-compatible float-string \"%s\" to int", ZSTR_VAL(s));
+}
+
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -806,8 +831,16 @@ try_again:
 			return Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return Z_LVAL_P(op);
-		case IS_DOUBLE:
-			return zend_dval_to_lval(Z_DVAL_P(op));
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_P(op);
+			zend_long lval = zend_dval_to_lval(dval);
+			if (UNEXPECTED(is_strict)) {
+				if (!zend_is_long_compatible(dval, lval)) {
+					zend_incompatible_double_to_long_error(dval);
+				}
+			}
+			return lval;
+		}
 		case IS_STRING:
 			{
 				zend_uchar type;
@@ -823,7 +856,14 @@ try_again:
 					 * We use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					 return zend_dval_to_lval_cap(dval);
+					 /* Most usages are expected to not be (int) casts */
+					lval = zend_dval_to_lval_cap(dval);
+					if (UNEXPECTED(is_strict)) {
+						if (!zend_is_long_compatible(dval, lval)) {
+							zend_incompatible_string_to_long_error(Z_STR_P(op));
+						}
+					}
+					return lval;
 				}
 			}
 		case IS_ARRAY:
@@ -1455,9 +1495,17 @@ try_again:
 		case IS_LONG:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
 			return SUCCESS;
-		case IS_DOUBLE:
-			ZVAL_LONG(result, ~zend_dval_to_lval(Z_DVAL_P(op1)));
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op1));
+			if (!zend_is_long_compatible(Z_DVAL_P(op1), lval)) {
+				zend_incompatible_double_to_long_error(Z_DVAL_P(op1));
+				if (EG(exception)) {
+					return FAILURE;
+				}
+			}
+			ZVAL_LONG(result, ~lval);
 			return SUCCESS;
+		}
 		case IS_STRING: {
 			size_t i;
 

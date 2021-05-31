@@ -11,7 +11,7 @@ echo "*** Testing chunk_split() : different strings for 'ending' ***\n";
 
 //Initializing variables
 $str = "This is to test chunk_split() with various ending string";
-$chunklen = 6.5;
+$chunklen = 6;
 
 //different values for 'ending' argument
 $values = array (

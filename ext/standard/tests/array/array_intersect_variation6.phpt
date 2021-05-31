@@ -42,11 +42,11 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1,  "fruit" => 2.2,
-             133 => "int", 444.432 => "float",
+             133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
-// array to be passsed to $arr1 argument
+// array to be passed to $arr1 argument
 $arr1 = array(1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11);
 
 // loop through each sub-array within $arrays to check the behavior of array_intersect()
@@ -144,19 +144,15 @@ array(1) {
   string(5) "hello"
 }
 -- Iterator 9 --
-array(3) {
+array(2) {
   [0]=>
   int(1)
-  [1]=>
-  string(5) "float"
   [4]=>
   float(2.2)
 }
-array(3) {
+array(2) {
   [0]=>
   int(1)
-  [1]=>
-  string(5) "float"
   [4]=>
   float(2.2)
 }

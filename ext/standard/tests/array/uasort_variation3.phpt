@@ -45,7 +45,6 @@ $array_arg = array(
   // numeric keys
   1 => 10, // expecting: value will be replaced by 'TRUE'
   -2 => 9,
-  8.9 => 8,
   012 => 7,
   0x34 => 6,
 
@@ -86,7 +85,7 @@ echo "Done"
 *** Testing uasort() : Sorting array with all possible keys ***
 bool(true)
 -- Sorted array after uasort() function call --
-array(14) {
+array(13) {
   ["multiline heredoc with 123
 and speci@! ch@r..
 check	also"]=>
@@ -105,8 +104,6 @@ check	also"]=>
   int(25)
   [-2]=>
   int(9)
-  [8]=>
-  int(8)
   [10]=>
   int(7)
   [52]=>

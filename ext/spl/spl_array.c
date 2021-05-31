@@ -310,7 +310,7 @@ try_again:
 		break;
 	case IS_DOUBLE:
 		key->key = NULL;
-		key->h = (zend_long) Z_DVAL_P(offset);
+		key->h = zend_dval_to_lval_safe(Z_DVAL_P(offset));
 		break;
 	case IS_FALSE:
 		key->key = NULL;
