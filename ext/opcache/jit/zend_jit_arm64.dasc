@@ -57,10 +57,8 @@
 |.define REG1w,   w9
 |.define REG2,    x10
 |.define REG2w,   w10
-|.define FPR0,    v0
-|.define FPR1,    v1
-|.define FPR0d,   d0
-|.define FPR1d,   d1
+|.define FPR0,    d0
+|.define FPR1,    d1
 
 |.define ZREG_REG0,   ZREG_X8
 |.define ZREG_REG1,   ZREG_X9
@@ -75,8 +73,7 @@
 |.define TMP2w,   w16
 |.define TMP3,    x17 // TODO: remember about hard-coded: mrs TMP3, tpidr_el0
 |.define TMP3w,   w17
-|.define FPTMP,   v16
-|.define FPTMPd,  d16
+|.define FPTMP,   d16
 
 |.define ZREG_TMP1,   ZREG_X15
 |.define ZREG_TMP2,   ZREG_X16
@@ -167,10 +164,10 @@ const char* zend_reg_name[] = {
 	"x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
 	"x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
 	"x24", "x25", "x26", "x27", "x28", "x29", "x30", "sp",
-	"v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7",
-	"v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15",
-	"v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
-	"v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31"
+	"d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+	"d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15",
+	"d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23",
+	"d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31"
 };
 
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -3909,13 +3906,13 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 				uint64_t val = 0x3ff0000000000000; // 1.0
 				|	LOAD_64BIT_VAL TMP1, val
-				|	fmov FPTMPd, TMP1
-				|	fadd Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMPd
+				|	fmov FPTMP, TMP1
+				|	fadd Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMP
 			} else {
 				uint64_t val = 0x3ff0000000000000; // 1.0
 				|	LOAD_64BIT_VAL TMP1, val
-				|	fmov FPTMPd, TMP1
-				|	fsub Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMPd
+				|	fmov FPTMP, TMP1
+				|	fsub Rd(tmp_reg-ZREG_V0), Rd(tmp_reg-ZREG_V0), FPTMP
 			}
 			|	SET_ZVAL_DVAL op1_def_addr, tmp_reg, ZREG_TMP1
 			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
@@ -8088,7 +8085,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		|	mov TMP1, xzr
-		|	fmov FPR0d, TMP1
+		|	fmov FPR0, TMP1
 		|	DOUBLE_CMP ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
 		if (set_bool) {
