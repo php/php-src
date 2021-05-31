@@ -19,6 +19,10 @@ PHP                                                                        NEWS
     reference). (Dmitry)
   . Fixed bug #80968 (JIT segfault with return from required file). (Dmitry)
 
+- OpenSSL:
+  . Fixed bug #76694 (native Windows cert verification uses CN as sever name).
+    (cmb)
+
 - MySQLnd:
   . Fixed bug #80761 (PDO uses too much memory). (Nikita)
 

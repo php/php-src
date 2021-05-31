@@ -715,56 +715,14 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		LPWSTR server_name = NULL;
 		BOOL verify_result;
 
-		{ /* This looks ridiculous and it is - but we validate the name ourselves using the peer_name
-		     ctx option, so just use the CN from the cert here */
-
-			X509_NAME *cert_name;
-			unsigned char *cert_name_utf8;
-			int index, cert_name_utf8_len;
-			DWORD num_wchars;
-
-			cert_name = X509_get_subject_name(cert);
-			index = X509_NAME_get_index_by_NID(cert_name, NID_commonName, -1);
-			if (index < 0) {
-				php_error_docref(NULL, E_WARNING, "Unable to locate certificate CN");
-				CertFreeCertificateChain(cert_chain_ctx);
-				CertFreeCertificateContext(cert_ctx);
-				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
-			}
-
-			cert_name_utf8_len = PHP_X509_NAME_ENTRY_TO_UTF8(cert_name, index, cert_name_utf8);
-
-			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, NULL, 0);
-			if (num_wchars == 0) {
-				php_error_docref(NULL, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
-				OPENSSL_free(cert_name_utf8);
-				CertFreeCertificateChain(cert_chain_ctx);
-				CertFreeCertificateContext(cert_ctx);
-				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
-			}
-
-			server_name = emalloc((num_wchars * sizeof(WCHAR)) + sizeof(WCHAR));
-
-			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, server_name, num_wchars);
-			if (num_wchars == 0) {
-				php_error_docref(NULL, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
-				efree(server_name);
-				OPENSSL_free(cert_name_utf8);
-				CertFreeCertificateChain(cert_chain_ctx);
-				CertFreeCertificateContext(cert_ctx);
-				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
-			}
-
-			OPENSSL_free(cert_name_utf8);
-		}
-
 		ssl_policy_params.dwAuthType = (sslsock->is_client) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
-		ssl_policy_params.pwszServerName = server_name;
+		/* we validate the name ourselves using the peer_name
+		   ctx option, so no need to use a server name here */
+		ssl_policy_params.pwszServerName = NULL;
 		chain_policy_params.pvExtraPolicyPara = &ssl_policy_params;
 
 		verify_result = CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_SSL, cert_chain_ctx, &chain_policy_params, &chain_policy_status);
 
-		efree(server_name);
 		CertFreeCertificateChain(cert_chain_ctx);
 		CertFreeCertificateContext(cert_ctx);
 
