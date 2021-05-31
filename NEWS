@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #76359 (open_basedir bypass through adding ".."). (cmb)
   . Fixed bug #81090 (Typed property performance degradation with .= operator).
     (Nikita)
+  . Fixed bug #81070 (Integer underflow in memory limit comparison).
+    (Peter van Dommelen)
 
 - OCI8:
   . Fixed bug #81088 (error in regression test for oci_fetch_object() and
