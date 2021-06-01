@@ -628,6 +628,7 @@ static inheritance_status zend_perform_covariant_type_check(
 	 * as the child can add types, however none of them can be a supertype of
 	 * a parent type. */
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+		bool parent_union_has_unresolved = false;
 		/* First try to check whether we can succeed without resolving anything */
 		ZEND_TYPE_FOREACH(proto_type, single_type) {
 			inheritance_status status;
@@ -649,14 +650,33 @@ static inheritance_status zend_perform_covariant_type_check(
 				proto_scope, proto_class_name, proto_ce,
 				fe_scope, fe_type, /* register_unresolved */ false);
 
-			if (status == INHERITANCE_ERROR) {
-				return NHERITANCE_ERROR;
-			}
-			if (status != INHERITANCE_SUCCESS) {
-				ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
-				all_success = false;
+			/* If the parent is a union type then the intersection type must only be
+			 * a subtype of one of them */
+			if (ZEND_TYPE_IS_UNION(proto_type)) {
+				if (status == INHERITANCE_SUCCESS) {
+					return INHERITANCE_SUCCESS;
+				}
+				if (status == INHERITANCE_UNRESOLVED) {
+					all_success = false;
+				}
+			} else {
+				if (status == INHERITANCE_ERROR) {
+					return INHERITANCE_ERROR;
+				}
+				if (status != INHERITANCE_SUCCESS) {
+					ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
+					parent_union_has_unresolved = true;
+					all_success = false;
+				}
 			}
 		} ZEND_TYPE_FOREACH_END();
+
+		/* Reaching this means either the child intersection type is a valid/unresolved
+		 * subtype of a parent single/intersection type, either it is an INvalid subtype
+		 * when the parent is a union or it is unresolved, we check which case this is */
+		if (ZEND_TYPE_IS_UNION(proto_type) && !parent_union_has_unresolved) {
+			return tentative ? INHERITANCE_WARNING : INHERITANCE_ERROR;
+		}
 	} else {
 		/* First try to check whether we can succeed without resolving anything */
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
