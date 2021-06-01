@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-20 May 2021, PHP 8.0.7RC1
+03 Jun 2021, PHP 8.0.7
 
 - Core:
   . Fixed bug #80960 (opendir() warning wrong info when failed on Windows).
