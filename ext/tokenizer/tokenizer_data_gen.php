@@ -58,7 +58,6 @@ foreach ($matches['token_name'] as $tokenName) {
     $result .= "\tREGISTER_LONG_CONSTANT(\"$tokenName\", $tokenName, CONST_CS | CONST_PERSISTENT);\n";
 }
 $result .= "\tREGISTER_LONG_CONSTANT(\"T_DOUBLE_COLON\", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);\n";
-$result .= "\tREGISTER_LONG_CONSTANT(\"T_AMPERSAND\", T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG, CONST_CS | CONST_PERSISTENT);\n";
 
 $result .= <<<CODE
 }
@@ -76,8 +75,6 @@ foreach ($matches['token_name'] as $tokenName) {
     }
     if ($tokenName === 'T_PAAMAYIM_NEKUDOTAYIM') {
         $result .= "\t\tcase T_PAAMAYIM_NEKUDOTAYIM: return \"T_DOUBLE_COLON\";\n";
-    } else if ($tokenName === 'T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG') {
-        $result .= "\t\tcase T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: return \"T_AMPERSAND\";\n";
     } else {
         $result .= "\t\tcase $tokenName: return \"$tokenName\";\n";
     }
