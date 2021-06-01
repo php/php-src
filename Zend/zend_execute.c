@@ -1030,10 +1030,6 @@ static zend_always_inline bool zend_check_type_slow(
 							if (!ce) {
 								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 								if (!ce) {
-									if (HAVE_CACHE_SLOT) {
-										cache_slot++;
-									}
-
 									/* Cannot resolve */
 									return false;
 								}
@@ -1042,10 +1038,6 @@ static zend_always_inline bool zend_check_type_slow(
 							ce = zend_fetch_class(name,
 								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 							if (!ce) {
-								if (HAVE_CACHE_SLOT) {
-									cache_slot++;
-								}
-
 								/* Cannot resolve */
 								return false;
 							}
@@ -1053,7 +1045,8 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 
 					/* Perform actual type check */
-					/* Instance of a single type part of a union is sufficient to pass the type check */
+					/* If type is not an instance of one of the types taking part in the
+					 * intersection it cannot be a valid instance of the whole intersection type. */
 					if (!instanceof_function(Z_OBJCE_P(arg), ce)) {
 						return false;
 					}
