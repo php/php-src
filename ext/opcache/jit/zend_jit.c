@@ -2109,6 +2109,17 @@ failure:
 	return NULL;
 }
 
+static bool zend_jit_next_is_send_result(const zend_op *opline)
+{
+	if (opline->result_type == IS_TMP_VAR
+	 && (opline+1)->opcode == ZEND_SEND_VAL
+	 && (opline+1)->op1_type == IS_TMP_VAR
+	 && (opline+1)->op1.var == opline->result.var) {
+		return 1;
+	}
+	return 0;
+}
+
 static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
 	int b, i, end;
@@ -2400,11 +2411,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
 						 && (i + 1) <= end
-						 && (opline+1)->opcode == ZEND_SEND_VAL
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op1.var == opline->result.var) {
+						 && zend_jit_next_is_send_result(opline)) {
 							i++;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -2454,11 +2462,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
 						 && (i + 1) <= end
-						 && (opline+1)->opcode == ZEND_SEND_VAL
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op1.var == opline->result.var) {
+						 && zend_jit_next_is_send_result(opline)) {
 							i++;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -2511,12 +2516,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						res_addr = RES_REG_ADDR();
-						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
-						 && (i + 1) <= end
-						 && (opline+1)->opcode == ZEND_SEND_VAL
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op1.var == opline->result.var) {
+						if ((i + 1) <= end
+						 && zend_jit_next_is_send_result(opline)) {
 							i++;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 							if (!zend_jit_reuse_ip(&dasm_state)) {
@@ -2765,11 +2766,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							res_addr = RES_REG_ADDR();
 							res_info = RES_INFO();
 							if (Z_MODE(res_addr) != IS_REG
-							 && opline->result_type == IS_TMP_VAR
 							 && (i + 1) <= end
-							 && (opline+1)->opcode == ZEND_SEND_VAL
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var
+							 && zend_jit_next_is_send_result(opline)
 							 && (!(op1_info & MAY_HAVE_DTOR) || !(op1_info & MAY_BE_RC1))) {
 								i++;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);

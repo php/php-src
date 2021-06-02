@@ -28,8 +28,6 @@ static const void **zend_jit_exit_groups = NULL;
 #define ZEND_JIT_TRACE_STOP_DESCRIPTION(name, description) \
 	description,
 
-#define USE_ABSTRACT_STACK_FOR_RES_USE_INFO 1
-
 static const char * zend_jit_trace_stop_description[] = {
 	ZEND_JIT_TRACE_STOP(ZEND_JIT_TRACE_STOP_DESCRIPTION)
 };
@@ -3574,6 +3572,37 @@ static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_o
 	return 0;
 }
 
+static bool zend_jit_trace_next_is_send_result(const zend_op              *opline,
+                                               zend_jit_trace_rec         *p,
+                                               zend_jit_trace_stack_frame *frame)
+{
+	if (opline->result_type == IS_TMP_VAR
+	 && (p+1)->op == ZEND_JIT_TRACE_VM
+	 && (p+1)->opline == opline + 1
+	 && ((opline+1)->opcode == ZEND_SEND_VAL
+	  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
+	   && frame
+	   && frame->call
+	   && frame->call->func
+	   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
+	 && (opline+1)->op1_type == IS_TMP_VAR
+	 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
+	 && (opline+1)->op1.var == opline->result.var) {
+
+		if (frame->call
+		 && frame->call->func
+		 && frame->call->func->type == ZEND_USER_FUNCTION) {
+			uint8_t res_type = (p+1)->op1_type;
+
+			if (res_type != IS_UNKNOWN && !(res_type & IS_TRACE_REFERENCE) ) {
+				zend_jit_trace_send_type(opline+1, frame->call, res_type);
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -3930,22 +3959,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						if (opline->result_type != IS_UNUSED) {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 							res_use_info = zend_jit_trace_type_to_info(
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
-#else
-							res_use_info = -1;
-							if (opline->result_type == IS_CV) {
-								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
-
-								if (Z_MODE(res_use_addr) != IS_REG
-								 || Z_LOAD(res_use_addr)
-								 || Z_STORE(res_use_addr)) {
-									res_use_info = RES_USE_INFO();
-								}
-							}
-#endif
 							res_info = RES_INFO();
 							res_addr = RES_REG_ADDR();
 						} else {
@@ -3997,32 +4013,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
-						 && (p+1)->op == ZEND_JIT_TRACE_VM
-						 && (p+1)->opline == opline + 1
-						 && ((opline+1)->opcode == ZEND_SEND_VAL
-						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
-						   && frame
-						   && frame->call
-						   && frame->call->func
-						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
-						 && (opline+1)->op1.var == opline->result.var) {
-							p++;
-							if (frame->call) {
-								uint8_t res_type = p->op1_type;
-								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;
-								}
-								if (res_type != IS_UNKNOWN) {
-									zend_jit_trace_send_type(opline+1, frame->call, res_type);
-								}
-							}
-							while ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE ||
-							      (p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-								p++;
-							}
+						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -4030,22 +4021,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 							res_use_info = zend_jit_trace_type_to_info(
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
-#else
-							res_use_info = -1;
-							if (opline->result_type == IS_CV) {
-								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
-
-								if (Z_MODE(res_use_addr) != IS_REG
-								 || Z_LOAD(res_use_addr)
-								 || Z_STORE(res_use_addr)) {
-									res_use_info = RES_USE_INFO();
-								}
-							}
-#endif
 						}
 						res_info = RES_INFO();
 						if (!zend_jit_long_math(&dasm_state, opline,
@@ -4077,34 +4055,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
-						 && (p+1)->op == ZEND_JIT_TRACE_VM
-						 && (p+1)->opline == opline + 1
-						 && ((opline+1)->opcode == ZEND_SEND_VAL
-						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
-						   && frame
-						   && frame->call
-						   && frame->call->func
-						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
-						 && (opline+1)->op1.var == opline->result.var) {
-							p++;
-							if (frame->call
-							 && frame->call->func
-							 && frame->call->func->type == ZEND_USER_FUNCTION) {
-								uint8_t res_type = p->op1_type;
-								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;
-								}
-								if (res_type != IS_UNKNOWN) {
-									zend_jit_trace_send_type(opline+1, frame->call, res_type);
-								}
-							}
-							while ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE ||
-							      (p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-								p++;
-							}
+						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -4112,22 +4063,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else {
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 							res_use_info = zend_jit_trace_type_to_info(
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
-#else
-							res_use_info = -1;
-							if (opline->result_type == IS_CV) {
-								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
-
-								if (Z_MODE(res_use_addr) != IS_REG
-								 || Z_LOAD(res_use_addr)
-								 || Z_STORE(res_use_addr)) {
-									res_use_info = RES_USE_INFO();
-								}
-							}
-#endif
 						}
 						res_info = RES_INFO();
 						if (opline->opcode == ZEND_ADD &&
@@ -4165,35 +4103,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						res_addr = RES_REG_ADDR();
-						if (Z_MODE(res_addr) != IS_REG
-						 && opline->result_type == IS_TMP_VAR
-						 && (p+1)->op == ZEND_JIT_TRACE_VM
-						 && (p+1)->opline == opline + 1
-						 && ((opline+1)->opcode == ZEND_SEND_VAL
-						  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
-						   && frame
-						   && frame->call
-						   && frame->call->func
-						   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
-						 && (opline+1)->op1_type == IS_TMP_VAR
-						 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
-						 && (opline+1)->op1.var == opline->result.var) {
-							p++;
-							if (frame->call
-							 && frame->call->func
-							 && frame->call->func->type == ZEND_USER_FUNCTION) {
-								uint8_t res_type = p->op1_type;
-								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;
-								}
-								if (res_type != IS_UNKNOWN) {
-									zend_jit_trace_send_type(opline+1, frame->call, res_type);
-								}
-							}
-							while ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE ||
-							      (p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-								p++;
-							}
+						if (zend_jit_trace_next_is_send_result(opline, p, frame)) {
 							send_result = 1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 							if (!zend_jit_reuse_ip(&dasm_state)) {
@@ -4616,34 +4526,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							res_addr = RES_REG_ADDR();
 							res_info = RES_INFO();
 							if (Z_MODE(res_addr) != IS_REG
-							 && opline->result_type == IS_TMP_VAR
-							 && (p+1)->op == ZEND_JIT_TRACE_VM
-							 && (p+1)->opline == opline + 1
-							 && ((opline+1)->opcode == ZEND_SEND_VAL
-							  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
-							   && frame
-							   && frame->call
-							   && frame->call->func
-							   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op2_type != IS_CONST /* Named parameters not supported in JIT */
-							 && (opline+1)->op1.var == opline->result.var) {
-								p++;
-								if (frame->call
-								 && frame->call->func
-								 && frame->call->func->type == ZEND_USER_FUNCTION) {
-									uint8_t res_type = p->op1_type;
-									if (res_type & IS_TRACE_REFERENCE) {
-										res_type = IS_UNKNOWN;
-									}
-									if (res_type != IS_UNKNOWN) {
-										zend_jit_trace_send_type(opline+1, frame->call, res_type);
-									}
-								}
-								while ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE ||
-								      (p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
-									p++;
-								}
+							 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 								send_result = 1;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 								if (!zend_jit_reuse_ip(&dasm_state)) {
@@ -4682,13 +4565,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
 						res_info = RES_INFO();
-#if USE_ABSTRACT_STACK_FOR_RES_USE_INFO
 						res_use_info = zend_jit_trace_type_to_info(
 							STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
 								& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
-#else
-						res_use_info = MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE;
-#endif
 						if (!zend_jit_qm_assign(&dasm_state, opline,
 								op1_info, op1_addr, op1_def_addr,
 								res_use_info, res_info, RES_REG_ADDR())) {
@@ -6077,6 +5956,10 @@ done:
 
 				if (send_result) {
 					ssa_op++;
+					p++;
+					if ((p+1)->op == ZEND_JIT_TRACE_OP1_TYPE) {
+						p++;
+					}
 					send_result = 0;
 				}
 			}
