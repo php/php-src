@@ -5777,12 +5777,16 @@ static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) 
 	ZEND_ASSERT(ZEND_FCI_INITIALIZED(*fci));
 
 	zval *operand = iter->funcs->get_current_data(iter);
-	ZVAL_COPY_VALUE(&fci->params[0], fci->retval);
-	ZVAL_COPY(&fci->params[1], operand);
+	if (UNEXPECTED(!operand || EG(exception))) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	ZVAL_DEREF(operand);
+	ZVAL_COPY_VALUE(&reduce_data->args[0], fci->retval);
+	ZVAL_COPY(&reduce_data->args[1], operand);
 	ZVAL_NULL(fci->retval);
 	int result = zend_call_function(&reduce_data->fci, &reduce_data->fcc);
 	zval_ptr_dtor(operand);
-	zval_ptr_dtor(&fci->params[0]);
+	zval_ptr_dtor(&reduce_data->args[0]);
 	if (UNEXPECTED(result == FAILURE || EG(exception))) {
 		return ZEND_HASH_APPLY_STOP;
 	}
@@ -5791,12 +5795,11 @@ static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) 
 
 static zend_always_inline void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
 {
-	zval args[2];
 	traversable_reduce_data reduce_data;
 	reduce_data.fci = fci;
 	reduce_data.fci.retval = return_value;
 	reduce_data.fci.param_count = 2;
-	reduce_data.fci.params = args;
+	reduce_data.fci.params = reduce_data.args;
 	reduce_data.fcc = fci_cache;
 
 	spl_iterator_apply(obj, php_traversable_reduce_elem, (void*)&reduce_data);
@@ -6236,7 +6239,7 @@ PHP_FUNCTION(array_combine)
 static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, int stop_value, int negate) /* {{{ */
 {
 	zval args[1];
-	zend_bool have_callback = 0;
+	bool have_callback = 0;
 	zval *operand;
 	zval retval;
 	int result;
@@ -6254,7 +6257,7 @@ static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fca
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
 		if (have_callback) {
-			zend_bool retval_true;
+			bool retval_true;
 			ZVAL_COPY(&args[0], operand);
 
 			/* Treat the operand like an array of size 1  */
@@ -6296,11 +6299,16 @@ static int php_traversable_func_until(zend_object_iterator *iter, void *puser) /
 	zval retval;
 	php_iterator_until_info *until_info = (php_iterator_until_info*) puser;
 	int result;
-	zend_bool stop;
+	bool stop;
 
 	fci = until_info->fci;
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		zval *operand = iter->funcs->get_current_data(iter);
+		if (UNEXPECTED(!operand || EG(exception))) {
+			until_info->result = FAILURE;
+			return ZEND_HASH_APPLY_STOP;
+		}
+		ZVAL_DEREF(operand);
 		fci.retval = &retval;
 		fci.param_count = 1;
 		/* Use the operand like an array of size 1 */
@@ -6317,7 +6325,13 @@ static int php_traversable_func_until(zend_object_iterator *iter, void *puser) /
 		stop = zend_is_true(&retval) == until_info->stop_value;
 		zval_ptr_dtor(&retval);
 	} else {
-		stop = zend_is_true(iter->funcs->get_current_data(iter)) == until_info->stop_value;
+		zval *operand = iter->funcs->get_current_data(iter);
+		if (UNEXPECTED(!operand || EG(exception))) {
+			return ZEND_HASH_APPLY_STOP;
+		}
+		ZVAL_DEREF(operand);
+		stop = zend_is_true(operand) == until_info->stop_value;
+		zval_ptr_dtor(operand);
 	}
 	if (stop) {
 		until_info->found = 1;
@@ -6390,7 +6404,7 @@ PHP_FUNCTION(reduce)
 {
 	zval *input;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 	zval *initial = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -6413,6 +6427,135 @@ PHP_FUNCTION(reduce)
 		case IS_OBJECT: {
 			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(input), zend_ce_traversable));
 			php_traversable_reduce(input, fci, fci_cache, return_value);
+			return;
+		}
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+/* }}} */
+
+static zend_always_inline void php_array_find(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
+{
+	zval retval;
+	zval *operand;
+
+	if (zend_hash_num_elements(htbl) > 0) {
+		fci.retval = &retval;
+		fci.param_count = 1;
+
+		ZEND_HASH_FOREACH_VAL(htbl, operand) {
+			fci.params = operand;
+			Z_TRY_ADDREF_P(operand);
+
+			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
+				bool found = zend_is_true(&retval);
+				if (found) {
+					ZVAL_COPY_VALUE(return_value, operand);
+					return;
+				} else {
+					zval_ptr_dtor(operand);
+				}
+			} else {
+				zval_ptr_dtor(operand);
+				return;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (default_value) {
+		ZVAL_COPY(return_value, default_value);
+	} else {
+		ZVAL_NULL(return_value);
+	}
+}
+/* }}} */
+
+typedef struct {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *return_value;
+	bool found;
+} traversable_find_data;
+
+static int php_traversable_find_elem(zend_object_iterator *iter, void *puser) /* {{{ */
+{
+	zval retval;
+	traversable_find_data *find_data = puser;
+	zend_fcall_info *fci = &find_data->fci;
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(*fci));
+
+	zval *operand = iter->funcs->get_current_data(iter);
+	if (UNEXPECTED(!operand || EG(exception))) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	ZVAL_DEREF(operand);
+    // Treat this as a 1-element array.
+	fci->params = operand;
+	fci->retval = &retval;
+	Z_TRY_ADDREF_P(operand);
+	int result = zend_call_function(&find_data->fci, &find_data->fcc);
+	if (UNEXPECTED(result == FAILURE || EG(exception))) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	fci->retval = &retval;
+	bool found = zend_is_true(&retval);
+	zval_ptr_dtor(&retval);
+	if (UNEXPECTED(EG(exception))) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	if (found) {
+		ZVAL_COPY_VALUE(find_data->return_value, operand);
+		find_data->found = 1;
+		return ZEND_HASH_APPLY_STOP;
+	}
+	zval_ptr_dtor(operand);
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static zend_always_inline void php_traversable_find(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
+{
+	traversable_find_data find_data;
+	find_data.fci = fci;
+	find_data.fci.param_count = 1;
+	find_data.fcc = fci_cache;
+	find_data.return_value = return_value;
+	find_data.found = 0;
+
+	if (spl_iterator_apply(obj, php_traversable_find_elem, (void*)&find_data) != SUCCESS || EG(exception)) {
+		return;
+	}
+	if (find_data.found) {
+		return;
+	}
+	if (default_value) {
+		ZVAL_COPY(return_value, default_value);
+	} else {
+		ZVAL_NULL(return_value);
+	}
+}
+/* }}} */
+
+/* {{{ Finds the first value or returns the default */
+PHP_FUNCTION(find)
+{
+	zval *input;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	zval *default_value = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ITERABLE(input)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(default_value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(input)) {
+		case IS_ARRAY:
+			php_array_find(Z_ARRVAL_P(input), fci, fci_cache, return_value, default_value);
+			return;
+		case IS_OBJECT: {
+			php_traversable_find(input, fci, fci_cache, return_value, default_value);
 			return;
 		}
 		EMPTY_SWITCH_DEFAULT_CASE();
