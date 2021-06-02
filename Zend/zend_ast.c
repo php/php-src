@@ -1757,6 +1757,9 @@ simple_list:
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}
+			if (ast->attr & ZEND_ACC_READONLY) {
+				smart_str_appends(str, "readonly ");
+			}
 
 			if (type_ast) {
 				zend_ast_export_type(str, type_ast, indent);
