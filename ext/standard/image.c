@@ -1161,11 +1161,13 @@ static struct gfxinfo *php_handle_avif(php_stream * stream) {
 }
 /* }}} */
 
-/* {{{ php_little2bigendian
- * Reverse the bytes in a little-endian uint32, returning the big-endian equivalent.
- * Adapted lovingly from libavif's read.c.
+/* {{{ php_ntohl
+ * Convert a big-endian network uint32 to host order - 
+ * which may be either little-endian or big-endian.
+ * Thanks to Rob Pike via Joe Drago:
+ * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
  */
-static uint32_t php_little2bigendian(val) {
+static uint32_t php_ntohl(val) {
     uint8_t data[4];
 
     memcpy(&data, &val, sizeof(data));
@@ -1204,7 +1206,7 @@ static int php_is_image_avif(php_stream * stream) {
 		return 0;
 	}
 
-	header_size = php_little2bigendian(header_size_reversed);
+	header_size = php_ntohl(header_size_reversed);
 
 	// If the box type isn't "ftyp", it can't be an AVIF image.
 	if (php_stream_read(stream, box_type, 4) != 4) {
