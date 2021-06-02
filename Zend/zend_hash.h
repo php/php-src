@@ -1222,12 +1222,12 @@ static zend_always_inline zend_bool zend_array_is_list(zend_array *array)
 	zend_long expected_idx = 0;
 	zend_long num_idx;
 	zend_string* str_idx;
-	/* Empty arrays are not lists */
+	/* Empty arrays are not lists, because empty array without any key. */
 	if (zend_hash_num_elements(array) == 0) {
 		return 0;
 	}
 
-	/* Packed arrays are lists, because empty array without any key */
+	/* Packed arrays are lists */
 	if (HT_IS_PACKED(array) && HT_IS_WITHOUT_HOLES(array)) {
 		return 1;
 	}
