@@ -622,6 +622,11 @@ ZEND_METHOD(Fiber, this)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	/* Follow RFC for now */
+	if (EG(current_fiber) == EG(main_fiber)) {
+		RETURN_NULL();
+	}
+
 	RETURN_OBJ_COPY(&EG(current_fiber)->std);
 }
 

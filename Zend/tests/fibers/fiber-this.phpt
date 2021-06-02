@@ -13,7 +13,6 @@ $fiber->start();
 
 ?>
 --EXPECTF--
-object(Fiber)#%d (0) {
-}
+NULL
 object(Fiber)#%d (0) {
 }
