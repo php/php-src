@@ -118,7 +118,6 @@ do {																			\
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
-BEGIN_EXTERN_C()
 
 static void strip_underscores(char *str, size_t *len)
 {
@@ -587,7 +586,6 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
-END_EXTERN_C()
 
 static zend_op_array *zend_compile(int type)
 {
@@ -811,7 +809,6 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 }
 
 
-BEGIN_EXTERN_C()
 zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zend_lex_state original_lex_state;

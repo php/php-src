@@ -169,5 +169,5 @@ points to be regarded.
 #define PHP_FOO_VERSION "1.2.3"
 ```
 
-This macros has to be used within your foo_module_entry to indicate the
+This macro has to be used within your foo_module_entry to indicate the
 extension version.

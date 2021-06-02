@@ -78,8 +78,8 @@ foreach ($tests as $testnum => $test) {
     // draw baseline:
     $width = sqrt(pow($bboxDrawn[2] - $bboxDrawn[0], 2) + pow($bboxDrawn[3] - $bboxDrawn[1], 2));
     imageline($g, $test['x'], $test['y'],
-        $test['x'] + $width * cos(deg2rad($test['angle'])),
-        $test['y'] - $width * sin(deg2rad($test['angle'])), $blue);
+        $test['x'] + (int)($width * cos(deg2rad($test['angle']))),
+        $test['y'] - (int)($width * sin(deg2rad($test['angle']))), $blue);
 }
 
 imagepng($g, "$cwd/bug53504.png");

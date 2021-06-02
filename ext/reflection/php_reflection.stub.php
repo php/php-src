@@ -714,7 +714,10 @@ class ReflectionEnumUnitCase extends ReflectionClassConstant
 
     public function getEnum(): ReflectionEnum {}
 
-    /** @implementation-alias ReflectionClassConstant::getValue */
+    /**
+     * @implementation-alias ReflectionClassConstant::getValue
+     * @no-verify
+     */
     public function getValue(): UnitEnum {}
 }
 

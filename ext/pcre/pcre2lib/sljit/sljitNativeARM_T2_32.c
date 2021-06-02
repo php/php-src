@@ -377,7 +377,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	CHECK_PTR(check_sljit_generate_code(compiler));
 	reverse_buf(compiler);
 
-	code = (sljit_u16*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_u16));
+	code = (sljit_u16*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_u16), compiler->exec_allocator_data);
 	PTR_FAIL_WITH_EXEC_IF(code);
 	buf = compiler->buf;
 
@@ -463,6 +463,8 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	code_ptr = (sljit_u16 *)SLJIT_ADD_EXEC_OFFSET(code_ptr, executable_offset);
 
 	SLJIT_CACHE_FLUSH(code, code_ptr);
+	SLJIT_UPDATE_WX_FLAGS(code, code_ptr, 1);
+
 	/* Set thumb mode flag. */
 	return (void*)((sljit_uw)code | 0x1);
 }
@@ -608,7 +610,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 			   Although some clever things could be done here, "NOT IMM" does not worth the efforts. */
 			break;
 		case SLJIT_ADD:
-			nimm = -imm;
+			nimm = -(sljit_sw)imm;
 			if (IS_2_LO_REGS(reg, dst)) {
 				if (imm <= 0x7)
 					return push_inst16(compiler, ADDSI3 | IMM3(imm) | RD3(dst) | RN3(reg));
@@ -630,7 +632,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 			nimm = get_imm(imm);
 			if (nimm != INVALID_IMM)
 				return push_inst32(compiler, ADD_WI | (flags & SET_FLAGS) | RD4(dst) | RN4(reg) | nimm);
-			nimm = get_imm(-imm);
+			nimm = get_imm(-(sljit_sw)imm);
 			if (nimm != INVALID_IMM)
 				return push_inst32(compiler, SUB_WI | (flags & SET_FLAGS) | RD4(dst) | RN4(reg) | nimm);
 			break;
@@ -655,11 +657,11 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 				nimm = get_imm(imm);
 				if (nimm != INVALID_IMM)
 					return push_inst32(compiler, CMPI_W | RN4(reg) | nimm);
-				nimm = get_imm(-imm);
+				nimm = get_imm(-(sljit_sw)imm);
 				if (nimm != INVALID_IMM)
 					return push_inst32(compiler, CMNI_W | RN4(reg) | nimm);
 			}
-			nimm = -imm;
+			nimm = -(sljit_sw)imm;
 			if (IS_2_LO_REGS(reg, dst)) {
 				if (imm <= 0x7)
 					return push_inst16(compiler, SUBSI3 | IMM3(imm) | RD3(dst) | RN3(reg));
@@ -681,7 +683,7 @@ static sljit_s32 emit_op_imm(struct sljit_compiler *compiler, sljit_s32 flags, s
 			nimm = get_imm(imm);
 			if (nimm != INVALID_IMM)
 				return push_inst32(compiler, SUB_WI | (flags & SET_FLAGS) | RD4(dst) | RN4(reg) | nimm);
-			nimm = get_imm(-imm);
+			nimm = get_imm(-(sljit_sw)imm);
 			if (nimm != INVALID_IMM)
 				return push_inst32(compiler, ADD_WI | (flags & SET_FLAGS) | RD4(dst) | RN4(reg) | nimm);
 			break;
@@ -2366,15 +2368,16 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_put_label* sljit_emit_put_label(struct slj
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_jump_addr(sljit_uw addr, sljit_uw new_target, sljit_sw executable_offset)
 {
 	sljit_u16 *inst = (sljit_u16*)addr;
+	SLJIT_UNUSED_ARG(executable_offset);
+
+	SLJIT_UPDATE_WX_FLAGS(inst, inst + 4, 0);
 	modify_imm32_const(inst, new_target);
+	SLJIT_UPDATE_WX_FLAGS(inst, inst + 4, 1);
 	inst = (sljit_u16 *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
 	SLJIT_CACHE_FLUSH(inst, inst + 4);
 }
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_constant, sljit_sw executable_offset)
 {
-	sljit_u16 *inst = (sljit_u16*)addr;
-	modify_imm32_const(inst, new_constant);
-	inst = (sljit_u16 *)SLJIT_ADD_EXEC_OFFSET(inst, executable_offset);
-	SLJIT_CACHE_FLUSH(inst, inst + 4);
+	sljit_set_jump_addr(addr, new_constant, executable_offset);
 }

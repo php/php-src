@@ -928,41 +928,55 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-	} else
+		return true;
+	}
 #endif
+
 	if (zend_string_equals_literal_ci(prot, "SHA")) {
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
-	} else {
-		zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
-		return false;
+		return true;
 	}
-	return true;
+
+	zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
+	return false;
 }
 /* }}} */
 
 /* {{{ Set the security protocol in the snmpv3 session */
 static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
+#ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+		return true;
+	}
+#endif
+
 #ifdef HAVE_AES
-	} else if (zend_string_equals_literal_ci(prot, "AES128")
-		|| zend_string_equals_literal_ci(prot, "AES")
-	) {
+	if (zend_string_equals_literal_ci(prot, "AES128")
+			|| zend_string_equals_literal_ci(prot, "AES")) {
 		s->securityPrivProto = usmAESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
-#endif
-	} else {
-#ifdef HAVE_AES
-		zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
-#else
-		zend_value_error("Security protocol must be \"DES\"");
-#endif
-		return false;
+		return true;
 	}
-	return true;
+#endif
+
+#ifdef HAVE_AES
+# ifndef NETSNMP_DISABLE_DES
+	zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
+# else
+	zend_value_error("Security protocol must be one of \"AES128\", or \"AES\"");
+# endif
+#else
+# ifndef NETSNMP_DISABLE_DES
+	zend_value_error("Security protocol must be \"DES\"");
+# else
+	zend_value_error("No security protocol supported");
+# endif
+#endif
+	return false;
 }
 /* }}} */
 

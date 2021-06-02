@@ -100,6 +100,7 @@ PHP 8.1 UPGRADE NOTES
   . Classes extending mysqli_stmt::execute() will be required to specify the
     additional parameter now.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
+  . mysqli::connect() will now return true instead of null on success.
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
@@ -345,6 +346,9 @@ PHP 8.1 UPGRADE NOTES
   . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
     RFC: https://wiki.php.net/rfc/is_list
 
+- pcntl:
+  . Added pcntl_rfork for FreeBSD variants
+
 - Reflection:
   . Added ReflectionFunctionAbstract::getClosureUsedVariables
 
@@ -399,6 +403,9 @@ PHP 8.1 UPGRADE NOTES
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
+
+- Sockets:
+  . FreeBSD defines SO_ACCEPTFILTER
 
 - Standard:
   . --with-password-argon2 now uses pkg-config to detect libargon2. As such,

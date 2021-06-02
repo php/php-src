@@ -9,30 +9,30 @@ class finfo
 
     /**
      * @param resource|null $context
-     * @return string|false
+     * @tentative-return-type
      * @alias finfo_file
      */
-    public function file(string $filename, int $flags = FILEINFO_NONE, $context = null) {}
+    public function file(string $filename, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
     /**
      * @param resource|null $context
-     * @return string|false
+     * @tentative-return-type
      * @alias finfo_buffer
      */
-    public function buffer(string $string, int $flags = FILEINFO_NONE, $context = null) {}
+    public function buffer(string $string, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
     /**
      * @return bool
      * @alias finfo_set_flags
      */
-    public function set_flags(int $flags) {}
+    public function set_flags(int $flags) {} // TODO make return type void
 }
 
 function finfo_open(int $flags = FILEINFO_NONE, ?string $magic_database = null): finfo|false {}
 
 function finfo_close(finfo $finfo): bool {}
 
-function finfo_set_flags(finfo $finfo, int $flags): bool {}
+function finfo_set_flags(finfo $finfo, int $flags): bool {} // TODO make return type void
 
 /**
  * @param resource|null $context

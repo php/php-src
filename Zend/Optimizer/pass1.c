@@ -119,12 +119,12 @@ constant_binary_op:
 				} else if (opline->extended_value == ZEND_MOD
 				 || opline->extended_value == ZEND_SL
 				 || opline->extended_value == ZEND_SR) {
-					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						/* don't optimize if it should produce a runtime numeric string error */
-						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
-							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
-							convert_to_long(&ZEND_OP2_LITERAL(opline));
+					zval *op2 = &ZEND_OP2_LITERAL(opline);
+					if (Z_TYPE_P(op2) != IS_LONG) {
+						if (!zend_is_op_long_compatible(op2)) {
+							break;
 						}
+						convert_to_long(op2);
 					}
 				} else if (opline->extended_value == ZEND_CONCAT) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {

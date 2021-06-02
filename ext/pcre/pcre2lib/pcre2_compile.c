@@ -1398,32 +1398,47 @@ static BOOL
 read_repeat_counts(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, uint32_t *minp,
   uint32_t *maxp, int *errorcodeptr)
 {
-PCRE2_SPTR p = *ptrptr;
+PCRE2_SPTR p;
 BOOL yield = FALSE;
+BOOL had_comma = FALSE;
 int32_t min = 0;
 int32_t max = REPEAT_UNLIMITED; /* This value is larger than MAX_REPEAT_COUNT */
 
-/* NB read_number() initializes the error code to zero. The only error is for a
-number that is too big. */
+/* Check the syntax */
 
+*errorcodeptr = 0;
+for (p = *ptrptr;; p++)
+  {
+  uint32_t c;
+  if (p >= ptrend) return FALSE;
+  c = *p;
+  if (IS_DIGIT(c)) continue;
+  if (c == CHAR_RIGHT_CURLY_BRACKET) break;
+  if (c == CHAR_COMMA)
+    {
+    if (had_comma) return FALSE;
+    had_comma = TRUE;
+    }
+  else return FALSE;
+  }
+
+/* The only error from read_number() is for a number that is too big. */
+
+p = *ptrptr;
 if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &min, errorcodeptr))
   goto EXIT;
-
-if (p >= ptrend) goto EXIT;
 
 if (*p == CHAR_RIGHT_CURLY_BRACKET)
   {
   p++;
   max = min;
   }
-
 else
   {
-  if (*p++ != CHAR_COMMA || p >= ptrend) goto EXIT;
-  if (*p != CHAR_RIGHT_CURLY_BRACKET)
+  if (*(++p) != CHAR_RIGHT_CURLY_BRACKET)
     {
     if (!read_number(&p, ptrend, -1, MAX_REPEAT_COUNT, ERR5, &max,
-        errorcodeptr) || p >= ptrend ||  *p != CHAR_RIGHT_CURLY_BRACKET)
+        errorcodeptr))
       goto EXIT;
     if (max < min)
       {
@@ -1438,11 +1453,10 @@ yield = TRUE;
 if (minp != NULL) *minp = (uint32_t)min;
 if (maxp != NULL) *maxp = (uint32_t)max;
 
-/* Update the pattern pointer on success, or after an error, but not when
-the result is "not a repeat quantifier". */
+/* Update the pattern pointer */
 
 EXIT:
-if (yield || *errorcodeptr != 0) *ptrptr = p;
+*ptrptr = p;
 return yield;
 }
 
@@ -1776,19 +1790,23 @@ else
       {
       oldptr = ptr;
       ptr--;   /* Back to the digit */
-      if (!read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, ERR61, &s,
-          errorcodeptr))
-        break;
 
-      /* \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
+      /* As we know we are at a digit, the only possible error from
+      read_number() is a number that is too large to be a group number. In this
+      case we fall through handle this as not a group reference. If we have
+      read a small enough number, check for a back reference.
+
+      \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
       are octal escapes if there are not that many previous captures. */
 
-      if (s < 10 || oldptr[-1] >= CHAR_8 || s <= (int)cb->bracount)
+      if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, 0, &s, errorcodeptr) &&
+          (s < 10 || oldptr[-1] >= CHAR_8 || s <= (int)cb->bracount))
         {
         if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
           else escape = -s;     /* Indicates a back reference */
         break;
         }
+
       ptr = oldptr;      /* Put the pointer back and fall through */
       }
 
@@ -2344,7 +2362,7 @@ if (ptr > *nameptr + MAX_NAME_SIZE)
   *errorcodeptr = ERR48;
   goto FAILED;
   }
-*namelenptr = ptr - *nameptr;
+*namelenptr = (uint32_t)(ptr - *nameptr);
 
 /* Subpattern names must not be empty, and their terminator is checked here.
 (What follows a verb or alpha assertion name is checked separately.) */
@@ -4331,6 +4349,7 @@ while (ptr < ptrend)
           {
           if (++ptr >= ptrend || !IS_DIGIT(*ptr)) goto BAD_VERSION_CONDITION;
           minor = (*ptr++ - CHAR_0) * 10;
+          if (ptr >= ptrend) goto BAD_VERSION_CONDITION;
           if (IS_DIGIT(*ptr)) minor += *ptr++ - CHAR_0;
           if (ptr >= ptrend || *ptr != CHAR_RIGHT_PARENTHESIS)
             goto BAD_VERSION_CONDITION;

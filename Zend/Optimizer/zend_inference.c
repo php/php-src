@@ -4481,7 +4481,6 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_DIV:
-		case ZEND_MOD:
 			if (!OP2_HAS_RANGE() ||
 				(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
 				/* Division by zero */
@@ -4493,10 +4492,18 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 		case ZEND_POW:
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		/* Ops may throw if not an integer */
+		case ZEND_MOD:
+			if (!OP2_HAS_RANGE() ||
+				(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
+				/* Division by zero */
+				return 1;
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_SL:
 		case ZEND_SR:
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+			return (t1 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				!OP2_HAS_RANGE() ||
 				OP2_MIN_RANGE() < 0;
 		case ZEND_CONCAT:
@@ -4510,10 +4517,10 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
 				return 0;
 			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (t1 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_BW_NOT:
-			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_PRE_INC:
 		case ZEND_POST_INC:
 		case ZEND_PRE_DEC:

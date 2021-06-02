@@ -12,14 +12,26 @@ $sessionName = ini_get('session.name');
 
 // session_start(); // Uncommenting this makes it not crash when reading the session (see below), but it will not return any data.
 
-$sh->open($savePath, $sessionName);
-$sh->write("foo", "bar");
-var_dump($sh->read(""));
+try {
+    $sh->open($savePath, $sessionName);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $sh->write("foo", "bar");
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $sh->read("");
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
---EXPECTF--
-Warning: SessionHandler::open(): Session is not active in %s on line 10
-
-Warning: SessionHandler::write(): Session is not active in %s on line 11
-
-Warning: SessionHandler::read(): Session is not active in %s on line 12
-bool(false)
+--EXPECT--
+Session is not active
+Session is not active
+Session is not active

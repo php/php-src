@@ -33,77 +33,77 @@ class XMLReader
     public string $xmlLang;
 
     /** @return bool */
-    public function close() {}
+    public function close() {} // TODO make the return type void
 
-    /** @return string|null */
-    public function getAttribute(string $name) {}
+    /** @tentative-return-type */
+    public function getAttribute(string $name): ?string {}
 
-    /** @return string|null */
-    public function getAttributeNo(int $index) {}
+    /** @tentative-return-type */
+    public function getAttributeNo(int $index): ?string {}
 
-    /** @return string|null */
-    public function getAttributeNs(string $name, string $namespace) {}
+    /** @tentative-return-type */
+    public function getAttributeNs(string $name, string $namespace): ?string {}
 
-    /** @return bool */
-    public function getParserProperty(int $property) {}
+    /** @tentative-return-type */
+    public function getParserProperty(int $property): bool {}
 
-    /** @return bool */
-    public function isValid() {}
+    /** @tentative-return-type */
+    public function isValid(): bool {}
 
-    /** @return string|null */
-    public function lookupNamespace(string $prefix) {}
+    /** @tentative-return-type */
+    public function lookupNamespace(string $prefix): ?string {}
 
-    /** @return bool */
-    public function moveToAttribute(string $name) {}
+    /** @tentative-return-type */
+    public function moveToAttribute(string $name): bool {}
 
-    /** @return bool */
-    public function moveToAttributeNo(int $index) {}
+    /** @tentative-return-type */
+    public function moveToAttributeNo(int $index): bool {}
 
-    /** @return bool */
-    public function moveToAttributeNs(string $name, string $namespace) {}
+    /** @tentative-return-type */
+    public function moveToAttributeNs(string $name, string $namespace): bool {}
 
-    /** @return bool */
-    public function moveToElement() {}
+    /** @tentative-return-type */
+    public function moveToElement(): bool {}
 
-    /** @return bool */
-    public function moveToFirstAttribute() {}
+    /** @tentative-return-type */
+    public function moveToFirstAttribute(): bool {}
 
-    /** @return bool */
-    public function moveToNextAttribute() {}
+    /** @tentative-return-type */
+    public function moveToNextAttribute(): bool {}
 
-    /** @return bool */
-    public function read() {}
+    /** @tentative-return-type */
+    public function read(): bool {}
 
-    /** @return bool */
-    public function next(?string $name = null) {}
-
-    /** @return bool|XMLReader */
-    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {}
-
-    /** @return string */
-    public function readInnerXml() {}
-
-    /** @return string */
-    public function readOuterXml() {}
-
-    /** @return string */
-    public function readString() {}
-
-    /** @return bool */
-    public function setSchema(?string $filename) {}
-
-    /** @return bool */
-    public function setParserProperty(int $property, bool $value) {}
-
-    /** @return bool */
-    public function setRelaxNGSchema(?string $filename) {}
-
-    /** @return bool */
-    public function setRelaxNGSchemaSource(?string $source) {}
+    /** @tentative-return-type */
+    public function next(?string $name = null): bool {}
 
     /** @return bool|XMLReader */
-    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {}
+    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
-    /** @return DOMNode|false */
-    public function expand(?DOMNode $baseNode = null) {}
+    /** @tentative-return-type */
+    public function readInnerXml(): string {}
+
+    /** @tentative-return-type */
+    public function readOuterXml(): string {}
+
+    /** @tentative-return-type */
+    public function readString(): string {}
+
+    /** @tentative-return-type */
+    public function setSchema(?string $filename): bool {}
+
+    /** @tentative-return-type */
+    public function setParserProperty(int $property, bool $value): bool {}
+
+    /** @tentative-return-type */
+    public function setRelaxNGSchema(?string $filename): bool {}
+
+    /** @tentative-return-type */
+    public function setRelaxNGSchemaSource(?string $source): bool {}
+
+    /** @return bool|XMLReader */
+    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
+
+    /** @tentative-return-type */
+    public function expand(?DOMNode $baseNode = null): DOMNode|false {}
 }

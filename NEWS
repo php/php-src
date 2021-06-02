@@ -11,6 +11,12 @@ PHP                                                                        NEWS
     the method is private). (Nikita)
   . Implemented FR #77372 (Relative file path is removed from uploaded file).
     (Björn Tantau)
+  . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
+    (krakjoe)
+ 
+ - Standard:
+  . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
+    (krakjoe)
 
 - Date:
   . Fixed bug #52480 (Incorrect difference using DateInterval) (Derick)
@@ -86,6 +92,9 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
+
+- PCRE:
+  . Bundled PCRE2 is 10.37.
 
 - PDO:
   . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for

@@ -6,7 +6,7 @@ Observer: End handlers fire after a fatal error
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
-memory_limit=1M
+memory_limit=2M
 --FILE--
 <?php
 function foo()

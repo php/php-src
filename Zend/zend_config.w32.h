@@ -48,16 +48,6 @@
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
 
-#ifndef __cplusplus
-/* This will cause the compilation process to be MUCH longer, but will generate
- * a much quicker PHP binary
- */
-#ifdef ZEND_WIN32_FORCE_INLINE
-# undef inline
-# define inline __forceinline
-#endif
-#endif
-
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)
 #else

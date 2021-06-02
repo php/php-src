@@ -266,12 +266,17 @@ static PHP_INI_MH(OnSetSerializePrecision)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
+	size_t value;
 	if (new_value) {
-		PG(memory_limit) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		value = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	} else {
-		PG(memory_limit) = Z_L(1)<<30;		/* effectively, no limit */
+		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	zend_set_memory_limit(PG(memory_limit));
+	if (zend_set_memory_limit(value) == FAILURE) {
+		zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+		return FAILURE;
+	}
+	PG(memory_limit) = value;
 	return SUCCESS;
 }
 /* }}} */
@@ -1230,6 +1235,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_lineno) = error_lineno;
 	}
 
+	if (zend_alloc_in_memory_limit_error_reporting()) {
+		php_output_discard_all();
+	}
+
 	/* display/log the error if necessary */
 	if (display && ((EG(error_reporting) & type) || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
@@ -1778,19 +1787,7 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
-
-		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-			(size_t)PG(memory_limit) < zend_memory_usage(1)
-		) {
-			send_buffer = 0;
-		}
-
-		if (!send_buffer) {
-			php_output_discard_all();
-		} else {
-			php_output_end_all();
-		}
+		php_output_end_all();
 	} zend_end_try();
 
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */

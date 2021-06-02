@@ -8,7 +8,7 @@ var_dump($result);
 
 class A implements \JsonSerializable
 {
-    function jsonSerialize()
+    function jsonSerialize(): mixed
     {
         return ['end' => json_decode('', true)];
     }

@@ -860,9 +860,22 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
     @unlink($info_file);
 
-    // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    // load list of enabled and loadable extensions
+    save_text($info_file, <<<'PHP'
+        <?php
+        echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions()));
+        $ext_dir = ini_get("extension_dir");
+        foreach (scandir($ext_dir) as $file) {
+            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                continue;
+            }
+            $ext = $matches[1];
+            if (!extension_loaded($ext) && @dl($file)) {
+                echo ",", $ext;
+            }
+        }
+        ?>
+    PHP);
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -2614,6 +2627,7 @@ COMMAND $cmd
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
+            $wanted_re = str_replace('%0', '\x00', $wanted_re);
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
@@ -2740,9 +2754,14 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
+            $env_lines = [];
+            foreach ($env as $env_var => $env_val) {
+                $env_lines[] = "export $env_var=" . escapeshellarg($env_val);
+            }
+            $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH
 #!/bin/sh
-
+{$exported_environment}
 case "$1" in
 "gdb")
     gdb --args {$orig_cmd}

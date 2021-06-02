@@ -744,10 +744,17 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 #elif defined(__aarch64__)
 	size_t ret;
 
+# ifdef __APPLE__
+	// Points to struct TLVDecriptor for _tsrm_ls_cache in macOS.
+	asm("adrp %0, #__tsrm_ls_cache@TLVPPAGE\n\t"
+	    "ldr %0, [%0, #__tsrm_ls_cache@TLVPPAGEOFF]"
+	     : "=r" (ret));
+# else
 	asm("mov %0, xzr\n\t"
 	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
 	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
 	     : "=r" (ret));
+# endif
 	return ret;
 #else
 	return 0;

@@ -535,6 +535,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_LISTENQLIMIT",       SO_LISTENQLIMIT,        CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_LISTENQLEN",       SO_LISTENQLEN,        CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_USER_COOKIE",       SO_USER_COOKIE,        CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER",       SO_ACCEPTFILTER,        CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
@@ -1818,6 +1819,23 @@ PHP_FUNCTION(socket_get_option)
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
 				return;
+#ifdef SO_ACCEPTFILTER
+			case SO_ACCEPTFILTER: {
+
+				struct accept_filter_arg af = {0};
+				optlen = sizeof(af);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&af, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				add_assoc_string(return_value, "af_name", af.af_name);
+				return;
+			}
+#endif
 		}
 	}
 
@@ -1954,6 +1972,20 @@ PHP_FUNCTION(socket_set_option)
 				opt_ptr = "";
 				optlen = 0;
 			}
+			break;
+		}
+#endif
+
+#ifdef SO_ACCEPTFILTER
+		case SO_ACCEPTFILTER: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
+				RETURN_FALSE;
+			}
+			struct accept_filter_arg af = {0};
+			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			opt_ptr = &af;
+			optlen = sizeof(af);
 			break;
 		}
 #endif

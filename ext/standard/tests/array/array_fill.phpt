@@ -2,7 +2,7 @@
 basic array_fill test
 --FILE--
 <?php
-$array1 = array(0.0, 1, 2.5);
+$array1 = array(0.0, 1, 2);
 $array2 = array(TRUE, FALSE, NULL, "d", "e", "f");
 foreach($array1 as $start)
 {
@@ -81,7 +81,7 @@ start: 0 num: 1 value: array(1) {
 }
 ===========================
 bool(true)
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   bool(true)
   [1]=>
@@ -89,7 +89,7 @@ start: 0 num: 2.5 value: array(2) {
 }
 ===========================
 bool(false)
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   bool(false)
   [1]=>
@@ -97,7 +97,7 @@ start: 0 num: 2.5 value: array(2) {
 }
 ===========================
 NULL
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   NULL
   [1]=>
@@ -105,7 +105,7 @@ start: 0 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "d"
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   string(1) "d"
   [1]=>
@@ -113,7 +113,7 @@ start: 0 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "e"
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   string(1) "e"
   [1]=>
@@ -121,7 +121,7 @@ start: 0 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "f"
-start: 0 num: 2.5 value: array(2) {
+start: 0 num: 2 value: array(2) {
   [0]=>
   string(1) "f"
   [1]=>
@@ -189,7 +189,7 @@ start: 1 num: 1 value: array(1) {
 }
 ===========================
 bool(true)
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   bool(true)
   [2]=>
@@ -197,7 +197,7 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 bool(false)
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   bool(false)
   [2]=>
@@ -205,7 +205,7 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 NULL
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   NULL
   [2]=>
@@ -213,7 +213,7 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "d"
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   string(1) "d"
   [2]=>
@@ -221,7 +221,7 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "e"
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   string(1) "e"
   [2]=>
@@ -229,7 +229,7 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "f"
-start: 1 num: 2.5 value: array(2) {
+start: 1 num: 2 value: array(2) {
   [1]=>
   string(1) "f"
   [2]=>
@@ -237,67 +237,67 @@ start: 1 num: 2.5 value: array(2) {
 }
 ===========================
 bool(true)
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 bool(false)
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 NULL
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 string(1) "d"
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 string(1) "e"
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 string(1) "f"
-start: 2.5 num: 0 value: array(0) {
+start: 2 num: 0 value: array(0) {
 }
 ===========================
 bool(true)
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   bool(true)
 }
 ===========================
 bool(false)
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   bool(false)
 }
 ===========================
 NULL
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   NULL
 }
 ===========================
 string(1) "d"
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   string(1) "d"
 }
 ===========================
 string(1) "e"
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   string(1) "e"
 }
 ===========================
 string(1) "f"
-start: 2.5 num: 1 value: array(1) {
+start: 2 num: 1 value: array(1) {
   [2]=>
   string(1) "f"
 }
 ===========================
 bool(true)
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   bool(true)
   [3]=>
@@ -305,7 +305,7 @@ start: 2.5 num: 2.5 value: array(2) {
 }
 ===========================
 bool(false)
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   bool(false)
   [3]=>
@@ -313,7 +313,7 @@ start: 2.5 num: 2.5 value: array(2) {
 }
 ===========================
 NULL
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   NULL
   [3]=>
@@ -321,7 +321,7 @@ start: 2.5 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "d"
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   string(1) "d"
   [3]=>
@@ -329,7 +329,7 @@ start: 2.5 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "e"
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   string(1) "e"
   [3]=>
@@ -337,7 +337,7 @@ start: 2.5 num: 2.5 value: array(2) {
 }
 ===========================
 string(1) "f"
-start: 2.5 num: 2.5 value: array(2) {
+start: 2 num: 2 value: array(2) {
   [2]=>
   string(1) "f"
   [3]=>

@@ -227,7 +227,7 @@ memory_limit=83886080
                 $current_targets = mt_rand(-100000, 100000) / 10;
                 do {
                     $trend = (mt_rand(0, 3) > 1) ? (mt_rand(-10000, 10000) / 100) : 'NULL';
-                } while (isset($values[$trend]));
+                } while (isset($values[(string)$trend]));
 
                 $sql = sprintf('INSERT INTO test(targetport, current_targets, maxreports, trend) VALUES (%d, %f, %s, %s)',
                     $i,
@@ -239,7 +239,7 @@ memory_limit=83886080
                     break 2;
                 }
                 if ($current_targets > 0 && $trend !== 'NULL')
-                    $values[$trend] = $i;
+                    $values[(string)$trend] = $i;
             }
             krsort($values);
 

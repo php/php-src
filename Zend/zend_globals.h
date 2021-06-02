@@ -62,7 +62,6 @@ END_EXTERN_C()
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber zend_fiber;
-typedef struct _zend_error_info zend_error_info;
 
 
 struct _zend_compiler_globals {

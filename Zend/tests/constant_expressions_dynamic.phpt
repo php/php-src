@@ -46,6 +46,8 @@ var_dump(
 ?>
 --EXPECTF--
 Warning: A non-numeric value encountered in %s on line %d
+
+Deprecated: Implicit conversion from non-compatible float 3.14 to int in %s on line %d
 int(3)
 string(4) "1foo"
 bool(false)

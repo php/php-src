@@ -56,7 +56,7 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-             $fp => 'resource', 133 => "int", 444.432 => "float",
+             $fp => 'resource', 133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -288,8 +288,8 @@ array(5) {
   string(8) "resource"
 }
 -- Iteration 9 --
-int(8)
-array(8) {
+int(7)
+array(7) {
   [0]=>
   int(10)
   ["hello"]=>
@@ -300,15 +300,13 @@ array(8) {
   string(8) "resource"
   [2]=>
   string(3) "int"
-  [3]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }
-int(10)
-array(10) {
+int(9)
+array(9) {
   [0]=>
   int(10)
   [1]=>
@@ -323,8 +321,6 @@ array(10) {
   string(8) "resource"
   [4]=>
   string(3) "int"
-  [5]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>

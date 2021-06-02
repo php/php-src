@@ -9,7 +9,7 @@ opcache
 --FILE--
 <?php
 class BugLoader extends php_user_filter {
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing): int {
         if (!class_exists("Test")) {
             eval("class Test extends ArrayObject {}");
         }

@@ -8,47 +8,47 @@ if (!extension_loaded('session')) die('skip session extension not available');
 <?php
 class MySessionHandler implements SessionHandlerInterface, SessionIdInterface, SessionUpdateTimestampHandlerInterface
 {
-    public function close()
+    public function close(): bool
     {
         return true;
     }
 
-    public function destroy($session_id)
+    public function destroy($session_id): bool
     {
         return true;
     }
 
-    public function gc($maxlifetime)
+    public function gc($maxlifetime): int|false
     {
         return true;
     }
 
-    public function open($save_path, $session_name)
+    public function open($save_path, $session_name): bool
     {
         return true;
     }
 
-    public function read($session_id)
+    public function read($session_id): string|false
     {
         return '';
     }
 
-    public function write($session_id, $session_data)
+    public function write($session_id, $session_data): bool
     {
         return true;
     }
 
-    public function create_sid()
+    public function create_sid(): string
     {
         return uniqid();
     }
 
-    public function updateTimestamp($key, $val)
+    public function updateTimestamp($key, $val): bool
     {
         return true;
     }
 
-    public function validateId($key)
+    public function validateId($key): bool
     {
         return true;
     }

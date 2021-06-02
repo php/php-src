@@ -167,6 +167,10 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_CS | CONST_PERSISTENT);
+#if defined(PRIO_DARWIN_BG)
+	REGISTER_LONG_CONSTANT("PRIO_DARWIN_BG", PRIO_DARWIN_BG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PRIO_DARWIN_THREAD", PRIO_DARWIN_THREAD, CONST_CS | CONST_PERSISTENT);
+#endif
 #endif
 
 	/* {{{ "how" argument for sigprocmask */
@@ -334,6 +338,36 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #endif
 #ifdef CLONE_NEWCGROUP
 	REGISTER_LONG_CONSTANT("CLONE_NEWCGROUP",	CLONE_NEWCGROUP, CONST_CS | CONST_PERSISTENT);
+#endif
+#endif
+
+#ifdef HAVE_RFORK
+#ifdef RFPROC
+	REGISTER_LONG_CONSTANT("RFPROC",	RFPROC, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFNOWAIT
+	REGISTER_LONG_CONSTANT("RFNOWAIT",	RFNOWAIT, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFCFDG
+	REGISTER_LONG_CONSTANT("RFCFDG",	RFCFDG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFFDG
+	REGISTER_LONG_CONSTANT("RFFDG",	RFFDG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFLINUXTHPN
+	REGISTER_LONG_CONSTANT("RFLINUXTHPN",	RFLINUXTHPN, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFMEM
+	REGISTER_LONG_CONSTANT("RFMEM",	RFMEM, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFSIGSHARE
+	REGISTER_LONG_CONSTANT("RFSIGSHARE",	RFSIGSHARE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFTSIGZMB
+	REGISTER_LONG_CONSTANT("RFTSIGZMB",	RFTSIGZMB, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RFTHREAD
+	REGISTER_LONG_CONSTANT("RFTHREAD",	RFTHREAD, CONST_CS | CONST_PERSISTENT);
 #endif
 #endif
 }
@@ -1463,6 +1497,54 @@ PHP_FUNCTION(pcntl_unshare)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_RFORK
+/* {{{ proto bool pcntl_rfork(int flags [, int signal])
+   More control over the process creation is given over fork/vfork. */
+PHP_FUNCTION(pcntl_rfork)
+{
+  zend_long flags;
+  zend_long csignal = 0;
+  pid_t pid;
+
+  ZEND_PARSE_PARAMETERS_START(1, 2)
+    Z_PARAM_LONG(flags)
+    Z_PARAM_OPTIONAL
+    Z_PARAM_LONG(csignal)
+  ZEND_PARSE_PARAMETERS_END();
+
+  /* This is a flag to use with great caution in general, preferably not within PHP */
+  if ((flags & RFMEM) != 0) {
+    flags &= ~RFMEM;
+  }
+
+  /* A new pid is required */
+  flags |= RFPROC;
+
+  if ((flags & RFTSIGZMB) != 0) {
+    flags |= RFTSIGFLAGS(csignal);
+  }
+
+  pid = rfork(flags);
+
+  if (pid == -1) {
+    PCNTL_G(last_error) = errno;
+    switch (errno) {
+      case EINVAL:
+        php_error_docref(NULL, E_WARNING, "RFFDG and RFCFDG modes are mutually exclusive");
+        break;
+      case EAGAIN:
+        php_error_docref(NULL, E_WARNING, "Maximum process creations limit reached\n");
+        break;
+      default:
+        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+    }
+  }
+
+  RETURN_LONG((zend_long) pid);
+}
+#endif
+/* }}} */
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {

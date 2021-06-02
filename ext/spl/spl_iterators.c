@@ -1779,7 +1779,7 @@ PHP_METHOD(RegexIterator, __construct)
 /* {{{ Calls the callback with the current value, the current key and the inner iterator as arguments */
 PHP_METHOD(CallbackFilterIterator, accept)
 {
-	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
+	spl_dual_it_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();

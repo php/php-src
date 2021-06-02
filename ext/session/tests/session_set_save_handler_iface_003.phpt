@@ -15,7 +15,7 @@ echo "*** Testing session_set_save_handler() function: id interface ***\n";
 class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     public $path;
 
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         if (!$path) {
             $path = sys_get_temp_dir();
         }
@@ -23,33 +23,34 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
         return true;
     }
 
-    public function close() {
+    public function close(): bool {
         return true;
     }
 
-    public function read($id) {
+    public function read($id): string|false {
         return (string)@file_get_contents($this->path . $id);
     }
 
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         // Empty $data = 0 = false
         return (bool)file_put_contents($this->path . $id, $data);
     }
 
-    public function destroy($id) {
+    public function destroy($id): bool {
         @unlink($this->path . $id);
     }
 
-    public function gc($maxlifetime) {
+    public function gc($maxlifetime): int|false {
         foreach (glob($this->path . '*') as $filename) {
             if (filemtime($filename) + $maxlifetime < time()) {
                 @unlink($filename);
             }
         }
+
         return true;
     }
 
-    public function create_sid() {
+    public function create_sid(): string {
         return pathinfo(__FILE__)['filename'];
     }
 }

@@ -95,13 +95,6 @@ typedef int gid_t;
 typedef char * caddr_t;
 typedef int pid_t;
 
-# ifndef PHP_DEBUG
-#  ifdef inline
-#   undef inline
-#  endif
-#  define inline		__inline
-# endif
-
 # define M_TWOPI        (M_PI * 2.0)
 # define off_t			_off_t
 

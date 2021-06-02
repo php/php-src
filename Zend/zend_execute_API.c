@@ -1518,14 +1518,7 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string 
 		}
 		if (EG(exception)) {
 			if (!(fetch_type & ZEND_FETCH_CLASS_EXCEPTION)) {
-				zend_string *exception_str;
-				zval exception_zv;
-				ZVAL_OBJ(&exception_zv, EG(exception));
-				Z_ADDREF(exception_zv);
-				zend_clear_exception();
-				exception_str = zval_get_string(&exception_zv);
-				zend_error_noreturn(E_ERROR,
-					"During class fetch: Uncaught %s", ZSTR_VAL(exception_str));
+				zend_exception_uncaught_error("During class fetch");
 			}
 			return NULL;
 		}

@@ -7,22 +7,22 @@ session.save_handler=whatever
 --FILE--
 <?php
 class DummyHandler implements SessionHandlerInterface {
-    public function open($savePath, $sessionName) {
+    public function open($savePath, $sessionName): bool {
         return true;
     }
-    public function close() {
+    public function close(): bool {
         return true;
     }
-    public function read($id) {
+    public function read($id): string|false {
         return '';
     }
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         return true;
     }
-    public function destroy($id) {
+    public function destroy($id): bool {
         return true;
     }
-    public function gc($maxlifetime) {
+    public function gc($maxlifetime): int|false {
         return true;
     }
 }

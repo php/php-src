@@ -154,7 +154,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 void php_clear_stmt_bind(MY_STMT *stmt)
 {
 	if (stmt->stmt) {
-		if (mysqli_stmt_close(stmt->stmt, TRUE)) {
+		if (mysqli_stmt_close(stmt->stmt, true)) {
 			php_error_docref(NULL, E_WARNING, "Error occurred while closing statement");
 			return;
 		}
@@ -519,7 +519,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->report_mode = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;;
 	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->local_infile_directory = NULL;
-	mysqli_globals->rollback_on_cached_plink = FALSE;
+	mysqli_globals->rollback_on_cached_plink = false;
 }
 /* }}} */
 

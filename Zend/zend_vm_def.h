@@ -5227,10 +5227,23 @@ ZEND_VM_C_LABEL(send_array):
 		if (OP2_TYPE != IS_UNUSED) {
 			/* We don't need to handle named params in this case,
 			 * because array_slice() is called with $preserve_keys == false. */
-			zval *op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			zval *op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
-			zend_long len = zval_get_long(op2);
+			zend_long len;
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+				len = Z_LVAL_P(op2);
+			} else if (Z_TYPE_P(op2) == IS_NULL) {
+				len = count - skip;
+			} else if (EX_USES_STRICT_TYPES()
+					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
+				zend_type_error(
+					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
+					zend_zval_type_name(op2));
+				FREE_OP2();
+				FREE_OP1();
+				HANDLE_EXCEPTION();
+			}
 
 			if (len < 0) {
 				len += (zend_long)(count - skip);
@@ -5924,7 +5937,7 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
 			ZEND_VM_C_GOTO(num_index);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -6407,7 +6420,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(offset_again);
 			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
@@ -9600,7 +9613,7 @@ ZEND_VM_C_LABEL(fetch_dim_r_index_array):
 		if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 			offset = Z_LVAL_P(dim);
 		} else {
-			offset = zval_get_long(dim);
+			offset = zval_get_long_ex(dim, /* is_strict */ true);
 		}
 		ht = Z_ARRVAL_P(container);
 		ZEND_HASH_INDEX_FIND(ht, offset, value, ZEND_VM_C_LABEL(fetch_dim_r_index_undef));

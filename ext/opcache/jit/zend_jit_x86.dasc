@@ -6598,6 +6598,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 			default:
 				ZEND_UNREACHABLE();
 		}
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
 	}
 
 	if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
@@ -6634,30 +6635,27 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 		|	add r4, 8
 		|.endif
 
+		|9:
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+		if (may_throw) {
+			zend_jit_check_exception(Dst);
+		}
+
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|	jmp >9 // END
 			|.code
+			|9:
 		}
-	}
-
-	if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_ARRAY
-	 && (op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) == 0
-	 && (op1_data_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 		|.cold_code
-	}
-
-	|9:
-	|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
-	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-	if (may_throw) {
-		zend_jit_check_exception(Dst);
-	}
-
-	if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_ARRAY
-	 && (op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) == 0
-	 && (op1_data_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
-		|	jmp >9
+		|9:
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
 		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+		if (may_throw) {
+			zend_jit_check_exception(Dst);
+		}
+		|	jmp >9
 		|.code
 		|9:
 	}
@@ -13898,7 +13896,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 						IS_CV, opline->op1, var_addr, var_info, NULL,
 						(opline+1)->op1_type, (opline+1)->op1, val_addr, val_info,
 						val_range,
-						0, var_addr, var_def_info, var_info, 0)) {
+						0, var_addr, var_def_info, var_info, /* may throw */ 1)) {
 					return 0;
 				}
 				break;
