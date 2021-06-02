@@ -587,6 +587,11 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(symbol_table);
 	REGISTER_EG(jit_trace_num);
 #undef  REGISTER_EG
+#define REGISTER_CG(n)  \
+	zend_jit_disasm_add_symbol("CG("#n")", \
+		(uint64_t)(uintptr_t)&compiler_globals.n, sizeof(compiler_globals.n))
+	REGISTER_CG(map_ptr_base);
+#undef  REGISTER_CG
 #endif
 
 	/* Register JIT helper functions */
