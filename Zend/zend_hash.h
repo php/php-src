@@ -1227,7 +1227,7 @@ static zend_always_inline zend_bool zend_array_is_list(zend_array *array)
 		return 0;
 	}
 
-	/* Packed arrays are lists */
+	/* Packed arrays are lists, because empty array without any key */
 	if (HT_IS_PACKED(array) && HT_IS_WITHOUT_HOLES(array)) {
 		return 1;
 	}

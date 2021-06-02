@@ -92,7 +92,7 @@ unset middle: false
 unset end: true
 unset string key: true
 unset into order: true
-unset to empty: false
+unset to empty: true
 append implicit: true
 append explicit: true
 append with gap: false
