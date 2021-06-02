@@ -2,6 +2,10 @@
 Exhaustive test of CP932 encoding verification and conversion
 --EXTENSIONS--
 mbstring
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 srand(4321); /* Make results consistent */
