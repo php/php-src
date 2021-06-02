@@ -12511,7 +12511,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		|	add FCARG1a, r0
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 		if (opline->opcode == ZEND_FETCH_OBJ_W
-		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
 		 && (!ce ||	ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 
@@ -12521,6 +12520,21 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	jnz >1
 			|.cold_code
 			|1:
+			|	test dword [FCARG2a + offsetof(zend_property_info, flags)], ZEND_ACC_READONLY
+			|	jz >3
+			|	IF_NOT_Z_TYPE FCARG1a, IS_OBJECT, >2
+			|	GET_Z_PTR r0, FCARG1a
+			|	GC_ADDREF r0
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
+			|	jmp >9
+			|2:
+			|	mov FCARG1a, FCARG2a
+			|	SET_EX_OPLINE opline, r0
+			|	EXT_CALL zend_readonly_property_modification_error, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR
+			|	jmp >9
+			|3:
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				|	SET_EX_OPLINE opline, r0
 				|	EXT_CALL zend_jit_check_array_promotion, r0
@@ -12538,7 +12552,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				|.endif
 				|	jmp >9
 			} else {
-				ZEND_UNREACHABLE();
+				ZEND_ASSERT(flags == 0);
 			}
 			|.code
 		}
@@ -12558,6 +12572,22 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			}
 		} else {
 			|	IF_UNDEF dl, >5
+		}
+		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
+			|	IF_NOT_TYPE dl, IS_OBJECT, >4
+			|	GET_ZVAL_PTR r0, prop_addr
+			|	GC_ADDREF r0
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
+			|	jmp >9
+			|.cold_code
+			|4:
+			|	LOAD_ADDR FCARG1a, prop_info
+			|	SET_EX_OPLINE opline, r0
+			|	EXT_CALL zend_readonly_property_modification_error, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR
+			|	jmp >9
+			|.code
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
@@ -13677,7 +13707,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, prop_info->offset);
-		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
+		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set || (prop_info->flags & ZEND_ACC_READONLY)) {
 			// Undefined property with magic __get()/__set()
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);

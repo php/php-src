@@ -1249,6 +1249,14 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
 			}
+			if (UNEXPECTED((child_info->flags & ZEND_ACC_READONLY) != (parent_info->flags & ZEND_ACC_READONLY))) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot redeclare %s property %s::$%s as %s %s::$%s",
+					parent_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
+					ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
+					child_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
+					ZSTR_VAL(ce->name), ZSTR_VAL(key));
+			}
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
@@ -2218,10 +2226,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
+					uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
 					not_compatible = 1;
 
-					if ((colliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
-						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC)) &&
+					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
 						property_types_compatible(property_info, colliding_prop) == INHERITANCE_SUCCESS
 					) {
 						/* the flags are identical, thus, the properties may be compatible */

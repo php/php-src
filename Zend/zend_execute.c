@@ -823,6 +823,12 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	zend_string_release(type_str);
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
+		zend_property_info *info) {
+	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",
+		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+}
+
 static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		/* We need to explicitly check for this here, to avoid updating the type in the trait and
@@ -926,6 +932,11 @@ ZEND_API bool zend_never_inline zend_verify_property_type(zend_property_info *in
 static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
 {
 	zval tmp;
+
+	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
+		zend_readonly_property_modification_error(info);
+		return &EG(uninitialized_zval);
+	}
 
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
@@ -1884,7 +1895,9 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zend_object *
 	object->handlers->write_property(object, name, &z_copy, cache_slot);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&z_copy);
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 }
 
 static zend_never_inline void zend_pre_incdec_overloaded_property(zend_object *object, zend_string *name, void **cache_slot OPLINE_DC EXECUTE_DATA_DC)
@@ -1915,7 +1928,9 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zend_object *o
 	object->handlers->write_property(object, name, &z_copy, cache_slot);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&z_copy);
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 }
 
 static zend_never_inline void zend_assign_op_overloaded_property(zend_object *object, zend_string *name, void **cache_slot, zval *value OPLINE_DC EXECUTE_DATA_DC)
@@ -1938,7 +1953,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zend_object *ob
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), &res);
 	}
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 	zval_ptr_dtor(&res);
 	OBJ_RELEASE(object);
 }
@@ -2821,9 +2838,22 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			ptr = OBJ_PROP(zobj, prop_offset);
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 				ZVAL_INDIRECT(result, ptr);
-				if (flags) {
-					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
-					if (prop_info) {
+				zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+				if (prop_info) {
+					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+						/* For objects, R/RW/UNSET fetch modes might not actually modify object.
+						 * Similar as with magic __get() allow them, but return the value as a copy
+						 * to make sure no actual modification is possible. */
+						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
+						if (Z_TYPE_P(ptr) == IS_OBJECT) {
+							ZVAL_COPY(result, ptr);
+						} else {
+							zend_readonly_property_modification_error(prop_info);
+							ZVAL_ERROR(result);
+						}
+						return;
+					}
+					if (flags) {
 						zend_handle_fetch_obj_flags(result, ptr, NULL, prop_info, flags);
 					}
 				}
