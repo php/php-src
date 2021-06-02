@@ -57,4 +57,4 @@ bool(true)
 
 Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "file:///%s/test_bug_61367-read/bad" in %s on line %d
 
-Warning: Attempt to read property "nodeValue" on null in %s on line %d
+Notice: Trying to get property 'nodeValue' of non-object in %s on line %d

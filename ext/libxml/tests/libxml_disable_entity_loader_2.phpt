@@ -34,8 +34,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-
-Deprecated: Function libxml_disable_entity_loader() is deprecated in %s on line %d
 bool(false)
 
 Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "%s" in %s on line %d
