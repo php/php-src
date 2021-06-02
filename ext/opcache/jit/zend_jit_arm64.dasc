@@ -772,7 +772,7 @@ static bool logical_immediate_p (uint64_t value, uint32_t reg_size)
 
 /* Update IP with 32-bit immediate 'val'. */
 |.macro ADD_IP_WITH_CONST, val, tmp_reg
-||	ZEND_ASSERT(((int32_t)(val)) > 0 && ((int32_t)(val)) <= ADD_SUB_IMM);
+||	ZEND_ASSERT(val >= 0 && val <= ADD_SUB_IMM);
 ||	if (GCC_GLOBAL_REGS) {
 |		add IP, IP, #val
 ||	} else {
@@ -972,7 +972,7 @@ static bool logical_immediate_p (uint64_t value, uint32_t reg_size)
  * the computation result is stored back into 'addr'.
  * Note: it should be guaranteed that 'val' can be encoded into add/sub instruction. */
 |.macro LONG_ADD_SUB_WITH_IMM, add_sub_ins, addr, val, tmp_reg1, tmp_reg2
-||	ZEND_ASSERT(((int32_t)(val)) > 0 && ((int32_t)(val)) <= ADD_SUB_IMM);
+||	ZEND_ASSERT(val >= 0 && val <= ADD_SUB_IMM);
 ||	if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (((uint32_t)(Z_OFFSET(addr))) > LDR_STR_PIMM64) {
 |			LOAD_32BIT_VAL tmp_reg2, Z_OFFSET(addr)
