@@ -1879,7 +1879,9 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zend_object *
 	object->handlers->write_property(object, name, &z_copy, cache_slot);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&z_copy);
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 }
 
 static zend_never_inline void zend_pre_incdec_overloaded_property(zend_object *object, zend_string *name, void **cache_slot OPLINE_DC EXECUTE_DATA_DC)
@@ -1910,7 +1912,9 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zend_object *o
 	object->handlers->write_property(object, name, &z_copy, cache_slot);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&z_copy);
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 }
 
 static zend_never_inline void zend_assign_op_overloaded_property(zend_object *object, zend_string *name, void **cache_slot, zval *value OPLINE_DC EXECUTE_DATA_DC)
@@ -1933,7 +1937,9 @@ static zend_never_inline void zend_assign_op_overloaded_property(zend_object *ob
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), &res);
 	}
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 	zval_ptr_dtor(&res);
 	OBJ_RELEASE(object);
 }
