@@ -1149,12 +1149,102 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_avif }}} */
-/* TODO: This is just a stub */
+/* {{{ php_handle_avif */
+/* There's no simple way to get this information - so, for now, this is unsupported.
+   Simply return 0 for everything.
+ */
 static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	return NULL;
-}
+		struct gfxinfo * result;
 
+		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+		return result;
+}
+/* }}} */
+
+/* {{{ php_little2bigendian
+ * Reverse the bytes in a little-endian uint32, returning the big-endian equivalent.
+ * Adapted lovingly from libavif's read.c.
+ */
+static uint32_t php_little2bigendian(val) {
+    uint8_t data[4];
+
+    memcpy(&data, &val, sizeof(data));
+    return ((uint32_t)data[3] << 0) |
+					 ((uint32_t)data[2] << 8) |
+					 ((uint32_t)data[1] << 16) | 
+					 ((uint32_t)data[0] << 24);
+}
+/* }}} */
+
+/* {{{ php_is_image_avif
+   detect whether an image is of type AVIF
+	 
+	 An AVIF image will start off a header "box".
+	 This starts with with a four-byte integer containing the number of bytes in the filetype box.
+	 This must be followed by the string "ftyp".
+	 Next comes a four-byte string indicating the "major brand".
+	 If that's "avif" or "avis", this is an AVIF image.
+	 Next, there's a four-byte "minor version" field, which we can ignore.
+	 Next comes an array of four-byte strings containing "compatible brands".
+	 These extend to the end of the box.
+	 If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
+	 Otherwise, well, it's not.
+
+	 For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
+*/
+static int php_is_image_avif(php_stream * stream) {
+	uint32_t header_size_reversed, header_size, i;
+	char box_type[4], brand[4];
+
+	if (php_stream_rewind(stream)) {
+		return 0;
+	}
+
+	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
+		return 0;
+	}
+
+	header_size = php_little2bigendian(header_size_reversed);
+
+	// If the box type isn't "ftyp", it can't be an AVIF image.
+	if (php_stream_read(stream, box_type, 4) != 4) {
+		return 0;
+	}
+
+	if (memcmp(box_type, "ftyp", 4)) {
+		return 0;
+	}
+	
+	// If the major brand is "avif" or "avis", it's an AVIF image.
+	if (php_stream_read(stream, brand, 4) != 4) {
+		return 0;
+	}
+
+	if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
+		return 1;
+	}
+
+	// Skip the next four bytes, which are the "minor version".
+	if (php_stream_read(stream, brand, 4) != 4) {
+		return 0;
+	}
+
+	// Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
+	// Note we've already read four groups of four bytes.
+
+	for (i = 16; i < header_size; i += 4) {
+		if (php_stream_read(stream, brand, 4) != 4) {
+			return 0;
+		}
+
+		if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
 
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
@@ -1365,13 +1455,20 @@ PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filety
 	if (php_get_wbmp(stream, NULL, 1)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
-    if (!twelve_bytes_read) {
+
+	if (php_is_image_avif(stream)) {
+		return IMAGE_FILETYPE_AVIF;
+	}
+
+	if (!twelve_bytes_read) {
 		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
-    }
+	}
+
 	if (php_get_xbm(stream, NULL)) {
 		return IMAGE_FILETYPE_XBM;
 	}
+
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
