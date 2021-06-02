@@ -1247,7 +1247,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 				name = called_scope->name;
 			}
 		}
-		str = add_type_string(str, name, ZEND_TYPE_IS_INTERSECTION(type));
+		str = add_type_string(str, name, /* is_intersection */ false);
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_CALLABLE), /* is_intersection */ false);
@@ -6299,9 +6299,8 @@ static zend_type zend_compile_typename(
 	} else if (ast->kind == ZEND_AST_TYPE_INTERSECTION) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
-		unsigned int has_static = 0;
 
-		// TODO static means that one slot may be unused
+		// TODO Is this still true if self/parent are accepted?
 		/* Allocate the type list directly on the arena as it must be a type
 		 * list of the same number of elements as the AST list has children */
 		type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->children));
@@ -6314,25 +6313,11 @@ static zend_type zend_compile_typename(
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
 			/* An intersection of standard types cannot exist so invalidate it */
-			/* Treat "static" as a class type. */
-			if (ZEND_TYPE_IS_ONLY_MASK(single_type) && !(ZEND_TYPE_FULL_MASK(single_type) & MAY_BE_STATIC)) {
+			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
 				zend_string_release_ex(standard_type_str, false);
-			}
-
-			/* If the type is static */
-			if (UNEXPECTED(!ZEND_TYPE_IS_COMPLEX(single_type))) {
-				/* Check that static doesn't overlap */
-				uint32_t type_mask_overlap = ZEND_TYPE_PURE_MASK(type) & MAY_BE_STATIC;
-				if (type_mask_overlap) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type static is redundant");
-				}
-				ZEND_TYPE_FULL_MASK(type) |= MAY_BE_STATIC;
-				ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
-				has_static = 1;
-				continue;
 			}
 
 			/* Add type to the type list */
@@ -6349,7 +6334,7 @@ static zend_type zend_compile_typename(
 			}
 		}
 
-		ZEND_ASSERT((list->children - has_static) == type_list->num_types);
+		ZEND_ASSERT(list->children == type_list->num_types);
 
 		ZEND_TYPE_SET_LIST(type, type_list);
 		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;

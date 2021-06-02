@@ -845,7 +845,6 @@ static bool zend_check_and_resolve_property_class_type(
 		zend_type *list_type;
 
 		if (ZEND_TYPE_IS_INTERSECTION(info->type)) {
-			/* Property class can't have static as a type so need to check it here */
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
 				if (ZEND_TYPE_HAS_NAME(*list_type)) {
 					zend_string *name = ZEND_TYPE_NAME(*list_type);
@@ -1020,10 +1019,6 @@ static zend_always_inline bool zend_check_type_slow(
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			zend_type *list_type;
 			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
-				/* Check if intersection has static inside it */
-				if ((ZEND_TYPE_FULL_MASK(*type) & MAY_BE_STATIC) && !zend_value_instanceof_static(arg)) {
-					return false;
-				}
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 					if (HAVE_CACHE_SLOT && *cache_slot) {
 						ce = *cache_slot;
