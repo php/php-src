@@ -6300,7 +6300,6 @@ static zend_type zend_compile_typename(
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
 
-		// TODO Is this still true if self/parent are accepted?
 		/* Allocate the type list directly on the arena as it must be a type
 		 * list of the same number of elements as the AST list has children */
 		type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->children));
@@ -6311,14 +6310,20 @@ static zend_type zend_compile_typename(
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
+			zend_string *standard_type_str = zend_type_to_string(single_type);
 
 			/* An intersection of standard types cannot exist so invalidate it */
 			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
-				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
-				zend_string_release_ex(standard_type_str, false);
 			}
+			/* Check for "self" and "parent" too */
+			if (zend_string_equals_literal_ci(standard_type_str, "self")
+					|| zend_string_equals_literal_ci(standard_type_str, "parent")) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
+			}
+			zend_string_release_ex(standard_type_str, false);
 
 			/* Add type to the type list */
 			type_list->types[type_list->num_types++] = single_type;
