@@ -34,21 +34,21 @@ var_dump($var);
 --EXPECTF--
 Bitwise ops:
 
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(3)
 
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(1)
 
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(2)
 
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(6)
 
-Deprecated: Implicit conversion from non-compatible float 1.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 int(1)
 Modulo:
 
-Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 int(1)
