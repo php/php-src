@@ -2329,6 +2329,54 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 }
 /* }}} */
 
+static void *sqlite3_php_malloc(int size)
+{
+	size_t *h;
+	ZEND_ASSERT(size > 0);
+	h = emalloc(sizeof(size_t) + (size_t) size);
+	*h = size;
+	return h + 1;
+}
+
+static void *sqlite3_php_realloc(void *ptr, int size)
+{
+	size_t *h;
+	ZEND_ASSERT(ptr != 0);
+	ZEND_ASSERT(size > 0);
+	h = erealloc(((size_t *) ptr) - 1, sizeof(size_t) + (size_t) size);
+	*h = size;
+	return h + 1;
+}
+
+static void sqlite3_php_free(void *ptr)
+{
+	ZEND_ASSERT(ptr != 0);
+	efree(((size_t *) ptr) - 1);
+}
+
+static int sqlite3_php_size(void *ptr)
+{
+	ZEND_ASSERT(ptr != 0);
+	return *(((size_t *) ptr) - 1);
+}
+
+static int sqlite3_php_roundup(int size)
+{
+	return size;
+}
+
+static int sqlite3_php_init(void *unused)
+{
+	(void) unused;
+	return SQLITE_OK;
+}
+
+static void sqlite3_php_shutdown(void *unused)
+{
+	(void) unused;
+	return;
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sqlite3)
 {
@@ -2339,6 +2387,19 @@ PHP_MINIT_FUNCTION(sqlite3)
 		return FAILURE;
 	}
 #endif
+
+	/* Use ZendMM to count/limit memory */
+	static const sqlite3_mem_methods sqlite3_php_mem_methods = {
+		sqlite3_php_malloc,
+		sqlite3_php_free,
+		sqlite3_php_realloc,
+		sqlite3_php_size,
+		sqlite3_php_roundup,
+		sqlite3_php_init,
+		sqlite3_php_shutdown,
+		NULL,
+	};
+	sqlite3_config(SQLITE_CONFIG_MALLOC, &sqlite3_php_mem_methods);
 
 	memcpy(&sqlite3_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	memcpy(&sqlite3_stmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
