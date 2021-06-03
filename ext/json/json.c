@@ -249,10 +249,10 @@ PHP_FUNCTION(json_encode)
 	encoder.max_depth = (int)depth;
 
 	if (input_indent_str) {
-	    indent_str.s = input_indent_str;
+		indent_str.s = input_indent_str;
 	} else {
-	    for (int i = 0; i < indent; i++)
-		smart_str_appendc(&indent_str, ' ');
+		for (int i = 0; i < indent; i++)
+			smart_str_appendc(&indent_str, ' ');
 	}
 	encoder.indent_str = &indent_str;
 
