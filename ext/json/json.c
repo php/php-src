@@ -233,7 +233,7 @@ PHP_FUNCTION(json_encode)
 	php_json_encoder encoder;
 	smart_str buf = {0};
 	smart_str indent_str = {0};
-	zend_string *input_indent_str = {0};
+	zend_string *input_indent_str = 0;
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long indent = PHP_JSON_ENCODER_DEFAULT_INDENT;
