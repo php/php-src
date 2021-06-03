@@ -101,15 +101,13 @@ require_once('skipifconnectfailure.inc');
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    if (function_exists("memory_get_usage")) {
-        $mem = memory_get_usage();
-        for ($i = 0; $i < 20000; $i++) {
-            if (!true === ($tmp = mysqli_stmt_bind_param($stmt, "is", $id, $label)))
-                printf("[008][$i] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-        }
-        if (($tmp = (memory_get_usage() - $mem)) > 600)
-            printf("[009] Function seems to be leaking, because it used %d bytes. During tests it used only 92 bytes.", $tmp);
+    $mem = memory_get_usage();
+    for ($i = 0; $i < 20000; $i++) {
+        if (!true === ($tmp = mysqli_stmt_bind_param($stmt, "is", $id, $label)))
+            printf("[008][$i] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
     }
+    if (($tmp = (memory_get_usage() - $mem)) > 600)
+        printf("[009] Function seems to be leaking, because it used %d bytes. During tests it used only 92 bytes.", $tmp);
 
     $id = 100;
     $label = "z";

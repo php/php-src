@@ -248,6 +248,12 @@ struct _zend_mm_heap {
 #if ZEND_MM_STAT
 	size_t             real_peak;               /* peak size of allocated pages */
 #endif
+#if ZEND_MM_STAT || ZEND_MM_LIMIT
+	int64_t            persistent_size;         /* current persistent memory usage */
+#if ZEND_MM_STAT
+#endif
+	int64_t            persistent_peak;         /* peak persistent memory usage */
+#endif
 #if ZEND_MM_LIMIT
 	size_t             limit;                   /* memory limit */
 	int                overflow;                /* memory overflow flag */
@@ -949,7 +955,7 @@ get_chunk:
 				heap->cached_chunks = chunk->next;
 			} else {
 #if ZEND_MM_LIMIT
-				if (UNEXPECTED(ZEND_MM_CHUNK_SIZE > heap->limit - heap->real_size)) {
+				if (UNEXPECTED(ZEND_MM_CHUNK_SIZE > heap->limit - heap->real_size - heap->persistent_size)) {
 					if (zend_mm_gc(heap)) {
 						goto get_chunk;
 					} else if (heap->overflow == 0) {
@@ -1475,8 +1481,8 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 			}
 		} else /* if (new_size > old_size) */ {
 #if ZEND_MM_LIMIT
-			if (UNEXPECTED(new_size - old_size > heap->limit - heap->real_size)) {
-				if (zend_mm_gc(heap) && new_size - old_size <= heap->limit - heap->real_size) {
+			if (UNEXPECTED(new_size - old_size > heap->limit - heap->real_size - heap->persistent_size)) {
+				if (zend_mm_gc(heap) && new_size - old_size <= heap->limit - heap->real_size - heap->persistent_size) {
 					/* pass */
 				} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
@@ -1767,8 +1773,8 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	}
 
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {
-		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
+	if (UNEXPECTED(new_size > heap->limit - heap->real_size - heap->persistent_size)) {
+		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size - heap->persistent_size) {
 			/* pass */
 		} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
@@ -2661,7 +2667,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(memory_limit < AG(mm_heap)->real_size)) {
+	if (UNEXPECTED(memory_limit < AG(mm_heap)->real_size) + AG(mm_heap)->persistent_size) {
 		return FAILURE;
 	}
 	AG(mm_heap)->limit = memory_limit;
@@ -2725,7 +2731,7 @@ static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *pt
 }
 
 static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t add_size) {
-	if (add_size > heap->limit - heap->size && !heap->overflow) {
+	if (add_size > heap->limit - heap->size - heap->persistent_size && !heap->overflow) {
 #if ZEND_DEBUG
 		zend_mm_safe_error(heap,
 			"Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
