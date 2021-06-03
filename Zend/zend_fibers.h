@@ -25,6 +25,19 @@
 
 BEGIN_EXTERN_C()
 
+typedef enum {
+	ZEND_FIBER_STATUS_INIT,
+	ZEND_FIBER_STATUS_RUNNING,
+	ZEND_FIBER_STATUS_SUSPENDED,
+	ZEND_FIBER_STATUS_DEAD,
+} zend_fiber_status;
+
+typedef enum {
+	ZEND_FIBER_FLAG_THREW     = 1 << 0,
+	ZEND_FIBER_FLAG_BAILOUT   = 1 << 1,
+	ZEND_FIBER_FLAG_DESTROYED = 1 << 2,
+} zend_fiber_flag;
+
 void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
 
@@ -59,8 +72,11 @@ typedef struct _zend_fiber {
 	/* Fiber PHP object handle. */
 	zend_object std;
 
-	/* Status of the fiber, one of the ZEND_FIBER_STATUS_* constants. */
-	zend_uchar status;
+	/* Status of the fiber, one of the zend_fiber_status values. */
+	zend_fiber_status status;
+
+	/* Flags of the fiber, bit field of the zend_fiber_flag values. */
+	zend_uchar flags;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;
@@ -81,16 +97,6 @@ typedef struct _zend_fiber {
 	/* Storage for temporaries and fiber return value. */
 	zval value;
 } zend_fiber;
-
-static const zend_uchar ZEND_FIBER_STATUS_INIT      = 0x0;
-static const zend_uchar ZEND_FIBER_STATUS_SUSPENDED = 0x1;
-static const zend_uchar ZEND_FIBER_STATUS_RUNNING   = 0x2;
-static const zend_uchar ZEND_FIBER_STATUS_RETURNED  = 0x4;
-static const zend_uchar ZEND_FIBER_STATUS_THREW     = 0x8;
-static const zend_uchar ZEND_FIBER_STATUS_SHUTDOWN  = 0x10;
-static const zend_uchar ZEND_FIBER_STATUS_BAILOUT   = 0x20;
-
-static const zend_uchar ZEND_FIBER_STATUS_FINISHED  = 0x2c;
 
 /* These functions create and manipulate a Fiber object, allowing any internal function to start, resume, or suspend a fiber. */
 ZEND_API zend_fiber *zend_fiber_create(const zend_fcall_info *fci, const zend_fcall_info_cache *fci_cache);
