@@ -153,13 +153,14 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 	smart_str indent_str = {0};
 	for (int i = 0; i < indent; i++)
 		smart_str_appendc(&indent_str, ' ');
-	smart_str_0(&indent_str);
 	encoder.indent_str = &indent_str;
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
-	smart_str_free(&indent_str);
+	if (indent > 0) {
+		smart_str_free(&indent_str);
+	}
 
 	return return_code;
 }
