@@ -4,7 +4,9 @@ Serialization of readonly properties
 <?php
 
 class Test {
-    public readonly int $prop = 1;
+    public function __construct(
+        public readonly int $prop = 1,
+    ) {}
 }
 
 var_dump($s = serialize(new Test));

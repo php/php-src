@@ -15,5 +15,5 @@ try {
 }
 
 ?>
---EXPECT--
-Cannot modify readonly property Test::$prop
+--EXPECTF--
+Fatal error: Readonly property Test::$prop cannot have default value in %s on line %d
