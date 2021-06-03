@@ -26,9 +26,9 @@ var_dump($array[$string_float]);
 int(0)
 bool(true)
 
-Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.0E+121 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.0E+121 to int loses precision in %s on line %d
 array(2) {
   [0]=>
   string(11) "Large float"
@@ -42,13 +42,13 @@ array(2) {
   string(18) "String large float"
 }
 
-Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.0E+121 to int loses precision in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d
 NULL
 
-Deprecated: Implicit conversion from non-compatible float 1.0E+121 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.0E+121 to int loses precision in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d

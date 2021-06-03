@@ -53,22 +53,22 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
     echo "\n", toUTF8(65), "\n", toUTF8(233), "\n", toUTF8(1252), "\n", toUTF8(20095), "\n";
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
 A
 
-Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from non-compatible float 4294965248 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294965248 to int loses precision in %s on line %d
 é
 
-Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from non-compatible float 4294965248 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294965248 to int loses precision in %s on line %d
 Ӥ
 
-Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from non-compatible float 4294965248 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294965248 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from non-compatible float 4294901760 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294901760 to int loses precision in %s on line %d
 乿
