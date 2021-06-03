@@ -4,6 +4,13 @@ PDO_sqlite: Testing memory limit
 pdo_sqlite
 --SKIPIF--
 <?php
+
+
+
+if (true) { die("skip ext/pdo_sqlite until ext/sqlite3 is fully working"); }
+
+
+
 if (getenv("USE_ZEND_ALLOC") === "0") { die("skip requires zmm"); }
 ?>
 --INI--
