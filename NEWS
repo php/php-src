@@ -121,6 +121,9 @@ PHP                                                                        NEWS
   . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)
   . Convert resource<pspell config> to object \PSpell\Config. (Sara)
 
+- readline:
+  . Fixed bug #72998 (invalid read in readline completion). (krakjoe)
+
 - Reflection:
   . Implement ReflectionFunctionAbstract::getClosureUsedVariables (krakjoe)
 
