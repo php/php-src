@@ -85,9 +85,6 @@ Constant: IMAGETYPE_XBM
 Constant: IMAGETYPE_WEBP
 	With dot: .webp
 	Without dot: webp
-Constant: IMAGETYPE_AVIF
-	With dot: .avif
-	Without dot: avif
 bool(false)
 bool(false)
 Done
