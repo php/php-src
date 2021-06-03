@@ -800,11 +800,6 @@ found:
 				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
 			goto exit;
 		}
-		if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
-				&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
-			variable_ptr = &EG(error_zval);
-			goto exit;
-		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
 			/* Writes to uninitialized typed properties bypass __set(). */
 			goto write_std_property;
@@ -855,6 +850,13 @@ write_std_property:
 
 			Z_TRY_ADDREF_P(value);
 			if (UNEXPECTED(prop_info)) {
+				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY)
+						&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
+					Z_TRY_DELREF_P(value);
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
 					zval_ptr_dtor(value);
@@ -1093,11 +1095,12 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			}
 			return;
 		}
-		if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
-				&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
-			return;
-		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
+					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
+				return;
+			}
+
 			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
 			Z_PROP_FLAG_P(slot) = 0;
 			return;
