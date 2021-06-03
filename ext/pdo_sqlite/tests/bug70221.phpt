@@ -2,6 +2,9 @@
 Bug #70221 (persistent sqlite connection + custom function segfaults)
 --SKIPIF--
 <?php
+
+die('skip PDO::ATTR_PERSISTENT tests');
+
 if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--
