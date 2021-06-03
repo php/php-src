@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-function json_encode(mixed $value, int $flags = 0, int $depth = 512): string|false {}
+function json_encode(mixed $value, int $flags = 0, int $depth = 512, string|int $indent = 4): string|false {}
 
 function json_decode(string $json, ?bool $associative = null, int $depth = 512, int $flags = 0): mixed {}
 
