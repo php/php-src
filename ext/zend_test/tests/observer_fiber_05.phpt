@@ -44,9 +44,7 @@ $fiber->resume();
 <destroying '%s'>
 <!-- switching from fiber %s to %s -->
 <destroying '%s'>
-<destroyed '%s'>
 <!-- switching from fiber %s to %s -->
-<destroying '%s'>
 <destroyed '%s'>
 <!-- switching from fiber %s to 0 -->
 <destroyed '%s'>
