@@ -2333,7 +2333,7 @@ static void *sqlite3_php_malloc(int size)
 {
 	size_t *h;
 	ZEND_ASSERT(size > 0);
-	h = emalloc(sizeof(size_t) + (size_t) size);
+	h = pemalloc(sizeof(size_t) + (size_t) size, true);
 	*h = size;
 	return h + 1;
 }
@@ -2343,7 +2343,7 @@ static void *sqlite3_php_realloc(void *ptr, int size)
 	size_t *h;
 	ZEND_ASSERT(ptr != 0);
 	ZEND_ASSERT(size > 0);
-	h = erealloc(((size_t *) ptr) - 1, sizeof(size_t) + (size_t) size);
+	h = perealloc(((size_t *) ptr) - 1, sizeof(size_t) + (size_t) size, true);
 	*h = size;
 	return h + 1;
 }
@@ -2351,7 +2351,7 @@ static void *sqlite3_php_realloc(void *ptr, int size)
 static void sqlite3_php_free(void *ptr)
 {
 	ZEND_ASSERT(ptr != 0);
-	efree(((size_t *) ptr) - 1);
+	pefree(((size_t *) ptr) - 1, true);
 }
 
 static int sqlite3_php_size(void *ptr)
