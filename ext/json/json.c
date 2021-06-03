@@ -232,6 +232,7 @@ PHP_FUNCTION(json_encode)
 	php_json_encoder encoder;
 	smart_str buf = {0};
 	smart_str indent_str = {0};
+	zend_string *input_indent_str = {0};
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long indent = PHP_JSON_ENCODER_DEFAULT_INDENT;
@@ -241,21 +242,22 @@ PHP_FUNCTION(json_encode)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)
-		Z_PARAM_LONG(indent)
+		Z_PARAM_STR_OR_LONG(input_indent_str, indent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 
-	if (indent > 0) {
-		for (int i = 0; i < indent; i++)
-			smart_str_appendc(&indent_str, ' ');
-		smart_str_0(&indent_str);
-		encoder.indent_str = &indent_str;
+	if (input_indent_str) {
+	    indent_str.s = input_indent_str;
+	} else {
+	    for (int i = 0; i < indent; i++)
+		smart_str_appendc(&indent_str, ' ');
 	}
+	encoder.indent_str = &indent_str;
 
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
-	if (indent > 0) {
+	if (indent > 0 && indent_str.s) {
 		smart_str_free(&indent_str);
 	}
 
