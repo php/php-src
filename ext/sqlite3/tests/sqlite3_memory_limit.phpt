@@ -10,8 +10,7 @@ if (getenv("USE_ZEND_ALLOC") === "0") { die("skip requires zmm"); }
 memory_limit=10M
 --FILE--
 <?php
-require __DIR__ . '/new_db.inc';
-
+$db = new SQLite3(':memory:');
 var_dump($db->exec('CREATE TABLE test (foo TEXT)'));
 
 var_dump($db->exec('INSERT INTO test (foo) VALUES (\'short_text\')'));
@@ -29,11 +28,13 @@ if ($mDiff > 1 * 1024 * 1024) {
     echo "UNEXPECTED: Database purged, but " . round($mDiff / (1024 ** 2), 2) . " MB of memory remained allocated\n";
 }
 
-require __DIR__ . '/new_db.inc';
-
+$db = new SQLite3(':memory:');
 var_dump($db->exec('CREATE TABLE test (foo TEXT)'));
 
+$mBefore = memory_get_usage();
 var_dump($db->exec('INSERT INTO test (foo) VALUES (\'' . bin2hex(random_bytes(10 * 1024 * 1024)) . '\')'));
+$mDiff = memory_get_usage() - $mBefore;
+echo "UNEXPECTED: Code should never get here, " . round($mDiff / (1024 ** 2), 2) . " MB of memory allocated by previous insert\n";
 ?>
 --EXPECTF--
 bool(true)
