@@ -173,15 +173,70 @@ static bool arm64_may_use_adrp(const void *addr)
 }
 
 /* Determine whether an immediate value can be encoded as the immediate operand of logical instructions. */
+#define TOTAL_IMM_NUM  5334                         /* = 1*2 + 3*4 + 7*8 + 15*16 + 31*32 + 63*64 */
+static uint64_t logical_immediates[TOTAL_IMM_NUM];  /* Initialized in zend_jit_setup() */
+
+static int cmp_u64(const void *a, const void *b)
+{
+	uint64_t first = *(uint64_t *)a;
+	uint64_t second = *(uint64_t *)b;
+
+	return (first > second) ? 1 : (first == second) ? 0 : -1;
+}
+
+static void init_logical_immediate_table()
+{
+	uint32_t e, s, r, len;
+	uint64_t imm;
+	int num = 0;
+
+	for (e = 2; e <= 64; e *= 2) {
+		for (s = 1; s < e; s++) {
+			imm = 0xffffffffffffffffull >> (64 - s);
+			for (len = e; len < 64; len *= 2) {
+				imm |= (imm << len);
+			}
+			for (r = 0; r < e; r++) {
+				logical_immediates[num] = imm;
+				num ++;
+				imm = (imm >> 63) | (imm << 1);
+			}
+		}
+	}
+
+	ZEND_ASSERT(num == TOTAL_IMM_NUM);
+	qsort(logical_immediates, num, sizeof(uint64_t), cmp_u64);
+}
+
+/* Note: reg_size can be 32 or 64. */
 static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 {
-	/* fast path: power of two */
+	uint64_t *res;
+
+	/* value should be 32-bit long for 32-bit register */
+	if (reg_size == 32) {
+		ZEND_ASSERT(value >> 32 == 0);
+	}
+
+	/* Fast path: power of two */
 	if (value > 0 && !(value & (value - 1))) {
 		return true;
 	}
 
-	// TODO: slow path
-	return false;
+	/* Replicate to 64-bit value */
+	if (reg_size == 32) {
+		value |= (value << 32);
+	}
+
+	/* Fast path: all zeros or all ones */
+	if (value == 0 || (value + 1) == 0) {
+		return false;
+	}
+
+	/* Search: return true if found, otherwise return false. */
+	res = (uint64_t *)bsearch(&value, logical_immediates, TOTAL_IMM_NUM,
+	                          sizeof(uint64_t), cmp_u64);
+	return (res != NULL);
 }
 
 /* Not Implemented Yet */
@@ -328,17 +383,6 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |		tst reg, #val
 ||	} else {
 |		LOAD_32BIT_VAL tmp_reg, val
-|		tst reg, tmp_reg
-||	}
-|.endmacro
-
-|.macro TST_64_WITH_CONST, reg, val, tmp_reg
-||	if (val == 0) {
-|		tst reg, xzr
-||	} else if (logical_immediate_p(val, 64)) {
-|		tst reg, #val
-||	} else {
-|		LOAD_64BIT_VAL tmp_reg, val
 |		tst reg, tmp_reg
 ||	}
 |.endmacro
@@ -2765,6 +2809,9 @@ static int zend_jit_setup(void)
 		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_RET] + NR_SPAD;    // sub r4, NR_SPAD
 	}
 #endif
+
+	/* Initialize valid immediates for logical instructions. */
+	init_logical_immediate_table();
 
 	return SUCCESS;
 }
