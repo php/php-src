@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
+   | http://www.php.net/license/3_01.txt                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -87,8 +87,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
 	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",    IMAGE_FILETYPE_WEBP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",    IMAGE_FILETYPE_AVIF,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -1149,13 +1148,6 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_avif }}} */
-/* TODO: This is just a stub */
-static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	return NULL;
-}
-
-
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
@@ -1191,8 +1183,6 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/vnd.microsoft.icon";
 		case IMAGE_FILETYPE_WEBP:
 			return "image/webp";
-		case IMAGE_FILETYPE_AVIF:
-			return "image/avif";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1275,8 +1265,6 @@ PHP_FUNCTION(image_type_to_extension)
 		case IMAGE_FILETYPE_WEBP:
 			imgext = ".webp";
 			break;
-		case IMAGE_FILETYPE_AVIF:
-			imgext = ".avif";
 	}
 
 	if (imgext) {
@@ -1442,9 +1430,6 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			result = php_handle_webp(stream);
-			break;
-		case IMAGE_FILETYPE_AVIF:
-			result = php_handle_avif(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
