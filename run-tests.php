@@ -1675,6 +1675,7 @@ escape:
                                 'E_USER_NOTICE',
                                 'E_STRICT', // TODO Cleanup when removed from Zend Engine.
                                 'E_RECOVERABLE_ERROR',
+                                'E_DEPRECATED',
                                 'E_USER_DEPRECATED'
                             ];
                             $error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
@@ -2782,7 +2783,7 @@ COMMAND $cmd
         if (strpos($log_format, 'S') !== false) {
             $env_lines = [];
             foreach ($env as $env_var => $env_val) {
-                $env_lines[] = "export $env_var=" . escapeshellarg($env_val);
+                $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
             }
             $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH
