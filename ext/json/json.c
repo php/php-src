@@ -249,7 +249,7 @@ PHP_FUNCTION(json_encode)
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 
-	if (indent_str == 0) {
+	if (indent_str == NULL) {
 		if (indent < 0) {
 			zend_argument_value_error(4, "must be either a string or a number greater than or equal to 0");
 			RETURN_THROWS();
