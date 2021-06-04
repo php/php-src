@@ -150,6 +150,11 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 	stack->valgrind = VALGRIND_STACK_REGISTER(base, base + stack->size);
 #endif
 
+#ifdef __SANITIZE_ADDRESS__
+	stack->prior_pointer = stack->pointer;
+	stack->prior_size = stack->size;
+#endif
+
 	return true;
 }
 
@@ -179,18 +184,15 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 {
 	zend_fiber_context *context = EG(current_fiber);
+	zend_fiber_context *from = transfer.data;
 
-	((zend_fiber_context *) transfer.data)->handle = transfer.context;
+	from->handle = transfer.context;
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(NULL, &context->stack.prior_pointer, &context->stack.prior_size);
+	__sanitizer_finish_switch_fiber(NULL, &from->stack.prior_pointer, &from->stack.prior_size);
 #endif
 
 	zend_fiber_context *to = context->function(context);
-
-#ifdef __SANITIZE_ADDRESS__
-	__sanitizer_start_switch_fiber(NULL, context->stack.prior_pointer, context->stack.prior_size);
-#endif
 
 	zend_fiber_switch_context(to);
 
@@ -227,8 +229,11 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	ZEND_ASSERT(from && "From context must be present");
 
 #ifdef __SANITIZE_ADDRESS__
-	void *fake_stack;
-	__sanitizer_start_switch_fiber(&fake_stack, to->stack.pointer, to->stack.size);
+	void *fake_stack = NULL;
+	__sanitizer_start_switch_fiber(
+		from->status != ZEND_FIBER_STATUS_DEAD ? &fake_stack : NULL,
+		to->stack.prior_pointer,
+		to->stack.prior_size);
 #endif
 
 	EG(current_fiber) = to;
@@ -291,8 +296,7 @@ static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size)
 
 static ZEND_STACK_ALIGNED zend_fiber_context *zend_fiber_execute(zend_fiber_context *context)
 {
-	zend_fiber *fiber = zend_fiber_from_context(EG(current_fiber));
-	ZEND_ASSERT(fiber);
+	zend_fiber *fiber = zend_fiber_from_context(context);
 
 	zend_long error_reporting = INI_INT("error_reporting");
 	if (!error_reporting && !INI_STR("error_reporting")) {
