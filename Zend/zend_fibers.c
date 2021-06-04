@@ -78,28 +78,6 @@ extern transfer_t jump_fcontext(fcontext_t to, void *vp);
 
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
-#define ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, trace_num, bailout) do { \
-	stack = EG(vm_stack); \
-	stack->top = EG(vm_stack_top); \
-	stack->end = EG(vm_stack_end); \
-	stack_page_size = EG(vm_stack_page_size); \
-	execute_data = EG(current_execute_data); \
-	error_reporting = EG(error_reporting); \
-	trace_num = EG(jit_trace_num); \
-	bailout = EG(bailout); \
-} while (0)
-
-#define ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, trace_num, bailout) do { \
-	EG(vm_stack) = stack; \
-	EG(vm_stack_top) = stack->top; \
-	EG(vm_stack_end) = stack->end; \
-	EG(vm_stack_page_size) = stack_page_size; \
-	EG(current_execute_data) = execute_data; \
-	EG(error_reporting) = error_reporting; \
-	EG(jit_trace_num) = trace_num; \
-	EG(bailout) = bailout; \
-} while (0)
-
 static size_t zend_fiber_get_page_size(void)
 {
 	static size_t page_size = 0;
@@ -265,43 +243,29 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *from, zend_fiber_con
 
 static void zend_fiber_suspend_from(zend_fiber *fiber)
 {
-	zend_vm_stack stack;
-	size_t stack_page_size;
-	zend_execute_data *execute_data;
-	int error_reporting;
-	uint32_t jit_trace_num;
-	JMP_BUF *bailout;
+	zend_fiber_vm_state state;
 
 	ZEND_ASSERT(fiber->caller && "Fiber has no caller");
 
-	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
-
+	zend_fiber_capture_vm_state(&state);
 	zend_fiber_switch_context(zend_fiber_get_context(fiber), zend_fiber_get_context(fiber->caller));
-
-	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
+	zend_fiber_restore_vm_state(&state);
 }
 
 static void zend_fiber_switch_to(zend_fiber *fiber)
 {
 	zend_fiber_context *context = zend_fiber_get_context(fiber);
-	zend_vm_stack stack;
-	size_t stack_page_size;
-	zend_execute_data *execute_data;
-	int error_reporting;
-	uint32_t jit_trace_num;
-	JMP_BUF *bailout;
+	zend_fiber_vm_state state;
 
 	zend_observer_fiber_switch_notify(EG(current_fiber), context);
 
-	ZEND_FIBER_BACKUP_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
-
 	fiber->caller = zend_fiber_from_context(EG(current_fiber));
 
+	zend_fiber_capture_vm_state(&state);
 	zend_fiber_switch_context(EG(current_fiber), context);
+	zend_fiber_restore_vm_state(&state);
 
 	fiber->caller = NULL;
-
-	ZEND_FIBER_RESTORE_EG(stack, stack_page_size, execute_data, error_reporting, jit_trace_num, bailout);
 
 	zend_observer_fiber_switch_notify(context, EG(current_fiber));
 
