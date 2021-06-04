@@ -242,9 +242,6 @@ PHP_FUNCTION(json_encode)
 		Z_PARAM_STR_OR_LONG(indent_str, indent)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_json_encode_init(&encoder);
-	encoder.max_depth = (int)depth;
-
 	if (indent_str == NULL) {
 		if (indent < 0) {
 			zend_argument_value_error(4, "must be either a string or a number greater than or equal to 0");
@@ -252,16 +249,21 @@ PHP_FUNCTION(json_encode)
 		}
 
 		if (indent > 0) {
+			// Generate indent_str
 			indent_str = zend_string_alloc(indent, 0);
 			for (zend_long i = 0; i < indent; i++)
 				ZSTR_VAL(indent_str)[i] = ' ';
 		}
 	}
 
+	php_json_encode_init(&encoder);
+	encoder.max_depth = (int)depth;
 	encoder.indent_str = indent_str;
 
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+
 	if (indent > 0 && indent_str) {
+		// If the indent_str was generated locally, we need to release it.
 		zend_string_release(indent_str);
 	}
 
