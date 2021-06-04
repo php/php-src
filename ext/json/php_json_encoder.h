@@ -26,7 +26,7 @@ struct _php_json_encoder {
 	int depth;
 	int max_depth;
 	php_json_error_code error_code;
-	smart_str *indent_str;
+	zend_string *indent_str;
 };
 
 static inline void php_json_encode_init(php_json_encoder *encoder)

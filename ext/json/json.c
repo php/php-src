@@ -97,7 +97,6 @@ static PHP_GINIT_FUNCTION(json)
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
 	json_globals->encode_max_depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
-	json_globals->encoder_indent = PHP_JSON_ENCODER_DEFAULT_INDENT;
 }
 /* }}} */
 
@@ -142,24 +141,26 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth, int indent) /* {{{ */
+PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth, zend_string *indent_str) /* {{{ */
 {
 	php_json_encoder encoder;
 	int return_code;
+	bool default_indent_used = 0;
+
+	if (indent_str == 0) {
+		indent_str = zend_string_init("    ", strlen("    "), 0);
+		default_indent_used = 1;
+	}
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = depth;
-
-	smart_str indent_str = {0};
-	for (int i = 0; i < indent; i++)
-		smart_str_appendc(&indent_str, ' ');
-	encoder.indent_str = &indent_str;
+	encoder.indent_str = indent_str;
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
-	if (indent > 0) {
-		smart_str_free(&indent_str);
+	if (default_indent_used) {
+		zend_string_release(indent_str);
 	}
 
 	return return_code;
@@ -168,7 +169,7 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), JSON_G(encoder_indent));
+	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), 0);
 }
 /* }}} */
 
@@ -232,8 +233,7 @@ PHP_FUNCTION(json_encode)
 	zval *parameter;
 	php_json_encoder encoder;
 	smart_str buf = {0};
-	smart_str indent_str = {0};
-	zend_string *input_indent_str = 0;
+	zend_string *indent_str = 0;
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long indent = PHP_JSON_ENCODER_DEFAULT_INDENT;
@@ -243,23 +243,30 @@ PHP_FUNCTION(json_encode)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)
-		Z_PARAM_STR_OR_LONG(input_indent_str, indent)
+		Z_PARAM_STR_OR_LONG(indent_str, indent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 
-	if (input_indent_str) {
-		indent_str.s = input_indent_str;
-	} else {
-		for (int i = 0; i < indent; i++)
-			smart_str_appendc(&indent_str, ' ');
+	if (indent_str == 0) {
+		if (indent < 0) {
+			zend_argument_value_error(4, "must be either a string or a number greater than or equal to 0");
+			RETURN_THROWS();
+		}
+
+		if (indent > 0) {
+			indent_str = zend_string_alloc(indent, 0);
+			for (int i = 0; i < indent; i++)
+				ZSTR_VAL(indent_str)[i] = ' ';
+		}
 	}
-	encoder.indent_str = &indent_str;
+
+	encoder.indent_str = indent_str;
 
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
-	if (indent > 0 && indent_str.s) {
-		smart_str_free(&indent_str);
+	if (indent > 0 && indent_str) {
+		zend_string_release(indent_str);
 	}
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
