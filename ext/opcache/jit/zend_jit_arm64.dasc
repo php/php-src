@@ -2447,16 +2447,14 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	ldr REG0, EX->func
 		|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 		|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-		|	add REG0, IP, REG0
-		|	ldr REG0, [REG0]
+		|	ldr REG0, [IP, REG0]
 		|	br REG0
 	} else if (GCC_GLOBAL_REGS) {
 		|	ldp x29, x30, [sp], # SPAD // stack alignment
 		|	ldr REG0, EX->func
 		|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 		|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-		|	add REG0, IP, REG0
-		|	ldr REG0, [REG0]
+		|	ldr REG0, [IP, REG0]
 		|	br REG0
 	} else {
 		|	ldr IP, EX->opline
@@ -2464,8 +2462,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	ldr REG0, EX->func
 		|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 		|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-		|	add REG0, IP, REG0
-		|	ldr REG0, [REG0]
+		|	ldr REG0, [IP, REG0]
 		|	blr REG0
 		|
 		|	tst RETVALw, RETVALw
@@ -3115,8 +3112,7 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 			|	ldr REG0, EX->func
 			|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 			|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-			|	add REG0, IP, REG0
-			|	ldr REG0, [REG0]
+			|	ldr REG0, [IP, REG0]
 			|	br REG0
 		}
 	} else if (GCC_GLOBAL_REGS) {
@@ -3127,8 +3123,7 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 			|	ldr REG0, EX->func
 			|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 			|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-			|	add REG0, IP, REG0
-			|	ldr REG0, [REG0]
+			|	ldr REG0, [IP, REG0]
 			|	br REG0
 		}
 	} else {
@@ -3137,8 +3132,7 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 			|	ldr REG0, EX->func
 			|	ldr REG0, [REG0, #offsetof(zend_op_array, reserved[zend_func_info_rid])]
 			|	ldr REG0, [REG0, #offsetof(zend_jit_op_array_trace_extension, offset)]
-			|	add REG0, IP, REG0
-			|	ldr REG0, [REG0]
+			|	ldr REG0, [IP, REG0]
 			|	blr REG0
 		}
 		|	ldp FP, RX, T2                // retore FP and IP
