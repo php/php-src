@@ -26,6 +26,15 @@
 #  include <asm/hwcap.h>
 # elif defined(__APPLE__)
 #  include <sys/sysctl.h>
+# elif defined(__FreeBSD__)
+#  include <sys/auxv.h>
+
+static unsigned long getauxval(unsigned long key) {
+	unsigned long ret = 0;
+	if (elf_aux_info(key, &ret, sizeof(ret)) != 0)
+		return 0;
+	return ret;
+}
 # endif
 
 static inline int has_crc32_insn() {
