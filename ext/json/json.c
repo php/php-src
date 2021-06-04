@@ -257,7 +257,7 @@ PHP_FUNCTION(json_encode)
 
 		if (indent > 0) {
 			indent_str = zend_string_alloc(indent, 0);
-			for (int i = 0; i < indent; i++)
+			for (zend_long i = 0; i < indent; i++)
 				ZSTR_VAL(indent_str)[i] = ' ';
 		}
 	}
