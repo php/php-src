@@ -147,13 +147,10 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 				}
 
 				if (ZEND_PARTIAL_FUNC_FLAG(prototype, ZEND_ACC_VARIADIC)) {
-					if (ZEND_PARTIAL_IS_CALL_TRAMPOLINE(prototype)) {
-						memcpy(info, zend_call_magic_arginfo, sizeof(zend_arg_info));
-					} else {
-						memcpy(info,
+					ZEND_ASSERT(!ZEND_PARTIAL_IS_CALL_TRAMPOLINE(prototype));
+					memcpy(info,
 							prototype->common.arg_info + prototype->common.num_args,
 							sizeof(zend_arg_info));
-					}
 					num++;
 				}
 
@@ -494,7 +491,7 @@ static zend_always_inline void zend_partial_prototype_overflow(zend_function *fu
 			ZSTR_VAL(function->op_array.filename), function->op_array.line_start);
 	} else {
 		zend_throw_error(NULL,
-			"not enough arguments for application of %s, %d given and a maximum of %d expected",
+			"too many arguments for application of %s, %d given and a maximum of %d expected",
 			ZSTR_VAL(symbol), args, expected);
 	}
 }
