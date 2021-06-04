@@ -67,7 +67,7 @@ typedef struct _zend_fiber_stack {
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
 
-/* Fiber function is passed the fiber context and must return another context to switch to after it ran to completion. */
+/* Coroutine functions must return a fiber context to switch to after they are finished. */
 typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context);
 
 /* Defined as a macro to allow anonymous embedding. */
@@ -83,7 +83,7 @@ struct _zend_fiber_context {
 	ZEND_FIBER_CONTEXT_FIELDS;
 };
 
-/* Zend VM that needs to be captured / restored during context switch. */
+/* Zend VM state that needs to be captured / restored during fiber context switch. */
 typedef struct _zend_fiber_vm_state {
 	zend_vm_stack vm_stack;
 	size_t vm_stack_page_size;

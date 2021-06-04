@@ -192,10 +192,10 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	__sanitizer_finish_switch_fiber(NULL, &from->stack.prior_pointer, &from->stack.prior_size);
 #endif
 
-	zend_fiber_context *to = context->function(context);
+	/* Final context switch, the fiber must not be resumed afterwards! */
+	zend_fiber_switch_context(context->function(context));
 
-	zend_fiber_switch_context(to);
-
+	/* Abort here because we are in an inconsistent program state. */
 	abort();
 }
 
@@ -226,7 +226,8 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	zend_fiber_context *from = EG(current_fiber);
 
 	ZEND_ASSERT(to && to->handle && "Invalid fiber context");
-	ZEND_ASSERT(from && "From context must be present");
+	ZEND_ASSERT(from && "From fiber context must be present");
+	ZEND_ASSERT(to != from && "Cannot switch into the running fiber context");
 
 #ifdef __SANITIZE_ADDRESS__
 	void *fake_stack = NULL;
