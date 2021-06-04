@@ -60,13 +60,13 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, php_json_encoder *encoder) /* {{{ */
 {
 	int i;
-	int indent_length = 0;
 
-	if (encoder->indent_str) {
-	    indent_length = ZSTR_LEN(encoder->indent_str);
+	int indent_length = encoder->indent_str ? ZSTR_LEN(encoder->indent_str) : 0;
+	if (!indent_length) {
+		return;
 	}
 
-	if (options & PHP_JSON_PRETTY_PRINT && indent_length > 0) {
+	if (options & PHP_JSON_PRETTY_PRINT) {
 		for (i = 0; i < encoder->depth; ++i) {
 			smart_str_appendl(buf, ZSTR_VAL(encoder->indent_str), indent_length);
 		}
