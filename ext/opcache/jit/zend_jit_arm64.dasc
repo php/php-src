@@ -14760,7 +14760,7 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 
 #ifdef HAVE_DISASM
 	    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
-			const char *name = zend_jit_disasm_find_symbol((ptrdiff_t)cp + offset - 4, &offset);
+			const char *name = zend_jit_disasm_find_symbol((ptrdiff_t)cp + offset - 4, (int64_t *)(&offset));
 
 			if (name && !offset) {
 				if (strstr(name, "@veneer") == NULL) {
