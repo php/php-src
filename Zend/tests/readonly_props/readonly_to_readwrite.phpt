@@ -1,5 +1,5 @@
 --TEST--
-Can replace readonly with readwrite
+Cannot replace readonly with readwrite
 --FILE--
 <?php
 
@@ -11,6 +11,5 @@ class B extends A {
 }
 
 ?>
-===DONE===
---EXPECT--
-===DONE===
+--EXPECTF--
+Fatal error: Cannot redeclare readonly property A::$prop as non-readonly B::$prop in %s on line %d

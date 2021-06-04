@@ -1249,10 +1249,12 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
 			}
-			if (UNEXPECTED((child_info->flags & ZEND_ACC_READONLY) && !(parent_info->flags & ZEND_ACC_READONLY))) {
+			if (UNEXPECTED((child_info->flags & ZEND_ACC_READONLY) != (parent_info->flags & ZEND_ACC_READONLY))) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot redeclare non-readonly property %s::$%s as readonly %s::$%s",
+					"Cannot redeclare %s property %s::$%s as %s %s::$%s",
+					parent_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
 					ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
+					child_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
 					ZSTR_VAL(ce->name), ZSTR_VAL(key));
 			}
 
