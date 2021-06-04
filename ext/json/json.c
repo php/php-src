@@ -145,12 +145,6 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 {
 	php_json_encoder encoder;
 	int return_code;
-	bool default_indent_used = 0;
-
-	if (indent_str == 0) {
-		indent_str = zend_string_init("    ", strlen("    "), 0);
-		default_indent_used = 1;
-	}
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = depth;
@@ -159,17 +153,19 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
-	if (default_indent_used) {
-		zend_string_release(indent_str);
-	}
-
 	return return_code;
 }
 /* }}} */
 
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), 0);
+	zend_string *indent_str = zend_string_init("    ", strlen("    "), 0);
+
+	int result = php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), 0);
+
+	zend_string_release(indent_str);
+
+	return result;
 }
 /* }}} */
 
