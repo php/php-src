@@ -23,6 +23,11 @@
 #include "zend_API.h"
 #include "zend_types.h"
 
+#define ZEND_FIBER_GUARD_PAGES 1
+
+#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
+#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
+
 BEGIN_EXTERN_C()
 
 typedef enum {
@@ -44,6 +49,7 @@ void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
+/* Encapsulates the fiber C stack with extension for debugging tools. */
 typedef struct _zend_fiber_stack {
 	void *pointer;
 	size_t size;
@@ -61,8 +67,10 @@ typedef struct _zend_fiber_stack {
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
 
+/* Fiber function is passed the fiber context and must return another context to switch to after it ran to completion. */
 typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context);
 
+/* Defined as a macro to allow anonymous embedding. */
 #define ZEND_FIBER_CONTEXT_FIELDS \
 	void *handle; \
 	zend_fiber_coroutine function; \
@@ -70,10 +78,12 @@ typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context)
 	zend_fiber_status status; \
 	zend_uchar flags
 
+/* Standalone context (used primarily as pointer type). */
 struct _zend_fiber_context {
 	ZEND_FIBER_CONTEXT_FIELDS;
 };
 
+/* Zend VM that needs to be captured / restored during context switch. */
 typedef struct _zend_fiber_vm_state {
 	zend_vm_stack vm_stack;
 	size_t vm_stack_page_size;
@@ -120,13 +130,7 @@ ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_
 /* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
 ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *from, zend_fiber_context *to);
-
-#define ZEND_FIBER_GUARD_PAGES 1
-
-#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
-
-#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
+ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 
 END_EXTERN_C()
 

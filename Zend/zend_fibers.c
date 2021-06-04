@@ -192,7 +192,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	__sanitizer_start_switch_fiber(NULL, context->stack.prior_pointer, context->stack.prior_size);
 #endif
 
-	zend_fiber_switch_context(context, to);
+	zend_fiber_switch_context(to);
 
 	abort();
 }
@@ -219,8 +219,10 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 	zend_fiber_stack_free(&context->stack);
 }
 
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *from, zend_fiber_context *to)
+ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 {
+	zend_fiber_context *from = EG(current_fiber);
+
 	ZEND_ASSERT(to && to->handle && "Invalid fiber context");
 	ZEND_ASSERT(from && "From context must be present");
 
@@ -248,7 +250,7 @@ static void zend_fiber_suspend_from(zend_fiber *fiber)
 	ZEND_ASSERT(fiber->caller && "Fiber has no caller");
 
 	zend_fiber_capture_vm_state(&state);
-	zend_fiber_switch_context(zend_fiber_get_context(fiber), zend_fiber_get_context(fiber->caller));
+	zend_fiber_switch_context(zend_fiber_get_context(fiber->caller));
 	zend_fiber_restore_vm_state(&state);
 }
 
@@ -262,7 +264,7 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 	fiber->caller = zend_fiber_from_context(EG(current_fiber));
 
 	zend_fiber_capture_vm_state(&state);
-	zend_fiber_switch_context(EG(current_fiber), context);
+	zend_fiber_switch_context(context);
 	zend_fiber_restore_vm_state(&state);
 
 	fiber->caller = NULL;
