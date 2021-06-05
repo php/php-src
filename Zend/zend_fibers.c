@@ -673,6 +673,8 @@ ZEND_METHOD(Fiber, getReturn)
 	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
 		if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
 			message = "The fiber threw an exception";
+		} else if (fiber->flags & ZEND_FIBER_FLAG_BAILOUT) {
+			message = "The fiber exited with a fatal error";
 		} else {
 			RETURN_COPY(&fiber->value);
 		}
