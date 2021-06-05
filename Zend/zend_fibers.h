@@ -76,6 +76,7 @@ typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context)
 	void *handle; \
 	/* Pointer that identifies the fiber type. */ \
 	void *kind; \
+	zend_fiber_context *caller; \
 	zend_fiber_coroutine function; \
 	zend_fiber_stack stack; \
 	zend_fiber_status status; \
@@ -89,6 +90,8 @@ struct _zend_fiber_context {
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
 typedef struct _zend_fiber_vm_state {
 	zend_vm_stack vm_stack;
+	zval* vm_stack_top;
+	zval* vm_stack_end;
 	size_t vm_stack_page_size;
 	zend_execute_data *current_execute_data;
 	int error_reporting;
@@ -99,9 +102,6 @@ typedef struct _zend_fiber_vm_state {
 struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
-
-	/* Fiber that resumed us. */
-	zend_fiber_context *caller;
 
 	/* Fiber context fields (embedded to avoid memory allocation). */
 	ZEND_FIBER_CONTEXT_FIELDS;
@@ -152,8 +152,8 @@ static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
 {
 	state->vm_stack = EG(vm_stack);
-	state->vm_stack->top = EG(vm_stack_top);
-	state->vm_stack->end = EG(vm_stack_end);
+	state->vm_stack_top = EG(vm_stack_top);
+	state->vm_stack_end = EG(vm_stack_end);
 	state->vm_stack_page_size = EG(vm_stack_page_size);
 	state->current_execute_data = EG(current_execute_data);
 	state->error_reporting = EG(error_reporting);
@@ -164,8 +164,8 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
 {
 	EG(vm_stack) = state->vm_stack;
-	EG(vm_stack_top) = state->vm_stack->top;
-	EG(vm_stack_end) = state->vm_stack->end;
+	EG(vm_stack_top) = state->vm_stack_top;
+	EG(vm_stack_end) = state->vm_stack_end;
 	EG(vm_stack_page_size) = state->vm_stack_page_size;
 	EG(current_execute_data) = state->current_execute_data;
 	EG(error_reporting) = state->error_reporting;
