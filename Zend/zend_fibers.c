@@ -664,29 +664,26 @@ ZEND_METHOD(Fiber, isTerminated)
 ZEND_METHOD(Fiber, getReturn)
 {
 	zend_fiber *fiber;
+	const char *message;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	if (fiber->status != ZEND_FIBER_STATUS_DEAD || fiber->flags) {
-		const char *message;
-
-		if (fiber->status == ZEND_FIBER_STATUS_INIT) {
-			message = "The fiber has not been started";
-		} else if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
+	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
+		if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
 			message = "The fiber threw an exception";
-		} else if (fiber->flags & ZEND_FIBER_FLAG_BAILOUT) {
-			message = "The fiber exited with a fatal error";
 		} else {
-			message = "The fiber has not returned";
+			RETURN_COPY(&fiber->value);
 		}
-
-		zend_throw_error(zend_ce_fiber_error, "Cannot get fiber return value: %s", message);
-		RETURN_THROWS();
+	} else if (fiber->status == ZEND_FIBER_STATUS_INIT) {
+		message = "The fiber has not been started";
+	} else {
+		message = "The fiber has not returned";
 	}
 
-	RETURN_COPY(&fiber->value);
+	zend_throw_error(zend_ce_fiber_error, "Cannot get fiber return value: %s", message);
+	RETURN_THROWS();
 }
 
 ZEND_METHOD(Fiber, this)
