@@ -36,8 +36,11 @@ static zend_object_handlers zend_partial_handlers;
 
 static zend_arg_info zend_call_magic_arginfo[1];
 
-#define Z_IS_PLACEHOLDER_ARG_P(p)      (Z_TYPE_P(p) == _IS_PLACEHOLDER_ARG)
-#define Z_IS_PLACEHOLDER_VARIADIC_P(p) (Z_TYPE_P(p) == _IS_PLACEHOLDER_VARIADIC)
+#define Z_IS_PLACEHOLDER_ARG_P(p) \
+	(Z_TYPE_P(p) == _IS_PLACEHOLDER_ARG)
+
+#define Z_IS_PLACEHOLDER_VARIADIC_P(p) \
+	(Z_TYPE_P(p) == _IS_PLACEHOLDER_VARIADIC)
 
 #define Z_IS_PLACEHOLDER_P(p) \
 	(Z_IS_PLACEHOLDER_ARG_P(p) || Z_IS_PLACEHOLDER_VARIADIC_P(p))
@@ -359,7 +362,7 @@ static zend_function *zend_partial_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static int zend_partial_get_trampoline(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only)
+static int zend_partial_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only)
 {
 	zend_partial *partial = (zend_partial*) obj;
 
@@ -367,6 +370,12 @@ static int zend_partial_get_trampoline(zend_object *obj, zend_class_entry **ce_p
 	*obj_ptr  = (zend_object*) &partial->std;
 
 	return SUCCESS;
+}
+
+zend_function *zend_partial_get_trampoline(zend_object *obj) {
+	zend_partial *partial = (zend_partial*) obj;
+
+	return &partial->trampoline;
 }
 
 static void zend_partial_free(zend_object *object) {
@@ -417,7 +426,7 @@ void zend_partial_startup(void) {
 	zend_partial_handlers.free_obj = zend_partial_free;
 	zend_partial_handlers.get_debug_info = zend_partial_debug;
 	zend_partial_handlers.get_gc = zend_partial_get_gc;
-	zend_partial_handlers.get_closure = zend_partial_get_trampoline;
+	zend_partial_handlers.get_closure = zend_partial_get_closure;
 	zend_partial_handlers.get_method = zend_partial_get_method;
 
 	memset(&zend_call_magic_arginfo, 0, sizeof(zend_arg_info) * 1);
@@ -681,9 +690,9 @@ ZEND_NAMED_FUNCTION(zend_partial_call_magic)
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(partial->This) == IS_OBJECT) {
-		object = Z_OBJ(partial->This);
-	} else if (ZEND_PARTIAL_CALL_FLAG(partial, ZEND_APPLY_FACTORY)) {
+	fci.size = sizeof(zend_fcall_info);
+
+	if (UNEXPECTED(ZEND_PARTIAL_CALL_FLAG(partial, ZEND_APPLY_FACTORY))) {
 		zend_class_entry *type = Z_CE(partial->This);
 		zval instance;
 
@@ -703,9 +712,14 @@ ZEND_NAMED_FUNCTION(zend_partial_call_magic)
 		}
 
 		GC_ADD_FLAGS(object, IS_OBJ_DESTRUCTOR_CALLED);
+	} else {
+		if (Z_TYPE(partial->This) == IS_OBJECT) {
+			object = Z_OBJ(partial->This);
+		} else if (Z_TYPE(partial->This) == IS_UNDEF && Z_CE(partial->This)) {
+			fcc.called_scope = Z_CE(partial->This);
+		}
 	}
 
-	fci.size = sizeof(zend_fcall_info);
 	fci.retval = return_value;
 	fcc.function_handler = &partial->func;
 
@@ -828,6 +842,8 @@ void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_funct
 		}
 	}
 
+	ZEND_PARTIAL_FUNC_ADD(&partial->func, ZEND_ACC_FAKE_CLOSURE);
+
 	if (partial->func.type == ZEND_USER_FUNCTION) {
 		zend_string_addref(partial->func.common.function_name);
 
@@ -868,6 +884,32 @@ void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_funct
 
 		ZEND_ADD_CALL_FLAG(partial, backup_info);
 	}
-	
+
 	zend_partial_trampoline_create(partial, &partial->trampoline);
+}
+
+void zend_partial_bind(zval *result, zval *partial, zval *this_ptr, zend_class_entry *scope) {
+	zval This;
+	zend_partial *object = (zend_partial*) Z_OBJ_P(partial);
+
+	ZVAL_UNDEF(&This);
+
+	if (!this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
+	    ZEND_ASSERT(scope && "scope must be set");
+
+		Z_CE(This) = scope;
+	} else {
+		ZVAL_COPY_VALUE(&This, this_ptr);
+	}
+
+	zend_partial_create(result, ZEND_CALL_INFO(object), &This,
+		&object->func, object->argc, object->argv, object->named);
+
+	zval *argv = object->argv,
+		 *end = argv + object->argc;
+
+	while (argv < end) {
+		Z_TRY_ADDREF_P(argv);
+		argv++;
+	}
 }

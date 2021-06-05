@@ -29,7 +29,11 @@ void zend_partial_startup(void);
 
 void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_function *function, uint32_t argc, zval *argv, zend_array *extra_named_params);
 
+void zend_partial_bind(zval *result, zval *partial, zval *this_ptr, zend_class_entry *scope);
+
 void zend_partial_args_check(zend_execute_data *call);
+
+zend_function *zend_partial_get_trampoline(zend_object *object);
 
 ZEND_NAMED_FUNCTION(zend_partial_call_magic);
 

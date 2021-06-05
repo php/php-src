@@ -25,6 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
+#include "zend_partial.h"
 #include "zend_globals.h"
 #include "zend_closures_arginfo.h"
 
@@ -59,8 +60,8 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 
 	if (!(func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
 		/* destruct the function also, then - we have allocated it in get_method */
-	    zend_string_release_ex(func->internal_function.function_name, 0);
-	    efree(func);
+		zend_string_release_ex(func->internal_function.function_name, 0);
+		efree(func);
 	}
 #if ZEND_DEBUG
 	execute_data->func = NULL;
@@ -73,12 +74,7 @@ static bool zend_valid_closure_binding(
 {
 	zend_function *func = &closure->func;
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
-	
-	if (func->common.fn_flags & ZEND_ACC_PARTIAL) {
-	    zend_error(E_WARNING, "Cannot bind an instance to a partial Closure");
-	    return 0;
-	}
-	
+
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
@@ -152,7 +148,13 @@ ZEND_METHOD(Closure, call)
 		return;
 	}
 
-	if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
+	if (closure->func.common.fn_flags & ZEND_ACC_PARTIAL) {
+		zval new_closure;
+		zend_partial_bind(&new_closure, ZEND_THIS, newthis, newclass);
+		closure = (zend_closure *) Z_OBJ(new_closure);
+		fci_cache.function_handler = zend_partial_get_trampoline(Z_OBJ(new_closure));
+		newobj = Z_OBJ(new_closure);
+	} else if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;
 		zend_create_closure(&new_closure, &closure->func, newclass, closure->called_scope, newthis);
 		closure = (zend_closure *) Z_OBJ(new_closure);
@@ -193,7 +195,9 @@ ZEND_METHOD(Closure, call)
 		ZVAL_COPY_VALUE(return_value, &closure_result);
 	}
 
-	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
+	if (!fci_cache.function_handler) {
+		OBJ_RELEASE(newobj);
+	} else if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
 		GC_DELREF(&closure->std);
 	} else if (ZEND_USER_CODE(my_function.type)
@@ -231,7 +235,11 @@ static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, z
 		called_scope = ce;
 	}
 
-	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
+	if (closure->func.common.fn_flags & ZEND_ACC_PARTIAL) {
+		zend_partial_bind(return_value, zclosure, newthis, called_scope);
+	} else {
+		zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
+	}
 }
 
 /* {{{ Create a closure from another one and bind to another object and scope */
