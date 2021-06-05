@@ -27,25 +27,25 @@ $fiber->resume();
 ?>
 --EXPECTF--
 <!-- init '%sobserver_fiber_04.php' -->
-<!-- switching from fiber 0 to %s -->
+<!-- switching from fiber %s to %s -->
 <init '%s'>
 <!-- init {closure}() -->
-<!-- switching from fiber %s to 0 -->
+<!-- switching from fiber %s to %s -->
 <suspend '%s'>
-<!-- switching from fiber 0 to %s -->
+<!-- switching from fiber %s to %s -->
 <resume '%s'>
 <!-- switching from fiber %s to %s -->
 <init '%s'>
 <!-- init {closure}() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>
-<!-- switching from fiber %s to 0 -->
+<!-- switching from fiber %s to %s -->
 <suspend '%s'>
-<!-- switching from fiber 0 to %s -->
+<!-- switching from fiber %s to %s -->
 <resume '%s'>
 <!-- switching from fiber %s to %s -->
 <destroying '%s'>
 <!-- switching from fiber %s to %s -->
 <destroyed '%s'>
-<!-- switching from fiber %s to 0 -->
+<!-- switching from fiber %s to %s -->
 <returned '%s'>

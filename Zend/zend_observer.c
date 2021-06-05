@@ -264,7 +264,7 @@ ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_han
 	zend_llist_add_element(&zend_observer_fiber_switch, &handler);
 }
 
-void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to)
+ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context *from, zend_fiber_context *to)
 {
 	zend_llist_element *element;
 	zend_observer_fiber_switch_handler callback;

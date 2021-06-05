@@ -78,10 +78,10 @@ typedef void (*zend_observer_error_cb)(int type, zend_string *error_filename, ui
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
 void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
-typedef void (*zend_observer_fiber_switch_handler)(zend_fiber *from, zend_fiber *to);
+typedef void (*zend_observer_fiber_switch_handler)(zend_fiber_context *from, zend_fiber_context *to);
 
 ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler);
-void zend_observer_fiber_switch_notify(zend_fiber *from, zend_fiber *to);
+ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context *from, zend_fiber_context *to);
 
 END_EXTERN_C()
 

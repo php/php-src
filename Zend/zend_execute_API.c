@@ -380,6 +380,7 @@ void shutdown_executor(void) /* {{{ */
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 
 	zend_weakrefs_shutdown();
+	zend_fiber_shutdown();
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
