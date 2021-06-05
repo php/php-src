@@ -71,6 +71,7 @@ try {
 } catch (ValueError $e) {
     printf("%s\n", $e->getMessage());
 }
+unset($select);
 
 $stmt = $db->prepare("SELECT 42");
 if (false !== $stmt->getColumnMeta(0)) {
