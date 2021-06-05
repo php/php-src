@@ -145,7 +145,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(void);
-static int _php_image_type(char data[12]);
+static int _php_image_type (zend_string *data);
 
 /* output streaming (formerly gd_ctx.c) */
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
@@ -1469,14 +1469,15 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
 }
 /* }}} */
 
-/* {{{ _php_image_type */
+/* {{{ _php_image_type
+ * Based on ext/standard/image.c
+ */
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
-static int _php_image_type (char data[12])
+static int _php_image_type (zend_string *data)
 {
-	/* Based on ext/standard/image.c */
-
-	if (data == NULL) {
+	if (ZSTR_LEN(data) < 12) {
+		/* Handle this the same way as an unknown image type. */
 		return -1;
 	}
 
@@ -1493,18 +1494,24 @@ static int _php_image_type (char data[12])
 	} else if(!memcmp(data, php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
 		return PHP_GDIMG_TYPE_WEBP;
 	}
-	else {
-		gdIOCtx *io_ctx;
-		io_ctx = gdNewDynamicCtxEx(8, data, 0);
-		if (io_ctx) {
-			if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
-				io_ctx->gd_free(io_ctx);
-				return PHP_GDIMG_TYPE_WBM;
-			} else {
-				io_ctx->gd_free(io_ctx);
-			}
+
+	php_gd_image_reader reader = { .data = data, .data_pos = 0 };
+
+  if (php_is_image_avif(&reader)) {
+  	return PHP_GDIMG_TYPE_AVIF;
+	}
+
+	gdIOCtx *io_ctx;
+	io_ctx = gdNewDynamicCtxEx(8, data, 0);
+	if (io_ctx) {
+		if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
+			io_ctx->gd_free(io_ctx);
+			return PHP_GDIMG_TYPE_WBM;
+		} else {
+			io_ctx->gd_free(io_ctx);
 		}
 	}
+
 	return -1;
 }
 /* }}} */
@@ -1540,21 +1547,12 @@ PHP_FUNCTION(imagecreatefromstring)
 	zend_string *data;
 	gdImagePtr im;
 	int imtype;
-	char sig[12];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZSTR_LEN(data) < sizeof(sig)) {
-		/* Handle this the same way as an unknown image type. */
-		php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
-		RETURN_FALSE;
-	}
-
-	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
-
-	imtype = _php_image_type(sig);
+	imtype = _php_image_type(data);
 
 	switch (imtype) {
 		case PHP_GDIMG_TYPE_JPG:

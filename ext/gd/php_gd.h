@@ -18,6 +18,9 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
+#include "zend_string.h"
+#include "php_streams.h"
+
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */
@@ -85,6 +88,15 @@ PHP_MSHUTDOWN_FUNCTION(gd);
 PHP_RSHUTDOWN_FUNCTION(gd);
 
 PHP_GD_API struct gdImageStruct *php_gd_libgdimageptr_from_zval_p(zval* zp);
+
+/* Struct and function to be used for testing whether an image is AVIF */
+typedef struct {
+  php_stream * stream;
+  zend_string * data;
+  size_t data_pos;
+} php_gd_image_reader;
+
+int php_is_image_avif(php_gd_image_reader * reader);
 
 #else
 

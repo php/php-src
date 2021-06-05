@@ -26,6 +26,7 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
+#include "../gd/php_gd.h"
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
@@ -1149,9 +1150,9 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_avif */
-/* There's no simple way to get this information - so, for now, this is unsupported.
-   Simply return 0 for everything.
+/* {{{ php_handle_avif
+ * There's no simple way to get this information - so, for now, this is unsupported.
+ * Simply return 0 for everything.
  */
 static struct gfxinfo *php_handle_avif(php_stream * stream) {
 		struct gfxinfo * result;
@@ -1178,38 +1179,56 @@ static uint32_t php_ntohl(val) {
 }
 /* }}} */
 
-/* {{{ php_is_image_avif
-   detect whether an image is of type AVIF
-	 
-	 An AVIF image will start off a header "box".
-	 This starts with with a four-byte integer containing the number of bytes in the filetype box.
-	 This must be followed by the string "ftyp".
-	 Next comes a four-byte string indicating the "major brand".
-	 If that's "avif" or "avis", this is an AVIF image.
-	 Next, there's a four-byte "minor version" field, which we can ignore.
-	 Next comes an array of four-byte strings containing "compatible brands".
-	 These extend to the end of the box.
-	 If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
-	 Otherwise, well, it's not.
+/* {{{ php_image_read_bytes 
+ * A generalized function that reads bytes from an image_reader struct.
+ * It can read either from a php_stream or a zend_string.
+ */
+static size_t php_image_read_bytes(php_gd_image_reader * reader, char * buf, size_t count) {
+  if (reader->stream) {
+    return php_stream_read(reader->stream, buf, count);
+  }
+  
+  if (reader->data) {
+    if (ZSTR_LEN(reader->data) < reader->data_pos + count) {
+      return 0;
+    }
 
-	 For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
-*/
-static int php_is_image_avif(php_stream * stream) {
+    memcpy(buf, ZSTR_VAL(reader->data) + reader->data_pos, count);
+    reader->data_pos += count;
+    return count;
+  }
+
+  return 0;
+}
+/* }}} */
+
+/* {{{ php_is_image_avif
+ * detect whether an image is of type AVIF
+ * 
+ * An AVIF image will start off a header "box".
+ * This starts with with a four-byte integer containing the number of bytes in the filetype box.
+ * This must be followed by the string "ftyp".
+ * Next comes a four-byte string indicating the "major brand".
+ * If that's "avif" or "avis", this is an AVIF image.
+ * Next, there's a four-byte "minor version" field, which we can ignore.
+ * Next comes an array of four-byte strings containing "compatible brands".
+ * These extend to the end of the box.
+ * If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
+ * Otherwise, well, it's not.
+ * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
+ */
+int php_is_image_avif(php_gd_image_reader * reader) {
 	uint32_t header_size_reversed, header_size, i;
 	char box_type[4], brand[4];
 
-	if (php_stream_rewind(stream)) {
-		return 0;
-	}
-
-	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
+	if (php_image_read_bytes(reader, (char *) &header_size_reversed, 4) != 4) {
 		return 0;
 	}
 
 	header_size = php_ntohl(header_size_reversed);
 
-	// If the box type isn't "ftyp", it can't be an AVIF image.
-	if (php_stream_read(stream, box_type, 4) != 4) {
+	/* If the box type isn't "ftyp", it can't be an AVIF image. */
+	if (php_image_read_bytes(reader, box_type, 4) != 4) {
 		return 0;
 	}
 
@@ -1217,8 +1236,8 @@ static int php_is_image_avif(php_stream * stream) {
 		return 0;
 	}
 	
-	// If the major brand is "avif" or "avis", it's an AVIF image.
-	if (php_stream_read(stream, brand, 4) != 4) {
+	/* If the major brand is "avif" or "avis", it's an AVIF image. */
+	if (php_image_read_bytes(reader, brand, 4) != 4) {
 		return 0;
 	}
 
@@ -1226,16 +1245,16 @@ static int php_is_image_avif(php_stream * stream) {
 		return 1;
 	}
 
-	// Skip the next four bytes, which are the "minor version".
-	if (php_stream_read(stream, brand, 4) != 4) {
+	/* Skip the next four bytes, which are the "minor version". */
+	if (php_image_read_bytes(reader, brand, 4) != 4) {
 		return 0;
 	}
 
-	// Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
-	// Note we've already read four groups of four bytes.
+	/* Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
+	   Note we've already read four groups of four bytes. */
 
 	for (i = 16; i < header_size; i += 4) {
-		if (php_stream_read(stream, brand, 4) != 4) {
+		if (php_image_read_bytes(reader, brand, 4) != 4) {
 			return 0;
 		}
 
@@ -1381,7 +1400,7 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, const char * input, char * filetype)
 {
 	char tmp[12];
     int twelve_bytes_read;
@@ -1458,7 +1477,10 @@ PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filety
 		return IMAGE_FILETYPE_WBMP;
 	}
 
-	if (php_is_image_avif(stream)) {
+	php_gd_image_reader reader;
+	reader.stream = stream;
+
+	if (!php_stream_rewind(stream) && php_is_image_avif(&reader)) {
 		return IMAGE_FILETYPE_AVIF;
 	}
 
