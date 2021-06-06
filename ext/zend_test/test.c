@@ -436,7 +436,7 @@ static void fiber_enter_observer(zend_fiber_context *from, zend_fiber_context *t
 	if (ZT_G(observer_fiber_switch)) {
 		if (to->status == ZEND_FIBER_STATUS_INIT) {
 			php_printf("<init '%p'>\n", to);
-		} else if (from->status == ZEND_FIBER_STATUS_RUNNING && to->status == ZEND_FIBER_STATUS_SUSPENDED) {
+		} else if (to->caller == NULL) {
 			if (to->flags & ZEND_FIBER_FLAG_DESTROYED) {
 				php_printf("<destroying '%p'>\n", to);
 			} else if (to->status != ZEND_FIBER_STATUS_DEAD) {
@@ -449,7 +449,7 @@ static void fiber_enter_observer(zend_fiber_context *from, zend_fiber_context *t
 static void fiber_suspend_observer(zend_fiber_context *from, zend_fiber_context *to)
 {
 	if (ZT_G(observer_fiber_switch)) {
-		if (from->status == ZEND_FIBER_STATUS_RUNNING && to->status == ZEND_FIBER_STATUS_RUNNING) {
+		if (from->caller == to && from->status == ZEND_FIBER_STATUS_RUNNING) {
 			php_printf("<suspend '%p'>\n", from);
 		} else if (from->status == ZEND_FIBER_STATUS_DEAD) {
 			if (from->flags & ZEND_FIBER_FLAG_THREW) {

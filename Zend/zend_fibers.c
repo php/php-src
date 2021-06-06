@@ -192,12 +192,12 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	__sanitizer_finish_switch_fiber(NULL, &from->stack.prior_pointer, &from->stack.prior_size);
 #endif
 
-	from = context->function(context);
+	zend_fiber_context *to = context->function(context);
 
 	context->status = ZEND_FIBER_STATUS_DEAD;
 
 	/* Final context switch, the fiber must not be resumed afterwards! */
-	zend_fiber_switch_context(from);
+	zend_fiber_switch_context(to);
 
 	/* Abort here because we are in an inconsistent program state. */
 	abort();
@@ -244,6 +244,14 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 		to->caller = from;
 	}
 
+	if (from->status == ZEND_FIBER_STATUS_RUNNING) {
+		from->status = ZEND_FIBER_STATUS_SUSPENDED;
+	}
+
+	if (from->caller == to) {
+		from->caller = NULL;
+	}
+
 	EG(current_fiber) = to;
 
 #ifdef __SANITIZE_ADDRESS__
@@ -260,22 +268,19 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
 #endif
 
-	((zend_fiber_context *) transfer.data)->handle = transfer.context;
-
 	EG(current_fiber) = from;
-
-	if (to->caller == from && to->status == ZEND_FIBER_STATUS_RUNNING) {
-		to->status = ZEND_FIBER_STATUS_SUSPENDED;
-	}
 
 	zend_fiber_restore_vm_state(&state);
 
-	if (UNEXPECTED(to->flags & ZEND_FIBER_FLAG_BAILOUT)) {
+	zend_fiber_context *previous = transfer.data;
+	previous->handle = transfer.context;
+
+	if (UNEXPECTED(previous->flags & ZEND_FIBER_FLAG_BAILOUT)) {
 		// zend_bailout() was called in the fiber, so call it again in the previous fiber or {main}.
 		zend_bailout();
 	}
 
-	if (to->status == ZEND_FIBER_STATUS_DEAD) {
+	if (previous->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(to);
 	}
 }
@@ -530,7 +535,7 @@ ZEND_METHOD(Fiber, suspend)
 
 ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value)
 {
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
+	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -570,7 +575,7 @@ ZEND_METHOD(Fiber, resume)
 
 ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value)
 {
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED)) {
+	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -623,7 +628,7 @@ ZEND_METHOD(Fiber, isSuspended)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
+	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
 }
 
 ZEND_METHOD(Fiber, isRunning)
@@ -634,7 +639,7 @@ ZEND_METHOD(Fiber, isRunning)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_RUNNING);
+	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_RUNNING || fiber->caller != NULL);
 }
 
 ZEND_METHOD(Fiber, isTerminated)
