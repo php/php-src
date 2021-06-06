@@ -90,8 +90,8 @@ struct _zend_fiber_context {
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
 typedef struct _zend_fiber_vm_state {
 	zend_vm_stack vm_stack;
-	zval* vm_stack_top;
-	zval* vm_stack_end;
+	zval *vm_stack_top;
+	zval *vm_stack_end;
 	size_t vm_stack_page_size;
 	zend_execute_data *current_execute_data;
 	int error_reporting;
