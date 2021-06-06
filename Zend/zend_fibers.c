@@ -226,7 +226,7 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 	zend_fiber_stack_free(&context->stack);
 }
 
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
+ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to)
 {
 	zend_fiber_context *from = EG(current_fiber);
 	zend_fiber_vm_state state;
@@ -283,6 +283,8 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_context *to)
 	if (previous->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(to);
 	}
+
+	return previous;
 }
 
 

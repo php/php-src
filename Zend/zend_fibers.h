@@ -133,7 +133,7 @@ ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_
 /* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
+ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to);
 
 END_EXTERN_C()
 
