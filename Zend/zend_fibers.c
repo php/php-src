@@ -270,18 +270,19 @@ ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to)
 
 	EG(current_fiber) = from;
 
-	zend_fiber_restore_vm_state(&state);
-
 	zend_fiber_context *previous = transfer.data;
 	previous->handle = transfer.context;
 
-	if (UNEXPECTED(previous->flags & ZEND_FIBER_FLAG_BAILOUT)) {
-		// zend_bailout() was called in the fiber, so call it again in the previous fiber or {main}.
-		zend_bailout();
-	}
+	zend_fiber_restore_vm_state(&state);
 
+	/* Destroy context first to ensure it does not leak if some extension does custom bailout handling. */
 	if (previous->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(previous);
+	}
+
+	/* Propagate bailout to current fiber / main. */
+	if (UNEXPECTED(previous->flags & ZEND_FIBER_FLAG_BAILOUT)) {
+		zend_bailout();
 	}
 
 	return previous;
@@ -493,7 +494,7 @@ ZEND_METHOD(Fiber, suspend)
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	zend_fiber_switch_context(zend_fiber_get_context(fiber)->caller);
+	zend_fiber_switch_context(fiber->caller);
 
 	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the fiber is GC'ed while suspended.
