@@ -76,7 +76,6 @@ typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context)
 	void *handle; \
 	/* Pointer that identifies the fiber type. */ \
 	void *kind; \
-	zend_fiber_context *caller; \
 	zend_fiber_coroutine function; \
 	zend_fiber_stack stack; \
 	zend_fiber_status status; \
@@ -105,6 +104,9 @@ struct _zend_fiber {
 
 	/* Fiber context fields (embedded to avoid memory allocation). */
 	ZEND_FIBER_CONTEXT_FIELDS;
+
+	/* Fiber that resumed us. */
+	zend_fiber_context *caller;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;

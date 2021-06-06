@@ -240,16 +240,9 @@ ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to)
 	zend_fiber_capture_vm_state(&state);
 
 	to->status = ZEND_FIBER_STATUS_RUNNING;
-	if (to->caller == NULL) {
-		to->caller = from;
-	}
 
 	if (from->status == ZEND_FIBER_STATUS_RUNNING) {
 		from->status = ZEND_FIBER_STATUS_SUSPENDED;
-	}
-
-	if (from->caller == to) {
-		from->caller = NULL;
 	}
 
 	EG(current_fiber) = to;
@@ -353,7 +346,10 @@ static ZEND_STACK_ALIGNED zend_fiber_context *zend_fiber_execute(zend_fiber_cont
 	fiber->execute_data = NULL;
 	fiber->stack_bottom = NULL;
 
-	return fiber->caller;
+	zend_fiber_context *caller = fiber->caller;
+	fiber->caller = NULL;
+
+	return caller;
 }
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
@@ -380,6 +376,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
+	fiber->caller = EG(current_fiber);
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
 	zend_fiber_switch_context(zend_fiber_get_context(fiber));
@@ -452,6 +449,8 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
+	fiber->caller = EG(current_fiber);
+
 	zend_fiber_switch_context(context);
 
 	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
@@ -477,6 +476,7 @@ ZEND_METHOD(Fiber, suspend)
 	}
 
 	zend_fiber *fiber = zend_fiber_from_context(EG(current_fiber));
+	zend_fiber_context *caller = fiber->caller;
 
 	if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
@@ -484,6 +484,7 @@ ZEND_METHOD(Fiber, suspend)
 	}
 
 	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING);
+	ZEND_ASSERT(caller != NULL);
 
 	if (value) {
 		ZVAL_COPY(&fiber->value, value);
@@ -491,10 +492,11 @@ ZEND_METHOD(Fiber, suspend)
 		ZVAL_NULL(&fiber->value);
 	}
 
+	fiber->caller = NULL;
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	zend_fiber_switch_context(fiber->caller);
+	zend_fiber_switch_context(caller);
 
 	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the fiber is GC'ed while suspended.
@@ -537,6 +539,7 @@ ZEND_METHOD(Fiber, resume)
 		ZVAL_NULL(&fiber->value);
 	}
 
+	fiber->caller = EG(current_fiber);
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	zend_fiber_switch_context(zend_fiber_get_context(fiber));
@@ -568,6 +571,7 @@ ZEND_METHOD(Fiber, throw)
 	Z_ADDREF_P(exception);
 	fiber->exception = exception;
 
+	fiber->caller = EG(current_fiber);
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	zend_fiber_switch_context(zend_fiber_get_context(fiber));
@@ -693,7 +697,6 @@ void zend_fiber_init(void)
 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
 
 	context->status = ZEND_FIBER_STATUS_RUNNING;
-	context->caller = (zend_fiber_context *) -1;
 
 	EG(main_fiber) = context;
 	EG(current_fiber) = context;
