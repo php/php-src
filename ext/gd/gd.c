@@ -31,6 +31,7 @@
 #include <math.h>
 #include "SAPI.h"
 #include "php_gd.h"
+#include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "zend_object_handlers.h"

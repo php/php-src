@@ -55,4 +55,13 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 
 PHPAPI char * php_image_type_to_mime_type(int image_type);
 
+/* Struct and function to be used for testing whether an image is AVIF */
+typedef struct {
+  php_stream * stream;
+  zend_string * data;
+  size_t data_pos;
+} php_gd_image_reader;
+
+PHPAPI int php_is_image_avif(php_gd_image_reader * reader);
+
 #endif /* PHP_IMAGE_H */

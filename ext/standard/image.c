@@ -26,7 +26,6 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
-#include "../gd/php_gd.h"
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
