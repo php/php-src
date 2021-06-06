@@ -281,7 +281,7 @@ ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to)
 	}
 
 	if (previous->status == ZEND_FIBER_STATUS_DEAD) {
-		zend_fiber_destroy_context(to);
+		zend_fiber_destroy_context(previous);
 	}
 
 	return previous;
