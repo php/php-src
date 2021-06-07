@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #81070 (Integer underflow in memory limit comparison).
     (Peter van Dommelen)
 
+- Bzip2:
+  . Fixed bug #81092 (fflush before stream_filter_remove corrupts stream).
+    (cmb)
+
 - OpenSSL:
   . Fixed bug #76694 (native Windows cert verification uses CN as sever name).
     (cmb)
