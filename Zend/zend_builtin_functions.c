@@ -1655,6 +1655,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 		RETURN_THROWS();
 	}
 
+	if (skip_last < 0) {
+		zend_argument_value_error(3, "must be greater than or equal to zero");
+		RETURN_THROWS();
+	}
+
 	zend_fetch_debug_backtrace(&backtrace, skip_last, options, limit);
 	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
 
@@ -1685,13 +1690,21 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		return;
 	}
 
-	while (skip_last--) {
-		if (!call->prev_execute_data) {
-			break;
-		}
-
+    if (skip_last == 1) {
 		call = call->prev_execute_data;
-	}
+    } else if (skip_last > 1) {
+		while (skip_last--) {
+			if (!call->prev_execute_data) {
+				break;
+			}
+
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_GENERATOR) {
+				call = zend_generator_check_placeholder_frame(call->prev_execute_data);
+			} else {
+				call = call->prev_execute_data;
+			}
+	    }
+    }
 
 	while (call && (limit == 0 || frameno < limit)) {
 		zend_execute_data *prev = call->prev_execute_data;
@@ -1877,6 +1890,11 @@ ZEND_FUNCTION(debug_backtrace)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lll", &options, &limit, &skip_last) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (skip_last < 0) {
+	    zend_argument_value_error(3, "must be greater than or equal to zero");
+	    RETURN_THROWS();
 	}
 
 	zend_fetch_debug_backtrace(return_value, skip_last, options, limit);
