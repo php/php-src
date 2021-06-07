@@ -23,6 +23,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
        spl_ce_Stringable, spl_ce_Traversable alias class entries have been removed in favor of zend_ce_aggregate,
        zend_ce_arrayaccess, zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_stringable,
        zend_ce_traversable.
+     - The ZVAL_NEW_ARR() macro has been removed. Use array_init() or ZVAL_ARR
+       with zend_new_array() instead.
   b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
       - zend_file_handle.filename now is zend_string*
       - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
