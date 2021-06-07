@@ -21,8 +21,6 @@ echo $dtpg4->getBestPattern("YYYYMMMdd"), "\n";
 
 echo $dtpg->getBestPattern(""), "\n";
 
-echo datepatterngenerator_get_best_pattern(datepatterngenerator_create(), "YYYYMMMdd"), "\n";
-
 try {
     $dtpg->getBestPattern();
 } catch(\ArgumentCountError $e) {
@@ -36,5 +34,4 @@ HH:mm
 MMM dd, YYYY
 dd. MMM YYYY
 
-MMM dd, YYYY
 IntlDatePatternGenerator::getBestPattern() expects exactly 1 argument, 0 given

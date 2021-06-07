@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 04893f966115e4ec08650e04e18cb4ff9f80a842 */
+ * Stub hash: 74026c524046787844da9f8132029735243176c6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDatePatternGenerator___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -15,14 +15,14 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(IntlDatePatternGenerator, __construct);
-ZEND_FUNCTION(datepatterngenerator_create);
-ZEND_FUNCTION(datepatterngenerator_get_best_pattern);
+ZEND_METHOD(IntlDatePatternGenerator, create);
+ZEND_METHOD(IntlDatePatternGenerator, getBestPattern);
 
 
 static const zend_function_entry class_IntlDatePatternGenerator_methods[] = {
 	ZEND_ME(IntlDatePatternGenerator, __construct, arginfo_class_IntlDatePatternGenerator___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(create, datepatterngenerator_create, arginfo_class_IntlDatePatternGenerator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getBestPattern, datepatterngenerator_get_best_pattern, arginfo_class_IntlDatePatternGenerator_getBestPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlDatePatternGenerator, create, arginfo_class_IntlDatePatternGenerator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlDatePatternGenerator, getBestPattern, arginfo_class_IntlDatePatternGenerator_getBestPattern, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

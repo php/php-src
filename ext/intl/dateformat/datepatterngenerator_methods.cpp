@@ -74,7 +74,7 @@ error:
 	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
 }
 
-U_CFUNC PHP_FUNCTION( datepatterngenerator_create )
+U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
 {
     object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
     if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -102,7 +102,7 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 }
 
 
-U_CFUNC PHP_FUNCTION(datepatterngenerator_get_best_pattern)
+U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 {
 	char			*skeleton_str	= NULL;
 	size_t			skeleton_len;
