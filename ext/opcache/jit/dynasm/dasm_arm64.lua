@@ -640,10 +640,10 @@ end
 local function alias_bfiz(p)
   parse_reg(p[1], 0)
   if parse_reg_type == "w" then
-    p[3] = "#-("..p[3]:sub(2)..")%32"
+    p[3] = "#(32-("..p[3]:sub(2).."))%32"
     p[4] = "#("..p[4]:sub(2)..")-1"
   else
-    p[3] = "#-("..p[3]:sub(2)..")%64"
+    p[3] = "#(64-("..p[3]:sub(2).."))%64"
     p[4] = "#("..p[4]:sub(2)..")-1"
   end
 end
@@ -652,10 +652,10 @@ local alias_lslimm = op_alias("ubfm_4", function(p)
   parse_reg(p[1], 0)
   local sh = p[3]:sub(2)
   if parse_reg_type == "w" then
-    p[3] = "#-("..sh..")%32"
+    p[3] = "#(32-("..sh.."))%32"
     p[4] = "#31-("..sh..")"
   else
-    p[3] = "#-("..sh..")%64"
+    p[3] = "#(64-("..sh.."))%64"
     p[4] = "#63-("..sh..")"
   end
 end)
@@ -1001,8 +1001,8 @@ function op_template(params, template, nparams)
   if not params then return template:gsub("%x%x%x%x%x%x%x%x", "") end
 
   -- Limit number of section buffer positions used by a single dasm_put().
-  -- A single opcode needs a maximum of 3 positions.
-  if secpos+3 > maxsecpos then wflush() end
+  -- A single opcode needs a maximum of 4 positions.
+  if secpos+4 > maxsecpos then wflush() end
   local pos = wpos()
   local lpos, apos, spos = #actlist, #actargs, secpos
 
@@ -1014,9 +1014,11 @@ function op_template(params, template, nparams)
     actlist[lpos+1] = nil
     actlist[lpos+2] = nil
     actlist[lpos+3] = nil
+    actlist[lpos+4] = nil
     actargs[apos+1] = nil
     actargs[apos+2] = nil
     actargs[apos+3] = nil
+    actargs[apos+4] = nil
   end
   error(err, 0)
 end
