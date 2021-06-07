@@ -30,7 +30,6 @@ using icu::DateTimePatternGenerator;
 using icu::Locale;
 using icu::StringPiece;
 
-/* {{{ Internal constructor for IntlDatePatternGenerator */
 static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
@@ -74,9 +73,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 error:
 	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
 }
-/* }}} */
 
-/* {{{ Create IntlDatePatternGenerator. */
 U_CFUNC PHP_FUNCTION( datepatterngenerator_create )
 {
     object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
@@ -85,9 +82,7 @@ U_CFUNC PHP_FUNCTION( datepatterngenerator_create )
 		RETURN_NULL();
 	}
 }
-/* }}} */
 
-/* {{{ IntlDatePatternGenerator object constructor. */
 U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 {
 	zend_error_handling error_handling;
@@ -105,10 +100,8 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 	}
 	zend_restore_error_handling(&error_handling);
 }
-/* }}} */
 
 
-/* {{{ Get date format pattern from skeleton. */
 U_CFUNC PHP_FUNCTION(datepatterngenerator_get_best_pattern)
 {
 	char			*skeleton_str	= NULL;
@@ -150,4 +143,3 @@ U_CFUNC PHP_FUNCTION(datepatterngenerator_get_best_pattern)
 		RETVAL_STR(u8str);
 	}
 }
-/* }}} */

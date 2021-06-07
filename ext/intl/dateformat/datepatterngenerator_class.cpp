@@ -31,12 +31,9 @@ extern "C" {
 using icu::DateTimePatternGenerator;
 using icu::Locale;
 
-/* {{{ Global variables */
 zend_class_entry *IntlDatePatternGenerator_ce_ptr;
 zend_object_handlers IntlDatePatternGenerator_handlers;
-/* }}} */
 
-/* {{{ clone handler for IntlDatePatternGenerator */
 static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 {
 	IntlDatePatternGenerator_object		*dtpgo_orig,
@@ -74,9 +71,8 @@ static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 
 	return ret_val;
 }
-/* }}} */
 
-/* {{{ void IntlDatePatternGenerator_object_init(IntlDatePatternGenerator_object* to)
+/*
  * Initialize internals of IntlDatePatternGenerator_object not specific to zend standard objects.
  */
 static void IntlDatePatternGenerator_object_init(IntlDatePatternGenerator_object *co)
@@ -84,9 +80,7 @@ static void IntlDatePatternGenerator_object_init(IntlDatePatternGenerator_object
 	intl_error_init(DTPATTERNGEN_ERROR_P(co));
 	co->dtpg = NULL;
 }
-/* }}} */
 
-/* {{{ IntlDatePatternGenerator_object_free */
 static void IntlDatePatternGenerator_object_free(zend_object *object)
 {
 	IntlDatePatternGenerator_object* co = php_intl_datepatterngenerator_fetch_object(object);
@@ -99,9 +93,7 @@ static void IntlDatePatternGenerator_object_free(zend_object *object)
 
 	zend_object_std_dtor(&co->zo);
 }
-/* }}} */
 
-/* {{{ IntlDatePatternGenerator_object_create */
 static zend_object *IntlDatePatternGenerator_object_create(zend_class_entry *ce)
 {
 	IntlDatePatternGenerator_object*	intern;
@@ -117,13 +109,12 @@ static zend_object *IntlDatePatternGenerator_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * 'IntlDatePatternGenerator' class registration structures & functions
  */
 
-/* {{{ dateformat_register_class
+/*
  * Initialize 'IntlDatePatternGenerator' class
  */
 void dateformat_register_IntlDatePatternGenerator_class( void )
@@ -138,4 +129,3 @@ void dateformat_register_IntlDatePatternGenerator_class( void )
 	IntlDatePatternGenerator_handlers.clone_obj = IntlDatePatternGenerator_object_clone;
 	IntlDatePatternGenerator_handlers.free_obj = IntlDatePatternGenerator_object_free;
 }
-/* }}} */
