@@ -4571,9 +4571,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	add Rx(result_reg), Rx(Z_REG(op1_addr)), Rx(Z_REG(op1_addr))
 			} else {
 				|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
-				|	// TODO: DynAsm can't encode "lsl/ubfm", use "add+lsl" instead
-				|	//lsl Rx(result_reg), Rx(result_reg), #op2_lval
-				|	add Rx(result_reg), xzr, Rx(result_reg), lsl #op2_lval
+				|	lsl Rx(result_reg), Rx(result_reg), #op2_lval
 			}
 		} else {
 			zend_reg op2_reg;
