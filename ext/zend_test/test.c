@@ -436,7 +436,7 @@ static void fiber_enter_observer(zend_fiber_context *from, zend_fiber_context *t
 	if (ZT_G(observer_fiber_switch)) {
 		if (to->status == ZEND_FIBER_STATUS_INIT) {
 			php_printf("<init '%p'>\n", to);
-		} else if (to != EG(main_fiber)) {
+		} else if (to->kind == zend_ce_fiber) {
 			zend_fiber *fiber = zend_fiber_from_context(to);
 			if (fiber->caller != from) {
 				return;
@@ -462,7 +462,7 @@ static void fiber_suspend_observer(zend_fiber_context *from, zend_fiber_context 
 			} else {
 				php_printf("<returned '%p'>\n", from);
 			}
-		} else if (from != EG(main_fiber)) {
+		} else if (from->kind == zend_ce_fiber) {
 			zend_fiber *fiber = zend_fiber_from_context(from);
 			if (fiber->caller == NULL) {
 				php_printf("<suspend '%p'>\n", from);
