@@ -1894,7 +1894,7 @@ static int zend_jit_icall_throw_stub(dasm_State **Dst)
 	|	ldr IP, EX->opline
 	|	// if (EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
 	|	ldrb TMP1w, OP:IP->opcode
-	|	cmp TMP1w,# ZEND_HANDLE_EXCEPTION
+	|	cmp TMP1w, #ZEND_HANDLE_EXCEPTION
 	|	beq >1
 	|	// EG(opline_before_exception) = opline;
 	|	MEM_STORE_64_ZTS str, IP, executor_globals, opline_before_exception, TMP2
@@ -2227,8 +2227,7 @@ static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 	|	sub REG2, REG2, TMP1
 	|	// divide by sizeof(zend_op)
 	||	ZEND_ASSERT(sizeof(zend_op) == 32);
-	|	asr REG2, REG2, #2
-	|	add TMP1, REG1, REG2
+	|	add TMP1, REG1, REG2, asr #2
 	|	ldr TMP1, [TMP1, #offsetof(zend_jit_op_array_hot_extension, orig_handlers)]
 	|	br TMP1
 	return 1;
@@ -2696,7 +2695,7 @@ static int zend_jit_unwind_cb(_Unwind_Context *ctx, void *a)
 	if (arg->cnt == 3) {
 		return 5; // _URC_END_OF_STACK
 	}
-	return 0; // _URC_NO_REASON;
+	return 0;     // _URC_NO_REASON;
 }
 
 static void ZEND_FASTCALL zend_jit_touch_vm_stack_data(void *vm_stack_data)
@@ -3975,8 +3974,6 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			/* Use 'smulh' to get the upper 64 bits fo the 128-bit result.
 			 * For signed multiplication, the top 65 bits of the result will contain
 			 * either all zeros or all ones if no overflow occurred.
-			 * Note that 'cmp, TMP1, Rx(result_reg), asr, #63' is not supported by DynASM/arm64
-			 * currently, and we put 'asr' and 'cmp' separately.
 			 * Flag: bne -> overflow. beq -> no overflow.
 			 */
 			use_ovf_flag = 0;
@@ -10024,9 +10021,8 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 	|.cold_code
 	|4:
 	|	MEM_LOAD_64_ZTS ldr, FCARG1x, executor_globals, zend_constants, FCARG1x
-	|	lsr REG0, REG0, #1
 	|	ldr TMP1w, [FCARG1x, #offsetof(HashTable, nNumOfElements)]
-	|	cmp TMP1, REG0
+	|	cmp TMP1, REG0, lsr #1
 
 	if (smart_branch_opcode) {
 		if (exit_addr) {
