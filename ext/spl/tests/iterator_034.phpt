@@ -5,7 +5,7 @@ SPL: RecursiveIteratorIterator and break deep
 
 class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid())
         {
@@ -18,13 +18,13 @@ class MyRecursiveArrayIterator extends RecursiveArrayIterator
         }
     }
 
-    function getChildren()
+    function getChildren(): ?RecursiveArrayIterator
     {
         echo __METHOD__ . "()\n";
         return parent::getChildren();
     }
 
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "()\n";
         parent::rewind();

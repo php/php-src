@@ -31,7 +31,7 @@ foreach($f as $k => $v)
 
 class MyCSVFile extends SplFileObject
 {
-    function current()
+    function current(): string|array|false
     {
         return parent::fgetcsv(',', '"');
     }
@@ -62,7 +62,7 @@ foreach($v as $k => $d)
 
 class MyCSVFile2 extends SplFileObject
 {
-    function getCurrentLine()
+    function getCurrentLine(): string
     {
         echo __METHOD__ . "\n";
         return implode('|', parent::fgetcsv(',', '"'));

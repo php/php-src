@@ -3,6 +3,7 @@ Iterator::key() with by-ref return
 --FILE--
 <?php
 class Test extends ArrayIterator {
+    #[ReturnTypeWillChange]
     function &key() {
         return $foo;
     }

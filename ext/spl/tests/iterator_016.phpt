@@ -5,7 +5,7 @@ SPL: RecursiveIteratorIterator and beginChildren/endChildren
 
 class Menu extends ArrayObject
 {
-    function getIterator()
+    function getIterator(): RecursiveArrayIterator
     {
         echo __METHOD__ . "\n";
         return new RecursiveArrayIterator($this);

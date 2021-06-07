@@ -14,7 +14,7 @@ class NumericArrayIterator implements Iterator
         $this->a = $a;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         echo __METHOD__ . "\n";
         $this->i = 0;

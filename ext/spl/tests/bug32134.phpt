@@ -11,7 +11,7 @@ class myArray extends ArrayIterator
         parent::__construct($array);
     }
 
-    public function offsetGet($index)
+    public function offsetGet($index): mixed
     {
         static $i = 0;
         echo __METHOD__ . "($index)\n";
@@ -19,10 +19,10 @@ class myArray extends ArrayIterator
         return parent::offsetGet($index);
     }
 
-    public function offsetSet($index, $newval)
+    public function offsetSet($index, $newval): void
     {
         echo __METHOD__ . "($index,$newval)\n";
-        return parent::offsetSet($index, $newval);
+        parent::offsetSet($index, $newval);
     }
 
 }

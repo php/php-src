@@ -20,7 +20,7 @@ class Bug66405 extends RecursiveDirectoryIterator
         return $current;
     }
 
-    public function getChildren()
+    public function getChildren(): RecursiveDirectoryIterator
     {
         $children = parent::getChildren();
         if (is_object($children)) {

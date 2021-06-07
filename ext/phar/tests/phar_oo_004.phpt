@@ -31,31 +31,31 @@ class MyDirectoryIterator extends DirectoryIterator
         parent::__construct($dir);
     }
 
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
         parent::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         return parent::valid();
     }
 
-    function key()
+    function key(): mixed
     {
         echo __METHOD__ . "\n";
         return parent::key();
     }
 
-    function current()
+    function current(): mixed
     {
         echo __METHOD__ . "\n";
         return parent::current();
     }
 
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
         parent::next();
