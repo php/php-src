@@ -180,7 +180,18 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 		return true;
 	}
 
-	// TODO: slow path
+	if (reg_size == 32) {
+		if (dasm_imm13((uint32_t)value, (uint32_t)value) != -1) {
+			return true;
+		}
+	} else if (reg_size == 64) {
+		if (dasm_imm13((uint32_t)value, (uint32_t)(value >> 32)) != -1) {
+			return true;
+		}
+	} else {
+		ZEND_UNREACHABLE();
+	}
+
 	return false;
 }
 
