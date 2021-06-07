@@ -107,4 +107,6 @@ extern const php_stream_ops pdo_pgsql_lob_stream_ops;
 
 void pdo_libpq_version(char *buf, size_t len);
 
+int pdo_pgsql_parser(pdo_parser_t *s);
+
 #endif /* PHP_PDO_PGSQL_INT_H */
