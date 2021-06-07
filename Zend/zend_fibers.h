@@ -72,7 +72,10 @@ typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context)
 
 /* Defined as a macro to allow anonymous embedding. */
 #define ZEND_FIBER_CONTEXT_FIELDS \
+	/* Handle to fiber state as needed by boost.context */ \
 	void *handle; \
+	/* Pointer that identifies the fiber type. */ \
+	void *kind; \
 	zend_fiber_coroutine function; \
 	zend_fiber_stack stack; \
 	zend_fiber_status status; \
@@ -98,7 +101,7 @@ struct _zend_fiber {
 	zend_object std;
 
 	/* Fiber that resumed us. */
-	zend_fiber *caller;
+	zend_fiber_context *caller;
 
 	/* Fiber context fields (embedded to avoid memory allocation). */
 	ZEND_FIBER_CONTEXT_FIELDS;
@@ -128,7 +131,7 @@ ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_val
 ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value);
 
 /* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
-ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
+ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
 
@@ -136,6 +139,8 @@ END_EXTERN_C()
 
 static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context *context)
 {
+	ZEND_ASSERT(context->kind == zend_ce_fiber && "Fiber context does not belong to a Zend fiber");
+
 	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, handle));
 }
 

@@ -199,7 +199,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(transfer_t transfer)
 	abort();
 }
 
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size)
+ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	if (UNEXPECTED(!zend_fiber_stack_allocate(&context->stack, stack_size))) {
 		return false;
@@ -211,6 +211,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_co
 	context->handle = make_fcontext(stack, context->stack.size, zend_fiber_trampoline);
 	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
 
+	context->kind = kind;
 	context->function = coroutine;
 
 	return true;
@@ -256,7 +257,7 @@ static void zend_fiber_suspend_from(zend_fiber *fiber)
 	ZEND_ASSERT(fiber->caller && "Fiber has no caller");
 
 	zend_fiber_capture_vm_state(&state);
-	zend_fiber_switch_context(zend_fiber_get_context(fiber->caller));
+	zend_fiber_switch_context(fiber->caller);
 	zend_fiber_restore_vm_state(&state);
 }
 
@@ -267,7 +268,7 @@ static void zend_fiber_switch_to(zend_fiber *fiber)
 
 	zend_observer_fiber_switch_notify(EG(current_fiber), context);
 
-	fiber->caller = zend_fiber_from_context(EG(current_fiber));
+	fiber->caller = EG(current_fiber);
 
 	zend_fiber_capture_vm_state(&state);
 	zend_fiber_switch_context(context);
@@ -352,7 +353,7 @@ static ZEND_STACK_ALIGNED zend_fiber_context *zend_fiber_execute(zend_fiber_cont
 	fiber->execute_data = NULL;
 	fiber->stack_bottom = NULL;
 
-	return zend_fiber_get_context(fiber->caller);
+	return fiber->caller;
 }
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
@@ -451,7 +452,7 @@ ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_c
 	fiber->fci.param_count = param_count;
 	fiber->fci.named_params = named_params;
 
-	if (!zend_fiber_init_context(zend_fiber_get_context(fiber), zend_fiber_execute, EG(fiber_stack_size))) {
+	if (!zend_fiber_init_context(zend_fiber_get_context(fiber), zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
 		RETURN_THROWS();
 	}
 
@@ -481,7 +482,7 @@ ZEND_METHOD(Fiber, start)
 
 ZEND_API void zend_fiber_suspend(zval *value, zval *return_value)
 {
-	if (UNEXPECTED(EG(current_fiber) == EG(main_fiber))) {
+	if (UNEXPECTED(EG(current_fiber)->kind != zend_ce_fiber)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend outside of a fiber");
 		RETURN_THROWS();
 	}
@@ -692,7 +693,7 @@ ZEND_METHOD(Fiber, this)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (EG(current_fiber) == EG(main_fiber)) {
+	if (EG(current_fiber)->kind != zend_ce_fiber) {
 		RETURN_NULL();
 	}
 
