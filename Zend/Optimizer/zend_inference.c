@@ -1866,10 +1866,17 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					__type |= get_ssa_alias_types(__ssa_var->alias);	\
 				}														\
 			}															\
-			if (ssa_var_info[__var].type != __type) { 					\
-				if (ssa_var_info[__var].type & ~__type) {				\
+			uint32_t __old_type = ssa_var_info[__var].type;				\
+			if (__old_type != __type) { 								\
+				if (__old_type & ~__type) {								\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
+				}														\
+				if ((__type & MAY_BE_REF) &&							\
+						!(__old_type & MAY_BE_REF) &&					\
+						pessimize_range(&ssa_var_info[__var]) &&		\
+						update_worklist) {								\
+					add_usages(op_array, ssa, range_worklist, __var);	\
 				}														\
 				ssa_var_info[__var].type = __type;						\
 				if (update_worklist) { 									\
@@ -1964,6 +1971,22 @@ static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa 
 	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
 	const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
 	zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
+}
+
+/* If we determine that a variable is a reference, we need to discard range information. */
+static bool pessimize_range(zend_ssa_var_info *info) {
+	if (!info->has_range) {
+		return false;
+	}
+	if (info->range.underflow && info->range.overflow && info->range.min == ZEND_LONG_MIN &&
+			info->range.max == ZEND_LONG_MAX) {
+		return false;
+	}
+
+	info->range.underflow = info->range.overflow = true;
+	info->range.min = ZEND_LONG_MIN;
+	info->range.max = ZEND_LONG_MAX;
+	return true;
 }
 
 ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert)
@@ -2352,6 +2375,7 @@ static zend_always_inline int _zend_update_type_info(
 			zend_ssa            *ssa,
 			const zend_script   *script,
 			zend_bitset          worklist,
+			zend_bitset          range_worklist,
 			zend_op             *opline,
 			zend_ssa_op         *ssa_op,
 			const zend_op      **ssa_opcodes,
@@ -3627,7 +3651,7 @@ ZEND_API int zend_update_type_info(
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level)
 {
-	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0);
+	return _zend_update_type_info(op_array, ssa, script, NULL, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0);
 }
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
@@ -3676,7 +3700,7 @@ static zend_class_entry *join_class_entries(
 	return ce1;
 }
 
-int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
+int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_bitset range_worklist, zend_long optimization_level)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -3686,8 +3710,28 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
 	bool update_worklist = 1;
 
-	while (!zend_bitset_empty(worklist, worklist_len)) {
+	while (true) {
+		j = zend_bitset_first(range_worklist, worklist_len);
+		if (j != -1) {
+			/* Propagate potential range change */
+			zend_ssa_range range;
+			zend_bitset_excl(range_worklist, j);
+			if (zend_inference_calc_range(op_array, ssa, j, /* widening */ true, /* narrowing */ false, &range) == FAILURE) {
+				return FAILURE;
+			}
+			if (zend_inference_widening_meet(&ssa->var_info[j], &range)) {
+				add_usages(op_array, ssa, range_worklist, j);
+				add_usages(op_array, ssa, worklist, j);
+			}
+			continue;
+		}
+
 		j = zend_bitset_first(worklist, worklist_len);
+		if (j == -1) {
+			/* Both range and primary worklist are empty. */
+			break;
+		}
+
 		zend_bitset_excl(worklist, j);
 		if (ssa_vars[j].definition_phi) {
 			zend_ssa_phi *p = ssa_vars[j].definition_phi;
@@ -3747,7 +3791,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 			}
 		} else if (ssa_vars[j].definition >= 0) {
 			i = ssa_vars[j].definition;
-			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, 1) == FAILURE) {
+			if (_zend_update_type_info(op_array, ssa, script, worklist, range_worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, 1) == FAILURE) {
 				return FAILURE;
 			}
 		}
@@ -3928,16 +3972,18 @@ static bool can_convert_to_double(
 static int zend_type_narrowing(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
-	zend_bitset visited, worklist;
+	zend_bitset visited, worklist, range_worklist;
 	int i, v;
 	zend_op *opline;
 	bool narrowed = 0;
 	ALLOCA_FLAG(use_heap)
 
-	visited = ZEND_BITSET_ALLOCA(2 * bitset_len, use_heap);
+	visited = ZEND_BITSET_ALLOCA(3 * bitset_len, use_heap);
 	worklist = visited + bitset_len;
+	range_worklist = worklist + bitset_len;
 
 	zend_bitset_clear(worklist, bitset_len);
+	zend_bitset_clear(range_worklist, bitset_len);
 
 	for (v = op_array->last_var; v < ssa->vars_count; v++) {
 		if ((ssa->var_info[v].type & (MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF)) != MAY_BE_LONG) continue;
@@ -3969,7 +4015,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 		return SUCCESS;
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) != SUCCESS) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, range_worklist, optimization_level) != SUCCESS) {
 		free_alloca(visited, use_heap);
 		return FAILURE;
 	}
@@ -4245,11 +4291,14 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
 	int j;
-	zend_bitset worklist;
+	zend_bitset worklist, range_worklist;
 	ALLOCA_FLAG(use_heap);
 
 	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
 	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+
+	range_worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
+	memset(range_worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
 
 	/* Type Inference */
 	for (j = op_array->last_var; j < ssa_vars_count; j++) {
@@ -4257,7 +4306,7 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 		ssa_var_info[j].type = 0;
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) != SUCCESS) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, range_worklist, optimization_level) != SUCCESS) {
 		free_alloca(worklist,  use_heap);
 		return FAILURE;
 	}

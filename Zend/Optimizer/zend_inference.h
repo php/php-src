@@ -263,8 +263,6 @@ int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
-int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
-
 ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
 ZEND_API void zend_init_func_return_info(
