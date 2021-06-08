@@ -5731,7 +5731,7 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
-static zend_always_inline void php_array_reduce(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
+static void php_array_reduce(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
 {
 	zval args[2];
 	zval *operand;
@@ -5793,7 +5793,7 @@ static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) 
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static zend_always_inline void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
+static void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
 {
 	traversable_reduce_data reduce_data;
 	reduce_data.fci = fci;
@@ -6236,7 +6236,7 @@ PHP_FUNCTION(array_combine)
 }
 /* }}} */
 
-static inline void php_array_until(zval *return_value, HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, int stop_value, int negate) /* {{{ */
+static void php_array_until(zval *return_value, HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, int stop_value, int negate) /* {{{ */
 {
 	zval args[1];
 	bool have_callback = 0;
@@ -6341,7 +6341,7 @@ static int php_traversable_func_until(zend_object_iterator *iter, void *puser) /
 }
 /* }}} */
 
-static inline void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value, int negate) /* {{{ */
+static void php_iterable_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value, int negate) /* {{{ */
 {
 	zval *input;
 	zend_fcall_info fci = empty_fcall_info;
@@ -6434,7 +6434,7 @@ PHP_FUNCTION(reduce)
 }
 /* }}} */
 
-static zend_always_inline void php_array_find(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
+static void php_array_find(HashTable *htbl, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
 {
 	zval retval;
 	zval *operand;
@@ -6512,7 +6512,7 @@ static int php_traversable_find_elem(zend_object_iterator *iter, void *puser) /*
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static zend_always_inline void php_traversable_find(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
+static void php_traversable_find(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value, zval *default_value) /* {{{ */
 {
 	traversable_find_data find_data;
 	find_data.fci = fci;
