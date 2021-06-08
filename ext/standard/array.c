@@ -5788,7 +5788,7 @@ static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) 
 		goto keep;
 	}
 
-	ZVAL_COPY(&reduce_data->args[0], fci->retval);
+	ZVAL_COPY_VALUE(&reduce_data->args[0], fci->retval);
 	ZVAL_COPY(&reduce_data->args[1], operand);
 	ZVAL_NULL(fci->retval);
 	zend_result result = zend_call_function(&reduce_data->fci, &reduce_data->fcc);
