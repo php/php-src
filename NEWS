@@ -13,7 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #81135 (unknown help topic causes assertion failure). (krakjoe)
 
 - SPL:
-  . Fixed buf #81112 (Special json_encode behavior for SplFixedArray). (Nikita)
+  . Fixed bug #81112 (Special json_encode behavior for SplFixedArray). (Nikita)
+  . Fixed bug #80945 ("Notice: Undefined index" on unset() ArrayObject
+    non-existing key). (Nikita)
 
 10 Jun 2021, PHP 8.1.0alpha1
 

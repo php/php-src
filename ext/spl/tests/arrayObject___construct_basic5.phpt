@@ -64,8 +64,6 @@ bool(true)
 Warning: Undefined array key "prop" in %s on line %d
 
 Warning: Undefined array key "prop" in %s on line %d
-
-Warning: Undefined array key "prop" in %s on line %d
 NULL
 NULL
   - After:

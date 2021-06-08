@@ -554,9 +554,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		if (data) {
 			if (Z_TYPE_P(data) == IS_INDIRECT) {
 				data = Z_INDIRECT_P(data);
-				if (Z_TYPE_P(data) == IS_UNDEF) {
-					zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
-				} else {
+				if (Z_TYPE_P(data) != IS_UNDEF) {
 					zval_ptr_dtor(data);
 					ZVAL_UNDEF(data);
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
@@ -565,17 +563,13 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 						spl_array_skip_protected(intern, ht);
 					}
 				}
-			} else if (zend_hash_del(ht, key.key) == FAILURE) {
-				zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+			} else {
+				zend_hash_del(ht, key.key);
 			}
-		} else {
-			zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
 		}
 		spl_hash_key_release(&key);
 	} else {
-		if (zend_hash_index_del(ht, key.h) == FAILURE) {
-			zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
-		}
+		zend_hash_index_del(ht, key.h);
 	}
 } /* }}} */
 

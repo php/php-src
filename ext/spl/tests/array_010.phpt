@@ -125,10 +125,6 @@ array(6) {
   [6]=>
   string(9) "changed 6"
 }
-
-Warning: Undefined array key 7 in %s on line %d
-
-Warning: Undefined array key "8th" in %s on line %d
 array(4) {
   [0]=>
   string(3) "1st"
