@@ -34,7 +34,7 @@ typedef struct {
 	intl_error  err;
 
 	// ICU break iterator
-	DateTimePatternGenerator*	dtpg;
+	DateTimePatternGenerator *dtpg;
 
 	zend_object	zo;
 } IntlDatePatternGenerator_object;

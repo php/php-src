@@ -50,9 +50,7 @@ static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 	zend_objects_clone_members(&dtpgo_new->zo, &dtpgo_orig->zo);
 
 	if (dtpgo_orig->dtpg != NULL) {
-		DateTimePatternGenerator	*newDtpg;
-
-		newDtpg = dtpgo_orig->dtpg->clone();
+		DateTimePatternGenerator *newDtpg = dtpgo_orig->dtpg->clone();
 		if (!newDtpg) {
 			zend_string *err_msg;
 			intl_errors_set_code(DTPATTERNGEN_ERROR_P(dtpgo_orig),
@@ -96,9 +94,7 @@ static void IntlDatePatternGenerator_object_free(zend_object *object)
 
 static zend_object *IntlDatePatternGenerator_object_create(zend_class_entry *ce)
 {
-	IntlDatePatternGenerator_object*	intern;
-
-	intern = (IntlDatePatternGenerator_object*)ecalloc(1, sizeof(IntlDatePatternGenerator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	IntlDatePatternGenerator_object *intern = zend_object_alloc(sizeof(IntlDatePatternGenerator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
