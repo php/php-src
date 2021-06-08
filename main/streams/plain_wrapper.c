@@ -60,6 +60,9 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 # define PLAIN_WRAP_BUF_SIZE(st) (st)
 # if !defined(HAVE_FDATASYNC)
 #  define fdatasync fsync
+# elif defined(__APPLE__)
+  // The symbol is present, however not in the headers
+  extern int fdatasync(int);
 # endif
 #endif
 
