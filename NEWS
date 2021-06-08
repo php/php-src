@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0alpha1
+?? ??? ????, PHP 8.1.0alpha2
+
+10 Jun 2021, PHP 8.1.0alpha1
 
 - Core:
   . Fixed inclusion order for phpize builds on Windows. (cmb)
