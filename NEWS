@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #81070 (Integer underflow in memory limit comparison).
     (Peter van Dommelen)
 
+- Bzip2:
+  . Fixed bug #81092 (fflush before stream_filter_remove corrupts stream).
+    (cmb)
+
 - OCI8:
   . Fixed bug #81088 (error in regression test for oci_fetch_object() and
     oci_fetch_array()). (Máté)
