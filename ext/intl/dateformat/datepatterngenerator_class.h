@@ -15,9 +15,6 @@
 #ifndef DATEPATTERNGENERATOR_CLASS_H
 #define DATEPATTERNGENERATOR_CLASS_H
 
-//redefinition of inline in PHP headers causes problems, so include this before
-#include <math.h>
-
 #include <php.h>
 #include "intl_common.h"
 #include "intl_error.h"
@@ -31,7 +28,7 @@ using icu::DateTimePatternGenerator;
 
 typedef struct {
 	// 	error handling
-	intl_error  err;
+	intl_error err;
 
 	// ICU break iterator
 	DateTimePatternGenerator *dtpg;
@@ -42,7 +39,7 @@ typedef struct {
 static inline IntlDatePatternGenerator_object *php_intl_datepatterngenerator_fetch_object(zend_object *obj) {
 	return (IntlDatePatternGenerator_object *)((char*)(obj) - XtOffsetOf(IntlDatePatternGenerator_object, zo));
 }
-#define Z_INTL_DATETIMEPATTERNGENERATOR_P(zv) php_intl_datepatterngenerator_fetch_object(Z_OBJ_P(zv))
+#define Z_INTL_DATEPATTERNGENERATOR_P(zv) php_intl_datepatterngenerator_fetch_object(Z_OBJ_P(zv))
 
 #define DTPATTERNGEN_ERROR(dtpgo)		(dtpgo)->err
 #define DTPATTERNGEN_ERROR_P(dtpgo)		&(DTPATTERNGEN_ERROR(dtpgo))
@@ -51,7 +48,7 @@ static inline IntlDatePatternGenerator_object *php_intl_datepatterngenerator_fet
 #define DTPATTERNGEN_ERROR_CODE_P(dtpgo)	&(INTL_ERROR_CODE(DTPATTERNGEN_ERROR(dtpgo)))
 
 #define DTPATTERNGEN_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(IntlDatePatternGenerator, dtpgo)
-#define DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_DATETIMEPATTERNGENERATOR, dtpgo)
+#define DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_DATEPATTERNGENERATOR, dtpgo)
 #define DTPATTERNGEN_METHOD_FETCH_OBJECT \
 	DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (dtpgo->dtpg == NULL) \

@@ -32,14 +32,12 @@ using icu::StringPiece;
 
 static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval		*object;
-	char		*locale_str;
-	size_t		locale_len	= 0;
-	Locale		locale;
+	char *locale_str;
+	size_t locale_len = 0;
 	IntlDatePatternGenerator_object* dtpgo;
 
 	intl_error_reset(NULL);
-	object = return_value;
+	zval *object = return_value;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -57,7 +55,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if (locale_len == 0) {
 		locale_str = (char *) intl_locale_get_default();
 	}
-	locale = Locale::createFromName(locale_str);
+	Locale locale = Locale::createFromName(locale_str);
 
 	dtpgo->dtpg = DateTimePatternGenerator::createInstance(
 		locale,
@@ -67,11 +65,10 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		intl_error_set(NULL, DTPATTERNGEN_ERROR_CODE(dtpgo),
 				"Error creating DateTimePatternGenerator",
 				0);
-		goto error;
+		return FAILURE;
 	}
 
-error:
-	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
+	return SUCCESS;
 }
 
 U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
@@ -107,7 +104,6 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 	char			*skeleton_str	= NULL;
 	size_t			skeleton_len;
 	UnicodeString	skeleton_uncleaned;
-	UnicodeString	skeleton;
 
 	DTPATTERNGEN_METHOD_INIT_VARS;
 
@@ -124,22 +120,17 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 
 	INTL_METHOD_CHECK_STATUS(dtpgo, "Skeleton is not a valid UTF-8 string");
 
-	skeleton = dtpgo->dtpg->getSkeleton(skeleton_uncleaned, DTPATTERNGEN_ERROR_CODE(dtpgo));
+	UnicodeString skeleton = dtpgo->dtpg->getSkeleton(skeleton_uncleaned, DTPATTERNGEN_ERROR_CODE(dtpgo));
 
 	INTL_METHOD_CHECK_STATUS(dtpgo, "Error getting cleaned skeleton");
 
-	{
-		zend_string *u8str;
-		UnicodeString result;
+	UnicodeString result = dtpgo->dtpg->getBestPattern(skeleton, DTPATTERNGEN_ERROR_CODE(dtpgo));
 
-		result = dtpgo->dtpg->getBestPattern(skeleton, DTPATTERNGEN_ERROR_CODE(dtpgo));
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Error retrieving pattern");
 
-		INTL_METHOD_CHECK_STATUS(dtpgo, "Error retrieving pattern");
+	zend_string *u8str = intl_charFromString(result, DTPATTERNGEN_ERROR_CODE_P(dtpgo));
 
-		u8str = intl_charFromString(result, DTPATTERNGEN_ERROR_CODE_P(dtpgo));
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Error converting result to UTF-8");
 
-		INTL_METHOD_CHECK_STATUS(dtpgo, "Error converting result to UTF-8");
-
-		RETVAL_STR(u8str);
-	}
+	RETVAL_STR(u8str);
 }

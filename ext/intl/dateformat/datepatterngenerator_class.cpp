@@ -36,16 +36,13 @@ zend_object_handlers IntlDatePatternGenerator_handlers;
 
 static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 {
-	IntlDatePatternGenerator_object		*dtpgo_orig,
-											*dtpgo_new;
-	zend_object								*ret_val;
 	intl_error_reset(NULL);
 
-	dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
+	IntlDatePatternGenerator_object *dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
 	intl_error_reset(DTPATTERNGEN_ERROR_P(dtpgo_orig));
 
-	ret_val = IntlDatePatternGenerator_ce_ptr->create_object(object->ce);
-	dtpgo_new  = php_intl_datepatterngenerator_fetch_object(ret_val);
+	zend_object *ret_val = IntlDatePatternGenerator_ce_ptr->create_object(object->ce);
+	IntlDatePatternGenerator_object *dtpgo_new  = php_intl_datepatterngenerator_fetch_object(ret_val);
 
 	zend_objects_clone_members(&dtpgo_new->zo, &dtpgo_orig->zo);
 
@@ -94,12 +91,12 @@ static void IntlDatePatternGenerator_object_free(zend_object *object)
 
 static zend_object *IntlDatePatternGenerator_object_create(zend_class_entry *ce)
 {
-	IntlDatePatternGenerator_object *intern = zend_object_alloc(sizeof(IntlDatePatternGenerator_object), ce);
+	IntlDatePatternGenerator_object *intern =
+		(IntlDatePatternGenerator_object*) zend_object_alloc(sizeof(IntlDatePatternGenerator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
 	IntlDatePatternGenerator_object_init(intern);
-
 
 	intern->zo.handlers = &IntlDatePatternGenerator_handlers;
 
