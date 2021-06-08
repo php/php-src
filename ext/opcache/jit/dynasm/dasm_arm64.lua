@@ -441,6 +441,35 @@ local function parse_fpimm(imm)
   end
 end
 
+local function parse_imm_movi(n)
+  local lo = tonumber(n % 0x100000000)
+  local hi = tonumber((n-lo) / 0x100000000)
+  local m = 0
+  for j=0,1 do
+    local h
+    if j == 0 then h = hi else h = lo end
+    for i=3,0,-1 do
+      local b = band(shr(h, i*8), 0xff)
+      if b ~= 0xff and b ~= 0 then return false, _ end
+      m = m*2 + band(b, 1)
+    end
+  end
+  return true, m
+end
+
+local function parse_imm64(imm)
+  imm = match(imm, "^#(.*)$")
+  if not imm then werror("expected immediate operand") end
+  local n = parse_number(imm)
+  if n then
+    local ok, m = parse_imm_movi(n)
+    if ok then return shl(band(m, 0x1f), 5) + shl(band(m, 0xe0), 11) end
+    werror("invalid immediate `"..imm.."'")
+  else
+    werror("NYI movi imm action")
+  end
+end
+
 local function parse_shift(expr)
   local s, s2 = match(expr, "^(%S+)%s*(.*)$")
   s = map_shift[s]
@@ -889,6 +918,7 @@ map_op = {
 
   -- TODO: crc32*, aes*, sha*, pmull
   -- TODO: SIMD instructions.
+  movi_2   = "2f00e400DOd",
 }
 
 for cond,c in pairs(map_cond) do
@@ -975,6 +1005,8 @@ local function parse_template(params, template, nparams, pos)
       op = op + parse_imm(q, 4, 0, 0, false); n = n + 1
     elseif p == "F" then
       op = op + parse_fpimm(q); n = n + 1
+    elseif p == "O" then
+      op = op + parse_imm64(q); n = n + 1
     elseif p == "Z" then
       if q ~= "#0" and q ~= "#0.0" then werror("expected zero immediate") end
       n = n + 1
