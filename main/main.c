@@ -303,8 +303,14 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
 	if (zend_set_memory_limit(value) == FAILURE) {
-		zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
-		return FAILURE;
+		/* When the memory limit is reset to the original level during deactivation, we may be
+		 * using more memory than the original limit while shutdown is still in progress.
+		 * Ignore a failure for now, and set the memory limit when the memory manager has been
+		 * shut down and the minimal amount of memory is used. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+			return FAILURE;
+		}
 	}
 	PG(memory_limit) = value;
 	return SUCCESS;
@@ -1962,6 +1968,10 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
+
+	/* Reset memory limit, as the reset during INI_STAGE_DEACTIVATE may have failed.
+	 * At this point, no memory beyond a single chunk should be in use. */
+	zend_set_memory_limit(PG(memory_limit));
 
 	/* 16. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
