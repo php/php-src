@@ -2079,10 +2079,6 @@ static void spl_dual_it_dtor(zend_object *_object)
 	zend_objects_destroy_object(_object);
 
 	spl_dual_it_free(object);
-
-	if (object->inner.iterator) {
-		zend_iterator_dtor(object->inner.iterator);
-	}
 }
 /* }}} */
 
@@ -2091,6 +2087,9 @@ static void spl_dual_it_free_storage(zend_object *_object)
 {
 	spl_dual_it_object *object = spl_dual_it_from_obj(_object);
 
+	if (object->inner.iterator) {
+		zend_iterator_dtor(object->inner.iterator);
+	}
 
 	if (!Z_ISUNDEF(object->inner.zobject)) {
 		zval_ptr_dtor(&object->inner.zobject);
@@ -2136,6 +2135,17 @@ static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
 {
 	spl_dual_it_object *object = spl_dual_it_from_obj(obj);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (object->inner.iterator && object->inner.iterator->funcs->get_gc) {
+		zval *inner_table;
+		int inner_n;
+		HashTable *inner_ht = object->inner.iterator->funcs->get_gc(
+			object->inner.iterator, &inner_table, &inner_n);
+		zend_get_gc_buffer_add_zvals(gc_buffer, inner_table, inner_n);
+		if (inner_ht) {
+			zend_get_gc_buffer_add_ht(gc_buffer, inner_ht);
+		}
+	}
 
 	if (!Z_ISUNDEF(object->inner.zobject)) {
 		zend_get_gc_buffer_add_zval(gc_buffer, &object->inner.zobject);
