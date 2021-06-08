@@ -10,6 +10,7 @@ if (getenv("SKIP_REPEAT")) {
 opcache
 --INI--
 opcache.enable_cli=1
+opcache.file_cache=
 zend_test.register_passes=1
 --FILE--
 <?php
