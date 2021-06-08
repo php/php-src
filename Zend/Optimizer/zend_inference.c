@@ -4291,14 +4291,15 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
 	int j;
+	int worklist_len = zend_bitset_len(ssa_vars_count);
 	zend_bitset worklist, range_worklist;
 	ALLOCA_FLAG(use_heap);
 
-	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
-	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	worklist = do_alloca(sizeof(zend_ulong) * worklist_len * 2, use_heap);
+	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
 
-	range_worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
-	memset(range_worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	range_worklist = worklist + worklist_len;
+	memset(range_worklist, 0, sizeof(zend_ulong) * worklist_len);
 
 	/* Type Inference */
 	for (j = op_array->last_var; j < ssa_vars_count; j++) {
