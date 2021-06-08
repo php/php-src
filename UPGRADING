@@ -163,6 +163,7 @@ PHP 8.1 UPGRADE NOTES
 - SPL:
   . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
     define a custom eol sequence, the default remains the same and is "\n".
+  . SplFixedArray will now be JSON encoded like an array.
 
 ========================================
 2. New Features

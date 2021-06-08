@@ -735,9 +735,14 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ spl_module_entry */
+static const zend_module_dep spl_deps[] = {
+	ZEND_MOD_REQUIRED("json")
+	ZEND_MOD_END
+};
+
 zend_module_entry spl_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	spl_deps,
 	"SPL",
 	ext_functions,
 	PHP_MINIT(spl),
@@ -748,4 +753,3 @@ zend_module_entry spl_module_entry = {
 	PHP_SPL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */

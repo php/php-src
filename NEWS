@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #81135 (unknown help topic causes assertion failure). (krakjoe)
 
+- SPL:
+  . Fixed buf #81112 (Special json_encode behavior for SplFixedArray). (Nikita)
+
 10 Jun 2021, PHP 8.1.0alpha1
 
 - Core:

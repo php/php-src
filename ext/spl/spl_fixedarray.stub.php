@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
+class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSerializable
 {
     public function __construct(int $size = 0) {}
 
@@ -49,4 +49,6 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable
     public function offsetUnset($index) {}
 
     public function getIterator(): Iterator {}
+
+    public function jsonSerialize(): array {}
 }

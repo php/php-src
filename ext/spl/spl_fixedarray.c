@@ -31,6 +31,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "spl_iterators.h"
+#include "ext/json/php_json.h"
 
 zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -758,6 +759,18 @@ PHP_METHOD(SplFixedArray, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
+PHP_METHOD(SplFixedArray, jsonSerialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	array_init_size(return_value, intern->array.size);
+	for (zend_long i = 0; i < intern->array.size; i++) {
+		zend_hash_next_index_insert_new(Z_ARR_P(return_value), &intern->array.elements[i]);
+		Z_TRY_ADDREF(intern->array.elements[i]);
+	}
+}
+
 static void spl_fixedarray_it_dtor(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
@@ -838,7 +851,8 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 
 PHP_MINIT_FUNCTION(spl_fixedarray)
 {
-	spl_ce_SplFixedArray = register_class_SplFixedArray(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable);
+	spl_ce_SplFixedArray = register_class_SplFixedArray(
+		zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable, php_json_serializable_ce);
 	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
 	spl_ce_SplFixedArray->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
