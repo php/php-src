@@ -6498,7 +6498,7 @@ PHP_FUNCTION(reduce)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_result result = php_iterable_reduce(input, &fci, &fci_cache, return_value);
+	iterable_reduce_result result = php_iterable_reduce(input, &fci, &fci_cache, return_value);
 
 	if (result == REDUCE_EEMPTY) {
 		zend_argument_value_error(1, "must not be empty");
