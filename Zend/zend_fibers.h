@@ -89,6 +89,8 @@ struct _zend_fiber_context {
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
 typedef struct _zend_fiber_vm_state {
 	zend_vm_stack vm_stack;
+	zval *vm_stack_top;
+	zval *vm_stack_end;
 	size_t vm_stack_page_size;
 	zend_execute_data *current_execute_data;
 	int error_reporting;
@@ -100,11 +102,11 @@ struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
 
-	/* Fiber that resumed us. */
-	zend_fiber_context *caller;
-
 	/* Fiber context fields (embedded to avoid memory allocation). */
 	ZEND_FIBER_CONTEXT_FIELDS;
+
+	/* Fiber that resumed us. */
+	zend_fiber_context *caller;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;
@@ -123,17 +125,10 @@ struct _zend_fiber {
 	zval value;
 };
 
-/* These functions create and manipulate a Fiber object, allowing any internal function to start, resume, or suspend a fiber. */
-ZEND_API zend_fiber *zend_fiber_create(const zend_fcall_info *fci, const zend_fcall_info_cache *fci_cache);
-ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_count, zend_array *named_params, zval *return_value);
-ZEND_API void zend_fiber_suspend(zval *value, zval *return_value);
-ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value);
-ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value);
-
-/* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
+/* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
+ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to);
 
 END_EXTERN_C()
 
@@ -152,8 +147,8 @@ static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
 {
 	state->vm_stack = EG(vm_stack);
-	state->vm_stack->top = EG(vm_stack_top);
-	state->vm_stack->end = EG(vm_stack_end);
+	state->vm_stack_top = EG(vm_stack_top);
+	state->vm_stack_end = EG(vm_stack_end);
 	state->vm_stack_page_size = EG(vm_stack_page_size);
 	state->current_execute_data = EG(current_execute_data);
 	state->error_reporting = EG(error_reporting);
@@ -164,8 +159,8 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
 {
 	EG(vm_stack) = state->vm_stack;
-	EG(vm_stack_top) = state->vm_stack->top;
-	EG(vm_stack_end) = state->vm_stack->end;
+	EG(vm_stack_top) = state->vm_stack_top;
+	EG(vm_stack_end) = state->vm_stack_end;
 	EG(vm_stack_page_size) = state->vm_stack_page_size;
 	EG(current_execute_data) = state->current_execute_data;
 	EG(error_reporting) = state->error_reporting;
