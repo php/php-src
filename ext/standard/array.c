@@ -5768,6 +5768,7 @@ typedef struct {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval args[2];
+	zend_long count;
 } traversable_reduce_data;
 
 static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -5781,19 +5782,36 @@ static int php_traversable_reduce_elem(zend_object_iterator *iter, void *puser) 
 		return ZEND_HASH_APPLY_STOP;
 	}
 	ZVAL_DEREF(operand);
-	ZVAL_COPY_VALUE(&reduce_data->args[0], fci->retval);
+
+	if (reduce_data->count++ == 0) {
+		ZVAL_COPY(fci->retval, operand);
+		goto keep;
+	}
+
+	ZVAL_COPY(&reduce_data->args[0], fci->retval);
 	ZVAL_COPY(&reduce_data->args[1], operand);
 	ZVAL_NULL(fci->retval);
-	int result = zend_call_function(&reduce_data->fci, &reduce_data->fcc);
-	zval_ptr_dtor(operand);
+	zend_result result = zend_call_function(&reduce_data->fci, &reduce_data->fcc);
+	zval_ptr_dtor(&reduce_data->args[1]);
 	zval_ptr_dtor(&reduce_data->args[0]);
 	if (UNEXPECTED(result == FAILURE || EG(exception))) {
 		return ZEND_HASH_APPLY_STOP;
 	}
+
+keep:
+	if (UNEXPECTED(Z_ISREF_P(fci->retval))) {
+		zend_unwrap_reference(fci->retval);
+	}
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
+typedef enum {
+	REDUCE_SUCCESS = 0,
+	REDUCE_EEMPTY,      // iterable was empty
+	REDUCE_ERUNTIME,    // error when applying callback
+} iterable_reduce_result;
+
+static iterable_reduce_result php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval* return_value) /* {{{ */
 {
 	traversable_reduce_data reduce_data;
 	reduce_data.fci = fci;
@@ -5801,8 +5819,17 @@ static void php_traversable_reduce(zval *obj, zend_fcall_info fci, zend_fcall_in
 	reduce_data.fci.param_count = 2;
 	reduce_data.fci.params = reduce_data.args;
 	reduce_data.fcc = fci_cache;
+	reduce_data.count = 0;
 
-	spl_iterator_apply(obj, php_traversable_reduce_elem, (void*)&reduce_data);
+	if (spl_iterator_apply(obj, php_traversable_reduce_elem, (void*)&reduce_data) != SUCCESS) {
+		return REDUCE_ERUNTIME;
+	}
+
+	if (reduce_data.count == 0) {
+		return REDUCE_EEMPTY;
+	}
+
+	return REDUCE_SUCCESS;
 }
 /* }}} */
 
@@ -6399,37 +6426,82 @@ PHP_FUNCTION(none)
 }
 /* }}} */
 
+static iterable_reduce_result php_iterable_array_reduce(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zval *return_value)
+{
+	zval args[2];
+	zval *operand;
+	zval retval;
+
+	if (zend_hash_num_elements(ht) == 0) {
+		return REDUCE_EEMPTY;
+	}
+
+	fci->retval = &retval;
+	fci->param_count = 2;
+
+	zend_long count = 0;
+	ZEND_HASH_FOREACH_VAL(ht, operand) {
+		if (count++ == 0) {
+			ZVAL_COPY(return_value, operand);
+			if (UNEXPECTED(Z_ISREF_P(return_value))) {
+				zend_unwrap_reference(return_value);
+			}
+			continue;
+		}
+
+		ZVAL_COPY_VALUE(&args[0], return_value);
+		ZVAL_COPY(&args[1], operand);
+		fci->params = args;
+
+		zend_result result = zend_call_function(fci, fci_cache);
+		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
+
+		if (result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			ZVAL_COPY_VALUE(return_value, &retval);
+			if (UNEXPECTED(Z_ISREF_P(return_value))) {
+				zend_unwrap_reference(return_value);
+			}
+		} else {
+			RETVAL_NULL();
+			return REDUCE_ERUNTIME;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return REDUCE_SUCCESS;
+}
+
+static iterable_reduce_result php_iterable_reduce(zval *iterable, zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zval *return_value)
+{
+	ZEND_ASSERT(zend_is_iterable(iterable));
+
+	switch (Z_TYPE_P(iterable)) {
+		case IS_ARRAY:
+			return php_iterable_array_reduce(Z_ARRVAL_P(iterable), fci, fci_cache, return_value);
+
+		case IS_OBJECT:
+			return php_traversable_reduce(iterable, *fci, *fci_cache, return_value);
+
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 /* {{{ Reduces values */
 PHP_FUNCTION(reduce)
 {
 	zval *input;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	zval *initial = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ITERABLE(input)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(initial)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_COPY(return_value, initial);
-	} else {
-		ZVAL_NULL(return_value);
-	}
+	zend_result result = php_iterable_reduce(input, &fci, &fci_cache, return_value);
 
-	switch (Z_TYPE_P(input)) {
-		case IS_ARRAY:
-			php_array_reduce(Z_ARRVAL_P(input), fci, fci_cache, return_value);
-			return;
-		case IS_OBJECT: {
-			ZEND_ASSERT(instanceof_function(Z_OBJCE_P(input), zend_ce_traversable));
-			php_traversable_reduce(input, fci, fci_cache, return_value);
-			return;
-		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+	if (result == REDUCE_EEMPTY) {
+		zend_argument_value_error(1, "must not be empty");
 	}
 }
 /* }}} */

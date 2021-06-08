@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f57589852a699be9edd08f434073007b9fef4e34 */
+ * Stub hash: c04b8fad2fb795a23786e6340a514c63d9edf5a1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2218,25 +2218,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_any, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_all, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_iterable_all arginfo_iterable_any
+#define arginfo_iterable_any arginfo_iterable_all
 
-#define arginfo_iterable_none arginfo_iterable_any
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_reduce, 0, 2, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, initial, IS_MIXED, 0, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_iterable_none arginfo_iterable_all
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_find, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, default, IS_MIXED, 0, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterable_reduce, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, iterable, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, by, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -2860,11 +2859,11 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
-ZEND_FUNCTION(any);
 ZEND_FUNCTION(all);
+ZEND_FUNCTION(any);
 ZEND_FUNCTION(none);
-ZEND_FUNCTION(reduce);
 ZEND_FUNCTION(find);
+ZEND_FUNCTION(reduce);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3518,11 +3517,11 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
-	ZEND_NS_FE("iterable", any, arginfo_iterable_any)
 	ZEND_NS_FE("iterable", all, arginfo_iterable_all)
+	ZEND_NS_FE("iterable", any, arginfo_iterable_any)
 	ZEND_NS_FE("iterable", none, arginfo_iterable_none)
-	ZEND_NS_FE("iterable", reduce, arginfo_iterable_reduce)
 	ZEND_NS_FE("iterable", find, arginfo_iterable_find)
+	ZEND_NS_FE("iterable", reduce, arginfo_iterable_reduce)
 	ZEND_FE_END
 };
 

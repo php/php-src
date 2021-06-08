@@ -1516,14 +1516,16 @@ function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 
 namespace iterable {
 
-function any(iterable $iterable, ?callable $callback = null): bool {}
-
 function all(iterable $iterable, ?callable $callback = null): bool {}
+
+function any(iterable $iterable, ?callable $callback = null): bool {}
 
 function none(iterable $iterable, ?callable $callback = null): bool {}
 
-function reduce(iterable $iterable, callable $callback, mixed $initial = null): mixed {}
-
 function find(iterable $iterable, callable $callback, mixed $default = null): mixed {}
+
+//function fold(iterable $iterable, callable $by, mixed $initial): mixed {}
+
+function reduce(iterable $iterable, callable $by): mixed {}
 
 }
