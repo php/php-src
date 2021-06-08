@@ -1648,14 +1648,13 @@ ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_long options = 0;
 	zend_long limit = 0;
-	zend_long skip_last = 1;
 	zval backtrace;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lll", &options, &limit, &skip_last) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zend_fetch_debug_backtrace(&backtrace, skip_last, options, limit);
+	zend_fetch_debug_backtrace(&backtrace, 1, options, limit);
 	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
 
 	zend_string *str = zend_trace_to_string(Z_ARRVAL(backtrace), /* include_main */ false);
@@ -1685,11 +1684,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		return;
 	}
 
-	while (skip_last--) {
-		if (!call->prev_execute_data) {
-			break;
-		}
-
+	if (skip_last) {
+		/* skip debug_backtrace() */
 		call = call->prev_execute_data;
 	}
 
@@ -1873,13 +1869,12 @@ ZEND_FUNCTION(debug_backtrace)
 {
 	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
 	zend_long limit = 0;
-	zend_long skip_last = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lll", &options, &limit, &skip_last) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zend_fetch_debug_backtrace(return_value, skip_last, options, limit);
+	zend_fetch_debug_backtrace(return_value, 1, options, limit);
 }
 /* }}} */
 

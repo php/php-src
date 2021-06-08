@@ -111,9 +111,9 @@ function get_loaded_extensions(bool $zend_extensions = false): array {}
 
 function get_defined_constants(bool $categorize = false): array {}
 
-function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0, int $skip_last = 1): array {}
+function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): array {}
 
-function debug_print_backtrace(int $options = 0, int $limit = 0, int $skip_last = 1): void {}
+function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 
 function extension_loaded(string $extension): bool {}
 

@@ -13,7 +13,6 @@ PHP                                                                        NEWS
     (Björn Tantau)
   . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
     (krakjoe)
-  . Fixed bug #24214 (implement skipping frames in backtraces). (krakjoe)
  
  - Standard:
   . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
