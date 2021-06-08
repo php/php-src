@@ -93,7 +93,8 @@
 
 #define ADD_SCC_VAR(_var) \
 	do { \
-		if (ssa->vars[_var].scc == scc) { \
+		if (ssa->vars[_var].scc == scc && \
+		    !(ssa->var_info[_var].type & MAY_BE_REF)) { \
 			zend_bitset_incl(worklist, _var); \
 		} \
 	} while (0)
@@ -101,6 +102,7 @@
 #define ADD_SCC_VAR_1(_var) \
 	do { \
 		if (ssa->vars[_var].scc == scc && \
+		    !(ssa->var_info[_var].type & MAY_BE_REF) && \
 		    !zend_bitset_in(visited, _var)) { \
 			zend_bitset_incl(worklist, _var); \
 		} \
@@ -1657,7 +1659,8 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 	for (n = 0; n < RANGE_WARMUP_PASSES; n++) {
 		j= scc_var[scc];
 		while (j >= 0) {
-			if (ssa->vars[j].scc_entry) {
+			if (ssa->vars[j].scc_entry
+			 && !(ssa->var_info[j].type & MAY_BE_REF)) {
 				zend_bitset_incl(worklist, j);
 			}
 			j = next_scc_var[j];
@@ -1758,7 +1761,9 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 		j = scc_var[scc];
 		if (next_scc_var[j] < 0) {
 			/* SCC with a single element */
-			if (zend_inference_calc_range(op_array, ssa, j, 0, 1, &tmp)) {
+			if (ssa->var_info[j].type & MAY_BE_REF) {
+				/* pass */
+			} else if (zend_inference_calc_range(op_array, ssa, j, 0, 1, &tmp)) {
 				zend_inference_init_range(op_array, ssa, j, tmp.underflow, tmp.min, tmp.max, tmp.overflow);
 			} else {
 				zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
@@ -1767,7 +1772,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			/* Find SCC entry points */
 			memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
 			do {
-				if (ssa->vars[j].scc_entry) {
+				if (ssa->vars[j].scc_entry
+				 && !(ssa->var_info[j].type & MAY_BE_REF)) {
 					zend_bitset_incl(worklist, j);
 				}
 				j = next_scc_var[j];
@@ -1777,7 +1783,9 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			zend_infer_ranges_warmup(op_array, ssa, scc_var, next_scc_var, scc);
 			j = scc_var[scc];
 			do {
-				zend_bitset_incl(worklist, j);
+				if (!(ssa->var_info[j].type & MAY_BE_REF)) {
+					zend_bitset_incl(worklist, j);
+				}
 				j = next_scc_var[j];
 			} while (j >= 0);
 #endif
@@ -1791,7 +1799,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 
 			/* initialize missing ranges */
 			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
-				if (!ssa->var_info[j].has_range) {
+				if (!ssa->var_info[j].has_range
+				 && !(ssa->var_info[j].type & MAY_BE_REF)) {
 					zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
 					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
 				}
@@ -1807,7 +1816,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			/* Add all SCC entry variables into worklist for narrowing */
 			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
 				if (ssa->vars[j].definition_phi
-				 && ssa->vars[j].definition_phi->pi < 0) {
+				 && ssa->vars[j].definition_phi->pi < 0
+				 && !(ssa->var_info[j].type & MAY_BE_REF)) {
 					/* narrowing Phi functions first */
 					zend_ssa_range_narrowing(op_array, ssa, j, scc);
 				}
@@ -4273,6 +4283,134 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	return SUCCESS;
 }
 
+static int zend_mark_cv_references(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
+{
+	int var, def;
+	const zend_op *opline;
+	zend_arg_info *arg_info;
+	uint32_t worklist_len = zend_bitset_len(ssa->vars_count);
+	zend_bitset worklist;
+	ALLOCA_FLAG(use_heap);
+
+	worklist = do_alloca(sizeof(zend_ulong) * worklist_len, use_heap);
+	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
+
+	/* Collect SSA variables which definitions creates PHP reference */
+	for (var = 0; var < ssa->vars_count; var++) {
+		def = ssa->vars[var].definition;
+		if (def >= 0 && ssa->vars[var].var < op_array->last_var) {
+			opline = op_array->opcodes + def;
+			if (ssa->ops[def].result_def == var) {
+				switch (opline->opcode) {
+					case ZEND_RECV:
+					case ZEND_RECV_INIT:
+						arg_info = &op_array->arg_info[opline->op1.num-1];
+						if (!ZEND_ARG_SEND_MODE(arg_info)) {
+							continue;
+						}
+						break;
+					default:
+						continue;
+				}
+			} else if (ssa->ops[def].op1_def == var) {
+				switch (opline->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_MAKE_REF:
+					case ZEND_FE_RESET_RW:
+					case ZEND_BIND_GLOBAL:
+					case ZEND_SEND_REF:
+					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
+						break;
+					case ZEND_ADD_ARRAY_ELEMENT:
+						if (!(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
+							continue;
+						}
+						break;
+					case ZEND_BIND_LEXICAL:
+					case ZEND_BIND_STATIC:
+						if (!(opline->extended_value & ZEND_BIND_REF)) {
+							continue;
+						}
+						break;
+					case ZEND_YIELD:
+						if (!(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+							continue;
+						}
+						break;
+					case ZEND_OP_DATA:
+						switch ((opline-1)->opcode) {
+							case ZEND_ASSIGN_OBJ_REF:
+							case ZEND_ASSIGN_STATIC_PROP_REF:
+								break;
+							default:
+								continue;
+						}
+						break;
+					default:
+						continue;
+				}
+			} else if (ssa->ops[def].op2_def == var) {
+				if (opline->opcode != ZEND_ASSIGN_REF) {
+					continue;
+				}
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			zend_bitset_incl(worklist, var);
+		} else if (ssa->var_info[var].type & MAY_BE_REF) {
+			zend_bitset_incl(worklist, var);
+		} else if (ssa->vars[var].alias == SYMTABLE_ALIAS) {
+			zend_bitset_incl(worklist, var);
+		}
+	}
+
+	/* Set and propagate MAY_BE_REF */
+	WHILE_WORKLIST(worklist, worklist_len, var) {
+
+		ssa->var_info[var].type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+
+		if (ssa->vars[var].phi_use_chain) {
+			zend_ssa_phi *p = ssa->vars[var].phi_use_chain;
+			do {
+				if (!(ssa->var_info[p->ssa_var].type & MAY_BE_REF)) {
+					zend_bitset_incl(worklist, p->ssa_var);
+				}
+				p = zend_ssa_next_use_phi(ssa, var, p);
+			} while (p);
+		}
+
+		if (ssa->vars[var].use_chain >= 0) {
+			int use = ssa->vars[var].use_chain;
+			zend_ssa_op *op;
+
+			do {
+				op = ssa->ops + use;
+				if (op->op1_use == var && op->op1_def >= 0) {
+					if (!(ssa->var_info[op->op1_def].type & MAY_BE_REF)) {
+						zend_bitset_incl(worklist, op->op1_def);
+					}
+				}
+				if (op->op2_use == var && op->op2_def >= 0) {
+					if (!(ssa->var_info[op->op2_def].type & MAY_BE_REF)) {
+						zend_bitset_incl(worklist, op->op2_def);
+					}
+				}
+				if (op->result_use == var && op->result_def >= 0) {
+					if (!(ssa->var_info[op->result_def].type & MAY_BE_REF)) {
+						zend_bitset_incl(worklist, op->result_def);
+					}
+				}
+
+				use = zend_ssa_next_use(ssa->ops, var, use);
+			} while (use >= 0);
+		}
+	} WHILE_WORKLIST_END();
+
+	free_alloca(worklist,  use_heap);
+	return SUCCESS;
+}
+
 ZEND_API int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
 {
 	zend_ssa_var_info *ssa_var_info;
@@ -4300,6 +4438,10 @@ ZEND_API int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_arra
 	for (i = op_array->last_var; i < ssa->vars_count; i++) {
 		ssa_var_info[i].type = 0;
 		ssa_var_info[i].has_range = 0;
+	}
+
+	if (zend_mark_cv_references(op_array, script, ssa) != SUCCESS) {
+		return FAILURE;
 	}
 
 	if (zend_infer_ranges(op_array, ssa) != SUCCESS) {
