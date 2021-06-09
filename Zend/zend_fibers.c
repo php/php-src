@@ -284,18 +284,18 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 	boost_context_data data = jump_fcontext(to->handle, transfer);
 
-#ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
-#endif
-
-	EG(current_fiber) = from;
-
 	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
 	*transfer = *data.transfer;
 
 	/* Get a hold of the context that resumed us and update it's handle to allow for symmetric coroutines. */
 	to = transfer->context;
 	to->handle = data.handle;
+
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
+#endif
+
+	EG(current_fiber) = from;
 
 	zend_fiber_restore_vm_state(&state);
 
