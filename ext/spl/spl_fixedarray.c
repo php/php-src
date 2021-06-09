@@ -854,7 +854,6 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
 	spl_handler_SplFixedArray.get_properties  = spl_fixedarray_object_get_properties;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
-	spl_handler_SplFixedArray.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
 
 	return SUCCESS;

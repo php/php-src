@@ -1871,7 +1871,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.unset_property = spl_array_unset_property;
 
 	spl_handler_ArrayObject.compare = spl_array_compare_objects;
-	spl_handler_ArrayObject.dtor_obj = zend_objects_destroy_object;
 	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 
 	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);

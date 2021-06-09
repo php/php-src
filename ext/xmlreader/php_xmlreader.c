@@ -1150,7 +1150,6 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
-	xmlreader_object_handlers.dtor_obj = zend_objects_destroy_object;
 	xmlreader_object_handlers.free_obj = xmlreader_objects_free_storage;
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;

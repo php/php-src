@@ -1199,7 +1199,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
-	spl_handler_SplObjectStorage.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_SplObjectStorage.free_obj        = spl_SplObjectStorage_free_storage;
 
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
