@@ -104,8 +104,8 @@ typedef struct _spl_recursive_it_object {
 	zend_function            *endChildren;
 	zend_function            *nextElement;
 	zend_class_entry         *ce;
-	smart_str                prefix[6];
-	smart_str                postfix[1];
+	zend_string              *prefix[6];
+	zend_string              *postfix[1];
 	zend_object              std;
 } spl_recursive_it_object;
 
@@ -925,14 +925,15 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 	}
 
 	zend_object_std_dtor(&object->std);
-	smart_str_free(&object->prefix[0]);
-	smart_str_free(&object->prefix[1]);
-	smart_str_free(&object->prefix[2]);
-	smart_str_free(&object->prefix[3]);
-	smart_str_free(&object->prefix[4]);
-	smart_str_free(&object->prefix[5]);
+	for (size_t i = 0; i < 6; i++) {
+		if (object->prefix[i]) {
+			zend_string_release(object->prefix[i]);
+		}
+	}
 
-	smart_str_free(&object->postfix[0]);
+	if (object->postfix[0]) {
+		zend_string_release(object->postfix[0]);
+	}
 }
 /* }}} */
 
@@ -944,14 +945,14 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 	intern = zend_object_alloc(sizeof(spl_recursive_it_object), class_type);
 
 	if (init_prefix) {
-		smart_str_appendl(&intern->prefix[0], "",    0);
-		smart_str_appendl(&intern->prefix[1], "| ",  2);
-		smart_str_appendl(&intern->prefix[2], "  ",  2);
-		smart_str_appendl(&intern->prefix[3], "|-",  2);
-		smart_str_appendl(&intern->prefix[4], "\\-", 2);
-		smart_str_appendl(&intern->prefix[5], "",    0);
+		intern->prefix[0] = ZSTR_EMPTY_ALLOC();
+		intern->prefix[1] = zend_string_init("| ",  2, 0);
+		intern->prefix[2] = zend_string_init("  ",  2, 0);
+		intern->prefix[3] = zend_string_init("|-",  2, 0);
+		intern->prefix[4] = zend_string_init("\\-", 2, 0);
+		intern->prefix[5] = ZSTR_EMPTY_ALLOC();
 
-		smart_str_appendl(&intern->postfix[0], "",    0);
+		intern->postfix[0] = ZSTR_EMPTY_ALLOC();
 	}
 
 	zend_object_std_init(&intern->std, class_type);
@@ -982,15 +983,15 @@ static zend_string *spl_recursive_tree_iterator_get_prefix(spl_recursive_it_obje
 	zval       has_next;
 	int        level;
 
-	smart_str_appendl(&str, ZSTR_VAL(object->prefix[0].s), ZSTR_LEN(object->prefix[0].s));
+	smart_str_append(&str, object->prefix[0]);
 
 	for (level = 0; level < object->level; ++level) {
 		zend_call_method_with_0_params(Z_OBJ(object->iterators[level].zobject), object->iterators[level].ce, NULL, "hasnext", &has_next);
 		if (Z_TYPE(has_next) != IS_UNDEF) {
 			if (Z_TYPE(has_next) == IS_TRUE) {
-				smart_str_appendl(&str, ZSTR_VAL(object->prefix[1].s), ZSTR_LEN(object->prefix[1].s));
+				smart_str_append(&str, object->prefix[1]);
 			} else {
-				smart_str_appendl(&str, ZSTR_VAL(object->prefix[2].s), ZSTR_LEN(object->prefix[2].s));
+				smart_str_append(&str, object->prefix[2]);
 			}
 			zval_ptr_dtor(&has_next);
 		}
@@ -998,14 +999,14 @@ static zend_string *spl_recursive_tree_iterator_get_prefix(spl_recursive_it_obje
 	zend_call_method_with_0_params(Z_OBJ(object->iterators[level].zobject), object->iterators[level].ce, NULL, "hasnext", &has_next);
 	if (Z_TYPE(has_next) != IS_UNDEF) {
 		if (Z_TYPE(has_next) == IS_TRUE) {
-			smart_str_appendl(&str, ZSTR_VAL(object->prefix[3].s), ZSTR_LEN(object->prefix[3].s));
+			smart_str_append(&str, object->prefix[3]);
 		} else {
-			smart_str_appendl(&str, ZSTR_VAL(object->prefix[4].s), ZSTR_LEN(object->prefix[4].s));
+			smart_str_append(&str, object->prefix[4]);
 		}
 		zval_ptr_dtor(&has_next);
 	}
 
-	smart_str_appendl(&str, ZSTR_VAL(object->prefix[5].s), ZSTR_LEN(object->prefix[5].s));
+	smart_str_append(&str, object->prefix[5]);
 	smart_str_0(&str);
 
 	return str.s;
@@ -1029,7 +1030,7 @@ static zend_string *spl_recursive_tree_iterator_get_entry(spl_recursive_it_objec
 
 static zend_string *spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object)
 {
-	return zend_string_copy(object->postfix[0].s);
+	return zend_string_copy(object->postfix[0]);
 }
 
 /* {{{ RecursiveIteratorIterator to generate ASCII graphic trees for the entries in a RecursiveIterator */
@@ -1042,11 +1043,10 @@ PHP_METHOD(RecursiveTreeIterator, __construct)
 PHP_METHOD(RecursiveTreeIterator, setPrefixPart)
 {
 	zend_long  part;
-	char* prefix;
-	size_t   prefix_len;
+	zend_string *prefix;
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &part, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS", &part, &prefix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1055,8 +1055,8 @@ PHP_METHOD(RecursiveTreeIterator, setPrefixPart)
 		RETURN_THROWS();
 	}
 
-	smart_str_free(&object->prefix[part]);
-	smart_str_appendl(&object->prefix[part], prefix, prefix_len);
+	zend_string_release(object->prefix[part]);
+	object->prefix[part] = zend_string_copy(prefix);
 } /* }}} */
 
 /* {{{ Returns the string to place in front of current element */
@@ -1080,15 +1080,14 @@ PHP_METHOD(RecursiveTreeIterator, getPrefix)
 PHP_METHOD(RecursiveTreeIterator, setPostfix)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
-	char* postfix;
-	size_t   postfix_len;
+	zend_string *postfix;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &postfix, &postfix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &postfix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	smart_str_free(&object->postfix[0]);
-	smart_str_appendl(&object->postfix[0], postfix, postfix_len);
+	zend_string_release(object->postfix[0]);
+	object->postfix[0] = zend_string_copy(postfix);
 } /* }}} */
 
 /* {{{ Returns the string presentation built for current element */
