@@ -1491,9 +1491,8 @@ static inline void spl_dual_it_free(spl_dual_it_object *intern)
 		ZVAL_UNDEF(&intern->current.key);
 	}
 	if (intern->dit_type == DIT_CachingIterator || intern->dit_type == DIT_RecursiveCachingIterator) {
-		if (Z_TYPE(intern->u.caching.zstr) != IS_UNDEF) {
-			zval_ptr_dtor(&intern->u.caching.zstr);
-			ZVAL_UNDEF(&intern->u.caching.zstr);
+		if (intern->u.caching.zstr) {
+			zend_string_release(intern->u.caching.zstr);
 		}
 		if (Z_TYPE(intern->u.caching.zchildren) != IS_UNDEF) {
 			zval_ptr_dtor(&intern->u.caching.zchildren);
@@ -2161,7 +2160,6 @@ static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
 		case DIT_CachingIterator:
 		case DIT_RecursiveCachingIterator:
 			zend_get_gc_buffer_add_zval(gc_buffer, &object->u.caching.zcache);
-			zend_get_gc_buffer_add_zval(gc_buffer, &object->u.caching.zstr);
 			zend_get_gc_buffer_add_zval(gc_buffer, &object->u.caching.zchildren);
 			break;
 		case DIT_CallbackFilterIterator:
@@ -2384,18 +2382,10 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 			}
 		}
 		if (intern->u.caching.flags & (CIT_TOSTRING_USE_INNER|CIT_CALL_TOSTRING)) {
-			int  use_copy;
-			zval expr_copy;
 			if (intern->u.caching.flags & CIT_TOSTRING_USE_INNER) {
-				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &intern->inner.zobject);
+				intern->u.caching.zstr = zval_get_string(&intern->inner.zobject);
 			} else {
-				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &intern->current.data);
-			}
-			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
-			if (use_copy) {
-				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &expr_copy);
-			} else {
-				Z_TRY_ADDREF(intern->u.caching.zstr);
+				intern->u.caching.zstr = zval_get_string(&intern->current.data);
 			}
 		}
 		spl_dual_it_next(intern, 0);
@@ -2498,8 +2488,8 @@ PHP_METHOD(CachingIterator, __toString)
 		convert_to_string(return_value);
 		return;
 	}
-	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
-		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
+	if (intern->u.caching.zstr) {
+		RETURN_STR_COPY(intern->u.caching.zstr);
 	} else {
 		RETURN_EMPTY_STRING();
 	}

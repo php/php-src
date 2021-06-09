@@ -129,7 +129,7 @@ typedef struct _spl_dual_it_object {
 		} limit;
 		struct {
 			zend_long             flags; /* CIT_* */
-			zval             zstr;
+			zend_string          *zstr;
 			zval             zchildren;
 			zval             zcache;
 		} caching;
