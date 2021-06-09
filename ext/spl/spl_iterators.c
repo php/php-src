@@ -1470,6 +1470,7 @@ static inline void spl_dual_it_free(spl_dual_it_object *intern)
 	if (intern->dit_type == DIT_CachingIterator || intern->dit_type == DIT_RecursiveCachingIterator) {
 		if (intern->u.caching.zstr) {
 			zend_string_release(intern->u.caching.zstr);
+			intern->u.caching.zstr = NULL;
 		}
 		if (Z_TYPE(intern->u.caching.zchildren) != IS_UNDEF) {
 			zval_ptr_dtor(&intern->u.caching.zchildren);
