@@ -1360,7 +1360,7 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
 		char *_error = NULL; \
-		ZEND_ATTRIBUTE_UNUSED bool _dummy; \
+		bool _dummy = 0; \
 		bool _optional = 0; \
 		int _error_code = ZPP_ERROR_OK; \
 		((void)_i); \
@@ -1369,6 +1369,7 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 		((void)_expected_type); \
 		((void)_error); \
 		((void)_optional); \
+		((void)_dummy); \
 		\
 		do { \
 			if (UNEXPECTED(_num_args < _min_num_args) || \

@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0alpha1
+?? ??? ????, PHP 8.1.0alpha2
+
+10 Jun 2021, PHP 8.1.0alpha1
 
 - Core:
   . Fixed inclusion order for phpize builds on Windows. (cmb)
@@ -13,7 +15,6 @@ PHP                                                                        NEWS
     (Björn Tantau)
   . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
     (krakjoe)
-  . Fixed bug #24214 (implement skipping frames in backtraces). (krakjoe)
  
  - Standard:
   . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).

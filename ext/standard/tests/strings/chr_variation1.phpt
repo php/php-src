@@ -59,11 +59,11 @@ string(2) "ff"
 string(2) "00"
 -- Iteration 5 --
 
-Deprecated: Implicit conversion from non-compatible float 10.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 10.5 to int loses precision in %s on line %d
 string(2) "0a"
 -- Iteration 6 --
 
-Deprecated: Implicit conversion from non-compatible float -20.5 to int in %s on line %d
+Deprecated: Implicit conversion from float -20.5 to int loses precision in %s on line %d
 string(2) "ec"
 -- Iteration 7 --
 string(2) "48"

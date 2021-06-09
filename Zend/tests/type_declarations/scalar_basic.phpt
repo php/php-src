@@ -72,7 +72,7 @@ int(1)
 int(1)
 
 *** Trying float(1.5)
-E_DEPRECATED: Implicit conversion from non-compatible float 1.5 to int on line 14
+E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line 14
 int(1)
 
 *** Trying string(2) "1a"

@@ -421,6 +421,9 @@ PHP 8.1 UPGRADE NOTES
     MYSQLI_REFRESH_SLAVE, in line with an upstream change in MySQL. The old
     constant is still available for backwards-compatibility reasons, but may
     be deprecated/removed in the future.
+    
+- Sockets:
+  . TCP_DEFER_ACCEPT socket option added where available.
 
 ========================================
 11. Changes to INI File Handling
