@@ -109,7 +109,7 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
  * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
- * ZEND_TYPE_IS_ONLY_MASK() - checks if type-hint refer to standard type only
+ * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
  * ZEND_TYPE_HAS_CLASS()     - checks if type-hint contains some class
  * ZEND_TYPE_HAS_CE()        - checks if type-hint contains some class as zend_class_entry *
  * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *

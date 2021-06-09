@@ -430,7 +430,8 @@ static inheritance_status zend_perform_intersection_covariant_class_type_check(
 			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name, register_unresolved);
 			fe_ce = ZEND_TYPE_CE(*single_type);
 		} else {
-			/* standard type */
+			/* standard type in an intersection type is impossible,
+			 * because it would be a fatal compile error */
 			ZEND_UNREACHABLE();
 			continue;
 		}
