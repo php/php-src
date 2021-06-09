@@ -888,7 +888,7 @@ PHP_METHOD(UConverter, getStandards) {
 /* }}} */
 
 /* {{{ Converter create/clone/destroy */
-static void php_converter_dtor_object(zend_object *obj) {
+static void php_converter_free_object(zend_object *obj) {
 	php_converter_object *objval = php_converter_fetch_object(obj);
 
 	if (objval->src) {
@@ -899,7 +899,8 @@ static void php_converter_dtor_object(zend_object *obj) {
 		ucnv_close(objval->dest);
 	}
 
-	intl_error_reset(&(objval->error));
+	intl_error_reset(&objval->error);
+	zend_object_std_dtor(obj);
 }
 
 static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval) {
@@ -971,7 +972,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
-	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;
+	php_converter_object_handlers.free_obj = php_converter_free_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);
