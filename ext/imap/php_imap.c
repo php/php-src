@@ -193,6 +193,8 @@ static void imap_object_destroy(zend_object *zobj) {
 		efree(IMAPG(imap_password));
 		IMAPG(imap_password) = 0;
 	}
+
+	zend_object_std_dtor(zobj);
 }
 
 #define GET_IMAP_STREAM(imap_conn_struct, zval_imap_obj) \
@@ -485,7 +487,7 @@ PHP_MINIT_FUNCTION(imap)
 	memcpy(&imap_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	imap_object_handlers.offset = XtOffsetOf(php_imap_object, std);
 	imap_object_handlers.get_constructor = imap_object_get_constructor;
-	imap_object_handlers.dtor_obj = imap_object_destroy;
+	imap_object_handlers.free_obj = imap_object_destroy;
 	imap_object_handlers.clone_obj = NULL;
 
 	/* lets allow NIL */
