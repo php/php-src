@@ -1073,6 +1073,26 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 			}
 		}
 		ZVAL_UNDEF(result);
+	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
+		zend_false_to_array_deprecated();
+		zend_array *arr = zend_new_array(0);
+		ZVAL_ARR(object_ptr, arr);
+		zval *var;
+		if (dim) {
+			if (type == BP_VAR_W) {
+				var = zend_jit_fetch_dim_w_helper(arr, dim);
+			} else {
+				ZEND_ASSERT(type == BP_VAR_RW);
+				var = zend_jit_fetch_dim_rw_helper(arr, dim);
+			}
+		} else {
+			var = zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
+		}
+		if (var) {
+			ZVAL_INDIRECT(result, var);
+		} else {
+			ZVAL_UNDEF(result);
+		}
 	} else {
 		if (type == BP_VAR_UNSET) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
@@ -1120,6 +1140,24 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 		} else {
 			zend_assign_to_string_offset(object_ptr, dim, value, result);
 		}
+	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
+		zend_false_to_array_deprecated();
+		zend_array *arr = zend_new_array(0);
+		ZVAL_ARR(object_ptr, arr);
+		zval *var = dim
+			? zend_jit_fetch_dim_w_helper(arr, dim)
+			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
+		if (!var) {
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
+
+		ZVAL_COPY_DEREF(var, value);
+		if (result) {
+			ZVAL_COPY(result, var);
+		}
 	} else {
 		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 		if (result) {
@@ -1145,34 +1183,31 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			if (z == &rv) {
 				zval_ptr_dtor(&rv);
 			}
-//???			if (retval) {
-//???				ZVAL_COPY(retval, &res);
-//???			}
 			zval_ptr_dtor(&res);
 		} else {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
-//???			if (retval) {
-//???				ZVAL_NULL(retval);
-//???			}
+		}
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		if (!dim) {
+			zend_throw_error(NULL, "[] operator not supported for strings");
+		} else {
+			if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+				zend_check_string_offset(dim/*, BP_VAR_RW*/);
+			}
+			zend_wrong_string_offset();
+		}
+	} else if (Z_TYPE_P(container) == IS_FALSE) {
+		zend_false_to_array_deprecated();
+		zend_array *arr = zend_new_array(0);
+		ZVAL_ARR(container, arr);
+		zval *var = dim
+			? zend_jit_fetch_dim_rw_helper(arr, dim)
+			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
+		if (var) {
+			binary_op(var, var, value);
 		}
 	} else {
-		if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-			if (!dim) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
-			} else {
-				if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-					zend_check_string_offset(dim/*, BP_VAR_RW*/);
-				}
-				zend_wrong_string_offset();
-			}
-//???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-//???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
-		} else {
-			zend_throw_error(NULL, "Cannot use a scalar value as an array");
-//???			if (retval) {
-//???				ZVAL_NULL(retval);
-//???			}
-		}
+		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 	}
 }
 
@@ -1890,6 +1925,9 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 		if (ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(ref))
 				&& !zend_verify_ref_array_assignable(Z_REF_P(ref))) {
 			return NULL;
+		}
+		if (Z_TYPE_P(val) == IS_FALSE) {
+			zend_false_to_array_deprecated();
 		}
 		ZVAL_ARR(val, zend_new_array(8));
 	}

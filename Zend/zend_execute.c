@@ -1583,6 +1583,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_functi
 	}
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
+{
+	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+}
+
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_uchar c;
@@ -2329,6 +2334,9 @@ fetch_from_array:
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
+			}
+			if (Z_TYPE_P(container) == IS_FALSE) {
+				zend_false_to_array_deprecated();
 			}
 			if (type != BP_VAR_UNSET) {
 				array_init(container);

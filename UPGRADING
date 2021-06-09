@@ -356,6 +356,9 @@ PHP 8.1 UPGRADE NOTES
   . Returning a non-array from __sleep will raise a warning
   . Returning by reference from a void function is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+  . Automatic conversion of "false" into an empty array on write operands is
+    deprecated.
+    RFC: https://wiki.php.net/rfc/autovivification_false
 
 - Ctype:
   . Passing a non-string value to ctype_*() functions is deprecated. A future
