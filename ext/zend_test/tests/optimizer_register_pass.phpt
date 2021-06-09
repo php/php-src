@@ -11,6 +11,7 @@ opcache
 --INI--
 opcache.enable_cli=1
 opcache.file_cache=
+opcache.file_cache_only=0
 zend_test.register_passes=1
 --FILE--
 <?php
