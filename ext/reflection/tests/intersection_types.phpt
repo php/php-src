@@ -5,11 +5,11 @@ Intersection types in reflection
 
 function dumpType(ReflectionIntersectionType $rt) {
     echo "Type $rt:\n";
-    echo "Allows null: " . ($rt->allowsNull() ? "true" : "false") . "\n";
+    echo "Allows null: " . json_encode($rt->allowsNull()) . "\n";
     foreach ($rt->getTypes() as $type) {
         echo "  Name: " . $type->getName() . "\n";
         echo "  String: " . (string) $type . "\n";
-        echo "  Allows Null: " . ($type->allowsNull() ? "true" : "false") . "\n";
+        echo "  Allows Null: " . json_encode($type->allowsNull()) . "\n";
     }
 }
 
