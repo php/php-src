@@ -352,13 +352,6 @@ static void TimeZone_object_init(TimeZone_object *to)
 }
 /* }}} */
 
-/* {{{ TimeZone_objects_dtor */
-static void TimeZone_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ TimeZone_objects_free */
 static void TimeZone_objects_free(zend_object *object)
 {
@@ -406,7 +399,6 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
 	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;
-	TimeZone_handlers.dtor_obj = TimeZone_objects_dtor;
 	TimeZone_handlers.free_obj = TimeZone_objects_free;
 
 

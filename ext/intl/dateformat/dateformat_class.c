@@ -28,13 +28,6 @@ static zend_object_handlers IntlDateFormatter_handlers;
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
  */
 
-/* {{{ IntlDateFormatter_objects_dtor */
-static void IntlDateFormatter_object_dtor(zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ IntlDateFormatter_objects_free */
 void IntlDateFormatter_object_free( zend_object *object )
 {
@@ -116,7 +109,6 @@ void dateformat_register_IntlDateFormatter_class( void )
 		sizeof IntlDateFormatter_handlers);
 	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
-	IntlDateFormatter_handlers.dtor_obj = IntlDateFormatter_object_dtor;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }
 /* }}} */
