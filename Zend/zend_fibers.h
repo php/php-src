@@ -43,6 +43,10 @@ typedef enum {
 	ZEND_FIBER_FLAG_DESTROYED = 1 << 2,
 } zend_fiber_flag;
 
+typedef enum {
+	ZEND_FIBER_TRANSFER_FLAG_ERROR = 1 << 0,
+} zend_fiber_transfer_flag;
+
 void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
 void zend_fiber_shutdown(void);
@@ -67,8 +71,19 @@ typedef struct _zend_fiber_stack {
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
 
-/* Coroutine functions must return a fiber context to switch to after they are finished. */
-typedef zend_fiber_context *(*zend_fiber_coroutine)(zend_fiber_context *context);
+/* Encapsulates data needed for a context switch. */
+typedef struct _zend_fiber_transfer {
+	/* Fiber that will be switched to / has resumed us. */
+	zend_fiber_context *context;
+	/* Value to that should be send to (or was received from) a fiber. */
+	zval value;
+	/* Bitmask of flags defined in enum zend_fiber_transfer_flag. */
+	uint8_t flags;
+} zend_fiber_transfer;
+
+/* Coroutine functions must populate the given transfer with a new context
+ * and (optional) data before they return. */
+typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 
 /* Defined as a macro to allow anonymous embedding. */
 #define ZEND_FIBER_CONTEXT_FIELDS \
@@ -118,17 +133,14 @@ struct _zend_fiber {
 	/* Frame on the bottom of the fiber vm stack. */
 	zend_execute_data *stack_bottom;
 
-	/* Exception to be thrown from Fiber::suspend(). */
-	zval *exception;
-
-	/* Storage for temporaries and fiber return value. */
-	zval value;
+	/* Storage for fiber return value. */
+	zval result;
 };
 
 /* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-ZEND_API zend_fiber_context *zend_fiber_switch_context(zend_fiber_context *to);
+ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
 
 END_EXTERN_C()
 
