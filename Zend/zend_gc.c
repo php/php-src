@@ -1637,12 +1637,6 @@ ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer) {
 	gc_buffer->cur = gc_buffer->start + old_capacity;
 }
 
-ZEND_API void zend_get_gc_buffer_add_zvals(zend_get_gc_buffer *gc_buffer, zval *zvs, size_t n) {
-	for (size_t i = 0; i < n; i++) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &zvs[i]);
-	}
-}
-
 static void zend_get_gc_buffer_release() {
 	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
 	efree(gc_buffer->start);

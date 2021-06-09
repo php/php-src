@@ -2103,15 +2103,8 @@ static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
 	spl_dual_it_object *object = spl_dual_it_from_obj(obj);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
-	if (object->inner.iterator && object->inner.iterator->funcs->get_gc) {
-		zval *inner_table;
-		int inner_n;
-		HashTable *inner_ht = object->inner.iterator->funcs->get_gc(
-			object->inner.iterator, &inner_table, &inner_n);
-		zend_get_gc_buffer_add_zvals(gc_buffer, inner_table, inner_n);
-		if (inner_ht) {
-			zend_get_gc_buffer_add_ht(gc_buffer, inner_ht);
-		}
+	if (object->inner.iterator) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &object->inner.iterator->std);
 	}
 
 	zend_get_gc_buffer_add_zval(gc_buffer, &object->current.data);

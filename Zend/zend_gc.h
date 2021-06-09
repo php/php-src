@@ -93,7 +93,6 @@ typedef struct {
 
 ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create(void);
 ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer);
-ZEND_API void zend_get_gc_buffer_add_zvals(zend_get_gc_buffer *gc_buffer, zval *zvs, size_t n);
 
 static zend_always_inline void zend_get_gc_buffer_add_zval(
 		zend_get_gc_buffer *gc_buffer, zval *zv) {
@@ -112,15 +111,6 @@ static zend_always_inline void zend_get_gc_buffer_add_obj(
 		zend_get_gc_buffer_grow(gc_buffer);
 	}
 	ZVAL_OBJ(gc_buffer->cur, obj);
-	gc_buffer->cur++;
-}
-
-static zend_always_inline void zend_get_gc_buffer_add_ht(
-		zend_get_gc_buffer *gc_buffer, HashTable *ht) {
-	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
-		zend_get_gc_buffer_grow(gc_buffer);
-	}
-	ZVAL_ARR(gc_buffer->cur, ht);
 	gc_buffer->cur++;
 }
 
