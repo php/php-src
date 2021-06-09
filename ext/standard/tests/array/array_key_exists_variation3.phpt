@@ -34,7 +34,7 @@ echo "Done";
 -- Iteration 1 --
 Pass float as $key:
 
-Deprecated: Implicit conversion from non-compatible float 1.23456789E-10 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.23456789E-10 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)
@@ -42,7 +42,7 @@ bool(true)
 -- Iteration 1 --
 Pass float as $key:
 
-Deprecated: Implicit conversion from non-compatible float 1.00000000000001 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.00000000000001 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)
@@ -50,7 +50,7 @@ bool(true)
 -- Iteration 1 --
 Pass float as $key:
 
-Deprecated: Implicit conversion from non-compatible float 1.99999999999999 to int in %s on line %d
+Deprecated: Implicit conversion from float 1.99999999999999 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)

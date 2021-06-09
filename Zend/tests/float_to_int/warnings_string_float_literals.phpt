@@ -54,45 +54,45 @@ var_dump($instance->a);
 --EXPECTF--
 Bitwise ops:
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(3)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(1)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(2)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(8)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(0)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(6)
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(1)
 Modulo:
 
-Deprecated: Implicit conversion from non-compatible float-string "6.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "6.5" to int loses precision in %s on line %d
 int(0)
 
-Deprecated: Implicit conversion from non-compatible float-string "2.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "2.5" to int loses precision in %s on line %d
 int(1)
 Function calls:
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(1)
 
-Deprecated: Implicit conversion from non-compatible float-string "60.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "60.5" to int loses precision in %s on line %d
 string(1) "<"
 Function returns:
 
-Deprecated: Implicit conversion from non-compatible float-string "3.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "3.5" to int loses precision in %s on line %d
 int(3)
 Typed property assignment:
 
-Deprecated: Implicit conversion from non-compatible float-string "1.5" to int in %s on line %d
+Deprecated: Implicit conversion from float-string "1.5" to int loses precision in %s on line %d
 int(1)

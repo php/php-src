@@ -227,7 +227,7 @@ array(3) {
   string(3) "333"
 }
 
-Deprecated: Implicit conversion from non-compatible float 0.123 to int in %s on line %d
+Deprecated: Implicit conversion from float 0.123 to int loses precision in %s on line %d
 array(3) {
   ["aaa"]=>
   string(3) "111"
@@ -259,7 +259,7 @@ array(3) {
   string(3) "ccc"
 }
 
-Deprecated: Implicit conversion from non-compatible float 3.14 to int in %s on line %d
+Deprecated: Implicit conversion from float 3.14 to int loses precision in %s on line %d
 array(0) {
 }
 

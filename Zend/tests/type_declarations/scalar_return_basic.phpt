@@ -71,7 +71,7 @@ int(1)
 *** Trying float(1)
 int(1)
 *** Trying float(1.5)
-E_DEPRECATED: Implicit conversion from non-compatible float 1.5 to int on line %d
+E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line %d
 int(1)
 *** Trying string(2) "1a"
 *** Caught {closure}(): Return value must be of type int, string returned in %s on line %d
