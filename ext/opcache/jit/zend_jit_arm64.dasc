@@ -2493,7 +2493,7 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 		|	JMP_IP TMP1
 	} else if (GCC_GLOBAL_REGS) {
 		|	ldp x29, x30, [sp], # SPAD    // stack alignment
-		|	JMP_IP, TMP1
+		|	JMP_IP TMP1
 	} else {
 		|	ldp FP, RX, T2                // retore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
