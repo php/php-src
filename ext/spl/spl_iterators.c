@@ -976,7 +976,7 @@ static zend_object *spl_RecursiveTreeIterator_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *object, zval *return_value)
+static zend_string *spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *object)
 {
 	smart_str  str = {0};
 	zval       has_next;
@@ -1008,31 +1008,28 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	smart_str_appendl(&str, ZSTR_VAL(object->prefix[5].s), ZSTR_LEN(object->prefix[5].s));
 	smart_str_0(&str);
 
-	RETURN_NEW_STR(str.s);
+	return str.s;
 }
 
-static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *object, zval *return_value)
+static zend_string *spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *object)
 {
-	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
-	zval                      *data;
-
-	data = iterator->funcs->get_current_data(iterator);
-	if (data) {
-		ZVAL_DEREF(data);
-		/* TODO: Remove this special case? */
-		if (Z_TYPE_P(data) == IS_ARRAY) {
-			RETVAL_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
-		} else {
-			ZVAL_COPY(return_value, data);
-			convert_to_string(return_value);
-		}
+	zend_object_iterator *iterator = object->iterators[object->level].iterator;
+	zval *data = iterator->funcs->get_current_data(iterator);
+	if (!data) {
+		return NULL;
 	}
+
+	ZVAL_DEREF(data);
+	if (Z_TYPE_P(data) == IS_ARRAY) {
+		/* TODO: Remove this special case? */
+		return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
+	}
+	return zval_get_string(data);
 }
 
-static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object, zval *return_value)
+static zend_string *spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object)
 {
-	RETVAL_STR(object->postfix[0].s);
-	Z_ADDREF_P(return_value);
+	return zend_string_copy(object->postfix[0].s);
 }
 
 /* {{{ RecursiveIteratorIterator to generate ASCII graphic trees for the entries in a RecursiveIterator */
@@ -1076,7 +1073,7 @@ PHP_METHOD(RecursiveTreeIterator, getPrefix)
 		RETURN_THROWS();
 	}
 
-	spl_recursive_tree_iterator_get_prefix(object, return_value);
+	RETURN_STR(spl_recursive_tree_iterator_get_prefix(object));
 } /* }}} */
 
 /* {{{ Sets postfix as used in getPostfix() */
@@ -1108,7 +1105,12 @@ PHP_METHOD(RecursiveTreeIterator, getEntry)
 		RETURN_THROWS();
 	}
 
-	spl_recursive_tree_iterator_get_entry(object, return_value);
+	zend_string *entry = spl_recursive_tree_iterator_get_entry(object);
+	if (!entry) {
+		// TODO: Can this happen? It's not in the stubs.
+		RETURN_NULL();
+	}
+	RETURN_STR(entry);
 } /* }}} */
 
 /* {{{ Returns the string to place after the current element */
@@ -1125,16 +1127,13 @@ PHP_METHOD(RecursiveTreeIterator, getPostfix)
 		RETURN_THROWS();
 	}
 
-	spl_recursive_tree_iterator_get_postfix(object, return_value);
+	RETURN_STR(spl_recursive_tree_iterator_get_postfix(object));
 } /* }}} */
 
 /* {{{ Returns the current element prefixed and postfixed */
 PHP_METHOD(RecursiveTreeIterator, current)
 {
-	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
-	zval                       prefix, entry, postfix;
-	char                      *ptr;
-	zend_string               *str;
+	spl_recursive_it_object *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1159,33 +1158,24 @@ PHP_METHOD(RecursiveTreeIterator, current)
 		}
 	}
 
-	ZVAL_NULL(&prefix);
-	ZVAL_NULL(&entry);
-	spl_recursive_tree_iterator_get_prefix(object, &prefix);
-	spl_recursive_tree_iterator_get_entry(object, &entry);
-	if (Z_TYPE(entry) != IS_STRING) {
-		zval_ptr_dtor(&prefix);
-		zval_ptr_dtor(&entry);
+	zend_string *entry = spl_recursive_tree_iterator_get_entry(object);
+	if (!entry) {
 		RETURN_NULL();
 	}
-	spl_recursive_tree_iterator_get_postfix(object, &postfix);
 
-	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix), 0);
-	ptr = ZSTR_VAL(str);
+	zend_string *prefix = spl_recursive_tree_iterator_get_prefix(object);
+	zend_string *postfix = spl_recursive_tree_iterator_get_postfix(object);
 
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(entry), Z_STRLEN(entry));
-	ptr += Z_STRLEN(entry);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
-	*ptr = 0;
+	zend_string *result = zend_string_concat3(
+		ZSTR_VAL(prefix), ZSTR_LEN(prefix),
+		ZSTR_VAL(entry), ZSTR_LEN(entry),
+		ZSTR_VAL(postfix), ZSTR_LEN(postfix));
 
-	zval_ptr_dtor(&prefix);
-	zval_ptr_dtor(&entry);
-	zval_ptr_dtor(&postfix);
+	zend_string_release(entry);
+	zend_string_release(prefix);
+	zend_string_release(postfix);
 
-	RETURN_NEW_STR(str);
+	RETURN_NEW_STR(result);
 } /* }}} */
 
 /* {{{ Returns the current key prefixed and postfixed */
@@ -1193,9 +1183,7 @@ PHP_METHOD(RecursiveTreeIterator, key)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 	zend_object_iterator      *iterator;
-	zval                       prefix, key, postfix, key_copy;
-	char                      *ptr;
-	zend_string               *str;
+	zval                       key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1213,31 +1201,21 @@ PHP_METHOD(RecursiveTreeIterator, key)
 		RETURN_COPY_VALUE(&key);
 	}
 
-	if (Z_TYPE(key) != IS_STRING) {
-		if (zend_make_printable_zval(&key, &key_copy)) {
-			key = key_copy;
-		}
-	}
+	zend_string *key_str = zval_get_string(&key);
+	zend_string *prefix = spl_recursive_tree_iterator_get_prefix(object);
+	zend_string *postfix = spl_recursive_tree_iterator_get_postfix(object);
 
-	spl_recursive_tree_iterator_get_prefix(object, &prefix);
-	spl_recursive_tree_iterator_get_postfix(object, &postfix);
+	zend_string *result = zend_string_concat3(
+		ZSTR_VAL(prefix), ZSTR_LEN(prefix),
+		ZSTR_VAL(key_str), ZSTR_LEN(key_str),
+		ZSTR_VAL(postfix), ZSTR_LEN(postfix));
 
-	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix), 0);
-	ptr = ZSTR_VAL(str);
-
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(key), Z_STRLEN(key));
-	ptr += Z_STRLEN(key);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
-	*ptr = 0;
-
-	zval_ptr_dtor(&prefix);
+	zend_string_release(key_str);
+	zend_string_release(prefix);
+	zend_string_release(postfix);
 	zval_ptr_dtor(&key);
-	zval_ptr_dtor(&postfix);
 
-	RETURN_NEW_STR(str);
+	RETURN_NEW_STR(result);
 } /* }}} */
 
 static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key)
