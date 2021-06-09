@@ -892,36 +892,19 @@ static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_st
 	return function_handler;
 }
 
-/* {{{ spl_RecursiveIteratorIterator_dtor */
-static void spl_RecursiveIteratorIterator_dtor(zend_object *_object)
-{
-	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
-	zend_object_iterator *sub_iter;
-
-	/* call standard dtor */
-	zend_objects_destroy_object(_object);
-
-	if (object->iterators) {
-		while (object->level >= 0) {
-			sub_iter = object->iterators[object->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&object->iterators[object->level--].zobject);
-		}
-		efree(object->iterators);
-		object->iterators = NULL;
-	}
-}
-/* }}} */
-
 /* {{{ spl_RecursiveIteratorIterator_free_storage */
 static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 {
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
 
 	if (object->iterators) {
+		while (object->level >= 0) {
+			zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
+			zend_iterator_dtor(sub_iter);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
+			object->level--;
+		}
 		efree(object->iterators);
-		object->iterators = NULL;
-		object->level     = 0;
 	}
 
 	zend_object_std_dtor(&object->std);
@@ -936,6 +919,22 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 	}
 }
 /* }}} */
+
+static HashTable *spl_RecursiveIteratorIterator_get_gc(zend_object *obj, zval **table, int *n)
+{
+	spl_recursive_it_object *object = spl_recursive_it_from_obj(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (object->iterators) {
+		for (int level = 0; level <= object->level; level++) {
+			zend_get_gc_buffer_add_zval(gc_buffer, &object->iterators[level].zobject);
+			zend_get_gc_buffer_add_obj(gc_buffer, &object->iterators[object->level].iterator->std);
+		}
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return zend_std_get_properties(obj);
+}
 
 /* {{{ spl_RecursiveIteratorIterator_new_ex */
 static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class_type, int init_prefix)
@@ -3205,8 +3204,8 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_handlers_rec_it_it.offset = XtOffsetOf(spl_recursive_it_object, std);
 	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
-	spl_handlers_rec_it_it.dtor_obj = spl_RecursiveIteratorIterator_dtor;
 	spl_handlers_rec_it_it.free_obj = spl_RecursiveIteratorIterator_free_storage;
+	spl_handlers_rec_it_it.get_gc = spl_RecursiveIteratorIterator_get_gc;
 
 	memcpy(&spl_handlers_dual_it, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_handlers_dual_it.offset = XtOffsetOf(spl_dual_it_object, std);
