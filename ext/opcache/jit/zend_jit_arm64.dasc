@@ -1801,8 +1801,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 			|	EXT_CALL handler, REG0
 			|	ldp FP, RX, T2                // retore FP and IP
 			|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
-			|	tst RETVALw, RETVALw
-			|	blt >1
+			|	tbnz RETVALw, #31, >1
 			|	mov RETVALw, #1               // ZEND_VM_ENTER
 			|1:
 			|	ret
@@ -2283,8 +2282,7 @@ static int zend_jit_hybrid_hot_trace_stub(dasm_State **Dst)
 	|	mov FCARG1x, FP
 	|	GET_IP FCARG2x
 	|	EXT_CALL zend_jit_trace_hot_root, REG0
-	|	cmp RETVALw, wzr   // Result is < 0 on failure.
-	|	blt >1
+	|	tbnz RETVALw, #31, >1  // Result is < 0 on failure.
 	|	MEM_LOAD_64_ZTS ldr, FP, executor_globals, current_execute_data, REG0
 	|	LOAD_IP
 	|	JMP_IP TMP1
@@ -8355,10 +8353,9 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 				|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_HAS_THIS
 				|	str TMP1w, EX:RX->This.u1.type_info
 			} else {
-				|	LOAD_32BIT_VAL TMP1w, ZEND_CALL_HAS_THIS
-				|	ldr TMP2w, EX:RX->This.u1.type_info
-				|	orr TMP2w, TMP2w, TMP1w
-				|	str TMP2w, EX:RX->This.u1.type_info
+				|	ldr TMP1w, EX:RX->This.u1.type_info
+				|	BW_OP_32_WITH_CONST orr, TMP1w, TMP1w, ZEND_CALL_HAS_THIS, TMP2w
+				|	str TMP1w, EX:RX->This.u1.type_info
 			}
 	    } else {
 			if (opline->op1_type == IS_CV) {
@@ -8381,9 +8378,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	} else {
 		if (opline->op2_type == IS_CV) {
 			|	// GC_ADDREF(closure);
-			|	ldr TMP1w, [REG0]
-			|	add TMP1w, TMP1w, #1
-			|	str TMP1w, [REG0]
+			|	GC_ADDREF REG0, TMP1w
 		}
 		|	//	object_or_called_scope = closure->called_scope;
 		|	ldr REG1, [REG0, #offsetof(zend_closure, called_scope)]
