@@ -548,7 +548,6 @@ void dom_nnodemap_objects_free_storage(zend_object *object);
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
-static void dom_nnodemap_object_dtor(zend_object *object);
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
 #endif
@@ -568,7 +567,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
-	dom_nnodemap_object_handlers.dtor_obj = dom_nnodemap_object_dtor;
 	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
 	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
@@ -1050,13 +1048,10 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 /* }}} */
 #endif
 
-static void dom_nnodemap_object_dtor(zend_object *object) /* {{{ */
+void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 {
-	dom_object *intern;
-	dom_nnodemap_object *objmap;
-
-	intern = php_dom_obj_from_obj(object);
-	objmap = (dom_nnodemap_object *)intern->ptr;
+	dom_object *intern = php_dom_obj_from_obj(object);
+	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap) {
 		if (objmap->local) {
@@ -1071,12 +1066,6 @@ static void dom_nnodemap_object_dtor(zend_object *object) /* {{{ */
 		efree(objmap);
 		intern->ptr = NULL;
 	}
-}
-/* }}} */
-
-void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
-{
-	dom_object *intern = php_dom_obj_from_obj(object);
 
 	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
 
