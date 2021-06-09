@@ -5656,7 +5656,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	IF_NOT_ZVAL_REFCOUNTED var_use_addr, >5, ZREG_TMP1, ZREG_TMP2
 			}
 			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-				if (Z_REG(var_use_addr) == ZREG_FP) {
+				if (Z_REG(var_use_addr) != ZREG_FP) {
 					|	str Rx(Z_REG(var_use_addr)), T1 // save
 				}
 				|	GET_ZVAL_PTR FCARG1x, var_use_addr, TMP1
