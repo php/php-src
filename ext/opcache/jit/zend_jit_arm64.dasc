@@ -1749,8 +1749,8 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//EG(vm_interrupt) = 0;
 	|	MEM_STORE_8_ZTS strb, wzr, executor_globals, vm_interrupt, TMP1
 	|	//if (EG(timed_out)) {
-	|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, timed_out, TMP1
-	|	cbz REG0w, >1
+	|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, timed_out, TMP1
+	|	cbz TMP1w, >1
 	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, TMP1
 	|1:
@@ -2447,8 +2447,8 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|	LOAD_IP
 
 	|	// check for interrupt (try to avoid this ???)
-	|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-	|	cbnz REG0w, ->interrupt_handler
+	|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+	|	cbnz TMP1w, ->interrupt_handler
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	ADD_HYBRID_SPAD
@@ -2883,8 +2883,8 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline, const
 static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void *timeout_exit_addr)
 {
 	if (timeout_exit_addr) {
-		|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-		|	cbz REG0w, =>loop_label
+		|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+		|	cbz TMP1w, =>loop_label
 		|	b &timeout_exit_addr
 	} else {
 		|	b =>loop_label
@@ -3060,8 +3060,8 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 
 	if (timeout_exit_addr) {
 		/* Check timeout for links to LOOP */
-		|	MEM_LOAD_8_ZTS ldrb, REG0w, executor_globals, vm_interrupt, TMP1
-		|	cbz REG0w, &link_addr
+		|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, vm_interrupt, TMP1
+		|	cbz TMP1w, &link_addr
 		|	b &timeout_exit_addr
 	} else {
 		|	b &link_addr
@@ -14523,34 +14523,6 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 		 && (JIT_G(current_trace)[ZEND_JIT_TRACE_START_REC_SIZE].info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 			ZEND_REGSET_INCL(regset, ZREG_REG0);
 			ZEND_REGSET_INCL(regset, ZREG_REG1);
-		}
-	}
-
-	/* %r0 is used to check EG(vm_interrupt) */
-	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-		if (ssa_op == ssa->ops
-		 && (JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_LOOP ||
-			 JIT_G(current_trace)->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL)) {
-#if ZTS
-			ZEND_REGSET_INCL(regset, ZREG_REG0);
-#else
-			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
-				ZEND_REGSET_INCL(regset, ZREG_REG0);
-			}
-#endif
-		}
-	} else  {
-		uint32_t b = ssa->cfg.map[ssa_op - ssa->ops];
-
-		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
-		 && ssa->cfg.blocks[b].start == ssa_op - ssa->ops) {
-#if ZTS
-			ZEND_REGSET_INCL(regset, ZREG_REG0);
-#else
-			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(vm_interrupt)))) {
-				ZEND_REGSET_INCL(regset, ZREG_REG0);
-			}
-#endif
 		}
 	}
 
