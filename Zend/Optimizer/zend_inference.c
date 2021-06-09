@@ -1877,6 +1877,9 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 				}														\
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
+				ZEND_ASSERT(__ssa_var->var >= op_array->last_var ||		\
+					(ssa_var_info[__var].type & MAY_BE_REF)				\
+						== (__type & MAY_BE_REF));						\
 				if (ssa_var_info[__var].type & ~__type) {				\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
@@ -4252,7 +4255,6 @@ void zend_func_return_info(const zend_op_array   *op_array,
 
 static int zend_infer_types(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
 {
-	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
 	int j;
 	zend_bitset worklist;
@@ -4264,7 +4266,6 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	/* Type Inference */
 	for (j = op_array->last_var; j < ssa_vars_count; j++) {
 		zend_bitset_incl(worklist, j);
-		ssa_var_info[j].type = 0;
 	}
 
 	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) != SUCCESS) {
@@ -4322,12 +4323,12 @@ static int zend_mark_cv_references(const zend_op_array *op_array, const zend_scr
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_FUNC_ARG:
 						break;
+					case ZEND_INIT_ARRAY:
 					case ZEND_ADD_ARRAY_ELEMENT:
 						if (!(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 							continue;
 						}
 						break;
-					case ZEND_BIND_LEXICAL:
 					case ZEND_BIND_STATIC:
 						if (!(opline->extended_value & ZEND_BIND_REF)) {
 							continue;
@@ -4351,8 +4352,17 @@ static int zend_mark_cv_references(const zend_op_array *op_array, const zend_scr
 						continue;
 				}
 			} else if (ssa->ops[def].op2_def == var) {
-				if (opline->opcode != ZEND_ASSIGN_REF) {
-					continue;
+				switch (opline->opcode) {
+					case ZEND_ASSIGN_REF:
+					case ZEND_FE_FETCH_RW:
+						break;
+					case ZEND_BIND_LEXICAL:
+						if (!(opline->extended_value & ZEND_BIND_REF)) {
+							continue;
+						}
+						break;
+					default:
+						continue;
 				}
 			} else {
 				ZEND_UNREACHABLE();
@@ -4382,12 +4392,15 @@ static int zend_mark_cv_references(const zend_op_array *op_array, const zend_scr
 
 		if (ssa->vars[var].use_chain >= 0) {
 			int use = ssa->vars[var].use_chain;
-			zend_ssa_op *op;
-
-			do {
-				op = ssa->ops + use;
+			FOREACH_USE(&ssa->vars[var], use) {
+				zend_ssa_op *op = ssa->ops + use;
 				if (op->op1_use == var && op->op1_def >= 0) {
 					if (!(ssa->var_info[op->op1_def].type & MAY_BE_REF)) {
+						/* Unset breaks references (outside global scope). */
+						if (op_array->opcodes[use].opcode == ZEND_UNSET_CV
+								&& op_array->function_name) {
+							continue;
+						}
 						zend_bitset_incl(worklist, op->op1_def);
 					}
 				}
@@ -4401,9 +4414,7 @@ static int zend_mark_cv_references(const zend_op_array *op_array, const zend_scr
 						zend_bitset_incl(worklist, op->result_def);
 					}
 				}
-
-				use = zend_ssa_next_use(ssa->ops, var, use);
-			} while (use >= 0);
+			} FOREACH_USE_END();
 		}
 	} WHILE_WORKLIST_END();
 
