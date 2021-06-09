@@ -459,6 +459,45 @@ ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *p
 		} \
 	} while (0)
 
+/* The cache_slot may only be NULL in debug builds, where arginfo verification of
+ * internal functions is enabled. Avoid unnecessary checks in release builds. */
+#if ZEND_DEBUG
+# define HAVE_CACHE_SLOT (cache_slot != NULL)
+#else
+# define HAVE_CACHE_SLOT 1
+#endif
+
+static zend_always_inline zend_class_entry* zend_fetch_ce_from_cache_slot(void **cache_slot, zend_type *type)
+{
+	zend_class_entry *ce;
+
+	if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
+		ce = (zend_class_entry *) *cache_slot;
+	} else {
+		zend_string *name = ZEND_TYPE_NAME(*type);
+
+		if (ZSTR_HAS_CE_CACHE(name)) {
+			ce = ZSTR_GET_CE_CACHE(name);
+			if (!ce) {
+				ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				if (UNEXPECTED(!ce)) {
+					/* Cannot resolve */
+					return NULL;
+				}
+			}
+		} else {
+			ce = zend_fetch_class(name,
+				ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+			if (UNEXPECTED(!ce)) {
+				return NULL;
+			}
+		}
+		if (HAVE_CACHE_SLOT) {
+			*cache_slot = (void *) ce;
+		}
+	}
+	return ce;
+}
 
 END_EXTERN_C()
 

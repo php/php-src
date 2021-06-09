@@ -836,8 +836,39 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 	}
 }
 
-// TODO Handle complex types when added
-// TODO Update to handle union and intersection in the same loop
+// TODO better name
+static zend_always_inline zend_class_entry* zend_resolve_ce(
+		zend_property_info *info, zend_type *type) {
+	zend_class_entry *ce;
+	if (UNEXPECTED(ZEND_TYPE_HAS_NAME(*type))) {
+		zend_string *name = ZEND_TYPE_NAME(*type);
+
+		if (ZSTR_HAS_CE_CACHE(name)) {
+			ce = ZSTR_GET_CE_CACHE(name);
+			if (!ce) {
+				ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				if (UNEXPECTED(!ce)) {
+					/* Cannot resolve */
+					return NULL;
+				}
+			}
+		} else {
+			ce = resolve_single_class_type(name, info->ce);
+			if (!ce) {
+				/* Cannot resolve */
+				return NULL;
+			}
+			if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+				zend_string_release(name);
+				ZEND_TYPE_SET_CE(*type, ce);
+			}
+		}
+	} else {
+		ce = ZEND_TYPE_CE(*type);
+	}
+	return ce;
+}
+
 static bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	zend_class_entry *ce;
@@ -846,32 +877,14 @@ static bool zend_check_and_resolve_property_class_type(
 
 		if (ZEND_TYPE_IS_INTERSECTION(info->type)) {
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
-				if (ZEND_TYPE_HAS_NAME(*list_type)) {
-					zend_string *name = ZEND_TYPE_NAME(*list_type);
+				ce = zend_resolve_ce(info, list_type);
 
-					if (ZSTR_HAS_CE_CACHE(name)) {
-						ce = ZSTR_GET_CE_CACHE(name);
-						if (!ce) {
-							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-							if (UNEXPECTED(!ce)) {
-								/* Cannot resolve */
-								return false;
-							}
-						}
-					} else {
-						ce = resolve_single_class_type(name, info->ce);
-						if (!ce) {
-							/* Cannot resolve */
-							return false;
-						}
-						if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-							zend_string_release(name);
-							ZEND_TYPE_SET_CE(*list_type, ce);
-						}
-					}
-				} else {
-					ce = ZEND_TYPE_CE(*list_type);
+				/* If we cannot resolve the CE we cannot check if it satisfies
+				 * the type constraint, fail. */
+				if (ce == NULL) {
+					return false;
 				}
+
 				if (!instanceof_function(object_ce, ce)) {
 					return false;
 				}
@@ -879,29 +892,12 @@ static bool zend_check_and_resolve_property_class_type(
 			return true;
 		} else {
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
-				if (ZEND_TYPE_HAS_NAME(*list_type)) {
-					zend_string *name = ZEND_TYPE_NAME(*list_type);
+				ce = zend_resolve_ce(info, list_type);
 
-					if (ZSTR_HAS_CE_CACHE(name)) {
-						ce = ZSTR_GET_CE_CACHE(name);
-						if (!ce) {
-							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-							if (UNEXPECTED(!ce)) {
-								continue;
-							}
-						}
-					} else {
-						ce = resolve_single_class_type(name, info->ce);
-						if (!ce) {
-							continue;
-						}
-						if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-							zend_string_release(name);
-							ZEND_TYPE_SET_CE(*list_type, ce);
-						}
-					}
-				} else {
-					ce = ZEND_TYPE_CE(*list_type);
+				/* If we cannot resolve the CE we cannot check if it satisfies
+				 * the type constraint, check the next one. */
+				if (ce == NULL) {
+					continue;
 				}
 				if (instanceof_function(object_ce, ce)) {
 					return true;
@@ -910,30 +906,14 @@ static bool zend_check_and_resolve_property_class_type(
 			return false;
 		}
 	} else {
-		if (UNEXPECTED(ZEND_TYPE_HAS_NAME(info->type))) {
-			zend_string *name = ZEND_TYPE_NAME(info->type);
+		ce = zend_resolve_ce(info, &info->type);
 
-			if (ZSTR_HAS_CE_CACHE(name)) {
-				ce = ZSTR_GET_CE_CACHE(name);
-				if (!ce) {
-					ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					if (UNEXPECTED(!ce)) {
-						return 0;
-					}
-				}
-			} else {
-				ce = resolve_single_class_type(name, info->ce);
-				if (UNEXPECTED(!ce)) {
-					return 0;
-				}
-				if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-					zend_string_release(name);
-					ZEND_TYPE_SET_CE(info->type, ce);
-				}
-			}
-		} else {
-			ce = ZEND_TYPE_CE(info->type);
+		/* If we cannot resolve the CE we cannot check if it satisfies
+		 * the type constraint, fail. */
+		if (ce == NULL) {
+			return false;
 		}
+
 		return instanceof_function(object_ce, ce);
 	}
 }
@@ -999,16 +979,6 @@ ZEND_API bool zend_value_instanceof_static(zval *zv) {
 	return instanceof_function(Z_OBJCE_P(zv), called_scope);
 }
 
-/* The cache_slot may only be NULL in debug builds, where arginfo verification of
- * internal functions is enabled. Avoid unnecessary checks in release builds. */
-#if ZEND_DEBUG
-# define HAVE_CACHE_SLOT (cache_slot != NULL)
-#else
-# define HAVE_CACHE_SLOT 1
-#endif
-
-// TODO Handle complex types when added
-// TODO Update to handle union and intersection in the same loop
 static zend_always_inline bool zend_check_type_slow(
 		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
 		bool is_return_type, bool is_internal)
@@ -1020,28 +990,11 @@ static zend_always_inline bool zend_check_type_slow(
 			zend_type *list_type;
 			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					if (HAVE_CACHE_SLOT && *cache_slot) {
-						ce = *cache_slot;
-					} else {
-						zend_string *name = ZEND_TYPE_NAME(*list_type);
-
-						if (ZSTR_HAS_CE_CACHE(name)) {
-							ce = ZSTR_GET_CE_CACHE(name);
-							if (!ce) {
-								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-								if (!ce) {
-									/* Cannot resolve */
-									return false;
-								}
-							}
-						} else {
-							ce = zend_fetch_class(name,
-								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-							if (!ce) {
-								/* Cannot resolve */
-								return false;
-							}
-						}
+					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+					/* If we cannot resolve the CE we cannot check if it satisfies
+					 * the type constraint, fail. */
+					if (ce == NULL) {
+						return false;
 					}
 
 					/* Perform actual type check */
@@ -1057,32 +1010,14 @@ static zend_always_inline bool zend_check_type_slow(
 				return true;
 			} else {
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					if (HAVE_CACHE_SLOT && *cache_slot) {
-						ce = *cache_slot;
-					} else {
-						zend_string *name = ZEND_TYPE_NAME(*list_type);
-
-						if (ZSTR_HAS_CE_CACHE(name)) {
-							ce = ZSTR_GET_CE_CACHE(name);
-							if (!ce) {
-								ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-								if (!ce) {
-									if (HAVE_CACHE_SLOT) {
-										cache_slot++;
-									}
-									continue;
-								}
-							}
-						} else {
-							ce = zend_fetch_class(name,
-								ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-							if (!ce) {
-								if (HAVE_CACHE_SLOT) {
-									cache_slot++;
-								}
-								continue;
-							}
+					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+					/* If we cannot resolve the CE we cannot check if it satisfies
+					 * the type constraint, check the next one. */
+					if (ce == NULL) {
+						if (HAVE_CACHE_SLOT) {
+							cache_slot++;
 						}
+						continue;
 					}
 
 					/* Perform actual type check */
@@ -1096,30 +1031,13 @@ static zend_always_inline bool zend_check_type_slow(
 				} ZEND_TYPE_LIST_FOREACH_END();
 			}
 		} else {
-			if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
-				ce = (zend_class_entry *) *cache_slot;
-			} else {
-				zend_string *name = ZEND_TYPE_NAME(*type);
-
-				if (ZSTR_HAS_CE_CACHE(name)) {
-					ce = ZSTR_GET_CE_CACHE(name);
-					if (!ce) {
-						ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-						if (UNEXPECTED(!ce)) {
-							goto builtin_types;
-						}
-					}
-				} else {
-					ce = zend_fetch_class(name,
-						ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-					if (UNEXPECTED(!ce)) {
-						goto builtin_types;
-					}
-				}
-				if (HAVE_CACHE_SLOT) {
-					*cache_slot = (void *) ce;
-				}
+			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
+			/* If we cannot resolve the CE we cannot check if it satisfies
+			 * the type constraint, check if a standard type satisfies it. */
+			if (ce == NULL) {
+				goto builtin_types;
 			}
+
 			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
 				return 1;
 			}
