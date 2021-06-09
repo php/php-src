@@ -2911,53 +2911,12 @@ static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op
 
 static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_trace_info *parent, uint32_t exit_num)
 {
-	zend_regset regset = ZEND_REGSET_SCRATCH;
-
-	// In the x86 implementation, this clause would be conducted if ZTS is enabled or the addressing mode is 64-bit.
-	{
-		/* assignment to EG(jit_trace_num) shouldn't clober CPU register used by deoptimizer */
-		if (parent) {
-			int i;
-			int parent_vars_count = parent->exit_info[exit_num].stack_size;
-			zend_jit_trace_stack *parent_stack =
-				parent->stack_map +
-				parent->exit_info[exit_num].stack_offset;
-
-			for (i = 0; i < parent_vars_count; i++) {
-				if (STACK_REG(parent_stack, i) != ZREG_NONE) {
-					if (STACK_REG(parent_stack, i) < ZREG_NUM) {
-						ZEND_REGSET_EXCL(regset, STACK_REG(parent_stack, i));
-					} else if (STACK_REG(parent_stack, i) == ZREG_ZVAL_COPY_GPR0) {
-						ZEND_REGSET_EXCL(regset, ZREG_REG0);
-					}
-				}
-			}
-		}
-	}
-
-	if (parent && parent->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-		ZEND_REGSET_EXCL(regset, ZREG_REG0);
-	}
 
 	current_trace_num = trace_num;
 
 	|	// EG(jit_trace_num) = trace_num;
-	if (regset == ZEND_REGSET_EMPTY || ZEND_REGSET_IS_SINGLETON(regset)) {
-		|	sub sp, sp, #16
-		|	stp TMP1, TMP2, [sp]       // save TMP1 and TMP2
-		|	LOAD_32BIT_VAL TMP1w, trace_num
-		|	MEM_STORE_32_ZTS str, TMP1w, executor_globals, jit_trace_num, TMP2
-		|	ldp TMP1, TMP2, [sp]      // retore TMP1 and TMP2
-		|	add sp, sp, #16
-	} else {
-		zend_reg tmp1 = ZEND_REGSET_FIRST(regset);
-		zend_reg tmp2 = ZEND_REGSET_FIRST(ZEND_REGSET_EXCL(regset, tmp1));
-
-		|	LOAD_32BIT_VAL Rw(tmp1), trace_num
-		|	MEM_STORE_32_ZTS str, Rw(tmp1), executor_globals, jit_trace_num, Rx(tmp2)
-		(void)tmp1;
-		(void)tmp2;
-	}
+	|	LOAD_32BIT_VAL TMP1w, trace_num
+	|	MEM_STORE_32_ZTS str, TMP1w, executor_globals, jit_trace_num, TMP2
 
 	return 1;
 }
