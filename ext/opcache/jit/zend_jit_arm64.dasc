@@ -8276,15 +8276,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	} else {
 		if (!is_closure) {
 			|	// call->func = func;
-			if (func
-			 && op_array == &func->op_array
-			 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
-			 && (sizeof(void*) != 8 || IS_SIGNED_32BIT(func))) {
-				|	LOAD_ADDR TMP1, func
-				|	str TMP1, EX:RX->func
-			} else {
-				|	str REG0, EX:RX->func
-			}
+			|	str REG0, EX:RX->func
 		} else {
 			|	// call->func = &closure->func;
 			|	add REG1, REG0, #offsetof(zend_closure, func)
