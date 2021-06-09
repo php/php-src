@@ -2631,9 +2631,6 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 			tmp = 0;
-			if (t1 & MAY_BE_REF) {
-				tmp |= MAY_BE_REF;
-			}
 			if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
 				tmp |= MAY_BE_RC1;
 				if (ssa_op->result_def >= 0) {
@@ -2670,13 +2667,16 @@ static zend_always_inline int _zend_update_type_info(
 				if (t1 & MAY_BE_STRING) {
 					tmp |= MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE;
 				}
-				tmp |= t1 & (MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_KEY_ANY);
-			}
-			if (ssa_op->op1_def >= 0) {
-				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
+				tmp |= t1 & (MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_OBJECT);
 			}
 			if (ssa_op->result_def >= 0) {
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			}
+			if (ssa_op->op1_def >= 0) {
+				if (t1 & MAY_BE_REF) {
+					tmp |= MAY_BE_REF;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
 			break;
 		case ZEND_POST_INC:
