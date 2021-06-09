@@ -15276,6 +15276,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
+bw_op:
 				regset = ZEND_REGSET_EMPTY;
 				if (ssa_op->result_def != current_var &&
 				    (ssa_op->op1_use != current_var || !last_use)) {
@@ -15291,25 +15292,15 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
-				regset = ZEND_REGSET_EMPTY;
 				if (opline->op2_type == IS_CONST &&
 				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
 				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2))) &&
 				    OP1_HAS_RANGE() &&
 				    OP1_MIN_RANGE() >= 0) {
-					if (ssa_op->result_def != current_var &&
-					    (ssa_op->op1_use != current_var || !last_use)) {
-						ZEND_REGSET_INCL(regset, ZREG_R0);
-					}
-					if (sizeof(void*) == 8
-					 && !IS_SIGNED_32BIT(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)) - 1)) {
-						if (!ZEND_REGSET_IN(regset, ZREG_R0)) {
-							ZEND_REGSET_INCL(regset, ZREG_R0);
-						} else {
-							ZEND_REGSET_INCL(regset, ZREG_R1);
-						}
-					}
+				    /* MOD is going to be optimized into AND */
+				    goto bw_op;
 				} else {
+					regset = ZEND_REGSET_EMPTY;
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 					ZEND_REGSET_INCL(regset, ZREG_R2);
 					if (opline->op2_type == IS_CONST) {
