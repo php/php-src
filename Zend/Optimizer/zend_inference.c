@@ -1877,7 +1877,8 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 				}														\
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
-				ZEND_ASSERT(__ssa_var->var >= op_array->last_var ||		\
+				ZEND_ASSERT(ssa_opcodes != NULL ||						\
+					__ssa_var->var >= op_array->last_var ||				\
 					(ssa_var_info[__var].type & MAY_BE_REF)				\
 						== (__type & MAY_BE_REF));						\
 				if (ssa_var_info[__var].type & ~__type) {				\
@@ -3445,7 +3446,7 @@ static zend_always_inline int _zend_update_type_info(
 				zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, opline, ssa_op);
 
 				tmp = zend_fetch_prop_type(script, prop_info, &ce);
-				if (opline->result_type != IS_TMP_VAR) {
+				if (opline->result_type == IS_VAR) {
 					tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 				} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
 					zend_class_entry *ce = NULL;
@@ -3481,7 +3482,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 			tmp = zend_fetch_prop_type(script,
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
-			if (opline->result_type != IS_TMP_VAR) {
+			if (opline->result_type == IS_VAR) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 			} else {
 				tmp &= ~MAY_BE_RC1;
@@ -3600,6 +3601,8 @@ unknown_opcode:
 					} else {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					}
+				} else if (opline->result_type == IS_CV) {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
 					tmp |= MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN;
 					switch (opline->opcode) {
@@ -3698,6 +3701,7 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 	int i, j;
 	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
 	bool update_worklist = 1;
+	const zend_op **ssa_opcodes = NULL;
 
 	while (!zend_bitset_empty(worklist, worklist_len)) {
 		j = zend_bitset_first(worklist, worklist_len);
