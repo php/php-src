@@ -1210,6 +1210,11 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
 			}
+			
+			if (Z_TYPE_P(container) == IS_FALSE) {
+				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			}
+
 			ZVAL_ARR(container, zend_new_array(8));
 			ZEND_VM_C_GOTO(assign_dim_op_new_array);
 		} else {
@@ -2590,6 +2595,11 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+
+			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
+				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			}
+
 			if (Z_ISREF_P(orig_object_ptr)
 			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
 			 && !zend_verify_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
