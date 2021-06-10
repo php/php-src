@@ -175,7 +175,7 @@ if (IS_GMP(zval)) {                                               \
 
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
 static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
-static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
+static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator);
 
 /*
  * The gmp_*_op functions provide an implementation for several common types
@@ -194,7 +194,7 @@ typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, gmp_ulong);
 typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef gmp_ulong (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong);
 
-static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero);
+static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, bool check_b_zero, bool is_operator);
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op);
 
@@ -350,11 +350,10 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	}
 }
 
-#define DO_BINARY_UI_OP_EX(op, uop, check_b_zero)       \
-	gmp_zval_binary_ui_op(                              \
-		result, op1, op2, op, uop, check_b_zero         \
-	);                                                  \
-	if (UNEXPECTED(EG(exception))) { return FAILURE; }  \
+#define DO_BINARY_UI_OP_EX(op, uop, check_b_zero) \
+	gmp_zval_binary_ui_op( \
+		result, op1, op2, op, uop, check_b_zero, /* is_operator */ true); \
+	if (UNEXPECTED(EG(exception))) { return FAILURE; } \
 	return SUCCESS;
 
 #define DO_BINARY_UI_OP(op) DO_BINARY_UI_OP_EX(op, op ## _ui, 0)
@@ -428,7 +427,7 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 {
 	zval result;
 
-	gmp_cmp(&result, op1, op2);
+	gmp_cmp(&result, op1, op2, /* is_operator */ true);
 
 	/* An error/exception occurs if one of the operands is not a numeric string
 	 * or an object which is different from GMP */
@@ -613,13 +612,11 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 
 		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), (int) base);
 		if (-1 == ret) {
-			/* if unserializing */
 			if (arg_pos == 0) {
-				php_error_docref(NULL, E_WARNING,
-					"Cannot convert variable to GMP, it is not an integer string");
-				return FAILURE;
+				zend_value_error("Number is not an integer string");
+			} else {
+				zend_argument_value_error(arg_pos, "is not an integer string");
 			}
-			zend_argument_value_error(arg_pos, "is not an integer string");
 			return FAILURE;
 		}
 
@@ -628,7 +625,13 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 	default: {
 		zend_long lval;
 		if (!zend_parse_arg_long_slow(val, &lval)) {
-			zend_argument_type_error(arg_pos, "must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+			if (arg_pos == 0) {
+				zend_type_error(
+					"Number must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+			} else {
+				zend_argument_type_error(arg_pos,
+					"must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+			}
 			return FAILURE;
 		}
 
@@ -670,20 +673,20 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 }
 /* }}} */
 
-static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
+static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator) /* {{{ */
 {
 	mpz_ptr gmpnum_a, gmpnum_b;
 	gmp_temp_t temp_a, temp_b;
 	zend_bool use_si = 0;
 	zend_long res;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, is_operator ? 0 : 1);
 
 	if (Z_TYPE_P(b_arg) == IS_LONG) {
 		use_si = 1;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, is_operator ? 0 : 2);
 	}
 
 	if (use_si) {
@@ -702,18 +705,18 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg) /* {{{ */
 /* {{{ gmp_zval_binary_ui_op
    Execute GMP binary operation.
 */
-static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
+static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, bool check_b_zero, bool is_operator)
 {
 	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
 	gmp_temp_t temp_a, temp_b;
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, is_operator ? 0 : 1);
 
 	if (gmp_ui_op && Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) >= 0) {
 		gmpnum_b = NULL;
 		temp_b.is_used = 0;
 	} else {
-		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, is_operator ? 0 : 2);
 	}
 
 	if (check_b_zero) {
@@ -810,7 +813,8 @@ static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op
 		RETURN_THROWS();
 	}
 
-	gmp_zval_binary_ui_op(return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero);
+	gmp_zval_binary_ui_op(
+		return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero, /* is_operator */ false);
 }
 /* }}} */
 
@@ -1096,13 +1100,16 @@ ZEND_FUNCTION(gmp_div_r)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_r, gmp_mpz_tdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_tdiv_r, gmp_mpz_tdiv_r_ui, 1, /* is_operator */ false);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_r, gmp_mpz_cdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_cdiv_r, gmp_mpz_cdiv_r_ui, 1, /* is_operator */ false);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_r, gmp_mpz_fdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_fdiv_r, gmp_mpz_fdiv_r_ui, 1, /* is_operator */ false);
 		break;
 	default:
 		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
@@ -1123,13 +1130,16 @@ ZEND_FUNCTION(gmp_div_q)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1, /* is_operator */ false);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_q, gmp_mpz_cdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_cdiv_q, gmp_mpz_cdiv_q_ui, 1, /* is_operator */ false);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_q, gmp_mpz_fdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(
+			return_value, a_arg, b_arg, mpz_fdiv_q, gmp_mpz_fdiv_q_ui, 1, /* is_operator */ false);
 		break;
 	default:
 		zend_argument_value_error(3, "must be one of GMP_ROUND_ZERO, GMP_ROUND_PLUSINF, or GMP_ROUND_MINUSINF");
@@ -1670,7 +1680,7 @@ ZEND_FUNCTION(gmp_cmp)
 		RETURN_THROWS();
 	}
 
-	gmp_cmp(return_value, a_arg, b_arg);
+	gmp_cmp(return_value, a_arg, b_arg, /* is_operator */ false);
 }
 /* }}} */
 
