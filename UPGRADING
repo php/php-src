@@ -393,6 +393,10 @@ PHP 8.1 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Intl:
+  . Added IntlDatePatternGenerator to dynamically generate patterns to use with IntlDateFormatter.
+    RFC: https://wiki.php.net/rfc/intldatetimepatterngenerator
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================

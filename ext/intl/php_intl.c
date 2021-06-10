@@ -47,6 +47,7 @@
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
 #include "dateformat/dateformat_data.h"
+#include "dateformat/datepatterngenerator_class.h"
 
 #include "resourcebundle/resourcebundle_class.h"
 
@@ -186,6 +187,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Expose DateFormat constants to PHP scripts */
 	dateformat_register_constants( INIT_FUNC_ARGS_PASSTHRU );
+
+	/* Register 'IntlDateTimeFormatter' PHP class */
+	dateformat_register_IntlDatePatternGenerator_class(  );
 
 	/* Register 'ResourceBundle' PHP class */
 	resourcebundle_register_class( );

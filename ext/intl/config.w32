@@ -70,6 +70,8 @@ if (PHP_INTL != "no") {
 				dateformat_attrcpp.cpp \
 				dateformat_helpers.cpp \
 				dateformat_create.cpp \
+				datepatterngenerator_class.cpp \
+				datepatterngenerator_methods.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/uchar", "\
 				uchar.c",
