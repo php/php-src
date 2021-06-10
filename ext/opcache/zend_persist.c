@@ -774,15 +774,14 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 	}
 	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
 	zend_persist_op_array_ex(op_array, NULL);
-	if ((ce->ce_flags & ZEND_ACC_LINKED)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		}
-	} else {
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+		if (ce->ce_flags & ZEND_ACC_LINKED) {
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+			if (op_array->static_variables) {
+				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+			}
+		} else {
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
@@ -870,6 +869,14 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
+			if ((ce->ce_flags & ZEND_ACC_LINKED)
+			 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+				ZEND_MAP_PTR_NEW(ce->mutable_data);
+			} else {
+				ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+			}
+		} else {
+			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		ce->inheritance_cache = NULL;
 
@@ -902,15 +909,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			for (i = 0; i < ce->default_properties_count; i++) {
 				zend_persist_zval(&ce->default_properties_table[i]);
 			}
-		}
-		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
-		 && (ce->ce_flags & ZEND_ACC_LINKED)
-		 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-			ZEND_MAP_PTR_NEW(ce->mutable_data);
-		} else if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-			ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
-		} else {
-			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		if (ce->default_static_members_table) {
 			int i;
