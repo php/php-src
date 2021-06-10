@@ -1482,17 +1482,17 @@ static int _php_image_type (zend_string *data)
 		return -1;
 	}
 
-	if (!memcmp(data, php_sig_gd2, sizeof(php_sig_gd2))) {
+	if (!memcmp(ZSTR_VAL(data), php_sig_gd2, sizeof(php_sig_gd2))) {
 		return PHP_GDIMG_TYPE_GD2;
-	} else if (!memcmp(data, php_sig_jpg, sizeof(php_sig_jpg))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_jpg, sizeof(php_sig_jpg))) {
 		return PHP_GDIMG_TYPE_JPG;
-	} else if (!memcmp(data, php_sig_png, sizeof(php_sig_png))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_png, sizeof(php_sig_png))) {
 		return PHP_GDIMG_TYPE_PNG;
-	} else if (!memcmp(data, php_sig_gif, sizeof(php_sig_gif))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_gif, sizeof(php_sig_gif))) {
 		return PHP_GDIMG_TYPE_GIF;
-	} else if (!memcmp(data, php_sig_bmp, sizeof(php_sig_bmp))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_bmp, sizeof(php_sig_bmp))) {
 		return PHP_GDIMG_TYPE_BMP;
-	} else if(!memcmp(data, php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
+	} else if(!memcmp(ZSTR_VAL(data), php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
 		return PHP_GDIMG_TYPE_WEBP;
 	}
 
@@ -1503,7 +1503,7 @@ static int _php_image_type (zend_string *data)
 	}
 
 	gdIOCtx *io_ctx;
-	io_ctx = gdNewDynamicCtxEx(8, data, 0);
+	io_ctx = gdNewDynamicCtxEx(8, ZSTR_VAL(data), 0);
 	if (io_ctx) {
 		if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
 			io_ctx->gd_free(io_ctx);
