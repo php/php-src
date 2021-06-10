@@ -1479,7 +1479,6 @@ rerun_gc:
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
 			 * destructors at this point and automatically re-run GC afterwards. */
-			should_rerun_gc = 1;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -1540,6 +1539,8 @@ rerun_gc:
 						GC_ADDREF(obj);
 						obj->handlers->dtor_obj(obj);
 						GC_DELREF(obj);
+
+						should_rerun_gc = 1;
 					}
 				}
 				idx++;
