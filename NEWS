@@ -45,6 +45,9 @@ PHP                                                                        NEWS
   . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
     (krakjoe)
 
+- Windows:
+  . Fixed bug #81120 (PGO data for main PHP DLL are not used). (cmb)
+
 03 Jun 2021, PHP 8.0.7
 
 - Core:
