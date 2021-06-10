@@ -27,6 +27,13 @@
 
 #if HAVE_GETIFADDRS
 # include <ifaddrs.h>
+#elif defined(__PASE__)
+/* IBM i implements getifaddrs, but under its own name */
+#include <as400_protos.h>
+#define getifaddrs Qp2getifaddrs
+#define freeifaddrs Qp2freeifaddrs
+#define ifaddrs ifaddrs_pase
+#define HAVE_GETIFADDRS
 #endif
 
 #ifdef PHP_WIN32
@@ -126,7 +133,6 @@ static void iface_append_unicast(zval *unicast, zend_long flags,
 
 	add_next_index_zval(unicast, &u);
 }
-#endif
 
 /* {{{ Returns an array in the form:
 array(
@@ -304,4 +310,5 @@ PHP_FUNCTION(net_get_interfaces) {
 	ZEND_UNREACHABLE();
 #endif
 }
+#endif
 /* }}} */
