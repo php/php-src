@@ -774,7 +774,9 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
-	executor_globals->current_fiber = NULL;
+	executor_globals->current_fiber_context = NULL;
+	executor_globals->main_fiber_context = NULL;
+	executor_globals->active_fiber = NULL;
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
