@@ -1469,6 +1469,9 @@ rerun_gc:
 			return 0;
 		}
 
+		bool fiber_switch_enabled = EG(fiber_switch_enabled);
+		EG(fiber_switch_enabled) = false;
+
 		end = GC_G(first_unused);
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
@@ -1548,6 +1551,7 @@ rerun_gc:
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
+				EG(fiber_switch_enabled) = fiber_switch_enabled;
 				return 0;
 			}
 		}
@@ -1605,6 +1609,8 @@ rerun_gc:
 			}
 			current++;
 		}
+
+		EG(fiber_switch_enabled) = fiber_switch_enabled;
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;

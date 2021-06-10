@@ -259,6 +259,10 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 		))
 	) && "Error transfer requires a throwable value");
 
+	if (UNEXPECTED(!EG(fiber_switch_enabled))) {
+		zend_error(E_ERROR, "Cannot switch fibers within current execution context");
+	}
+
 	zend_observer_fiber_switch_notify(from, to);
 
 	zend_fiber_capture_vm_state(&state);
@@ -434,7 +438,12 @@ static void zend_fiber_object_destroy(zend_object *object)
 		.context = zend_fiber_get_context(fiber)
 	};
 
+	bool fiber_switch_enabled = EG(fiber_switch_enabled);
+	EG(fiber_switch_enabled) = true;
+
 	zend_fiber_switch_context(&transfer);
+
+	EG(fiber_switch_enabled) = fiber_switch_enabled;
 
 	if (transfer.flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
 		EG(exception) = Z_OBJ(transfer.value);
@@ -492,8 +501,13 @@ ZEND_METHOD(Fiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
+	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_INIT)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!EG(fiber_switch_enabled))) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
 
@@ -529,6 +543,11 @@ ZEND_METHOD(Fiber, suspend)
 
 	if (UNEXPECTED(EG(current_fiber)->kind != zend_ce_fiber)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend outside of a fiber");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!EG(fiber_switch_enabled))) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
 
@@ -587,6 +606,11 @@ ZEND_METHOD(Fiber, resume)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(!EG(fiber_switch_enabled))) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+		RETURN_THROWS();
+	}
+
 	fiber->caller = EG(current_fiber);
 
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
@@ -619,6 +643,11 @@ ZEND_METHOD(Fiber, throw)
 
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!EG(fiber_switch_enabled))) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
 
@@ -752,11 +781,13 @@ void zend_fiber_init(void)
 
 	context->status = ZEND_FIBER_STATUS_RUNNING;
 
+	EG(fiber_switch_enabled) = true;
 	EG(main_fiber) = context;
 	EG(current_fiber) = context;
 }
 
 void zend_fiber_shutdown(void)
 {
+	EG(fiber_switch_enabled) = false;
 	efree(EG(main_fiber));
 }

@@ -249,6 +249,7 @@ struct _zend_executor_globals {
 
 	zend_get_gc_buffer get_gc_buffer;
 
+	bool fiber_switch_enabled;
 	zend_fiber_context *main_fiber;
 	zend_fiber_context *current_fiber;
 

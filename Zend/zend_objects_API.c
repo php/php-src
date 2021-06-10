@@ -52,9 +52,14 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 
 					if (obj->handlers->dtor_obj != zend_objects_destroy_object
 							|| obj->ce->destructor) {
+						bool fiber_switch_enabled = EG(fiber_switch_enabled);
+						EG(fiber_switch_enabled) = false;
+
 						GC_ADDREF(obj);
 						obj->handlers->dtor_obj(obj);
 						GC_DELREF(obj);
+
+						EG(fiber_switch_enabled) = fiber_switch_enabled;
 					}
 				}
 			}
@@ -92,6 +97,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
+	bool fiber_switch_enabled = EG(fiber_switch_enabled);
+	EG(fiber_switch_enabled) = false;
+
 	if (fast_shutdown) {
 		do {
 			obj_ptr--;
@@ -119,6 +127,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 			}
 		} while (obj_ptr != end);
 	}
+
+	EG(fiber_switch_enabled) = fiber_switch_enabled;
 }
 
 
@@ -174,9 +184,14 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 
 		if (object->handlers->dtor_obj != zend_objects_destroy_object
 				|| object->ce->destructor) {
+			bool fiber_switch_enabled = EG(fiber_switch_enabled);
+			EG(fiber_switch_enabled) = false;
+
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
+
+			EG(fiber_switch_enabled) = fiber_switch_enabled;
 		}
 	}
 
@@ -188,9 +203,14 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		ZEND_ASSERT(IS_OBJ_VALID(EG(objects_store).object_buckets[handle]));
 		EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
 		if (!(OBJ_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
+			bool fiber_switch_enabled = EG(fiber_switch_enabled);
+			EG(fiber_switch_enabled) = false;
+
 			GC_ADD_FLAGS(object, IS_OBJ_FREE_CALLED);
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->free_obj(object);
+
+			EG(fiber_switch_enabled) = fiber_switch_enabled;
 		}
 		ptr = ((char*)object) - object->handlers->offset;
 		GC_REMOVE_FROM_BUFFER(object);
