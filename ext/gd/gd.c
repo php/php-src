@@ -1492,7 +1492,7 @@ static int _php_image_type (zend_string *data)
 		return PHP_GDIMG_TYPE_GIF;
 	} else if (!memcmp(ZSTR_VAL(data), php_sig_bmp, sizeof(php_sig_bmp))) {
 		return PHP_GDIMG_TYPE_BMP;
-	} else if(!memcmp(ZSTR_VAL(data), php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
+	} else if(!memcmp(ZSTR_VAL(data), php_sig_riff, sizeof(php_sig_riff)) && !memcmp(ZSTR_VAL(data) + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
 		return PHP_GDIMG_TYPE_WEBP;
 	}
 
