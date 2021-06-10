@@ -31,6 +31,8 @@ array(16) {
   string(10) "image/webp"
   ["test1bpix.bmp"]=>
   string(9) "image/bmp"
+  ["test1pix.avif"]=>
+  string(10) "image/avif"
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
   ["test1pix.jp2"]=>

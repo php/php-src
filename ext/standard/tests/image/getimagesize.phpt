@@ -39,19 +39,6 @@ array(16) {
     ["mime"]=>
     string(9) "image/bmp"
   }
-  ["test1pix.avif"]=>
-  array(5) {
-    [0]=>
-    int(0)
-    [1]=>
-    int(0)
-    [2]=>
-    int(19)
-    [3]=>
-    string(20) "width="0" height="0""
-    ["mime"]=>
-    string(10) "image/avif"
-  }
   ["test12pix.webp"]=>
   array(6) {
     [0]=>
@@ -81,6 +68,19 @@ array(16) {
     int(32)
     ["mime"]=>
     string(9) "image/bmp"
+  }
+  ["test1pix.avif"]=>
+  array(5) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(0)
+    [2]=>
+    int(19)
+    [3]=>
+    string(20) "width="0" height="0""
+    ["mime"]=>
+    string(10) "image/avif"
   }
   ["test1pix.bmp"]=>
   array(6) {
