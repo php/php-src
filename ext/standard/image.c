@@ -1167,7 +1167,7 @@ static struct gfxinfo *php_handle_avif(php_stream * stream) {
  * Thanks to Rob Pike via Joe Drago:
  * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
  */
-static uint32_t php_ntohl(val) {
+static uint32_t php_ntohl(uint32_t val) {
     uint8_t data[4];
 
     memcpy(&data, &val, sizeof(data));
