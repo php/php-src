@@ -6007,7 +6007,7 @@ done:
 			op_array_ssa = &jit_extension->func_info.ssa;
 			frame->call = call->prev;
 			call->prev = frame;
-			if (p->info & ZEND_JIT_TRACE_RETRUN_VALUE_USED) {
+			if (p->info & ZEND_JIT_TRACE_RETURN_VALUE_USED) {
 				TRACE_FRAME_SET_RETURN_VALUE_USED(call);
 			} else {
 				TRACE_FRAME_SET_RETURN_VALUE_UNUSED(call);
