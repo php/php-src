@@ -24,7 +24,7 @@ image_type_to_mime_type()
     var_dump($result);
 ?>
 --EXPECT--
-array(16) {
+array(17) {
   ["test-1pix.bmp"]=>
   string(9) "image/bmp"
   ["test12pix.webp"]=>

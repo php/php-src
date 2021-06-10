@@ -23,7 +23,7 @@ GetImageSize()
     var_dump($result);
 ?>
 --EXPECT--
-array(16) {
+array(17) {
   ["test-1pix.bmp"]=>
   array(6) {
     [0]=>
