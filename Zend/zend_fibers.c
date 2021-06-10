@@ -310,17 +310,6 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	}
 }
 
-static zend_always_inline zend_vm_stack zend_fiber_vm_stack_alloc(size_t size)
-{
-	zend_vm_stack page = emalloc(size);
-
-	page->top = ZEND_VM_STACK_ELEMENTS(page);
-	page->end = (zval *) ((uintptr_t) page + size);
-	page->prev = NULL;
-
-	return page;
-}
-
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_UNDEF && "First context switch into a fiber must not transmit data");
@@ -335,7 +324,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	EG(vm_stack) = NULL;
 
 	zend_first_try {
-		zend_vm_stack stack = zend_fiber_vm_stack_alloc(ZEND_FIBER_VM_STACK_SIZE);
+		zend_vm_stack stack = zend_vm_stack_new_page(ZEND_FIBER_VM_STACK_SIZE, NULL);
 		EG(vm_stack) = stack;
 		EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
 		EG(vm_stack_end) = stack->end;
