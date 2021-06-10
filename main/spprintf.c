@@ -189,8 +189,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 {
 	char *s = NULL;
 	size_t s_len;
-	int free_zcopy;
-	zval *zvp, zcopy;
 
 	int min_width = 0;
 	int precision = 0;
@@ -231,11 +229,11 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 			/*
 			 * Default variable settings
 			 */
+			zend_string *tmp_str = NULL;
 			adjust = RIGHT;
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
-			free_zcopy = 0;
 
 			fmt++;
 
@@ -375,13 +373,10 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 			 */
 			switch (*fmt) {
 				case 'Z': {
-									zvp = (zval*) va_arg(ap, zval*);
-					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
-					if (free_zcopy) {
-						zvp = &zcopy;
-					}
-					s_len = Z_STRLEN_P(zvp);
-					s = Z_STRVAL_P(zvp);
+					zval *zvp = va_arg(ap, zval*);
+					zend_string *str = zval_get_tmp_string(zvp, &tmp_str);
+					s_len = ZSTR_LEN(str);
+					s = ZSTR_VAL(str);
 					if (adjust_precision && (size_t)precision < s_len) {
 						s_len = precision;
 					}
@@ -783,9 +778,7 @@ fmt_error:
 				PAD_CHAR(xbuf, pad_char, min_width - s_len, is_char);
 			}
 
-			if (free_zcopy) {
-				zval_ptr_dtor_str(&zcopy);
-			}
+			zend_tmp_string_release(tmp_str);
 		}
 skip_output:
 		fmt++;
