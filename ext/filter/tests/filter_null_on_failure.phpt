@@ -1,7 +1,7 @@
 --TEST--
 FILTER_NULL_ON_FAILURE will give NULL on filters
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var("invalid", FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE));
