@@ -1,9 +1,7 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
---SKIPIF--
-<?php
-if (!extension_loaded('session')) die('skip session extension not available');
-?>
+--EXTENSIONS--
+session
 --FILE--
 <?php
 class obj implements Serializable {

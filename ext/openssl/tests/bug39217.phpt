@@ -1,9 +1,7 @@
 --TEST--
 Bug #39217 (Large serial number return -1)
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $dir = __DIR__;

@@ -1,8 +1,8 @@
 --TEST--
 Phar: tar-based phar, make new gzipped tar
---SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 --FILE--

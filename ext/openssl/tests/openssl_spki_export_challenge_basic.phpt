@@ -2,9 +2,10 @@
 openssl_spki_export_challenge() tests for exporting challenge
 --INI--
 error_reporting=0
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--

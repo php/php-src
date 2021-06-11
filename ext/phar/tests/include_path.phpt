@@ -1,7 +1,7 @@
 --TEST--
 Phar: include_path with phar:// wrapper
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --CONFLICTS--
 tempmanifest1.phar.php
 --INI--

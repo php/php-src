@@ -1,8 +1,9 @@
 --TEST--
 Bug #76705: feof might hang on TLS streams in case of fragmented TLS records
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

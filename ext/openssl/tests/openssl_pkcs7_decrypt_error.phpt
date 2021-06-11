@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs7_decrypt() and invalid parameters
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

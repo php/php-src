@@ -1,7 +1,7 @@
 --TEST--
 openssl_csr_export() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $wrong = "wrong";

@@ -1,9 +1,7 @@
 --TEST--
 Bug #71917: openssl_open() returns junk on envelope < 16 bytes
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 function test($envkey) {

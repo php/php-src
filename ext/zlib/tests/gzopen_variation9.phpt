@@ -1,11 +1,7 @@
 --TEST--
 Test gzopen() function : variation: try opening with possibly invalid modes
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 echo "*** Testing gzopen() : variation ***\n";

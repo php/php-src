@@ -2,12 +2,8 @@
 Check xsltprocessor::setparameter error handling with no-string
 --DESCRIPTION--
 Memleak: http://bugs.php.net/bug.php?id=48221
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) {
-    die("skip\n");
-}
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';

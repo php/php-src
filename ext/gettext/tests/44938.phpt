@@ -1,10 +1,7 @@
 --TEST--
 #44938: gettext functions crash with overlong strings
---SKIPIF--
-<?php
-if (!extension_loaded("gettext")) {
-    die("skip\n");
-}
+--EXTENSIONS--
+gettext
 --FILE--
 <?php
 $overflown = str_repeat('C', 8476509);

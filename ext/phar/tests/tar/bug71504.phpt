@@ -1,8 +1,8 @@
 --TEST--
 Bug #71504: Parsing of tar file with duplicate filenames causes memory leak
---SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --FILE--
 <?php
 $fname = str_replace('\\', '/', __DIR__ . '/files/HTML_CSS-1.5.4.tgz');

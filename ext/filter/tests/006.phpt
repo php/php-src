@@ -1,7 +1,7 @@
 --TEST--
 filter_input() test
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --POST--
 foo=<b>abc</b>
 --FILE--

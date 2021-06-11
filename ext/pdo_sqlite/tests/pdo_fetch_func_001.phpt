@@ -1,9 +1,7 @@
 --TEST--
 Testing several callbacks using PDO::FETCH_FUNC
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

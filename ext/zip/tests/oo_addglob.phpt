@@ -4,9 +4,10 @@ ZipArchive::addGlob() method
 Sammy Kaye Powers <sammyk@sammykmedia.com>
 w/Kenzo over the shoulder
 #phptek Chicago 2014
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
 if(!defined("GLOB_BRACE")) die ('skip');
 ?>
 --FILE--

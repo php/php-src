@@ -1,7 +1,7 @@
 --TEST--
 openssl_seal() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 // simple tests

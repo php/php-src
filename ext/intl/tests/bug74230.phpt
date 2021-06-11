@@ -1,7 +1,7 @@
 --TEST--
 Bug #74230 iconv fails to fail on surrogates
---SKIPIF--
-<?php if(!extension_loaded('iconv')) print 'skip'; ?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 

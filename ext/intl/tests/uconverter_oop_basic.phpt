@@ -1,7 +1,7 @@
 --TEST--
 Basic UConverter::convert() usage
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $c = new UConverter('utf-8', 'latin1');

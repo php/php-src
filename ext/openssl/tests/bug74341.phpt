@@ -1,7 +1,7 @@
 --TEST--
 Bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without seconds)
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

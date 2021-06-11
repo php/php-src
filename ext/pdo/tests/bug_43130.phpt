@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #43130 (Bound parameters cannot have - in their name)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite', strlen('sqlite'))) die('skip not relevant for sqlite driver');

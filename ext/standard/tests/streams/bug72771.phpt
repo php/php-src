@@ -1,10 +1,11 @@
 --TEST--
 Bug #72771. FTPS to FTP downgrade not allowed when server doesn't support AUTH TLS or AUTH SSL.
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
 if (array_search('ftp',stream_get_wrappers()) === FALSE) die("skip ftp wrapper not available.");
 if (!function_exists('pcntl_fork')) die("skip pcntl_fork() not available.");
-if (!extension_loaded('openssl')) die ("skip openssl not available.");
 ?>
 --FILE--
 <?php

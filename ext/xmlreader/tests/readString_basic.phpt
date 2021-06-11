@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: readString basic
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip XMLReader extension required"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 

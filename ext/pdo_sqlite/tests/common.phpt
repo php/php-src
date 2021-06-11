@@ -1,8 +1,7 @@
 --TEST--
 SQLite
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --REDIRECTTEST--
 return array(
 	'ENV' => array(

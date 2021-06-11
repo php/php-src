@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_external_entity_loader() variation: restore original handler; returning NULL
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
+--EXTENSIONS--
+dom
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/foobar.dtd");

@@ -1,10 +1,10 @@
 --TEST--
 Test if socket_set_option() works, option:TCP_DEFER_ACCEPT
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
+
 if (strpos(PHP_OS, 'Linux') === false) {
 	die('SKIP on non Linux');
 }

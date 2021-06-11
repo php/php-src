@@ -1,7 +1,7 @@
 --TEST--
 Phar: corrupted zip (central directory offset incorrect)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {

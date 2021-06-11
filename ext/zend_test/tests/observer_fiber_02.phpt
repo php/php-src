@@ -1,7 +1,7 @@
 --TEST--
 Observer: Unfinished fiber
---SKIPIF--
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.fiber_switch=1

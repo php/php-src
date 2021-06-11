@@ -1,12 +1,11 @@
 --TEST--
 Test if socket_recvfrom() receives data sent by socket_sendto() through a Unix domain socket
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
-}
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
 }
 --FILE--
 <?php

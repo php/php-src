@@ -1,9 +1,9 @@
 --TEST--
 Phar: invalid aliases
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip no zlib"); ?>
-<?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
+--EXTENSIONS--
+phar
+zlib
+bz2
 --FILE--
 <?php
 $e = __DIR__ . '/files/';

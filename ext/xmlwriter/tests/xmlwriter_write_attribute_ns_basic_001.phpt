@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_write_attribute_ns basic function tests
---SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 $xw = xmlwriter_open_memory();

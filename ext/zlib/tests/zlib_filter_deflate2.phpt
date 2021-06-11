@@ -1,7 +1,7 @@
 --TEST--
 zlib.deflate (with level parameter set)
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $text = 'I am the very model of a modern major general, I\'ve information vegetable, animal, and mineral.';

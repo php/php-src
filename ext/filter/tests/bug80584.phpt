@@ -1,9 +1,7 @@
 --TEST--
 Bug #80584: "0x" and "0X" are considered valid hex numbers by filter_var()
---SKIPIF--
-<?php
-if (!extension_loaded('filter')) die('skip filter extension not available');
-?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var('0x', FILTER_VALIDATE_INT, FILTER_FLAG_ALLOW_HEX));

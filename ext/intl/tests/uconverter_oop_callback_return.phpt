@@ -1,7 +1,7 @@
 --TEST--
 UConverter::convert() w/ Callback Return Values
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 class MyConverter extends UConverter {

@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: Does not force correct dateformat
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--

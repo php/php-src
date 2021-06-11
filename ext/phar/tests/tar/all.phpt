@@ -1,9 +1,7 @@
 --TEST--
 Phar: test that creation of tar-based phar generates valid tar with all bells/whistles
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

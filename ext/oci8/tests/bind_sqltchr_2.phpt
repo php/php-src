@@ -1,7 +1,7 @@
 --TEST--
 PL/SQL bind with SQLT_CHR
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

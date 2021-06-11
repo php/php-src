@@ -1,9 +1,7 @@
 --TEST--
 ldap_read() does not modify $attributes array
---SKIPIF--
-<?php
-if (!extension_loaded('ldap')) die('skip ldap extension not available');
-?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 $array = [123, 456, 789];

@@ -1,9 +1,7 @@
 --TEST--
 PDO Common: PDORow + get_parent_class()
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) die ("skip Need PDO_SQlite support");
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $db = new PDO('sqlite::memory:');
