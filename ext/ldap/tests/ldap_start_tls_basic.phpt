@@ -3,8 +3,9 @@ ldap_start_tls() - Basic ldap_start_tls test
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 --FILE--
 <?php

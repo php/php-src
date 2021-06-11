@@ -2,8 +2,9 @@
 ldap_parse_result() - Test the parsing of controls from result object
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
 require_once('skipifcontrol.inc');

@@ -1,7 +1,8 @@
 --TEST--
 ldap_count_references() - Basic ldap_count_references test
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
