@@ -1,10 +1,6 @@
 <?php declare(strict_types=1);
 
 function curl_cli_server_start() {
-    if(getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
-        return getenv('PHP_CURL_HTTP_REMOTE_SERVER');
-    }
-
     $php_executable = getenv('TEST_PHP_EXECUTABLE');
     $doc_root = __DIR__;
     $router = "responder/get.inc";
