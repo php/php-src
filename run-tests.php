@@ -2064,7 +2064,7 @@ TEST $file
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipCache->getExtensions($php, "$pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -3683,22 +3683,22 @@ class SkipCache
         return $result;
     }
 
-    public function getExtensions(string $php): array
+    public function getExtensions(string $php, string $extensionsOptions): array
     {
-        if (isset($this->extensions[$php])) {
+        if (isset($this->extensions[$php . " " . $extensionsOptions])) {
             $this->extHits++;
-            return $this->extensions[$php];
+            return $this->extensions[$php . " " . $extensionsOptions];
         }
 
         $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extensions = explode(",", `$php $extensionsOptions -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
         $extensions = array_map('strtolower', $extensions);
         if (in_array('zend opcache', $extensions)) {
             $extensions[] = 'opcache';
         }
 
         $result = [$extDir, $extensions];
-        $this->extensions[$php] = $result;
+        $this->extensions[$php . " " . $extensionsOptions] = $result;
         $this->extMisses++;
 
         return $result;
