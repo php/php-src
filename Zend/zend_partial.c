@@ -172,6 +172,7 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 						sizeof(zend_arg_info));
 				}
 				info++;
+				break;
 			}
 		}
 
