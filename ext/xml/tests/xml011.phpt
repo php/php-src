@@ -1,9 +1,7 @@
 --TEST--
 XML Parser test: concat character data and set empty handlers
---SKIPIF--
-<?php
-require_once("skipif.inc");
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 function start_elem($parser,$name,$attribs) {

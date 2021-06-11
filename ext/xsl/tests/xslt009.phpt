@@ -2,10 +2,7 @@
 Test 9: Stream Wrapper XPath-Document()
 --EXTENSIONS--
 zlib
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    ?>
+xsl
 --FILE--
 <?php
 echo "Test 9: Stream Wrapper XPath-Document()";

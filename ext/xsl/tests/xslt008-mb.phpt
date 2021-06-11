@@ -2,10 +2,7 @@
 Test 8: Stream Wrapper Includes
 --EXTENSIONS--
 zlib
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    ?>
+xsl
 --FILE--
 <?php
 echo "Test 8: Stream Wrapper Includes ";
