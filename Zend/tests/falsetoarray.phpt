@@ -83,6 +83,30 @@ $false = false;
 $r42 = 42;
 $false[] &= $r42;
 
+$false = false;
+$false2 = false;
+$false3 = false;
+function &g(){
+    print "[018]\n";
+    global $false;
+    $false[] = 42;
+
+    $var1 = false;
+    $GLOBALS["false2"] =& $var1;
+
+    print "[019]\n";
+    $GLOBALS["false3"][] = 42;
+
+    print "[020]\n";
+    static $f2 = false;
+    return $f2;
+}
+
+$false = &g();
+$false[] = 42;
+print "[021]\n";
+$false2[] = 42;
+
 ?>
 --EXPECTF--
 [001]
@@ -140,5 +164,17 @@ Deprecated: Automatic conversion of false to array is deprecated in %s
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
 [017]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[018]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[019]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[020]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[021]
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
