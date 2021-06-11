@@ -130,7 +130,7 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 			} else {
 				ZEND_ASSERT(0 && "argument out of range");
 			}
-		} else if (Z_IS_PLACEHOLDER_VARIADIC_P(arg)) {
+		} else if (Z_IS_PLACEHOLDER_VARIADIC_P(arg) || Z_ISUNDEF_P(arg)) {
 			if (offset < prototype->common.num_args) {
 				while (offset < prototype->common.num_args) {
 					if ((offset < partial->argc) &&
@@ -633,9 +633,17 @@ static zend_always_inline uint32_t zend_partial_apply(
 				cStart++;
 			}
 		} else {
-			ZVAL_COPY_VALUE(fParam, pStart);
-			pCount++;
-			fParam++;
+			if (cStart < cEnd && Z_ISUNDEF_P(pStart)) {
+				ZVAL_COPY_VALUE(fParam, cStart);
+				pCount++;
+				fParam++;
+				cStart++;
+			} else {
+				ZVAL_COPY_VALUE(fParam, pStart);
+				pCount++;
+				fParam++;
+			}
+
 		}
 		pStart++;
 	}
@@ -895,7 +903,7 @@ void zend_partial_bind(zval *result, zval *partial, zval *this_ptr, zend_class_e
 	ZVAL_UNDEF(&This);
 
 	if (!this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
-	    ZEND_ASSERT(scope && "scope must be set");
+		ZEND_ASSERT(scope && "scope must be set");
 
 		Z_CE(This) = scope;
 	} else {
