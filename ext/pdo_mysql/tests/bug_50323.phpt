@@ -2,9 +2,9 @@
 Bug #50323 (No ability to connect to database named 't;', no chance to escape semicolon)
 --EXTENSIONS--
 pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_mysql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();

@@ -2,8 +2,7 @@
 Bug #70019 Files extracted from archive may be placed outside of destination directory
 --EXTENSIONS--
 phar
---SKIPIF--
-<?php if (!extension_loaded('zlib')) die("skip"); ?>
+zlib
 --FILE--
 <?php
 $dir = __DIR__."/bug70019";

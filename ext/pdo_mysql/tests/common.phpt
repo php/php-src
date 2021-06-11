@@ -2,10 +2,7 @@
 MySQL
 --EXTENSIONS--
 pdo
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_mysql')) print 'skip not loaded';
-?>
+pdo_mysql
 --REDIRECTTEST--
 # magic auto-configuration
 

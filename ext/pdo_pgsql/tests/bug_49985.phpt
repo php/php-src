@@ -2,9 +2,9 @@
 Bug #49985 (pdo_pgsql prepare() re-use previous aborted transaction)
 --EXTENSIONS--
 pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();

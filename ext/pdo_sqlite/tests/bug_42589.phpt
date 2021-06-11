@@ -2,10 +2,7 @@
 PDO SQLite Feature Request #42589 (getColumnMeta() should also return table name)
 --EXTENSIONS--
 pdo
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) die('skip not loaded');
-?>
+pdo_sqlite
 --FILE--
 <?php
 $db = new PDO("sqlite::memory:");

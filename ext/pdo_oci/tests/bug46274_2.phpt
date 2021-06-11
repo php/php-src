@@ -2,10 +2,9 @@
 Bug #46274 (pdo_pgsql - Segfault when using PDO::ATTR_STRINGIFY_FETCHES and blob)
 --EXTENSIONS--
 pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_oci'))
-die('skip not loaded');
 require __DIR__.'/../../pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
