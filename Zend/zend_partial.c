@@ -131,8 +131,8 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 				ZEND_ASSERT(0 && "argument out of range");
 			}
 		} else if (Z_IS_PLACEHOLDER_VARIADIC_P(arg) || Z_ISUNDEF_P(arg)) {
-			if (offset < prototype->common.num_args) {
-				while (offset < prototype->common.num_args) {
+			if (offset < partial->func.common.num_args) {
+				while (offset < partial->func.common.num_args) {
 					if ((offset < partial->argc) &&
 						!Z_IS_PLACEHOLDER_P(&partial->argv[offset]) && 
 						!Z_ISUNDEF(partial->argv[offset])) {
@@ -142,7 +142,7 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 
 					num++;
 					memcpy(info,
-						&prototype->common.arg_info[offset], 
+						&partial->func.common.arg_info[offset], 
 						sizeof(zend_arg_info));
 					ZEND_TYPE_FULL_MASK(info->type) &= ~_ZEND_IS_VARIADIC_BIT;
 					info++;
@@ -643,7 +643,6 @@ static zend_always_inline uint32_t zend_partial_apply(
 				pCount++;
 				fParam++;
 			}
-
 		}
 		pStart++;
 	}
