@@ -1,7 +1,7 @@
 --TEST--
 zend multibyte (16)
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 --FILE--
