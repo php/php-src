@@ -13,7 +13,7 @@ if (!preg_match("/vendor name => openldap/i", ob_get_clean()))
 ?>
 --FILE--
 <?php
-$conf=tempnam("/tmp","ldap.conf");
+$conf=tempnam(sys_get_temp_dir(),"ldap.conf");
 file_put_contents($conf, "uri ldaps://example.com:3141/");
 putenv("LDAPCONF=$conf");
 $link = ldap_connect();
