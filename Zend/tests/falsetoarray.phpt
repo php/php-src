@@ -3,37 +3,41 @@ Autovivification of false to array
 --FILE--
 <?php
 
-// no
+// control
 $undef[] = 42;
 
-// no
+// control
 $null = null;
 $null[] = 42;
 
-// yes
+// control
+$false = false;
+$false = [42];
+
+print "[001]\n";
 $false = false;
 $false[] = 42;
 
-// yes
+print "[002]\n";
 $ref = false;
 $ref2 = &$ref;
 $ref2[] = 42;
 
-echo "now function\n";
+echo "\nFunction\n";
 function ffalse(bool $a, ?bool $b, &$c, ...$d) {
-    // yes
+    print "[003]\n";
     $a[] = 42;
-    // yes
+    print "[004]\n";
     $b[] = 42;
-    // yes
+    print "[005]\n";
     $c[] = 42;
-    // yes
+    print "[006]\n";
     $d[0][] = 42;
 }
 $ref = false;
 ffalse(false, false, $ref, false);
 
-echo "now class\n";
+echo "\nProperties\n";
 class Cfalse {
     public $def;
     private $untyped = false;
@@ -41,51 +45,85 @@ class Cfalse {
     static private $st2 = false;
     static private $st3 = false;
     public function __construct(public $pu, private $pr = false) {
-        // yes
+        print "[007]\n";
         $this->def = false;
         $this->def[] = 42;
-        // yes
+        print "[008]\n";
         $this->untyped[] = 42;
-        // yes
+        print "[009]\n";
         self::$st[] = 42;
-        // yes
+        print "[010]\n";
         static::$st2[] = 42;
-        // yes
+        print "[011]\n";
         $this::$st3[] = 42;
-        // yes
+        print "[012]\n";
         $this->pu[] = 42;
-        // yes
+        print "[013]\n";
         $this->pr[] = 42;
     }
 }
 new Cfalse(false, false);
 
+echo "\nDestructuring\n";
+
+print "[014]\n";
+$add = false;
+foreach ([42] as $add[]);
+
+print "[015]\n";
+$arr = false;
+[$arr[]] = [42];
+
 ?>
 --EXPECTF--
-Deprecated: Automatic conversion of false to array is deprecated in %s
+[001]
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
-now function
-
-Deprecated: Automatic conversion of false to array is deprecated in %s
-
-Deprecated: Automatic conversion of false to array is deprecated in %s
+[002]
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
 
+Function
+[003]
+
 Deprecated: Automatic conversion of false to array is deprecated in %s
-now class
+[004]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 43
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[005]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 45
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[006]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 47
+Deprecated: Automatic conversion of false to array is deprecated in %s
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 49
+Properties
+[007]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 51
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[008]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 53
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[009]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s on line 55
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[010]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[011]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[012]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[013]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+
+Destructuring
+[014]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[015]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
