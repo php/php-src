@@ -5,11 +5,11 @@ pcntl
 posix
 --SKIPIF--
 <?php
-    elseif (!function_exists('pcntl_sigwaitinfo') or !function_exists('pcntl_sigtimedwait')) die('skip required functionality is not available');
-    elseif (!defined('CLD_EXITED')) die('skip CLD_EXITED not defined');
-    elseif (getenv('SKIP_ASAN')) die('skip Fails intermittently under asan/msan');
-    elseif (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
-    elseif (str_contains(PHP_OS, 'FreeBSD')) die('skip Results in parallel test runner hang on FreeBSD');
+if (!function_exists('pcntl_sigwaitinfo') or !function_exists('pcntl_sigtimedwait')) die('skip required functionality is not available');
+elseif (!defined('CLD_EXITED')) die('skip CLD_EXITED not defined');
+elseif (getenv('SKIP_ASAN')) die('skip Fails intermittently under asan/msan');
+elseif (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
+elseif (str_contains(PHP_OS, 'FreeBSD')) die('skip Results in parallel test runner hang on FreeBSD');
 ?>
 --FILE--
 <?php

@@ -7,7 +7,7 @@ Er Galvão Abbott galvao@galvao.eti.br
 pcntl
 --SKIPIF--
 <?php
- else if (!function_exists('pcntl_getpriority')) {
+if (!function_exists('pcntl_getpriority')) {
     die('skip - pcntl_getpriority doesn\'t exist');
 }
 ?>
