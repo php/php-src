@@ -2,9 +2,10 @@
 ldap_search() bug 48441 - options persists after specifying them in ldap_search
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--

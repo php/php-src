@@ -2,9 +2,10 @@
 ldap_search() test with sort and VLV controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 require_once('skipifcontrol.inc');
 skipifunsupportedcontrol(LDAP_CONTROL_SORTREQUEST);

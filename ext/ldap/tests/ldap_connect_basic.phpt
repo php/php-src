@@ -3,8 +3,8 @@ ldap_connect() - Basic connection
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";
