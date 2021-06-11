@@ -1,7 +1,7 @@
 --TEST--
 Fiber interaction with custom fiber implementation 4
---SKIPIF--
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 $fiber = new Fiber(function (): int {
