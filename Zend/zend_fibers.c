@@ -59,6 +59,21 @@
 # include <sanitizer/common_interface_defs.h>
 #endif
 
+/* Encapsulates the fiber C stack with extension for debugging tools. */
+struct _zend_fiber_stack {
+	void *pointer;
+	size_t size;
+
+#ifdef HAVE_VALGRIND
+	unsigned int valgrind_stack_id;
+#endif
+
+#ifdef __SANITIZE_ADDRESS__
+	const void *asan_pointer;
+	size_t asan_size;
+#endif
+};
+
 /* boost_context_data is our customized definition of struct transfer_t as
  * provided by boost.context in fcontext.hpp:
  *
@@ -102,25 +117,25 @@ static size_t zend_fiber_get_page_size(void)
 	return page_size;
 }
 
-static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
+static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
 
 	ZEND_ASSERT(size >= page_size + ZEND_FIBER_GUARD_PAGES * page_size);
 
-	stack->size = (size + page_size - 1) / page_size * page_size;
-	const size_t msize = stack->size + ZEND_FIBER_GUARD_PAGES * page_size;
+	const size_t stack_size = (size + page_size - 1) / page_size * page_size;
+	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
 
 #ifdef ZEND_WIN32
-	pointer = VirtualAlloc(0, msize, MEM_COMMIT, PAGE_READWRITE);
+	pointer = VirtualAlloc(0, alloc_size, MEM_COMMIT, PAGE_READWRITE);
 
 	if (!pointer) {
 		DWORD err = GetLastError();
 		char *errmsg = php_win32_error_to_msg(err);
 		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: VirtualAlloc failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
 		php_win32_error_msg_free(errmsg);
-		return false;
+		return NULL;
 	}
 
 # if ZEND_FIBER_GUARD_PAGES
@@ -132,49 +147,48 @@ static bool zend_fiber_stack_allocate(zend_fiber_stack *stack, size_t size)
 		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
 		php_win32_error_msg_free(errmsg);
 		VirtualFree(pointer, 0, MEM_RELEASE);
-		return false;
+		return NULL;
 	}
 # endif
 #else
-	pointer = mmap(NULL, msize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
+	pointer = mmap(NULL, alloc_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
 
 	if (pointer == MAP_FAILED) {
 		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: mmap failed: %s (%d)", strerror(errno), errno);
-		return false;
+		return NULL;
 	}
 
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
 		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: mmap failed: %s (%d)", strerror(errno), errno);
-		munmap(pointer, msize);
-		return false;
+		munmap(pointer, alloc_size);
+		return NULL;
 	}
 # endif
 #endif
 
+	zend_fiber_stack *stack = emalloc(sizeof(zend_fiber_stack));
+
 	stack->pointer = (void *) ((uintptr_t) pointer + ZEND_FIBER_GUARD_PAGES * page_size);
+	stack->size = stack_size;
 
 #ifdef VALGRIND_STACK_REGISTER
 	uintptr_t base = (uintptr_t) stack->pointer;
-	stack->valgrind = VALGRIND_STACK_REGISTER(base, base + stack->size);
+	stack->valgrind_stack_id = VALGRIND_STACK_REGISTER(base, base + stack->size);
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
-	stack->prior_pointer = stack->pointer;
-	stack->prior_size = stack->size;
+	stack->asan_pointer = stack->pointer;
+	stack->asan_size = stack->size;
 #endif
 
-	return true;
+	return stack;
 }
 
 static void zend_fiber_stack_free(zend_fiber_stack *stack)
 {
-	if (!stack->pointer) {
-		return;
-	}
-
 #ifdef VALGRIND_STACK_DEREGISTER
-	VALGRIND_STACK_DEREGISTER(stack->valgrind);
+	VALGRIND_STACK_DEREGISTER(stack->valgrind_stack_id);
 #endif
 
 	const size_t page_size = zend_fiber_get_page_size();
@@ -187,7 +201,7 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	munmap(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
 #endif
 
-	stack->pointer = NULL;
+	efree(stack);
 }
 
 static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
@@ -195,7 +209,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 	zend_fiber_context *from = data.transfer->context;
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(NULL, &from->stack.prior_pointer, &from->stack.prior_size);
+	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
 #endif
 
 	/* Get a hold of the context that resumed us and update it's handle to allow for symmetric coroutines. */
@@ -218,14 +232,16 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
-	if (UNEXPECTED(!zend_fiber_stack_allocate(&context->stack, stack_size))) {
+	context->stack = zend_fiber_stack_allocate(stack_size);
+
+	if (UNEXPECTED(!context->stack)) {
 		return false;
 	}
 
 	// Stack grows down, calculate the top of the stack. make_fcontext then shifts pointer to lower 16-byte boundary.
-	void *stack = (void *) ((uintptr_t) context->stack.pointer + context->stack.size);
+	void *stack = (void *) ((uintptr_t) context->stack->pointer + context->stack->size);
 
-	context->handle = make_fcontext(stack, context->stack.size, zend_fiber_trampoline);
+	context->handle = make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
 	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
 
 	context->kind = kind;
@@ -236,7 +252,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
-	zend_fiber_stack_free(&context->stack);
+	zend_fiber_stack_free(context->stack);
 }
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
@@ -278,8 +294,8 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	void *fake_stack = NULL;
 	__sanitizer_start_switch_fiber(
 		from->status != ZEND_FIBER_STATUS_DEAD ? &fake_stack : NULL,
-		to->stack.prior_pointer,
-		to->stack.prior_size);
+		to->stack->asan_pointer,
+		to->stack->asan_size);
 #endif
 
 	boost_context_data data = jump_fcontext(to->handle, transfer);
@@ -292,7 +308,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	to->handle = data.handle;
 
 #ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
+	__sanitizer_finish_switch_fiber(fake_stack, &to->stack->asan_pointer, &to->stack->asan_size);
 #endif
 
 	EG(current_fiber_context) = from;
@@ -741,6 +757,11 @@ void zend_fiber_init(void)
 {
 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
 
+#ifdef __SANITIZE_ADDRESS__
+	// Main fiber context stack is only accessed if ASan is enabled.
+	context->stack = emalloc(sizeof(zend_fiber_stack));
+#endif
+
 	context->status = ZEND_FIBER_STATUS_RUNNING;
 
 	EG(main_fiber_context) = context;
@@ -750,5 +771,8 @@ void zend_fiber_init(void)
 
 void zend_fiber_shutdown(void)
 {
+#ifdef __SANITIZE_ADDRESS__
+	efree(EG(main_fiber_context)->stack);
+#endif
 	efree(EG(main_fiber_context));
 }

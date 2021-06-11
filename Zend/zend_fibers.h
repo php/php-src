@@ -53,23 +53,9 @@ void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
-/* Encapsulates the fiber C stack with extension for debugging tools. */
-typedef struct _zend_fiber_stack {
-	void *pointer;
-	size_t size;
-
-#ifdef HAVE_VALGRIND
-	int valgrind;
-#endif
-
-#ifdef __SANITIZE_ADDRESS__
-	const void *prior_pointer;
-	size_t prior_size;
-#endif
-} zend_fiber_stack;
-
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
+typedef struct _zend_fiber_stack zend_fiber_stack;
 
 /* Encapsulates data needed for a context switch. */
 typedef struct _zend_fiber_transfer {
@@ -92,9 +78,9 @@ typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 	/* Pointer that identifies the fiber type. */ \
 	void *kind; \
 	zend_fiber_coroutine function; \
-	zend_fiber_stack stack; \
+	zend_fiber_stack *stack; \
 	zend_fiber_status status; \
-	zend_uchar flags
+	uint8_t flags
 
 /* Standalone context (used primarily as pointer type). */
 struct _zend_fiber_context {
