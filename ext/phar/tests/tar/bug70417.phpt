@@ -1,10 +1,11 @@
 --TEST--
 Bug #70417 (PharData::compress() doesn't close temp file)
+--EXTENSIONS--
+phar
+zlib
 --SKIPIF--
 <?php
-if (!extension_loaded('phar') || !extension_loaded('zlib')) {
-    die("skip ext/phar or ext/zlib not available");
-}
+
 exec('lsof -p ' . getmypid(), $out, $status);
 if ($status !== 0) {
     die("skip lsof(8) not available");

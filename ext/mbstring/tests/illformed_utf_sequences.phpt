@@ -1,7 +1,7 @@
 --TEST--
 Unicode standard conformance test (ill-formed UTF sequences.)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 function chk_enc($str, $n, $enc = "UTF-8") {

@@ -1,7 +1,7 @@
 --TEST--
 mb_output_handler() (Shift_JIS)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 output_handler=mb_output_handler
 internal_encoding=Shift_JIS

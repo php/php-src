@@ -1,9 +1,8 @@
 --TEST--
 MySQL
---SKIPIF--
-<?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo
+pdo_mysql
 --REDIRECTTEST--
 # magic auto-configuration
 

@@ -1,8 +1,9 @@
 --TEST--
 Test mb_internal_encoding() function : error conditions - pass an unknown encoding
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is not available in this build");
 ?>
 --FILE--

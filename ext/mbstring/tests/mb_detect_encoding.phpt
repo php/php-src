@@ -1,7 +1,7 @@
 --TEST--
 mb_detect_encoding()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.language=Japanese
 --FILE--

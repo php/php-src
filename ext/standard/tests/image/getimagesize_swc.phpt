@@ -1,10 +1,12 @@
 --TEST--
 GetImageSize() for compressed swf files
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-    if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
-        die("skip zlib extension is not available");
-    }
+if (!defined("IMAGETYPE_SWC")) {
+    die("skip IMAGETYPE_SWC is not available");
+}
 ?>
 --FILE--
 <?php

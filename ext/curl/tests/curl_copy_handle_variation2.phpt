@@ -3,10 +3,8 @@ Test curl_copy_handle() add options to the handles
 --CREDITS--
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
---SKIPIF--
-<?php
-    if (!extension_loaded("curl")) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --DESCRIPTION--
 the only way to test if a option is setten on a curl handle is using the curl_getinfo() function.
 but this can only check on a limited amount of options...

@@ -1,7 +1,7 @@
 --TEST--
 mb_strimwidth()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 output_handler=
 --FILE--

@@ -1,8 +1,9 @@
 --TEST--
 Test of ASCII and JIS X 0201/0208/0212 support in ISO-2022-JP and JIS7/8 encodings
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--

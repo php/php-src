@@ -1,8 +1,9 @@
 --TEST--
 Test mb_substr_count() function : error conditions - pass unknown encoding
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_substr_count') or die("skip mb_substr_count() is not available in this build");
 ?>
 --FILE--
