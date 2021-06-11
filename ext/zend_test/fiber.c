@@ -125,7 +125,7 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 
 static zend_object *zend_test_fiber_object_create(zend_class_entry *ce)
 {
-	zend_fiber *fiber;
+	zend_test_fiber *fiber;
 
 	fiber = emalloc(sizeof(zend_test_fiber));
 	memset(fiber, 0, sizeof(zend_test_fiber));
