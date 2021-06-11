@@ -1,8 +1,10 @@
 --TEST--
 Handling OCI_SUCCESS_WITH_INFO
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
+if (!extension_loaded('pdo_oci')) die('skip not loaded');
 ?>
 --FILE--
 <?php

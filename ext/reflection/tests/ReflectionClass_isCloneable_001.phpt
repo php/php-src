@@ -1,7 +1,9 @@
 --TEST--
 Testing ReflectionClass::isCloneable()
+--EXTENSIONS--
+simplexml
 --SKIPIF--
-<?php if (!extension_loaded('simplexml') || !extension_loaded('xmlwriter')) die("skip SimpleXML and XMLWriter is required for this test"); ?>
+<?php if (!extension_loaded('xmlwriter')) die("skip SimpleXML and XMLWriter is required for this test"); ?>
 --FILE--
 <?php
 

@@ -1,8 +1,10 @@
 --TEST--
 Bug #73959 (lastInsertId fails to throw an exception)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
+if (!extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 require __DIR__ . '/config.inc';
 PDOTest::skip();

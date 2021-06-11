@@ -1,7 +1,9 @@
 --TEST--
 Check for libsodium stream
+--EXTENSIONS--
+sodium
 --SKIPIF--
-<?php if (!extension_loaded("sodium") || !defined('SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES')) print "skip"; ?>
+<?php if (!defined('SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES')) print "skip"; ?>
 --FILE--
 <?php
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES);

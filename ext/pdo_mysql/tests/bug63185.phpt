@@ -1,8 +1,10 @@
 --TEST--
 Bug #63185: nextRowset() ignores MySQL errors with native prepared statements
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
+if (!extension_loaded('pdo_mysql')) die('skip not loaded');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();

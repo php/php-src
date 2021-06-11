@@ -1,8 +1,10 @@
 --TEST--
 PDO::exec() returns 0 when the statement is a SELECT.
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
+if (!extension_loaded('pdo_pgsql')) die('skip not loaded');
 require_once __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once __DIR__ . '/config.inc';
 PDOTest::skip();
