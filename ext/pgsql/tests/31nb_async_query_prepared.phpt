@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL non-blocking async prepared queries
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 include("skipif.inc");

@@ -1,8 +1,9 @@
 --TEST--
 ensure an error is returned when mysqli.allow_local_infile is off
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 $link = mysqli_init();

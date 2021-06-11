@@ -1,5 +1,7 @@
 --TEST--
 pg_close() default link after connection variable has been dropped
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

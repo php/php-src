@@ -1,8 +1,9 @@
 --TEST--
 Bug #62885 (mysqli_poll - Segmentation fault)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND) {
     die("skip mysqlnd only test");

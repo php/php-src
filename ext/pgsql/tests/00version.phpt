@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL version
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

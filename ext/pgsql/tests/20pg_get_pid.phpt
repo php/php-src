@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_get_pid() functions
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

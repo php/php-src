@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_select() - basic test using schema
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

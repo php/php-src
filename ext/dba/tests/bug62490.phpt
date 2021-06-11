@@ -1,5 +1,7 @@
 --TEST--
 Bug #62490 (dba_delete returns true on missing item (inifile))
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "inifile";

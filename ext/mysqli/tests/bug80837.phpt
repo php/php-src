@@ -1,8 +1,9 @@
 --TEST--
 Bug #80837 Calling stmt_store_result after fetch doesn't throw an error
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
 require_once 'skipifconnectfailure.inc';
 if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) die('skip requires mysqlnd');
 ?>

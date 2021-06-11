@@ -1,5 +1,7 @@
 --TEST--
 Bug #67972: SessionHandler Invalid memory read create_sid()
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

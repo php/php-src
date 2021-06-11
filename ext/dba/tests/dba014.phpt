@@ -1,5 +1,7 @@
 --TEST--
 DBA with array key with array containing too many elements
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 require_once(__DIR__ .'/skipif.inc');

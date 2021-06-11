@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_delete()
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

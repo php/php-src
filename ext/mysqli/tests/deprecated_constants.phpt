@@ -1,9 +1,7 @@
 --TEST--
 Deprecated constants
---SKIPIF--
-<?php
-require_once 'skipif.inc';
-?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
 

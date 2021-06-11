@@ -1,8 +1,9 @@
 --TEST--
 mysqli_result->data_seek()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

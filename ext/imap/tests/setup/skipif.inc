@@ -1,6 +1,4 @@
 <?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-
 include __DIR__ . '/imap_include.inc';
 
 $options = OP_HALFOPEN; // this should be enough to verify server present

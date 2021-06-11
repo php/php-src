@@ -1,5 +1,7 @@
 --TEST--
 Bug #32223 (weird behaviour of pg_last_notice using define)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

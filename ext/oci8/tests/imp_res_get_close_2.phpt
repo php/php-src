@@ -2,6 +2,7 @@
 Oracle Database 12c Implicit Result Sets: oci_get_implicit_resultset: oci_free_statement #2
 --EXTENSIONS--
 oci8
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

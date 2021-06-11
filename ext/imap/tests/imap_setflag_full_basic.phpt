@@ -1,5 +1,7 @@
 --TEST--
 imap_setflag_full() basic test
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');

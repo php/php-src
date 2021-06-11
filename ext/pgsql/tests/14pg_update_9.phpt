@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_update() (9.0+)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 include("skipif.inc");

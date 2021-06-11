@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL create large object with given oid
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 include("skipif.inc");

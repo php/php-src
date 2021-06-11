@@ -1,5 +1,7 @@
 --TEST--
 Bug #69111 Crash in SessionHandler::read()
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

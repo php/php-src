@@ -1,8 +1,9 @@
 --TEST--
 Persistent connections and mysqli.max_links
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
     require_once('skipifconnectfailure.inc');
     require_once('table.inc');
 

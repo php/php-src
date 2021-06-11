@@ -2,6 +2,7 @@
 oci_set_call_timeout: test timing out 
 --EXTENSIONS--
 oci8
+oci8
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');

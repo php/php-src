@@ -1,8 +1,9 @@
 --TEST--
 Bug #33263 (mysqli_real_connect in __construct)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

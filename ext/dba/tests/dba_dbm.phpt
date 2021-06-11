@@ -1,5 +1,7 @@
 --TEST--
 DBA DBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'dbm';

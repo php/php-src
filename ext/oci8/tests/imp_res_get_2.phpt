@@ -2,6 +2,7 @@
 Oracle Database 12c Implicit Result Sets: oci_get_implicit_resultset: similar to imp_res_get_1 but with unrolled loop
 --EXTENSIONS--
 oci8
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

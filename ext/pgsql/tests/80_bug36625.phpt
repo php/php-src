@@ -1,5 +1,7 @@
 --TEST--
 Bug #36625 (8.0+) (pg_trace() does not work)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

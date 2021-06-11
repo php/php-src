@@ -1,8 +1,9 @@
 --TEST--
 Calling connect() on an open persistent connection to create a new persistent connection
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

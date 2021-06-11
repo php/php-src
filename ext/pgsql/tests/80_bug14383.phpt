@@ -1,5 +1,7 @@
 --TEST--
 Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any keys)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 require_once(__DIR__.'/../../dba/tests/skipif.inc');

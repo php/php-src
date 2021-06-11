@@ -1,5 +1,7 @@
 --TEST--
 DBA Handler Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler="flatfile";

@@ -1,5 +1,7 @@
 --TEST--
 Bug #55688 (Crash when calling SessionHandler::gc())
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

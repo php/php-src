@@ -1,5 +1,7 @@
 --TEST--
 Bug #24499 (Notice: Undefined property: stdClass::)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

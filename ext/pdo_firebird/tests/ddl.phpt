@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: DDL/transactions
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --ENV--

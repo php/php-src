@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL create db
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

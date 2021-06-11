@@ -1,5 +1,7 @@
 --TEST--
 Bug #75419 Default link leaked via pg_close()
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

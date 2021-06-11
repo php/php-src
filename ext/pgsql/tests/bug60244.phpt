@@ -1,5 +1,7 @@
 --TEST--
 Bug #60244 (pg_fetch_* functions do not validate that row param is >0)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 include("skipif.inc");

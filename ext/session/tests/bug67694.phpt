@@ -7,6 +7,8 @@ session.auto_start = 0
 session.use_cookies = 0
 session.cache_limiter =
 date.timezone = UTC
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

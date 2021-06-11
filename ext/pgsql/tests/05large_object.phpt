@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL large object
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

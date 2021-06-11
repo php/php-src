@@ -1,5 +1,7 @@
 --TEST--
 Bug #72479: Use After Free Vulnerability in SNMP with GC and unserialize()
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

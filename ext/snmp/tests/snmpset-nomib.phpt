@@ -2,6 +2,8 @@
 Function snmpset (without MIBs loading)
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

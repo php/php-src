@@ -1,5 +1,7 @@
 --TEST--
 Bug #46408 (Locale number format settings can cause pg_query_params to break with numerics)
+--EXTENSIONS--
+psql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

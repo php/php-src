@@ -1,8 +1,9 @@
 --TEST--
 mysqli_options() - MYSQLI_OPT_INT_AND_FLOAT_NATIVE
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');

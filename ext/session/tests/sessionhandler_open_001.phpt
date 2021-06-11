@@ -1,5 +1,7 @@
 --TEST--
 Testing repated SessionHandler::open() calls
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

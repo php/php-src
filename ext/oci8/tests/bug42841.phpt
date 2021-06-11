@@ -1,5 +1,7 @@
 --TEST--
 Bug #42841 (REF CURSOR and oci_new_cursor PHP crash)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
