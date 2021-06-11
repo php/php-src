@@ -439,7 +439,9 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
 function net_get_interfaces(): array|false {}
+#endif
 
 /* ftok.c */
 
