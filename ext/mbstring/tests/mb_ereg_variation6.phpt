@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : usage variations - match special characters
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--

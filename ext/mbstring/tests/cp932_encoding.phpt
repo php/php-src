@@ -1,7 +1,7 @@
 --TEST--
 Exhaustive test of CP932 encoding verification and conversion
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 srand(4321); /* Make results consistent */

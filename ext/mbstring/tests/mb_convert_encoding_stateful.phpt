@@ -1,7 +1,7 @@
 --TEST--
 mb_convert_encoding() with stateful encodings
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 output_handler=
 mbstring.language=Japanese

@@ -1,8 +1,9 @@
 --TEST--
 mb_strtoupper() / mb_strtolower()
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_strtolower') and
 function_exists('mb_convert_case' ) or die("skip mb_convert_case() is not available");
 ?>

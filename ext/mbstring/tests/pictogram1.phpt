@@ -1,7 +1,7 @@
 --TEST--
 Emoji (Pictogram characters for cellular phone in Japan) test based on Unicode 6.0
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 mb_substitute_character(0x3f);

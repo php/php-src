@@ -1,9 +1,7 @@
 --TEST--
 php-users@php.gr.jp #16242
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip mbstring not available');
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.language=Japanese
 internal_encoding=UTF-8
