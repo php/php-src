@@ -17,6 +17,8 @@
 #ifndef PHP_TEST_H
 #define PHP_TEST_H
 
+#include "fiber.h"
+
 extern zend_module_entry zend_test_module_entry;
 #define phpext_zend_test_ptr &zend_test_module_entry
 
@@ -29,6 +31,28 @@ extern zend_module_entry zend_test_module_entry;
 #if defined(ZTS) && defined(COMPILE_DL_ZEND_TEST)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_BEGIN_MODULE_GLOBALS(zend_test)
+	int observer_enabled;
+	int observer_show_output;
+	int observer_observe_all;
+	int observer_observe_includes;
+	int observer_observe_functions;
+	int observer_show_return_type;
+	int observer_show_return_value;
+	int observer_show_init_backtrace;
+	int observer_show_opcode;
+	char *observer_show_opcode_in_user_handler;
+	int observer_nesting_depth;
+	int observer_fiber_switch;
+	int replace_zend_execute_ex;
+	int register_passes;
+	zend_test_fiber *active_fiber;
+ZEND_END_MODULE_GLOBALS(zend_test)
+
+extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)
+
+#define ZT_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(zend_test, v)
 
 struct bug79096 {
 	uint64_t a;
