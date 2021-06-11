@@ -6895,7 +6895,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 	prev_execute_data = fiber->stack_bottom->prev_execute_data;
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	if (EG(current_fiber) != zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) != fiber) {
 		// No need to replace current execute data if within the current fiber.
 		EG(current_execute_data) = fiber->execute_data;
 	}
@@ -6915,7 +6915,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;
@@ -6933,7 +6933,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;

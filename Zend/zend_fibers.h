@@ -111,6 +111,7 @@ typedef struct _zend_fiber_vm_state {
 	int error_reporting;
 	uint32_t jit_trace_num;
 	JMP_BUF *bailout;
+	zend_fiber *active_fiber;
 } zend_fiber_vm_state;
 
 struct _zend_fiber {
@@ -122,6 +123,9 @@ struct _zend_fiber {
 
 	/* Fiber that resumed us. */
 	zend_fiber_context *caller;
+
+	/* Fiber that suspended us. */
+	zend_fiber_context *previous;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;
@@ -166,6 +170,7 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->error_reporting = EG(error_reporting);
 	state->jit_trace_num = EG(jit_trace_num);
 	state->bailout = EG(bailout);
+	state->active_fiber = EG(active_fiber);
 }
 
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
@@ -178,6 +183,7 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(error_reporting) = state->error_reporting;
 	EG(jit_trace_num) = state->jit_trace_num;
 	EG(bailout) = state->bailout;
+	EG(active_fiber) = state->active_fiber;
 }
 
 #endif

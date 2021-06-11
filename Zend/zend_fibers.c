@@ -204,7 +204,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 	/* Initialize transfer struct with a copy of passed data. */
 	zend_fiber_transfer transfer = *data.transfer;
 
-	zend_fiber_context *context = EG(current_fiber);
+	zend_fiber_context *context = EG(current_fiber_context);
 
 	context->function(&transfer);
 	context->status = ZEND_FIBER_STATUS_DEAD;
@@ -241,7 +241,7 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 {
-	zend_fiber_context *from = EG(current_fiber);
+	zend_fiber_context *from = EG(current_fiber_context);
 	zend_fiber_context *to = transfer->context;
 	zend_fiber_vm_state state;
 
@@ -272,7 +272,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	/* Update transfer context with the current fiber before switching. */
 	transfer->context = from;
 
-	EG(current_fiber) = to;
+	EG(current_fiber_context) = to;
 
 #ifdef __SANITIZE_ADDRESS__
 	void *fake_stack = NULL;
@@ -295,7 +295,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	__sanitizer_finish_switch_fiber(fake_stack, &to->stack.prior_pointer, &to->stack.prior_size);
 #endif
 
-	EG(current_fiber) = from;
+	EG(current_fiber_context) = from;
 
 	zend_fiber_restore_vm_state(&state);
 
@@ -312,11 +312,11 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
-	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_UNDEF && "First context switch into a fiber must not transmit data");
+	zend_fiber *fiber = EG(active_fiber);
 
-	zend_fiber *fiber = zend_fiber_from_context(EG(current_fiber));
-
+	/* Determine the current error_reporting ini setting. */
 	zend_long error_reporting = INI_INT("error_reporting");
+	/* If error_reporting is 0 and not explicitly set to 0, INI_STR returns a null pointer. */
 	if (!error_reporting && !INI_STR("error_reporting")) {
 		error_reporting = E_ALL;
 	}
@@ -392,6 +392,50 @@ static zend_always_inline void delegate_transfer_result(
 	RETURN_COPY_VALUE(&transfer->value);
 }
 
+static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
+	zend_fiber_context *context, zval *value, bool exception
+) {
+	zend_fiber_transfer transfer = {
+		.context = context,
+		.flags = exception ? ZEND_FIBER_TRANSFER_FLAG_ERROR : 0,
+	};
+
+	if (value) {
+		ZVAL_COPY(&transfer.value, value);
+	} else {
+		ZVAL_NULL(&transfer.value);
+	}
+
+	zend_fiber_switch_context(&transfer);
+
+	return transfer;
+}
+
+static zend_always_inline zend_fiber_transfer zend_fiber_resume(zend_fiber *fiber, zval *value, bool exception)
+{
+	zend_fiber *previous = EG(active_fiber);
+
+	fiber->caller = EG(current_fiber_context);
+	EG(active_fiber) = fiber;
+
+	zend_fiber_transfer transfer = zend_fiber_switch_to(fiber->previous, value, exception);
+
+	EG(active_fiber) = previous;
+
+	return transfer;
+}
+
+static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fiber, zval *value)
+{
+	ZEND_ASSERT(fiber->caller != NULL);
+
+	zend_fiber_context *caller = fiber->caller;
+	fiber->previous = EG(current_fiber_context);
+	fiber->caller = NULL;
+
+	return zend_fiber_switch_to(caller, value, false);
+}
+
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 {
 	zend_fiber *fiber;
@@ -416,14 +460,9 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
-	fiber->caller = EG(current_fiber);
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
-	zend_fiber_transfer transfer = {
-		.context = zend_fiber_get_context(fiber)
-	};
-
-	zend_fiber_switch_context(&transfer);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
 	if (transfer.flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
 		EG(exception) = Z_OBJ(transfer.value);
@@ -496,13 +535,9 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	fiber->caller = EG(current_fiber);
+	fiber->previous = context;
 
-	zend_fiber_transfer transfer = {
-		.context = context
-	};
-
-	zend_fiber_switch_context(&transfer);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
 	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -516,38 +551,24 @@ ZEND_METHOD(Fiber, suspend)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(EG(current_fiber)->kind != zend_ce_fiber)) {
+	zend_fiber *fiber = EG(active_fiber);
+
+	if (UNEXPECTED(!fiber)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend outside of a fiber");
 		RETURN_THROWS();
 	}
-
-	zend_fiber *fiber = zend_fiber_from_context(EG(current_fiber));
-	zend_fiber_context *caller = fiber->caller;
 
 	if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 		RETURN_THROWS();
 	}
 
-	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING);
-	ZEND_ASSERT(caller != NULL);
-
-	fiber->caller = NULL;
+	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING || fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
 
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	zend_fiber_transfer transfer = {
-		.context = caller
-	};
-
-	if (value) {
-		ZVAL_COPY(&transfer.value, value);
-	} else {
-		ZVAL_NULL(&transfer.value);
-	}
-
-	zend_fiber_switch_context(&transfer);
+	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
 
 	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the fiber is GC'ed while suspended.
@@ -576,21 +597,9 @@ ZEND_METHOD(Fiber, resume)
 		RETURN_THROWS();
 	}
 
-	fiber->caller = EG(current_fiber);
-
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
-	zend_fiber_transfer transfer = {
-		.context = zend_fiber_get_context(fiber)
-	};
-
-	if (value) {
-		ZVAL_COPY(&transfer.value, value);
-	} else {
-		ZVAL_NULL(&transfer.value);
-	}
-
-	zend_fiber_switch_context(&transfer);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, value, false);
 
 	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -611,18 +620,9 @@ ZEND_METHOD(Fiber, throw)
 		RETURN_THROWS();
 	}
 
-	fiber->caller = EG(current_fiber);
-
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
-	zend_fiber_transfer transfer = {
-		.context = zend_fiber_get_context(fiber),
-		.flags = ZEND_FIBER_TRANSFER_FLAG_ERROR
-	};
-
-	ZVAL_COPY(&transfer.value, exception);
-
-	zend_fiber_switch_context(&transfer);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, exception, true);
 
 	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -702,11 +702,13 @@ ZEND_METHOD(Fiber, this)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (EG(current_fiber)->kind != zend_ce_fiber) {
+	zend_fiber *fiber = EG(active_fiber);
+
+	if (!fiber) {
 		RETURN_NULL();
 	}
 
-	RETURN_OBJ_COPY(&zend_fiber_from_context(EG(current_fiber))->std);
+	RETURN_OBJ_COPY(&fiber->std);
 }
 
 ZEND_METHOD(FiberError, __construct)
@@ -741,11 +743,12 @@ void zend_fiber_init(void)
 
 	context->status = ZEND_FIBER_STATUS_RUNNING;
 
-	EG(main_fiber) = context;
-	EG(current_fiber) = context;
+	EG(main_fiber_context) = context;
+	EG(current_fiber_context) = context;
+	EG(active_fiber) = NULL;
 }
 
 void zend_fiber_shutdown(void)
 {
-	efree(EG(main_fiber));
+	efree(EG(main_fiber_context));
 }
