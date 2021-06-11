@@ -2047,7 +2047,8 @@ TEST $file
     $env['TZ'] = '';
 
     if ($test->sectionNotEmpty('ENV')) {
-        foreach (explode("\n", $test->getSection('ENV')) as $e) {
+        $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
             if (!empty($e[0]) && isset($e[1])) {
