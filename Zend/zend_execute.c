@@ -2867,12 +2867,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 	ZVAL_INDIRECT(result, ptr);
 	if (flags) {
-		if (flags == ZEND_FETCH_DIM_WRITE) {
-			if (Z_TYPE_P(ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
-			}
-		}
-
 		zend_property_info *prop_info;
 
 		if (prop_op_type == IS_CONST) {
