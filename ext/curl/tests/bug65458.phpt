@@ -1,9 +1,7 @@
 --TEST--
 Bug #65458 (curl memory leak)
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $ch = curl_init();
