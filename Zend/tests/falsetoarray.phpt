@@ -74,6 +74,15 @@ print "[015]\n";
 $arr = false;
 [$arr[]] = [42];
 
+print "[016]\n";
+$arr = [ 0 => [ 0 => false ] ];
+$arr[0][0][0][] = 42;
+
+print "[017]\n";
+$false = false;
+$r42 = 42;
+$false[] &= $r42;
+
 ?>
 --EXPECTF--
 [001]
@@ -125,5 +134,11 @@ Destructuring
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
 [015]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[016]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[017]
 
 Deprecated: Automatic conversion of false to array is deprecated in %s

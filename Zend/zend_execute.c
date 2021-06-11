@@ -2276,9 +2276,6 @@ fetch_from_array:
 						return;
 					}
 				}
-				if (Z_TYPE_P(container) == IS_FALSE) {
-					zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
-				}
 				array_init(container);
 				goto fetch_from_array;
 			} else {
