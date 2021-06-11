@@ -6,9 +6,6 @@ marcosptf - <marcosptf@yahoo.com.br>
 enchant
 --SKIPIF--
 <?php
-exit;
-}
-
 $broker = enchant_broker_init();
 
 if (!$broker) {
