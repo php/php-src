@@ -1,10 +1,7 @@
 --TEST--
 PDO Common: Bug #47769 (Strange extends PDO)
---SKIPIF--
-<?php
-if (!extension_loaded("pdo_sqlite"))
-    die("skip: PDO_SQLite not available");
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

@@ -1,9 +1,7 @@
 --TEST--
 Phar: test ini_set with readonly and require_hash enabled
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=1
 phar.readonly=1

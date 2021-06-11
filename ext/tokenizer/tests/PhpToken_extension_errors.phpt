@@ -1,7 +1,7 @@
 --TEST--
 PhpToken extensions that throw during construction
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

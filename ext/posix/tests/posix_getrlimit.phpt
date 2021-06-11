@@ -1,8 +1,9 @@
 --TEST--
 posix_getrlimit(): Basic tests
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
-if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 if (!function_exists('posix_getrlimit')) die('skip posix_getrlimit() not found');
 ?>
 --FILE--

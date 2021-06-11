@@ -1,9 +1,9 @@
 --TEST--
 Verify that the Driver Name attribute is set
+--EXTENSIONS--
+oci8
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
-
-require(__DIR__."/connect.inc");
+<?php require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip as Output might vary with DRCP");
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #47435 (FILTER_FLAG_NO_PRIV_RANGE and FILTER_FLAG_NO_RES_RANGE don't work with ipv6)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var("FC00::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));

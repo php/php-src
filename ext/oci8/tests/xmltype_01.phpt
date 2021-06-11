@@ -1,8 +1,9 @@
 --TEST--
 Basic XMLType test
+--EXTENSIONS--
+simplexml
 --SKIPIF--
 <?php
-if (!extension_loaded("simplexml")) die("skip no simplexml extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>

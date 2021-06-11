@@ -1,10 +1,7 @@
 --TEST--
 Attribute validation callback of internal attributes.
---SKIPIF--
-<?php
-if (!extension_loaded('zend_test')) {
-    echo "skip requires zend_test extension\n";
-}
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

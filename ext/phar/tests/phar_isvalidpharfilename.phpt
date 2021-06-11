@@ -1,7 +1,7 @@
 --TEST--
 Phar: Phar::isValidPharFilename()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
 --FILE--

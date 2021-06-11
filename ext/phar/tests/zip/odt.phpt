@@ -1,8 +1,8 @@
 --TEST--
 Phar: test a zip archive created by openoffice
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --FILE--
 <?php
 $a = new PharData(__DIR__ . '/files/odt.odt');

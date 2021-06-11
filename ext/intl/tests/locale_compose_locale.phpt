@@ -1,7 +1,7 @@
 --TEST--
 locale_compose_locale()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

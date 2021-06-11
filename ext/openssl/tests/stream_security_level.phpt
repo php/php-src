@@ -1,8 +1,9 @@
 --TEST--
 security_level setting to prohibit cert
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSL >= v1.1.0 required");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>

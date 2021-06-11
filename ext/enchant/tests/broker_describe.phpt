@@ -2,11 +2,11 @@
 enchant_broker_describe() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if (!extension_loaded('enchant')) {
-    echo "skip: Enchant extension not enabled\n";
-    exit;
+exit;
 }
 
 $broker = enchant_broker_init();

@@ -1,11 +1,7 @@
 --TEST--
 encoding conversion from script encoding into internal encoding
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 mbstring.encoding_translation = On

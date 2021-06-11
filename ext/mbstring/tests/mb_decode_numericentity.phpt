@@ -1,8 +1,9 @@
 --TEST--
 Test mb_decode_numericentity() function : Convert HTML-Entities to UTF-8
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
 ?>
 --FILE--

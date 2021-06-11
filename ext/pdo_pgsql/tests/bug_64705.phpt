@@ -1,9 +1,7 @@
 --TEST--
 Bug #64705 errorInfo property of PDOException is null when PDO::__construct() fails
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_pgsql')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_pgsql
 --FILE--
 <?php
 $dsn = 'pgsql:host=DonotExistsHost;dbname=test;user=foo;password=wrongpass';

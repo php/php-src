@@ -1,8 +1,9 @@
 --TEST--
 DRCP: oci8.connection_class with ini_get() and ini_set()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
 if (!(isset($matches[0]) && $matches[0] >= 11)) {
     die("skip works only with Oracle 11g or greater version of Oracle client libraries");

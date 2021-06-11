@@ -1,8 +1,8 @@
 --TEST--
 MessageFormat accepts IntlCalendar args icu >= 4.8 && icu < 50.1.2
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php

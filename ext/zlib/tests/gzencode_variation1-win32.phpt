@@ -1,5 +1,7 @@
 --TEST--
 Test gzencode() function : variation
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
 
@@ -7,9 +9,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" ) {
   die("skip only for Windows");
 }
 
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
+
 ?>
 --FILE--
 <?php

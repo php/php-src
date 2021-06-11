@@ -1,9 +1,7 @@
 --TEST--
 setComment error behavior
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $file = __DIR__ . '/__tmp_oo_set_comment_error.zip';

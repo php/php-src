@@ -1,7 +1,7 @@
 --TEST--
 Bug #77025: mb_strpos throws Unknown encoding or conversion error
---SKIPIF--
-<?php if(!extension_loaded('mbstring')) die('skip mbstring not loaded'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Phar: PharFileInfo::__construct
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

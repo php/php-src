@@ -2,10 +2,8 @@
 IntlCalendar::setFirstDayOfWeek(): bad arguments
 --INI--
 date.timezone=Atlantic/Azores
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

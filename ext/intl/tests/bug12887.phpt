@@ -1,7 +1,7 @@
 --TEST--
 locale_get_keywords() bug #12887
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

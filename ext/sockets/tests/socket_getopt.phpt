@@ -2,12 +2,8 @@
 mixed socket_getopt( resource $socket , int $level , int $optname ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-  die('skip sockets extension not available.');
-}
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $domain = AF_INET;

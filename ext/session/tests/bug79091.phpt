@@ -1,9 +1,7 @@
 --TEST--
 Bug #79091 (heap use-after-free in session_create_id())
---SKIPIF--
-<?php
-if (!extension_loaded('session')) die('skip session extension not available');
-?>
+--EXTENSIONS--
+session
 --FILE--
 <?php
 class MySessionHandler implements SessionHandlerInterface, SessionIdInterface, SessionUpdateTimestampHandlerInterface

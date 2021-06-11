@@ -1,9 +1,7 @@
 --TEST--
 Bug #72374 (ZipArchive::addGlob remove_path option strips first char of filename)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = dirname(__FILE__) . '/';

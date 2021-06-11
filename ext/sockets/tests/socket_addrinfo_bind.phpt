@@ -1,10 +1,7 @@
 --TEST--
 Test socket_addrinfo_bind()
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(

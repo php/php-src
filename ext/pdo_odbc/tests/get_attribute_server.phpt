@@ -1,8 +1,9 @@
 --TEST--
 PDO ODBC getAttribute SERVER_INFO and SERVER_VERSION
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>

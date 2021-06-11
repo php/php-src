@@ -1,10 +1,10 @@
 --TEST--
 socket_export_stream: effects of leaked handles
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+
 if (!function_exists('zend_leak_variable'))
     die('SKIP only for debug builds');
 ?>

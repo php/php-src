@@ -1,7 +1,8 @@
 --TEST--
 UConverter::convert() w/ Callback Reasons
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '60.1') < 0) die('skip for ICU >= 60.1'); ?>
 --FILE--
 <?php

@@ -1,11 +1,7 @@
 --TEST--
 Test compress.zlib:// scheme with the directory functions
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $inputFileName = __DIR__."/dir.gz";

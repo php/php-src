@@ -1,9 +1,10 @@
 --TEST--
 Bug #78775: TLS issues from HTTP request affecting other encrypted connections
+--EXTENSIONS--
+curl
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded('curl')) die('skip Requires curl');
-if (!extension_loaded('openssl')) die('skip Requires openssl');
 if (getenv('SKIP_ONLINE_TESTS')) die('skip Online test');
 ?>
 --FILE--

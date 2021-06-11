@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_BOOL
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 

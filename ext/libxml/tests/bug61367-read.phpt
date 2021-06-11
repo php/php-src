@@ -1,8 +1,9 @@
 --TEST--
 Bug #61367: open_basedir bypass in libxml RSHUTDOWN: read test
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-if(!extension_loaded('dom')) echo 'skip dom extension not available';
 if (LIBXML_VERSION >= 20912) die('skip For libxml2 < 2.9.12 only');
 ?>
 --INI--

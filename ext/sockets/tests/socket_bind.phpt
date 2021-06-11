@@ -3,11 +3,11 @@ ext/sockets - socket_bind - basic test
 --CREDITS--
 Florian Anderiasch
 fa@php.net
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
-        die('skip - sockets extension not available.');
-    }
+    
     if (getenv("SKIP_ONLINE_TESTS")) {
         die("skip test requiring internet connection");
     }

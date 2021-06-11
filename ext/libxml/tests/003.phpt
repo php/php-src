@@ -1,7 +1,7 @@
 --TEST--
 libxml_use_internal_errors() memory leaks
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml extension not available'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 var_dump(libxml_use_internal_errors(true));

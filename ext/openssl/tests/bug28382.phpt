@@ -1,9 +1,7 @@
 --TEST--
 Bug #28382 (openssl_x509_parse extensions support)
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert = file_get_contents(__DIR__ . "/bug28382cert.txt");

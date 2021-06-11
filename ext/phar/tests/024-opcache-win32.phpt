@@ -1,8 +1,10 @@
 --TEST--
 Phar: phar:// include with Opcache
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows."); ?>
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+
 <?php if (!extension_loaded('Zend OPcache')) die('skip Zend OPcache extension not available'); ?>
 <?php
     $cache_dir = dirname(__FILE__) . "/024-file_cache";

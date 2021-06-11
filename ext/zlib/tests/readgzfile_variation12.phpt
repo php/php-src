@@ -1,9 +1,7 @@
 --TEST--
 Test function readgzfile() by substituting argument 2 with int values.
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 

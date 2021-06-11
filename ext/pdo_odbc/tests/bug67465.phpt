@@ -1,8 +1,9 @@
 --TEST--
 Bug #67465 (NULL Pointer dereference in odbc_handle_preparer)
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) die('skip pdo_odbc extension not available');
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
