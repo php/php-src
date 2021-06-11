@@ -33,7 +33,6 @@
 #define getifaddrs Qp2getifaddrs
 #define freeifaddrs Qp2freeifaddrs
 #define ifaddrs ifaddrs_pase
-#define HAVE_GETIFADDRS
 #endif
 
 #ifdef PHP_WIN32
@@ -103,7 +102,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	return NULL;
 }
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 static void iface_append_unicast(zval *unicast, zend_long flags,
                                  struct sockaddr *addr, struct sockaddr *netmask,
                                  struct sockaddr *broadcast, struct sockaddr *ptp) {
@@ -265,7 +264,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	FREE(pAddresses);
 #undef MALLOC
 #undef FREE
-#elif HAVE_GETIFADDRS /* !PHP_WIN32 */
+#elif HAVE_GETIFADDRS || defined(__PASE__) /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
 
 	ZEND_PARSE_PARAMETERS_NONE();
