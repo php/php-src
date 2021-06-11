@@ -24,32 +24,13 @@
 #include "ext/standard/php_var.h"
 #include "php_test.h"
 #include "test_arginfo.h"
+#include "fiber.h"
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_smart_str.h"
-#include "zend_fibers.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 
-ZEND_BEGIN_MODULE_GLOBALS(zend_test)
-	int observer_enabled;
-	int observer_show_output;
-	int observer_observe_all;
-	int observer_observe_includes;
-	int observer_observe_functions;
-	int observer_show_return_type;
-	int observer_show_return_value;
-	int observer_show_init_backtrace;
-	int observer_show_opcode;
-	char *observer_show_opcode_in_user_handler;
-	int observer_nesting_depth;
-	int observer_fiber_switch;
-	int replace_zend_execute_ex;
-	int register_passes;
-ZEND_END_MODULE_GLOBALS(zend_test)
-
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
-
-#define ZT_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(zend_test, v)
 
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
@@ -528,6 +509,8 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_optimizer_register_pass(pass1);
 		zend_optimizer_register_pass(pass2);
 	}
+
+	zend_test_fiber_init();
 
 	return SUCCESS;
 }
