@@ -96,10 +96,6 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 
 	uint32_t offset = 0, num = 0, required = 0, limit = partial->argc;
 
-	if (ZEND_PARTIAL_CALL_FLAG(partial, ZEND_APPLY_VARIADIC)) {
-		limit++;
-	}
-
 	ZEND_PARTIAL_FUNC_DEL(&partial->prototype, ZEND_ACC_VARIADIC);
 
 	while (offset < limit) {
@@ -154,11 +150,11 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 					memcpy(info,
 							prototype->common.arg_info + prototype->common.num_args,
 							sizeof(zend_arg_info));
-					num++;
-				}
 
-				if (ZEND_TYPE_FULL_MASK(info->type) & _ZEND_IS_VARIADIC_BIT) {
-					ZEND_PARTIAL_FUNC_ADD(&partial->prototype, ZEND_ACC_VARIADIC);
+					if (ZEND_TYPE_FULL_MASK(info->type) & _ZEND_IS_VARIADIC_BIT) {
+						ZEND_PARTIAL_FUNC_ADD(&partial->prototype, ZEND_ACC_VARIADIC);
+					}
+					num++;
 				}
 				break;
 			} else if (ZEND_PARTIAL_FUNC_FLAG(prototype, ZEND_ACC_VARIADIC)) {
@@ -784,8 +780,9 @@ ZEND_NAMED_FUNCTION(zend_partial_call_magic)
 	efree(fci.params);
 }
 
-void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_function *function, uint32_t argc, zval *argv, zend_array *extra_named_params) {
+bool zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_function *function, uint32_t argc, zval *argv, zend_array *extra_named_params) {
 	zend_function *prototype = NULL;
+	bool zend_release_trampoline = false;
 
 	ZVAL_OBJ(result, zend_partial_new(zend_ce_closure, info));
 
@@ -878,8 +875,7 @@ void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_funct
 						ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
 					This = this_ptr;
 					if (!ZEND_PARTIAL_FUNC_FLAG(function, ZEND_ACC_TRAMPOLINE_PERMANENT)) {
-						EG(trampoline).common.function_name = NULL;
-						efree(function);
+						zend_release_trampoline = true;
 					}
 				} else {
 					This = zend_get_closure_this_ptr(this_ptr);
@@ -894,6 +890,8 @@ void zend_partial_create(zval *result, uint32_t info, zval *this_ptr, zend_funct
 	}
 
 	zend_partial_trampoline_create(partial, &partial->trampoline);
+
+	return zend_release_trampoline;
 }
 
 void zend_partial_bind(zval *result, zval *partial, zval *this_ptr, zend_class_entry *scope) {
