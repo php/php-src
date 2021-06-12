@@ -218,6 +218,11 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 	/* Initialize transfer struct with a copy of passed data. */
 	zend_fiber_transfer transfer = *data.transfer;
 
+	/* Ensure that previous fiber will be cleaned up (needed by symmetric coroutines). */
+	if (from->status == ZEND_FIBER_STATUS_DEAD) {
+		zend_fiber_destroy_context(from);
+	}
+
 	zend_fiber_context *context = EG(current_fiber_context);
 
 	context->function(&transfer);
