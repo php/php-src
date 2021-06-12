@@ -10,5 +10,7 @@ final class _ZendTestFiber
 
     public function resume(mixed $value = null): mixed {}
 
+    public function pipeTo(callable $callback): _ZendTestFiber {}
+
     public static function suspend(mixed $value = null): mixed {}
 }

@@ -74,6 +74,7 @@ static zend_fiber_transfer zend_test_fiber_suspend(zend_test_fiber *fiber, zval 
 static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *transfer)
 {
 	zend_test_fiber *fiber = ZT_G(active_fiber);
+	zval retval;
 
 	zend_execute_data *execute_data;
 
@@ -93,10 +94,11 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		EG(current_execute_data) = execute_data;
 		EG(jit_trace_num) = 0;
 
-		fiber->fci.retval = &fiber->result;
+		fiber->fci.retval = &retval;
 
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
+		zval_ptr_dtor(&fiber->result); // Destroy param from symmetric coroutine.
 		zval_ptr_dtor(&fiber->fci.function_name);
 
 		if (EG(exception)) {
@@ -111,15 +113,30 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 
 			zend_clear_exception();
 		} else {
+			ZVAL_COPY_VALUE(&fiber->result, &retval);
 			ZVAL_COPY(&transfer->value, &fiber->result);
 		}
 	} zend_catch {
 		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
 	} zend_end_try();
 
-	transfer->context = fiber->caller;
-
 	zend_vm_stack_destroy();
+
+	if (fiber->target) {
+		zend_fiber_context *target = zend_test_fiber_get_context(fiber->target);
+		zend_fiber_init_context(target, zend_test_fiber_class, zend_test_fiber_execute, EG(fiber_stack_size));
+		transfer->context = target;
+
+		ZVAL_COPY(&fiber->target->result, &fiber->result);
+		fiber->target->fci.params = &fiber->target->result;
+		fiber->target->fci.param_count = 1;
+
+		fiber->target->caller = fiber->caller;
+		ZT_G(active_fiber) = fiber->target;
+	} else {
+		transfer->context = fiber->caller;
+	}
+
 	fiber->caller = NULL;
 }
 
@@ -179,6 +196,10 @@ static void zend_test_fiber_object_free(zend_object *object)
 		zval_ptr_dtor(&fiber->fci.function_name);
 	}
 
+	if (fiber->target) {
+		OBJ_RELEASE(&fiber->target->std);
+	}
+
 	zval_ptr_dtor(&fiber->result);
 
 	zend_object_std_dtor(&fiber->std);
@@ -224,6 +245,11 @@ static ZEND_METHOD(_ZendTestFiber, start)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_INIT);
+
+	if (fiber->previous != NULL) {
+		zend_throw_error(NULL, "Cannot start a fiber that is the target of another fiber");
+		RETURN_THROWS();
+	}
 
 	fiber->fci.params = params;
 	fiber->fci.param_count = param_count;
@@ -285,6 +311,33 @@ static ZEND_METHOD(_ZendTestFiber, resume)
 	zend_fiber_transfer transfer = zend_test_fiber_resume(fiber, value, false);
 
 	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+static ZEND_METHOD(_ZendTestFiber, pipeTo)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *target = (zend_test_fiber *) zend_test_fiber_class->create_object(zend_test_fiber_class);
+
+	target->fci = fci;
+	target->fci_cache = fci_cache;
+	Z_TRY_ADDREF(target->fci.function_name);
+
+	target->previous = zend_test_fiber_get_context(fiber);
+
+	if (fiber->target) {
+		OBJ_RELEASE(&fiber->target->std);
+	}
+
+	fiber->target = target;
+
+	RETURN_OBJ_COPY(&target->std);
 }
 
 void zend_test_fiber_init(void)

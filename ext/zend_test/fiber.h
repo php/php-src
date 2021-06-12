@@ -19,15 +19,18 @@
 
 #include "zend_fibers.h"
 
-typedef struct _zend_test_fiber {
+typedef struct _zend_test_fiber zend_test_fiber;
+
+struct _zend_test_fiber {
 	zend_object std;
 	ZEND_FIBER_CONTEXT_FIELDS;
 	zend_fiber_context *caller;
 	zend_fiber_context *previous;
+	zend_test_fiber *target;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 	zval result;
-} zend_test_fiber;
+};
 
 void zend_test_fiber_init(void);
 
