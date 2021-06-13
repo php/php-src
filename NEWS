@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha2
 
+- Opcache:
+  . Fixed bug #81133 (building opcache with phpize fails). (krakjoe)
+
 - PDO OCI:
   . Fixed bug #77120 (Support 'success with info' at connection).
     (Sergei Morozov)
