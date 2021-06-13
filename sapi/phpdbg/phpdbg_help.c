@@ -20,7 +20,6 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
-#include "phpdbg_eol.h"
 #include "zend.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
@@ -59,11 +58,6 @@ void pretty_print(char *text)
 	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
 	unsigned int line_count = 0;          /* number printable chars on current line */
-
-	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-		phpdbg_xml("<help %r msg=\"%s\" />", text);
-		return;
-	}
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -132,7 +126,7 @@ void pretty_print(char *text)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
+		phpdbg_error("Output overrun of %lu bytes", ((q - new) - size));
 	}
 
 	phpdbg_out("%s\n", new);
@@ -255,7 +249,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 				pretty_print(get_help("duplicate!"));
 				return SUCCESS;
 			} else {
-				phpdbg_error("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", param->str[0]);
+				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
 				return FAILURE;
 			}
 
@@ -284,15 +278,15 @@ PHPDBG_HELP(aliases) /* {{{ */
 
 	/* Print out aliases for all commands except help as this one comes last */
 	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
-	phpdbg_xml("<helpcommands %r>");
+
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln(" %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+						phpdbg_writeln(" %c %c   %s %-*s  %s",
 							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
@@ -300,23 +294,17 @@ PHPDBG_HELP(aliases) /* {{{ */
 		}
 	}
 
-	phpdbg_xml("</helpcommands>");
-
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
 	get_command("h", 1, &c, phpdbg_prompt_commands);
-	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
-
-	phpdbg_xml("<helpaliases>");
+	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
 
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+			phpdbg_writeln(" %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
-
-	phpdbg_xml("</helpaliases>");
 
 	pretty_print(get_help("aliases!"));
 	return SUCCESS;
@@ -408,9 +396,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-E**                          Enable step through eval, careful!" CR
 "  **-s**      **-s=**, **-s**=foo         Read code to execute from stdin with an optional delimiter" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
-"  **-l**      **-l**4000              Setup remote console ports" CR
-"  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
-"  **-x**                          Enable xml output (instead of normal text output)" CR
 "  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
 "  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
@@ -423,15 +408,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "(\"foo\" in the example) needs to be specified at the end of the input on its own line, followed by "
 "a line break. If **-rr** has been specified, it is allowed to omit the delimiter (**-s=**) and "
 "it will read until EOF. See also the help entry for the **stdin** command." CR CR
-
-"**Remote Console Mode**" CR CR
-
-"This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
-"interface by default, and this can only be overridden by explicitly setting the remote console "
-"bind address using the **-a** option. If **-a** is specified without an argument, then phpdbg "
-"will bind to all available interfaces.  You should be aware of the security implications of "
-"doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port." CR CR
 
 "**Opcode output**" CR CR
 

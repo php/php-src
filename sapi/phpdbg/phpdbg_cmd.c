@@ -479,7 +479,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 				return SUCCESS;
 			}
 
-			phpdbg_error("command", "type=\"toomanyargs\" command=\"%s\" expected=\"0\"", "The command \"%s\" expected no arguments",
+			phpdbg_error("The command \"%s\" expected no arguments",
 				phpdbg_command_name(command, buffer));
 			return FAILURE;
 		}
@@ -499,14 +499,14 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 
 #define verify_arg(e, a, t) if (!(a)) { \
 	if (!optional) { \
-		phpdbg_error("command", "type=\"noarg\" command=\"%s\" expected=\"%s\" num=\"%lu\"", "The command \"%s\" expected %s and got nothing at parameter %lu", \
+		phpdbg_error("The command \"%s\" expected %s and got nothing at parameter %lu", \
 			phpdbg_command_name(command, buffer), \
 			(e), \
 			current); \
 		return FAILURE;\
 	} \
 } else if ((a)->type != (t)) { \
-	phpdbg_error("command", "type=\"wrongarg\" command=\"%s\" expected=\"%s\" got=\"%s\" num=\"%lu\"", "The command \"%s\" expected %s and got %s at parameter %lu", \
+	phpdbg_error("The command \"%s\" expected %s and got %s at parameter %lu", \
 		phpdbg_command_name(command, buffer), \
 		(e),\
 		phpdbg_get_param_type((a)), \
@@ -554,7 +554,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 #undef verify_arg
 
 		if ((received < least)) {
-			phpdbg_error("command", "type=\"toofewargs\" command=\"%s\" expected=\"%d\" argtypes=\"%s\" got=\"%d\"", "The command \"%s\" expected at least %lu arguments (%s) and received %lu",
+			phpdbg_error("The command \"%s\" expected at least %lu arguments (%s) and received %lu",
 				phpdbg_command_name(command, buffer),
 				least,
 				command->args,
@@ -608,9 +608,9 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	switch (matches) {
 		case 0:
 			if (parent) {
-				phpdbg_error("command", "type=\"notfound\" command=\"%s\" subcommand=\"%s\"", "The command \"%s %s\" could not be found", parent->name, name->str);
+				phpdbg_error("The command \"%s %s\" could not be found", parent->name, name->str);
 			} else {
-				phpdbg_error("command", "type=\"notfound\" command=\"%s\"", "The command \"%s\" could not be found", name->str);
+				phpdbg_error("The command \"%s\" could not be found", name->str);
 			}
 			return parent;
 
@@ -643,7 +643,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 			}
 
 			/* ", " separated matches */
-			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambiguous, matching %lu commands (%s)", name->str, matches, list);
+			phpdbg_error("The command \"%s\" is ambiguous, matching %lu commands (%s)", name->str, matches, list);
 			efree(list);
 
 			return NULL;
@@ -671,7 +671,7 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, bool allow_async
 
 		case RUN_PARAM:
 			if (!allow_async_unsafe) {
-				phpdbg_error("signalsegv", "command=\"run\"", "run command is disallowed during hard interrupt");
+				phpdbg_error("run command is disallowed during hard interrupt");
 			}
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
@@ -679,7 +679,7 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, bool allow_async
 
 		case SHELL_PARAM:
 			if (!allow_async_unsafe) {
-				phpdbg_error("signalsegv", "command=\"sh\"", "sh command is disallowed during hard interrupt");
+				phpdbg_error("sh command is disallowed during hard interrupt");
 				return FAILURE;
 			}
 			phpdbg_activate_err_buf(0);
@@ -691,7 +691,7 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, bool allow_async
 
 			if (handler) {
 				if (!allow_async_unsafe && !(handler->flags & PHPDBG_ASYNC_SAFE)) {
-					phpdbg_error("signalsegv", "command=\"%s\"", "%s command is disallowed during hard interrupt", handler->name);
+					phpdbg_error("%s command is disallowed during hard interrupt", handler->name);
 					return FAILURE;
 				}
 
@@ -704,7 +704,7 @@ static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, bool allow_async
 		} return FAILURE;
 
 		default:
-			phpdbg_error("command", "type=\"invalidcommand\"", "The first parameter makes no sense !");
+			phpdbg_error("The first parameter makes no sense !");
 			return FAILURE;
 	}
 
@@ -716,12 +716,12 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, bool allow_async_unsa
 	phpdbg_param_t *top = stack;
 
 	if (stack->type != STACK_PARAM) {
-		phpdbg_error("command", "type=\"nostack\"", "The passed argument was not a stack !");
+		phpdbg_error("The passed argument was not a stack !");
 		return FAILURE;
 	}
 
 	if (!stack->len) {
-		phpdbg_error("command", "type=\"emptystack\"", "The stack contains nothing !");
+		phpdbg_error("The stack contains nothing !");
 		return FAILURE;
 	}
 
@@ -743,34 +743,23 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 	char *buffer = NULL;
 
 	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
-		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem()) {
-			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
-		}
-
 		if (buffered == NULL) {
 #ifdef HAVE_PHPDBG_READLINE
-			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
-			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))
-#endif
-			{
-				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
-				phpdbg_consume_stdin_line(buf);
-				buffer = estrdup(buf);
-			}
-#ifdef HAVE_PHPDBG_READLINE
-			else {
-				char *cmd = readline(phpdbg_get_prompt());
-				PHPDBG_G(last_was_newline) = 1;
+			char *cmd = readline(phpdbg_get_prompt());
+			PHPDBG_G(last_was_newline) = 1;
 
-				if (!cmd) {
-					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
-					zend_bailout();
-				}
-
-				add_history(cmd);
-				buffer = estrdup(cmd);
-				free(cmd);
+			if (!cmd) {
+				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+				zend_bailout();
 			}
+
+			add_history(cmd);
+			buffer = estrdup(cmd);
+			free(cmd);
+#else
+            phpdbg_write("%s", phpdbg_get_prompt());
+			phpdbg_consume_stdin_line(buf);
+			buffer = estrdup(buf);
 #endif
 		} else {
 			buffer = estrdup(buffered);
@@ -808,21 +797,19 @@ PHPDBG_API void phpdbg_destroy_input(char **input) /*{{{ */
 } /* }}} */
 
 PHPDBG_API int phpdbg_ask_user_permission(const char *question) {
-	if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
-		char buf[PHPDBG_MAX_CMD];
-		phpdbg_out("%s", question);
-		phpdbg_out(" (type y or n): ");
+    char buf[PHPDBG_MAX_CMD];
+	phpdbg_out("%s", question);
+	phpdbg_out(" (type y or n): ");
 
-		while (1) {
-			phpdbg_consume_stdin_line(buf);
-			if ((buf[1] == '\n' || (buf[1] == '\r' && buf[2] == '\n')) && (buf[0] == 'y' || buf[0] == 'n')) {
-				if (buf[0] == 'y') {
-					return SUCCESS;
-				}
-				return FAILURE;
+	while (1) {
+		phpdbg_consume_stdin_line(buf);
+		if ((buf[1] == '\n' || (buf[1] == '\r' && buf[2] == '\n')) && (buf[0] == 'y' || buf[0] == 'n')) {
+			if (buf[0] == 'y') {
+				return SUCCESS;
 			}
-			phpdbg_out("Please enter either y (yes) or n (no): ");
+			return FAILURE;
 		}
+		phpdbg_out("Please enter either y (yes) or n (no): ");
 	}
 
 	return SUCCESS;
