@@ -70,7 +70,6 @@ static PHP_INI_MH(OnUpdateEol)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, socket_path, zend_phpdbg_globals, phpdbg_globals)
 	STD_PHP_INI_ENTRY("phpdbg.eol", "2", PHP_INI_ALL, OnUpdateEol, eol, zend_phpdbg_globals, phpdbg_globals)
 PHP_INI_END()
 
@@ -157,8 +156,6 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	memset(pg->io, 0, sizeof(pg->io));
 	pg->frame.num = 0;
 	pg->sapi_name_ptr = NULL;
-	pg->socket_fd = -1;
-	pg->socket_server_fd = -1;
 	pg->unclean_eval = 0;
 
 	pg->req_id = 0;
@@ -892,9 +889,6 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array) /* {{{ */
 
 static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length) /* {{{ */
 {
-	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-		send(PHPDBG_G(socket_fd), message, length, 0);
-	}
 	return phpdbg_script(P_STDOUT, "%.*s", (int) length, message);
 } /* }}} */
 

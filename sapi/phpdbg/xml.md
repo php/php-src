@@ -568,21 +568,6 @@ set
 - generally enables / disables showing of refcount in watchpoint breaks silently with no further xml answer
 - if the boolean switch is omitted, it emits current state in a &lt;setrefcount active="" /> where active is on or off
 
-wait
-----
-
-- internally executes exec, so exec will output first (if binding to socket worked)
-
-### attributes ###
-
-- import: has value "success"/"fail"
-- missingmodule/missingextension: modules/extensions loaded in the target SAPI, but not in phpdbg
-
-### errors (by type) ###
-
-- nosocket: couldn't establish socket
-- invaliddata: invalid JSON passed to socket
-
 dl
 --
 
