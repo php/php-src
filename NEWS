@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - PDO OCI:
   . Fixed bug #77120 (Support 'success with info' at connection).
     (Sergei Morozov)
+    
+- phpdbg:
+  . Fixed bug #81135 (unknown help topic causes assertion failure). (krakjoe)
 
 10 Jun 2021, PHP 8.1.0alpha1
 

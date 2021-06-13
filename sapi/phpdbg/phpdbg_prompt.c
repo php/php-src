@@ -1558,7 +1558,9 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {
-							phpdbg_output_err_buf("%b");
+							if (PHPDBG_G(err_buf).active) {
+							    phpdbg_output_err_buf("%b");
+							}
 						}
 					}
 				break;

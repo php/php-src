@@ -263,6 +263,8 @@ PHPDBG_COMMAND(help) /* {{{ */
 					pretty_print(get_help(cmd->name));
 					return SUCCESS;
 				}
+			} else {
+			    phpdbg_error("No help topic found for %s", param->str);
 			}
 		}
 	}
