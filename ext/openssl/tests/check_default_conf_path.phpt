@@ -6,6 +6,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip windows only test');
 }
 ?>
+--ENV--
+OPENSSL_CONF=
 --FILE--
 <?php
 
