@@ -91,15 +91,6 @@
 # endif
 #endif
 
-/* {{{ remote console headers */
-#ifndef _WIN32
-#	include <sys/socket.h>
-#	include <sys/un.h>
-#	include <sys/select.h>
-#	include <sys/types.h>
-#	include <netdb.h>
-#endif /* }}} */
-
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
@@ -133,9 +124,6 @@
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
-#ifdef PHP_WIN32
-# include "phpdbg_sigio_win32.h"
-#endif
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
@@ -186,24 +174,24 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 #define PHPDBG_IS_INTERACTIVE         (1ULL<<27)
 #define PHPDBG_PREVENT_INTERACTIVE    (1ULL<<28)
 #define PHPDBG_IS_BP_ENABLED          (1ULL<<29)
-#define PHPDBG_IS_REMOTE              (1ULL<<30)
-#define PHPDBG_IS_DISCONNECTED        (1ULL<<31)
-#define PHPDBG_WRITE_XML              (1ULL<<32)
-
-#define PHPDBG_SHOW_REFCOUNTS         (1ULL<<33)
-
-#define PHPDBG_IN_SIGNAL_HANDLER      (1ULL<<34)
-
-#define PHPDBG_DISCARD_OUTPUT         (1ULL<<35)
-
-#define PHPDBG_HAS_PAGINATION         (1ULL<<36)
+#define PHPDBG_SHOW_REFCOUNTS         (1ULL<<30)
+#define PHPDBG_IN_SIGNAL_HANDLER      (1ULL<<31)
+#define PHPDBG_DISCARD_OUTPUT         (1ULL<<32)
+#define PHPDBG_HAS_PAGINATION         (1ULL<<33)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL | PHPDBG_IN_FINISH | PHPDBG_IN_LEAVE)
 #define PHPDBG_BP_RESOLVE_MASK	      (PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
 #define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP | PHPDBG_HAS_SYM_BP | PHPDBG_HAS_METHOD_BP | PHPDBG_HAS_OPLINE_BP | PHPDBG_HAS_COND_BP | PHPDBG_HAS_OPCODE_BP | PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
 #define PHPDBG_IS_STOPPING            (PHPDBG_IS_QUITTING | PHPDBG_IS_CLEANING)
 
-#define PHPDBG_PRESERVE_FLAGS_MASK    (PHPDBG_SHOW_REFCOUNTS | PHPDBG_IS_STEPONEVAL | PHPDBG_IS_BP_ENABLED | PHPDBG_STEP_OPCODE | PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_REMOTE | PHPDBG_WRITE_XML | PHPDBG_IS_DISCONNECTED | PHPDBG_HAS_PAGINATION)
+#define PHPDBG_PRESERVE_FLAGS_MASK    \
+    (PHPDBG_SHOW_REFCOUNTS | \
+     PHPDBG_IS_STEPONEVAL | \
+     PHPDBG_IS_BP_ENABLED | \
+     PHPDBG_STEP_OPCODE | \
+     PHPDBG_IS_QUIET | \
+     PHPDBG_IS_COLOURED | \
+     PHPDBG_HAS_PAGINATION)
 
 #ifndef _WIN32
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
@@ -287,18 +275,13 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		FILE *ptr;
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
-	int eol;                                     /* type of line ending to use */
 	ssize_t (*php_stdiop_write)(php_stream *, const char *, size_t);
-	int in_script_xml;                           /* in <stream> output mode */
 	struct {
 		bool active;
 		int type;
 		int fd;
-		char *tag;
 		char *msg;
 		int msglen;
-		char *xml;
-		int xmllen;
 	} err_buf;                                   /* error buffer */
 	zend_ulong req_id;                           /* "request id" to keep track of commands */
 
@@ -319,10 +302,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	uint64_t flags;                              /* phpdbg flags */
 
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
-#ifdef PHP_WIN32
-	HANDLE sigio_watcher_thread;                 /* sigio watcher thread handle */
-	struct win32_sigio_watcher_data swd;
-#endif
 	long lines;                                  /* max number of lines to display */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 

@@ -19,20 +19,9 @@
 
 #include "phpdbg.h"
 
-/* Older versions of glibc <= 2.3.0 and <= OS X 10.5 do not have this constant defined */
-#ifndef AI_NUMERICSERV
-#define AI_NUMERICSERV 0
-#endif
-
 PHPDBG_API int phpdbg_consume_stdin_line(char *buf);
 
-PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo);
-PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len);
-PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo);
-PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len);
-
-PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *res);
-PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port);
-PHPDBG_API void phpdbg_close_socket(int sock);
+PHPDBG_API int phpdbg_mixed_read(int fd, char *ptr, int len, int tmo);
+PHPDBG_API int phpdbg_mixed_write(int fd, const char *ptr, int len);
 
 #endif /* PHPDBG_IO_H */
