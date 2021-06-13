@@ -41,7 +41,6 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
-#include "phpdbg_wait.h"
 #include "phpdbg_eol.h"
 
 #if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
@@ -89,7 +88,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(wait,      "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,     "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
 	PHPDBG_COMMAND_D(next,      "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(eol,       "set EOL",                                  'E', NULL, "|s", 0),
@@ -896,11 +894,6 @@ free_cmd:
 				zend_bailout();
 			}
 		} zend_end_try();
-
-		if (PHPDBG_G(socket_fd) != -1) {
-			close(PHPDBG_G(socket_fd));
-			PHPDBG_G(socket_fd) = -1;
-		}
 
 		if (restore) {
 			zend_exception_restore();
