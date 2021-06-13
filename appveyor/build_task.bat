@@ -45,15 +45,6 @@ if not exist "%DEPS_DIR%" (
 )
 if %errorlevel% neq 0 exit /b 3
 
-rem install libavif into dependency directory
-rem temporary workaround for libavif not being part of the official dependencies
-if not exist "%DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip" (
-	curl -fsSL -o %DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip https://windows.php.net/downloads/pecl/deps/libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip
-)
-if not exist "%DEPS_DIR%\lib\avif.lib" (
-	7z x %DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip -o%DEPS_DIR%
-)
-
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
