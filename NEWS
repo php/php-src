@@ -2,9 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha2
 
-- PDO:
-
-. PDO OCI:
+- PDO OCI:
   . Fixed bug #77120 (Support 'success with info' at connection).
     (Sergei Morozov)
 
