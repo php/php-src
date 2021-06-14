@@ -16,12 +16,7 @@ var_dump(define("test const", 3));
 var_dump(define("test const", 3));
 var_dump(define("test", array(1)));
 var_dump(define("test1", fopen(__FILE__, 'r')));
-
-try {
 var_dump(define("test2", new stdclass));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
 
 var_dump(constant(" "));
 var_dump(constant("[[["));
@@ -42,7 +37,7 @@ Warning: Constant test const already defined in %s on line %d
 bool(false)
 bool(true)
 bool(true)
-define(): Argument #2 ($value) cannot be an object, stdClass given
+bool(true)
 int(1)
 int(2)
 int(3)
