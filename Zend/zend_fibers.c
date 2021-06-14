@@ -100,6 +100,12 @@ static zend_object_handlers zend_fiber_handlers;
 
 static zend_function zend_fiber_function = { ZEND_INTERNAL_FUNCTION };
 
+ZEND_TLS uint32_t zend_fiber_switch_blocking = 0;
+
+ZEND_API void (*zend_fiber_switch_block)(void);
+ZEND_API void (*zend_fiber_switch_unblock)(void);
+ZEND_API bool (*zend_fiber_switch_blocked)(void);
+
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
 static size_t zend_fiber_get_page_size(void)
@@ -233,6 +239,22 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 
 	/* Abort here because we are in an inconsistent program state. */
 	abort();
+}
+
+static void fiber_switch_block(void)
+{
+	++zend_fiber_switch_blocking;
+}
+
+static void fiber_switch_unblock(void)
+{
+	ZEND_ASSERT(zend_fiber_switch_blocking && "Fiber switching was not blocked");
+	--zend_fiber_switch_blocking;
+}
+
+static bool fiber_switch_blocked(void)
+{
+	return zend_fiber_switch_blocking;
 }
 
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
@@ -541,6 +563,11 @@ ZEND_METHOD(Fiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+		RETURN_THROWS();
+	}
+
 	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
 		RETURN_THROWS();
@@ -584,6 +611,11 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+		RETURN_THROWS();
+	}
+
 	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING || fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
 
 	fiber->execute_data = EG(current_execute_data);
@@ -611,6 +643,11 @@ ZEND_METHOD(Fiber, resume)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+		RETURN_THROWS();
+	}
+
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
 	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
@@ -633,6 +670,11 @@ ZEND_METHOD(Fiber, throw)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+		RETURN_THROWS();
+	}
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
@@ -772,6 +814,10 @@ void zend_fiber_init(void)
 	EG(main_fiber_context) = context;
 	EG(current_fiber_context) = context;
 	EG(active_fiber) = NULL;
+
+	zend_fiber_switch_block = fiber_switch_block;
+	zend_fiber_switch_unblock = fiber_switch_unblock;
+	zend_fiber_switch_blocked = fiber_switch_blocked;
 }
 
 void zend_fiber_shutdown(void)
@@ -780,4 +826,6 @@ void zend_fiber_shutdown(void)
 	efree(EG(main_fiber_context)->stack);
 #endif
 	efree(EG(main_fiber_context));
+
+	zend_fiber_switch_block();
 }

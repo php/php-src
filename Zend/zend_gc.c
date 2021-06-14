@@ -68,6 +68,7 @@
  */
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_fibers.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -1469,6 +1470,8 @@ rerun_gc:
 			return 0;
 		}
 
+		zend_fiber_switch_block();
+
 		end = GC_G(first_unused);
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
@@ -1548,6 +1551,7 @@ rerun_gc:
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
+				zend_fiber_switch_unblock();
 				return 0;
 			}
 		}
@@ -1605,6 +1609,8 @@ rerun_gc:
 			}
 			current++;
 		}
+
+		zend_fiber_switch_unblock();
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;

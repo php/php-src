@@ -52,6 +52,9 @@ void zend_fiber_init(void);
 void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
+extern ZEND_API void (*zend_fiber_switch_block)(void);
+extern ZEND_API void (*zend_fiber_switch_unblock)(void);
+extern ZEND_API bool (*zend_fiber_switch_blocked)(void);
 
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
