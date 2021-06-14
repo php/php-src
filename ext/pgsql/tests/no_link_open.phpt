@@ -1,5 +1,7 @@
 --TEST--
 Using pg function with default link while no link open
+--EXTENSIONS--
+pgsql
 --FILE--
 <?php
 

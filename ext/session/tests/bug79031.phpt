@@ -1,5 +1,7 @@
 --TEST--
 Bug #79031: Session unserialization problem
+--EXTENSIONS--
+session
 --FILE--
 <?php
 

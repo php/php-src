@@ -1,5 +1,7 @@
 --TEST--
 Bug #52681 (mb_send_mail() appends an extra MIME-Version header)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
