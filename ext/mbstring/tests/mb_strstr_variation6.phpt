@@ -2,10 +2,6 @@
 Test mb_strstr() function : variation - case sensitivity
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strstr') or die("skip mb_strstr() is not available in this build");
-?>
 --FILE--
 <?php
 echo "*** Testing mb_strstr() : variation ***\n";

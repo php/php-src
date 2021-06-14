@@ -2,10 +2,6 @@
 Test mb_stristr() function : with empty needle
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_stristr') or die("skip mb_stristr() is not available in this build");
-?>
 --FILE--
 <?php
 

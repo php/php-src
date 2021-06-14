@@ -2,10 +2,6 @@
 Test mb_encode_mimeheader() function : usage variations - Pass different strings to $linefeed arg
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
-?>
 --FILE--
 <?php
 /* (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])

@@ -2,11 +2,6 @@
 mb_strtoupper() / mb_strtolower()
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strtolower') and
-function_exists('mb_convert_case' ) or die("skip mb_convert_case() is not available");
-?>
 --INI--
 output_handler=
 --FILE--

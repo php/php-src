@@ -2,10 +2,6 @@
 Test mb_strrichr() function : error conditions
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strrichr') or die("skip mb_strrichr() is not available in this build");
-?>
 --FILE--
 <?php
 echo "*** Testing mb_strrichr() : error conditions ***\n";

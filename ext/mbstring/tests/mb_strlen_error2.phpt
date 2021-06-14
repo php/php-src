@@ -2,10 +2,6 @@
 Test mb_strlen() function : error conditions - pass an unknown encoding
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strlen') or die("skip mb_strlen() is not available in this build");
-?>
 --FILE--
 <?php
 /*

@@ -2,10 +2,6 @@
 Testing mb_convert_kana() function
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-if (!function_exists("mb_convert_kana")) print "skip mb_convert_kana() not available";
-?>
 --FILE--
 <?php
 $zenKakuA    =	'ァアィイゥウェエォオカガキギク';

@@ -2,10 +2,6 @@
 mb_strcut() missing boundary check.
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_convert_encoding') or die("skip mb_convert_encoding() is not available in this build");
-?>
 --FILE--
 <?php
 mb_internal_encoding("UCS-4LE");

@@ -2,10 +2,6 @@
 Test mb_stripos() function : basic functionality
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_stripos') or die("skip mb_stripos() is not available in this build");
-?>
 --FILE--
 <?php
 /*

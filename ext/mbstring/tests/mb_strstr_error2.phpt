@@ -2,10 +2,6 @@
 Test mb_strstr() function : error conditions
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strstr') or die("skip mb_strstr() is not available in this build");
-?>
 --FILE--
 <?php
 echo "*** Testing mb_strstr() : error conditions ***\n";

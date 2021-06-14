@@ -2,10 +2,6 @@
 Test mb_substr_count() function : variation - pass a $needle that overlaps in $haystack
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_substr_count') or die("skip mb_substr_count() is not available in this build");
-?>
 --FILE--
 <?php
 /*

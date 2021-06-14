@@ -2,10 +2,6 @@
 Test mb_strrpos() function : basic functionality
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this build");
-?>
 --FILE--
 <?php
 /*

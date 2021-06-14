@@ -2,10 +2,6 @@
 Test mb_convert_encoding() function : array functionality
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_convert_encoding') or die("skip mb_convert_encoding() is not available in this build");
-?>
 --FILE--
 <?php
 /*

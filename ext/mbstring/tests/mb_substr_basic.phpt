@@ -2,10 +2,6 @@
 Test mb_substr() function : basic functionality
 --EXTENSIONS--
 mbstring
---SKIPIF--
-<?php
-function_exists('mb_substr') or die("skip mb_substr() is not available in this build");
-?>
 --INI--
 internal_encoding=ISO-8859-1
 --FILE--
