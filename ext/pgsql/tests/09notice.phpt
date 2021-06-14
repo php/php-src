@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL notice function
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #77047 pg_insert has a broken regex for the 'TIME WITHOUT TIMEZONE' data type
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

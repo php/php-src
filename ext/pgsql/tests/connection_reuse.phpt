@@ -1,7 +1,7 @@
 --TEST--
 Reusing connection with same connection string
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

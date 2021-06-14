@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_insert() - test for CVE-2015-1532
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

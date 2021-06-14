@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL import large object with given oid
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

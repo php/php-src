@@ -1,7 +1,7 @@
 --TEST--
 Bug #65119 (pg_copy_from() modifies input array variable)
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

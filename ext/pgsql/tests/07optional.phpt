@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL optional functions
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

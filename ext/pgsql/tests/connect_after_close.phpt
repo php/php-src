@@ -1,7 +1,7 @@
 --TEST--
 Reopen connection after it was closed
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

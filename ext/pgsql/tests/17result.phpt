@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_fetch_*() functions
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

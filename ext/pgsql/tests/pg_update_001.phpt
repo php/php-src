@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_update() - basic test using schema
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

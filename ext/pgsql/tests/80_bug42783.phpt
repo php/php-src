@@ -1,7 +1,7 @@
 --TEST--
 Bug #42783 (pg_insert() does not support an empty value array)
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_metadata()
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

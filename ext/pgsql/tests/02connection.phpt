@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL connection
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_result_status()
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

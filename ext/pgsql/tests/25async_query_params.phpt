@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL async query params
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

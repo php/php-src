@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL non-blocking async connect
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

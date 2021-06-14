@@ -1,7 +1,7 @@
 --TEST--
 Bug #47199 (pg_delete fails on NULL)
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

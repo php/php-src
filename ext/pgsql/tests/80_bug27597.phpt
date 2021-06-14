@@ -1,7 +1,7 @@
 --TEST--
 Bug #27597 (pg_fetch_array not returning false)
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');

@@ -1,7 +1,7 @@
 --TEST--
 Bug #37100 (data is returned truncated with BINARY CURSOR)
 --EXTENSIONS--
-psql
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");
