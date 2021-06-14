@@ -19,7 +19,7 @@
 #endif
 #include "php.h"
 
-#include <magic.h>
+#include "libmagic/magic.h"
 /*
  * HOWMANY specifies the maximum offset libmagic will look at
  * this is currently hardcoded in the libmagic source but not exported

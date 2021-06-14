@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #81092 (fflush before stream_filter_remove corrupts stream).
     (cmb)
 
+- Fileinfo:
+  . Fixed bug #80197 (implicit declaration of function 'magic_stream' is
+    invalid). (Nikita)
+
 - GMP:
   . Fixed bug #81119 (GMP operators throw errors with wrong parameter names).
     (Nikita)
