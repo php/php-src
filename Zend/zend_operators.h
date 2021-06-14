@@ -800,11 +800,6 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #endif
 }
 
-static zend_always_inline zend_result fast_div_function(zval *result, zval *op1, zval *op2)
-{
-	return div_function(result, op1, op2);
-}
-
 static zend_always_inline bool zend_fast_equal_strings(zend_string *s1, zend_string *s2)
 {
 	if (s1 == s2) {
