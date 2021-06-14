@@ -830,6 +830,18 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
 			HashTable *arr = Z_ARRVAL_P(ele_value);
 			zval *data;
+			int max_value = 0;
+
+			/* Decide the max_value: the max. no. of elements allowed */
+			if( strcmp(key_name , LOC_VARIANT_TAG) ==0 ){
+				max_value  = MAX_NO_VARIANT;
+			}
+			if( strcmp(key_name , LOC_EXTLANG_TAG) ==0 ){
+				max_value  = MAX_NO_EXTLANG;
+			}
+			if( strcmp(key_name , LOC_PRIVATE_TAG) ==0 ){
+				max_value  = MAX_NO_PRIVATE;
+			}
 
 			ZEND_HASH_FOREACH_VAL(arr, data) {
 				if(Z_TYPE_P(data) != IS_STRING) {
@@ -840,6 +852,9 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
+				if (max_value > 0 && isFirstSubtag >= max_value) {
+					break;
+				}
 			} ZEND_HASH_FOREACH_END();
 			return SUCCESS;
 		} else {
