@@ -92,11 +92,11 @@ copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
-rem generate tmp-php.ini
-echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\tmp-php.ini
-echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\tmp-php.ini
-if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\tmp-php.ini
-echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\tmp-php.ini
+rem generate php.ini
+echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
+echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
+if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
+echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
 for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
