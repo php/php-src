@@ -1496,7 +1496,7 @@ static int _php_image_type (zend_string *data)
 		return PHP_GDIMG_TYPE_WEBP;
 	}
 
-	php_gd_image_reader reader = { .data = data, .data_pos = 0 };
+	php_gd_image_reader reader = { .stream = NULL, .data = data, .data_pos = 0 };
 
   if (php_is_image_avif(&reader)) {
   	return PHP_GDIMG_TYPE_AVIF;
