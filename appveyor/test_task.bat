@@ -89,9 +89,20 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 mkdir %LOCALAPPDATA%\enchant\hunspell
 copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 
-set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_OBJ_DIR%\Release
-if "%THREAD_SAFE%" equ "1" set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%_TS
-set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%\phpdbg.exe
+set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
+if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
+
+rem overwrite tmp-php.ini
+echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\tmp-php.ini
+echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\tmp-php.ini
+if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\tmp-php.ini
+
+rem remove ext dlls for which tests are not supported
+for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
+	del %PHP_BUILD_DIR%\php_%%i.dll
+)
+
+set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 mkdir c:\tests_tmp
 
