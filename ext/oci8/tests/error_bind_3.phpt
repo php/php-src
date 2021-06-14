@@ -2,7 +2,6 @@
 Test some more oci_bind_by_name error conditions
 --EXTENSIONS--
 oci8
-oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs

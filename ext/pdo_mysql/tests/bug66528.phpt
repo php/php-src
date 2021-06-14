@@ -3,7 +3,6 @@ Bug #66528: No PDOException or errorCode if database becomes unavailable before 
 --EXTENSIONS--
 pdo
 pdo_mysql
-pdo_mysql
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

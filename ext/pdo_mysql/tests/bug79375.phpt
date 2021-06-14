@@ -3,7 +3,6 @@ Bug #79375: mysqli_store_result does not report error from lock wait timeout
 --EXTENSIONS--
 pdo
 pdo_mysql
-pdo_mysql
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

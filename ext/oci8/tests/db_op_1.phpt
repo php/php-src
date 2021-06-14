@@ -2,7 +2,6 @@
 oci_set_db_operation: basic test for end-to-end tracing
 --EXTENSIONS--
 oci8
-oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

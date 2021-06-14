@@ -3,7 +3,6 @@ Bug #70066: Unexpected "Cannot execute queries while other unbuffered queries"
 --EXTENSIONS--
 pdo
 pdo_mysql
-pdo_mysql
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

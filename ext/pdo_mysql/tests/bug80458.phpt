@@ -3,7 +3,6 @@ Bug #80458 PDOStatement::fetchAll() throws for upsert queries
 --EXTENSIONS--
 pdo
 pdo_mysql
-pdo_mysql
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

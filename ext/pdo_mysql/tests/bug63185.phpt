@@ -3,7 +3,6 @@ Bug #63185: nextRowset() ignores MySQL errors with native prepared statements
 --EXTENSIONS--
 pdo
 pdo_mysql
-pdo_mysql
 --SKIPIF--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

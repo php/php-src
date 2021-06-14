@@ -2,7 +2,6 @@
 Set and get of connection attributes with all types of connections.
 --EXTENSIONS--
 oci8
-oci8
 --SKIPIF--
 <?php $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');

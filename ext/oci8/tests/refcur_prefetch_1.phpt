@@ -2,7 +2,6 @@
 Prefetch with REF cursor. Test different values for prefetch with oci_set_prefetch().
 --EXTENSIONS--
 oci8
-oci8
 --SKIPIF--
 <?php require(__DIR__."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
