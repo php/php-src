@@ -96,6 +96,7 @@ rem overwrite tmp-php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\tmp-php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\tmp-php.ini
 if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\tmp-php.ini
+echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\tmp-php.ini
 
 rem remove ext dlls for which tests are not supported
 for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
