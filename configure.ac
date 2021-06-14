@@ -1570,6 +1570,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_call_graph.h \
     zend_cfg.h \
+    zend_dfg.h \
     zend_dump.h \
     zend_func_info.h \
     zend_inference.h \

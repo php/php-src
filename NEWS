@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #81133 (building opcache with phpize fails). (krakjoe)
+  . Fixed bug #81136 (opcache header not installed). (krakjoe)
 
 - PDO OCI:
   . Fixed bug #77120 (Support 'success with info' at connection).
