@@ -1,6 +1,7 @@
 --TEST--
 Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any keys)
 --EXTENSIONS--
+dba
 pgsql
 --SKIPIF--
 <?php
