@@ -92,7 +92,7 @@ copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
-rem overwrite tmp-php.ini
+rem generate tmp-php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\tmp-php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\tmp-php.ini
 if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\tmp-php.ini
