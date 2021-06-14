@@ -4,6 +4,8 @@ ldap_connect() - Connection using default host from openldap's ldap.conf
 David Caldwell <david@galvanix.com>
 --EXTENSIONS--
 ldap
+--ENV--
+LDAPCONF={PWD}/ldap_connect_ldap_conf.conf
 --SKIPIF--
 <?php
 ob_start();
@@ -13,13 +15,9 @@ if (!preg_match("/vendor name => openldap/i", ob_get_clean()))
 ?>
 --FILE--
 <?php
-$conf=tempnam(sys_get_temp_dir(),"ldap.conf");
-file_put_contents($conf, "uri ldaps://example.com:3141/");
-putenv("LDAPCONF=$conf");
 $link = ldap_connect();
 ldap_get_option($link, LDAP_OPT_HOST_NAME, $host);
 var_dump($host);
-unlink($conf);
 ?>
 --EXPECT--
 string(16) "example.com:3141"
