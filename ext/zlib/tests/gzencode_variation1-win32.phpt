@@ -4,22 +4,12 @@ Test gzencode() function : variation
 zlib
 --SKIPIF--
 <?php
-
-if( substr(PHP_OS, 0, 3) != "WIN" ) {
+if (substr(PHP_OS, 0, 3) != "WIN") {
   die("skip only for Windows");
 }
-
-
 ?>
 --FILE--
 <?php
-if(!function_exists("gzdecode")) {
-    function gzdecode($data)
-    {
-       return gzinflate(substr($data,10,-8));
-    }
-}
-
 
 include(__DIR__ . '/data.inc');
 
