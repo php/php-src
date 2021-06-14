@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #81112 (Special json_encode behavior for SplFixedArray). (Nikita)
   . Fixed bug #80945 ("Notice: Undefined index" on unset() ArrayObject
     non-existing key). (Nikita)
+    
+- Standard:
+  . Fixed bug #81137 (hrtime breaks build on OSX before Sierra). (krakjoe)
 
 10 Jun 2021, PHP 8.1.0alpha1
 
