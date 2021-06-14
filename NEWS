@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.22
 
+- Intl:
+  . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
+    (cmb)
 
 01 Jul 2021, PHP 7.4.21
 
