@@ -2,10 +2,9 @@
 Bug #52820 (writes to fopencookie FILE* not committed when seeking the stream)
 --EXTENSIONS--
 curl
+zend_test
 --SKIPIF--
 <?php
-if (!function_exists('zend_leak_variable'))
-   die("skip only for debug builds");
 /* unfortunately no standard function does a cast to FILE*, so we need
  * curl to test this */
 $handle=curl_init('file:///i_dont_exist/');

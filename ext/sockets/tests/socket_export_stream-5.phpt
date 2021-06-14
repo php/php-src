@@ -2,12 +2,7 @@
 socket_export_stream: effects of leaked handles
 --EXTENSIONS--
 sockets
---SKIPIF--
-<?php
-
-if (!function_exists('zend_leak_variable'))
-    die('SKIP only for debug builds');
-?>
+zend_test
 --INI--
 report_memleaks=0
 --FILE--
