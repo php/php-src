@@ -195,7 +195,7 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/fibers
   . It is now possible to use "new ClassName()" expressions as parameter
     default values, static variable and global constant initializers, as well
-    as attribute arguments.
+    as attribute arguments. Objects can also be passed to `define()` now.
     RFC: https://wiki.php.net/rfc/new_in_initializers
   . Closures for callables can now be created using the syntax `myFunc(...)`,
     which is the same as `Closure::fromCallable('myFunc')`. Yes, the `...` is
