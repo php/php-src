@@ -2,9 +2,6 @@
 Test curl_reset
 --EXTENSIONS--
 curl
---SKIPIF--
-<?php if (!function_exists("curl_reset")) exit("skip curl_reset doesn't exists (require libcurl >= 7.12.1)");
-?>
 --FILE--
 <?php
 
