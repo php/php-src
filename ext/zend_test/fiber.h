@@ -23,7 +23,7 @@ typedef struct _zend_test_fiber zend_test_fiber;
 
 struct _zend_test_fiber {
 	zend_object std;
-	ZEND_FIBER_CONTEXT_FIELDS;
+	zend_fiber_context context;
 	zend_fiber_context *caller;
 	zend_fiber_context *previous;
 	zend_test_fiber *target;

@@ -6873,7 +6873,7 @@ ZEND_METHOD(ReflectionFiber, getFiber)
 }
 
 #define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
-		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status == ZEND_FIBER_STATUS_DEAD) { \
+		if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_INIT || fiber->context.status == ZEND_FIBER_STATUS_DEAD) { \
 			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
 			RETURN_THROWS(); \
 		} \
@@ -6948,7 +6948,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_DEAD) {
+	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
 		RETURN_THROWS();
 	}

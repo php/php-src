@@ -392,10 +392,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zval_ptr_dtor(&fiber->fci.function_name);
 
 		if (EG(exception)) {
-			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
+			if (!(fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED)
 				|| !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))
 			) {
-				fiber->flags |= ZEND_FIBER_FLAG_THREW;
+				fiber->context.flags |= ZEND_FIBER_FLAG_THREW;
 				transfer->flags = ZEND_FIBER_TRANSFER_FLAG_ERROR;
 
 				ZVAL_OBJ_COPY(&transfer->value, EG(exception));
@@ -406,7 +406,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 			ZVAL_COPY(&transfer->value, &fiber->result);
 		}
 	} zend_catch {
-		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
+		fiber->context.flags |= ZEND_FIBER_FLAG_BAILOUT;
 	} zend_end_try();
 
 	transfer->context = fiber->caller;
@@ -427,7 +427,7 @@ static zend_always_inline void delegate_transfer_result(
 		RETURN_THROWS();
 	}
 
-	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
+	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		zval_ptr_dtor(&transfer->value);
 		RETURN_NULL();
 	}
@@ -496,14 +496,14 @@ static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	if (fiber->status != ZEND_FIBER_STATUS_SUSPENDED) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
 		return;
 	}
 
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
-	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
+	fiber->context.flags |= ZEND_FIBER_FLAG_DESTROYED;
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
@@ -530,7 +530,7 @@ static void zend_fiber_object_free(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	if (fiber->status == ZEND_FIBER_STATUS_INIT) {
+	if (fiber->context.status == ZEND_FIBER_STATUS_INIT) {
 		// Fiber was never started, so we need to release the reference to the callback.
 		zval_ptr_dtor(&fiber->fci.function_name);
 	}
@@ -568,7 +568,7 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	if (fiber->status != ZEND_FIBER_STATUS_INIT) {
+    if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
 		RETURN_THROWS();
 	}
@@ -577,13 +577,11 @@ ZEND_METHOD(Fiber, start)
 	fiber->fci.param_count = param_count;
 	fiber->fci.named_params = named_params;
 
-	zend_fiber_context *context = zend_fiber_get_context(fiber);
-
-	if (!zend_fiber_init_context(context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
+	if (!zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
 		RETURN_THROWS();
 	}
 
-	fiber->previous = context;
+	fiber->previous = &fiber->context;
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
@@ -606,7 +604,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
+	if (UNEXPECTED(fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 		RETURN_THROWS();
 	}
@@ -616,14 +614,14 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_RUNNING || fiber->status == ZEND_FIBER_STATUS_SUSPENDED);
+    ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
 
-	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
+	if (fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the fiber is GC'ed while suspended.
 		zval_ptr_dtor(&transfer.value);
 		zend_throw_graceful_exit();
@@ -650,7 +648,7 @@ ZEND_METHOD(Fiber, resume)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -678,7 +676,7 @@ ZEND_METHOD(Fiber, throw)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -698,7 +696,7 @@ ZEND_METHOD(Fiber, isStarted)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status != ZEND_FIBER_STATUS_INIT);
+	RETURN_BOOL(fiber->context.status != ZEND_FIBER_STATUS_INIT);
 }
 
 ZEND_METHOD(Fiber, isSuspended)
@@ -709,7 +707,7 @@ ZEND_METHOD(Fiber, isSuspended)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
+	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
 }
 
 ZEND_METHOD(Fiber, isRunning)
@@ -720,7 +718,7 @@ ZEND_METHOD(Fiber, isRunning)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_RUNNING || fiber->caller != NULL);
+	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->caller != NULL);
 }
 
 ZEND_METHOD(Fiber, isTerminated)
@@ -731,7 +729,7 @@ ZEND_METHOD(Fiber, isTerminated)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	RETURN_BOOL(fiber->status == ZEND_FIBER_STATUS_DEAD);
+	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_DEAD);
 }
 
 ZEND_METHOD(Fiber, getReturn)
@@ -743,15 +741,15 @@ ZEND_METHOD(Fiber, getReturn)
 
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
-	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
-		if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
+	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
+		if (fiber->context.flags & ZEND_FIBER_FLAG_THREW) {
 			message = "The fiber threw an exception";
-		} else if (fiber->flags & ZEND_FIBER_FLAG_BAILOUT) {
+		} else if (fiber->context.flags & ZEND_FIBER_FLAG_BAILOUT) {
 			message = "The fiber exited with a fatal error";
 		} else {
 			RETURN_COPY(&fiber->result);
 		}
-	} else if (fiber->status == ZEND_FIBER_STATUS_INIT) {
+	} else if (fiber->context.status == ZEND_FIBER_STATUS_INIT) {
 		message = "The fiber has not been started";
 	} else {
 		message = "The fiber has not returned";

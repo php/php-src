@@ -74,20 +74,15 @@ typedef struct _zend_fiber_transfer {
  * and (optional) data before they return. */
 typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 
-/* Defined as a macro to allow anonymous embedding. */
-#define ZEND_FIBER_CONTEXT_FIELDS \
-	/* Handle to fiber state as needed by boost.context */ \
-	void *handle; \
-	/* Pointer that identifies the fiber type. */ \
-	void *kind; \
-	zend_fiber_coroutine function; \
-	zend_fiber_stack *stack; \
-	zend_fiber_status status; \
-	uint8_t flags
-
-/* Standalone context (used primarily as pointer type). */
 struct _zend_fiber_context {
-	ZEND_FIBER_CONTEXT_FIELDS;
+	/* Handle to fiber state as needed by boost.context */
+	void *handle;
+	/* Pointer that identifies the fiber type. */
+	void *kind;
+	zend_fiber_coroutine function;
+	zend_fiber_stack *stack;
+	zend_fiber_status status;
+	uint8_t flags;
 };
 
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
@@ -107,8 +102,7 @@ struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
 
-	/* Fiber context fields (embedded to avoid memory allocation). */
-	ZEND_FIBER_CONTEXT_FIELDS;
+	zend_fiber_context context;
 
 	/* Fiber that resumed us. */
 	zend_fiber_context *caller;
@@ -141,12 +135,12 @@ static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context
 {
 	ZEND_ASSERT(context->kind == zend_ce_fiber && "Fiber context does not belong to a Zend fiber");
 
-	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, handle));
+	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, context));
 }
 
 static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber *fiber)
 {
-	return (zend_fiber_context *) &fiber->handle;
+	return &fiber->context;
 }
 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)

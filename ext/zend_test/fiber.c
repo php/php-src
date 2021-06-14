@@ -23,11 +23,6 @@
 static zend_class_entry *zend_test_fiber_class;
 static zend_object_handlers zend_test_fiber_handlers;
 
-static zend_always_inline zend_fiber_context *zend_test_fiber_get_context(zend_test_fiber *fiber)
-{
-	return (zend_fiber_context *) &fiber->handle;
-}
-
 static zend_fiber_transfer zend_test_fiber_switch_to(zend_fiber_context *context, zval *value, bool exception)
 {
 	zend_fiber_transfer transfer = {
@@ -102,10 +97,10 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		zval_ptr_dtor(&fiber->fci.function_name);
 
 		if (EG(exception)) {
-			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
+			if (!(fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED)
 				|| !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))
 			) {
-				fiber->flags |= ZEND_FIBER_FLAG_THREW;
+				fiber->context.flags |= ZEND_FIBER_FLAG_THREW;
 				transfer->flags = ZEND_FIBER_TRANSFER_FLAG_ERROR;
 
 				ZVAL_OBJ_COPY(&transfer->value, EG(exception));
@@ -117,13 +112,13 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 			ZVAL_COPY(&transfer->value, &fiber->result);
 		}
 	} zend_catch {
-		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
+		fiber->context.flags |= ZEND_FIBER_FLAG_BAILOUT;
 	} zend_end_try();
 
 	zend_vm_stack_destroy();
 
 	if (fiber->target) {
-		zend_fiber_context *target = zend_test_fiber_get_context(fiber->target);
+		zend_fiber_context *target = &fiber->target->context;
 		zend_fiber_init_context(target, zend_test_fiber_class, zend_test_fiber_execute, EG(fiber_stack_size));
 		transfer->context = target;
 
@@ -157,14 +152,14 @@ static void zend_test_fiber_object_destroy(zend_object *object)
 {
 	zend_test_fiber *fiber = (zend_test_fiber *) object;
 
-	if (fiber->status != ZEND_FIBER_STATUS_SUSPENDED) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
 		return;
 	}
 
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
-	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
+	fiber->context.flags |= ZEND_FIBER_FLAG_DESTROYED;
 
 	zend_fiber_transfer transfer = zend_test_fiber_resume(fiber, NULL, false);
 
@@ -191,7 +186,7 @@ static void zend_test_fiber_object_free(zend_object *object)
 {
 	zend_test_fiber *fiber = (zend_test_fiber *) object;
 
-	if (fiber->status == ZEND_FIBER_STATUS_INIT) {
+	if (fiber->context.status == ZEND_FIBER_STATUS_INIT) {
 		// Fiber was never started, so we need to release the reference to the callback.
 		zval_ptr_dtor(&fiber->fci.function_name);
 	}
@@ -213,7 +208,7 @@ static zend_always_inline void delegate_transfer_result(
 		RETURN_THROWS();
 	}
 
-	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
+	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		zval_ptr_dtor(&transfer->value);
 		RETURN_NULL();
 	}
@@ -244,7 +239,7 @@ static ZEND_METHOD(_ZendTestFiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZEND_ASSERT(fiber->status == ZEND_FIBER_STATUS_INIT);
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_INIT);
 
 	if (fiber->previous != NULL) {
 		zend_throw_error(NULL, "Cannot start a fiber that is the target of another fiber");
@@ -255,11 +250,9 @@ static ZEND_METHOD(_ZendTestFiber, start)
 	fiber->fci.param_count = param_count;
 	fiber->fci.named_params = named_params;
 
-	zend_fiber_context *context = zend_test_fiber_get_context(fiber);
+	zend_fiber_init_context(&fiber->context, zend_test_fiber_class, zend_test_fiber_execute, EG(fiber_stack_size));
 
-	zend_fiber_init_context(context, zend_test_fiber_class, zend_test_fiber_execute, EG(fiber_stack_size));
-
-	fiber->previous = context;
+	fiber->previous = &fiber->context;
 
 	zend_fiber_transfer transfer = zend_test_fiber_resume(fiber, NULL, false);
 
@@ -281,7 +274,7 @@ static ZEND_METHOD(_ZendTestFiber, suspend)
 
 	zend_fiber_transfer transfer = zend_test_fiber_suspend(fiber, value);
 
-	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
+	if (fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the test fiber is GC'ed while suspended.
 		zval_ptr_dtor(&transfer.value);
 		zend_throw_graceful_exit();
@@ -303,7 +296,7 @@ static ZEND_METHOD(_ZendTestFiber, resume)
 
 	fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
 
-	if (UNEXPECTED(fiber->status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(NULL, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -329,7 +322,7 @@ static ZEND_METHOD(_ZendTestFiber, pipeTo)
 	target->fci_cache = fci_cache;
 	Z_TRY_ADDREF(target->fci.function_name);
 
-	target->previous = zend_test_fiber_get_context(fiber);
+	target->previous = &fiber->context;
 
 	if (fiber->target) {
 		OBJ_RELEASE(&fiber->target->std);
