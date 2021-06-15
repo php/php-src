@@ -48,7 +48,7 @@ typedef enum {
 } zend_fiber_transfer_flag;
 
 void zend_register_fiber_ce(void);
-void zend_fiber_startup();
+void zend_fiber_startup(void);
 void zend_fiber_init(void);
 void zend_fiber_shutdown(void);
 
