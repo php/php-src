@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.21
+?? ??? ????, PHP 7.4.22
+
+
+01 Jul 2021, PHP 7.4.21
 
 - Core:
   . Fixed bug #81068 (Double free in realpath_cache_clean()). (Dimitry Andric)
