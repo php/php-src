@@ -4738,7 +4738,7 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	zval value_zv;
 
 	if (*value_ast_ptr) {
-		zend_const_expr_to_zval(&value_zv, value_ast_ptr);
+		zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ true);
 	} else {
 		ZVAL_NULL(&value_zv);
 	}
@@ -6069,7 +6069,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 
 		if (zend_string_equals_literal_ci(name, "ticks")) {
 			zval value_zv;
-			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 			FC(declarables).ticks = zval_get_long(&value_zv);
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
@@ -6091,7 +6091,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 					"use block mode");
 			}
 
-			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 
 			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
@@ -6477,7 +6477,8 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 							"Cannot use positional argument after named argument");
 					}
 
-					zend_const_expr_to_zval(&attr->args[j].value, arg_ast_ptr);
+					zend_const_expr_to_zval(
+						&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
 				}
 			}
 		}
@@ -6607,7 +6608,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
-			zend_const_expr_to_zval(&default_node.u.constant, default_ast_ptr);
+			zend_const_expr_to_zval(
+				&default_node.u.constant, default_ast_ptr, /* allow_dynamic */ true);
 			CG(compiler_options) = cops;
 
 			if (last_required_param != (uint32_t) -1 && i < last_required_param) {
@@ -7285,7 +7287,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 		}
 
 		if (*value_ast_ptr) {
-			zend_const_expr_to_zval(&value_zv, value_ast_ptr);
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 
 			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
 					&& !zend_is_valid_default_value(type, &value_zv)) {
@@ -7374,7 +7376,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 			);
 		}
 
-		zend_const_expr_to_zval(&value_zv, value_ast_ptr);
+		zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
 
 		if (attr_ast) {
@@ -7833,7 +7835,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 	zend_ast *const_enum_init_ast = zend_ast_create(ZEND_AST_CONST_ENUM_INIT, class_name_ast, case_name_ast, case_value_zval_ast);
 
 	zval value_zv;
-	zend_const_expr_to_zval(&value_zv, &const_enum_init_ast);
+	zend_const_expr_to_zval(&value_zv, &const_enum_init_ast, /* allow_dynamic */ false);
 
 	/* Doc comment has been appended as second last element in ZEND_AST_ENUM ast - attributes are conventionally last */
 	zend_ast *doc_comment_ast = ast->child[2];
@@ -8015,7 +8017,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zval *value_zv = &value_node.u.constant;
 
 		value_node.op_type = IS_CONST;
-		zend_const_expr_to_zval(value_zv, value_ast_ptr);
+		zend_const_expr_to_zval(value_zv, value_ast_ptr, /* allow_dynamic */ true);
 
 		if (zend_get_special_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -9600,7 +9602,9 @@ bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_CONST || kind == ZEND_AST_CLASS_CONST
 		|| kind == ZEND_AST_CLASS_NAME
 		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE
-		|| kind == ZEND_AST_CONST_ENUM_INIT;
+		|| kind == ZEND_AST_CONST_ENUM_INIT
+		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
+		|| kind == ZEND_AST_NAMED_ARG;
 }
 /* }}} */
 
@@ -9704,8 +9708,61 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
+static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 {
+	zend_ast *class_ast = (*ast_ptr)->child[0];
+	if (class_ast->kind == ZEND_AST_CLASS) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use anonymous class in constant expression");
+	}
+	if (class_ast->kind != ZEND_AST_ZVAL) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use dynamic class name in constant expression");
+	}
+
+	zend_string *class_name = zend_resolve_class_name_ast(class_ast);
+	int fetch_type = zend_get_class_fetch_type(class_name);
+	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"\"static\" is not allowed in compile-time constants");
+	}
+
+	zval *class_ast_zv = zend_ast_get_zval(class_ast);
+	zval_ptr_dtor_nogc(class_ast_zv);
+	ZVAL_STR(class_ast_zv, class_name);
+	class_ast->attr = fetch_type;
+}
+
+static void zend_compile_const_expr_args(zend_ast **ast_ptr)
+{
+	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
+	bool uses_named_args = false;
+	for (uint32_t i = 0; i < list->children; i++) {
+		zend_ast *arg = list->child[i];
+		if (arg->kind == ZEND_AST_UNPACK) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Argument unpacking in constant expressions is not supported");
+		}
+		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			uses_named_args = true;
+		} else if (uses_named_args) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use positional argument after named argument");
+		}
+	}
+	if (uses_named_args) {
+		list->attr = 1;
+	}
+}
+
+typedef struct {
+	/* Whether the value of this expression may differ on each evaluation. */
+	bool allow_dynamic;
+} const_expr_context;
+
+void zend_compile_const_expr(zend_ast **ast_ptr, void *context) /* {{{ */
+{
+	const_expr_context *ctx = (const_expr_context *) context;
 	zend_ast *ast = *ast_ptr;
 	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
 		return;
@@ -9728,17 +9785,29 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 		case ZEND_AST_MAGIC_CONST:
 			zend_compile_const_expr_magic_const(ast_ptr);
 			break;
-		default:
-			zend_ast_apply(ast, zend_compile_const_expr);
+		case ZEND_AST_NEW:
+			if (!ctx->allow_dynamic) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"New expressions are not supported in this context");
+			}
+			zend_compile_const_expr_new(ast_ptr);
+			break;
+		case ZEND_AST_ARG_LIST:
+			zend_compile_const_expr_args(ast_ptr);
 			break;
 	}
+
+	zend_ast_apply(ast, zend_compile_const_expr, context);
 }
 /* }}} */
 
-void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr) /* {{{ */
+void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynamic) /* {{{ */
 {
+	const_expr_context context;
+	context.allow_dynamic = allow_dynamic;
+
 	zend_eval_const_expr(ast_ptr);
-	zend_compile_const_expr(ast_ptr);
+	zend_compile_const_expr(ast_ptr, &context);
 	if ((*ast_ptr)->kind != ZEND_AST_ZVAL) {
 		/* Replace with compiled AST zval representation. */
 		zval ast_zv;
@@ -10376,6 +10445,25 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 			break;
 		}
+		// TODO: We should probably use zend_ast_apply to recursively walk nodes without
+		// special handling. It is required that all nodes that are part of a const expr
+		// are visited. Probably we should be distinguishing evaluation of const expr and
+		// normal exprs here.
+		case ZEND_AST_ARG_LIST:
+		{
+			zend_ast_list *list = zend_ast_get_list(ast);
+			for (uint32_t i = 0; i < list->children; i++) {
+				zend_eval_const_expr(&list->child[i]);
+			}
+			return;
+		}
+		case ZEND_AST_NEW:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+			return;
+		case ZEND_AST_NAMED_ARG:
+			zend_eval_const_expr(&ast->child[1]);
+			return;
 		default:
 			return;
 	}

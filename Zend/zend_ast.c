@@ -504,6 +504,11 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 	return FAILURE;
 }
 
+zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
+{
+	return zend_fetch_class(zend_ast_get_str(ast), ast->attr | ZEND_FETCH_CLASS_EXCEPTION);
+}
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
@@ -797,6 +802,88 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			ZVAL_COPY_OR_DUP(result, zv);
 			break;
 		}
+		case ZEND_AST_NEW:
+		{
+			zend_class_entry *ce = zend_ast_fetch_class(ast->child[0], scope);
+			if (!ce) {
+				return FAILURE;
+			}
+
+			if (object_init_ex(result, ce) != SUCCESS) {
+				return FAILURE;
+			}
+
+			zend_ast_list *args_ast = zend_ast_get_list(ast->child[1]);
+			if (args_ast->attr) {
+				/* Has named arguments. */
+				HashTable *args = zend_new_array(args_ast->children);
+				for (uint32_t i = 0; i < args_ast->children; i++) {
+					zend_ast *arg_ast = args_ast->child[i];
+					zend_string *name = NULL;
+					zval arg;
+					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
+						name = zend_ast_get_str(arg_ast->child[0]);
+						arg_ast = arg_ast->child[1];
+					}
+					if (zend_ast_evaluate(&arg, arg_ast, scope) == FAILURE) {
+						zend_array_destroy(args);
+						zval_ptr_dtor(result);
+						return FAILURE;
+					}
+					if (name) {
+						if (!zend_hash_add(args, name, &arg)) {
+							zend_throw_error(NULL,
+								"Named parameter $%s overwrites previous argument",
+								ZSTR_VAL(name));
+							zend_array_destroy(args);
+							zval_ptr_dtor(result);
+							return FAILURE;
+						}
+					} else {
+						zend_hash_next_index_insert(args, &arg);
+					}
+				}
+
+				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+				if (ctor) {
+					zend_call_known_function(
+						ctor, Z_OBJ_P(result), Z_OBJCE_P(result), NULL, 0, NULL, args);
+				}
+
+				zend_array_destroy(args);
+			} else {
+				ALLOCA_FLAG(use_heap)
+				zval *args = do_alloca(sizeof(zval) * args_ast->children, use_heap);
+				for (uint32_t i = 0; i < args_ast->children; i++) {
+					if (zend_ast_evaluate(&args[i], args_ast->child[i], scope) == FAILURE) {
+						for (uint32_t j = 0; j < i; j++) {
+							zval_ptr_dtor(&args[j]);
+						}
+						free_alloca(args, use_heap);
+						zval_ptr_dtor(result);
+						return FAILURE;
+					}
+				}
+
+				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+				if (ctor) {
+					zend_call_known_instance_method(
+						ctor, Z_OBJ_P(result), NULL, args_ast->children, args);
+				}
+
+				for (uint32_t i = 0; i < args_ast->children; i++) {
+					zval_ptr_dtor(&args[i]);
+				}
+				free_alloca(args, use_heap);
+			}
+
+			if (EG(exception)) {
+				zend_object_store_ctor_failed(Z_OBJ_P(result));
+				zval_ptr_dtor(result);
+				return FAILURE;
+			}
+			return SUCCESS;
+		}
 		default:
 			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;
@@ -949,17 +1036,17 @@ ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast)
 	efree(ast);
 }
 
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context) {
 	if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		uint32_t i;
 		for (i = 0; i < list->children; ++i) {
-			fn(&list->child[i]);
+			fn(&list->child[i], context);
 		}
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; ++i) {
-			fn(&ast->child[i]);
+			fn(&ast->child[i], context);
 		}
 	}
 }

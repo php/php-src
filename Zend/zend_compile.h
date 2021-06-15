@@ -130,7 +130,7 @@ void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
 zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, bool by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
-void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr);
+void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynamic);
 
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
