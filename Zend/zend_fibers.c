@@ -798,6 +798,13 @@ void zend_register_fiber_ce(void)
 	zend_ce_fiber_error->create_object = zend_ce_error->create_object;
 }
 
+void zend_fiber_startup(void)
+{
+	zend_fiber_switch_block = fiber_switch_block;
+	zend_fiber_switch_unblock = fiber_switch_unblock;
+	zend_fiber_switch_blocked = fiber_switch_blocked;
+}
+
 void zend_fiber_init(void)
 {
 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
@@ -812,10 +819,6 @@ void zend_fiber_init(void)
 	EG(main_fiber_context) = context;
 	EG(current_fiber_context) = context;
 	EG(active_fiber) = NULL;
-
-	zend_fiber_switch_block = fiber_switch_block;
-	zend_fiber_switch_unblock = fiber_switch_unblock;
-	zend_fiber_switch_blocked = fiber_switch_blocked;
 
 	zend_fiber_switch_blocking = 0;
 }
