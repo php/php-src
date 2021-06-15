@@ -4803,7 +4803,7 @@ static zend_result get_default_via_ast(zval *default_value_zval, const char *def
 	/* Disable constant substitution, to make getDefaultValueConstant() work. */
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 	zend_file_context_begin(&original_file_context);
-	zend_const_expr_to_zval(default_value_zval, const_expr_ast_ptr);
+	zend_const_expr_to_zval(default_value_zval, const_expr_ast_ptr, /* allow_dynamic */ true);
 	CG(ast_arena) = original_ast_arena;
 	CG(compiler_options) = original_compiler_options;
 	zend_file_context_end(&original_file_context);

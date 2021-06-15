@@ -303,8 +303,8 @@ ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
-typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
+typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
 static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
