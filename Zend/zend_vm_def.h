@@ -6461,7 +6461,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Unsetting offset in a false variable is deprecated");
+			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
 		}
 	} while (0);
 

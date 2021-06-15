@@ -191,4 +191,4 @@ Deprecated: Automatic conversion of false to array is deprecated in %s
 Deprecated: Automatic conversion of false to array is deprecated in %s
 [023]
 
-Deprecated: Unsetting offset in a false variable is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s

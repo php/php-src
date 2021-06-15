@@ -96,7 +96,7 @@ try {
 --EXPECTF--
 Warning: Undefined variable $x in %s on line %d
 
-Deprecated: Unsetting offset in a false variable is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
