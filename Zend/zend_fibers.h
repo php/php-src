@@ -48,14 +48,10 @@ typedef enum {
 } zend_fiber_transfer_flag;
 
 void zend_register_fiber_ce(void);
-void zend_fiber_startup(void);
 void zend_fiber_init(void);
 void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
-extern ZEND_API void (*zend_fiber_switch_block)(void);
-extern ZEND_API void (*zend_fiber_switch_unblock)(void);
-extern ZEND_API bool (*zend_fiber_switch_blocked)(void);
 
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_fiber_context zend_fiber_context;
@@ -129,6 +125,10 @@ struct _zend_fiber {
 ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
+
+ZEND_API void zend_fiber_switch_block(void);
+ZEND_API void zend_fiber_switch_unblock(void);
+ZEND_API bool zend_fiber_switch_blocked(void);
 
 END_EXTERN_C()
 

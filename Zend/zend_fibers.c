@@ -102,10 +102,6 @@ static zend_function zend_fiber_function = { ZEND_INTERNAL_FUNCTION };
 
 ZEND_TLS uint32_t zend_fiber_switch_blocking = 0;
 
-ZEND_API void (*zend_fiber_switch_block)(void);
-ZEND_API void (*zend_fiber_switch_unblock)(void);
-ZEND_API bool (*zend_fiber_switch_blocked)(void);
-
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
 static size_t zend_fiber_get_page_size(void)
@@ -241,18 +237,18 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 	abort();
 }
 
-static void fiber_switch_block(void)
+ZEND_API void zend_fiber_switch_block(void)
 {
 	++zend_fiber_switch_blocking;
 }
 
-static void fiber_switch_unblock(void)
+ZEND_API void zend_fiber_switch_unblock(void)
 {
 	ZEND_ASSERT(zend_fiber_switch_blocking && "Fiber switching was not blocked");
 	--zend_fiber_switch_blocking;
 }
 
-static bool fiber_switch_blocked(void)
+ZEND_API bool zend_fiber_switch_blocked(void)
 {
 	return zend_fiber_switch_blocking;
 }
@@ -796,13 +792,6 @@ void zend_register_fiber_ce(void)
 
 	zend_ce_fiber_error = register_class_FiberError(zend_ce_error);
 	zend_ce_fiber_error->create_object = zend_ce_error->create_object;
-}
-
-void zend_fiber_startup(void)
-{
-	zend_fiber_switch_block = fiber_switch_block;
-	zend_fiber_switch_unblock = fiber_switch_unblock;
-	zend_fiber_switch_blocked = fiber_switch_blocked;
 }
 
 void zend_fiber_init(void)
