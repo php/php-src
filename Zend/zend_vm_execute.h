@@ -24566,7 +24566,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
@@ -26741,7 +26741,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
@@ -30741,7 +30741,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
@@ -41984,7 +41984,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
@@ -45452,7 +45452,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
@@ -50557,7 +50557,7 @@ num_index_dim:
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);

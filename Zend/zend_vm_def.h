@@ -6460,7 +6460,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				offset++;
 			}
 			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
-		} else if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		}
 	} while (0);
