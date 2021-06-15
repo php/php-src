@@ -816,6 +816,8 @@ void zend_fiber_init(void)
 	zend_fiber_switch_block = fiber_switch_block;
 	zend_fiber_switch_unblock = fiber_switch_unblock;
 	zend_fiber_switch_blocked = fiber_switch_blocked;
+
+	zend_fiber_switch_blocking = 0;
 }
 
 void zend_fiber_shutdown(void)
