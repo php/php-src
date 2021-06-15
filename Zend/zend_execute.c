@@ -2330,10 +2330,10 @@ fetch_from_array:
 			if (type != BP_VAR_W && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
 			}
+			if (Z_TYPE_P(container) == IS_FALSE) {
+				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			}
 			if (type != BP_VAR_UNSET) {
-				if (Z_TYPE_P(container) == IS_FALSE) {
-					zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
-				}
 				array_init(container);
 				goto fetch_from_array;
 			} else {

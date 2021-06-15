@@ -107,6 +107,14 @@ $false[] = 42;
 print "[021]\n";
 $false2[] = 42;
 
+print "[022]\n";
+$a = false;
+unset($a[0][0]);
+
+print "[023]\n";
+$a = false;
+unset($a[0]);
+
 ?>
 --EXPECTF--
 [001]
@@ -178,3 +186,9 @@ Deprecated: Automatic conversion of false to array is deprecated in %s
 [021]
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
+[022]
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
+[023]
+
+Deprecated: Unsetting offset in a false variable is deprecated in %s

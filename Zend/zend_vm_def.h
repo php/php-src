@@ -6460,6 +6460,8 @@ ZEND_VM_C_LABEL(num_index_dim):
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
+			zend_error(E_DEPRECATED, "Unsetting offset in a false variable is deprecated");
 		}
 	} while (0);
 
