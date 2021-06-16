@@ -770,7 +770,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			{
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
 				HANDLE hfile = (HANDLE)_get_osfhandle(fd);
-				DWORD prot, acc, loffs = 0, delta = 0;
+				DWORD prot, acc, loffs = 0, hoffs = 0, delta = 0;
 				LARGE_INTEGER file_size;
 
 				switch (value) {
@@ -840,6 +840,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							gran = info.dwAllocationGranularity;
 							loffs = ((DWORD)range->offset / gran) * gran;
 							delta = (DWORD)range->offset - loffs;
+							hoffs = range->offset >> 32;
 						}
 
 						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
@@ -847,7 +848,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 
-						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length + delta);
+						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, hoffs, loffs, range->length + delta);
 
 						if (data->last_mapped_addr) {
 							/* give them back the address of the start offset they requested */
