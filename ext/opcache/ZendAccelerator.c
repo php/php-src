@@ -2385,6 +2385,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 		return NULL;
 	}
 
+	zend_map_ptr_extend(ZCSG(map_ptr_last));
+
 #if ZEND_MM_ALIGNMENT < 8
 	/* Align to 8-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
@@ -2427,6 +2429,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
+
+	ZCSG(map_ptr_last) = CG(map_ptr_last);
 
 	zend_shared_alloc_destroy_xlat_table();
 
