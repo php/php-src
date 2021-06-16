@@ -81,7 +81,7 @@ static int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 
 		case P_WRITE:
 			if (msg) {
-				msgout = strndup(msg, msglen);
+				msgout = pestrndup(msg, msglen, 1);
 				msgoutlen = msglen;
 				PHPDBG_G(last_was_newline) = msg[msglen - 1] == '\n';
 			} else {
