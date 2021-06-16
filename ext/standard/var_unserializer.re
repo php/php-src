@@ -947,7 +947,13 @@ use_double:
 	} else if (len == 1) {
 		ZVAL_INTERNED_STR(rval, ZSTR_CHAR((zend_uchar)*str));
 	} else if (as_key) {
-		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
+		zend_string *key = zend_string_init(str, len, 0);
+		zend_string *ikey = zend_interned_string_find_permanent(key);
+		if (ikey) {
+			zend_string_release(key);
+			key = ikey;
+		}
+		ZVAL_STR(rval, key);
 	} else {
 		ZVAL_STRINGL(rval, str, len);
 	}
