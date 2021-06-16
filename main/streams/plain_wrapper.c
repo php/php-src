@@ -838,9 +838,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 							GetSystemInfo(&info);
 							gran = info.dwAllocationGranularity;
-							loffs = ((DWORD)range->offset / gran) * gran;
-							delta = (DWORD)range->offset - loffs;
-							hoffs = range->offset >> 32;
+							ZEND_ASSERT(gran != 0 && (gran & (gran - 1)) == 0);
+							size_t rounded_offset = (range->offset / gran) * gran;
+							delta = range->offset - rounded_offset;
+							loffs = (DWORD)rounded_offset;
+							hoffs = (DWORD)(rounded_offset >> 32);
 						}
 
 						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
