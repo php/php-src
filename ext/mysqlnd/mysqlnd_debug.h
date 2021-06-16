@@ -27,8 +27,10 @@ struct st_mysqlnd_debug_methods
 	void			 (*set_mode)(MYSQLND_DEBUG * self, const char * const mode);
 	enum_func_status (*log)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							unsigned int level, const char * type, const char *message);
-	enum_func_status (*log_va)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
-							   unsigned int level, const char * type, const char *format, ...);
+	enum_func_status (*log_va)(
+		MYSQLND_DEBUG * self, unsigned int line, const char * const file,
+		unsigned int level, const char * type, const char *format, ...)
+			ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
 	bool (*func_enter)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							const char * const func_name, unsigned int func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time);

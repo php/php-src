@@ -175,7 +175,7 @@ static bool mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", ZSTR_LEN(sql), ZSTR_VAL(sql));
+	PDO_DBG_INF_FMT("sql=%.*s", (int) ZSTR_LEN(sql), ZSTR_VAL(sql));
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -410,7 +410,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	bool bval;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
@@ -486,7 +486,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 	PDO_DBG_ENTER("pdo_mysql_get_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, (char *)mysql_get_client_info());

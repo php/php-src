@@ -337,7 +337,7 @@ static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::dtor");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	conn->m->free_contents(conn);
 	conn->m->free_options(conn);
@@ -765,7 +765,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
 		}
 
-		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
+		DBG_INF_FMT("connection_id=%" PRIu64, conn->thread_id);
 
 		conn->m->local_tx_end(conn, this_func, PASS);
 		DBG_RETURN(PASS);
@@ -837,7 +837,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::query");
-	DBG_INF_FMT("conn=%p conn=%llu query=%s", conn, conn->thread_id, query);
+	DBG_INF_FMT("conn=%p conn=%" PRIu64 " query=%s", conn, conn->thread_id, query);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		if (PASS == conn->m->send_query(conn, query, query_len, MYSQLND_SEND_QUERY_IMPLICIT, NULL, NULL) &&
@@ -863,7 +863,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), send_query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::send_query");
-	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
+	DBG_INF_FMT("conn=%" PRIu64 " query=%s", conn->thread_id, query);
 	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 
 	if (type == MYSQLND_SEND_QUERY_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
@@ -889,7 +889,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), reap_query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::reap_query");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	if (type == MYSQLND_REAP_RESULT_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
@@ -916,7 +916,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const c
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::list_method");
-	DBG_INF_FMT("conn=%llu query=%s wild=%u", conn->thread_id, query, achtung_wild);
+	DBG_INF_FMT("conn=%" PRIu64 " query=%s wild=%p", conn->thread_id, query, achtung_wild);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		if (par1) {
@@ -1014,7 +1014,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn,
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), escape_string);
 	zend_ulong ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::escape_string");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		DBG_INF_FMT("server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
@@ -1037,7 +1037,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), server_dump_debug_information);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::dump_debug_info");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->command->debug(conn);
 		conn->m->local_tx_end(conn, this_func, ret);
@@ -1056,7 +1056,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::select_db");
-	DBG_INF_FMT("conn=%llu db=%s", conn->thread_id, db);
+	DBG_INF_FMT("conn=%" PRIu64 " db=%s", conn->thread_id, db);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		const MYSQLND_CSTRING database = {db, db_len};
@@ -1077,7 +1077,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::ping");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->command->ping(conn);
@@ -1097,7 +1097,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::statistic");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->command->statistics(conn, message);
@@ -1116,7 +1116,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::kill");
-	DBG_INF_FMT("conn=%llu pid=%u", conn->thread_id, pid);
+	DBG_INF_FMT("conn=%" PRIu64 " pid=%u", conn->thread_id, pid);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		const unsigned int process_id = pid;
@@ -1140,7 +1140,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_charset)(MYSQLND_CONN_DATA * const conn, c
 	const MYSQLND_CHARSET * const charset = mysqlnd_find_charset_name(csname);
 
 	DBG_ENTER("mysqlnd_conn_data::set_charset");
-	DBG_INF_FMT("conn=%llu cs=%s", conn->thread_id, csname);
+	DBG_INF_FMT("conn=%" PRIu64 " cs=%s", conn->thread_id, csname);
 
 	if (!charset) {
 		SET_CLIENT_ERROR(conn->error_info, CR_CANT_FIND_CHARSET, UNKNOWN_SQLSTATE, "Invalid character set was provided");
@@ -1174,7 +1174,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), refresh_server);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::refresh");
-	DBG_INF_FMT("conn=%llu options=%lu", conn->thread_id, options);
+	DBG_INF_FMT("conn=%" PRIu64 " options=%u", conn->thread_id, options);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->command->refresh(conn, options);
@@ -1192,7 +1192,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), shutdown_server);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::shutdown");
-	DBG_INF_FMT("conn=%llu level=%lu", conn->thread_id, level);
+	DBG_INF_FMT("conn=%" PRIu64 " level=%u", conn->thread_id, level);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->command->shutdown(conn, level);
@@ -1213,7 +1213,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 	enum mysqlnd_connection_state state = GET_CONNECTION_STATE(&conn->state);
 
 	DBG_ENTER("mysqlnd_send_close");
-	DBG_INF_FMT("conn=%llu vio->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
+	DBG_INF_FMT("conn=%" PRIu64 " vio->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 	DBG_INF_FMT("state=%u", state);
 
 	if (state >= CONN_READY) {
@@ -1272,7 +1272,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference)(MYSQLND_CONN_DATA * con
 {
 	DBG_ENTER("mysqlnd_conn_data::get_reference");
 	++conn->refcount;
-	DBG_INF_FMT("conn=%llu new_refcount=%u", conn->thread_id, conn->refcount);
+	DBG_INF_FMT("conn=%" PRIu64 " new_refcount=%u", conn->thread_id, conn->refcount);
 	DBG_RETURN(conn);
 }
 /* }}} */
@@ -1284,7 +1284,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference)(MYSQLND_CONN_DATA * co
 {
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn_data::free_reference");
-	DBG_INF_FMT("conn=%llu old_refcount=%u", conn->thread_id, conn->refcount);
+	DBG_INF_FMT("conn=%" PRIu64 " old_refcount=%u", conn->thread_id, conn->refcount);
 	if (!(--conn->refcount)) {
 		/*
 		  No multithreading issues as we don't share the connection :)
@@ -1463,7 +1463,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::next_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64 "", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
@@ -1571,7 +1571,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn_data::change_user");
-	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
+	DBG_INF_FMT("conn=%" PRIu64 " user=%s passwd=%s db=%s silent=%u",
 				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", silent == TRUE);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func)) {
@@ -1619,7 +1619,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), set_client_option);
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn_data::set_client_option");
-	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
+	DBG_INF_FMT("conn=%" PRIu64 " option=%u", conn->thread_id, option);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func)) {
 		goto end;
@@ -1786,7 +1786,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), set_client_option_2d);
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn_data::set_client_option_2d");
-	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
+	DBG_INF_FMT("conn=%" PRIu64 " option=%u", conn->thread_id, option);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func)) {
 		goto end;
@@ -1835,7 +1835,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn)
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::use_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
@@ -1877,7 +1877,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn)
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::store_result");
-	DBG_INF_FMT("conn=%llu conn=%p", conn->thread_id, conn);
+	DBG_INF_FMT("conn=%" PRIu64 " conn=%p", conn->thread_id, conn);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
@@ -2363,7 +2363,7 @@ static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn)
 {
 	DBG_ENTER("mysqlnd_conn::dtor");
-	DBG_INF_FMT("conn=%llu", conn->data->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->data->thread_id);
 
 	conn->data->m->free_reference(conn->data);
 
@@ -2383,7 +2383,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, const enum_connection
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_conn::close");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%" PRIu64, conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		if (GET_CONNECTION_STATE(&conn->state) >= CONN_READY) {
@@ -2475,7 +2475,7 @@ mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t
 		 * is not displayed.
 		 * */
 		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
-		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
+		DBG_INF_FMT("conn=%" PRIu64 " stream=%p", (*p)->data->thread_id, stream);
 		if (stream != NULL &&
 			SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) &&
 			ZEND_VALID_SOCKET(this_fd))
@@ -2508,7 +2508,7 @@ mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 
 	while (*fwd) {
 		stream = (*fwd)->data->vio->data->m.get_stream((*fwd)->data->vio);
-		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
+		DBG_INF_FMT("conn=%" PRIu64 " stream=%p", (*fwd)->data->thread_id, stream);
 		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {

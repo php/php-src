@@ -619,7 +619,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	DBG_ENTER("mysqlnd_command::handshake");
 
 	DBG_INF_FMT("stream=%p", conn->vio->data->m.get_stream(conn->vio));
-	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
+	DBG_INF_FMT("[user=%s] [db=%s:%zu] [flags=%zu]", user, db, db_len, mysql_flags);
 
 	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 

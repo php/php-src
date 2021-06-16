@@ -1506,7 +1506,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 	if (!stmt || ! conn) {
 		DBG_RETURN(NULL);
 	}
-	DBG_INF_FMT("stmt=%u field_count=%u", stmt->stmt_id, stmt->field_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " field_count=%u", stmt->stmt_id, stmt->field_count);
 
 	if (!stmt->field_count || !stmt->result || !stmt->result->meta) {
 		DBG_INF("NULL");
@@ -1618,18 +1618,20 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 
 	switch (attr_type) {
 		case STMT_ATTR_UPDATE_MAX_LENGTH:
-			*(bool *) value= stmt->update_max_length;
+			*(bool *) value = stmt->update_max_length;
+			DBG_INF_FMT("value=%d", *(bool *) value);
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
-			*(unsigned long *) value= stmt->flags;
+			*(unsigned long *) value = stmt->flags;
+			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
 			break;
 		case STMT_ATTR_PREFETCH_ROWS:
-			*(unsigned long *) value= stmt->prefetch_rows;
+			*(unsigned long *) value = stmt->prefetch_rows;
+			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
 			break;
 		default:
 			DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("value=%lu", value);
 	DBG_RETURN(PASS);
 }
 /* }}} */
