@@ -1154,10 +1154,10 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
  * Simply return 0 for everything.
  */
 static struct gfxinfo *php_handle_avif(php_stream * stream) {
-		struct gfxinfo * result;
+	struct gfxinfo * result;
 
-		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-		return result;
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	return result;
 }
 /* }}} */
 
@@ -1172,9 +1172,9 @@ static uint32_t php_ntohl(uint32_t val) {
 
     memcpy(&data, &val, sizeof(data));
     return ((uint32_t)data[3] << 0) |
-					 ((uint32_t)data[2] << 8) |
-					 ((uint32_t)data[1] << 16) | 
-					 ((uint32_t)data[0] << 24);
+			((uint32_t)data[2] << 8) |
+			((uint32_t)data[1] << 16) | 
+			((uint32_t)data[0] << 24);
 }
 /* }}} */
 
@@ -1402,7 +1402,7 @@ PHP_FUNCTION(image_type_to_extension)
 PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetype)
 {
 	char tmp[12];
-    int twelve_bytes_read;
+  int twelve_bytes_read;
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
@@ -1477,7 +1477,6 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 	}
 
 	php_gd_image_reader reader = { .stream = stream, .data = NULL, .data_pos = 0 };
-
 
 	if (!php_stream_rewind(stream) && php_is_image_avif(&reader)) {
 		return IMAGE_FILETYPE_AVIF;
