@@ -10931,6 +10931,16 @@ static int zend_jit_leave_frame(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_free_cvs(dasm_State **Dst)
+{
+	|	// EG(current_execute_data) = EX(prev_execute_data);
+	|	mov FCARG1a, EX->prev_execute_data
+	|	MEM_STORE_ZTS aword, executor_globals, current_execute_data, FCARG1a, r0
+	|	// zend_free_compiled_variables(execute_data);
+	|	EXT_CALL zend_free_compiled_variables, r0
+	return 1;
+}
+
 static int zend_jit_free_cv(dasm_State **Dst, uint32_t info, uint32_t var)
 {
 	if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {

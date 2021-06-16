@@ -4883,36 +4883,45 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
-							for (j = 0 ; j < op_array->last_var; j++) {
-								uint32_t info;
-								zend_uchar type;
-
-								info = zend_ssa_cv_info(op_array, op_array_ssa, j);
-								type = STACK_TYPE(stack, j);
-								info = zend_jit_trace_type_to_info_ex(type, info);
-								if (opline->op1_type == IS_CV
-								 && EX_VAR_TO_NUM(opline->op1.var) == j
-								 && !(op1_info & (MAY_BE_REF|MAY_BE_OBJECT))) {
-									if (JIT_G(current_frame)
-									 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
-										continue;
-									} else {
-										info |= MAY_BE_NULL;
-									}
+							if (op_array->last_var > 100) {
+								/* To many CVs to unroll */
+								if (!zend_jit_free_cvs(&dasm_state)) {
+									goto jit_failure;
 								}
-								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-									if (!left_frame) {
-										left_frame = 1;
-									    if (!zend_jit_leave_frame(&dasm_state)) {
+								left_frame = 1;
+							}
+							if (!left_frame) {
+								for (j = 0 ; j < op_array->last_var; j++) {
+									uint32_t info;
+									zend_uchar type;
+
+									info = zend_ssa_cv_info(op_array, op_array_ssa, j);
+									type = STACK_TYPE(stack, j);
+									info = zend_jit_trace_type_to_info_ex(type, info);
+									if (opline->op1_type == IS_CV
+									 && EX_VAR_TO_NUM(opline->op1.var) == j
+									 && !(op1_info & (MAY_BE_REF|MAY_BE_OBJECT))) {
+										if (JIT_G(current_frame)
+										 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+											continue;
+										} else {
+											info |= MAY_BE_NULL;
+										}
+									}
+									if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+										if (!left_frame) {
+											left_frame = 1;
+										    if (!zend_jit_leave_frame(&dasm_state)) {
+												goto jit_failure;
+										    }
+										}
+										if (!zend_jit_free_cv(&dasm_state, info, j)) {
 											goto jit_failure;
-									    }
-									}
-									if (!zend_jit_free_cv(&dasm_state, info, j)) {
-										goto jit_failure;
-									}
-									if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
-										if (info & MAY_BE_RC1) {
-											may_throw = 1;
+										}
+										if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
+											if (info & MAY_BE_RC1) {
+												may_throw = 1;
+											}
 										}
 									}
 								}
