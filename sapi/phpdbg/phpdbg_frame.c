@@ -279,7 +279,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
 			phpdbg_dump_prototype(tmp);
-			phpdbg_out(" at %s:%ld\n", Z_STRVAL_P(file), Z_LVAL_P(line));
+			phpdbg_out(" at %s:"ZEND_LONG_FMT"\n", Z_STRVAL_P(file), Z_LVAL_P(line));
 			i++;
 		} else {
 			phpdbg_out(" => ");
@@ -292,7 +292,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 	}
 
-	phpdbg_writeln("frame #%d: {main} at %s:%ld", i, Z_STRVAL_P(file), Z_LVAL_P(line));
+	phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, Z_STRVAL_P(file), Z_LVAL_P(line));
 
 	zval_ptr_dtor_nogc(&zbacktrace);
 	zend_string_release(Z_STR(startfile));

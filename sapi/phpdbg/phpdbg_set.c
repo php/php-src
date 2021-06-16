@@ -79,7 +79,7 @@ PHPDBG_SET(pagination) /* {{{ */
 PHPDBG_SET(lines) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("Lines %ld", PHPDBG_G(lines));
+		phpdbg_writeln("Lines "ZEND_ULONG_FMT, PHPDBG_G(lines));
 	} else switch (param->type) {
 		case NUMERIC_PARAM: {
 			PHPDBG_G(lines) = param->num;
@@ -105,9 +105,9 @@ PHPDBG_SET(break) /* {{{ */
 			} else {
 				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num);
 				if (brake) {
-					phpdbg_writeln("Breakpoint #%ld %s", param->num, brake->disabled ? "off" : "on");
+					phpdbg_writeln("Breakpoint #"ZEND_LONG_FMT" %s", param->num, brake->disabled ? "off" : "on");
 				} else {
-					phpdbg_error("Failed to find breakpoint #%ld", param->num);
+					phpdbg_error("Failed to find breakpoint #"ZEND_LONG_FMT, param->num);
 				}
 			}
 		} break;

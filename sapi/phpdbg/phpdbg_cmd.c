@@ -101,7 +101,7 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 		break;
 
 		case NUMERIC_PARAM:
-			ZEND_IGNORE_VALUE(asprintf(pointer, "%li", param->num));
+			ZEND_IGNORE_VALUE(asprintf(pointer, ZEND_LONG_FMT, param->num));
 		break;
 
 		case METHOD_PARAM:
@@ -110,18 +110,18 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 
 		case FILE_PARAM:
 			if (param->num) {
-				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu#%lu", param->file.name, param->file.line, param->num));
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:"ZEND_ULONG_FMT"#"ZEND_ULONG_FMT, param->file.name, param->file.line, param->num));
 			} else {
-				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu", param->file.name, param->file.line));
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:"ZEND_ULONG_FMT, param->file.name, param->file.line));
 			}
 		break;
 
 		case NUMERIC_FUNCTION_PARAM:
-			ZEND_IGNORE_VALUE(asprintf(pointer, "%s#%lu", param->str, param->num));
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s#"ZEND_ULONG_FMT, param->str, param->num));
 		break;
 
 		case NUMERIC_METHOD_PARAM:
-			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s#%lu", param->method.class, param->method.name, param->num));
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s#"ZEND_ULONG_FMT, param->method.class, param->method.name, param->num));
 		break;
 
 		default:
@@ -331,11 +331,11 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			break;
 
 			case NUMERIC_FILE_PARAM:
-				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#%lu)\n", msg, param->file.name, param->file.line);
+				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#"ZEND_ULONG_FMT")\n", msg, param->file.name, param->file.line);
 			break;
 
 			case FILE_PARAM:
-				fprintf(stderr, "%s FILE_PARAM(%s:%lu)\n", msg, param->file.name, param->file.line);
+				fprintf(stderr, "%s FILE_PARAM(%s:"ZEND_ULONG_FMT")\n", msg, param->file.name, param->file.line);
 			break;
 
 			case METHOD_PARAM:
@@ -347,11 +347,11 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			break;
 
 			case NUMERIC_FUNCTION_PARAM:
-				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%ld)\n", msg, param->str, param->num);
+				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::"ZEND_LONG_FMT")\n", msg, param->str, param->num);
 			break;
 
 			case NUMERIC_PARAM:
-				fprintf(stderr, "%s NUMERIC_PARAM(%ld)\n", msg, param->num);
+				fprintf(stderr, "%s NUMERIC_PARAM("ZEND_LONG_FMT")\n", msg, param->num);
 			break;
 
 			case COND_PARAM:
@@ -468,9 +468,9 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 		char buffer[128] = {0,};
 		const phpdbg_param_t *top = (stack != NULL) ? *stack : NULL;
 		const char *arg = command->args;
-		size_t least = 0L,
-		       received = 0L,
-		       current = 0L;
+		zend_ulong least = 0L,
+		           received = 0L,
+		           current = 0L;
 		bool optional = 0;
 
 		/* check for arg spec */
@@ -499,14 +499,14 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 
 #define verify_arg(e, a, t) if (!(a)) { \
 	if (!optional) { \
-		phpdbg_error("The command \"%s\" expected %s and got nothing at parameter %lu", \
+		phpdbg_error("The command \"%s\" expected %s and got nothing at parameter "ZEND_ULONG_FMT, \
 			phpdbg_command_name(command, buffer), \
 			(e), \
 			current); \
 		return FAILURE;\
 	} \
 } else if ((a)->type != (t)) { \
-	phpdbg_error("The command \"%s\" expected %s and got %s at parameter %lu", \
+	phpdbg_error("The command \"%s\" expected %s and got %s at parameter "ZEND_ULONG_FMT, \
 		phpdbg_command_name(command, buffer), \
 		(e),\
 		phpdbg_get_param_type((a)), \
@@ -554,7 +554,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 #undef verify_arg
 
 		if ((received < least)) {
-			phpdbg_error("The command \"%s\" expected at least %lu arguments (%s) and received %lu",
+			phpdbg_error("The command \"%s\" expected at least "ZEND_ULONG_FMT" arguments (%s) and received "ZEND_ULONG_FMT,
 				phpdbg_command_name(command, buffer),
 				least,
 				command->args,
@@ -643,7 +643,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 			}
 
 			/* ", " separated matches */
-			phpdbg_error("The command \"%s\" is ambiguous, matching %lu commands (%s)", name->str, matches, list);
+			phpdbg_error("The command \"%s\" is ambiguous, matching "ZEND_ULONG_FMT" commands (%s)", name->str, matches, list);
 			efree(list);
 
 			return NULL;

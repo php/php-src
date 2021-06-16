@@ -331,39 +331,39 @@ int phpdbg_rebuild_symtable(void) {
 	return SUCCESS;
 }
 
-PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
+PHPDBG_API uint32_t phpdbg_get_terminal_width(void) /* {{{ */
 {
-	int columns;
+	uint32_t columns;
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	columns = (uint32_t) csbi.srWindow.Right - csbi.srWindow.Left + 1;
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
-	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
+	columns = (uint32_t) ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
 #else
 	columns = 80;
 #endif
 	return columns;
 } /* }}} */
 
-PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
+PHPDBG_API uint32_t phpdbg_get_terminal_height(void) /* {{{ */
 {
-	int lines;
+	uint32_t lines;
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
 	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
-		lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		lines = (uint32_t) csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 	} else {
 		lines = 40;
 	}
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
-	lines = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_row : 40;
+	lines = (uint32_t) ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_row : 40;
 #else
 	lines = 40;
 #endif
@@ -529,7 +529,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
-					phpdbg_error("%.*s is undefined", (int) input[i] == ']' ? i + 1 : i, input);
+					phpdbg_error("%.*s is undefined", (int) (input[i] == ']' ? i + 1 : i), input);
 				}
 				return FAILURE;
 			}

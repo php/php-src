@@ -272,7 +272,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_oplog_entry *oplog_cur;               /* current oplog entry */
 
 	struct {
-		FILE *ptr;
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
 	ssize_t (*php_stdiop_write)(php_stream *, const char *, size_t);
@@ -302,7 +301,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	uint64_t flags;                              /* phpdbg flags */
 
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
-	long lines;                                  /* max number of lines to display */
+	zend_ulong lines;                                  /* max number of lines to display */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif
