@@ -40,6 +40,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
         destructors zend_destroy_file_handle() and zend_file_handle_dtor().
       - zend_ini_scanner_globals.filename now is zend_string*
   c. Added the zend_get_opcode_id() function, which is intended to get opcode id from name.
+  d. Removed support for "p" modifier (%pd, %pu, etc) in PHP's printf
+     implementations. Use ZEND_LONG_FMT and ZEND_ULONG_FMT instead.
 
 ========================
 2. Build system changes
