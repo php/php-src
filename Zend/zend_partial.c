@@ -124,7 +124,7 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 				ZEND_TYPE_FULL_MASK(info->type) &= ~_ZEND_IS_VARIADIC_BIT;
 				info++;
 			} else {
-				ZEND_ASSERT(0 && "argument out of range");
+				break;
 			}
 		} else if (Z_IS_PLACEHOLDER_VARIADIC_P(arg) || Z_ISUNDEF_P(arg)) {
 			if (offset < partial->func.common.num_args) {
@@ -546,15 +546,14 @@ void zend_partial_args_check(zend_execute_data *call) {
 	/* this is invoked by VM before the creation of zend_partial */
 	zend_function *function = call->func;
 	
-	uint32_t num = ZEND_CALL_NUM_ARGS(call) + 
-		((ZEND_CALL_INFO(call) & ZEND_CALL_VARIADIC_PLACEHOLDER) ? -1 : 0);
+	/* this check is delayed in the case of variadic application */
+	if (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER)) {
+		return;
+	}
 
+	uint32_t num = ZEND_CALL_NUM_ARGS(call);
+	
 	if (num < function->common.required_num_args) {
-		/* this check is delayed in the case of variadic application */
-		if (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER)) {
-			return;
-		}
-
 		zend_string *symbol = zend_partial_symbol_name(call, function);
 		zend_partial_args_underflow(
 			function, symbol, 
