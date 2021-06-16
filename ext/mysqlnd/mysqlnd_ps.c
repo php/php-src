@@ -80,7 +80,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	if (!stmt || !conn || !stmt->result) {
 		DBG_RETURN(NULL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	/* be compliant with libmysql - NULL will turn */
 	if (!stmt->field_count) {
@@ -150,7 +150,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	if (!stmt || !conn || !stmt->result) {
 		DBG_RETURN(NULL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	/* be compliant with libmysql - NULL will turn */
 	if (!stmt->field_count) {
@@ -230,7 +230,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s)
 	if (!stmt || !conn || !stmt->result) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING || !(UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS)) {
 		DBG_RETURN(FAIL);
@@ -268,7 +268,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s)
 	if (!pool) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	conn->payload_decoder_factory->m.init_result_field_packet(&field_packet);
 	field_packet.memory_pool = pool;
@@ -302,7 +302,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	conn->payload_decoder_factory->m.init_prepare_response_packet(&prepare_resp);
 
@@ -342,7 +342,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	conn->payload_decoder_factory->m.init_eof_packet(&fields_eof);
 	if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
@@ -380,7 +380,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 	DBG_INF_FMT("query=%s", query);
 
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->upsert_status);
@@ -659,7 +659,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->upsert_status);
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
@@ -743,7 +743,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 	if (!stmt || !conn || !stmt->result) {
 		DBG_RETURN(NULL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	if (!stmt->field_count || !mysqlnd_stmt_check_state(stmt)) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
@@ -784,7 +784,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu flags=%u", stmt->stmt_id, flags);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " flags=%u", stmt->stmt_id, flags);
 
 	if (stmt->state < MYSQLND_STMT_USER_FETCHING) {
 		/* Only initted - error */
@@ -874,7 +874,7 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, bool * const fetched
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	if (!stmt->result || stmt->state < MYSQLND_STMT_WAITING_USE_OR_STORE) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
@@ -925,7 +925,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
@@ -979,7 +979,7 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	if (stmt->stmt_id) {
 		/*
@@ -1020,7 +1020,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_no=%u data_len=%lu", stmt->stmt_id, param_no, data_length);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " param_no=%u data_len=" ZEND_ULONG_FMT, stmt->stmt_id, param_no, data_length);
 
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);
@@ -1121,7 +1121,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_count=%u", stmt->stmt_id, stmt->param_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " param_count=%u", stmt->stmt_id, stmt->param_count);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1194,7 +1194,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_no=%u param_count=%u type=%u", stmt->stmt_id, param_no, stmt->param_count, type);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " param_no=%u param_count=%u type=%u", stmt->stmt_id, param_no, stmt->param_count, type);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1250,7 +1250,7 @@ MYSQLND_METHOD(mysqlnd_stmt, refresh_bind_param)(MYSQLND_STMT * const s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_count=%u", stmt->stmt_id, stmt->param_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " param_count=%u", stmt->stmt_id, stmt->param_count);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1281,7 +1281,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu field_count=%u", stmt->stmt_id, stmt->field_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " field_count=%u", stmt->stmt_id, stmt->field_count);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1338,7 +1338,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu field_count=%u", stmt->stmt_id, stmt->field_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " field_count=%u", stmt->stmt_id, stmt->field_count);
 
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_CLIENT_ERROR(stmt->error_info, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
@@ -1559,7 +1559,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu attr_type=%u", stmt->stmt_id, attr_type);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " attr_type=%u", stmt->stmt_id, attr_type);
 
 	switch (attr_type) {
 		case STMT_ATTR_UPDATE_MAX_LENGTH:{
@@ -1614,7 +1614,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu attr_type=%u", stmt->stmt_id, attr_type);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " attr_type=%u", stmt->stmt_id, attr_type);
 
 	switch (attr_type) {
 		case STMT_ATTR_UPDATE_MAX_LENGTH:
@@ -1649,7 +1649,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s)
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	if (!stmt->result) {
 		DBG_INF("no result");
@@ -1702,7 +1702,7 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s)
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
-	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u", stmt->stmt_id, stmt->result_bind, stmt->field_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " result_bind=%p field_count=%u", stmt->stmt_id, stmt->result_bind, stmt->field_count);
 
 	if (!stmt->result_bind) {
 		DBG_VOID_RETURN;
@@ -1765,7 +1765,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s)
 	if (!stmt) {
 		DBG_VOID_RETURN;
 	}
-	DBG_INF_FMT("stmt=%lu param_bind=%p param_count=%u", stmt->stmt_id, stmt->param_bind, stmt->param_count);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT " param_bind=%p param_count=%u", stmt->stmt_id, stmt->param_bind, stmt->param_count);
 
 	/* Destroy the input bind */
 	if (stmt->param_bind) {
@@ -1804,7 +1804,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt->stmt_id);
 
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(conn->error_info);

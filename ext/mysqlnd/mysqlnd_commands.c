@@ -524,7 +524,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_ENTER("mysqlnd_command::enable_ssl");
 
-	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
+	DBG_INF_FMT("client_capability_flags=%zu", client_capabilities);
 	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", client_capabilities & CLIENT_LONG_PASSWORD? 1:0);
 	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", client_capabilities & CLIENT_FOUND_ROWS? 1:0);
 	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", client_capabilities & CLIENT_LONG_FLAG? 1:0);

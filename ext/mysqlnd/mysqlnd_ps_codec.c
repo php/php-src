@@ -334,7 +334,7 @@ ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, const unsigned int
 {
 	const zend_ulong length = php_mysqlnd_net_field_length(row);
 	DBG_ENTER("ps_fetch_string");
-	DBG_INF_FMT("len = %lu", length);
+	DBG_INF_FMT("len = " ZEND_ULONG_FMT, length);
 	DBG_INF("copying from the row buffer");
 	ZVAL_STRINGL_FAST(zv, (char *)*row, length);
 
