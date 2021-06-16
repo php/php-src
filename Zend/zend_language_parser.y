@@ -548,10 +548,10 @@ unset_variable:
 ;
 
 function_declaration_statement:
-    function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
-    backup_fn_flags function_body backup_fn_flags
-        { $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $11, $1, $4,
-            zend_ast_get_str($3), $6, NULL, $10, $8, NULL); CG(extra_fn_flags) = $9; }
+	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	backup_fn_flags function_body backup_fn_flags
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $11, $1, $4,
+			zend_ast_get_str($3), $6, NULL, $10, $8, NULL); CG(extra_fn_flags) = $9; }
 ;
 
 function_body:
