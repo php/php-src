@@ -1259,7 +1259,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		len != MYSQLND_NULL_LENGTH)
 	{
 		BAIL_IF_NO_MORE_DATA;
-		DBG_INF_FMT("Def found, length %lu", len);
+		DBG_INF_FMT("Def found, length " ZEND_ULONG_FMT, len);
 		meta->def = packet->memory_pool->get_chunk(packet->memory_pool, len + 1);
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
