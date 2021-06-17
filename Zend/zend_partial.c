@@ -442,7 +442,7 @@ void zend_partial_startup(void) {
 
 	memset(&zend_call_magic_arginfo, 0, sizeof(zend_arg_info) * 1);
 
-	zend_call_magic_arginfo[0].name = zend_string_init_interned("args", sizeof("args")-1, 1);
+	zend_call_magic_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_ARGS);
 	zend_call_magic_arginfo[0].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_IS_VARIADIC_BIT);
 }
 
@@ -477,9 +477,9 @@ static zend_always_inline zend_string* zend_partial_symbol_name(zend_execute_dat
 				*symbol;
  
 	if (scope) {
-		symbol = zend_strpprintf(0, "%s::%s", ZSTR_VAL(scope), ZSTR_VAL(name));
+		symbol = zend_create_member_string(scope, name);
 	} else {
-		symbol = zend_strpprintf(0, "%s", ZSTR_VAL(name));
+		symbol = zend_string_copy(name);
 	}
 
 	zend_string_release(name);
