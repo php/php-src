@@ -2,7 +2,7 @@
 Partial application variation extra through variadic
 --FILE--
 <?php
-function appliesCb($cb) { return runsCb($cb(1, ?, ?, ...)); } 
+function appliesCb($cb) { return runsCb($cb(1, ?, ...)); }
 
 function runsCb($cb) {
         return $cb(2, 3);

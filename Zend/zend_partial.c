@@ -545,15 +545,16 @@ static zend_always_inline void zend_partial_args_overflow(zend_function *functio
 void zend_partial_args_check(zend_execute_data *call) {
 	/* this is invoked by VM before the creation of zend_partial */
 	zend_function *function = call->func;
-	
-	/* this check is delayed in the case of variadic application */
-	if (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER)) {
-		return;
-	}
 
-	uint32_t num = ZEND_CALL_NUM_ARGS(call);
+	uint32_t num = ZEND_CALL_NUM_ARGS(call) +
+	    (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER) ? -1 : 0);
 	
 	if (num < function->common.required_num_args) {
+		/* this check is delayed in the case of variadic application */
+		if (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER)) {
+			return;
+		}
+
 		zend_string *symbol = zend_partial_symbol_name(call, function);
 		zend_partial_args_underflow(
 			function, symbol, 
