@@ -85,10 +85,8 @@ static zend_always_inline uint32_t zend_partial_signature_size(zend_partial *par
 	return count * sizeof(zend_arg_info);
 }
 
-#define ZEND_PARTIAL_SIGNATURE_SIZE(partial) zend_partial_signature_size(partial)
-
 static zend_always_inline zend_function* zend_partial_signature_create(zend_partial *partial, zend_function *prototype) {
-	zend_arg_info *signature = emalloc(ZEND_PARTIAL_SIGNATURE_SIZE(partial)), *info = signature;
+	zend_arg_info *signature = emalloc(zend_partial_signature_size(partial)), *info = signature;
 
 	memcpy(&partial->prototype, prototype, ZEND_PARTIAL_FUNC_SIZE(prototype));
 
