@@ -341,23 +341,21 @@ static HashTable *zend_partial_get_gc(zend_object *obj, zval **table, int *n)
 {
 	zend_partial *partial = (zend_partial *)obj;
 
-    if (!partial->argc) {
-        *table = Z_TYPE(partial->This) == IS_OBJECT ? &partial->This : NULL;
-	    *n = Z_TYPE(partial->This) == IS_OBJECT ? 1 : 0;
+	if (!partial->argc) {
+		*table = Z_TYPE(partial->This) == IS_OBJECT ? &partial->This : NULL;
+		*n = Z_TYPE(partial->This) == IS_OBJECT ? 1 : 0;
     } else {
-        zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
-        
-        if (Z_TYPE(partial->This) == IS_OBJECT) {
-            zend_get_gc_buffer_add_zval(buffer, &partial->This);
-        }
-        
-        for (uint32_t arg = 0; arg < partial->argc; arg++) {
-            if (Z_OPT_REFCOUNTED(partial->argv[arg])) {
-                zend_get_gc_buffer_add_zval(buffer, &partial->argv[arg]);
-            }
-        }
-        
-        zend_get_gc_buffer_use(buffer, table, n);
+		zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
+
+		if (Z_TYPE(partial->This) == IS_OBJECT) {
+			zend_get_gc_buffer_add_zval(buffer, &partial->This);
+		}
+
+		for (uint32_t arg = 0; arg < partial->argc; arg++) {
+			zend_get_gc_buffer_add_zval(buffer, &partial->argv[arg]);
+		}
+
+		zend_get_gc_buffer_use(buffer, table, n);
     }
 
 	return NULL;
