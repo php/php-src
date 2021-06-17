@@ -14118,7 +14118,7 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			op2_info = OP2_INFO();
 			return
 				opline->op1_type == IS_CV &&
-				!(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_REF)) &&
+				!(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_RESOURCE|MAY_BE_OBJECT|MAY_BE_REF)) &&
 				!(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)));
 		case ZEND_ADD:
 		case ZEND_SUB:
