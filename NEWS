@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.22
 
+- Core:
+  . Fixed bug #81145 (copy() and stream_copy_to_stream() fail for +4GB files).
+    (cmb, Nikita)
+
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
     (cmb)
