@@ -8822,6 +8822,9 @@ ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
 			GC_ADD_FLAGS(Z_OBJ(call->This), IS_OBJ_DESTRUCTOR_CALLED);
 			OBJ_RELEASE(Z_OBJ(call->This));
 		}
+	} else if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
+	          !(call->func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
+		zend_do_release_trampoline = true;
 	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
@@ -8835,8 +8838,7 @@ ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
 	}
 
 	if (zend_do_release_trampoline) {
-	    EG(trampoline).common.function_name = NULL;
-	    efree(call->func);
+	    zend_free_trampoline(call->func);
 	}
 
 	EX(call) = call->prev_execute_data;
