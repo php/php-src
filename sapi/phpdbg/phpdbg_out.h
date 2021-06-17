@@ -32,38 +32,25 @@ enum {
 	P_LOG
 };
 
-/* phpdbg uses lots of custom format specifiers, so we disable format checks by default. */
-#if defined(PHPDBG_CHECK_FORMAT_STRINGS)
-# define PHPDBG_ATTRIBUTE_FORMAT(type, idx, first) PHP_ATTRIBUTE_FORMAT(type, idx, first)
-#else
-# define PHPDBG_ATTRIBUTE_FORMAT(type, idx, first)
-#endif
-
-PHPDBG_API int phpdbg_print(int severity, int fd, const char *strfmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_print(int severity, int fd, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #define phpdbg_error(strfmt, ...)              phpdbg_print(P_ERROR  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(strfmt, ...)             phpdbg_print(P_NOTICE , PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
 #define phpdbg_writeln(strfmt, ...)            phpdbg_print(P_WRITELN, PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
 #define phpdbg_write(strfmt, ...)              phpdbg_print(P_WRITE  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
-#define phpdbg_script(type, strfmt, ...)       phpdbg_print(type     , PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
-#define phpdbg_log(fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
-#define phpdbg_out(fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
 
-#define phpdbg_error_ex(out, strfmt, ...)         phpdbg_print(P_ERROR  , out, strfmt, ##__VA_ARGS__)
-#define phpdbg_notice_ex(out, trfmt, ...)         phpdbg_print(P_NOTICE , out, strfmt, ##__VA_ARGS__)
-#define phpdbg_writeln_ex(out, strfmt, ...)       phpdbg_print(P_WRITELN, out, strfmt, ##__VA_ARGS__)
-#define phpdbg_write_ex(out, strfmt, ...)         phpdbg_print(P_WRITE  , out, strfmt, ##__VA_ARGS__)
-#define phpdbg_script_ex(out, type, strfmt, ...)  phpdbg_print(type,      out, strfmt, ##__VA_ARGS__)
-#define phpdbg_log_ex(out, strfmt, ...) phpdbg_log_internal(out, strfmt, ##__VA_ARGS__)
-#define phpdbg_out_ex(out, strfmt, ...) phpdbg_out_internal(out, strfmt, ##__VA_ARGS__)
+#define phpdbg_log(fmt, ...)                   phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_out(fmt, ...)                   phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+
+#define phpdbg_script(type, strfmt, ...)       phpdbg_print(type,      PHPDBG_G(io)[PHPDBG_STDOUT].fd, strfmt, ##__VA_ARGS__)
 
 #define phpdbg_asprintf(buf, ...) _phpdbg_asprintf(buf, ##__VA_ARGS__)
 PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...);
 
 #if PHPDBG_DEBUG
-#	define phpdbg_debug(strfmt, ...) phpdbg_log_ex(PHPDBG_G(io)[PHPDBG_STDERR].fd, strfmt, ##__VA_ARGS__)
+#	define phpdbg_debug(strfmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDERR].fd, strfmt, ##__VA_ARGS__)
 #else
 #	define phpdbg_debug(strfmt, ...)
 #endif

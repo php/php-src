@@ -43,21 +43,21 @@ void pretty_print(char *text)
 	char *new, *p, *q;
 
 	const char  *prompt_escape = phpdbg_get_prompt();
-	unsigned int prompt_escape_len = strlen(prompt_escape);
-	unsigned int prompt_len = strlen(PHPDBG_G(prompt)[0]);
+	size_t prompt_escape_len = strlen(prompt_escape);
+	size_t prompt_len = strlen(PHPDBG_G(prompt)[0]);
 
 	const char  *bold_on_escape  = PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "\033[1m" : "";
 	const char  *bold_off_escape = PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "\033[0m" : "";
-	unsigned int bold_escape_len = strlen(bold_on_escape);
+	size_t bold_escape_len = strlen(bold_on_escape);
 
-	unsigned int term_width = phpdbg_get_terminal_width();
-	unsigned int size = 0;
+	uint32_t term_width = phpdbg_get_terminal_width();
+	uint32_t size = 0;
 
 	int in_bold = 0;
 
-	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
-	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
-	unsigned int line_count = 0;          /* number printable chars on current line */
+	char *last_new_blank = NULL;  /* position in new buffer of last blank char */
+	uint32_t last_blank_count = 0;    /* printable char offset of last blank char */
+	uint32_t line_count = 0;          /* number printable chars on current line */
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -126,7 +126,7 @@ void pretty_print(char *text)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q - new) - size));
+		phpdbg_error("Output overrun of %" PRIu32 " bytes", (uint32_t) ((q - new) - size));
 	}
 
 	phpdbg_out("%s\n", new);
@@ -279,7 +279,7 @@ PHPDBG_HELP(aliases) /* {{{ */
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
-	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
+	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
 
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {

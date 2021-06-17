@@ -873,7 +873,7 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 			return count;
 		}
 		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
-			phpdbg_script_ex(PHPDBG_G(io)[PHPDBG_STDERR].fd, P_STDERR, "%.*s", (int) count, buf);
+			phpdbg_script(P_STDERR, "%.*s", (int) count, buf);
 			return count;
 		}
 		break;
@@ -881,13 +881,6 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 
 	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
-
-static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
-{
-	if (!phpdbg_active_sigsafe_mem()) {
-		fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
-	}
-} /* }}} */
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
 void phpdbg_register_file_handles(void) /* {{{ */
@@ -950,7 +943,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 	php_sapi_phpdbg_deactivate,     /* deactivate */
 
 	php_sapi_phpdbg_ub_write,       /* unbuffered write */
-	php_sapi_phpdbg_flush,          /* flush */
+	NULL,                           /* flush */
 	NULL,                           /* get uid */
 	NULL,                           /* getenv */
 
@@ -1425,7 +1418,6 @@ phpdbg_main:
 		if (show_version || show_help) {
 			/* It ain't gonna proceed to real execution anyway,
 				but the correct descriptor is needed already. */
-			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 			if (show_help) {
 				phpdbg_do_help_cmd(exec);
@@ -1532,11 +1524,9 @@ phpdbg_main:
 #endif
         zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
 
-		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
+
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
-		PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 		PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
-		PHPDBG_G(io)[PHPDBG_STDERR].ptr = stderr;
 		PHPDBG_G(io)[PHPDBG_STDERR].fd = fileno(stderr);
 
 #ifndef _WIN32
@@ -1690,7 +1680,7 @@ phpdbg_main:
 					PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 					if (bp_tmp_str) {
 						bp_tmp = strdup(bp_tmp_str);
-						efree(bp_tmp_str);
+						free(bp_tmp_str);
 					}
 					cleaning = 1;
 				} else {

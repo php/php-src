@@ -72,8 +72,8 @@ PHPDBG_API void phpdbg_set_prompt(const char*);
 PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
 /* {{{ Console size */
-PHPDBG_API int phpdbg_get_terminal_width(void);
-PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
+PHPDBG_API uint32_t phpdbg_get_terminal_width(void);
+PHPDBG_API uint32_t phpdbg_get_terminal_height(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 

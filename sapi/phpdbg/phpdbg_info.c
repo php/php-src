@@ -83,7 +83,10 @@ PHPDBG_INFO(error) /* {{{ */
 {
 	if (PG(last_error_message)) {
 		phpdbg_try_access {
-			phpdbg_writeln("Last error: %s at %s line %d", PG(last_error_message), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
+			phpdbg_writeln("Last error: %s at %s line %d",
+			    ZSTR_VAL(PG(last_error_message)),
+			    ZSTR_VAL(PG(last_error_file)),
+			    PG(last_error_lineno));
 		} phpdbg_catch_access {
 			phpdbg_notice("No error found!");
 		} phpdbg_end_try_access();
@@ -140,7 +143,7 @@ PHPDBG_INFO(constants) /* {{{ */
 					VARIABLEINFO("\nbool (false)");
 					break;
 				case IS_LONG:
-					VARIABLEINFO("\nint (%ld)", Z_LVAL(data->value));
+					VARIABLEINFO("\nint ("ZEND_LONG_FMT")", Z_LVAL(data->value));
 					break;
 				case IS_DOUBLE:
 					VARIABLEINFO("\ndouble (%lf)", Z_DVAL(data->value));
@@ -261,7 +264,7 @@ retry_switch:
 						VARIABLEINFO("\nbool (false)");
 						break;
 					case IS_LONG:
-						VARIABLEINFO("\nint (%ld)", Z_LVAL_P(data));
+						VARIABLEINFO("\nint ("ZEND_LONG_FMT")", Z_LVAL_P(data));
 						break;
 					case IS_DOUBLE:
 						VARIABLEINFO("\ndouble (%lf)", Z_DVAL_P(data));

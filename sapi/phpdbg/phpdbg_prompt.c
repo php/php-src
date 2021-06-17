@@ -145,22 +145,22 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 						break;
 
 						case NUMERIC_METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s#%ld", next->method.class, next->method.name, next->num);
+							spprintf(&buffered, 0, "%s::%s#"ZEND_LONG_FMT, next->method.class, next->method.name, next->num);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case NUMERIC_FUNCTION_PARAM:
-							spprintf(&buffered, 0, "%s#%ld", next->str, next->num);
+							spprintf(&buffered, 0, "%s#"ZEND_LONG_FMT, next->str, next->num);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:%ld", next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:"ZEND_ULONG_FMT, next->file.name, next->file.line);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#%ld", next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:#"ZEND_ULONG_FMT, next->file.name, next->file.line);
 							add_next_index_string(&params, buffered);
 						break;
 
@@ -266,9 +266,9 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 						phpdbg_activate_err_buf(0);
 						if (phpdbg_call_register(&stack) == FAILURE) {
 							if (state->init_file) {
-								phpdbg_output_err_buf("Unrecognized command in %s:%d: %s, %b!", state->init_file, state->line, input);
+								phpdbg_output_err_buf("Unrecognized command in %s:%d: %s, %s!", state->init_file, state->line, input, PHPDBG_G(err_buf).msg);
 							} else {
-								phpdbg_output_err_buf("Unrecognized command on line %d: %s, %b!", state->line, input);
+								phpdbg_output_err_buf("Unrecognized command on line %d: %s, %s!", state->line, input, PHPDBG_G(err_buf).msg);
 							}
 						}
 					break;
@@ -1372,7 +1372,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 			phpdbg_activate_err_buf(1);
 			if ((type = phpdbg_load_module_or_extension(&path, &name)) == NULL) {
-				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %b", path);
+				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %s", path, PHPDBG_G(err_buf).msg);
 			} else {
 				phpdbg_notice("Successfully loaded the %s %s at path %s", type, name, path);
 			}
@@ -1559,7 +1559,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {
 							if (PHPDBG_G(err_buf).active) {
-							    phpdbg_output_err_buf("%b");
+							    phpdbg_output_err_buf("%s", PHPDBG_G(err_buf).msg);
 							}
 						}
 					}
@@ -1843,14 +1843,20 @@ void phpdbg_force_interruption(void) /* {{{ */ {
 	if (data) {
 		if (data->func) {
 			if (ZEND_USER_CODE(data->func->type)) {
-				phpdbg_notice("Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename->val, data->opline->lineno);
+				phpdbg_notice("Current opline: %p (op #%u) in %s:%u",
+				    data->opline,
+				    (uint32_t) (data->opline - data->func->op_array.opcodes),
+				    data->func->op_array.filename->val,
+				    data->opline->lineno);
 			} else if (data->func->internal_function.function_name) {
-				phpdbg_notice("Current opline: in internal function %s", data->func->internal_function.function_name->val);
+				phpdbg_notice("Current opline: in internal function %s",
+				    data->func->internal_function.function_name->val);
 			} else {
 				phpdbg_notice("Current opline: executing internal code");
 			}
 		} else {
-			phpdbg_notice("Current opline: %p (op_array information unavailable)", data->opline);
+			phpdbg_notice("Current opline: %p (op_array information unavailable)",
+			    data->opline);
 		}
 	} else {
 		phpdbg_notice("No information available about executing context");
