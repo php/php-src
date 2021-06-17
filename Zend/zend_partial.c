@@ -23,9 +23,13 @@
 
 typedef struct _zend_partial {
 	zend_object      std;
+	/* this is the prototype generated from application */
 	zend_function    prototype;
 	zval             This;
+	/* this is the unmodified function that will be invoked at call time */
 	zend_function    func;
+	/* this will be returned by get_closure, and has arginfo of prototype
+	    and will invoke func */
 	zend_function    trampoline;
 	uint32_t         argc;
 	zval            *argv;
