@@ -1,5 +1,5 @@
 --TEST--
-Partial application errors: named parameter overwrites place holder
+Partial application errors: named parameter overwrites placeholder
 --FILE--
 <?php
 function foo($a) {
@@ -13,5 +13,5 @@ try {
 }
 ?>
 --EXPECT--
-Named parameter $a overwrites previous place holder
+Named parameter $a overwrites previous placeholder
 

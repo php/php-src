@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-too many arguments and or place holders for application of Foo::__construct, 1 given and a maximum of 0 expected
+too many arguments and or placeholders for application of Foo::__construct, 1 given and a maximum of 0 expected

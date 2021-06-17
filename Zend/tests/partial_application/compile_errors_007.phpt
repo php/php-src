@@ -1,5 +1,5 @@
 --TEST--
-Partial application compile errors: mix application with unpack (place holder before)
+Partial application compile errors: mix application with unpack (placeholder before)
 --FILE--
 <?php
 foo(..., ...["foo" => "bar"]);

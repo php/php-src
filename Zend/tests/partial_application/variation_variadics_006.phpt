@@ -1,5 +1,5 @@
 --TEST--
-Partial application variation named may overwrite variadic place holder
+Partial application variation named may overwrite variadic placeholder
 --FILE--
 <?php
 function foo($a) {

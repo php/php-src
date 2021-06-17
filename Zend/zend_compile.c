@@ -3508,24 +3508,24 @@ uint32_t zend_compile_args(
 			if (arg->attr == _IS_PLACEHOLDER_VARIADIC) {
 				if (uses_named_args) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Named arguments must come after all place holders");
+						"Named arguments must come after all placeholders");
 				}
 
 				if (uses_variadic_placeholder) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Variadic place holder may only appear once");
+						"Variadic placeholder may only appear once");
 				}
 
 				uses_variadic_placeholder = 1;
 			} else if (arg->attr == _IS_PLACEHOLDER_ARG) {
 				if (uses_named_args) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Named arguments must come after all place holders");
+						"Named arguments must come after all placeholders");
 				}
 
 				if (uses_variadic_placeholder) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"Only named arguments may follow variadic place holder");
+						"Only named arguments may follow variadic placeholder");
 				}
 			}
 
@@ -3576,7 +3576,7 @@ uint32_t zend_compile_args(
 
 			if (uses_variadic_placeholder) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Only named arguments may follow variadic place holder");
+					"Only named arguments may follow variadic placeholder");
 			}
 
 			arg_count++;

@@ -5,5 +5,5 @@ Partial application compile errors: multiple ...
 foo(..., ...);
 ?>
 --EXPECTF--
-Fatal error: Variadic place holder may only appear once in %s on line %d
+Fatal error: Variadic placeholder may only appear once in %s on line %d
 

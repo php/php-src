@@ -38,7 +38,7 @@ $foo(1, 2, 3); // OK
 ?>
 --EXPECTF--
 too many arguments for application of foo, 3 given and a maximum of 2 expected, declared in %s on line %d
-too many arguments and or place holders for application of foo, 3 given and a maximum of 2 expected, declared in %s on line %d
+too many arguments and or placeholders for application of foo, 3 given and a maximum of 2 expected, declared in %s on line %d
 too many arguments for application of bar, 3 given and a maximum of 2 expected, declared in %s on line %d
 array(3) {
   [0]=>
