@@ -308,6 +308,10 @@ PHP 8.1 UPGRADE NOTES
     implement the new methods (if you only support PHP 7.4 and higher) or
     implement both (if you support older PHP versions as well).
     RFC: https://wiki.php.net/rfc/phase_out_serializable
+  . Implicit conversion of floats to integers that result in loss of precision,
+    e.g. a truncation from 1.9 to 1, is deprecated. This affects array keys,
+    int parameter and return types, and operators working on integers.
+    RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
 
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
