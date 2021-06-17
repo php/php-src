@@ -14,14 +14,20 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump(isset($string["foo"]["bar"]));
+try {
+    var_dump(isset($string["foo"]["bar"]));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "B"
 string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
 Cannot access offset of type string on string
+
+Warning: Cannot access offset of type string in isset or empty in %s on line %d
 bool(false)

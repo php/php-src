@@ -9,11 +9,26 @@ var_dump(isset($a->b));
 $a = '0';
 var_dump(isset($a->b));
 $a = '';
-var_dump(isset($a['b']));
+
+try {
+    var_dump(isset($a['b']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 $a = 'a';
-var_dump(isset($a['b']));
+
+try {
+    var_dump(isset($a['b']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 $a = '0';
-var_dump(isset($a['b']));
+
+try {
+    var_dump(isset($a['b']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $simpleString = "Bogus String Text";
 echo isset($simpleString->wrong)?"bug\n":"ok\n";
@@ -46,10 +61,18 @@ echo $simpleString["0"] === "B"?"ok\n":"bug\n";
 bool(false)
 bool(false)
 bool(false)
+
+Warning: Cannot access offset of type string in isset or empty in %s on line %d
 bool(false)
+
+Warning: Cannot access offset of type string in isset or empty in %s on line %d
 bool(false)
+
+Warning: Cannot access offset of type string in isset or empty in %s on line %d
 bool(false)
 ok
+
+Warning: Cannot access offset of type string in isset or empty in %s on line %d
 ok
 ok
 ok
