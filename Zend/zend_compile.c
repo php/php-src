@@ -3516,7 +3516,7 @@ uint32_t zend_compile_args(
 						"Variadic placeholder may only appear once");
 				}
 
-				uses_variadic_placeholder = 1;
+				uses_variadic_placeholder = true;
 			} else if (arg->attr == _IS_PLACEHOLDER_ARG) {
 				if (uses_named_args) {
 					zend_error_noreturn(E_COMPILE_ERROR,
