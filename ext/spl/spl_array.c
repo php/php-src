@@ -578,7 +578,7 @@ static void spl_array_unset_dimension(zend_object *object, zval *offset) /* {{{ 
 	spl_array_unset_dimension_ex(1, object, offset);
 } /* }}} */
 
-static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
+static int spl_array_has_dimension_ex(bool check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	zval rv, *value = NULL, *tmp;
@@ -586,16 +586,17 @@ static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, 
 	if (check_inherited && intern->fptr_offset_has) {
 		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 
-		if (zend_is_true(&rv)) {
-			zval_ptr_dtor(&rv);
-			if (check_empty != 1) {
-				return 1;
-			} else if (intern->fptr_offset_get) {
-				value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv);
-			}
-		} else {
+		if (!zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
 			return 0;
+		}
+		zval_ptr_dtor(&rv);
+
+		/* For isset calls we don't need to check the value, so return early */
+		if (!check_empty) {
+			return 1;
+		} else if (intern->fptr_offset_get) {
+			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv);
 		}
 	}
 
@@ -615,12 +616,14 @@ static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, 
 			tmp = zend_hash_index_find(ht, key.h);
 		}
 
-		if (tmp) {
-			if (check_empty == 2) {
-				return 1;
-			}
-		} else {
+		if (!tmp) {
 			return 0;
+		}
+
+		/* check_empty is only equal to 2 if it is called from offsetExists on this class,
+		 * where it needs to report an offset exists even if the value is null */
+		if (check_empty == 2) {
+			return 1;
 		}
 
 		if (check_empty && check_inherited && intern->fptr_offset_get) {
@@ -630,18 +633,17 @@ static int spl_array_has_dimension_ex(int check_inherited, zend_object *object, 
 		}
 	}
 
-	{
-		bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
-		if (value == &rv) {
-			zval_ptr_dtor(&rv);
-		}
-		return result;
+	if (value == &rv) {
+		zval_ptr_dtor(&rv);
 	}
+
+	/* empty() check the value is not falsy, isset() only check it is not null */
+	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
 } /* }}} */
 
 static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
-	return spl_array_has_dimension_ex(1, object, offset, check_empty);
+	return spl_array_has_dimension_ex(/* check_inherited */ true, object, offset, check_empty);
 } /* }}} */
 
 /* {{{ Returns whether the requested $index exists. */
@@ -651,7 +653,7 @@ PHP_METHOD(ArrayObject, offsetExists)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
-	RETURN_BOOL(spl_array_has_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, 2));
+	RETURN_BOOL(spl_array_has_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), index, 2));
 } /* }}} */
 
 /* {{{ Returns the value at the specified $index. */
