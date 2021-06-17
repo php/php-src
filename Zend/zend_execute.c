@@ -1399,7 +1399,7 @@ try_again:
 				goto try_again;
 			default:
 				zend_illegal_string_offset(dim);
-				break;
+				return 0;
 		}
 
 		offset = zval_get_long_func(dim);
@@ -2401,7 +2401,7 @@ try_string_offset:
 					goto try_string_offset;
 				default:
 					zend_illegal_string_offset(dim);
-					break;
+					return;
 			}
 
 			offset = zval_get_long_func(dim);
