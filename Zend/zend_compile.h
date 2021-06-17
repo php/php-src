@@ -301,7 +301,7 @@ typedef struct _zend_oparray_context {
 /* loaded from file cache to process memory               |     |     |     */
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 27-30)                         |     |     |     */
+/* Function Flags (unused: 29-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -361,7 +361,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PARTIAL                 (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* trampoline is permanent                                |     |     |     */
-#define ZEND_ACC_TRAMPOLINE_PERMANENT    (1 << 29)  /*    |  X  |     |     */
+#define ZEND_ACC_TRAMPOLINE_PERMANENT    (1 << 28)  /*    |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
