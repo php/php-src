@@ -2847,6 +2847,11 @@ static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 	return 1;
 }
 
+static int zend_jit_set_ip_ex(dasm_State **Dst, const zend_op *opline, bool set_ip_reg)
+{
+	return zend_jit_set_ip(Dst, opline);
+}
+
 static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 {
 	if (delayed_call_chain) {
