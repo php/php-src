@@ -1384,7 +1384,7 @@ try_again:
 					return offset;
 				}
 				zend_illegal_string_offset(dim);
-				break;
+				return 0;
 			}
 			case IS_UNDEF:
 				ZVAL_UNDEFINED_OP2();
@@ -1399,7 +1399,7 @@ try_again:
 				goto try_again;
 			default:
 				zend_illegal_string_offset(dim);
-				break;
+				return 0;
 		}
 
 		offset = zval_get_long_func(dim);
@@ -2384,7 +2384,8 @@ try_string_offset:
 						return;
 					}
 					zend_illegal_string_offset(dim);
-					break;
+					ZVAL_NULL(result);
+					return;
 				}
 				case IS_UNDEF:
 					ZVAL_UNDEFINED_OP2();
@@ -2401,7 +2402,8 @@ try_string_offset:
 					goto try_string_offset;
 				default:
 					zend_illegal_string_offset(dim);
-					break;
+					ZVAL_NULL(result);
+					return;
 			}
 
 			offset = zval_get_long_func(dim);
