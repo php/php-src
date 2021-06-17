@@ -518,7 +518,7 @@ static zend_always_inline void zend_partial_prototype_overflow(zend_function *fu
 
 static zend_always_inline void zend_partial_args_underflow(zend_function *function, zend_string *symbol, uint32_t args, uint32_t expected, bool calling, bool prototype) {
 	const char *what = calling ?
-			"arguments" : "arguments and or placeholders";
+			"arguments" : "arguments or placeholders";
 	const char *from = prototype ?
 		   "application" : "implementation";
 	const char *limit = function->common.num_args <= function->common.required_num_args ?
