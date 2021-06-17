@@ -2491,6 +2491,10 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
 					tmp |= MAY_BE_RC1;
+					if (opline->extended_value == IS_ARRAY
+					 && (t1 & (MAY_BE_UNDEF|MAY_BE_NULL))) {
+						tmp |= MAY_BE_RCN;
+					}
 				}
 			}
 			if (opline->extended_value == IS_ARRAY) {
@@ -2500,7 +2504,7 @@ static zend_always_inline int _zend_update_type_info(
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | ((t1 & MAY_BE_ANY) ? MAY_BE_ARRAY_PACKED : 0);
+					tmp |= ((t1 & (MAY_BE_ANY - MAY_BE_NULL)) << MAY_BE_ARRAY_SHIFT) | ((t1 & (MAY_BE_ANY - MAY_BE_NULL)) ? MAY_BE_ARRAY_PACKED : 0);
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
