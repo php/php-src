@@ -67,7 +67,7 @@ static zend_arg_info zend_call_magic_arginfo[1];
 	(ZEND_CALL_INFO(partial) & flag)
 
 static zend_always_inline uint32_t zend_partial_signature_size(zend_partial *partial) {
-	uint32_t count = partial->func.common.num_args + partial->argc;
+	uint32_t count = MAX(partial->func.common.num_args, partial->argc);
 
 	if (ZEND_PARTIAL_FUNC_FLAG(&partial->func, ZEND_ACC_HAS_RETURN_TYPE)) {
 		count++;
@@ -539,7 +539,7 @@ static zend_always_inline void zend_partial_args_underflow(zend_function *functi
 
 static zend_always_inline void zend_partial_args_overflow(zend_function *function, zend_string *symbol, uint32_t args, uint32_t expected, bool calling, bool prototype) {
 	const char *what = calling ?
-			"arguments" : "arguments and or placeholders";
+			"arguments" : "arguments or placeholders";
 	const char *from = prototype ?
 		   "application" : "implementation";
 
