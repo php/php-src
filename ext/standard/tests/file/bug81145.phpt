@@ -3,6 +3,7 @@ Bug #81145 (copy() and stream_copy_to_stream() fail for +4GB files)
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_INT_SIZE !== 8) die("skip this test is for 64bit platforms only");
 if (disk_free_space(__DIR__) < 0x220000000) die("skip insuffient disk space");
 if (PHP_OS_FAMILY !== "Windows") {
     exec("fallocate -h", $output, $status);
