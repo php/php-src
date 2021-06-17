@@ -4634,7 +4634,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
 				|	MEM_ACCESS_64_WITH_UOFFSET ldr, TMP2, Rx(Z_REG(op2_addr)), Z_OFFSET(op2_addr), TMP2
 				op2_reg = ZREG_TMP2;
-			} else if (Z_MODE(op2_addr) == IS_REG) {
+			} else {
+				ZEND_ASSERT(Z_MODE(op2_addr) == IS_REG);
 				op2_reg = Z_REG(op2_addr);
 			}
 
