@@ -8833,8 +8833,7 @@ ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
 	}
 
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
-		!(call->func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 		zend_free_trampoline(call->func);
 	}
 
