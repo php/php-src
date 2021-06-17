@@ -2390,54 +2390,12 @@ try_array:
 	}
 	if (!is_list && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
-
-try_string_offset:
-		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch (Z_TYPE_P(dim)) {
-				case IS_STRING:
-				{
-					bool trailing_data = false;
-					/* For BC reasons we allow errors so that we can warn on leading numeric string */
-					if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
-							NULL, /* allow errors */ true, NULL, &trailing_data)) {
-						if (UNEXPECTED(trailing_data)) {
-							zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-						}
-						goto out;
-					}
-					if (type == BP_VAR_IS) {
-						ZVAL_NULL(result);
-						return;
-					}
-					zend_illegal_string_offset(dim);
-					ZVAL_NULL(result);
-					return;
-				}
-				case IS_UNDEF:
-					ZVAL_UNDEFINED_OP2();
-					ZEND_FALLTHROUGH;
-				case IS_DOUBLE:
-				case IS_NULL:
-				case IS_FALSE:
-				case IS_TRUE:
-					if (type != BP_VAR_IS) {
-						zend_error(E_WARNING, "String offset cast occurred");
-					}
-					break;
-				case IS_REFERENCE:
-					dim = Z_REFVAL_P(dim);
-					goto try_string_offset;
-				default:
-					zend_illegal_string_offset(dim);
-					ZVAL_NULL(result);
-					return;
-			}
-
-			offset = zval_get_long_func(dim, /* is_strict */ false);
-		} else {
-			offset = Z_LVAL_P(dim);
+		offset = zend_check_string_offset(dim, BP_VAR_IS EXECUTE_DATA_CC);
+		/* Illegal offset */
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZVAL_NULL(result);
+			return;
 		}
-		out:
 
 		if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 			if (type != BP_VAR_IS) {
@@ -2572,18 +2530,15 @@ str_offset:
 				return 0;
 			}
 		} else {
-			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
-				ZVAL_DEREF(offset);
-			/*}*/
-			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				lval = zval_get_long_ex(offset, /* is_strict */ true);
-				goto str_offset;
+			lval = zend_check_string_offset(offset, BP_VAR_R EXECUTE_DATA_CC);
+			/* Illegal offset */
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				return false;
 			}
-			return 0;
+			goto str_offset;
 		}
 	} else {
+		/* Container is invalid, TODO deprecate this? */
 		return 0;
 	}
 }
@@ -2611,18 +2566,15 @@ str_offset:
 				return 1;
 			}
 		} else {
-			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
-				ZVAL_DEREF(offset);
-			/*}*/
-			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				lval = zval_get_long_ex(offset, /* is_strict */ true);
-				goto str_offset;
+			lval = zend_check_string_offset(offset, BP_VAR_R EXECUTE_DATA_CC);
+			/* Illegal offset */
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				return true;
 			}
-			return 1;
+			goto str_offset;
 		}
 	} else {
+		/* Container is invalid, TODO deprecate this? */
 		return 1;
 	}
 }

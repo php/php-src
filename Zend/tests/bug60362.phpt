@@ -4,12 +4,17 @@ Bug #60362: non-existent sub-sub keys should not have values
 <?php
 $arr = array('exists' => 'foz');
 
-if (isset($arr['exists']['non_existent'])) {
-    echo "sub-key 'non_existent' is set: ";
-    var_dump($arr['exists']['non_existent']);
-} else {
-    echo "sub-key 'non_existent' is not set.\n";
+try {
+    if (isset($arr['exists']['non_existent'])) {
+        echo "sub-key 'non_existent' is set: ";
+        var_dump($arr['exists']['non_existent']);
+    } else {
+        echo "sub-key 'non_existent' is not set.\n";
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
+
 if (isset($arr['exists'][1])) {
     echo "sub-key 1 is set: ";
     var_dump($arr['exists'][1]);
@@ -18,11 +23,15 @@ if (isset($arr['exists'][1])) {
 }
 
 echo "-------------------\n";
-if (isset($arr['exists']['non_existent']['sub_sub'])) {
-    echo "sub-key 'sub_sub' is set: ";
-    var_dump($arr['exists']['non_existent']['sub_sub']);
-} else {
-    echo "sub-sub-key 'sub_sub' is not set.\n";
+try {
+    if (isset($arr['exists']['non_existent']['sub_sub'])) {
+        echo "sub-key 'sub_sub' is set: ";
+        var_dump($arr['exists']['non_existent']['sub_sub']);
+    } else {
+        echo "sub-sub-key 'sub_sub' is not set.\n";
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 if (isset($arr['exists'][1][0])) {
     echo "sub-sub-key 0 is set: ";
@@ -32,11 +41,15 @@ if (isset($arr['exists'][1][0])) {
 }
 
 echo "-------------------\n";
-if (empty($arr['exists']['non_existent'])) {
-    echo "sub-key 'non_existent' is empty.\n";
-} else {
-    echo "sub-key 'non_existent' is not empty: ";
-    var_dump($arr['exists']['non_existent']);
+try {
+    if (empty($arr['exists']['non_existent'])) {
+        echo "sub-key 'non_existent' is empty.\n";
+    } else {
+        echo "sub-key 'non_existent' is not empty: ";
+        var_dump($arr['exists']['non_existent']);
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 if (empty($arr['exists'][1])) {
     echo "sub-key 1 is empty.\n";
@@ -46,11 +59,15 @@ if (empty($arr['exists'][1])) {
 }
 
 echo "-------------------\n";
-if (empty($arr['exists']['non_existent']['sub_sub'])) {
-    echo "sub-sub-key 'sub_sub' is empty.\n";
-} else {
-    echo "sub-sub-key 'sub_sub' is not empty: ";
-    var_dump($arr['exists']['non_existent']['sub_sub']);
+try {
+    if (empty($arr['exists']['non_existent']['sub_sub'])) {
+        echo "sub-sub-key 'sub_sub' is empty.\n";
+    } else {
+        echo "sub-sub-key 'sub_sub' is not empty: ";
+        var_dump($arr['exists']['non_existent']['sub_sub']);
+    }
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 if (empty($arr['exists'][1][0])) {
     echo "sub-sub-key 0 is empty.\n";
@@ -61,15 +78,15 @@ if (empty($arr['exists'][1][0])) {
 echo "DONE";
 ?>
 --EXPECT--
-sub-key 'non_existent' is not set.
+Cannot access offset of type string on string
 sub-key 1 is set: string(1) "o"
 -------------------
-sub-sub-key 'sub_sub' is not set.
+Cannot access offset of type string on string
 sub-sub-key 0 is set: string(1) "o"
 -------------------
-sub-key 'non_existent' is empty.
+Cannot access offset of type string on string
 sub-key 1 is not empty: string(1) "o"
 -------------------
-sub-sub-key 'sub_sub' is empty.
+Cannot access offset of type string on string
 sub-sub-key 0 is not empty: string(1) "o"
 DONE
