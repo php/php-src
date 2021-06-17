@@ -914,7 +914,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		efp = phar_get_efp(entry, 0);
 		newcrc32 = ~0;
 
-		newcrc32 = crc32_stream_bulk_update(newcrc32, efp, entry->uncompressed_filesize);
+		crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
 
 		entry->crc32 = ~newcrc32;
 		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);

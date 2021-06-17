@@ -112,7 +112,7 @@ uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-uint32_t crc32_stream_bulk_update(uint32_t crc, php_stream *fp, size_t nr)
+int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];
@@ -121,12 +121,16 @@ uint32_t crc32_stream_bulk_update(uint32_t crc, php_stream *fp, size_t nr)
 		n = nr - handled;
 		n = (n < sizeof(buf)) ? n : sizeof(buf); /* tweak to buf size */
 
-		php_stream_read(fp, buf, n);
-		crc = crc32_bulk_update(crc, buf, n);
-		handled += n;
+		n = php_stream_read(fp, buf, n);
+		if (n > 0) {
+			*crc = crc32_bulk_update(*crc, buf, n);
+			handled += n;
+		} else { /* EOF */
+			return FAILURE;
+		}
 	}
 
-	return crc;
+	return SUCCESS;
 }
 
 /* {{{ Calculate the crc32 polynomial of a string */
