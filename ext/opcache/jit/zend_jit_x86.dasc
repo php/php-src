@@ -3053,6 +3053,24 @@ static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 	return 1;
 }
 
+static int zend_jit_set_ip_ex(dasm_State **Dst, const zend_op *opline, bool set_ip_reg)
+{
+	if (last_valid_opline == opline) {
+		zend_jit_use_last_valid_opline();
+	} else if (GCC_GLOBAL_REGS && last_valid_opline) {
+		zend_jit_use_last_valid_opline();
+		|	ADD_IP (opline - last_valid_opline) * sizeof(zend_op);
+	} else if (!GCC_GLOBAL_REGS && set_ip_reg) {
+		|	LOAD_ADDR RX, opline
+		|	mov aword EX->opline, RX
+	} else {
+		|	LOAD_IP_ADDR opline
+	}
+	zend_jit_set_last_valid_opline(opline);
+
+	return 1;
+}
+
 static int zend_jit_set_valid_ip(dasm_State **Dst, const zend_op *opline)
 {
 	if (delayed_call_chain) {

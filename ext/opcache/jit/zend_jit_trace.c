@@ -6452,11 +6452,11 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
 	if (opline) {
-		zend_jit_set_ip(&dasm_state, opline);
 		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
 			/* prevent endless loop */
 			original_handler = 1;
 		}
+		zend_jit_set_ip_ex(&dasm_state, opline, original_handler);
 	}
 
 	zend_jit_trace_return(&dasm_state, original_handler);
