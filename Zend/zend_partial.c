@@ -763,7 +763,8 @@ ZEND_NAMED_FUNCTION(zend_partial_call_magic)
 	fci.params = ecalloc(sizeof(zval), partial->argc + num_params);
 	fci.param_count = zend_partial_apply(
 		partial->argv, partial->argv + partial->argc,
-		params, params + num_params, fci.params, true);
+		params ? params : NULL,
+		params ? params + num_params : NULL, fci.params, true);
 
 	if (fci.param_count < partial->func.common.required_num_args) {
 		/* doesn't satisfy implementation */
