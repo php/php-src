@@ -1168,13 +1168,13 @@ static struct gfxinfo *php_handle_avif(php_stream * stream) {
  * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
  */
 static uint32_t php_ntohl(uint32_t val) {
-    uint8_t data[4];
+	uint8_t data[4];
 
-    memcpy(&data, &val, sizeof(data));
-    return ((uint32_t)data[3] << 0) |
-			((uint32_t)data[2] << 8) |
-			((uint32_t)data[1] << 16) | 
-			((uint32_t)data[0] << 24);
+	memcpy(&data, &val, sizeof(data));
+	return ((uint32_t)data[3] << 0) |
+		((uint32_t)data[2] << 8) |
+		((uint32_t)data[1] << 16) | 
+		((uint32_t)data[0] << 24);
 }
 /* }}} */
 
