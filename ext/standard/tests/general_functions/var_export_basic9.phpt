@@ -8,5 +8,5 @@ Bug #55082: var_export() doesn't escape properties properly
 ?>
 --EXPECT--
 (object) array(
-   '\'\\' => 7,
+  '\'\\' => 7,
 )

@@ -7,7 +7,7 @@ var_export($a);
 ?>
 --EXPECT--
 (object) array(
-   '0' => 1,
-   '1' => 3,
-   'foo' => 'bar',
+  '0' => 1,
+  '1' => 3,
+  'foo' => 'bar',
 )
