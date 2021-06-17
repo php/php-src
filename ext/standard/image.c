@@ -1471,15 +1471,15 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 		return IMAGE_FILETYPE_JP2;
 	}
 
-/* AFTER ALL ABOVE FAILED */
-	if (php_get_wbmp(stream, NULL, 1)) {
-		return IMAGE_FILETYPE_WBMP;
-	}
-
 	php_gd_image_reader reader = { .stream = stream, .data = NULL, .data_pos = 0 };
 
 	if (!php_stream_rewind(stream) && php_is_image_avif(&reader)) {
 		return IMAGE_FILETYPE_AVIF;
+	}
+
+/* AFTER ALL ABOVE FAILED */
+	if (php_get_wbmp(stream, NULL, 1)) {
+		return IMAGE_FILETYPE_WBMP;
 	}
 
 	if (!twelve_bytes_read) {
