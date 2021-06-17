@@ -3513,7 +3513,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_PARTIAL_SPEC_HANDLER(
 	zend_execute_data *call = EX(call);
 	zval *result = NULL;
 	uint32_t info = ZEND_APPLY_NORMAL;
-	bool zend_do_release_trampoline = false;
 
 	if (opline->op1_type != IS_UNUSED) {
 		result = EX_VAR(opline->op1.var);
@@ -3532,7 +3531,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_PARTIAL_SPEC_HANDLER(
 	}
 
 	if (result) {
-		zend_do_release_trampoline = zend_partial_create(result, info,
+		zend_partial_create(result, info,
 		    &call->This, call->func,
 			ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
 			ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
@@ -3542,9 +3541,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_PARTIAL_SPEC_HANDLER(
 			GC_ADD_FLAGS(Z_OBJ(call->This), IS_OBJ_DESTRUCTOR_CALLED);
 			OBJ_RELEASE(Z_OBJ(call->This));
 		}
-	} else if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
-	          !(call->func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
-		zend_do_release_trampoline = true;
 	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
@@ -3557,8 +3553,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_PARTIAL_SPEC_HANDLER(
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
 	}
 
-	if (zend_do_release_trampoline) {
-	    zend_free_trampoline(call->func);
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
+		!(call->func->common.fn_flags & ZEND_ACC_TRAMPOLINE_PERMANENT)) {
+		zend_free_trampoline(call->func);
 	}
 
 	EX(call) = call->prev_execute_data;

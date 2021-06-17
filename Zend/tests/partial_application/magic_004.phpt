@@ -1,11 +1,11 @@
 --TEST--
-Partial application magic trampoline release unused
+Partial application magic trampoline release used
 --FILE--
 <?php
 class Foo {
     static function __callStatic($name, $args) {}
 }
-Foo::method(?);
+$a = Foo::method(?);
 
 echo "OK";
 ?>
