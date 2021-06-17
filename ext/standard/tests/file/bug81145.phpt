@@ -6,8 +6,11 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (PHP_INT_SIZE !== 8) die("skip this test is for 64bit platforms only");
 if (disk_free_space(__DIR__) < 0x220000000) die("skip insuffient disk space");
 if (PHP_OS_FAMILY !== "Windows") {
-    exec("fallocate -h", $output, $status);
-    if ($status !== 0) die("skip fallocate(1) not available");
+    $src = __DIR__ . "/bug81145_src.bin";
+    define('SIZE_4G', 0x100000000);
+    exec("fallocate -l " . (SIZE_4G-0x100) . " " . escapeshellarg($src), $output, $status);
+    if ($status !== 0) die("skip fallocate() not supported");
+    @unlink(__DIR__ . "/bug81145_src.bin");
 }
 ?>
 --FILE--
