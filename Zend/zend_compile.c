@@ -6310,20 +6310,20 @@ static zend_type zend_compile_typename(
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
-			zend_string *standard_type_str = zend_type_to_string(single_type);
 
 			/* An intersection of standard types cannot exist so invalidate it */
 			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
+				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
+				zend_string_release_ex(standard_type_str, false);
 			}
 			/* Check for "self" and "parent" too */
-			if (zend_string_equals_literal_ci(standard_type_str, "self")
-					|| zend_string_equals_literal_ci(standard_type_str, "parent")) {
+			if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(single_type), "self")
+					|| zend_string_equals_literal_ci(ZEND_TYPE_NAME(single_type), "parent")) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
+					"Type %s cannot be part of an intersection type", ZSTR_VAL(ZEND_TYPE_NAME(single_type)));
 			}
-			zend_string_release_ex(standard_type_str, false);
 
 			/* Add type to the type list */
 			type_list->types[type_list->num_types++] = single_type;
