@@ -336,7 +336,7 @@ PHPAPI char *GetSMErrorText(int index)
 /* strtok_r like, but recognizes quoted-strings */
 static char *find_address(char *list, char **state)
 {
-	zend_bool in_quotes = 0;
+	bool in_quotes = 0;
 	char *p = list;
 
 	if (list == NULL) {
@@ -1013,7 +1013,7 @@ static unsigned long GetAddr(LPSTR szHost)
 /* returns the contents of an angle-addr (caller needs to efree) or NULL */
 static char *get_angle_addr(char *address)
 {
-	zend_bool in_quotes = 0;
+	bool in_quotes = 0;
 	char *p1 = address, *p2;
 
 	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {

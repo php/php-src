@@ -1431,8 +1431,8 @@ static void zend_get_gc_buffer_release(void);
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
-	zend_bool should_rerun_gc = 0;
-	zend_bool did_rerun_gc = 0;
+	bool should_rerun_gc = 0;
+	bool did_rerun_gc = 0;
 
 rerun_gc:
 	if (GC_G(num_roots)) {
