@@ -840,31 +840,25 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 static zend_always_inline zend_class_entry* zend_resolve_ce(
 		zend_property_info *info, zend_type *type) {
 	zend_class_entry *ce;
-	if (UNEXPECTED(ZEND_TYPE_HAS_NAME(*type))) {
-		zend_string *name = ZEND_TYPE_NAME(*type);
+	zend_string *name = NULL;
 
-		if (ZSTR_HAS_CE_CACHE(name)) {
-			ce = ZSTR_GET_CE_CACHE(name);
-			if (!ce) {
-				ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-				if (UNEXPECTED(!ce)) {
-					/* Cannot resolve */
-					return NULL;
-				}
-			}
-		} else {
-			ce = resolve_single_class_type(name, info->ce);
-			if (!ce) {
-				/* Cannot resolve */
-				return NULL;
-			}
-			if (!(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-				zend_string_release(name);
-				ZEND_TYPE_SET_CE(*type, ce);
-			}
+	if (UNEXPECTED(!ZEND_TYPE_HAS_NAME(*type))) {
+		return ZEND_TYPE_CE(*type);
+	}
+
+	name = ZEND_TYPE_NAME(*type);
+
+	if (ZSTR_HAS_CE_CACHE(name)) {
+		ce = ZSTR_GET_CE_CACHE(name);
+		if (!ce) {
+			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		}
 	} else {
-		ce = ZEND_TYPE_CE(*type);
+		ce = resolve_single_class_type(name, info->ce);
+		if (ce && !(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+			zend_string_release(name);
+			ZEND_TYPE_SET_CE(*type, ce);
+		}
 	}
 	return ce;
 }
