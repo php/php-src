@@ -309,6 +309,38 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 	return new_object;
 }
 
+static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
+{
+	try_again:
+	switch (Z_TYPE_P(offset)) {
+		case IS_STRING: {
+			zend_ulong index;
+			if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), index)) {
+				return (zend_long) index;
+			}
+			break;
+		}
+		case IS_DOUBLE:
+			return zend_dval_to_lval_safe(Z_DVAL_P(offset));
+		case IS_LONG:
+			return Z_LVAL_P(offset);
+		case IS_FALSE:
+			return 0;
+		case IS_TRUE:
+			return 1;
+		case IS_REFERENCE:
+			offset = Z_REFVAL_P(offset);
+			goto try_again;
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)",
+				Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			return Z_RES_HANDLE_P(offset);
+	}
+
+	zend_type_error("Illegal offset type");
+	return 0;
+}
+
 static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset)
 {
 	zend_long index;
@@ -316,17 +348,17 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
 	if (!offset) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return NULL;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return NULL;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
@@ -368,17 +400,17 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 
 	if (!offset) {
 		/* '$array[] = value' syntax is not supported */
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
@@ -410,13 +442,13 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 {
 	zend_long index;
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
@@ -439,28 +471,24 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 	spl_fixedarray_object_unset_dimension_helper(intern, offset);
 }
 
-static int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, int check_empty)
+static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, bool check_empty)
 {
 	zend_long index;
-	int retval;
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return false;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		retval = 0;
-	} else {
-		if (check_empty) {
-			retval = zend_is_true(&intern->array.elements[index]);
-		} else {
-			retval = Z_TYPE(intern->array.elements[index]) != IS_NULL;
-		}
+		return false;
 	}
 
-	return retval;
+	if (check_empty) {
+		return zend_is_true(&intern->array.elements[index]);
+	}
+
+	return Z_TYPE(intern->array.elements[index]) != IS_NULL;
 }
 
 static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty)
