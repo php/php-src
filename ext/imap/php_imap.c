@@ -3025,7 +3025,7 @@ PHP_FUNCTION(imap_fetch_overview)
 }
 /* }}} */
 
-static zend_bool header_injection(zend_string *str, zend_bool adrlist)
+static bool header_injection(zend_string *str, bool adrlist)
 {
 	char *p = ZSTR_VAL(str);
 

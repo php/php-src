@@ -31,7 +31,7 @@ ini_set('pcre.backtrack_limit', 10000000);
 $API_params = array(
     'a' => array('zval**'), // array
     'A' => array('zval**'), // array or object
-    'b' => array('zend_bool*'), // boolean
+    'b' => array('bool*'), // boolean
     'd' => array('double*'), // double
     'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
     'h' => array('HashTable**'), // array as an HashTable*
@@ -238,7 +238,7 @@ function check_function($name, $txt, $offset)
                     // nullable arguments
                     case '!':
                         if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
-                            check_param($params, ++$j, 'zend_bool*', $optional);
+                            check_param($params, ++$j, 'bool*', $optional);
                         }
                     break;
 

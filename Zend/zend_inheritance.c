@@ -55,7 +55,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status);
 
-static void zend_type_copy_ctor(zend_type *type, zend_bool persistent) {
+static void zend_type_copy_ctor(zend_type *type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *old_list = ZEND_TYPE_LIST(*type);
 		size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
