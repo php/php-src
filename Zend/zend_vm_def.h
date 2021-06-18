@@ -8829,14 +8829,14 @@ ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
 		zend_array_release(call->extra_named_params);
 	}
 
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 		OBJ_RELEASE(Z_OBJ(call->This));
 	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
-	}
-
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_free_trampoline(call->func);
 	}
 
 	EX(call) = call->prev_execute_data;
