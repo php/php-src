@@ -21,29 +21,15 @@ function bar(X&Y $o): void {
     var_dump($o);
 }
 
-try {
-    $o = foo();
-    var_dump($o);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+$o = foo();
+var_dump($o);
 
 $c = new Collection();
 $a = new A();
 
-try {
-    $c->intersect = $a;
-    echo 'OK', \PHP_EOL;
-} catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    bar($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
+$c->intersect = $a;
+echo 'OK', \PHP_EOL;
+bar($a);
 ?>
 --EXPECT--
 object(A)#1 (0) {
