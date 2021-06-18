@@ -126,7 +126,7 @@ static zend_always_inline zend_function* zend_partial_signature_create(zend_part
 				ZEND_TYPE_FULL_MASK(info->type) &= ~_ZEND_IS_VARIADIC_BIT;
 				info++;
 			} else {
-				break;
+				ZEND_ASSERT(0);
 			}
 		} else if (Z_IS_PLACEHOLDER_VARIADIC_P(arg) || Z_ISUNDEF_P(arg)) {
 			if (offset < partial->func.common.num_args) {
