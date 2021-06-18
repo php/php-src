@@ -311,13 +311,13 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 
 static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
-	zend_ulong idx;
+	zend_long index;
 
 	try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
-			if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), idx)) {
-				return idx;
+			if (IS_LONG == is_numeric_str_function(Z_STR_P(offset), &index, NULL)) {
+				return index;
 			}
 			break;
 		case IS_DOUBLE:
@@ -332,9 +332,13 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			offset = Z_REFVAL_P(offset);
 			goto try_again;
 		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)",
+				Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			return Z_RES_HANDLE_P(offset);
-		}
-	return -1;
+	}
+
+	zend_type_error("Illegal offset type");
+	return 0;
 }
 
 static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset)
@@ -348,13 +352,13 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 		return NULL;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return NULL;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
@@ -400,13 +404,13 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 		return;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
@@ -438,13 +442,13 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 {
 	zend_long index;
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
+		// TODO Change error message and use OutOfBound SPL Exception?
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
@@ -472,10 +476,9 @@ static int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *int
 	zend_long index;
 	int retval;
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset);
-	} else {
-		index = Z_LVAL_P(offset);
+	index = spl_offset_convert_to_long(offset);
+	if (EG(exception)) {
+		return 0;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
