@@ -961,7 +961,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
 
-ZEND_API bool zend_value_instanceof_static(zval *zv) {
+static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return 0;
 	}
@@ -973,8 +973,48 @@ ZEND_API bool zend_value_instanceof_static(zval *zv) {
 	return instanceof_function(Z_OBJCE_P(zv), called_scope);
 }
 
-static zend_always_inline bool zend_check_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
+/* The cache_slot may only be NULL in debug builds, where arginfo verification of
+ * internal functions is enabled. Avoid unnecessary checks in release builds. */
+#if ZEND_DEBUG
+# define HAVE_CACHE_SLOT (cache_slot != NULL)
+#else
+# define HAVE_CACHE_SLOT 1
+#endif
+
+static zend_always_inline zend_class_entry* zend_fetch_ce_from_cache_slot(void **cache_slot, zend_type *type)
+{
+	zend_class_entry *ce;
+
+	if (EXPECTED(HAVE_CACHE_SLOT && *cache_slot)) {
+		ce = (zend_class_entry *) *cache_slot;
+	} else {
+		zend_string *name = ZEND_TYPE_NAME(*type);
+
+		if (ZSTR_HAS_CE_CACHE(name)) {
+			ce = ZSTR_GET_CE_CACHE(name);
+			if (!ce) {
+				ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				if (UNEXPECTED(!ce)) {
+					/* Cannot resolve */
+					return NULL;
+				}
+			}
+		} else {
+			ce = zend_fetch_class(name,
+				ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
+			if (UNEXPECTED(!ce)) {
+				return NULL;
+			}
+		}
+		if (HAVE_CACHE_SLOT) {
+			*cache_slot = (void *) ce;
+		}
+	}
+	return ce;
+}
+
+ZEND_API bool zend_check_type_slow(
+		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
 {
 	uint32_t type_mask;
@@ -1070,7 +1110,7 @@ static zend_always_inline bool zend_check_type(
 		return 1;
 	}
 
-	return zend_check_type_slow(type, arg, ref, cache_slot, scope, is_return_type, is_internal);
+	return zend_check_type_slow(type, arg, ref, cache_slot, is_return_type, is_internal);
 }
 
 static zend_always_inline bool zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)

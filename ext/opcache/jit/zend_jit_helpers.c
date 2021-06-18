@@ -1320,73 +1320,6 @@ check_indirect:
 	return ref;
 }
 
-static zend_always_inline bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
-{
-	uint32_t type_mask;
-
-	if (ZEND_TYPE_IS_COMPLEX(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
-		zend_class_entry *ce;
-		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			zend_type *list_type;
-			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-					/* If we cannot resolve the CE we cannot check if it satisfies
-					 * the type constraint, fail. */
-					if (ce == NULL) {
-						return false;
-					}
-					if (!instanceof_function(Z_OBJCE_P(arg), ce)) {
-						return false;
-					}
-					cache_slot++;
-				} ZEND_TYPE_LIST_FOREACH_END();
-				return true;
-			} else {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-					/* If we cannot resolve the CE we cannot check if it satisfies
-					 * the type constraint, check the next one. */
-					if (ce == NULL) {
-						cache_slot++;
-						continue;
-					}
-					if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-						return 1;
-					}
-					cache_slot++;
-				} ZEND_TYPE_LIST_FOREACH_END();
-			}
-		} else {
-			ce = zend_fetch_ce_from_cache_slot(cache_slot, &arg_info->type);
-			/* If we cannot resolve the CE we cannot check if it satisfies
-			 * the type constraint, check if a standard type satisfies it. */
-			if (ce == NULL) {
-				goto builtin_types;
-			}
-			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return 1;
-			}
-		}
-	}
-
-builtin_types:
-	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
-	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
-		return 1;
-	}
-	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
-		return 1;
-	}
-	return 0;
-}
-
 static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
@@ -1394,7 +1327,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 	void **cache_slot = CACHE_ADDR(opline->extended_value);
 	bool ret;
 
-	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
+	ret = zend_check_type_slow(&arg_info->type, arg, /* ref */ NULL, cache_slot,
+		/* is_return_type */ false, /* is_internal */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return 0;
@@ -1404,7 +1338,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 
 static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
-	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
+	if (UNEXPECTED(!zend_check_type_slow(&arg_info->type, arg, /* ref */ NULL, cache_slot,
+			/* is_return_type */ true, /* is_internal */ false))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }
