@@ -343,10 +343,10 @@ static HashTable *zend_partial_get_gc(zend_object *obj, zval **table, int *n)
 {
 	zend_partial *partial = (zend_partial *)obj;
 
-	if (!partial->argc) {
+	if (!partial->argc && !partial->named) {
 		*table = Z_TYPE(partial->This) == IS_OBJECT ? &partial->This : NULL;
 		*n = Z_TYPE(partial->This) == IS_OBJECT ? 1 : 0;
-    } else {
+	} else {
 		zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
 
 		if (Z_TYPE(partial->This) == IS_OBJECT) {
@@ -357,8 +357,16 @@ static HashTable *zend_partial_get_gc(zend_object *obj, zval **table, int *n)
 			zend_get_gc_buffer_add_zval(buffer, &partial->argv[arg]);
 		}
 
+		if (partial->named) {
+			zval named;
+
+			ZVAL_ARR(&named, partial->named);
+
+			zend_get_gc_buffer_add_zval(buffer, &named);
+		}
+
 		zend_get_gc_buffer_use(buffer, table, n);
-    }
+	}
 
 	return NULL;
 }
