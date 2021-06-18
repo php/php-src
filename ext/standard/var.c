@@ -764,15 +764,16 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 }
 /* }}} */
 
-static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function *fn, zval *retval) /* {{{ */
+static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
 {
 	zend_result res;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zval retval;
 
 	fci.size = sizeof(fci);
 	fci.object = obj;
-	fci.retval = retval;
+	fci.retval = &retval;
 	fci.param_count = 0;
 	fci.params = NULL;
 	fci.named_params = NULL;
@@ -786,18 +787,18 @@ static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function 
 	res = zend_call_function(&fci, &fci_cache);
 	BG(serialize_lock)--;
 
-	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
-		zval_ptr_dtor(retval);
-		return FAILURE;
+	if (res == FAILURE || Z_ISUNDEF(retval)) {
+		zval_ptr_dtor(&retval);
+		return NULL;
 	}
 
-	if (!HASH_OF(retval)) {
-		zval_ptr_dtor(retval);
+	if (Z_TYPE(retval) != IS_ARRAY) {
+		zval_ptr_dtor(&retval);
 		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
-		return FAILURE;
+		return NULL;
 	}
 
-	return SUCCESS;
+	return Z_ARRVAL(retval);
 }
 /* }}} */
 
@@ -864,7 +865,7 @@ static int php_var_serialize_get_sleep_props(
 	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
 	/* TODO: Rewrite this by fetching the property info instead of trying out different
 	 * name manglings? */
-	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+	ZEND_HASH_FOREACH_VAL_IND(sleep_retval, name_val) {
 		zend_string *name, *tmp_name, *priv_name, *prot_name;
 
 		ZVAL_DEREF(name_val);
@@ -977,10 +978,11 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 }
 /* }}} */
 
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, php_serialize_data_t var_hash) /* {{{ */
 {
 	HashTable props;
-	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
+
+	if (php_var_serialize_get_sleep_props(&props, struc, ht) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
 			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
@@ -1158,10 +1160,11 @@ again:
 					zval *zv = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP), 1);
 
 					if (zv) {
-						zval retval, tmp;
+						HashTable *ht;
+						zval tmp;
 
 						ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
-						if (php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv), &retval) == FAILURE) {
+						if (!(ht = php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv)))) {
 							if (!EG(exception)) {
 								/* we should still add element even if it's not OK,
 								 * since we already wrote the length of the array before */
@@ -1171,8 +1174,8 @@ again:
 							return;
 						}
 
-						php_var_serialize_class(buf, &tmp, &retval, var_hash);
-						zval_ptr_dtor(&retval);
+						php_var_serialize_class(buf, &tmp, ht, var_hash);
+						zend_array_release(ht);
 						OBJ_RELEASE(Z_OBJ(tmp));
 						return;
 					}
