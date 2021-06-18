@@ -387,6 +387,7 @@ static int zend_partial_get_closure(zend_object *obj, zend_class_entry **ce_ptr,
 
 	*fptr_ptr = &partial->trampoline;
 	*obj_ptr  = (zend_object*) &partial->std;
+	*ce_ptr = Z_TYPE(partial->This) == IS_OBJECT ? Z_OBJCE(partial->This) : NULL;
 
 	return SUCCESS;
 }
