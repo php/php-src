@@ -264,11 +264,11 @@ static zend_always_inline zend_object* zend_partial_new(zend_class_entry *type, 
 
 static zend_always_inline void zend_partial_debug_add(zend_function *function, HashTable *ht, zend_arg_info *info, zval *value) {
 	if (function->type == ZEND_USER_FUNCTION || ZEND_PARTIAL_FUNC_FLAG(function, ZEND_ACC_USER_ARG_INFO)) {
-		zend_hash_add(ht, info->name, value);
+		zend_hash_add_new(ht, info->name, value);
 	} else {
 		zend_internal_arg_info *internal = (zend_internal_arg_info*) info;
 
-		zend_hash_str_add(ht, internal->name, strlen(internal->name), value);
+		zend_hash_str_add_new(ht, internal->name, strlen(internal->name), value);
 	}
 }
 
@@ -286,17 +286,13 @@ static zend_always_inline void zend_partial_debug_fill(zend_partial *partial, Ha
 
 		if (arg < aend) {
 			if (Z_IS_NOT_PLACEHOLDER_P(arg)) {
-				ZVAL_COPY_VALUE(&param, arg);
+				ZVAL_COPY(&param, arg);
 			}
-
 			arg++;
 		}
 
 		zend_partial_debug_add(&partial->func, ht, info, &param);
 
-		if (Z_OPT_REFCOUNTED(param)) {
-			Z_ADDREF(param);
-		}
 		info++;
 	}
 
@@ -311,11 +307,8 @@ static zend_always_inline void zend_partial_debug_fill(zend_partial *partial, Ha
 			if (Z_IS_NOT_PLACEHOLDER_P(arg)) {
 				zend_hash_next_index_insert(Z_ARRVAL(variadics), arg);
 
-				if (Z_OPT_REFCOUNTED_P(arg)) {
-					Z_ADDREF_P(arg);
-				}
+				Z_TRY_ADDREF_P(arg);
 			}
-
 			arg++;
 		}
 
