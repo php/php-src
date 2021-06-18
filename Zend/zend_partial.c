@@ -273,10 +273,11 @@ static zend_always_inline void zend_partial_debug_add(zend_function *function, H
 }
 
 static zend_always_inline void zend_partial_debug_fill(zend_partial *partial, HashTable *ht) {
-	zval *arg = partial->argv,
-		 *aend = arg + partial->argc;
-	zend_arg_info *info = partial->func.common.arg_info,
-				  *iend = info + partial->func.common.num_args;
+	zval *arg = partial->argv;
+	zval *aend = arg + partial->argc;
+
+	zend_arg_info *info = partial->func.common.arg_info;
+	zend_arg_info *iend = info + partial->func.common.num_args;
 
 	while (info < iend) {
 		zval param;
