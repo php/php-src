@@ -825,7 +825,7 @@ static int php_var_serialize_get_sleep_props(
 	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
 	/* TODO: Rewrite this by fetching the property info instead of trying out different
 	 * name manglings? */
-	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+	ZEND_HASH_FOREACH_VAL_IND(sleep_retval, name_val) {
 		zend_string *name, *tmp_name, *priv_name, *prot_name;
 
 		ZVAL_DEREF(name_val);
