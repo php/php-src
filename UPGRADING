@@ -312,6 +312,7 @@ PHP 8.1 UPGRADE NOTES
     e.g. a truncation from 1.9 to 1, is deprecated. This affects array keys,
     int parameter and return types, and operators working on integers.
     RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
+  . returning a non-array from __sleep will raise a warning
 
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver

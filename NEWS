@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha2
 
+- Core:
+  . Fixed bug #81163 (__sleep allowed to return non-array). (krakjoe)
+
 - Opcache:
   . Fixed bug #81133 (building opcache with phpize fails). (krakjoe)
   . Fixed bug #81136 (opcache header not installed). (krakjoe)
