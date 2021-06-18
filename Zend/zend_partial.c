@@ -239,7 +239,7 @@ static zend_always_inline void zend_partial_trampoline_create(zend_partial *part
 	trampoline->common = partial->prototype.common;
 	trampoline->type = ZEND_INTERNAL_FUNCTION;
 	trampoline->internal_function.fn_flags =
-		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_TRAMPOLINE_PERMANENT | (partial->func.common.fn_flags & keep_flags);
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PARTIAL | ZEND_ACC_TRAMPOLINE_PERMANENT | (partial->prototype.common.fn_flags & keep_flags);
 	if (partial->func.type != ZEND_INTERNAL_FUNCTION || (partial->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		trampoline->internal_function.fn_flags |=
 			ZEND_ACC_USER_ARG_INFO;
@@ -580,11 +580,11 @@ void zend_partial_args_check(zend_execute_data *call) {
 
 		zend_string *symbol = zend_partial_symbol_name(call, function);
 		zend_partial_args_underflow(
-			function, symbol, 
+			function, symbol,
 			num, function->common.required_num_args, false, true);
 		zend_string_release(symbol);
 	} else if (num > function->common.num_args && 
-			!ZEND_PARTIAL_FUNC_FLAG(call->func, ZEND_ACC_VARIADIC)) {
+			!ZEND_PARTIAL_FUNC_FLAG(function, ZEND_ACC_VARIADIC)) {
 		zend_string *symbol = zend_partial_symbol_name(call, function);
 		zend_partial_args_overflow(
 			function, symbol,
