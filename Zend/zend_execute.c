@@ -1005,18 +1005,9 @@ static zend_always_inline bool zend_check_type_slow(
 			} else {
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-					/* If we cannot resolve the CE we cannot check if it satisfies
-					 * the type constraint, check the next one. */
-					if (ce == NULL) {
-						if (HAVE_CACHE_SLOT) {
-							cache_slot++;
-						}
-						continue;
-					}
-
-					/* Perform actual type check */
+					/* Perform actual type check if we have a CE */
 					/* Instance of a single type part of a union is sufficient to pass the type check */
-					if (instanceof_function(Z_OBJCE_P(arg), ce)) {
+					if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
 						return true;
 					}
 					if (HAVE_CACHE_SLOT) {
@@ -1026,19 +1017,14 @@ static zend_always_inline bool zend_check_type_slow(
 			}
 		} else {
 			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
-			/* If we cannot resolve the CE we cannot check if it satisfies
-			 * the type constraint, check if a standard type satisfies it. */
-			if (ce == NULL) {
-				goto builtin_types;
-			}
-
-			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return 1;
+			/* If we have a CE we check if it satisfies the type constraint,
+			 * otherwise it will check if a standard type satisfies it. */
+			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+				return true;
 			}
 		}
 	}
 
-builtin_types:
 	type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
 		return 1;
