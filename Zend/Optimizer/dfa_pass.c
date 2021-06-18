@@ -317,7 +317,7 @@ static inline bool can_elide_return_type_check(
 				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
 				zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
 				zend_string_release(lcname);
-				if (ce && safe_instanceof(use_info->ce, ce)) {
+				if (ce && ZEND_TYPE_IS_UNION(arg_info->type) && safe_instanceof(use_info->ce, ce)) {
 					/* One of the class union types matched. */
 					return true;
 				}
