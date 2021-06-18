@@ -3541,6 +3541,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_PARTIAL_SPEC_HANDLER(
 			GC_ADD_FLAGS(Z_OBJ(call->This), IS_OBJ_DESTRUCTOR_CALLED);
 			OBJ_RELEASE(Z_OBJ(call->This));
 		}
+	} else {
+	    zend_vm_stack_free_args(call);
 	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {

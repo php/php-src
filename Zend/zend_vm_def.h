@@ -8821,6 +8821,8 @@ ZEND_VM_HANDLER(203, ZEND_DO_FCALL_PARTIAL, ANY, ANY)
 			GC_ADD_FLAGS(Z_OBJ(call->This), IS_OBJ_DESTRUCTOR_CALLED);
 			OBJ_RELEASE(Z_OBJ(call->This));
 		}
+	} else {
+	    zend_vm_stack_free_args(call);
 	}
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {

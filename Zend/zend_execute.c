@@ -1159,7 +1159,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 static zend_always_inline bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
 	if (fbc->internal_function.handler == ZEND_FN(pass) ||
-	    fbc->internal_function.handler == zend_partial_call_magic) {
+		fbc->internal_function.handler == zend_partial_call_magic) {
 		/* Be lenient about the special pass functions. */
 		return 0;
 	}
@@ -3835,6 +3835,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
 					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_FCALL_PARTIAL:
 						level++;
 						break;
 					case ZEND_INIT_FCALL:
@@ -3871,6 +3872,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_SEND_ARRAY:
 					case ZEND_SEND_UNPACK:
 					case ZEND_CHECK_UNDEF_ARGS:
+					case ZEND_CHECK_PARTIAL_ARGS:
 						if (level == 0) {
 							do_exit = 1;
 						}
@@ -3890,6 +3892,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:
 						case ZEND_DO_FCALL_BY_NAME:
+						case ZEND_DO_FCALL_PARTIAL:
 							level++;
 							break;
 						case ZEND_INIT_FCALL:
@@ -3912,9 +3915,6 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 
 			zend_vm_stack_free_args(EX(call));
 
-			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-				OBJ_RELEASE(Z_OBJ(call->This));
-			}
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 				zend_free_extra_named_params(call->extra_named_params);
 			}
@@ -3923,6 +3923,9 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				zend_string_release_ex(call->func->common.function_name, 0);
 				zend_free_trampoline(call->func);
+			}
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+				OBJ_RELEASE(Z_OBJ(call->This));
 			}
 
 			EX(call) = call->prev_execute_data;
@@ -4511,7 +4514,7 @@ zval * ZEND_FASTCALL zend_handle_named_arg(
 		arg = ZEND_CALL_VAR_NUM(call, arg_offset);
 
 		if (UNEXPECTED(Z_TYPE_P(arg) == _IS_PLACEHOLDER_VARIADIC)) {
-		    ZVAL_UNDEF(arg);
+			ZVAL_UNDEF(arg);
 		}
 
 		if (UNEXPECTED(!Z_ISUNDEF_P(arg))) {
