@@ -304,11 +304,15 @@ static zend_always_inline void zend_partial_debug_fill(zend_partial *partial, Ha
 		zend_partial_debug_add(&partial->func, ht, info, &variadics);
 
 		while (arg < aend) {
-			if (Z_IS_NOT_PLACEHOLDER_P(arg)) {
-				zend_hash_next_index_insert(Z_ARRVAL(variadics), arg);
+			zval param;
 
-				Z_TRY_ADDREF_P(arg);
+			ZVAL_NULL(&param);
+
+			if (Z_IS_NOT_PLACEHOLDER_P(arg)) {
+				ZVAL_COPY(&param, arg);
 			}
+
+			zend_hash_next_index_insert(Z_ARRVAL(variadics), &param);
 			arg++;
 		}
 
@@ -565,7 +569,7 @@ void zend_partial_args_check(zend_execute_data *call) {
 	zend_function *function = call->func;
 
 	uint32_t num = ZEND_CALL_NUM_ARGS(call) +
-	    (ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER) ? -1 : 0);
+		(ZEND_PARTIAL_CALL_FLAG(call, ZEND_CALL_VARIADIC_PLACEHOLDER) ? -1 : 0);
 	
 	if (num < function->common.required_num_args) {
 		/* this check is delayed in the case of variadic application */

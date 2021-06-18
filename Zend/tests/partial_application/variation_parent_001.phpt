@@ -33,7 +33,9 @@ object(Closure)#%d (3) {
     ["b"]=>
     int(20)
     ["c"]=>
-    array(0) {
+    array(1) {
+      [0]=>
+      NULL
     }
   }
 }

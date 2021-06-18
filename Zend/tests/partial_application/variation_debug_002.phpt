@@ -27,7 +27,7 @@ object(Closure)#%d (2) {
       int(3)
     }
     ["arrays"]=>
-    array(2) {
+    array(3) {
       [0]=>
       array(3) {
         [0]=>
@@ -37,6 +37,8 @@ object(Closure)#%d (2) {
         [2]=>
         int(6)
       }
+      [1]=>
+      NULL
       ["four"]=>
       object(stdClass)#%d (0) {
       }
