@@ -471,27 +471,24 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 	spl_fixedarray_object_unset_dimension_helper(intern, offset);
 }
 
-static int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, int check_empty)
+static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, bool check_empty)
 {
 	zend_long index;
-	int retval;
 
 	index = spl_offset_convert_to_long(offset);
 	if (EG(exception)) {
-		return 0;
+		return false;
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		retval = 0;
-	} else {
-		if (check_empty) {
-			retval = zend_is_true(&intern->array.elements[index]);
-		} else {
-			retval = Z_TYPE(intern->array.elements[index]) != IS_NULL;
-		}
+		return false;
 	}
 
-	return retval;
+	if (check_empty) {
+		return zend_is_true(&intern->array.elements[index]);
+	}
+
+	return Z_TYPE(intern->array.elements[index]) != IS_NULL;
 }
 
 static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty)
