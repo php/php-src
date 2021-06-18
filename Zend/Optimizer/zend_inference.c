@@ -2210,29 +2210,40 @@ static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 	return result_mask;
 }
 
-ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
+static uint32_t zend_convert_type(const zend_script *script, zend_type type, zend_class_entry **pce)
 {
-	uint32_t tmp;
+	if (pce) {
+		*pce = NULL;
+	}
 
-	*pce = NULL;
-	if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+	if (!ZEND_TYPE_IS_SET(type)) {
 		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
 	}
 
-	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	uint32_t tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(type));
+	if (ZEND_TYPE_HAS_CLASS(type)) {
 		tmp |= MAY_BE_OBJECT;
-		/* As we only have space to store one CE, we use a plain object type for class unions. */
-		if (ZEND_TYPE_HAS_NAME(arg_info->type)) {
-			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
-			*pce = zend_optimizer_get_class_entry(script, lcname);
-			zend_string_release_ex(lcname, 0);
+		if (pce) {
+			/* As we only have space to store one CE,
+			 * we use a plain object type for class unions. */
+			if (ZEND_TYPE_HAS_CE(type)) {
+				*pce = ZEND_TYPE_CE(type);
+			} else if (ZEND_TYPE_HAS_NAME(type)) {
+				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
+				*pce = zend_optimizer_get_class_entry(script, lcname);
+				zend_string_release_ex(lcname, 0);
+			}
 		}
 	}
 	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	return tmp;
+}
+
+ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
+{
+	return zend_convert_type(script, arg_info->type, pce);
 }
 
 static zend_property_info *lookup_prop_info(zend_class_entry *ce, zend_string *name, zend_class_entry *scope) {
@@ -2323,29 +2334,14 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 
 static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_info *prop_info, zend_class_entry **pce)
 {
-	if (pce) {
-		*pce = NULL;
-	}
-	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
-		uint32_t type = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
-		if (ZEND_TYPE_HAS_CLASS(prop_info->type)) {
-			type |= MAY_BE_OBJECT;
-			if (pce) {
-				if (ZEND_TYPE_HAS_CE(prop_info->type)) {
-					*pce = ZEND_TYPE_CE(prop_info->type);
-				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
-					zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-					*pce = zend_optimizer_get_class_entry(script, lcname);
-					zend_string_release(lcname);
-				}
-			}
+	if (!prop_info) {
+		if (pce) {
+			*pce = NULL;
 		}
-		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			type |= MAY_BE_RC1 | MAY_BE_RCN;
-		}
-		return type;
+		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
 	}
-	return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
+
+	return zend_convert_type(script, prop_info->type, pce);
 }
 
 static zend_always_inline int _zend_update_type_info(
