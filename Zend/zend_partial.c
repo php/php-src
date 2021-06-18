@@ -457,7 +457,7 @@ void zend_partial_startup(void) {
 static zend_always_inline zend_string* zend_partial_function_name(zend_function *function) {
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
 		if (function->internal_function.handler == zend_pass_function.handler) {
-			return zend_strpprintf(0, "__construct");
+			return zend_string_init("__construct", sizeof("__construct")-1, 0);
 		}
 	}
 	return zend_string_copy(function->common.function_name);
