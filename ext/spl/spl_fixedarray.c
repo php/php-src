@@ -311,15 +311,15 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 
 static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
-	zend_long index;
-
 	try_again:
 	switch (Z_TYPE_P(offset)) {
-		case IS_STRING:
-			if (IS_LONG == is_numeric_str_function(Z_STR_P(offset), &index, NULL)) {
-				return index;
+		case IS_STRING: {
+			zend_ulong index;
+			if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), index)) {
+				return (zend_long) index;
 			}
 			break;
+		}
 		case IS_DOUBLE:
 			return zend_dval_to_lval_safe(Z_DVAL_P(offset));
 		case IS_LONG:
