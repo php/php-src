@@ -348,7 +348,7 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
 	if (!offset) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return NULL;
 	}
 
@@ -400,7 +400,7 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 
 	if (!offset) {
 		/* '$array[] = value' syntax is not supported */
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_error(NULL, "[] operator not supported for SplFixedArray");
 		return;
 	}
 
