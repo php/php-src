@@ -18,5 +18,5 @@ class bar extends foo
 serialize(new bar());
 ?>
 --EXPECTF--
-Notice: serialize(): "private" returned as member variable from __sleep() but does not exist in %s on line %d
+Warning: serialize(): "private" returned as member variable from __sleep() but does not exist in %s on line %d
 
