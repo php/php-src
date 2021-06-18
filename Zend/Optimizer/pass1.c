@@ -238,12 +238,9 @@ constant_binary_op:
 						zend_string_equals_ci(Z_STR(ZEND_OP1_LITERAL(opline)), op_array->scope->name)) {
 						ce = op_array->scope;
 					} else {
-						if ((ce = zend_hash_find_ptr(EG(class_table),
-								Z_STR(op_array->literals[opline->op1.constant + 1]))) == NULL ||
-								(ce->type == ZEND_INTERNAL_CLASS &&
-								 ce->info.internal.module->type != MODULE_PERSISTENT) ||
-								(ce->type == ZEND_USER_CLASS &&
-								 ce->info.user.filename != op_array->filename)) {
+						ce = zend_optimizer_get_class_entry(
+							ctx->script, Z_STR(op_array->literals[opline->op1.constant + 1]));
+						if (!ce) {
 							break;
 						}
 					}

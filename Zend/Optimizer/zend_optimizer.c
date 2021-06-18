@@ -754,24 +754,26 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 	}
 }
 
+zend_class_entry *zend_optimizer_get_class_entry(const zend_script *script, zend_string *lcname) {
+	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
+	if (ce) {
+		return ce;
+	}
+
+	ce = zend_hash_find_ptr(CG(class_table), lcname);
+	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
+		return ce;
+	}
+
+	return NULL;
+}
+
 static zend_class_entry *get_class_entry_from_op1(
 		zend_script *script, zend_op_array *op_array, zend_op *opline) {
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
-			zend_string *class_name = Z_STR_P(op1 + 1);
-			zend_class_entry *ce;
-			if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
-				return ce;
-			} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
-				if (ce->type == ZEND_INTERNAL_CLASS) {
-					return ce;
-				} else if (ce->type == ZEND_USER_CLASS &&
-						   ce->info.user.filename &&
-						   ce->info.user.filename == op_array->filename) {
-					return ce;
-				}
-			}
+			return zend_optimizer_get_class_entry(script, Z_STR_P(op1 + 1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)

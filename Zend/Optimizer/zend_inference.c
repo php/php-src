@@ -22,6 +22,7 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_worklist.h"
+#include "zend_optimizer_internal.h"
 
 /* The used range inference algorithm is described in:
  *     V. Campos, R. Rodrigues, I. de Assis Costa and F. Pereira.
@@ -2189,20 +2190,6 @@ static uint32_t binary_op_result_type(
 	return tmp;
 }
 
-static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) {
-	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
-	if (ce) {
-		return ce;
-	}
-
-	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
-		return ce;
-	}
-
-	return NULL;
-}
-
 static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 	uint32_t result_mask = type_mask & MAY_BE_ANY;
 	if (type_mask & MAY_BE_VOID) {
@@ -2238,7 +2225,7 @@ ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_i
 		/* As we only have space to store one CE, we use a plain object type for class unions. */
 		if (ZEND_TYPE_HAS_NAME(arg_info->type)) {
 			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
-			*pce = get_class_entry(script, lcname);
+			*pce = zend_optimizer_get_class_entry(script, lcname);
 			zend_string_release_ex(lcname, 0);
 		}
 	}
@@ -2320,7 +2307,7 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 			}
 		} else if (opline->op2_type == IS_CONST) {
 			zval *zv = CRT_CONSTANT(opline->op2);
-			ce = get_class_entry(script, Z_STR_P(zv + 1));
+			ce = zend_optimizer_get_class_entry(script, Z_STR_P(zv + 1));
 		}
 
 		if (ce) {
@@ -2348,7 +2335,7 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 					*pce = ZEND_TYPE_CE(prop_info->type);
 				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
 					zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-					*pce = get_class_entry(script, lcname);
+					*pce = zend_optimizer_get_class_entry(script, lcname);
 					zend_string_release(lcname);
 				}
 			}
@@ -3106,7 +3093,7 @@ static zend_always_inline int _zend_update_type_info(
 			} else if (opline->op2_type == IS_CONST) {
 				zval *zv = CRT_CONSTANT(opline->op2);
 				if (Z_TYPE_P(zv) == IS_STRING) {
-					ce = get_class_entry(script, Z_STR_P(zv+1));
+					ce = zend_optimizer_get_class_entry(script, Z_STR_P(zv+1));
 					UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
 				} else {
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->result_def);
@@ -3118,7 +3105,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_NEW:
 			tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_OBJECT;
 			if (opline->op1_type == IS_CONST &&
-			    (ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1))) != NULL) {
+			    (ce = zend_optimizer_get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
 			} else if ((t1 & MAY_BE_CLASS) && ssa_op->op1_use >= 0 && ssa_var_info[ssa_op->op1_use].ce) {
 				UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_op->op1_use].ce, ssa_var_info[ssa_op->op1_use].is_instanceof, ssa_op->result_def);
