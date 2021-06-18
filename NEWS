@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81145 (copy() and stream_copy_to_stream() fail for +4GB files).
     (cmb, Nikita)
+  . Fixed bug #81163 (incorrect handling of indirect vars in __sleep).
+    (krakjoe)
 
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
