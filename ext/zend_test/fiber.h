@@ -23,6 +23,7 @@ typedef struct _zend_test_fiber zend_test_fiber;
 
 struct _zend_test_fiber {
 	zend_object std;
+	uint8_t flags;
 	zend_fiber_context context;
 	zend_fiber_context *caller;
 	zend_fiber_context *previous;

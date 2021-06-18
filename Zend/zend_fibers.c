@@ -343,7 +343,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 	to->status = ZEND_FIBER_STATUS_RUNNING;
 
-	if (from->status == ZEND_FIBER_STATUS_RUNNING) {
+	if (EXPECTED(from->status == ZEND_FIBER_STATUS_RUNNING)) {
 		from->status = ZEND_FIBER_STATUS_SUSPENDED;
 	}
 
@@ -381,11 +381,6 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	if (to->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(to);
 	}
-
-	/* Propagate bailout to current fiber / main. */
-	if (UNEXPECTED(to->flags & ZEND_FIBER_FLAG_BAILOUT)) {
-		zend_bailout();
-	}
 }
 
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
@@ -400,6 +395,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	}
 
 	EG(vm_stack) = NULL;
+	transfer->flags = 0;
 
 	zend_first_try {
 		zend_vm_stack stack = zend_vm_stack_new_page(ZEND_FIBER_VM_STACK_SIZE, NULL);
@@ -427,10 +423,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zval_ptr_dtor(&fiber->fci.function_name);
 
 		if (EG(exception)) {
-			if (!(fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED)
+			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
 				|| !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))
 			) {
-				fiber->context.flags |= ZEND_FIBER_FLAG_THREW;
+				fiber->flags |= ZEND_FIBER_FLAG_THREW;
 				transfer->flags = ZEND_FIBER_TRANSFER_FLAG_ERROR;
 
 				ZVAL_OBJ_COPY(&transfer->value, EG(exception));
@@ -441,7 +437,8 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 			ZVAL_COPY(&transfer->value, &fiber->result);
 		}
 	} zend_catch {
-		fiber->context.flags |= ZEND_FIBER_FLAG_BAILOUT;
+		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
+		transfer->flags = ZEND_FIBER_TRANSFER_FLAG_BAILOUT;
 	} zend_end_try();
 
 	transfer->context = fiber->caller;
@@ -485,6 +482,11 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 	}
 
 	zend_fiber_switch_context(&transfer);
+
+	/* Forward bailout into current fiber. */
+	if (UNEXPECTED(transfer.flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT)) {
+		zend_bailout();
+	}
 
 	return transfer;
 }
@@ -538,7 +540,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
-	fiber->context.flags |= ZEND_FIBER_FLAG_DESTROYED;
+	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
@@ -639,7 +641,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED)) {
+	if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 		RETURN_THROWS();
 	}
@@ -656,7 +658,7 @@ ZEND_METHOD(Fiber, suspend)
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
 
-	if (fiber->context.flags & ZEND_FIBER_FLAG_DESTROYED) {
+	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
 		// This occurs when the fiber is GC'ed while suspended.
 		zval_ptr_dtor(&transfer.value);
 		zend_throw_graceful_exit();
@@ -777,9 +779,9 @@ ZEND_METHOD(Fiber, getReturn)
 	fiber = (zend_fiber *) Z_OBJ_P(getThis());
 
 	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
-		if (fiber->context.flags & ZEND_FIBER_FLAG_THREW) {
+		if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
 			message = "The fiber threw an exception";
-		} else if (fiber->context.flags & ZEND_FIBER_FLAG_BAILOUT) {
+		} else if (fiber->flags & ZEND_FIBER_FLAG_BAILOUT) {
 			message = "The fiber exited with a fatal error";
 		} else {
 			RETURN_COPY(&fiber->result);

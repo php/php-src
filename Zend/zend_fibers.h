@@ -45,6 +45,7 @@ typedef enum {
 
 typedef enum {
 	ZEND_FIBER_TRANSFER_FLAG_ERROR = 1 << 0,
+	ZEND_FIBER_TRANSFER_FLAG_BAILOUT = 1 << 1
 } zend_fiber_transfer_flag;
 
 void zend_register_fiber_ce(void);
@@ -61,8 +62,10 @@ typedef struct _zend_fiber_stack zend_fiber_stack;
 typedef struct _zend_fiber_transfer {
 	/* Fiber that will be switched to / has resumed us. */
 	zend_fiber_context *context;
+
 	/* Value to that should be send to (or was received from) a fiber. */
 	zval value;
+
 	/* Bitmask of flags defined in enum zend_fiber_transfer_flag. */
 	uint8_t flags;
 } zend_fiber_transfer;
@@ -74,18 +77,28 @@ typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 struct _zend_fiber_context {
 	/* Handle to fiber state as needed by boost.context */
 	void *handle;
+
 	/* Pointer that identifies the fiber type. */
 	void *kind;
+
+	/* Entrypoint function of the fiber. */
 	zend_fiber_coroutine function;
+
+	/* Assigned C stack. */
 	zend_fiber_stack *stack;
+
+	/* Fiber status. */
 	zend_fiber_status status;
-	uint8_t flags;
 };
 
 struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
 
+	/* Flags are defined in enum zend_fiber_flag. */
+	uint8_t flags;
+
+	/* Native C fiber context. */
 	zend_fiber_context context;
 
 	/* Fiber that resumed us. */
