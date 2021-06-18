@@ -35,6 +35,8 @@
 
 #define ZEND_WRONG_PROPERTY_OFFSET   0
 
+static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
+
 /* guard flags */
 #define IN_GET		(1<<0)
 #define IN_SET		(1<<1)
@@ -1125,6 +1127,13 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
+static zend_always_inline zend_arg_info* zend_get_call_trampoline_arginfo() {
+	if (UNEXPECTED(zend_call_trampoline_arginfo[0].name == NULL)) {
+		zend_call_trampoline_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_ARGS);
+	}
+	return zend_call_trampoline_arginfo;
+}
+
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
 	size_t mname_len;
@@ -1134,7 +1143,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
-	static const zend_arg_info arg_info[1] = {{0}};
 
 	ZEND_ASSERT(fbc);
 
@@ -1172,7 +1180,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	func->prototype = NULL;
 	func->num_args = 0;
 	func->required_num_args = 0;
-	func->arg_info = (zend_arg_info *) arg_info;
+	func->arg_info = zend_get_call_trampoline_arginfo();
 
 	return (zend_function*)func;
 }
