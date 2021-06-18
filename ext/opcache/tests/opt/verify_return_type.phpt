@@ -47,6 +47,10 @@ class Test3 {
     }
 }
 
+function getClassUnion(): stdClass|FooBar {
+    return new stdClass;
+}
+
 ?>
 --EXPECTF--
 $_main:
@@ -54,6 +58,16 @@ $_main:
      ; (after optimizer)
      ; %s
 0000 RETURN int(1)
+
+getClassUnion:
+     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (after optimizer)
+     ; %s
+0000 V0 = NEW 0 string("stdClass")
+0001 DO_FCALL
+0002 RETURN V0
+LIVE RANGES:
+     0: 0001 - 0002 (new)
 
 Test1::getIntOrFloat:
      ; (lines=2, args=1, vars=1, tmps=0)
