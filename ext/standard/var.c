@@ -791,7 +791,7 @@ static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function 
 		return FAILURE;
 	}
 
-	if (!HASH_OF(retval)) {
+	if (Z_TYPE_P(retval) != IS_ARRAY) {
 		zval_ptr_dtor(retval);
 		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
 		return FAILURE;
@@ -980,7 +980,8 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
 {
 	HashTable props;
-	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
+
+	if (php_var_serialize_get_sleep_props(&props, struc, Z_ARRVAL_P(retval_ptr)) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
 			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
