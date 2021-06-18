@@ -82,19 +82,6 @@ struct _zend_fiber_context {
 	uint8_t flags;
 };
 
-/* Zend VM state that needs to be captured / restored during fiber context switch. */
-typedef struct _zend_fiber_vm_state {
-	zend_vm_stack vm_stack;
-	zval *vm_stack_top;
-	zval *vm_stack_end;
-	size_t vm_stack_page_size;
-	zend_execute_data *current_execute_data;
-	int error_reporting;
-	uint32_t jit_trace_num;
-	JMP_BUF *bailout;
-	zend_fiber *active_fiber;
-} zend_fiber_vm_state;
-
 struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
@@ -142,32 +129,6 @@ static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context
 static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber *fiber)
 {
 	return &fiber->context;
-}
-
-static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
-{
-	state->vm_stack = EG(vm_stack);
-	state->vm_stack_top = EG(vm_stack_top);
-	state->vm_stack_end = EG(vm_stack_end);
-	state->vm_stack_page_size = EG(vm_stack_page_size);
-	state->current_execute_data = EG(current_execute_data);
-	state->error_reporting = EG(error_reporting);
-	state->jit_trace_num = EG(jit_trace_num);
-	state->bailout = EG(bailout);
-	state->active_fiber = EG(active_fiber);
-}
-
-static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
-{
-	EG(vm_stack) = state->vm_stack;
-	EG(vm_stack_top) = state->vm_stack_top;
-	EG(vm_stack_end) = state->vm_stack_end;
-	EG(vm_stack_page_size) = state->vm_stack_page_size;
-	EG(current_execute_data) = state->current_execute_data;
-	EG(error_reporting) = state->error_reporting;
-	EG(jit_trace_num) = state->jit_trace_num;
-	EG(bailout) = state->bailout;
-	EG(active_fiber) = state->active_fiber;
 }
 
 #endif
