@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
     (cmb)
 
+- PCRE:
+  . Fixed bug #81101 (PCRE2 10.37 shows unexpected result). (Anatol)
+
 17 Jun 2021, PHP 8.0.8
 
 - Core:
