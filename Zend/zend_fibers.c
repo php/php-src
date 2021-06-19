@@ -388,6 +388,9 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
+	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
+	ZEND_ASSERT(!transfer->flags && "No flags should be set on initial transfer");
+
 	zend_fiber *fiber = EG(active_fiber);
 
 	/* Determine the current error_reporting ini setting. */
@@ -398,7 +401,6 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	}
 
 	EG(vm_stack) = NULL;
-	transfer->flags = 0;
 
 	zend_first_try {
 		zend_vm_stack stack = zend_vm_stack_new_page(ZEND_FIBER_VM_STACK_SIZE, NULL);
@@ -436,8 +438,6 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 			}
 
 			zend_clear_exception();
-		} else {
-			ZVAL_COPY(&transfer->value, &fiber->result);
 		}
 	} zend_catch {
 		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
@@ -454,17 +454,12 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
 static zend_always_inline void zend_fiber_delegate_transfer_result(
-	zend_fiber *fiber, zend_fiber_transfer *transfer, INTERNAL_FUNCTION_PARAMETERS
+	zend_fiber_transfer *transfer, INTERNAL_FUNCTION_PARAMETERS
 ) {
 	if (transfer->flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
 		/* Use internal throw to skip the Throwable-check that would fail for (graceful) exit. */
 		zend_throw_exception_internal(Z_OBJ(transfer->value));
 		RETURN_THROWS();
-	}
-
-	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
-		zval_ptr_dtor(&transfer->value);
-		RETURN_NULL();
 	}
 
 	RETURN_COPY_VALUE(&transfer->value);
@@ -625,7 +620,7 @@ ZEND_METHOD(Fiber, start)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
-	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, suspend)
@@ -668,7 +663,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, resume)
@@ -697,7 +692,7 @@ ZEND_METHOD(Fiber, resume)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, value, false);
 
-	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, throw)
@@ -725,7 +720,7 @@ ZEND_METHOD(Fiber, throw)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, exception, true);
 
-	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, isStarted)
