@@ -812,9 +812,6 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 	HashTable	*input_params = NULL;
-#ifndef MYSQLI_USE_MYSQLND
-	unsigned int	i;
-#endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|h!", &mysql_stmt, mysqli_stmt_class_entry, &input_params) == FAILURE) {
 		RETURN_THROWS();
@@ -823,12 +820,10 @@ PHP_FUNCTION(mysqli_stmt_execute)
 
 	// bind-in-execute
 	if (input_params) {
-#if defined(MYSQLI_USE_MYSQLND)
 		zval *tmp;
 		unsigned int index;
 		unsigned int hash_num_elements;
 		unsigned int param_count;
-		MYSQLND_PARAM_BIND	*params;
 
 		if (!zend_array_is_list(input_params)) {
 			zend_argument_value_error(ERROR_ARG_POS(2), "must be a list array");
@@ -842,6 +837,8 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			RETURN_THROWS();
 		}
 
+#if defined(MYSQLI_USE_MYSQLND)
+		MYSQLND_PARAM_BIND	*params;
 		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
 		ZEND_ASSERT(params);
 
@@ -854,15 +851,51 @@ PHP_FUNCTION(mysqli_stmt_execute)
 
 		if (mysqlnd_stmt_bind_param(stmt->stmt, params)) {
 			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-			RETVAL_FALSE;
+			RETURN_FALSE;
 		}
 #else
-		zend_argument_count_error("Binding parameters in execute is not supported with libmysqlclient");
-		RETURN_THROWS();
+		MYSQL_BIND		*bind;
+		unsigned long	rc;
+
+		/* prevent leak if variables are already bound */
+		if (stmt->param.var_cnt) {
+			php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
+		}
+
+		stmt->param.is_null = ecalloc(hash_num_elements, sizeof(char));
+		bind = (MYSQL_BIND *) ecalloc(hash_num_elements, sizeof(MYSQL_BIND));
+
+		for (index = 0; index < hash_num_elements; index++) {
+			/* set specified type */
+			bind[index].buffer_type = MYSQL_TYPE_VAR_STRING;
+			/* don't initialize buffer and buffer_length because we use ecalloc */
+			bind[index].is_null = &stmt->param.is_null[index];
+
+			index++;
+		}
+		rc = mysql_stmt_bind_param(stmt->stmt, bind);
+		if (rc) {
+			efree(stmt->param.is_null);
+			efree(bind);
+			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+			RETURN_FALSE;
+		}
+
+		stmt->param.var_cnt = hash_num_elements;
+		stmt->param.vars = safe_emalloc(hash_num_elements, sizeof(zval), 0);
+		index = 0;
+		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
+			ZVAL_COPY_VALUE(&stmt->param.vars[index], tmp);
+			index++;
+		} ZEND_HASH_FOREACH_END();
+
+		efree(bind);
 #endif
 	}
 
 #ifndef MYSQLI_USE_MYSQLND
+	unsigned int	i;
+
 	if (stmt->param.var_cnt) {
 		int j;
 		for (i = 0; i < stmt->param.var_cnt; i++) {
