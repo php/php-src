@@ -31,6 +31,8 @@
 #include "mbfilter_euc_kr.h"
 #include "unicode_table_uhc.h"
 
+static int mbfl_filt_conv_euckr_wchar_flush(mbfl_convert_filter *filter);
+
 static const unsigned char mblen_table_euckr[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -69,7 +71,7 @@ const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_euckr_wchar_flush,
 	NULL,
 };
 
@@ -85,8 +87,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-int
-mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, w, flag;
 
@@ -94,13 +95,11 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 	case 0:
 		if (c >= 0 && c < 0x80) { /* latin */
 			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff && c != 0xc9) { /* dbcs lead byte */
+		} else if (((c >= 0xA1 && c <= 0xAC) || (c >= 0xB0 && c <= 0xFD)) && c != 0xC9) { /* dbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
@@ -114,7 +113,7 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 			flag = 2;
 		}
 		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
-			if (flag == 1){ /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
+			if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
 				w = (c1 - 0xa1)*190 + (c - 0x41);
 				if (w >= 0 && w < uhc2_ucs_table_size) {
 					w = uhc2_ucs_table[w];
@@ -131,18 +130,11 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_KSC5601;
+				w = (c1 << 8) | c | MBFL_WCSPLANE_KSC5601;
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) { /* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
@@ -154,10 +146,9 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
-mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 {
-	int c1, c2, s = 0;
+	int s = 0;
 
 	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
 		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
@@ -175,24 +166,19 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
 	}
 
-	c1 = (s >> 8) & 0xff;
-	c2 = s & 0xff;
 	/* exclude UHC extension area (although we are using the UHC conversion tables) */
-	if (c1 < 0xa1 || c2 < 0xa1) {
-		s = c;
+	if (((s >> 8) & 0xFF) < 0xA1 || (s & 0xFF) < 0xA1) {
+		s = 0;
 	}
 
 	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_KSC5601) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-		if (c == 0) {
-			s = 0;
-		} else if (s <= 0) {
+		if (c < 0x80) {
+			s = c;
+		} else {
 			s = -1;
 		}
 	}
+
 	if (s >= 0) {
 		if (s < 0x80) { /* latin */
 			CK((*filter->output_function)(s, filter->data));
@@ -205,4 +191,18 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_euckr_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status == 1) {
+		/* 2-byte character was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
