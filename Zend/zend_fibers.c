@@ -174,7 +174,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	if (!pointer) {
 		DWORD err = GetLastError();
 		char *errmsg = php_win32_error_to_msg(err);
-		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: VirtualAlloc failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
+		zend_throw_exception_ex(NULL, 0, "Fiber stack allocate failed: VirtualAlloc failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
 		php_win32_error_msg_free(errmsg);
 		return NULL;
 	}
@@ -185,7 +185,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	if (!VirtualProtect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PAGE_READWRITE | PAGE_GUARD, &protect)) {
 		DWORD err = GetLastError();
 		char *errmsg = php_win32_error_to_msg(err);
-		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
+		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
 		php_win32_error_msg_free(errmsg);
 		VirtualFree(pointer, 0, MEM_RELEASE);
 		return NULL;
@@ -195,13 +195,13 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	pointer = mmap(NULL, alloc_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
 
 	if (pointer == MAP_FAILED) {
-		zend_throw_exception_ex(NULL, 0, "Fiber make context failed: mmap failed: %s (%d)", strerror(errno), errno);
+		zend_throw_exception_ex(NULL, 0, "Fiber stack allocate failed: mmap failed: %s (%d)", strerror(errno), errno);
 		return NULL;
 	}
 
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
-		zend_throw_exception_ex(NULL, 0, "Fiber protect stack failed: mmap failed: %s (%d)", strerror(errno), errno);
+		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: mprotect failed: %s (%d)", strerror(errno), errno);
 		munmap(pointer, alloc_size);
 		return NULL;
 	}
@@ -253,7 +253,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
 #endif
 
-	/* Get a hold of the context that resumed us and update it's handle to allow for symmetric coroutines. */
+	/* Get a hold of the context that resumed us and update its handle to allow for symmetric coroutines. */
 	from->handle = data.handle;
 
 	/* Initialize transfer struct with a copy of passed data. */
@@ -309,6 +309,9 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 	context->kind = kind;
 	context->function = coroutine;
 
+	// Set status in case memory has not been zeroed.
+	context->status = ZEND_FIBER_STATUS_INIT;
+
 	return true;
 }
 
@@ -323,7 +326,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	zend_fiber_context *to = transfer->context;
 	zend_fiber_vm_state state;
 
-	ZEND_ASSERT(to && to->handle && "Invalid fiber context");
+	ZEND_ASSERT(to && to->handle && to->status != ZEND_FIBER_STATUS_DEAD && "Invalid fiber context");
 	ZEND_ASSERT(from && "From fiber context must be present");
 	ZEND_ASSERT(to != from && "Cannot switch into the running fiber context");
 
@@ -365,7 +368,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
 	*transfer = *data.transfer;
 
-	/* Get a hold of the context that resumed us and update it's handle to allow for symmetric coroutines. */
+	/* Get a hold of the context that resumed us and update its handle to allow for symmetric coroutines. */
 	to = transfer->context;
 	to->handle = data.handle;
 
@@ -377,7 +380,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 	zend_fiber_restore_vm_state(&state);
 
-	/* Destroy context first to ensure it does not leak if some extension does custom bailout handling. */
+	/* Destroy prior context if it has been marked as dead. */
 	if (to->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(to);
 	}
@@ -450,7 +453,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 }
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
-static zend_always_inline void delegate_transfer_result(
+static zend_always_inline void zend_fiber_delegate_transfer_result(
 	zend_fiber *fiber, zend_fiber_transfer *transfer, INTERNAL_FUNCTION_PARAMETERS
 ) {
 	if (transfer->flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
@@ -579,7 +582,7 @@ static void zend_fiber_object_free(zend_object *object)
 
 ZEND_METHOD(Fiber, __construct)
 {
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
@@ -591,7 +594,7 @@ ZEND_METHOD(Fiber, __construct)
 
 ZEND_METHOD(Fiber, start)
 {
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 	zval *params;
 	uint32_t param_count;
 	zend_array *named_params;
@@ -622,7 +625,7 @@ ZEND_METHOD(Fiber, start)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
 
-	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, suspend)
@@ -665,7 +668,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, resume)
@@ -683,7 +686,7 @@ ZEND_METHOD(Fiber, resume)
 		RETURN_THROWS();
 	}
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
@@ -694,7 +697,7 @@ ZEND_METHOD(Fiber, resume)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, value, false);
 
-	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, throw)
@@ -711,7 +714,7 @@ ZEND_METHOD(Fiber, throw)
 		RETURN_THROWS();
 	}
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
@@ -722,7 +725,7 @@ ZEND_METHOD(Fiber, throw)
 
 	zend_fiber_transfer transfer = zend_fiber_resume(fiber, exception, true);
 
-	delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_fiber_delegate_transfer_result(fiber, &transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Fiber, isStarted)
@@ -731,7 +734,7 @@ ZEND_METHOD(Fiber, isStarted)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	RETURN_BOOL(fiber->context.status != ZEND_FIBER_STATUS_INIT);
 }
@@ -742,7 +745,7 @@ ZEND_METHOD(Fiber, isSuspended)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
 }
@@ -753,7 +756,7 @@ ZEND_METHOD(Fiber, isRunning)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->caller != NULL);
 }
@@ -764,7 +767,7 @@ ZEND_METHOD(Fiber, isTerminated)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_DEAD);
 }
@@ -776,7 +779,7 @@ ZEND_METHOD(Fiber, getReturn)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	fiber = (zend_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	if (fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		if (fiber->flags & ZEND_FIBER_FLAG_THREW) {
@@ -814,7 +817,7 @@ ZEND_METHOD(FiberError, __construct)
 	zend_throw_error(
 		NULL,
 		"The \"%s\" class is reserved for internal use and cannot be manually instantiated",
-		ZSTR_VAL(Z_OBJCE_P(getThis())->name)
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name)
 	);
 }
 
