@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta1
 
-
+- Reflection:
+ . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)
 
 08 Jul 2021, PHP 8.1.0alpha3
 

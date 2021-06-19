@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2564122a201ca462ee35ead1562c94da3ea3c8a3 */
+ * Stub hash: b70561858fb66134ce9596921215881fd9b946c0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -543,6 +543,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionAttribute_newInstance, 0, 0, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_ReflectionAttribute___toString arginfo_class_ReflectionFunction___toString
+
 #define arginfo_class_ReflectionAttribute___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 #define arginfo_class_ReflectionAttribute___construct arginfo_class_ReflectionReference___construct
@@ -800,6 +802,7 @@ ZEND_METHOD(ReflectionAttribute, getTarget);
 ZEND_METHOD(ReflectionAttribute, isRepeated);
 ZEND_METHOD(ReflectionAttribute, getArguments);
 ZEND_METHOD(ReflectionAttribute, newInstance);
+ZEND_METHOD(ReflectionAttribute, __toString);
 ZEND_METHOD(ReflectionAttribute, __clone);
 ZEND_METHOD(ReflectionAttribute, __construct);
 ZEND_METHOD(ReflectionEnum, __construct);
@@ -1130,6 +1133,7 @@ static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_ME(ReflectionAttribute, isRepeated, arginfo_class_ReflectionAttribute_isRepeated, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, getArguments, arginfo_class_ReflectionAttribute_getArguments, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, newInstance, arginfo_class_ReflectionAttribute_newInstance, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, __toString, arginfo_class_ReflectionAttribute___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, __clone, arginfo_class_ReflectionAttribute___clone, ZEND_ACC_PRIVATE)
 	ZEND_ME(ReflectionAttribute, __construct, arginfo_class_ReflectionAttribute___construct, ZEND_ACC_PRIVATE)
 	ZEND_FE_END
@@ -1435,13 +1439,14 @@ static zend_class_entry *register_class_ReflectionReference(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_ReflectionAttribute(void)
+static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *class_entry_Reflector)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionAttribute", class_ReflectionAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	return class_entry;
 }

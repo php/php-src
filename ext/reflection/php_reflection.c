@@ -6452,6 +6452,57 @@ ZEND_METHOD(ReflectionAttribute, __clone)
 	_DO_THROW("Cannot clone object using __clone()");
 }
 
+/* {{{ Returns a string representation */
+ZEND_METHOD(ReflectionAttribute, __toString)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	smart_str str = {0};
+	smart_str_appends(&str, "Attribute [ ");
+	smart_str_append(&str, attr->data->name);
+	smart_str_appends(&str, " ]");
+
+	if (attr->data->argc > 0) {
+		smart_str_appends(&str, " {\n");
+		smart_str_append_printf(&str, "  - Arguments [%d] {\n", attr->data->argc);
+
+		for (uint32_t i = 0; i < attr->data->argc; i++) {
+			zval tmp;
+			if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
+				RETURN_THROWS();
+			}
+
+			smart_str_append_printf(&str, "    Argument #%d [ ", i);
+			if (attr->data->args[i].name != NULL) {
+				smart_str_append(&str, attr->data->args[i].name);
+				smart_str_appends(&str, " = ");
+			}
+
+			if (format_default_value(&str, &tmp, NULL) == FAILURE) {
+				return;
+			}
+
+			smart_str_appends(&str, " ]\n");
+			zval_ptr_dtor(&tmp);
+		}
+		smart_str_appends(&str, "  }\n");
+
+		smart_str_appends(&str, "}\n");
+	} else {
+		smart_str_appendc(&str, '\n');
+	}
+
+	RETURN_STR(smart_str_extract(&str));
+}
+/* }}} */
+
 /* {{{ *	   Returns the name of the attribute */
 ZEND_METHOD(ReflectionAttribute, getName)
 {
@@ -7121,7 +7172,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_reference_ptr = register_class_ReflectionReference();
 	reflection_init_class_handlers(reflection_reference_ptr);
 
-	reflection_attribute_ptr = register_class_ReflectionAttribute();
+	reflection_attribute_ptr = register_class_ReflectionAttribute(reflector_ptr);
 	reflection_init_class_handlers(reflection_attribute_ptr);
 
 	reflection_enum_ptr = register_class_ReflectionEnum(reflection_class_ptr);
