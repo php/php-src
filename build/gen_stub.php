@@ -2311,18 +2311,20 @@ if (isset($options["h"]) || isset($options["help"])) {
 }
 
 $fileInfos = [];
-$location = $argv[$optind] ?? ".";
-if (is_file($location)) {
-    // Generate single file.
-    $fileInfo = processStubFile($location, $context);
-    if ($fileInfo) {
-        $fileInfos[] = $fileInfo;
+$locations = array_slice($argv, $optind) ?: ['.'];
+foreach (array_unique($locations) as $location) {
+    if (is_file($location)) {
+        // Generate single file.
+        $fileInfo = processStubFile($location, $context);
+        if ($fileInfo) {
+            $fileInfos[] = $fileInfo;
+        }
+    } else if (is_dir($location)) {
+        array_push($fileInfos, ...processDirectory($location, $context));
+    } else {
+        echo "$location is neither a file nor a directory.\n";
+        exit(1);
     }
-} else if (is_dir($location)) {
-    $fileInfos = processDirectory($location, $context);
-} else {
-    echo "$location is neither a file nor a directory.\n";
-    exit(1);
 }
 
 if ($printParameterStats) {
