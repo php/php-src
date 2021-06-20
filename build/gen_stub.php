@@ -1462,9 +1462,17 @@ function parseFunctionLike(
                 } else if ($tag->name === 'tentative-return-type') {
                     $tentativeReturnType = true;
                 } else if ($tag->name === 'return') {
-                    $docReturnType = $tag->getType();
+                    try {
+                        $docReturnType = $tag->getType();
+                    } catch (Exception $e) {
+                        printf("Warning: Invalid return type in phpdoc '%s' of function/method %s: %s\n", $tag->getValue(), $name, $e->getMessage());
+                    }
                 } else if ($tag->name === 'param') {
-                    $docParamTypes[$tag->getVariableName()] = $tag->getType();
+                    try {
+                        $docParamTypes[$tag->getVariableName()] = $tag->getType();
+                    } catch (Exception $e) {
+                        printf("Warning: Invalid param type in phpdoc '%s' of function/method %s: %s\n", $tag->getValue(), $name, $e->getMessage());
+                    }
                 }
             }
         }
