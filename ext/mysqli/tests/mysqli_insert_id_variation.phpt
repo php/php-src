@@ -1,8 +1,9 @@
 --TEST--
 Checking last_insert_id after different operations
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

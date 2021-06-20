@@ -1,9 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class Transliterator
 {
+    public string $id;
+
     final private function __construct() {}
 
     /**

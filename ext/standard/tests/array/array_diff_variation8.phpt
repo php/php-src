@@ -41,8 +41,8 @@ $inputs = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 1.2),
 
        // arrays with string values
-/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'),
+/*5*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'),
        array(1 => "hello", "heredoc" => $heredoc, $heredoc),
 
        // array with object, unset variable and resource variable

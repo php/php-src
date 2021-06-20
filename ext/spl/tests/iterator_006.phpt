@@ -1,7 +1,7 @@
 --TEST--
 SPL: IteratorIterator and SimpleXMlElement
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) print "skip SimpleXML required"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

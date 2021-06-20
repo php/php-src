@@ -1,5 +1,7 @@
 --TEST--
 Bug #64609 (pg_convert enum type support)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

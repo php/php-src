@@ -36,8 +36,13 @@ var_dump($_POST);
 --EXPECTF--
 array(1) {
   ["file"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    array(1) {
+      [0]=>
+      string(9) "file1.txt"
+    }
+    ["full_path"]=>
     array(1) {
       [0]=>
       string(9) "file1.txt"

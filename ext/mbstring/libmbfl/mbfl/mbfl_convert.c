@@ -44,7 +44,6 @@
 #include "filters/mbfilter_euc_kr.h"
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
-#include "filters/mbfilter_sjis_open.h"
 #include "filters/mbfilter_sjis_2004.h"
 #include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_sjis_mac.h"
@@ -110,13 +109,12 @@ static void mbfl_convert_filter_init(mbfl_convert_filter *filter, const mbfl_enc
 	filter->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	filter->illegal_substchar = '?';
 	filter->num_illegalchar = 0;
-	filter->filter_ctor = vtbl->filter_ctor;
 	filter->filter_dtor = vtbl->filter_dtor;
 	filter->filter_function = vtbl->filter_function;
 	filter->filter_flush = (filter_flush_t)vtbl->filter_flush;
 	filter->filter_copy = vtbl->filter_copy;
 
-	(*filter->filter_ctor)(filter);
+	(*vtbl->filter_ctor)(filter);
 }
 
 mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mbfl_encoding *to, output_function_t output_function,

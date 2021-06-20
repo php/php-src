@@ -1,7 +1,8 @@
 --TEST--
 gmp_random_seed() basic tests
+--EXTENSIONS--
+gmp
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
@@ -108,7 +109,7 @@ var_dump(gmp_strval(gmp_random_range(-10000, 0)));
 // standard non conversion error
 try {
     var_dump(gmp_random_seed('not a number'));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

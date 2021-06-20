@@ -68,6 +68,7 @@
  */
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_fibers.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -209,10 +210,10 @@ typedef struct _gc_root_buffer {
 typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 
-	zend_bool         gc_enabled;
-	zend_bool         gc_active;        /* GC currently running, forbid nested GC */
-	zend_bool         gc_protected;     /* GC protected, forbid root additions */
-	zend_bool         gc_full;
+	bool         gc_enabled;
+	bool         gc_active;        /* GC currently running, forbid nested GC */
+	bool         gc_protected;     /* GC protected, forbid root additions */
+	bool         gc_full;
 
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
@@ -493,9 +494,9 @@ void gc_reset(void)
 	}
 }
 
-ZEND_API zend_bool gc_enable(zend_bool enable)
+ZEND_API bool gc_enable(bool enable)
 {
-	zend_bool old_enabled = GC_G(gc_enabled);
+	bool old_enabled = GC_G(gc_enabled);
 	GC_G(gc_enabled) = enable;
 	if (enable && !old_enabled && GC_G(buf) == NULL) {
 		GC_G(buf) = (gc_root_buffer*) pemalloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE, 1);
@@ -507,19 +508,19 @@ ZEND_API zend_bool gc_enable(zend_bool enable)
 	return old_enabled;
 }
 
-ZEND_API zend_bool gc_enabled(void)
+ZEND_API bool gc_enabled(void)
 {
 	return GC_G(gc_enabled);
 }
 
-ZEND_API zend_bool gc_protect(zend_bool protect)
+ZEND_API bool gc_protect(bool protect)
 {
-	zend_bool old_protected = GC_G(gc_protected);
+	bool old_protected = GC_G(gc_protected);
 	GC_G(gc_protected) = protect;
 	return old_protected;
 }
 
-ZEND_API zend_bool gc_protected(void)
+ZEND_API bool gc_protected(void)
 {
 	return GC_G(gc_protected);
 }
@@ -740,11 +741,8 @@ tail_call:
 			goto next;
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
-		if ((zend_array*)ref != &EG(symbol_table)) {
-			ht = (zend_array*)ref;
-		} else {
-			goto next;
-		}
+		ZEND_ASSERT((zend_array*)ref != &EG(symbol_table));
+		ht = (zend_array*)ref;
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -861,12 +859,8 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				goto next;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			if (((zend_array*)ref) == &EG(symbol_table)) {
-				GC_REF_SET_BLACK(ref);
-				goto next;
-			} else {
-				ht = (zend_array*)ref;
-			}
+			ZEND_ASSERT(((zend_array*)ref) != &EG(symbol_table));
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -1046,12 +1040,8 @@ tail_call:
 					goto next;
 				}
 			} else if (GC_TYPE(ref) == IS_ARRAY) {
-				if ((zend_array*)ref == &EG(symbol_table)) {
-					GC_REF_SET_BLACK(ref);
-					goto next;
-				} else {
-					ht = (zend_array*)ref;
-				}
+				ZEND_ASSERT((zend_array*)ref != &EG(symbol_table));
+				ht = (zend_array*)ref;
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 					ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -1436,12 +1426,15 @@ next:
 	return count;
 }
 
-static void zend_get_gc_buffer_release();
+static void zend_get_gc_buffer_release(void);
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
+	bool should_rerun_gc = 0;
+	bool did_rerun_gc = 0;
 
+rerun_gc:
 	if (GC_G(num_roots)) {
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
@@ -1477,6 +1470,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 			return 0;
 		}
 
+		zend_fiber_switch_block();
+
 		end = GC_G(first_unused);
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
@@ -1486,8 +1481,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 			 * be introduced. These references can be introduced in a way that does not
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
-			 * destructors at this point, and leave the actual freeing of the objects
-			 * until the next GC run. */
+			 * destructors at this point and automatically re-run GC afterwards. */
+			should_rerun_gc = 1;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -1556,6 +1551,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
+				zend_fiber_switch_unblock();
 				return 0;
 			}
 		}
@@ -1614,12 +1610,23 @@ ZEND_API int zend_gc_collect_cycles(void)
 			current++;
 		}
 
+		zend_fiber_switch_unblock();
+
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;
 		GC_G(gc_active) = 0;
 	}
 
 	gc_compact();
+
+	/* Objects with destructors were removed from this GC run. Rerun GC right away to clean them
+	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
+	 * run GC another time. */
+	if (should_rerun_gc && !did_rerun_gc) {
+		did_rerun_gc = 1;
+		goto rerun_gc;
+	}
+
 	zend_get_gc_buffer_release();
 	return count;
 }

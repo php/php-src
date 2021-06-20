@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_rand.h"
+#include "php_random.h"
 #include "php_mt_rand.h"
 
 /* MT RAND FUNCTIONS */
@@ -99,9 +100,9 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-	register uint32_t *s = state;
-	register uint32_t *r = state;
-	register int i = 1;
+	uint32_t *s = state;
+	uint32_t *r = state;
+	int i = 1;
 
 	*s++ = seed & 0xffffffffU;
 	for( ; i < N; ++i ) {
@@ -117,9 +118,9 @@ static inline void php_mt_reload(void)
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	register uint32_t *state = BG(state);
-	register uint32_t *p = state;
-	register int i;
+	uint32_t *state = BG(state);
+	uint32_t *p = state;
+	int i;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		for (i = N - M; i--; ++p)
@@ -158,10 +159,14 @@ PHPAPI uint32_t php_mt_rand(void)
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
 
-	register uint32_t s1;
+	uint32_t s1;
 
 	if (UNEXPECTED(!BG(mt_rand_is_seeded))) {
-		php_mt_srand(GENERATE_SEED());
+		zend_long bytes;
+		if (php_random_bytes_silent(&bytes, sizeof(zend_long)) == FAILURE) {
+			bytes = GENERATE_SEED();
+		}
+		php_mt_srand(bytes);
 	}
 
 	if (BG(left) == 0) {
@@ -189,8 +194,11 @@ PHP_FUNCTION(mt_srand)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 0)
-		seed = GENERATE_SEED();
+	if (ZEND_NUM_ARGS() == 0) {
+		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
+			seed = GENERATE_SEED();
+		}
+	}
 
 	switch (mode) {
 		case MT_RAND_PHP:

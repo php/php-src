@@ -4,8 +4,8 @@ AC_CHECK_HEADERS([io.h])
 dnl Check for strtoll, atoll
 AC_CHECK_FUNCS(strtoll atoll)
 
-PHP_DATE_CFLAGS="-I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
-timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c
+PHP_DATE_CFLAGS="-Wno-implicit-fallthrough -I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
+timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c lib/parse_posix.c
                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
 
 PHP_NEW_EXTENSION(date, php_date.c $timelib_sources, no,, $PHP_DATE_CFLAGS)
@@ -31,5 +31,6 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 #define timelib_realloc erealloc
 #define timelib_calloc  ecalloc
 #define timelib_strdup  estrdup
+#define timelib_strndup estrndup
 #define timelib_free    efree
 EOF

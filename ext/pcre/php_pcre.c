@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -67,7 +67,7 @@ ZEND_TLS pcre2_general_context *gctx = NULL;
 ZEND_TLS pcre2_compile_context *cctx = NULL;
 ZEND_TLS pcre2_match_context   *mctx = NULL;
 ZEND_TLS pcre2_match_data      *mdata = NULL;
-ZEND_TLS zend_bool              mdata_used = 0;
+ZEND_TLS bool              mdata_used = 0;
 ZEND_TLS uint8_t pcre2_init_ok = 0;
 #if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
 static MUTEX_T pcre_mt = NULL;
@@ -595,7 +595,11 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, co
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
 	pcre2_code			*re = NULL;
+#if 10 == PCRE2_MAJOR && 37 == PCRE2_MINOR && !HAVE_BUNDLED_PCRE
+	uint32_t			 coptions = PCRE2_NO_START_OPTIMIZE;
+#else
 	uint32_t			 coptions = 0;
+#endif
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -790,8 +794,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
 			zend_string_release(_k);
 		}
-		pcre2_set_character_tables(cctx, tables);
 	}
+	pcre2_set_character_tables(cctx, tables);
 
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
@@ -965,14 +969,14 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
-static void init_unmatched_null_pair() {
+static void init_unmatched_null_pair(void) {
 	zval val1, val2;
 	ZVAL_NULL(&val1);
 	ZVAL_LONG(&val2, -1);
 	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
 }
 
-static void init_unmatched_empty_pair() {
+static void init_unmatched_empty_pair(void) {
 	zval val1, val2;
 	ZVAL_EMPTY_STRING(&val1);
 	ZVAL_LONG(&val2, -1);
@@ -999,7 +1003,7 @@ static inline void populate_match_value(
 }
 
 static inline void add_named(
-		zval *subpats, zend_string *name, zval *val, zend_bool unmatched) {
+		zval *subpats, zend_string *name, zval *val, bool unmatched) {
 	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
 	 * In this case we want to preserve the one that actually has a value. */
 	if (!unmatched) {
@@ -1049,8 +1053,8 @@ static inline void add_offset_pair(
 static void populate_subpat_array(
 		zval *subpats, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
 		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
-	zend_bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
-	zend_bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
+	bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
+	bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 	zval val;
 	int i;
 	if (subpat_names) {
@@ -1145,7 +1149,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 }
 /* }}} */
 
-static zend_always_inline zend_bool is_known_valid_utf8(
+static zend_always_inline bool is_known_valid_utf8(
 		zend_string *subject_str, PCRE2_SIZE start_offset) {
 	if (!(GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)) {
 		/* We don't know whether the string is valid UTF-8 or not. */
@@ -1500,8 +1504,8 @@ PHP_FUNCTION(preg_match_all)
 /* {{{ preg_get_backref */
 static int preg_get_backref(char **str, int *backref)
 {
-	register char in_brace = 0;
-	register char *walk = *str;
+	char in_brace = 0;
+	char *walk = *str;
 
 	if (walk[1] == 0)
 		return 0;
@@ -1659,7 +1663,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + last_end_offset;
 
 		if (count >= 0 && limit > 0) {
-			zend_bool simple_string;
+			bool simple_string;
 
 			/* Check for too many substrings condition. */
 			if (UNEXPECTED(count == 0)) {
@@ -1858,7 +1862,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	zend_string		*result;			/* Result of replacement */
 	zend_string     *eval_result;		/* Result of custom function */
 	pcre2_match_data *match_data;
-	zend_bool old_mdata_used;
+	bool old_mdata_used;
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
@@ -2640,6 +2644,10 @@ matched:
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
+				/* Get next piece if no limit or limit not yet reached and something matched*/
+				if (limit_val != -1 && limit_val <= 1) {
+					break;
+				}
 				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {
@@ -2728,7 +2736,7 @@ PHP_FUNCTION(preg_quote)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(delim, 1, 0)
+		Z_PARAM_STR_OR_NULL(delim)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Nothing to do if we got an empty string */
@@ -2881,7 +2889,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	uint32_t		 options;			/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
-	zend_bool		 invert;			/* Whether to return non-matching
+	bool		 invert;			/* Whether to return non-matching
 										   entries */
 	pcre2_match_data *match_data;
 	invert = flags & PREG_GREP_INVERT ? 1 : 0;

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -51,11 +51,11 @@ typedef enum {
 typedef struct _phpdbg_param phpdbg_param_t;
 struct _phpdbg_param {
 	phpdbg_param_type type;
-	long num;
+	zend_long num;
 	zend_ulong addr;
 	struct {
 		char *name;
-		long line;
+		zend_ulong line;
 	} file;
 	struct {
 		char *class;
@@ -96,7 +96,7 @@ struct _phpdbg_command_t {
 	const phpdbg_command_t *subs;       /* Sub Commands */
 	char *args;                         /* Argument Spec */
 	const phpdbg_command_t *parent;     /* Parent Command */
-	zend_bool flags;                    /* General flags */
+	bool flags;                    /* General flags */
 };
 /* }}} */
 
@@ -136,7 +136,7 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
 PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param);
 PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top);
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack);
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, bool allow_async_unsafe);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*
@@ -144,7 +144,7 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 */
 PHPDBG_API void phpdbg_clear_param(phpdbg_param_t*);
 PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t*, phpdbg_param_t*);
-PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t *);
+PHPDBG_API bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t *);
 PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *);
 PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t*);
 PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer);
@@ -175,7 +175,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 */
 #define phpdbg_default_switch_case() \
 	default: \
-		phpdbg_error("command", "type=\"wrongarg\" got=\"%s\"", "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param)); \
+		phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param)); \
 	break
 
 #endif /* PHPDBG_CMD_H */

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,15 +24,13 @@
 ZEND_BEGIN_MODULE_GLOBALS(assert)
 	zval callback;
 	char *cb;
-	zend_bool active;
-	zend_bool bail;
-	zend_bool warning;
-	zend_bool exception;
+	bool active;
+	bool bail;
+	bool warning;
+	bool exception;
 ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
-
-static zend_class_entry *assertion_error_ce;
 
 #define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
@@ -45,6 +43,8 @@ enum {
 	ASSERT_WARNING,
 	ASSERT_EXCEPTION
 };
+
+PHPAPI zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
 {
@@ -89,8 +89,6 @@ static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{
 
 PHP_MINIT_FUNCTION(assert) /* {{{ */
 {
-	zend_class_entry ce;
-
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
@@ -100,9 +98,6 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
-
-	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
 
 	return SUCCESS;
 }
@@ -191,15 +186,20 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(exception)) {
 		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
+		if (ASSERTG(bail)) {
+			/* When bail is turned on, the exception will not be caught. */
+			zend_exception_error(EG(exception), E_ERROR);
+		}
 	} else if (ASSERTG(warning)) {
 		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
 	}
 
 	if (ASSERTG(bail)) {
-		zend_bailout();
+		zend_throw_unwind_exit();
+		RETURN_THROWS();
+	} else {
+		RETURN_FALSE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -208,7 +208,7 @@ PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
 	zend_long what;
-	zend_bool oldint;
+	bool oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 

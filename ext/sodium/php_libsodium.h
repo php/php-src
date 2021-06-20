@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -64,6 +64,19 @@ PHP_FUNCTION(sodium_crypto_box_seal);
 PHP_FUNCTION(sodium_crypto_box_seal_open);
 PHP_FUNCTION(sodium_crypto_box_secretkey);
 PHP_FUNCTION(sodium_crypto_box_seed_keypair);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_add);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_from_hash);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_is_valid_point);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_random);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_add);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_complement);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_invert);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_mul);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_negate);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_random);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_reduce);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_scalar_sub);
+PHP_FUNCTION(sodium_crypto_core_ristretto255_sub);
 PHP_FUNCTION(sodium_crypto_generichash);
 PHP_FUNCTION(sodium_crypto_generichash_final);
 PHP_FUNCTION(sodium_crypto_generichash_init);
@@ -86,6 +99,8 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash);
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify);
 PHP_FUNCTION(sodium_crypto_scalarmult);
 PHP_FUNCTION(sodium_crypto_scalarmult_base);
+PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255);
+PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255_base);
 PHP_FUNCTION(sodium_crypto_secretbox);
 PHP_FUNCTION(sodium_crypto_secretbox_keygen);
 PHP_FUNCTION(sodium_crypto_secretbox_open);
@@ -112,6 +127,9 @@ PHP_FUNCTION(sodium_crypto_sign_verify_detached);
 PHP_FUNCTION(sodium_crypto_stream);
 PHP_FUNCTION(sodium_crypto_stream_keygen);
 PHP_FUNCTION(sodium_crypto_stream_xor);
+PHP_FUNCTION(sodium_crypto_stream_xchacha20);
+PHP_FUNCTION(sodium_crypto_stream_xchacha20_keygen);
+PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor);
 PHP_FUNCTION(sodium_hex2bin);
 PHP_FUNCTION(sodium_increment);
 PHP_FUNCTION(sodium_memcmp);

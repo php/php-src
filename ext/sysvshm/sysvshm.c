@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -99,10 +99,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
-	sysvshm_ce = zend_register_internal_class(&ce);
-	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
 	sysvshm_ce->serialize = zend_class_serialize_deny;
 	sysvshm_ce->unserialize = zend_class_unserialize_deny;
@@ -112,6 +109,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
 	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;
+	sysvshm_object_handlers.compare = zend_objects_not_comparable;
 
 	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
@@ -136,7 +134,7 @@ PHP_FUNCTION(shm_attach)
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
 	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
-	zend_bool shm_size_is_null = 1;
+	bool shm_size_is_null = 1;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();

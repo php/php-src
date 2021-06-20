@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -352,7 +352,7 @@ static int check_http_host(char *target)
 	zend_string *host_tmp;
 	char *colon;
 
-	if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
+	if ((tmp = zend_hash_find(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 		Z_TYPE_P(tmp) == IS_ARRAY &&
 		(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
 		Z_TYPE_P(host) == IS_STRING) {
@@ -619,7 +619,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 }
 
 
-static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush, url_adapt_state_ex_t *ctx)
+static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, bool do_flush, url_adapt_state_ex_t *ctx)
 {
 	char *retval;
 
@@ -690,7 +690,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 	}
 
 	if (ZSTR_LEN(url_state->url_app.s) != 0) {
-		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0), url_state);
+		*handled_output = url_adapt_ext(output, output_len, &len, (bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0), url_state);
 		if (sizeof(unsigned int) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
@@ -842,7 +842,7 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 	smart_str form_app = {0};
 	zend_string *encoded;
 	int ret = SUCCESS;
-	zend_bool sep_removed = 0;
+	bool sep_removed = 0;
 	url_adapt_state_ex_t *url_state;
 
 	if (type) {

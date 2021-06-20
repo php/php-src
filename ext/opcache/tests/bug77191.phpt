@@ -1,5 +1,7 @@
 --TEST--
 Bug #77191: Assertion failure in dce_live_ranges() when silencing is used
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test($x) {

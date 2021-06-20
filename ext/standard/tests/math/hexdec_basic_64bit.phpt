@@ -25,7 +25,7 @@ $values = array(0x123abc,
                 '011237',
                 true,
                 false,
-                null);
+                );
 
 foreach($values as $value) {
     echo "\n-- hexdec $value --\n";
@@ -87,9 +87,6 @@ int(70199)
 
 -- hexdec 1 --
 int(1)
-
--- hexdec  --
-int(0)
 
 -- hexdec  --
 int(0)

@@ -1,5 +1,7 @@
 --TEST--
 Bug #80152 (odbc_execute() moves internal pointer of $params)
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

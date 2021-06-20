@@ -1,7 +1,7 @@
 --TEST--
 Bug #36802 (crashes with with mysqli_set_charset())
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
     class really_my_mysqli extends mysqli {
@@ -31,7 +31,7 @@ Bug #36802 (crashes with with mysqli_set_charset())
     }
 
     /* following operations should work */
-    $x[1] = ($mysql->client_version > 0);
+    $x[1] = ($mysql->error);
     $x[2] = $mysql->errno;
 
     $mysql->close();
@@ -43,7 +43,7 @@ mysqli object is not fully initialized
 mysqli object is not fully initialized
 array(2) {
   [1]=>
-  bool(true)
+  string(0) ""
   [2]=>
   int(0)
 }

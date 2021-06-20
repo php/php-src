@@ -57,7 +57,7 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
+ZEND_API void zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
@@ -271,7 +271,7 @@ ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_c
 	end_write(ht);
 }
 
-ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
+ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, bool ordered)
 {
 	int retval;
 

@@ -11,8 +11,8 @@ $var_array = array(
                    array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"),
                    array("1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"),
                    array(1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"),
-                   array("f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-                         "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five"),
+                   array("f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+                         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five"),
                    array(12, "name", 'age', '45'),
                    array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array())
                  );

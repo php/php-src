@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -587,18 +587,21 @@ PHP_FUNCTION(sapi_windows_cp_set)
 /* {{{ Get process codepage. */
 PHP_FUNCTION(sapi_windows_cp_get)
 {
-	char *kind;
-	size_t kind_len = 0;
+	zend_string *kind = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &kind, &kind_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &kind) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (kind_len == sizeof("ansi")-1 && !strncasecmp(kind, "ansi", kind_len)) {
+	if (!kind) {
+		const struct php_win32_cp *cp = php_win32_cp_get_current();
+		RETURN_LONG(cp->id);
+	} else if (zend_string_equals_literal_ci(kind, "ansi")) {
 		RETURN_LONG(GetACP());
-	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
+	} else if (zend_string_equals_literal_ci(kind, "oem")) {
 		RETURN_LONG(GetOEMCP());
 	} else {
+		/* TODO Warn/ValueError for invalid kind? */
 		const struct php_win32_cp *cp = php_win32_cp_get_current();
 		RETURN_LONG(cp->id);
 	}

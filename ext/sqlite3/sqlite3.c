@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -306,7 +306,7 @@ PHP_METHOD(SQLite3, enableExtendedResultCodes)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
-	zend_bool enable = 1;
+	bool enable = 1;
 	db_obj = Z_SQLITE3_DB_P(object);
 	int ret;
 
@@ -566,7 +566,7 @@ PHP_METHOD(SQLite3, query)
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
-		return;
+		RETURN_FALSE;
 	}
 
 	object_init_ex(&stmt, php_sqlite3_stmt_entry);
@@ -660,7 +660,7 @@ PHP_METHOD(SQLite3, querySingle)
 	zend_string *sql;
 	char *errtext = NULL;
 	int return_code;
-	zend_bool entire_row = 0;
+	bool entire_row = 0;
 	sqlite3_stmt *stmt;
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -680,7 +680,7 @@ PHP_METHOD(SQLite3, querySingle)
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
-		return;
+		RETURN_FALSE;
 	}
 
 	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &stmt, NULL);
@@ -1281,7 +1281,7 @@ PHP_METHOD(SQLite3, enableExceptions)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
-	zend_bool enableExceptions = 0;
+	bool enableExceptions = 0;
 
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -1607,7 +1607,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 PHP_METHOD(SQLite3Stmt, getSQL)
 {
 	php_sqlite3_stmt *stmt_obj;
-	zend_bool expanded = 0;
+	bool expanded = 0;
 	zval *object = getThis();
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 	int bind_rc;
@@ -1810,7 +1810,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 		}
 		case SQLITE_ERROR:
 			sqlite3_reset(stmt_obj->stmt);
-
+			ZEND_FALLTHROUGH;
 		default:
 			if (!EG(exception)) {
 				php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
@@ -1955,7 +1955,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
 			if (!USED_RET()) {
-				return;
+				RETURN_FALSE;
 			}
 
 			array_init(return_value);
@@ -2332,8 +2332,6 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sqlite3)
 {
-	zend_class_entry ce;
-
 #ifdef ZTS
 	/* Refuse to load if this wasn't a threasafe library loaded */
 	if (!sqlite3_threadsafe()) {
@@ -2347,32 +2345,29 @@ PHP_MINIT_FUNCTION(sqlite3)
 	memcpy(&sqlite3_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 
 	/* Register SQLite 3 Class */
-	INIT_CLASS_ENTRY(ce, "SQLite3", class_SQLite3_methods);
-	ce.create_object = php_sqlite3_object_new;
 	sqlite3_object_handlers.offset = XtOffsetOf(php_sqlite3_db_object, zo);
 	sqlite3_object_handlers.clone_obj = NULL;
 	sqlite3_object_handlers.free_obj = php_sqlite3_object_free_storage;
-	php_sqlite3_sc_entry = zend_register_internal_class(&ce);
+	php_sqlite3_sc_entry = register_class_SQLite3();
+	php_sqlite3_sc_entry->create_object = php_sqlite3_object_new;
 	php_sqlite3_sc_entry->serialize = zend_class_serialize_deny;
 	php_sqlite3_sc_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Prepared Statement Class */
-	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", class_SQLite3Stmt_methods);
-	ce.create_object = php_sqlite3_stmt_object_new;
 	sqlite3_stmt_object_handlers.offset = XtOffsetOf(php_sqlite3_stmt, zo);
 	sqlite3_stmt_object_handlers.clone_obj = NULL;
 	sqlite3_stmt_object_handlers.free_obj = php_sqlite3_stmt_object_free_storage;
-	php_sqlite3_stmt_entry = zend_register_internal_class(&ce);
+	php_sqlite3_stmt_entry = register_class_SQLite3Stmt();
+	php_sqlite3_stmt_entry->create_object = php_sqlite3_stmt_object_new;
 	php_sqlite3_stmt_entry->serialize = zend_class_serialize_deny;
 	php_sqlite3_stmt_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Result Class */
-	INIT_CLASS_ENTRY(ce, "SQLite3Result", class_SQLite3Result_methods);
-	ce.create_object = php_sqlite3_result_object_new;
 	sqlite3_result_object_handlers.offset = XtOffsetOf(php_sqlite3_result, zo);
 	sqlite3_result_object_handlers.clone_obj = NULL;
 	sqlite3_result_object_handlers.free_obj = php_sqlite3_result_object_free_storage;
-	php_sqlite3_result_entry = zend_register_internal_class(&ce);
+	php_sqlite3_result_entry = register_class_SQLite3Result();
+	php_sqlite3_result_entry->create_object = php_sqlite3_result_object_new;
 	php_sqlite3_result_entry->serialize = zend_class_serialize_deny;
 	php_sqlite3_result_entry->unserialize = zend_class_unserialize_deny;
 

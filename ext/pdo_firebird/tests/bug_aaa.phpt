@@ -1,7 +1,11 @@
 --TEST--
 PDO_Firebird: cursor should not be marked as opened on singleton statements
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';

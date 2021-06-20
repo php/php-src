@@ -30,12 +30,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
-
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
@@ -48,11 +42,11 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1,  "fruit" => 2.2,
-             133 => "int", 444.432 => "float",
+             133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
-// array to be passsed to $arr1 argument
+// array to be passed to $arr1 argument
 $arr1 = array(1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11);
 
 // loop through each sub-array within $arrays to check the behavior of array_intersect()
@@ -102,85 +96,63 @@ array(1) {
   int(1)
 }
 -- Iterator 5 --
-array(1) {
-  [1]=>
-  string(5) "float"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
-array(1) {
-  [1]=>
-  string(5) "float"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
 -- Iterator 6 --
-array(1) {
-  [2]=>
-  string(2) "f4"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
-array(1) {
-  [2]=>
-  string(2) "f4"
+array(2) {
+  [4]=>
+  float(2.2)
+  [5]=>
+  string(5) "color"
 }
 -- Iterator 7 --
 array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
 }
 array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+  [3]=>
+  string(5) "hello"
+  [6]=>
+  string(6) "string"
 }
 -- Iterator 8 --
-array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+array(1) {
+  [3]=>
+  string(5) "hello"
 }
-array(2) {
-  [4]=>
-  float(2.2)
-  [5]=>
-  string(5) "color"
+array(1) {
+  [3]=>
+  string(5) "hello"
 }
 -- Iterator 9 --
 array(2) {
-  [3]=>
-  string(5) "hello"
-  [6]=>
-  string(6) "string"
-}
-array(2) {
-  [3]=>
-  string(5) "hello"
-  [6]=>
-  string(6) "string"
-}
--- Iterator 10 --
-array(1) {
-  [3]=>
-  string(5) "hello"
-}
-array(1) {
-  [3]=>
-  string(5) "hello"
-}
--- Iterator 11 --
-array(3) {
   [0]=>
   int(1)
-  [1]=>
-  string(5) "float"
   [4]=>
   float(2.2)
 }
-array(3) {
+array(2) {
   [0]=>
   int(1)
-  [1]=>
-  string(5) "float"
   [4]=>
   float(2.2)
 }

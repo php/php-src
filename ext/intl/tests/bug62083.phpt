@@ -1,9 +1,7 @@
 --TEST--
 Bug #62083: grapheme_extract() leaks memory
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $arr1 = array();

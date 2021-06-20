@@ -1,7 +1,7 @@
 --TEST--
 Bug #30799 (SoapServer doesn't handle private or protected properties)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class foo {

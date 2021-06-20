@@ -1,7 +1,7 @@
 --TEST--
 Test ResourceBundle::get() and length() - existing/missing keys
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
     include "resourcebundle.inc";
@@ -26,6 +26,10 @@ function ut_main() {
     $str_res .= sprintf( "testarray: %s\n", ut_resourcebundle_get($r2, 2 ) );
 
     $t = ut_resourcebundle_get( $r, 'nonexisting' );
+    $str_res .= debug( $t );
+
+    // Make sure accessing existing after non-existing works.
+    $t = ut_resourcebundle_get( $r, 'teststring' );
     $str_res .= debug( $t );
 
     return $str_res;
@@ -55,3 +59,5 @@ testtable: 3
 testarray: string 3
 NULL
     2: Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR
+Hello World!
+    0: U_ZERO_ERROR

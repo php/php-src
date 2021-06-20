@@ -1,8 +1,8 @@
 --TEST--
 SimpleXML [interop]: simplexml_import_dom
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
-<?php if (!extension_loaded("dom")) die("skip dom extension not loaded"); ?>
+--EXTENSIONS--
+simplexml
+dom
 --FILE--
 <?php
 $dom = new domDocument;

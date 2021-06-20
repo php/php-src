@@ -71,13 +71,17 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing floor() : usage variations ***
 
 -- Iteration 1 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 2 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 3 --
@@ -114,9 +118,13 @@ floor(): Argument #1 ($num) must be of type int|float, string given
 floor(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 15 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 16 --

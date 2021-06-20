@@ -1,8 +1,9 @@
 --TEST--
 MySQL Prepared Statements and different column counts
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -116,6 +117,12 @@ if ($version < 50000)
     }
 
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+$pdo = MySQLPDOTest::factory();
+$pdo->query('DROP PROCEDURE IF EXISTS p');
 ?>
 --EXPECT--
 done!

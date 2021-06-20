@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -162,11 +162,7 @@ void curl_share_free_obj(zend_object *object)
 	zend_object_std_dtor(&sh->std);
 }
 
-void curl_share_register_class(const zend_function_entry *method_entries) {
-	zend_class_entry ce_share;
-	INIT_CLASS_ENTRY(ce_share, "CurlShareHandle", method_entries);
-	curl_share_ce = zend_register_internal_class(&ce_share);
-	curl_share_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+void curl_share_register_handlers(void) {
 	curl_share_ce->create_object = curl_share_create_object;
 	curl_share_ce->serialize = &zend_class_serialize_deny;
 	curl_share_ce->unserialize = &zend_class_unserialize_deny;
@@ -176,4 +172,5 @@ void curl_share_register_class(const zend_function_entry *method_entries) {
 	curl_share_handlers.free_obj = curl_share_free_obj;
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
+	curl_share_handlers.compare = zend_objects_not_comparable;
 }

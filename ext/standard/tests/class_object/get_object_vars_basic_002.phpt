@@ -48,10 +48,10 @@ array(4) {
 ---( Superclass: )---
 A::testA
 array(3) {
+  ["hiddenPriv"]=>
+  string(13) "A::hiddenPriv"
   ["prot"]=>
   string(7) "B::prot"
   ["pub"]=>
   string(6) "B::pub"
-  ["hiddenPriv"]=>
-  string(13) "A::hiddenPriv"
 }

@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class stdClass
+{
+}
 
 function zend_version(): string {}
 
@@ -58,6 +62,8 @@ function class_exists(string $class, bool $autoload = true): bool {}
 function interface_exists(string $interface, bool $autoload = true): bool {}
 
 function trait_exists(string $trait, bool $autoload = true): bool {}
+
+function enum_exists(string $enum, bool $autoload = true): bool {}
 
 function function_exists(string $function): bool {}
 

@@ -1,81 +1,109 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class XMLReader
 {
-    /** @return bool */
-    public function close() {}
+    public int $attributeCount;
 
-    /** @return string|null */
-    public function getAttribute(string $name) {}
+    public string $baseURI;
 
-    /** @return string|null */
-    public function getAttributeNo(int $index) {}
+    public int $depth;
 
-    /** @return string|null */
-    public function getAttributeNs(string $name, string $namespace) {}
+    public bool $hasAttributes;
 
-    /** @return bool */
-    public function getParserProperty(int $property) {}
+    public bool $hasValue;
 
-    /** @return bool */
-    public function isValid() {}
+    public bool $isDefault;
 
-    /** @return string|null */
-    public function lookupNamespace(string $prefix) {}
+    public bool $isEmptyElement;
 
-    /** @return bool */
-    public function moveToAttribute(string $name) {}
+    public string $localName;
 
-    /** @return bool */
-    public function moveToAttributeNo(int $index) {}
+    public string $name;
 
-    /** @return bool */
-    public function moveToAttributeNs(string $name, string $namespace) {}
+    public string $namespaceURI;
+
+    public int $nodeType;
+
+    public string $prefix;
+
+    public string $value;
+
+    public string $xmlLang;
 
     /** @return bool */
-    public function moveToElement() {}
+    public function close() {} // TODO make the return type void
 
-    /** @return bool */
-    public function moveToFirstAttribute() {}
+    /** @tentative-return-type */
+    public function getAttribute(string $name): ?string {}
 
-    /** @return bool */
-    public function moveToNextAttribute() {}
+    /** @tentative-return-type */
+    public function getAttributeNo(int $index): ?string {}
 
-    /** @return bool */
-    public function read() {}
+    /** @tentative-return-type */
+    public function getAttributeNs(string $name, string $namespace): ?string {}
 
-    /** @return bool */
-    public function next(?string $name = null) {}
+    /** @tentative-return-type */
+    public function getParserProperty(int $property): bool {}
+
+    /** @tentative-return-type */
+    public function isValid(): bool {}
+
+    /** @tentative-return-type */
+    public function lookupNamespace(string $prefix): ?string {}
+
+    /** @tentative-return-type */
+    public function moveToAttribute(string $name): bool {}
+
+    /** @tentative-return-type */
+    public function moveToAttributeNo(int $index): bool {}
+
+    /** @tentative-return-type */
+    public function moveToAttributeNs(string $name, string $namespace): bool {}
+
+    /** @tentative-return-type */
+    public function moveToElement(): bool {}
+
+    /** @tentative-return-type */
+    public function moveToFirstAttribute(): bool {}
+
+    /** @tentative-return-type */
+    public function moveToNextAttribute(): bool {}
+
+    /** @tentative-return-type */
+    public function read(): bool {}
+
+    /** @tentative-return-type */
+    public function next(?string $name = null): bool {}
 
     /** @return bool|XMLReader */
-    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {}
+    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
-    /** @return string */
-    public function readInnerXml() {}
+    /** @tentative-return-type */
+    public function readInnerXml(): string {}
 
-    /** @return string */
-    public function readOuterXml() {}
+    /** @tentative-return-type */
+    public function readOuterXml(): string {}
 
-    /** @return string */
-    public function readString() {}
+    /** @tentative-return-type */
+    public function readString(): string {}
 
-    /** @return bool */
-    public function setSchema(?string $filename) {}
+    /** @tentative-return-type */
+    public function setSchema(?string $filename): bool {}
 
-    /** @return bool */
-    public function setParserProperty(int $property, bool $value) {}
+    /** @tentative-return-type */
+    public function setParserProperty(int $property, bool $value): bool {}
 
-    /** @return bool */
-    public function setRelaxNGSchema(?string $filename) {}
+    /** @tentative-return-type */
+    public function setRelaxNGSchema(?string $filename): bool {}
 
-    /** @return bool */
-    public function setRelaxNGSchemaSource(?string $source) {}
+    /** @tentative-return-type */
+    public function setRelaxNGSchemaSource(?string $source): bool {}
 
     /** @return bool|XMLReader */
-    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {}
+    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
-    /** @return DOMNode|false */
-    public function expand(?DOMNode $baseNode = null) {}
+    /** @tentative-return-type */
+    public function expand(?DOMNode $baseNode = null): DOMNode|false {}
 }

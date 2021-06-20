@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -379,7 +379,7 @@ PHP_FUNCTION(get_meta_tags)
 {
 	char *filename;
 	size_t filename_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	int in_tag = 0, done = 0;
 	int looking_for_val = 0, have_name = 0, have_content = 0;
 	int saw_name = 0, saw_content = 0;
@@ -523,11 +523,11 @@ PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	size_t filename_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = 0;
 	zend_long maxlen;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -564,10 +564,6 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	if (maxlen > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "maxlen truncated from " ZEND_LONG_FMT " to %d bytes", maxlen, INT_MAX);
-		maxlen = INT_MAX;
-	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
 		RETVAL_STR(contents);
 	} else {
@@ -654,8 +650,8 @@ PHP_FUNCTION(file_put_contents)
 		case IS_DOUBLE:
 		case IS_FALSE:
 		case IS_TRUE:
-			convert_to_string_ex(data);
-
+			convert_to_string(data);
+			ZEND_FALLTHROUGH;
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
@@ -703,6 +699,7 @@ PHP_FUNCTION(file_put_contents)
 					break;
 				}
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			numbytes = -1;
 			break;
@@ -725,12 +722,12 @@ PHP_FUNCTION(file)
 	char *filename;
 	size_t filename_len;
 	char *p, *s, *e;
-	register int i = 0;
+	int i = 0;
 	char eol_marker = '\n';
 	zend_long flags = 0;
-	zend_bool use_include_path;
-	zend_bool include_new_line;
-	zend_bool skip_blank_lines;
+	bool use_include_path;
+	bool include_new_line;
+	bool skip_blank_lines;
 	php_stream *stream;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -828,10 +825,6 @@ PHP_FUNCTION(tempnam)
 		Z_PARAM_PATH(prefix, prefix_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(dir)) {
-		RETURN_FALSE;
-	}
-
 	p = php_basename(prefix, prefix_len, NULL, 0);
 	if (ZSTR_LEN(p) > 64) {
 		ZSTR_VAL(p)[63] = '\0';
@@ -839,7 +832,7 @@ PHP_FUNCTION(tempnam)
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, 1)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ALWAYS)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
@@ -869,7 +862,7 @@ PHP_FUNCTION(fopen)
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
@@ -1018,7 +1011,7 @@ PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
 	zend_long len = 1024;
-	zend_bool len_is_null = 1;
+	bool len_is_null = 1;
 	char *buf = NULL;
 	size_t line_len = 0;
 	zend_string *str;
@@ -1141,7 +1134,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
-	zend_bool maxlen_is_null = 1;
+	bool maxlen_is_null = 1;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -1286,7 +1279,7 @@ PHP_FUNCTION(mkdir)
 	size_t dir_len;
 	zval *zcontext = NULL;
 	zend_long mode = 0777;
-	zend_bool recursive = 0;
+	bool recursive = 0;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1329,7 +1322,7 @@ PHP_FUNCTION(readfile)
 	char *filename;
 	size_t filename_len;
 	size_t size = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 	php_stream_context *context = NULL;
@@ -1358,7 +1351,7 @@ PHP_FUNCTION(readfile)
 PHP_FUNCTION(umask)
 {
 	zend_long mask = 0;
-	zend_bool mask_is_null = 1;
+	bool mask_is_null = 1;
 	int oldumask;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
@@ -1470,6 +1463,44 @@ PHP_FUNCTION(unlink)
 	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
 }
 /* }}} */
+
+PHP_FUNCTION(fsync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
+}
+
+PHP_FUNCTION(fdatasync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
+}
 
 /* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
@@ -1651,7 +1682,7 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php
 		return FAILURE;
 	}
 
-	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET | PHP_STREAM_URL_STAT_NOCACHE, &dest_s, ctx)) {
+	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, ctx)) {
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
@@ -1782,7 +1813,7 @@ quit_loop:
 			if (last_chars[0] == '\r') {
 				return ptr - 2;
 			}
-			/* break is omitted intentionally */
+			ZEND_FALLTHROUGH;
 		case '\r':
 			return ptr - 1;
 	}
@@ -1803,14 +1834,16 @@ PHP_FUNCTION(fputcsv)
 	ssize_t ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
+	zend_string *eol_str = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(2, 5)
+	ZEND_PARSE_PARAMETERS_START(2, 6)
 		Z_PARAM_RESOURCE(fp)
 		Z_PARAM_ARRAY(fields)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 		Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 		Z_PARAM_STRING(escape_str, escape_str_len)
+		Z_PARAM_STR_OR_NULL(eol_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (delimiter_str != NULL) {
@@ -1848,7 +1881,7 @@ PHP_FUNCTION(fputcsv)
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
-	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char);
+	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char, eol_str);
 	if (ret < 0) {
 		RETURN_FALSE;
 	}
@@ -1856,10 +1889,10 @@ PHP_FUNCTION(fputcsv)
 }
 /* }}} */
 
-/* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char) */
-PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
+/* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str) */
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str)
 {
-	int count, i = 0;
+	uint32_t count, i = 0;
 	size_t ret;
 	zval *field_tmp;
 	smart_str csvline = {0};
@@ -1906,7 +1939,11 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 		zend_tmp_string_release(tmp_field_str);
 	} ZEND_HASH_FOREACH_END();
 
-	smart_str_appendc(&csvline, '\n');
+	if (eol_str) {
+		smart_str_append(&csvline, eol_str);
+	} else {
+		smart_str_appendc(&csvline, '\n');
+	}
 	smart_str_0(&csvline);
 
 	ret = php_stream_write(stream, ZSTR_VAL(csvline.s), ZSTR_LEN(csvline.s));
@@ -1931,7 +1968,7 @@ PHP_FUNCTION(fgetcsv)
 
 	{
 		zval *fd;
-		zend_bool len_is_null = 1;
+		bool len_is_null = 1;
 		char *delimiter_str = NULL;
 		size_t delimiter_str_len = 0;
 		char *enclosure_str = NULL;
@@ -2013,7 +2050,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
 	int inc_len;
-	zend_bool first_field = 1;
+	bool first_field = 1;
 
 	ZEND_ASSERT((escape_char >= 0 && escape_char <= UCHAR_MAX) || escape_char == PHP_CSV_NO_ESCAPE);
 
@@ -2082,7 +2119,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
-								/* break is omitted intentionally */
+								ZEND_FALLTHROUGH;
 
 							case 0: {
 								char *new_buf;
@@ -2134,7 +2171,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -2:
 					case -1:
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						/* we need to determine if the enclosure is
 						 * 'real' or is it escaped */
@@ -2203,7 +2240,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_3;
@@ -2234,7 +2271,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_4;

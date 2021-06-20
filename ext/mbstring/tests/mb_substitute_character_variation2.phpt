@@ -1,9 +1,7 @@
 --TEST--
 Test mb_substitute_character() function : variation unmappable out char for convert encoding
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo "*** Testing mb_substitute_character() : variation ***\n";

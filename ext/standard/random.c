@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -84,7 +84,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ php_random_bytes */
-PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
@@ -94,7 +94,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
@@ -222,7 +222,7 @@ PHP_FUNCTION(random_bytes)
 /* }}} */
 
 /* {{{ */
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
 {
 	zend_ulong umax;
 	zend_ulong trial;

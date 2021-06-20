@@ -1,7 +1,7 @@
 --TEST--
 Bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses containing = or ?)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 

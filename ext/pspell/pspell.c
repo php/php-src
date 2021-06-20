@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -88,7 +88,7 @@ static zend_object *php_pspell_object_to_zend_object(php_pspell_object *obj) {
 
 static zend_function *php_pspell_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpell object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Dictionary object except through helper functions");
 	return NULL;
 }
 
@@ -126,7 +126,7 @@ static zend_object *php_pspell_config_object_to_zend_object(php_pspell_config_ob
 
 static zend_function *php_pspell_config_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpellConfig object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Config object except through helper functions");
 	return NULL;
 }
 
@@ -150,10 +150,7 @@ static void php_pspell_config_object_free(zend_object *zobj) {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "PSpell", class_PSpell_methods);
-	php_pspell_ce = zend_register_internal_class(&ce);
-	php_pspell_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_pspell_ce = register_class_PSpell_Dictionary();
 	php_pspell_ce->create_object = php_pspell_object_create;
 	php_pspell_ce->serialize = zend_class_serialize_deny;
 	php_pspell_ce->unserialize = zend_class_unserialize_deny;
@@ -164,9 +161,7 @@ static PHP_MINIT_FUNCTION(pspell)
 	php_pspell_handlers.get_constructor = php_pspell_object_get_constructor;
 	php_pspell_handlers.offset = XtOffsetOf(php_pspell_object, std);
 
-	INIT_CLASS_ENTRY(ce, "PSpellConfig", class_PSpellConfig_methods);
-	php_pspell_config_ce = zend_register_internal_class(&ce);
-	php_pspell_config_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	php_pspell_config_ce = register_class_PSpell_Config();
 	php_pspell_config_ce->create_object = php_pspell_config_object_create;
 	php_pspell_config_ce->serialize = zend_class_serialize_deny;
 	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
@@ -645,7 +640,7 @@ PHP_FUNCTION(pspell_config_create)
 PHP_FUNCTION(pspell_config_runtogether)
 {
 	zval *zcfg;
-	zend_bool runtogether;
+	bool runtogether;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &runtogether) == FAILURE) {
@@ -773,7 +768,7 @@ PHP_FUNCTION(pspell_config_repl)
 PHP_FUNCTION(pspell_config_save_repl)
 {
 	zval *zcfg;
-	zend_bool save;
+	bool save;
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &zcfg, php_pspell_config_ce, &save) == FAILURE) {

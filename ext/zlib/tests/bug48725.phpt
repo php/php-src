@@ -1,9 +1,7 @@
 --TEST--
 Bug #48725 (Support for flushing in zlib stream)
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $text = str_repeat('0123456789abcdef', 1000);

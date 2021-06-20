@@ -44,12 +44,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"),
-
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
@@ -62,7 +56,7 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-             $fp => 'resource', 133 => "int", 444.432 => "float",
+             $fp => 'resource', 133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -184,37 +178,50 @@ array(7) {
   string(1) "4"
 }
 -- Iteration 5 --
-int(2)
-array(2) {
+int(5)
+array(5) {
   [0]=>
   int(10)
-  [1]=>
-  string(5) "float"
+  ["\tHello"]=>
+  int(111)
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
+  float(2.2)
+  ["pen\n"]=>
+  int(33)
 }
-int(4)
-array(4) {
+int(7)
+array(7) {
   [0]=>
   int(10)
   [1]=>
   string(5) "hello"
   [2]=>
   string(5) "world"
-  [3]=>
-  string(5) "float"
+  ["\tHello"]=>
+  int(111)
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
+  float(2.2)
+  ["pen\n"]=>
+  int(33)
 }
 -- Iteration 6 --
 int(5)
 array(5) {
   [0]=>
   int(10)
-  [1]=>
-  string(2) "f1"
-  [2]=>
-  string(2) "f2"
-  [3]=>
-  string(2) "f3"
-  [4]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
+  float(2.2)
+  ["pen
+"]=>
+  int(33)
 }
 int(7)
 array(7) {
@@ -224,128 +231,65 @@ array(7) {
   string(5) "hello"
   [2]=>
   string(5) "world"
-  [3]=>
-  string(2) "f1"
-  [4]=>
-  string(2) "f2"
-  [5]=>
-  string(2) "f3"
-  [6]=>
-  string(2) "f4"
+  ["	Hello"]=>
+  int(111)
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
+  float(2.2)
+  ["pen
+"]=>
+  int(33)
 }
 -- Iteration 7 --
-int(5)
-array(5) {
+int(3)
+array(3) {
   [0]=>
   int(10)
-  ["\tHello"]=>
-  int(111)
-  ["re\td"]=>
-  string(5) "color"
-  ["\v\fworld"]=>
-  float(2.2)
-  ["pen\n"]=>
-  int(33)
+  [1]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
-int(7)
-array(7) {
+int(5)
+array(5) {
   [0]=>
   int(10)
   [1]=>
   string(5) "hello"
   [2]=>
   string(5) "world"
-  ["\tHello"]=>
-  int(111)
-  ["re\td"]=>
-  string(5) "color"
-  ["\v\fworld"]=>
-  float(2.2)
-  ["pen\n"]=>
-  int(33)
+  [3]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 8 --
-int(5)
-array(5) {
+int(3)
+array(3) {
   [0]=>
   int(10)
-  ["	Hello"]=>
-  int(111)
-  ["re	d"]=>
-  string(5) "color"
-  ["world"]=>
-  float(2.2)
-  ["pen
-"]=>
-  int(33)
+  [""]=>
+  string(5) "hello"
+  [1]=>
+  string(8) "resource"
 }
-int(7)
-array(7) {
+int(5)
+array(5) {
   [0]=>
   int(10)
   [1]=>
   string(5) "hello"
   [2]=>
   string(5) "world"
-  ["	Hello"]=>
-  int(111)
-  ["re	d"]=>
-  string(5) "color"
-  ["world"]=>
-  float(2.2)
-  ["pen
-"]=>
-  int(33)
+  [""]=>
+  string(5) "hello"
+  [3]=>
+  string(8) "resource"
 }
 -- Iteration 9 --
-int(3)
-array(3) {
-  [0]=>
-  int(10)
-  [1]=>
-  string(5) "hello"
-  ["Hello world"]=>
-  string(6) "string"
-}
-int(5)
-array(5) {
-  [0]=>
-  int(10)
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  [3]=>
-  string(5) "hello"
-  ["Hello world"]=>
-  string(6) "string"
-}
--- Iteration 10 --
-int(3)
-array(3) {
-  [0]=>
-  int(10)
-  [""]=>
-  string(5) "hello"
-  [1]=>
-  string(8) "resource"
-}
-int(5)
-array(5) {
-  [0]=>
-  int(10)
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  [""]=>
-  string(5) "hello"
-  [3]=>
-  string(8) "resource"
-}
--- Iteration 11 --
-int(8)
-array(8) {
+int(7)
+array(7) {
   [0]=>
   int(10)
   ["hello"]=>
@@ -356,15 +300,13 @@ array(8) {
   string(8) "resource"
   [2]=>
   string(3) "int"
-  [3]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }
-int(10)
-array(10) {
+int(9)
+array(9) {
   [0]=>
   int(10)
   [1]=>
@@ -379,8 +321,6 @@ array(10) {
   string(8) "resource"
   [4]=>
   string(3) "int"
-  [5]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>

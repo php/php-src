@@ -3,8 +3,8 @@ ldap_first_attribute() - Testing ldap_first_attribute() that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";
@@ -17,4 +17,4 @@ try {
 }
 ?>
 --EXPECT--
-ldap_first_attribute(): supplied resource is not a valid ldap result entry resource
+ldap_first_attribute(): Argument #2 ($entry) must be of type LDAP\ResultEntry, LDAP\Connection given

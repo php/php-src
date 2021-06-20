@@ -47,7 +47,7 @@ ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
-ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
+ZEND_API void zend_interned_strings_switch_storage(bool request);
 
 ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
@@ -332,21 +332,21 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
@@ -505,6 +505,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
+	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
 	_(ZEND_STR_EVAL,                   "eval") \
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_REQUIRE,                "require") \
@@ -548,9 +549,19 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_CALLABLE,               "callable") \
 	_(ZEND_STR_ITERABLE,               "iterable") \
 	_(ZEND_STR_VOID,                   "void") \
+	_(ZEND_STR_NEVER,                  "never") \
 	_(ZEND_STR_FALSE,                  "false") \
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
+	_(ZEND_STR_SLEEP,                  "__sleep") \
+	_(ZEND_STR_WAKEUP,                 "__wakeup") \
+	_(ZEND_STR_CASES,                  "cases") \
+	_(ZEND_STR_FROM,                   "from") \
+	_(ZEND_STR_TRYFROM,                "tryFrom") \
+	_(ZEND_STR_TRYFROM_LOWERCASE,      "tryfrom") \
+	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
+	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
+	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
 
 
 typedef enum _zend_known_string_id {

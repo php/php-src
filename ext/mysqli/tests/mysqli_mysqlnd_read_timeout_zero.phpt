@@ -1,8 +1,9 @@
 --TEST--
 mysqlnd.net_read_timeout = 0
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND) {

@@ -2,9 +2,10 @@
 ldap_get_option() and ldap_set_option() tests related to ldap controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
@@ -104,7 +105,8 @@ array(1) {
     }
   }
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 int(1)
 bool(true)
 bool(false)

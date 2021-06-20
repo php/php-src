@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function pcntl_fork(): int {}
 
@@ -78,4 +78,8 @@ function pcntl_async_signals(?bool $enable = null): bool {}
 
 #ifdef HAVE_UNSHARE
 function pcntl_unshare(int $flags): bool {}
+#endif
+
+#ifdef HAVE_RFORK
+function pcntl_rfork(int $flags, int $signal = 0): int{}
 #endif

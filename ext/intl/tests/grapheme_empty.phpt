@@ -1,7 +1,7 @@
 --TEST--
 Test grapheme_strpos-alike functions with empty needle
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

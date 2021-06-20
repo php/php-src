@@ -20,7 +20,7 @@ $varient_arrays = array (
    array(NULL),// array with NULL
    array(null),// array with null
    array(NULL, true, null, "", 1), // mixed array
-   array(-1.5 => "test", -2 => "rest", 2.5 => "two",
+   array(-1 => "test", -2 => "rest", 2 => "two",
          "" => "string", 0 => "zero", "" => "" ) // mixed array
 );
 

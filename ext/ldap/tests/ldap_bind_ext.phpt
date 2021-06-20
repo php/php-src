@@ -2,8 +2,9 @@
 ldap_bind_ext() - Basic binding
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 <?php
 require_once('skipifcontrol.inc');
@@ -44,25 +45,29 @@ var_dump(
 );
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 bool(true)
 int(49)
 string(0) ""
 array(0) {
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 bool(true)
 int(34)
 string(10) "invalid DN"

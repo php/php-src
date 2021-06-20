@@ -100,4 +100,4 @@ TestFunc2(TestClass)
 %stestclass.class.inc
 bool(true)
 ===NOFUNCTION===
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback, function "unavailable_autoload_function" not found or invalid function name
+spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, function "unavailable_autoload_function" not found or invalid function name

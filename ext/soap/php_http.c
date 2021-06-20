@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -88,9 +88,9 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 
 /* Additional HTTP headers */
 void http_context_headers(php_stream_context* context,
-                          zend_bool has_authorization,
-                          zend_bool has_proxy_authorization,
-                          zend_bool has_cookies,
+                          bool has_authorization,
+                          bool has_proxy_authorization,
+                          bool has_cookies,
                           smart_str* soap_headers)
 {
 	zval *tmp;
@@ -359,11 +359,11 @@ int make_http_soap_request(zval        *this_ptr,
 	zend_long redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
-	zend_bool old_allow_url_fopen;
+	bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
-	zend_bool has_authorization = 0;
-	zend_bool has_proxy_authorization = 0;
-	zend_bool has_cookies = 0;
+	bool has_authorization = 0;
+	bool has_proxy_authorization = 0;
+	bool has_cookies = 0;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -491,7 +491,7 @@ try_again:
 		     (((use_ssl && orig->scheme != NULL && zend_string_equals_literal(orig->scheme, "https")) ||
 		      (!use_ssl && orig->scheme == NULL) ||
 		      (!use_ssl && !zend_string_equals_literal(orig->scheme, "https"))) &&
-		     strcmp(ZSTR_VAL(orig->host), ZSTR_VAL(phpurl->host)) == 0 &&
+		     zend_string_equals(orig->host, phpurl->host) &&
 		     orig->port == phpurl->port))) {
     } else {
 			php_stream_close(stream);

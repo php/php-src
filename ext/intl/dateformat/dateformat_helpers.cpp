@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,7 +29,7 @@ extern "C" {
 using icu::GregorianCalendar;
 
 int datefmt_process_calendar_arg(
-	zend_object *calendar_obj, zend_long calendar_long, zend_bool calendar_is_null, Locale const& locale,
+	zend_object *calendar_obj, zend_long calendar_long, bool calendar_is_null, Locale const& locale,
 	const char *func_name, intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
 ) {
 	char *msg;

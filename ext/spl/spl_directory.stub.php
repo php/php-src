@@ -1,8 +1,8 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-class SplFileInfo
+class SplFileInfo implements Stringable
 {
     public function __construct(string $filename) {}
 
@@ -199,7 +199,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return bool */
     public function valid() {}
 
-    /** @return string|false */
+    /** @return string */
     public function fgets() {}
 
     /** @return string|false */
@@ -209,7 +209,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return int|false */
-    public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
+    public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n") {}
 
     /** @return bool|null */
     public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
@@ -281,7 +281,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function seek(int $line) {}
 
     /**
-     * @return string|false
+     * @return string
      * @alias SplFileObject::fgets
      */
     public function getCurrentLine() {}

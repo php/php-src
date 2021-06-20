@@ -1,9 +1,7 @@
 --TEST--
 Bug #48725 (Support for flushing in zlib stream)
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $stream = fopen('data://text/plain;base64,' . base64_encode('Foo bar baz'), 

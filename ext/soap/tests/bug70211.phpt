@@ -1,7 +1,11 @@
 --TEST--
 Bug #70211 (php 7 ZEND_HASH_IF_FULL_DO_RESIZE use after free)
+--EXTENSIONS--
+soap
 --SKIPIF--
-<?php require 'skipif.inc'; ?>
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>
 --FILE--
 <?php
 

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -173,7 +173,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find_deref(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -199,6 +199,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print(" => ");
 			}
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
@@ -798,11 +799,11 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_PROVIDER
 		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
 #endif
-#ifdef COMPILER
-		php_info_print_table_row(2, "Compiler", COMPILER);
+#ifdef PHP_BUILD_COMPILER
+		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif
-#ifdef ARCHITECTURE
-		php_info_print_table_row(2, "Architecture", ARCHITECTURE);
+#ifdef PHP_BUILD_ARCH
+		php_info_print_table_row(2, "Architecture", PHP_BUILD_ARCH);
 #endif
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
@@ -995,7 +996,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	}
 
 
-	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {
+	if (flag & PHP_INFO_CREDITS) {
 		php_info_print_hr();
 		php_print_credits(PHP_CREDITS_ALL & ~PHP_CREDITS_FULLPAGE);
 	}

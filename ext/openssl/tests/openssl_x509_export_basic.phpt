@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_export() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert_file = __DIR__ . "/cert.crt";
@@ -29,9 +29,9 @@ if (PHP_EOL !== "\n") {
 
 var_dump(strcmp($output, $a));
 var_dump(strcmp($output, $output2));
-var_dump(strcmp($output, $output3));
-var_dump(strcmp($output, $output4)); // different
-var_dump(strcmp($output, $output5)); // different
+var_dump(strcmp($output, $output4));
+var_dump($output3);
+var_dump($output5);
 ?>
 --EXPECTF--
 bool(true)
@@ -44,5 +44,5 @@ openssl_x509_export(): Argument #1 ($certificate) must be of type OpenSSLCertifi
 int(0)
 int(0)
 int(%d)
-int(0)
-int(%d)
+NULL
+NULL

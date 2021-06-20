@@ -11,9 +11,11 @@ opcache.error_log=
 opcache.log_verbosity_level=4
 opcache.huge_code_pages=0
 opcache.preload=
+opcache.interned_strings_buffer=8
+--EXTENSIONS--
+opcache
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 // Prints "Debug Restarting!" message on next request.
 if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
 ?>

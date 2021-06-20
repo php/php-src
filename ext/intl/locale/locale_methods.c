@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -146,7 +146,7 @@ static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 	zend_off_t i;
 
 	for(i=savedPos-1; i>=0; i--) {
-		if(isIDSeparator(*(str+i)) ){
+		if(isIDSeparator(*(str+i)) || isKeywordSeparator(*(str+i))){
 			/* delimiter found; check for singleton */
 			if(i>=2 && isIDSeparator(*(str+i-2)) ){
 				/* a singleton; so send the position of token before the singleton */
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(locale_filter_matches)
 	char*       	cur_lang_tag    = NULL;
 	char*       	cur_loc_range   = NULL;
 
-	zend_bool 	boolCanonical 	= 0;
+	bool 	boolCanonical 	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 
 	intl_error_reset( NULL );
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(locale_lookup)
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;
-	zend_bool	boolCanonical	= 0;
+	bool	boolCanonical	= 0;
 	zend_string* 	result_str	= NULL;
 
 	intl_error_reset( NULL );

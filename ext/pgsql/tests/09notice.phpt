@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL notice function
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 
@@ -49,7 +51,8 @@ try {
 }
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
 string(0) ""
 array(0) {
 }

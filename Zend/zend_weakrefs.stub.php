@@ -1,7 +1,8 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class WeakReference
 {
     public function __construct() {}
@@ -11,6 +12,7 @@ final class WeakReference
     public function get(): ?object {}
 }
 
+/** @strict-properties */
 final class WeakMap implements ArrayAccess, Countable, IteratorAggregate
 {
     /**

@@ -1,7 +1,7 @@
 --TEST--
 FR #77711 (CURLFile should support UNICODE filenames)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';

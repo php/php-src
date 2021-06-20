@@ -1,7 +1,7 @@
 --TEST--
 Test 4: Checking UTF8 Output
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 4: Checking UTF8 Output";

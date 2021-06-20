@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -69,7 +69,7 @@ PHP_FUNCTION( datefmt_get_pattern )
 	UChar  value_buf[64];
 	uint32_t    length = USIZE( value_buf );
 	UChar* value  = value_buf;
-	zend_bool   is_pattern_localized = false;
+	bool   is_pattern_localized = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -106,7 +106,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 	size_t      value_len = 0;
 	int32_t     slength = 0;
 	UChar*	    svalue  = NULL;
-	zend_bool   is_pattern_localized = false;
+	bool   is_pattern_localized = false;
 
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -184,7 +184,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 /* {{{ Set formatter lenient. */
 PHP_FUNCTION( datefmt_set_lenient )
 {
-	zend_bool isLenient = false;
+	bool isLenient = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 

@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 22: user fault (through throw of subclass)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class MyFault extends SoapFault {

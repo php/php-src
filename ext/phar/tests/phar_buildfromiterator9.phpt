@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() iterator, 1 file resource passed in
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0

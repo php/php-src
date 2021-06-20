@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class UConverter
 {
@@ -11,7 +11,7 @@ class UConverter
 
     /**
      * @param int $error
-     * @return string|null
+     * @return string|int|array|null
      */
     public function fromUCallback(int $reason, array $source, int $codePoint, &$error) {}
 
@@ -59,7 +59,7 @@ class UConverter
 
     /**
      * @param int $error
-     * @return string|null
+     * @return string|int|array|null
      */
     public function toUCallback(int $reason, string $source, string $codeUnits, &$error) {}
 

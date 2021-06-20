@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_result_metadata() - non SELECT statements
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.php?id=42490");

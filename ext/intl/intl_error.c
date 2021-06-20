@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -202,17 +202,6 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 	intl_error_set_code( NULL, err_code );
 }
 /* }}} */
-
-void intl_register_IntlException_class( void )
-{
-	zend_class_entry ce;
-
-	/* Create and register 'IntlException' class. */
-	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
-	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		zend_ce_exception );
-	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
-}
 
 smart_str intl_parse_error_to_string( UParseError* pe )
 {

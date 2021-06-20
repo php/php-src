@@ -1,10 +1,10 @@
 --TEST--
 Test if socket_recvfrom() receives data sent by socket_sendto() via IPv6 UDP (Win32)
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip only for Windows');
 }

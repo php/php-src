@@ -1,8 +1,7 @@
 --TEST--
 Bug #74993 Wrong reflection on some locale_* functions
---SKIPIF--
-<?php
-extension_loaded('intl') || print 'skip';
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $funcs = [

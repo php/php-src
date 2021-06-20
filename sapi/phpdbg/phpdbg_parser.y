@@ -64,13 +64,9 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 %% /* Rules */
 
 input
-	: non_empty_input { $$ = $1; }
-	| %empty
-	;
-
-non_empty_input
 	: command { $$ = $1; }
-	| non_empty_input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
+	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
+	| %empty
 	;
 
 command
@@ -176,7 +172,7 @@ full_expression
 %%
 
 static int yyerror(const char *msg) {
-	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
+	phpdbg_error("Parse Error: %s", msg);
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);

@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: \PDOStatement::nextRowset() should succeed when all rows in current rowset haven't been fetched
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--

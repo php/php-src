@@ -1,5 +1,7 @@
 --TEST--
 PECL Bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

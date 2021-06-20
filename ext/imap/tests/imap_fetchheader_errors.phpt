@@ -1,5 +1,7 @@
 --TEST--
 imap_fetchheader() errors: ValueError and Warnings
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');

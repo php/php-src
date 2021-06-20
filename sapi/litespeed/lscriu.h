@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -55,7 +55,7 @@ extern "C" {
 // return 1 if CRIU is available, return 0 if CRIU is not available
 int LSCRIU_Init(void);
 
-void LSCRIU_inc_req_procssed(void);
+void LSCRIU_inc_req_processed(void);
 
 
 #if defined (c_plusplus) || defined (__cplusplus)

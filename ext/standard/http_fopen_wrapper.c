@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -103,7 +103,7 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 	}
 }
 
-static zend_bool check_has_header(const char *headers, const char *header) {
+static bool check_has_header(const char *headers, const char *header) {
 	const char *s = headers;
 	while ((s = strstr(s, header))) {
 		if (s == headers || *(s-1) == '\n') {
@@ -132,20 +132,19 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect = 0;
-	char *transport_string;
+	zend_string *transport_string;
 	zend_string *errstr = NULL;
-	size_t transport_len;
 	int have_header = 0;
-	zend_bool request_fulluri = 0, ignore_errors = 0;
+	bool request_fulluri = 0, ignore_errors = 0;
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
-	zend_bool follow_location = 1;
+	bool follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
 	smart_str req_buf = {0};
-	zend_bool custom_request_method;
+	bool custom_request_method;
 
 	tmp_line[0] = '\0';
 
@@ -172,9 +171,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		request_fulluri = 1;
 		use_ssl = 0;
 		use_proxy = 1;
-
-		transport_len = Z_STRLEN_P(tmpzval);
-		transport_string = estrndup(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		transport_string = zend_string_copy(Z_STR_P(tmpzval));
 	} else {
 		/* Normal http request (possibly with proxy) */
 
@@ -196,10 +193,9 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			Z_TYPE_P(tmpzval) == IS_STRING &&
 			Z_STRLEN_P(tmpzval) > 0) {
 			use_proxy = 1;
-			transport_len = Z_STRLEN_P(tmpzval);
-			transport_string = estrndup(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+			transport_string = zend_string_copy(Z_STR_P(tmpzval));
 		} else {
-			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
+			transport_string = zend_strpprintf(0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
 		}
 	}
 
@@ -221,7 +217,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		timeout.tv_usec = 0;
 	}
 
-	stream = php_stream_xport_create(transport_string, transport_len, options,
+	stream = php_stream_xport_create(ZSTR_VAL(transport_string), ZSTR_LEN(transport_string), options,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 			NULL, &timeout, context, &errstr, NULL);
 
@@ -235,7 +231,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		errstr = NULL;
 	}
 
-	efree(transport_string);
+	zend_string_release(transport_string);
 
 	if (stream && use_proxy && use_ssl) {
 		smart_str header = {0};
@@ -369,8 +365,8 @@ finish:
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
 			 * GET and HEAD unless it can be confirmed by the user */
 			if (!redirected
-				|| (Z_STRLEN_P(tmpzval) == 3 && memcmp("GET", Z_STRVAL_P(tmpzval), 3) == 0)
-				|| (Z_STRLEN_P(tmpzval) == 4 && memcmp("HEAD",Z_STRVAL_P(tmpzval), 4) == 0)
+				|| zend_string_equals_literal(Z_STR_P(tmpzval), "GET")
+				|| zend_string_equals_literal(Z_STR_P(tmpzval), "HEAD")
 			) {
 				custom_request_method = 1;
 				smart_str_append(&req_buf, Z_STR_P(tmpzval));
@@ -678,7 +674,7 @@ finish:
 			/* status codes of 1xx are "informational", and will be followed by a real response
 			 * e.g "100 Continue". RFC 7231 states that unexpected 1xx status MUST be parsed,
 			 * and MAY be ignored. As such, we need to skip ahead to the "real" status*/
-			if (response_code >= 100 && response_code < 200) {
+			if (response_code >= 100 && response_code < 200 && response_code != 101) {
 				/* consume lines until we find a line starting 'HTTP/1' */
 				while (
 					!php_stream_eof(stream)
@@ -730,24 +726,16 @@ finish:
 
 	/* read past HTTP headers */
 
-	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
-
 	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
 
-		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
+		if (http_header_line != NULL) {
+			efree(http_header_line);
+		}
+		if ((http_header_line = php_stream_get_line(stream, NULL, 0, &http_header_line_length)) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;
-			if (*e != '\n') {
-				do { /* partial header */
-					if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) == NULL) {
-						php_stream_wrapper_log_error(wrapper, options, "Failed to read HTTP headers");
-						goto out;
-					}
-					e = http_header_line + http_header_line_length - 1;
-				} while (*e != '\n');
-				continue;
-			}
+
 			while (e >= http_header_line && (*e == '\n' || *e == '\r')) {
 				e--;
 			}

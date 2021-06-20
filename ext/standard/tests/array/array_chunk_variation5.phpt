@@ -16,7 +16,7 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $input_array = array(1, 2, 3);
 
 // different magnitude's
-$sizes = array(-1, count($input_array) + 1, 0, 1.5);
+$sizes = array(-1, count($input_array) + 1, 0, 1);
 
 // loop through the array for size argument
 foreach ($sizes as $size){
@@ -86,7 +86,7 @@ array_chunk(): Argument #2 ($length) must be greater than 0
 array_chunk(): Argument #2 ($length) must be greater than 0
 array_chunk(): Argument #2 ($length) must be greater than 0
 
--- Testing array_chunk() when size = 1.5 --
+-- Testing array_chunk() when size = 1 --
 array(3) {
   [0]=>
   array(1) {

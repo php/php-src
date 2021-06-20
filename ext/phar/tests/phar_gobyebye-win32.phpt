@@ -1,8 +1,9 @@
 --TEST--
 Phar: test edge cases of intercepted functions when the underlying phar archive has been unlinkArchive()d
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");
-if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
+<?php if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
 ?>
 --INI--
 phar.readonly=0
@@ -41,6 +42,6 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: opendir(foo/hi,foo/hi): %s (code: 3) in phar://%sphar_gobyebye-win32.phar.php/foo/hi on line %d
+Warning: opendir(foo/hi): %s (code: 3) in phar://%sphar_gobyebye-win32.phar.php/foo/hi on line %d
 
 Warning: opendir(foo/hi): Failed to open directory: No such file or directory in phar://%sphar_gobyebye-win32.phar.php/foo/hi on line %d

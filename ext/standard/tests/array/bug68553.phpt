@@ -35,6 +35,8 @@ try {
 ?>
 --EXPECTF--
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+
+Deprecated: Implicit conversion from float 7.38 to int loses precision in %s on line %d
 array(8) {
   [10]=>
   array(1) {

@@ -1,22 +1,22 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_MAC
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $values = Array(
-    array("01-23-45-67-89-ab", null),
+    array("01-23-45-67-89-ab", 0),
     array("01-23-45-67-89-ab", array("options" => array("separator" => "-"))),
     array("01-23-45-67-89-ab", array("options" => array("separator" => "."))),
     array("01-23-45-67-89-ab", array("options" => array("separator" => ":"))),
-    array("01-23-45-67-89-AB", null),
-    array("01-23-45-67-89-aB", null),
-    array("01:23:45:67:89:ab", null),
-    array("01:23:45:67:89:AB", null),
-    array("01:23:45:67:89:aB", null),
-    array("01:23:45-67:89:aB", null),
-    array("xx:23:45:67:89:aB", null),
-    array("0123.4567.89ab", null),
+    array("01-23-45-67-89-AB", 0),
+    array("01-23-45-67-89-aB", 0),
+    array("01:23:45:67:89:ab", 0),
+    array("01:23:45:67:89:AB", 0),
+    array("01:23:45:67:89:aB", 0),
+    array("01:23:45-67:89:aB", 0),
+    array("xx:23:45:67:89:aB", 0),
+    array("0123.4567.89ab", 0),
     array("01-23-45-67-89-ab", array("options" => array("separator" => "--"))),
     array("01-23-45-67-89-ab", array("options" => array("separator" => ""))),
 );

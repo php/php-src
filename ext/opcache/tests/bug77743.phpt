@@ -1,7 +1,7 @@
 --TEST--
 Bug #77743: Incorrect pi node insertion for jmpznz with identical successors
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

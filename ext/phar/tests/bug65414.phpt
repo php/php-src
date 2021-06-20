@@ -1,7 +1,7 @@
 --TEST--
 Bug #65414 Injection (A1) in .phar files magic .phar directory
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly = 0
 --FILE--

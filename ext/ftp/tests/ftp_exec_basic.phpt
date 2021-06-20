@@ -3,10 +3,9 @@ Testing ftp_exec returns true
 --CREDITS--
 Rodrigo Moyle <eu [at] rodrigorm [dot] com [dot] br>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

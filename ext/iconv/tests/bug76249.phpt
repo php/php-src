@@ -1,7 +1,7 @@
 --TEST--
 Bug #76249 (stream filter convert.iconv leads to infinite loop on invalid sequence)
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $fh = fopen('php://memory', 'rw');

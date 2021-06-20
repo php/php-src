@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->__construct(), options
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -156,6 +157,11 @@ MySQLPDOTest::skip();
         set_option_and_check(33, PDO::MYSQL_ATTR_DIRECT_QUERY, 1, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
         set_option_and_check(34, PDO::MYSQL_ATTR_DIRECT_QUERY, 0, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
 
+        if (defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
+            set_option_and_check(35, PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, null, 'PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY');
+            // libmysqlclient returns the directory with a trailing slash.
+            // set_option_and_check(36, PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, __DIR__, 'PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY');
+        }
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s Line: %s\n",
             $e->getMessage(),

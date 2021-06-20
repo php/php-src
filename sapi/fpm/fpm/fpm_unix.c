@@ -34,7 +34,7 @@
 
 size_t fpm_pagesize;
 
-int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_worker_pool_config_s *c = wp->config;
 #ifdef HAVE_FPM_ACL
@@ -198,7 +198,7 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
+int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -249,7 +249,7 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 }
 /* }}} */
 
-int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_free_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -458,7 +458,7 @@ int fpm_unix_init_main() /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) fpm_global_config.rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
+			zlog(ZLOG_SYSERROR, "failed to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
 			return -1;
 		}
 	}
@@ -482,7 +482,7 @@ int fpm_unix_init_main() /* {{{ */
 		 *
 		 * The parent process has then to wait for the master
 		 * process to initialize to return a consistent exit
-		 * value. For this pupose, the master process will
+		 * value. For this purpose, the master process will
 		 * send \"1\" into the pipe if everything went well
 		 * and \"0\" otherwise.
 		 */

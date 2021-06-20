@@ -1,5 +1,7 @@
 --TEST--
 Bug #38377 (session_destroy() gives warning after session_regenerate_id())
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

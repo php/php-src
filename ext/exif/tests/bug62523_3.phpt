@@ -1,9 +1,7 @@
 --TEST--
 Bug 62523 (php crashes with segfault when exif_read_data called)
---SKIPIF--
-<?php
-extension_loaded("exif") or die("skip need exif");
-?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 echo "Test\n";

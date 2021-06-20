@@ -1,9 +1,7 @@
 --TEST--
 bcpow() does not support non-integral exponents
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 try {

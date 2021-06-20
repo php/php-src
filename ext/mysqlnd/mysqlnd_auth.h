@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -27,7 +27,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const MYSQLND_SESSION_OPTIONS * const session_options,
 						const zend_ulong mysql_flags,
 						const unsigned int server_charset_no,
-						const zend_bool use_full_blown_auth_packet,
+						const bool use_full_blown_auth_packet,
 						const char * const auth_protocol,
 						struct st_mysqlnd_authentication_plugin * auth_plugin,
 						const zend_uchar * const orig_auth_plugin_data,
@@ -48,8 +48,8 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const size_t passwd_len,
 								const char * const db,
 								const size_t db_len,
-								const zend_bool silent,
-								const zend_bool use_full_blown_auth_packet,
+								const bool silent,
+								const bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
 								struct st_mysqlnd_authentication_plugin * auth_plugin,
 								const zend_uchar * const orig_auth_plugin_data,
@@ -92,8 +92,8 @@ mysqlnd_run_authentication(
 			const unsigned int charset_no,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
 			const zend_ulong mysql_flags,
-			const zend_bool silent,
-			const zend_bool is_change_user
+			const bool silent,
+			const bool is_change_user
 			);
 
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, const size_t pass_len);

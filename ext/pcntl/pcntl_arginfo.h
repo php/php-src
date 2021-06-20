@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8742901e9b4fe5ee595a1e7c492474723f95d253 */
+ * Stub hash: fb7d243e0a1b5e85e0bfc0b2add5145cee134b25 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -119,6 +119,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_unshare, 0, 1, _IS_BOOL, 0
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_RFORK)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_rfork, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signal, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
@@ -157,6 +164,9 @@ ZEND_FUNCTION(pcntl_strerror);
 ZEND_FUNCTION(pcntl_async_signals);
 #if defined(HAVE_UNSHARE)
 ZEND_FUNCTION(pcntl_unshare);
+#endif
+#if defined(HAVE_RFORK)
+ZEND_FUNCTION(pcntl_rfork);
 #endif
 
 
@@ -199,6 +209,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_async_signals, arginfo_pcntl_async_signals)
 #if defined(HAVE_UNSHARE)
 	ZEND_FE(pcntl_unshare, arginfo_pcntl_unshare)
+#endif
+#if defined(HAVE_RFORK)
+	ZEND_FE(pcntl_rfork, arginfo_pcntl_rfork)
 #endif
 	ZEND_FE_END
 };

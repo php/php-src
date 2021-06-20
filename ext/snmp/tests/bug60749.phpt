@@ -2,6 +2,8 @@
 Bug #60749: SNMP module should not strip non-standard SNMP port from hostname
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

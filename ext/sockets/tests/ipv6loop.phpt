@@ -1,16 +1,16 @@
 --TEST--
 IPv6 Loopback test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
+    
     require 'ipv6_skipif.inc';
 ?>
 --FILE--
 <?php
     /* Setup socket server */
-    $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+    $server = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
     if (!$server) {
         die('Unable to create AF_INET6 socket [server]');
     }
@@ -29,7 +29,7 @@ IPv6 Loopback test
     }
 
     /* Connect to it */
-    $client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+    $client = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
     if (!$client) {
         die('Unable to create AF_INET6 socket [client]');
     }

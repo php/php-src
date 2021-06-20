@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -42,7 +42,7 @@ static int le_bucket;
 PHP_METHOD(php_user_filter, filter)
 {
 	zval *in, *out, *consumed;
-	zend_bool closing;
+	bool closing;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrzb", &in, &out, &consumed, &closing) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -51,6 +51,8 @@ PHP_METHOD(php_user_filter, filter)
 PHP_METHOD(php_user_filter, onCreate)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_TRUE;
 }
 
 PHP_METHOD(php_user_filter, onClose)
@@ -58,7 +60,7 @@ PHP_METHOD(php_user_filter, onClose)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static zend_class_entry user_filter_class_entry;
+static zend_class_entry *user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
@@ -71,14 +73,8 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 
 PHP_MINIT_FUNCTION(user_filters)
 {
-	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
-	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", class_php_user_filter_methods);
-	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry)) == NULL) {
-		return FAILURE;
-	}
-	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC);
+	user_filter_class_entry = register_class_php_user_filter();
 
 	/* init the filter resource; it has no dtor, as streams will always clean it up
 	 * at the correct time */
@@ -213,7 +209,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_stream_bucket *bucket = buckets_in->head;
+		php_stream_bucket *bucket;
 
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		while ((bucket = buckets_in->head)) {

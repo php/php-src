@@ -3,10 +3,8 @@ imageloadfont() "End of file while reading header"
 --CREDITS--
 Ike Devolder <ike.devolder@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $filename = __DIR__ .  '/font.gdf';

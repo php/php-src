@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -65,17 +65,16 @@ typedef struct {
 typedef struct {
 	zval                  func_name;
 	zend_fcall_info_cache fci_cache;
-	int                   method;
-} php_curl_progress, php_curl_fnmatch, php_curlm_server_push;
+} php_curl_callback;
 
 typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_progress *progress;
+	php_curl_callback *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_fnmatch  *fnmatch;
+	php_curl_callback  *fnmatch;
 #endif
 } php_curl_handlers;
 
@@ -89,21 +88,25 @@ struct _php_curl_send_headers {
 };
 
 struct _php_curl_free {
-	zend_llist str;
 	zend_llist post;
 	zend_llist stream;
+#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
+	zend_llist buffers;
+#endif
 	HashTable *slist;
 };
 
 typedef struct {
 	CURL                         *cp;
-	php_curl_handlers            *handlers;
+	php_curl_handlers             handlers;
 	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
-	zend_bool                     in_callback;
+	bool                     in_callback;
 	uint32_t*                     clone;
 	zval                          postfields;
+	/* For CURLOPT_PRIVATE */
+	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
 	zend_object                   std;
@@ -112,14 +115,13 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curlm_server_push	*server_push;
+	php_curl_callback	*server_push;
 } php_curlm_handlers;
 
 typedef struct {
-	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
-	php_curlm_handlers	*handlers;
+	php_curlm_handlers handlers;
 	struct {
 		int no;
 	} err;
@@ -153,8 +155,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
-void curl_multi_register_class(const zend_function_entry *method_entries);
-void curl_share_register_class(const zend_function_entry *method_entries);
+void curl_multi_register_handlers(void);
+void curl_share_register_handlers(void);
 void curlfile_register_class(void);
 int curl_cast_object(zend_object *obj, zval *result, int type);
 

@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -165,7 +165,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 				*locale;
 	size_t			key_len,
 				locale_len;
-	zend_bool	commonly_used;
+	bool	commonly_used;
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb",
@@ -440,7 +440,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 U_CFUNC PHP_FUNCTION(intlcal_clear)
 {
 	zend_long field;
-	zend_bool field_is_null = 1;
+	bool field_is_null = 1;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(),
@@ -757,7 +757,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 {
 	double date;
-	zend_bool date_is_null = 1;
+	bool date_is_null = 1;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -799,7 +799,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
 
 U_CFUNC PHP_FUNCTION(intlcal_set_lenient)
 {
-	zend_bool is_lenient;
+	bool is_lenient;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),

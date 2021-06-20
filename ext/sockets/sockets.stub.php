@@ -1,11 +1,13 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class Socket
 {
 }
 
+/** @strict-properties */
 final class AddressInfo
 {
 }
@@ -78,7 +80,7 @@ function socket_setopt(Socket $socket, int $level, int $option, $value): bool {}
 
 #ifdef HAVE_SOCKETPAIR
 /** @param array $pair */
-function socket_create_pair(int $domain, int $type, int $protocol, &$pair): ?bool {}
+function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool {}
 #endif
 
 #ifdef HAVE_SHUTDOWN

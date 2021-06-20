@@ -48,7 +48,7 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	"Shift_JIS",
 	mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,
 	&vtbl_wchar_sjis_mac
 };
@@ -373,6 +373,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			break;
 		}
 		s1 = s2 = 0;
+		ZEND_FALLTHROUGH;
 
 	case 0:
 

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 interface Throwable extends Stringable
 {
@@ -22,7 +22,17 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    final private function __clone(): void {}
+    /** @var string Intentionally left untyped for BC reasons */
+    protected $message = "";
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
+    protected $code = 0;
+    protected string $file = "";
+    protected int $line = 0;
+    private array $trace = [];
+    private ?Throwable $previous = null;
+
+    private function __clone(): void {}
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
@@ -49,15 +59,34 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    public function __construct(string $message = "", int $code = 0, int $severity = E_ERROR, ?string $filename = null, ?int $line = null, ?Throwable $previous = null) {}
+    protected int $severity = E_ERROR;
+
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        int $severity = E_ERROR,
+        ?string $filename = null,
+        ?int $line = null,
+        ?Throwable $previous = null
+    ) {}
 
     final public function getSeverity(): int {}
 }
 
 class Error implements Throwable
 {
+    /** @var string Intentionally left untyped for BC reasons */
+    protected $message = "";
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
+    protected $code = 0;
+    protected string $file = "";
+    protected int $line;
+    private array $trace = [];
+    private ?Throwable $previous = null;
+
     /** @implementation-alias Exception::__clone */
-    final private function __clone(): void {}
+    private function __clone(): void {}
 
     /** @implementation-alias Exception::__construct */
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
@@ -121,5 +150,9 @@ class ArithmeticError extends Error
 }
 
 class DivisionByZeroError extends ArithmeticError
+{
+}
+
+class UnhandledMatchError extends Error
 {
 }

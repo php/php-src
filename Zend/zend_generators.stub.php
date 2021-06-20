@@ -1,7 +1,8 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @strict-properties */
 final class Generator implements Iterator
 {
     public function rewind(): void {}
@@ -19,4 +20,8 @@ final class Generator implements Iterator
     public function throw(Throwable $exception): mixed {}
 
     public function getReturn(): mixed {}
+}
+
+class ClosedGeneratorException extends Exception
+{
 }

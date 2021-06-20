@@ -1,5 +1,7 @@
 --TEST--
 Bug #71600 (oci_fetch_all result in segfault when select more than 8 columns)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs

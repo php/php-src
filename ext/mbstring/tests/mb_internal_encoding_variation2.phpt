@@ -1,10 +1,7 @@
 --TEST--
 Test mb_internal_encoding() function : usage variations - Test different encodings
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*
@@ -179,10 +176,10 @@ string(9) "eucJP-win"
 -- Iteration 20 --
 string(9) "eucJP-win"
 bool(true)
-string(8) "SJIS-win"
+string(5) "CP932"
 
 -- Iteration 21 --
-string(8) "SJIS-win"
+string(5) "CP932"
 bool(true)
 string(11) "ISO-2022-JP"
 

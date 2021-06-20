@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_parse() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert = "file://" . __DIR__ . "/cert.crt";

@@ -1,9 +1,7 @@
 --TEST--
 Bug #62017: datefmt_create with incorrectly encoded timezone leaks pattern
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set('intl.error_level', E_WARNING);

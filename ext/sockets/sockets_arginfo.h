@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ee025740240c285691a84cfa3563c1dd1586a75d */
+ * Stub hash: aed25e8e90959fde6a454cf3b8d648feaf0ebad7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -125,7 +125,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_socket_setopt arginfo_socket_set_option
 
 #if defined(HAVE_SOCKETPAIR)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_create_pair, 0, 4, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_create_pair, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
@@ -321,3 +321,25 @@ static const zend_function_entry class_Socket_methods[] = {
 static const zend_function_entry class_AddressInfo_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Socket(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Socket", class_Socket_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_AddressInfo(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "AddressInfo", class_AddressInfo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}

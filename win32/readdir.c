@@ -21,10 +21,6 @@
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 DIR *opendir(const char *dir)
 {/*{{{*/
 	DIR *dp;
@@ -32,7 +28,7 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	char resolved_path_buff[MAXPATHLEN];
 	size_t resolvedw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
@@ -151,7 +147,7 @@ int rewinddir(DIR *dp)
 	wchar_t *filespecw;
 	HANDLE handle;
 	size_t dirw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	FindClose(dp->handle);
 
@@ -196,7 +192,3 @@ int rewinddir(DIR *dp)
 
 	return 0;
 }/*}}}*/
-
-#ifdef __cplusplus
-}
-#endif

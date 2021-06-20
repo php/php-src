@@ -24,8 +24,6 @@ var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
 var_dump(str_getcsv('" "" "', ' '));
 print "-----\n";
-var_dump(str_getcsv(NULL));
-print "-----\n";
 var_dump(str_getcsv(''));
 print "-----\n";
 
@@ -101,11 +99,6 @@ array(2) {
 array(1) {
   [0]=>
   string(3) " " "
-}
------
-array(1) {
-  [0]=>
-  NULL
 }
 -----
 array(1) {

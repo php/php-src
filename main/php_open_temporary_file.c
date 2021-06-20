@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -299,11 +299,17 @@ PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_strin
 def_tmp:
 		temp_dir = php_get_temporary_directory();
 
-		if (temp_dir && *temp_dir != '\0' && (!(flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK) || !php_check_open_basedir(temp_dir))) {
+		if (temp_dir &&
+		    *temp_dir != '\0' &&
+		    (!(flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ON_FALLBACK) || !php_check_open_basedir(temp_dir))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p);
 		} else {
 			return -1;
 		}
+	}
+
+	if ((flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ON_EXPLICIT_DIR) && php_check_open_basedir(dir)) {
+		return -1;
 	}
 
 	/* Try the directory given as parameter. */
@@ -320,7 +326,7 @@ def_tmp:
 
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, zend_string **opened_path_p)
 {
-	return php_open_temporary_fd_ex(dir, pfx, opened_path_p, 0);
+	return php_open_temporary_fd_ex(dir, pfx, opened_path_p, PHP_TMP_FILE_DEFAULT);
 }
 
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_p)

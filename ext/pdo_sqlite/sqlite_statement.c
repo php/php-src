@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -63,6 +63,7 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 
 		case SQLITE_ERROR:
 			sqlite3_reset(S->stmt);
+			ZEND_FALLTHROUGH;
 		case SQLITE_MISUSE:
 		case SQLITE_BUSY:
 		default:
@@ -225,6 +226,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 
 		case SQLITE_ERROR:
 			sqlite3_reset(S->stmt);
+			ZEND_FALLTHROUGH;
 		default:
 			pdo_sqlite_error_stmt(stmt);
 			return 0;
@@ -247,21 +249,11 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 	stmt->columns[colno].maxlen = SIZE_MAX;
 	stmt->columns[colno].precision = 0;
 
-	switch (sqlite3_column_type(S->stmt, colno)) {
-		case SQLITE_INTEGER:
-		case SQLITE_FLOAT:
-		case SQLITE3_TEXT:
-		case SQLITE_BLOB:
-		case SQLITE_NULL:
-		default:
-			stmt->columns[colno].param_type = PDO_PARAM_STR;
-			break;
-	}
-
 	return 1;
 }
 
-static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees)
+static int pdo_sqlite_stmt_get_col(
+		pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	if (!S->stmt) {
@@ -274,18 +266,35 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size
 	}
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
-			*ptr = NULL;
-			*len = 0;
+			ZVAL_NULL(result);
+			return 1;
+
+		case SQLITE_INTEGER: {
+			int64_t i = sqlite3_column_int64(S->stmt, colno);
+#if SIZEOF_ZEND_LONG < 8
+			if (i > ZEND_LONG_MAX || i < ZEND_LONG_MIN) {
+				ZVAL_STRINGL(result,
+					(char *) sqlite3_column_text(S->stmt, colno),
+					sqlite3_column_bytes(S->stmt, colno));
+				return 1;
+			}
+#endif
+			ZVAL_LONG(result, i);
+			return 1;
+		}
+
+		case SQLITE_FLOAT:
+			ZVAL_DOUBLE(result, sqlite3_column_double(S->stmt, colno));
 			return 1;
 
 		case SQLITE_BLOB:
-			*ptr = (char*)sqlite3_column_blob(S->stmt, colno);
-			*len = sqlite3_column_bytes(S->stmt, colno);
+			ZVAL_STRINGL_FAST(result,
+				sqlite3_column_blob(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
 			return 1;
 
 		default:
-			*ptr = (char*)sqlite3_column_text(S->stmt, colno);
-			*len = sqlite3_column_bytes(S->stmt, colno);
+			ZVAL_STRINGL_FAST(result,
+				(char *) sqlite3_column_text(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
 			return 1;
 	}
 }
@@ -311,20 +320,26 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
 			add_assoc_string(return_value, "native_type", "null");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_NULL);
 			break;
 
 		case SQLITE_FLOAT:
 			add_assoc_string(return_value, "native_type", "double");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
+			/* TODO Check this is correct */
+			ZEND_FALLTHROUGH;
 		case SQLITE_TEXT:
 			add_assoc_string(return_value, "native_type", "string");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_INTEGER:
 			add_assoc_string(return_value, "native_type", "integer");
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 	}
 

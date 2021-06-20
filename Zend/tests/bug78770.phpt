@@ -1,9 +1,7 @@
 --TEST--
 Bug #78770: Incorrect callability check inside internal methods
---SKIPIF--
-<?php
-if (!extension_loaded("intl")) die("skip requires intl");
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

@@ -29,7 +29,7 @@
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
 #define ZEND_OBSERVABLE_FN(fn_flags) \
-	(!(fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_FAKE_CLOSURE)))
+	(!(fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 
 typedef struct _zend_observer_fcall_data {
 	// points after the last handler
@@ -40,6 +40,7 @@ typedef struct _zend_observer_fcall_data {
 
 zend_llist zend_observers_fcall_list;
 zend_llist zend_observer_error_callbacks;
+zend_llist zend_observer_fiber_switch;
 
 int zend_observer_fcall_op_array_extension = -1;
 
@@ -72,6 +73,7 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 ZEND_API void zend_observer_startup(void) {
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
 	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
+	zend_llist_init(&zend_observer_fiber_switch, sizeof(zend_observer_fiber_switch_handler), NULL, 1);
 }
 
 ZEND_API void zend_observer_activate(void) {
@@ -89,6 +91,7 @@ ZEND_API void zend_observer_deactivate(void) {
 ZEND_API void zend_observer_shutdown(void) {
 	zend_llist_destroy(&zend_observers_fcall_list);
 	zend_llist_destroy(&zend_observer_error_callbacks);
+	zend_llist_destroy(&zend_observer_fiber_switch);
 }
 
 static void zend_observer_fcall_install(zend_execute_data *execute_data) {
@@ -220,7 +223,11 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 		first_observed_frame = NULL;
 		current_observed_frame = NULL;
 	} else {
-		current_observed_frame = execute_data->prev_execute_data;
+		zend_execute_data *ex = execute_data->prev_execute_data;
+		while (ex && !ex->func) {
+			ex = ex->prev_execute_data;
+		}
+		current_observed_frame = ex;
 	}
 }
 
@@ -228,7 +235,7 @@ ZEND_API void zend_observer_fcall_end_all(void)
 {
 	zend_execute_data *ex = current_observed_frame;
 	while (ex != NULL) {
-		if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+		if (ex->func && ex->func->type != ZEND_INTERNAL_FUNCTION) {
 			zend_observer_fcall_end(ex, NULL);
 		}
 		ex = ex->prev_execute_data;
@@ -241,7 +248,7 @@ ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
 }
 
-void zend_observer_error_notify(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	zend_llist_element *element;
 	zend_observer_error_cb callback;
@@ -249,5 +256,21 @@ void zend_observer_error_notify(int type, const char *error_filename, uint32_t e
 	for (element = zend_observer_error_callbacks.head; element; element = element->next) {
 		callback = *(zend_observer_error_cb *) (element->data);
 		callback(type, error_filename, error_lineno, message);
+	}
+}
+
+ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler)
+{
+	zend_llist_add_element(&zend_observer_fiber_switch, &handler);
+}
+
+ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context *from, zend_fiber_context *to)
+{
+	zend_llist_element *element;
+	zend_observer_fiber_switch_handler callback;
+
+	for (element = zend_observer_fiber_switch.head; element; element = element->next) {
+		callback = *(zend_observer_fiber_switch_handler *) element->data;
+		callback(from, to);
 	}
 }

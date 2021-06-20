@@ -1,7 +1,7 @@
 --TEST--
 Bug #36614 (Segfault when using Soap)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

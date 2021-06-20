@@ -1,8 +1,9 @@
 --TEST--
 PDO MySQL specific class constants
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     /* Need connection to detect library version */
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
@@ -12,6 +13,16 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
 --FILE--
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+
+    function get_client_version() {
+        if (extension_loaded('mysqli')) {
+            return mysqli_get_client_version();
+        }
+        /* XXX the MySQL client library version isn't exposed with any
+        constants, the single possibility is to use the PDO::getAttribute().
+        This however will fail with no connection. */
+        return MySQLPDOTest::getClientVersion(MySQLPDOTest::factory());
+    }
 
     $expected = array(
         'MYSQL_ATTR_USE_BUFFERED_QUERY'		=> true,
@@ -38,15 +49,12 @@ if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     if (extension_loaded('mysqlnd')) {
         $expected['MYSQL_ATTR_SSL_VERIFY_SERVER_CERT']  = true;
         $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
-    } else if (extension_loaded('mysqli')) {
-        if (mysqli_get_client_version() > 50605) {
-            $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']	= true;
-        }
-    } else if (MySQLPDOTest::getClientVersion(MySQLPDOTest::factory()) > 50605) {
-        /* XXX the MySQL client library version isn't exposed with any
-        constants, the single possibility is to use the PDO::getAttribute().
-        This however will fail with no connection. */
-        $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
+    } else if (get_client_version() > 50605) {
+        $expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']	= true;
+    }
+
+    if (MySQLPDOTest::isPDOMySQLnd() || get_client_version() >= 80021) {
+        $expected['MYSQL_ATTR_LOCAL_INFILE_DIRECTORY']	= true;
     }
 
     /*

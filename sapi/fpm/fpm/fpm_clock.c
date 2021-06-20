@@ -48,7 +48,7 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 }
 /* }}} */
 
-/* macosx clock */
+/* macOS clock */
 #elif defined(HAVE_CLOCK_GET_TIME)
 
 #include <mach/mach.h>

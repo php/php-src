@@ -1,9 +1,7 @@
 --TEST--
 BCMath functions return result with requested scale
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 echo

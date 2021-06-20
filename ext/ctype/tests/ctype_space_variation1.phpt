@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_space() function : usage variations - different data types as $c argument
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

@@ -1,8 +1,9 @@
 --TEST--
 Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling curl_exec)
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip not for Windows');
 }

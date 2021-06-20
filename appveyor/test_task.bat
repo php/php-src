@@ -62,7 +62,7 @@ rem set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
 set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
-rem prepare for Opcache
+rem prepare for OPcache
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M
 
 rem prepare for enchant
@@ -89,9 +89,23 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 mkdir %LOCALAPPDATA%\enchant\hunspell
 copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 
-set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_OBJ_DIR%\Release
-if "%THREAD_SAFE%" equ "1" set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%_TS
-set TEST_PHPDBG_EXECUTABLE=%TEST_PHPDBG_EXECUTABLE%\phpdbg.exe
+set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
+if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
+
+mkdir %PHP_BUILD_DIR%\test_file_cache
+rem generate php.ini
+echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
+echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
+if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
+rem work-around for some spawned PHP processes requiring OpenSSL
+echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
+
+rem remove ext dlls for which tests are not supported
+for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
+	del %PHP_BUILD_DIR%\php_%%i.dll
+)
+
+set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 mkdir c:\tests_tmp
 
@@ -102,6 +116,6 @@ nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set
 
 set EXIT_CODE=%errorlevel%
 
-powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\junit.out.xml')"
+appveyor PushArtifact %TEST_PHP_JUNIT%
 
 exit /b %EXIT_CODE%

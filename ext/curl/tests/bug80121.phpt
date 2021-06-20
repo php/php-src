@@ -1,5 +1,7 @@
 --TEST--
 Bug #80121: Null pointer deref if CurlHandle directly instantiated
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

@@ -1,9 +1,8 @@
 --TEST--
 ftp_append() create new file and append something
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

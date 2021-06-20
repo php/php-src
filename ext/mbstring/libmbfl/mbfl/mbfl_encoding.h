@@ -68,7 +68,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_eucjp2004,
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_sjis_open,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_sjis_sb,
@@ -113,9 +112,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_armscii8,
 	mbfl_no_encoding_cp850,
-	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_cp50220,
-	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_charset_max
@@ -151,7 +148,7 @@ typedef struct _mbfl_encoding {
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
-MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings();
+MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings(void);
 MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const char *mbfl_encoding_preferred_mime_name(const mbfl_encoding *encoding);

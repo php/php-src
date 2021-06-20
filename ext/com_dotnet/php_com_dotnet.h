@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -36,13 +36,13 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet);
 PHP_MINFO_FUNCTION(com_dotnet);
 
 ZEND_BEGIN_MODULE_GLOBALS(com_dotnet)
-	zend_bool allow_dcom;
-	zend_bool autoreg_verbose;
-	zend_bool autoreg_on;
-	zend_bool autoreg_case_sensitive;
+	bool allow_dcom;
+	bool autoreg_verbose;
+	bool autoreg_on;
+	bool autoreg_case_sensitive;
 	void *dotnet_runtime_stuff; /* opaque to avoid cluttering up other modules */
 	int code_page; /* default code_page if left unspecified */
-	zend_bool rshutdown_started;
+	bool rshutdown_started;
 ZEND_END_MODULE_GLOBALS(com_dotnet)
 
 #if defined(ZTS) && defined(COMPILE_DL_COM_DOTNET)

@@ -1,9 +1,7 @@
 --TEST--
 Bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, not enity)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 
@@ -21,7 +19,7 @@ $xw = new XMLWriter();
 $xw->openMemory();
 $xw->startDocument(NULL, "UTF-8");
 $xw->startDtd("root");
-$xw->writeDtdEntity("c", NULL, 0, "-//W3C//TEXT copyright//EN", "http://www.w3.org/xmlspec/copyright.xml");
+$xw->writeDtdEntity("c", "", 0, "-//W3C//TEXT copyright//EN", "http://www.w3.org/xmlspec/copyright.xml");
 $xw->endDtd();
 $xw->startElement("root");
 $xw->endDocument();

@@ -160,9 +160,13 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
 
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
+
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_ENUM_CASE,
 
 	/* 5 child nodes */
 	ZEND_AST_PARAM = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -301,11 +305,11 @@ ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
 
-static zend_always_inline zend_bool zend_ast_is_special(zend_ast *ast) {
+static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
 }
 
-static zend_always_inline zend_bool zend_ast_is_list(zend_ast *ast) {
+static zend_always_inline bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
 static zend_always_inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {

@@ -1,7 +1,7 @@
 --TEST--
 DOMNode::remove()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");
@@ -27,4 +27,3 @@ Num Children: 1
 Node Content: second
 
 NULL
-

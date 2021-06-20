@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -154,7 +154,7 @@ static int php_zlib_output_encoding(void)
 	zval *enc;
 
 	if (!ZLIBG(compression_coding)) {
-		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
+		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
 			convert_to_string(enc);
 			if (strstr(Z_STRVAL_P(enc), "gzip")) {
@@ -231,6 +231,7 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 					deflateEnd(&ctx->Z);
 					return FAILURE;
 				}
+				ZEND_FALLTHROUGH;
 			case Z_STREAM_END:
 				if (ctx->Z.avail_in) {
 					memmove(ctx->buffer.data, ctx->buffer.data + ctx->buffer.used - ctx->Z.avail_in, ctx->Z.avail_in);
@@ -366,7 +367,7 @@ static void php_zlib_output_compression_start(void)
 			break;
 		case 1:
 			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
-			/* break omitted intentionally */
+			ZEND_FALLTHROUGH;
 		default:
 			if (	php_zlib_output_encoding() &&
 					(h = php_zlib_output_handler_init(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS)) &&
@@ -611,7 +612,7 @@ PHP_FUNCTION(gzfile)
 	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	char buf[8192] = {0};
-	register int i = 0;
+	int i = 0;
 	zend_long use_include_path = 0;
 	php_stream *stream;
 
@@ -788,7 +789,7 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
-static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
+static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
@@ -930,6 +931,7 @@ PHP_FUNCTION(inflate_init)
 				php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 				efree(ctx->inflateDict);
 				ctx->inflateDict = NULL;
+				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
@@ -1271,9 +1273,9 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
-	if (!strncasecmp(ZSTR_VAL(new_value), "off", sizeof("off"))) {
+	if (zend_string_equals_literal_ci(new_value, "off")) {
 		int_value = 0;
-	} else if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
+	} else if (zend_string_equals_literal_ci(new_value, "on")) {
 		int_value = 1;
 	} else {
 		int_value = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
@@ -1337,10 +1339,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	php_output_handler_conflict_register(ZEND_STRL("ob_gzhandler"), php_zlib_output_conflict_check);
 	php_output_handler_conflict_register(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), php_zlib_output_conflict_check);
 
-	zend_class_entry inflate_ce;
-	INIT_CLASS_ENTRY(inflate_ce, "InflateContext", class_InflateContext_methods);
-	inflate_context_ce = zend_register_internal_class(&inflate_ce);
-	inflate_context_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
 	inflate_context_ce->serialize = zend_class_serialize_deny;
 	inflate_context_ce->unserialize = zend_class_unserialize_deny;
@@ -1350,11 +1349,9 @@ static PHP_MINIT_FUNCTION(zlib)
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
 	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
+	inflate_context_object_handlers.compare = zend_objects_not_comparable;
 
-	zend_class_entry deflate_ce;
-	INIT_CLASS_ENTRY(deflate_ce, "DeflateContext", class_DeflateContext_methods);
-	deflate_context_ce = zend_register_internal_class(&deflate_ce);
-	deflate_context_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
 	deflate_context_ce->serialize = zend_class_serialize_deny;
 	deflate_context_ce->unserialize = zend_class_unserialize_deny;
@@ -1364,6 +1361,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
 	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;
+	deflate_context_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);

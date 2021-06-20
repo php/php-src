@@ -1,8 +1,9 @@
 --TEST--
 Bug #43073 (TrueType bounding box is wrong for angle<>0)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
     if(!function_exists('imagettftext')) die('skip imagettftext() not available');
 ?>
 --FILE--
@@ -37,7 +38,7 @@ $y = 0;
 $cos_t = cos(deg2rad($delta_t));
 $sin_t = sin(deg2rad($delta_t));
 for ($angle = 0.0, $i = 0; $angle < 360.0; $angle += $delta_t, $i++) {
-  $bbox = imagettftext($g, 24, $angle, 400+$x, 400+$y, $black, $font, 'ABCDEF');
+  $bbox = imagettftext($g, 24, (int)$angle, (int)(400+$x), (int)(400+$y), $black, $font, 'ABCDEF');
   imagepolygon($g, $bbox, $red);
   printf("%2d: ", $i);
   for ($j = 0; $j < 8; $j++) {

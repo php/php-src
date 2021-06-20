@@ -1,11 +1,7 @@
 --TEST--
 Test function gzread() by calling it invalid lengths
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = __DIR__."/004.txt.gz";

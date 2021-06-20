@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_upper() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 echo "*** Testing ctype_upper() : basic functionality ***\n";

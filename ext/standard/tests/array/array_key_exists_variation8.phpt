@@ -30,18 +30,6 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-       'extreme floats' => array(
-       12.3456789000e10 => 'large',
-       12.3456789000E-10 => 'small',
-       ),
-
        // null data
 /*3*/ 'null uppercase' => array(
        NULL => 'null 1',
@@ -112,13 +100,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(true)
--- $key arguments are extreme floats data:
-bool(false)
-bool(true)
 -- $key arguments are null uppercase data:
 bool(false)
 -- $key arguments are null lowercase data:
@@ -142,89 +123,10 @@ bool(false)
 -- $key arguments are unset data:
 bool(false)
 
--- Iteration 2: float data --
--- $key arguments are int data:
-bool(true)
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(true)
-bool(true)
-bool(true)
--- $key arguments are extreme floats data:
-bool(false)
-bool(true)
--- $key arguments are null uppercase data:
-bool(false)
--- $key arguments are null lowercase data:
-bool(false)
--- $key arguments are bool lowercase data:
-bool(false)
-bool(true)
--- $key arguments are bool uppercase data:
-bool(false)
-bool(true)
--- $key arguments are empty double quotes data:
-bool(false)
--- $key arguments are empty single quotes data:
-bool(false)
--- $key arguments are string data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are undefined data:
-bool(false)
--- $key arguments are unset data:
-bool(false)
-
--- Iteration 3: extreme floats data --
--- $key arguments are int data:
-bool(true)
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(true)
--- $key arguments are extreme floats data:
-bool(true)
-bool(true)
--- $key arguments are null uppercase data:
-bool(false)
--- $key arguments are null lowercase data:
-bool(false)
--- $key arguments are bool lowercase data:
-bool(false)
-bool(true)
--- $key arguments are bool uppercase data:
-bool(false)
-bool(true)
--- $key arguments are empty double quotes data:
-bool(false)
--- $key arguments are empty single quotes data:
-bool(false)
--- $key arguments are string data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are undefined data:
-bool(false)
--- $key arguments are unset data:
-bool(false)
-
--- Iteration 4: null uppercase data --
+-- Iteration 2: null uppercase data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -250,17 +152,10 @@ bool(true)
 -- $key arguments are unset data:
 bool(true)
 
--- Iteration 5: null lowercase data --
+-- Iteration 3: null lowercase data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -286,19 +181,12 @@ bool(true)
 -- $key arguments are unset data:
 bool(true)
 
--- Iteration 6: bool lowercase data --
+-- Iteration 4: bool lowercase data --
 -- $key arguments are int data:
 bool(true)
 bool(true)
 bool(false)
 bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(true)
--- $key arguments are extreme floats data:
-bool(false)
-bool(true)
 -- $key arguments are null uppercase data:
 bool(false)
 -- $key arguments are null lowercase data:
@@ -322,19 +210,12 @@ bool(false)
 -- $key arguments are unset data:
 bool(false)
 
--- Iteration 7: bool uppercase data --
+-- Iteration 5: bool uppercase data --
 -- $key arguments are int data:
 bool(true)
 bool(true)
 bool(false)
 bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(true)
--- $key arguments are extreme floats data:
-bool(false)
-bool(true)
 -- $key arguments are null uppercase data:
 bool(false)
 -- $key arguments are null lowercase data:
@@ -358,17 +239,10 @@ bool(false)
 -- $key arguments are unset data:
 bool(false)
 
--- Iteration 8: empty double quotes data --
+-- Iteration 6: empty double quotes data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -394,17 +268,10 @@ bool(true)
 -- $key arguments are unset data:
 bool(true)
 
--- Iteration 9: empty single quotes data --
+-- Iteration 7: empty single quotes data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -430,17 +297,10 @@ bool(true)
 -- $key arguments are unset data:
 bool(true)
 
--- Iteration 10: string data --
+-- Iteration 8: string data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -466,17 +326,10 @@ bool(false)
 -- $key arguments are unset data:
 bool(false)
 
--- Iteration 11: undefined data --
+-- Iteration 9: undefined data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:
@@ -502,17 +355,10 @@ bool(true)
 -- $key arguments are unset data:
 bool(true)
 
--- Iteration 12: unset data --
+-- Iteration 10: unset data --
 -- $key arguments are int data:
 bool(false)
 bool(false)
-bool(false)
-bool(false)
--- $key arguments are float data:
-bool(false)
-bool(false)
-bool(false)
--- $key arguments are extreme floats data:
 bool(false)
 bool(false)
 -- $key arguments are null uppercase data:

@@ -3,8 +3,8 @@ iconv_get_encoding() parameter tests
 --CREDITS--
 Oystein Rose <orose@redpill-linpro.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php if (!extension_loaded("iconv")) { echo 'skip extension not available'; } ?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--

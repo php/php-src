@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -141,7 +141,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	return result;
 } /* }}} */
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
 {
 	/* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
@@ -154,7 +154,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 
 		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("opline", "line=\"%u\" opline=\"%p\" op=\"%s\" file=\"%s\"", "L%-5u %16p %s %s",
+			phpdbg_notice("L%-5u %16p %s %s",
 			   opline->lineno,
 			   opline,
 			   decode,
@@ -162,7 +162,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s\n",
+			phpdbg_log_internal(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s\n",
 				opline->lineno,
 				opline,
 				decode,
@@ -186,7 +186,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 	}
 } /* }}} */
 
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
 {
 	phpdbg_print_opline_ex(execute_data, ignore_flags);
 } /* }}} */

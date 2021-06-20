@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -313,6 +313,8 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 	ctx->context = NULL;
 }
 
+#define SAFE_STR(a) ((a)?((const char *)a):"")
+
 static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 {
 	sdlPtr tmpsdl = ctx->sdl;
@@ -374,7 +376,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				if (node_is_equal_ex(trav2, "schema", XSD_NAMESPACE)) {
 					load_schema(ctx, trav2);
 				} else if (is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", SAFE_STR(trav2->name));
 				}
 				trav2 = trav2->next;
 			}
@@ -435,7 +437,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				soap_error0(E_ERROR, "Parsing WSDL: <service> has no name attribute");
 			}
 		} else if (!node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -545,7 +547,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				}
 				smart_str_free(&key);
 			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 			}
 			trav = trav->next;
 		}
@@ -647,7 +649,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			}
 			smart_str_free(&key);
 		} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -679,14 +681,14 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 		sdlParamPtr param;
 
 		if (trav->ns != NULL && strcmp((char*)trav->ns->href, WSDL_NAMESPACE) != 0) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>",  SAFE_STR(trav->name));
 		}
 		if (node_is_equal(trav,"documentation")) {
 			trav = trav->next;
 			continue;
 		}
 		if (!node_is_equal(trav,"part")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		part = trav;
 		param = emalloc(sizeof(sdlParam));
@@ -695,7 +697,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 
 		name = get_attribute(part->properties, "name");
 		if (name == NULL) {
-			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'", message->name);
+			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'",  SAFE_STR(message->name));
 		}
 
 		param->paramName = estrdup((char*)name->children->content);
@@ -737,9 +739,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	zend_try {
-
+	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
@@ -766,7 +767,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					continue;
 				}
 				if (!node_is_equal(trav,"port")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 				}
 
 				port = trav;
@@ -805,7 +806,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						}
 					}
 					if (trav2 != address && is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 				  trav2 = trav2->next;
 				}
@@ -907,7 +908,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						continue;
 					}
 					if (!node_is_equal(trav2,"operation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 
 					operation = trav2;
@@ -926,7 +927,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						           !node_is_equal(trav3,"output") &&
 						           !node_is_equal(trav3,"fault") &&
 						           !node_is_equal(trav3,"documentation")) {
-							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav3->name);
+							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav3->name));
 						}
 						trav3 = trav3->next;
 					}
@@ -1104,7 +1105,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 												}
 											}
 										} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 										}
 										trav = trav->next;
 									}
@@ -2116,11 +2117,8 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	HashTable tmp_bindings;
 	HashTable tmp_functions;
 
-#ifdef ZEND_WIN32
 	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#else
-	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#endif
+
 	if (f < 0) {return;}
 
 	zend_hash_init(&tmp_types, 0, NULL, NULL, 0);
@@ -3169,8 +3167,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
-	zend_bool has_proxy_authorization = 0;
-	zend_bool has_authorization = 0;
+	bool has_proxy_authorization = 0;
+	bool has_authorization = 0;
 
 	ZVAL_UNDEF(&orig_context);
 	ZVAL_UNDEF(&new_context);

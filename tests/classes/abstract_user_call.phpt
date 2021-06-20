@@ -1,5 +1,5 @@
 --TEST--
-ZE2 An abstrcat method cannot be called indirectly
+ZE2 An abstract method cannot be called indirectly
 --FILE--
 <?php
 

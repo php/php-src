@@ -1,7 +1,7 @@
 --TEST--
 msgfmt creation failures icu >= 4.8
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -126,9 +126,21 @@ ArgumentCountError: msgfmt_create() expects exactly 2 arguments, 1 given in %s o
 ArgumentCountError: MessageFormatter::create() expects exactly 2 arguments, 1 given in %s on line %d
 'U_ZERO_ERROR'
 
+Deprecated: MessageFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: MessageFormatter::__construct(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
+
 IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+
+Deprecated: MessageFormatter::create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: MessageFormatter::create(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+
+Deprecated: msgfmt_create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: msgfmt_create(): Passing null to parameter #2 ($pattern) of type string is deprecated in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR in %s on line %d

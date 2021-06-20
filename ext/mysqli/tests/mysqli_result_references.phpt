@@ -1,10 +1,13 @@
 --TEST--
 References to result sets
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+opcache.enable=0
 --FILE--
 <?php
     require_once('connect.inc');
@@ -85,60 +88,78 @@ array(7) refcount(2){
   [0]=>
   array(2) refcount(1){
     ["id"]=>
-    int(1)
+    reference refcount(1) {
+      int(1)
+    }
     ["label"]=>
     string(1) "a" refcount(%d)
   }
   [1]=>
   array(2) refcount(1){
     ["id"]=>
-    int(2)
+    reference refcount(1) {
+      int(2)
+    }
     ["label"]=>
     string(1) "b" refcount(%d)
   }
   [2]=>
   array(2) refcount(1){
     ["id"]=>
-    int(1)
+    reference refcount(1) {
+      int(1)
+    }
     ["label"]=>
     string(1) "a" refcount(%d)
   }
   [3]=>
   array(2) refcount(1){
     ["id"]=>
-    int(2)
+    reference refcount(1) {
+      int(2)
+    }
     ["label"]=>
     string(1) "b" refcount(%d)
   }
   [4]=>
   array(3) refcount(1){
     ["id"]=>
-    &int(3)
+    reference refcount(2) {
+      int(3)
+    }
     ["label"]=>
     string(1) "a" refcount(%d)
     ["id2"]=>
-    &int(3)
+    reference refcount(2) {
+      int(3)
+    }
   }
   [5]=>
   array(3) refcount(1){
     ["id"]=>
-    &int(4)
+    reference refcount(2) {
+      int(4)
+    }
     ["label"]=>
     string(1) "b" refcount(%d)
     ["id2"]=>
-    &int(4)
+    reference refcount(2) {
+      int(4)
+    }
   }
   [6]=>
-  &object(mysqli_result)#%d (0) refcount(%d){
+  reference refcount(2) {
+    object(mysqli_result)#2 (0) refcount(1){
+    }
   }
 }
 array(1) refcount(2){
   [0]=>
   array(2) refcount(1){
     ["id"]=>
-    string(1) "1" refcount(%d)
+    string(1) "1" interned
     ["label"]=>
-    string(1) "a" refcount(%d)
+    string(1) "a" interned
   }
 }
 done!

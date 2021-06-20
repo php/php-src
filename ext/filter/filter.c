@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -308,7 +308,7 @@ static unsigned int php_sapi_filter_init(void)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, zend_bool copy) /* {{{ */
+static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, bool copy) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -433,7 +433,7 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, zend_bool copy) /* {{{ */
+static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, bool copy) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
@@ -476,13 +476,13 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			break;
 		case PARSE_SERVER:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_SERVER"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 			}
 			array_ptr = &IF_G(server_array);
 			break;
 		case PARSE_ENV:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_ENV"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 			}
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
@@ -602,7 +602,7 @@ static void php_filter_call(
 /* }}} */
 
 static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op_long,
-	zval *return_value, zend_bool add_empty
+	zval *return_value, bool add_empty
 ) /* {{{ */ {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
@@ -737,7 +737,7 @@ PHP_FUNCTION(filter_input_array)
 {
 	zend_long    fetch_from;
 	zval   *array_input = NULL;
-	zend_bool add_empty = 1;
+	bool add_empty = 1;
 	HashTable *op_ht = NULL;
 	zend_long op_long = FILTER_DEFAULT;
 
@@ -787,7 +787,7 @@ PHP_FUNCTION(filter_input_array)
 PHP_FUNCTION(filter_var_array)
 {
 	zval *array_input = NULL;
-	zend_bool add_empty = 1;
+	bool add_empty = 1;
 	HashTable *op_ht = NULL;
 	zend_long op_long = FILTER_DEFAULT;
 

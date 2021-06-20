@@ -1,7 +1,7 @@
 --TEST--
 filter_var() Float exponential weird result
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $data = array(

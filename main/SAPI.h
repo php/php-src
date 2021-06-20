@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -83,9 +83,9 @@ typedef struct {
 
 	const char *content_type;
 
-	zend_bool headers_only;
-	zend_bool no_headers;
-	zend_bool headers_read;
+	bool headers_only;
+	bool no_headers;
+	bool headers_read;
 
 	sapi_post_entry *post_entry;
 
@@ -122,7 +122,7 @@ typedef struct _sapi_globals_struct {
 	HashTable *rfc1867_uploaded_files;
 	zend_long post_max_size;
 	int options;
-	zend_bool sapi_started;
+	bool sapi_started;
 	double global_request_time;
 	HashTable known_post_content_types;
 	zval callback_func;
@@ -177,7 +177,7 @@ BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
 
 /* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace);
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 

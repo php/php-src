@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -496,7 +496,7 @@ PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char f
  * XXX: this is a magic number; do not decrease it
  * Emax = 1023
  * NDIG = 320
- * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
+ * NUM_BUF_SIZE >= strlen("-") + Emax + strlen(".") + NDIG + strlen("E+1023") + 1;
  */
 #define NUM_BUF_SIZE		2048
 
@@ -585,8 +585,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 	char *s = NULL;
 	size_t s_len;
-	int free_zcopy;
-	zval *zvp, zcopy;
 
 	int min_width = 0;
 	int precision = 0;
@@ -630,11 +628,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			/*
 			 * Default variable settings
 			 */
+			zend_string *tmp_str = NULL;
 			adjust = RIGHT;
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
-			free_zcopy = 0;
 
 			fmt++;
 
@@ -740,15 +738,22 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 #endif
 					break;
 				case 'p':
-					fmt++;
-					modifier = LM_PHP_INT_T;
+				{
+					char __next = *(fmt+1);
+					if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"printf \"p\" modifier is no longer supported, use ZEND_LONG_FMT");
+					}
+					modifier = LM_STD;
 					break;
+				}
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
+					ZEND_FALLTHROUGH;
 				default:
 					modifier = LM_STD;
 					break;
@@ -767,13 +772,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 */
 			switch (*fmt) {
 				case 'Z': {
-					zvp = (zval*) va_arg(ap, zval*);
-					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
-					if (free_zcopy) {
-						zvp = &zcopy;
-					}
-					s_len = Z_STRLEN_P(zvp);
-					s = Z_STRVAL_P(zvp);
+					zval *zvp = va_arg(ap, zval*);
+					zend_string *str = zval_get_tmp_string(zvp, &tmp_str);
+					s_len = ZSTR_LEN(str);
+					s = ZSTR_VAL(str);
 					if (adjust_precision && (size_t)precision < s_len) {
 						s_len = precision;
 					}
@@ -807,14 +809,12 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							i_num = (wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							i_num = (wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
 					 */
+					ZEND_FALLTHROUGH;
 				case 'd':
 				case 'i':
 					/*
@@ -852,9 +852,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 								i_num = (wide_int) va_arg(ap, ptrdiff_t);
 								break;
 #endif
-							case LM_PHP_INT_T:
-								i_num = (wide_int) va_arg(ap, zend_long);
-								break;
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -901,9 +898,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -943,9 +937,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -1143,6 +1134,7 @@ fmt_error:
 					 * Note that we can't point s inside fmt because the
 					 * unknown <char> could be preceded by width etc.
 					 */
+					ZEND_FALLTHROUGH;
 				default:
 					char_buf[0] = '%';
 					char_buf[1] = *fmt;
@@ -1175,9 +1167,7 @@ fmt_error:
 
 			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len)
 				PAD(min_width, s_len, pad_char);
-			if (free_zcopy) {
-				zval_ptr_dtor_str(&zcopy);
-			}
+			zend_tmp_string_release(tmp_str);
 		}
 skip_output:
 		fmt++;

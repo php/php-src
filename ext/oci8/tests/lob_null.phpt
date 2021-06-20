@@ -1,5 +1,7 @@
 --TEST--
 Test null data for CLOBs
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -9,6 +11,8 @@ require(__DIR__.'/skipif.inc');
 <?php
 
 require __DIR__.'/connect.inc';
+
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 // Initialization
 

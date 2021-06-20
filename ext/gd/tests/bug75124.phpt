@@ -1,8 +1,9 @@
 --TEST--
 Bug #75124 (gdImageGrayScale() may produce colors)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<')) {
     die('skip only for bundled libgd or external libgd >= 2.2.5');
 }

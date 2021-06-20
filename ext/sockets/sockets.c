@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -220,8 +220,10 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
+#ifndef HAVE_INET_NTOP
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
+#endif
 
 static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
@@ -432,10 +434,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-	zend_class_entry ce_socket;
-	INIT_CLASS_ENTRY(ce_socket, "Socket", class_Socket_methods);
-	socket_ce = zend_register_internal_class(&ce_socket);
-	socket_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	socket_ce = register_class_Socket();
 	socket_ce->create_object = socket_create_object;
 	socket_ce->serialize = zend_class_serialize_deny;
 	socket_ce->unserialize = zend_class_unserialize_deny;
@@ -446,11 +445,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
+	socket_object_handlers.compare = zend_objects_not_comparable;
 
-	zend_class_entry ce_address_info;
-	INIT_CLASS_ENTRY(ce_address_info, "AddressInfo", class_AddressInfo_methods);
-	address_info_ce = zend_register_internal_class(&ce_address_info);
-	address_info_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
 	address_info_ce->serialize = zend_class_serialize_deny;
 	address_info_ce->unserialize = zend_class_unserialize_deny;
@@ -460,6 +457,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
+	address_info_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
@@ -538,10 +536,16 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_LISTENQLEN",       SO_LISTENQLEN,        CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_USER_COOKIE",       SO_USER_COOKIE,        CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SO_ACCEPTFILTER
+	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER",       SO_ACCEPTFILTER,        CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef TCP_DEFER_ACCEPT
+	REGISTER_LONG_CONSTANT("TCP_DEFER_ACCEPT",   TCP_DEFER_ACCEPT,    CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_CS | CONST_PERSISTENT);
@@ -726,7 +730,7 @@ PHP_FUNCTION(socket_select)
 	PHP_SOCKET		max_fd = 0;
 	int				retval, sets = 0;
 	zend_long		sec, usec = 0;
-	zend_bool		sec_is_null = 0;
+	bool		sec_is_null = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!l!|l", &r_array, &w_array, &e_array, &sec, &sec_is_null, &usec) == FAILURE) {
 		RETURN_THROWS();
@@ -978,7 +982,7 @@ PHP_FUNCTION(socket_write)
 	int			retval;
 	size_t      str_len;
 	zend_long	length = 0;
-	zend_bool   length_is_null = 1;
+	bool   length_is_null = 1;
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l!", &arg1, socket_ce, &str, &str_len, &length, &length_is_null) == FAILURE) {
@@ -1076,10 +1080,12 @@ PHP_FUNCTION(socket_getsockname)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &addr, &port) == FAILURE) {
@@ -1100,8 +1106,8 @@ PHP_FUNCTION(socket_getsockname)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			ZEND_TRY_ASSIGN_REF_STRING(addr, addr6);
+			inet_ntop(AF_INET6, &sin6->sin6_addr,  addrbuf, sizeof(addrbuf));
+			ZEND_TRY_ASSIGN_REF_STRING(addr, addrbuf);
 
 			if (port != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin6->sin6_port));
@@ -1111,11 +1117,14 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (port != NULL) {
@@ -1148,10 +1157,12 @@ PHP_FUNCTION(socket_getpeername)
 	struct sockaddr_in		*sin;
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
-	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
+#ifdef HAVE_INET_NTOP
+	char					addrbuf[INET6_ADDRSTRLEN];
 #endif
 	struct sockaddr_un		*s_un;
-	char					*addr_string;
+	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|z", &arg1, socket_ce, &arg2, &arg3) == FAILURE) {
@@ -1172,9 +1183,9 @@ PHP_FUNCTION(socket_getpeername)
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
-			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6->sin6_addr, addrbuf, sizeof(addrbuf));
 
-			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr6);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, addrbuf);
 
 			if (arg3 != NULL) {
 				ZEND_TRY_ASSIGN_REF_LONG(arg3, htons(sin6->sin6_port));
@@ -1185,11 +1196,14 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_INET_NTOP
+			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			while (inet_ntoa_lock == 1);
 			inet_ntoa_lock = 1;
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
-
+#endif
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
@@ -1265,7 +1279,7 @@ PHP_FUNCTION(socket_connect)
 	int					retval;
 	size_t              addr_len;
 	zend_long				port;
-	zend_bool				port_is_null = 1;
+	bool				port_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l!", &resource_socket, socket_ce, &addr, &addr_len, &port, &port_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -1521,12 +1535,14 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in	sin;
 #if HAVE_IPV6
 	struct sockaddr_in6	sin6;
-	char				addr6[INET6_ADDRSTRLEN];
+#endif
+#ifdef HAVE_INET_NTOP
+	char				addrbuf[INET6_ADDRSTRLEN];
 #endif
 	socklen_t			slen;
 	int					retval;
 	zend_long				arg3, arg4;
-	char				*address;
+	const char			*address;
 	zend_string			*recv_buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozllz|z", &arg1, socket_ce, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
@@ -1584,7 +1600,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
+#ifdef HAVE_INET_NTOP
+			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
+#else
 			address = inet_ntoa(sin.sin_addr);
+#endif
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
@@ -1611,11 +1631,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			memset(addr6, 0, INET6_ADDRSTRLEN);
-			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
+			memset(addrbuf, 0, INET6_ADDRSTRLEN);
+			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_REF_STRING(arg5, addr6[0] ? addr6 : "::");
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, addrbuf[0] ? addrbuf : "::");
 			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif
@@ -1641,7 +1661,7 @@ PHP_FUNCTION(socket_sendto)
 	int					retval;
 	size_t              buf_len, addr_len;
 	zend_long			len, flags, port;
-	zend_bool           port_is_null = 1;
+	bool           port_is_null = 1;
 	char				*buf, *addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oslls|l!", &arg1, socket_ce, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port, &port_is_null) == FAILURE) {
@@ -1804,6 +1824,23 @@ PHP_FUNCTION(socket_get_option)
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
 				return;
+#ifdef SO_ACCEPTFILTER
+			case SO_ACCEPTFILTER: {
+
+				struct accept_filter_arg af = {0};
+				optlen = sizeof(af);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&af, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				add_assoc_string(return_value, "af_name", af.af_name);
+				return;
+			}
+#endif
 		}
 	}
 
@@ -1877,7 +1914,7 @@ PHP_FUNCTION(socket_set_option)
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
@@ -1889,8 +1926,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long_ex(l_onoff);
-			convert_to_long_ex(l_linger);
+			convert_to_long(l_onoff);
+			convert_to_long(l_linger);
 
 			lv.l_onoff = (unsigned short)Z_LVAL_P(l_onoff);
 			lv.l_linger = (unsigned short)Z_LVAL_P(l_linger);
@@ -1905,7 +1942,7 @@ PHP_FUNCTION(socket_set_option)
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
 
-			convert_to_array_ex(arg4);
+			convert_to_array(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
@@ -1917,8 +1954,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
-			convert_to_long_ex(sec);
-			convert_to_long_ex(usec);
+			convert_to_long(sec);
+			convert_to_long(usec);
 #ifndef PHP_WIN32
 			tv.tv_sec = Z_LVAL_P(sec);
 			tv.tv_usec = Z_LVAL_P(usec);
@@ -1944,9 +1981,23 @@ PHP_FUNCTION(socket_set_option)
 		}
 #endif
 
+#ifdef SO_ACCEPTFILTER
+		case SO_ACCEPTFILTER: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
+				RETURN_FALSE;
+			}
+			struct accept_filter_arg af = {0};
+			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			opt_ptr = &af;
+			optlen = sizeof(af);
+			break;
+		}
+#endif
+
 		default:
 default_case:
-			convert_to_long_ex(arg4);
+			convert_to_long(arg4);
 			ov = Z_LVAL_P(arg4);
 
 			optlen = sizeof(ov);

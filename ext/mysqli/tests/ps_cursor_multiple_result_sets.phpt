@@ -1,8 +1,9 @@
 --TEST--
 PS using cursor and returning multiple result sets
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -70,6 +71,13 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->next_result();
 
+?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS testPs');
+$link->close();
 ?>
 --EXPECT--
 use_result:

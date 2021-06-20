@@ -1,5 +1,7 @@
 --TEST--
 Bug #46994 (CLOB size does not update when using CLOB IN OUT param in stored procedure)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

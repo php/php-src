@@ -1,9 +1,7 @@
 --TEST--
 PDO SQLite Bug #78192 SegFault when reuse statement after schema change
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $connection = new \PDO('sqlite::memory:');
@@ -29,7 +27,7 @@ array(1) {
   [0]=>
   array(2) {
     ["id"]=>
-    string(2) "10"
+    int(10)
     ["name"]=>
     string(4) "test"
   }
@@ -38,7 +36,7 @@ array(1) {
   [0]=>
   array(3) {
     ["id"]=>
-    string(2) "10"
+    int(10)
     ["name"]=>
     string(4) "test"
     ["new_col"]=>

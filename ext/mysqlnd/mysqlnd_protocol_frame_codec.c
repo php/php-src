@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -135,8 +135,8 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 	do {
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
-		DBG_INF_FMT("to_be_sent=%u", to_be_sent);
-		DBG_INF_FMT("packets_sent=%u", packets_sent);
+		DBG_INF_FMT("to_be_sent=%zu", to_be_sent);
+		DBG_INF_FMT("packets_sent=%zu", packets_sent);
 		DBG_INF_FMT("compressed_envelope_packet_no=%u", pfc->data->compressed_envelope_packet_no);
 		DBG_INF_FMT("packet_no=%u", pfc->data->packet_no);
 #ifdef MYSQLND_COMPRESSION_ENABLED
@@ -200,7 +200,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 	/* Even for zero size payload we have to send a packet */
 	if (bytes_sent <= 0) {
-		DBG_ERR_FMT("Can't %u send bytes", count);
+		DBG_ERR_FMT("Can't %zu send bytes", count);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
 	DBG_RETURN(bytes_sent);
@@ -242,7 +242,7 @@ MYSQLND_METHOD(mysqlnd_pfc, read_compressed_packet_from_stream_and_fill_read_buf
 			goto end;
 		}
 	} else {
-		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %u bytes", net_payload_size);
+		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %zu bytes", net_payload_size);
 		pfc->data->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size);
 		if (FAIL == vio->data->m.network_read(vio, pfc->data->uncompressed_data->data, net_payload_size, conn_stats, error_info)) {
 			retval = FAIL;
@@ -387,7 +387,7 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			pfc->data->flags |= MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION;
 			break;
 		case MYSQL_SERVER_PUBLIC_KEY: {
-			const zend_bool pers = pfc->persistent;
+			const bool pers = pfc->persistent;
 			if (pfc->data->sha256_server_public_key) {
 				mnd_pefree(pfc->data->sha256_server_public_key, pers);
 			}
@@ -498,7 +498,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_PFC * pfc;

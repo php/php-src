@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -352,13 +352,6 @@ static void TimeZone_object_init(TimeZone_object *to)
 }
 /* }}} */
 
-/* {{{ TimeZone_objects_dtor */
-static void TimeZone_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
-}
-/* }}} */
-
 /* {{{ TimeZone_objects_free */
 static void TimeZone_objects_free(zend_object *object)
 {
@@ -396,18 +389,9 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
  */
 U_CFUNC void timezone_register_IntlTimeZone_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlTimeZone' class. */
-	INIT_CLASS_ENTRY(ce, "IntlTimeZone", class_IntlTimeZone_methods);
-	ce.create_object = TimeZone_object_create;
-	TimeZone_ce_ptr = zend_register_internal_class(&ce);
-	if (!TimeZone_ce_ptr) {
-		//can't happen now without bigger problems before
-		php_error_docref(NULL, E_ERROR,
-			"IntlTimeZone: class registration has failed.");
-		return;
-	}
+	TimeZone_ce_ptr = register_class_IntlTimeZone();
+	TimeZone_ce_ptr->create_object = TimeZone_object_create;
 
 	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
@@ -415,7 +399,6 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
 	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;
-	TimeZone_handlers.dtor_obj = TimeZone_objects_dtor;
 	TimeZone_handlers.free_obj = TimeZone_objects_free;
 
 

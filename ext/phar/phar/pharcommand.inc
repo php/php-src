@@ -223,13 +223,13 @@ class PharCommand extends CLICommand
                 }
             }
             if ($pear) {
-                $apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
+                $apiver = (string) `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
                 $apiver = trim(substr($apiver, strlen('API Version')));
             }
             if ($apiver) {
                 self::notice("PEAR package PHP_Archive: API Version: $apiver.\n");
-                $files  = explode("\n", `pear list-files PHP_Archive`);
-                $phpdir = `pear config-get php_dir 2>/dev/null`;
+                $files  = explode("\n", (string) `pear list-files PHP_Archive`);
+                $phpdir = (string) `pear config-get php_dir 2>/dev/null`;
                 $phpdir = trim($phpdir);
                 self::notice("PEAR package PHP_Archive: $phpdir.\n");
                 if (is_dir($phpdir)) {
@@ -246,7 +246,7 @@ class PharCommand extends CLICommand
                         }
                     }
                 } else {
-                    self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $php_dir.\n");
+                    self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $phpdir.\n");
                 }
             }
             if (isset($found)) {

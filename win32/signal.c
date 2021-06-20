@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,7 @@
 /* true globals; only used from main thread and from kernel callback */
 static zval ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
-static zend_bool *vm_interrupt_flag = NULL;
+static bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
@@ -89,7 +89,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zend_bool add = 1;
+	bool add = 1;
 
 
 	/* callable argument corresponds to the CTRL handler */
@@ -134,7 +134,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 PHP_FUNCTION(sapi_windows_generate_ctrl_event)
 {/*{{{*/
 	zend_long evt, pid = 0;
-	zend_bool ret = 0;
+	bool ret = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &evt, &pid) == FAILURE) {
 		RETURN_THROWS();

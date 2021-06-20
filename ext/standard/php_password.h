@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -37,10 +37,10 @@ PHP_MSHUTDOWN_FUNCTION(password);
 typedef struct _php_password_algo {
 	const char *name;
 	zend_string *(*hash)(const zend_string *password, zend_array *options);
-	zend_bool (*verify)(const zend_string *password, const zend_string *hash);
-	zend_bool (*needs_rehash)(const zend_string *password, zend_array *options);
+	bool (*verify)(const zend_string *password, const zend_string *hash);
+	bool (*needs_rehash)(const zend_string *password, zend_array *options);
 	int (*get_info)(zval *return_value, const zend_string *hash);
-	zend_bool (*valid)(const zend_string *hash);
+	bool (*valid)(const zend_string *hash);
 } php_password_algo;
 
 extern const php_password_algo php_password_algo_bcrypt;

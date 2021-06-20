@@ -2,9 +2,10 @@
 Phar front controller mime type override, Phar::PHPS zip-based
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+phar.require_hash=0
+--EXTENSIONS--
+phar
+zlib
 --ENV--
 SCRIPT_NAME=/frontcontroller15.phar.php
 REQUEST_URI=/frontcontroller15.phar.php/a.php

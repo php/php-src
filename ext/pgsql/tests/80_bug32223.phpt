@@ -1,5 +1,7 @@
 --TEST--
 Bug #32223 (weird behaviour of pg_last_notice)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -53,8 +55,10 @@ pg_close($dbh);
 
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
+object(PgSql\Result)#%d (0) {
+}
 array(1) {
   [0]=>
   string(1) "f"

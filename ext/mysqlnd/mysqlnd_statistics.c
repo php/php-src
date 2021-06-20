@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -212,7 +212,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const bool persistent)
 {
 	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
@@ -228,7 +228,7 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const z
 
 /* {{{ mysqlnd_stats_end */
 PHPAPI void
-mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent)
+mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);

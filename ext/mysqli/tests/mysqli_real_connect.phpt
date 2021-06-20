@@ -1,8 +1,9 @@
 --TEST--
 mysqli_real_connect()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--
@@ -154,6 +155,8 @@ mysqli.allow_local_infile=1
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
+  ["client_info"]=>
+  string(%d) "%s"
   ["client_version"]=>
   int(%d)
   ["connect_errno"]=>

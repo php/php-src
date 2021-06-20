@@ -32,6 +32,11 @@ $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)
 
+$(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.c: $(srcdir)/zend_vm_def.h $(srcdir)/zend_vm_execute.skl $(srcdir)/zend_vm_gen.php
+	@if test ! -z "$(PHP)"; then \
+		$(PHP) $(srcdir)/zend_vm_gen.php; \
+	fi;
+
 $(builddir)/zend_highlight.lo $(builddir)/zend_compile.lo: $(srcdir)/zend_language_parser.h
 
 Zend/zend_execute.lo: $(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.h

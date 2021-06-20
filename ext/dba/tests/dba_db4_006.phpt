@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 New File Creation popen("n") & Insert Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

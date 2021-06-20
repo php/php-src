@@ -1,8 +1,10 @@
 --TEST--
 Request #71855 (PDO placeholder escaping, part 2)
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require_once dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once dirname(__FILE__) . '/config.inc';
 PDOTest::skip();
@@ -40,18 +42,18 @@ foreach ([false, true] as $emulate) {
 --EXPECT--
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 ==OK==

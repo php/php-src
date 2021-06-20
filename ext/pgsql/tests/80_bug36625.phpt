@@ -1,5 +1,7 @@
 --TEST--
 Bug #36625 (8.0+) (pg_trace() does not work)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -50,6 +52,7 @@ unlink($tracefile);
 ?>
 --EXPECTF--
 bool(false)
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
 bool(true)
 bool(true)

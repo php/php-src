@@ -1,8 +1,8 @@
 --TEST--
 Bug #73789 (Strange behavior of class constants in switch/case block)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php if (!extension_loaded('ctype')) die('skip extension ctype not loaded'); ?>
+--EXTENSIONS--
+opcache
+ctype
 --FILE--
 <?php
 class Lexer

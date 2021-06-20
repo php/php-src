@@ -22,7 +22,7 @@ $values = array(01234567,
                 31.1013e5,
                 true,
                 false,
-                null);
+                );
 
 for ($i = 0; $i < count($values); $i++) {
     $res = octdec($values[$i]);
@@ -56,5 +56,4 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(102923)
 int(823384)
 int(1)
-int(0)
 int(0)

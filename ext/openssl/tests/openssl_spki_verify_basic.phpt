@@ -2,10 +2,8 @@
 openssl_spki_verify() tests for valid signature
 --INI--
 error_reporting=0
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

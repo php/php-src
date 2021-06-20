@@ -1,5 +1,7 @@
 --TEST--
 correct instantiation of references between variables in sessions
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_alpha() function : usage variations - different data types as $c arg
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

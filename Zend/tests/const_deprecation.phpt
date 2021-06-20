@@ -1,9 +1,7 @@
 --TEST--
 Internal constant deprecation
---SKIPIF--
-<?php
-if (!extension_loaded('zend-test')) die('skip requires zend-test');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

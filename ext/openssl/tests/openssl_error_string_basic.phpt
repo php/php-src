@@ -1,7 +1,7 @@
 --TEST--
 openssl_error_string() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 // helper function to check openssl errors

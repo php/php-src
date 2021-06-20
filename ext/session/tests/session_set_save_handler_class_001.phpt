@@ -4,6 +4,8 @@ Test session_set_save_handler() : basic class wrapping existing handler
 session.use_strict_mode=1
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -15,33 +17,34 @@ echo "*** Testing session_set_save_handler() : basic class wrapping existing han
 
 class MySession extends SessionHandler {
     public $i = 0;
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         ++$this->i;
         echo 'Open ', session_id(), "\n";
         return parent::open($path, $name);
     }
-    public function create_sid() {
+    public function create_sid(): string {
         // This method should be removed when 5.5 become unsupported.
         ++$this->i;
         echo 'Old Create SID ', session_id(), "\n";
         return parent::create_sid();
     }
-    public function read($key) {
+    public function read($key): string|false {
         ++$this->i;
         echo 'Read ', session_id(), "\n";
         return parent::read($key);
     }
-    public function write($key, $data) {
+    public function write($key, $data): bool {
         ++$this->i;
         echo 'Write ', session_id(), "\n";
         return parent::write($key, $data);
     }
-    public function close() {
+    public function close(): bool {
         ++$this->i;
         echo 'Close ', session_id(), "\n";
         return parent::close();
     }
-    public function createSid() {
+
+    public function createSid(): string {
         // User should use this rather than create_sid()
         // If both create_sid() and createSid() exists,
         // createSid() is used.
@@ -49,7 +52,7 @@ class MySession extends SessionHandler {
         echo 'New Create ID ', session_id(), "\n";
         return parent::create_sid();
     }
-    public function validateId($key) {
+    public function validateId($key): bool {
         ++$this->i;
         echo 'Validate ID ', session_id(), "\n";
         return TRUE;
@@ -57,7 +60,7 @@ class MySession extends SessionHandler {
         // cannot call parent as follows.
         // return parent::validateSid($key);
     }
-    public function updateTimestamp($key, $data) {
+    public function updateTimestamp($key, $data): bool {
         ++$this->i;
         echo 'Update Timestamp ', session_id(), "\n";
         return parent::write($key, $data);

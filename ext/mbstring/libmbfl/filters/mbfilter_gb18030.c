@@ -41,7 +41,7 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	"GB18030",
 	mbfl_encoding_gb18030_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_gb18030_wchar,
 	&vtbl_wchar_gb18030
 };

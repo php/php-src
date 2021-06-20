@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->__construct(), libmysql only options
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())

@@ -1,8 +1,10 @@
 --TEST--
 Bug #79375: mysqli_store_result does not report error from lock wait timeout
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require_once('skipifconnectfailure.inc');
 if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) die('skip requires mysqlnd');
 ?>

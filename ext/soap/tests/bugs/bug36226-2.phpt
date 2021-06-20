@@ -1,7 +1,7 @@
 --TEST--
 Bug #36226 (Inconsistent handling when passing nillable arrays)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -22,7 +22,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('PostEvents');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     echo "$request\n";
     $this->server->handle($request);
     return $response;

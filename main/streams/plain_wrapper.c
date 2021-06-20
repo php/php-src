@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,8 +54,16 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 
 #if defined(PHP_WIN32)
 # define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+#define fsync _commit
+#define fdatasync fsync
 #else
 # define PLAIN_WRAP_BUF_SIZE(st) (st)
+# if !defined(HAVE_FDATASYNC)
+#  define fdatasync fsync
+# elif defined(__APPLE__)
+  // The symbol is present, however not in the headers
+  extern int fdatasync(int);
+# endif
 #endif
 
 /* parse standard "fopen" modes into open() flags */
@@ -416,7 +424,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 
 		if (ret == (size_t)-1 && errno == EINTR) {
 			/* Read was interrupted, retry once,
-			   If read still fails, giveup with feof==0
+			   If read still fails, give up with feof==0
 			   so script can retry if desired */
 			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
@@ -535,6 +543,28 @@ static int php_stdiop_flush(php_stream *stream)
 		return fflush(data->file);
 	}
 	return 0;
+}
+
+
+static int php_stdiop_sync(php_stream *stream, bool dataonly)
+{
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+	FILE *fp;
+	int fd;
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS) == FAILURE) {
+		return -1;
+	}
+
+	if (php_stdiop_flush(stream) == 0) {
+		PHP_STDIOP_GET_FD(fd, data);
+		if (dataonly) {
+			return fdatasync(fd);
+		} else {
+			return fsync(fd);
+		}
+	}
+	return -1;
 }
 
 static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset)
@@ -777,7 +807,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			{
 				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
 				HANDLE hfile = (HANDLE)_get_osfhandle(fd);
-				DWORD prot, acc, loffs = 0, delta = 0;
+				DWORD prot, acc, loffs = 0, hoffs = 0, delta = 0;
 				LARGE_INTEGER file_size;
 
 				switch (value) {
@@ -845,8 +875,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 							GetSystemInfo(&info);
 							gran = info.dwAllocationGranularity;
-							loffs = ((DWORD)range->offset / gran) * gran;
-							delta = (DWORD)range->offset - loffs;
+							ZEND_ASSERT(gran != 0 && (gran & (gran - 1)) == 0);
+							size_t rounded_offset = (range->offset / gran) * gran;
+							delta = range->offset - rounded_offset;
+							loffs = (DWORD)rounded_offset;
+							hoffs = (DWORD)(rounded_offset >> 32);
 						}
 
 						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
@@ -854,7 +887,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
 
-						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length + delta);
+						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, hoffs, loffs, range->length + delta);
 
 						if (data->last_mapped_addr) {
 							/* give them back the address of the start offset they requested */
@@ -884,6 +917,18 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 #endif
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+
+		case PHP_STREAM_OPTION_SYNC_API:
+			switch (value) {
+				case PHP_STREAM_SYNC_SUPPORTED:
+					return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
+				case PHP_STREAM_SYNC_FSYNC:
+					return php_stdiop_sync(stream, 0) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+				case PHP_STREAM_SYNC_FDSYNC:
+					return php_stdiop_sync(stream, 1) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			/* Invalid option passed */
+			return PHP_STREAM_OPTION_RETURN_ERR;
 
 		case PHP_STREAM_OPTION_TRUNCATE_API:
 			switch (value) {
@@ -1026,7 +1071,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef PHP_WIN32
 	if (!dir) {
-		php_win32_docref2_from_error(GetLastError(), path, path);
+		php_win32_docref1_from_error(GetLastError(), path);
 	}
 
 	if (dir && dir->finished) {
@@ -1075,7 +1120,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 					//TODO: avoid reallocation???
 					*opened_path = zend_string_init(realpath, strlen(realpath), 0);
 				}
-				/* fall through */
+				ZEND_FALLTHROUGH;
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
 				efree(persistent_id);
@@ -1157,12 +1202,14 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, co
 
 static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context)
 {
-	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
-		url += sizeof("file://") - 1;
-	}
+	if (!(flags & PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR)) {
+		if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
+			url += sizeof("file://") - 1;
+		}
 
-	if (php_check_open_basedir_ex(url, (flags & PHP_STREAM_URL_STAT_QUIET) ? 0 : 1)) {
-		return -1;
+		if (php_check_open_basedir_ex(url, (flags & PHP_STREAM_URL_STAT_QUIET) ? 0 : 1)) {
+			return -1;
+		}
 	}
 
 #ifdef PHP_WIN32

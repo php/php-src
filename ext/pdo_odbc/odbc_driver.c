@@ -2,10 +2,10 @@
   +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -27,7 +27,7 @@
 #include "php_pdo_odbc_int.h"
 #include "zend_exceptions.h"
 
-static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
@@ -47,8 +47,6 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 	add_next_index_long(info, einfo->last_error);
 	add_next_index_str(info, message);
 	add_next_index_string(info, einfo->last_state);
-
-	return 1;
 }
 
 
@@ -120,7 +118,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 }
 /* }}} */
 
-static int odbc_handle_closer(pdo_dbh_t *dbh)
+static void odbc_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 
@@ -134,11 +132,9 @@ static int odbc_handle_closer(pdo_dbh_t *dbh)
 	H->env = NULL;
 	pefree(H, dbh->is_persistent);
 	dbh->driver_data = NULL;
-
-	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
+static bool odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -162,7 +158,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
 		efree(S);
-		return 0;
+		return false;
 	}
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &S->stmt);
@@ -173,7 +169,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 			zend_string_release(nsql);
 		}
 		pdo_odbc_drv_error("SQLAllocStmt");
-		return 0;
+		return false;
 	}
 
 	stmt->driver_data = S;
@@ -187,7 +183,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 			if (nsql) {
 				zend_string_release(nsql);
 			}
-			return 0;
+			return false;
 		}
 	}
 
@@ -211,12 +207,12 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *st
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
-static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -229,7 +225,7 @@ static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return -1;
 	}
 
-	rc = SQLExecDirect(stmt, (SQLCHAR *) sql, sql_len);
+	rc = SQLExecDirect(stmt, (SQLCHAR *) ZSTR_VAL(sql), ZSTR_LEN(sql));
 
 	if (rc == SQL_NO_DATA) {
 		/* If SQLExecDirect executes a searched update or delete statement that
@@ -266,7 +262,7 @@ static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquo
 }
 */
 
-static int odbc_handle_begin(pdo_dbh_t *dbh)
+static bool odbc_handle_begin(pdo_dbh_t *dbh)
 {
 	if (dbh->auto_commit) {
 		/* we need to disable auto-commit now, to be able to initiate a transaction */
@@ -276,13 +272,13 @@ static int odbc_handle_begin(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
-static int odbc_handle_commit(pdo_dbh_t *dbh)
+static bool odbc_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -293,7 +289,7 @@ static int odbc_handle_commit(pdo_dbh_t *dbh)
 		pdo_odbc_drv_error("SQLEndTran: Commit");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
-			return 0;
+			return false;
 		}
 	}
 
@@ -302,13 +298,13 @@ static int odbc_handle_commit(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
-static int odbc_handle_rollback(pdo_dbh_t *dbh)
+static bool odbc_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -319,7 +315,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh)
 		pdo_odbc_drv_error("SQLEndTran: Rollback");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
-			return 0;
+			return false;
 		}
 	}
 	if (dbh->auto_commit && H->dbc) {
@@ -327,26 +323,46 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh)
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
-			return 0;
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
-static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	bool bval;
+
 	switch (attr) {
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
-			H->assume_utf8 = zval_is_true(val);
-			return 1;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->assume_utf8 = bval;
+			return true;
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
 			strcpy(H->einfo.last_state, "IM001");
-			return 0;
+			return false;
 	}
+}
+
+static int pdo_odbc_get_info_string(pdo_dbh_t *dbh, SQLUSMALLINT type, zval *val)
+{
+	RETCODE rc;
+	SQLSMALLINT out_len;
+	char buf[256];
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	rc = SQLGetInfo(H->dbc, type, (SQLPOINTER)buf, sizeof(buf), &out_len);
+	/* returning -1 is treated as an error, not as unsupported */
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		return -1;
+	}
+	ZVAL_STRINGL(val, buf, out_len);
+	return 1;
 }
 
 static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
@@ -358,9 +374,11 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
+			return pdo_odbc_get_info_string(dbh, SQL_DBMS_VER, val);
+		case PDO_ATTR_SERVER_INFO:
+			return pdo_odbc_get_info_string(dbh, SQL_DBMS_NAME, val);
 		case PDO_ATTR_PREFETCH:
 		case PDO_ATTR_TIMEOUT:
-		case PDO_ATTR_SERVER_INFO:
 		case PDO_ATTR_CONNECTION_STATUS:
 			break;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
@@ -369,6 +387,26 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 	}
 	return 0;
+}
+
+static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
+{
+	RETCODE ret;
+	UCHAR d_name[32];
+	SQLSMALLINT len;
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+
+	/*
+	 * SQL_ATTR_CONNECTION_DEAD is tempting, but only in ODBC 3.5,
+	 * and not all drivers implement it properly
+	 */
+	ret = SQLGetInfo(H->dbc, SQL_DATA_SOURCE_READ_ONLY, d_name,
+		sizeof(d_name), &len);
+
+	if (ret != SQL_SUCCESS || len == 0) {
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 
 static const struct pdo_dbh_methods odbc_methods = {
@@ -383,10 +421,10 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	odbc_handle_get_attr,	/* get attr */
-	NULL, /* check_liveness */
+	odbc_handle_check_liveness, /* check_liveness */
 	NULL, /* get_driver_methods */
 	NULL, /* request_shutdown */
-	NULL, /* in_transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL /* get_gc */
 };
 

@@ -95,7 +95,7 @@ typedef uint32_t                    atomic_uint_t;
 typedef uint64_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
-static inline int atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
+static inline atomic_uint_t atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
 {
 	__asm__ __volatile__("casx [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
 
@@ -112,7 +112,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 typedef uint32_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
-static inline int atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
+static inline atomic_uint_t atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
 {
 	__asm__ __volatile__("cas [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
 

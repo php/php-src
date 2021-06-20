@@ -1,5 +1,7 @@
 --TEST--
 Bug #44206 (Test if selecting ref cursors leads to ORA-1000 maximum open cursors reached)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

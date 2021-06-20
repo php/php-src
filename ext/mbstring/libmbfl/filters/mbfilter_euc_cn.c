@@ -59,7 +59,7 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 	"CN-GB",
 	mbfl_encoding_euc_cn_aliases,
 	mblen_table_euccn,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_euccn_wchar,
 	&vtbl_wchar_euccn
 };

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ece8c5157dc3a62ca2951d058b3c5497bb5cb836 */
+ * Stub hash: 0d5b34913965434a4015e2b6ac7288edbbafc3f3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -69,3 +69,13 @@ static const zend_function_entry class_MessageFormatter_methods[] = {
 	ZEND_ME_MAPPING(getErrorMessage, msgfmt_get_error_message, arginfo_class_MessageFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_MessageFormatter(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "MessageFormatter", class_MessageFormatter_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

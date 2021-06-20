@@ -1,8 +1,12 @@
 --TEST--
 PDO_Firebird: ingnore parameter marks in comments
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); 	
 ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 	require("testdb.inc");

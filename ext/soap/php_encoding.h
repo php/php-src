@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -198,8 +198,8 @@ void whiteSpace_collapse(xmlChar* str);
 xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
 zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data);
 
-void encode_finish();
-void encode_reset_ns();
+void encode_finish(void);
+void encode_reset_ns(void);
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
 
 encodePtr get_conversion(int encode);

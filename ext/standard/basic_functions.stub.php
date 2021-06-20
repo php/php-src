@@ -1,6 +1,14 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+final class __PHP_Incomplete_Class
+{
+}
+
+class AssertionError extends Error
+{
+}
 
 /* main/main.c */
 
@@ -248,6 +256,8 @@ function array_chunk(array $array, int $length, bool $preserve_keys = false): ar
 
 function array_combine(array $keys, array $values): array {}
 
+function array_is_list(array $array): bool {}
+
 /* base64.c */
 
 function base64_encode(string $string): string {}
@@ -316,10 +326,10 @@ function ini_get(string $option): string|false {}
 
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-function ini_set(string $option, string $value): string|false {}
+function ini_set(string $option, string|int|float|bool|null $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $option, string $value): string|false {}
+function ini_alter(string $option, string|int|float|bool|null $value): string|false {}
 
 function ini_restore(string $option): void {}
 
@@ -429,7 +439,9 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 function net_get_interfaces(): array|false {}
+#endif
 
 /* ftok.c */
 
@@ -512,15 +524,15 @@ function headers_list(): array {}
 
 /* {{{ html.c */
 
-function htmlspecialchars(string $string, int $flags = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $flags = ENT_COMPAT): string {}
+function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE): string {}
 
-function html_entity_decode(string $string, int $flags = ENT_COMPAT, ?string $encoding = null): string {}
+function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null): string {}
 
-function htmlentities(string $string, int $flags = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
-function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_COMPAT, string $encoding = "UTF-8"): array {}
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, string $encoding = "UTF-8"): array {}
 
 /* }}} */
 
@@ -528,7 +540,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-function assert_options(int $option, mixed $value = UNKNOWN): array|object|int|string|null {}
+function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
 
@@ -695,13 +707,7 @@ function utf8_decode(string $string): string {}
  */
 function opendir(string $directory, $context = null) {}
 
-/** @param resource $context */
-function getdir(string $directory, $context = null): Directory|false {}
-
-/**
- * @param resource|null $context
- * @alias getdir
- */
+/** @param resource|null $context */
 function dir(string $directory, $context = null): Directory|false {}
 
 /** @param resource|null $dir_handle */
@@ -822,6 +828,12 @@ function ftell($stream): int|false {}
 function fflush($stream): bool {}
 
 /** @param resource $stream */
+function fsync($stream): bool {}
+
+/** @param resource $stream */
+function fdatasync($stream): bool {}
+
+/** @param resource $stream */
 function fwrite($stream, string $data, ?int $length = null): int|false {}
 
 /**
@@ -857,7 +869,7 @@ function unlink(string $filename, $context = null): bool {}
 function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): int|false {}
 
 /** @param resource $stream */
-function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
+function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
 
 /** @param resource $stream */
 function fgetcsv($stream, ?int $length = null, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
@@ -1012,7 +1024,7 @@ function iptcparse(string $iptc_block): array|false {}
 
 /* levenshtein.c */
 
-function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $repetition_cost = 1, int $deletion_cost = 1): int {}
+function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int {}
 
 /* link.c */
 
@@ -1136,7 +1148,7 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /* password.c */
 
-function password_get_info(string $hash): ?array {}
+function password_get_info(string $hash): array {}
 
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
@@ -1199,7 +1211,7 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
 
 /** @return resource */
 function stream_context_create(?array $options = null, ?array $params = null) {}

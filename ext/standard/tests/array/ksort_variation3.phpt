@@ -17,9 +17,6 @@ $various_arrays = array(
   // negative/posative integer key value array
   array(1 => 11, -2 => -11, 3 => 21, -4 => -21, 5 => 31, -6 => -31, 7 => 0, 8 => 41, -10 =>-41),
 
-  // float key values
-  array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1),
-
   // mixed value array with different types of keys
   array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9,
         9 => 10.6E-2, -10 => -10.6E-2, 11 => 33)
@@ -126,56 +123,6 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With default sort flag -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-
--- Iteration 3 --
 - With default sort flag -
 bool(true)
 array(11) {

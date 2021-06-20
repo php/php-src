@@ -1,5 +1,7 @@
 --TEST--
 DBA INIFILE handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'inifile';

@@ -1,12 +1,11 @@
 --TEST--
 Test if socket binds on 31338
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip.. Not valid for non Windows');
-}
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
 }
 --FILE--
 <?php

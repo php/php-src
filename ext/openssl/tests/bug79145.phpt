@@ -1,8 +1,9 @@
 --TEST--
 Bug #79145 (openssl memory leak)
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded('openssl')) die('skip openssl extension not available');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow test');
 ?>
 --FILE--

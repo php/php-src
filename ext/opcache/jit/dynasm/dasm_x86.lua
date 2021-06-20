@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM x86/x64 module.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -11,9 +11,9 @@ local x64 = x64
 local _info = {
   arch =	x64 and "x64" or "x86",
   description =	"DynASM x86/x64 module",
-  version =	"1.4.0",
-  vernum =	 10400,
-  release =	"2015-10-18",
+  version =	"1.5.0",
+  vernum =	 10500,
+  release =	"2021-05-02",
   author =	"Mike Pall",
   license =	"MIT",
 }
@@ -46,8 +46,8 @@ local action_names = {
   "SETLABEL", "REL_A",
   -- action arg (1 byte) or int arg, 2 buffer pos (link, offset):
   "REL_LG", "REL_PC",
-  -- action arg (1 byte) or ptrdiff_t arg, 1 buffer pos (link):
-  "IMM_LG", "IMM_LG64", "IMM_PC", "IMM_PC64",
+  -- action arg (1 byte) or int arg, 1 buffer pos (link):
+  "IMM_LG", "IMM_PC",
   -- action arg (1 byte) or int arg, 1 buffer pos (offset):
   "LABEL_LG", "LABEL_PC",
   -- action arg (1 byte), 1 buffer pos (offset):
@@ -438,16 +438,6 @@ local function wputlabel(aprefix, imm, num)
   end
 end
 
--- Put action for label arg (IMM_LG64, IMM_PC64, REL_LG, REL_PC).
-local function wputlabel64(aprefix, imm, num)
-  if type(imm) == "number" then
-    waction("IMM_LG64", nil, num);
-    wputxb(imm)
-  else
-    waction("IMM_PC64", imm, num)
-  end
-end
-
 -- Put signed byte or arg.
 local function wputsbarg(n)
   if type(n) == "number" then
@@ -479,26 +469,6 @@ local function wputwarg(n)
   else waction("IMM_W", n) end
 end
 
--- Put signed or unsigned qword or arg.
-local function wputqarg(n)
-  local tn = type(n)
-  if tn == "number" then
-    wputb(band(n, 255))
-    wputb(band(shr(n, 8), 255))
-    wputb(band(shr(n, 16), 255))
-    wputb(band(shr(n, 24), 255))
-    wputb(band(shr(n, 32), 255))
-    wputb(band(shr(n, 40), 255))
-    wputb(band(shr(n, 48), 255))
-    wputb(shr(n, 56))
-  elseif tn == "table" then
-    wputlabel64("IMM_", n[1], 1)
-  else
-    waction("IMM_D", format("(unsigned int)(%s)", n))
-    waction("IMM_D", format("(unsigned int)((%s)>>32)", n))
-  end
-end
-
 -- Put signed or unsigned dword or arg.
 local function wputdarg(n)
   local tn = type(n)
@@ -511,6 +481,22 @@ local function wputdarg(n)
     wputlabel("IMM_", n[1], 1)
   else
     waction("IMM_D", n)
+  end
+end
+
+-- Put signed or unsigned qword or arg.
+local function wputqarg(n)
+  local tn = type(n)
+  if tn == "number" then -- This is only used for numbers from -2^31..2^32-1.
+    wputb(band(n, 255))
+    wputb(band(shr(n, 8), 255))
+    wputb(band(shr(n, 16), 255))
+    wputb(shr(n, 24))
+    local sign = n < 0 and 255 or 0
+    wputb(sign); wputb(sign); wputb(sign); wputb(sign)
+  else
+    waction("IMM_D", format("(unsigned int)(%s)", n))
+    waction("IMM_D", format("(unsigned int)((unsigned long long)(%s)>>32)", n))
   end
 end
 
@@ -693,10 +679,16 @@ local function opmodestr(op, args)
 end
 
 -- Convert number to valid integer or nil.
-local function toint(expr)
+local function toint(expr, isqword)
   local n = tonumber(expr)
   if n then
-    if n % 1 ~= 0 or n < -2147483648 or n > 4294967295 then
+    if n % 1 ~= 0 then
+      werror("not an integer number `"..expr.."'")
+    elseif isqword then
+      if n < -2147483648 or n > 2147483647 then
+	n = nil -- Handle it as an expression to avoid precision loss.
+      end
+    elseif n < -2147483648 or n > 4294967295 then
       werror("bad integer number `"..expr.."'")
     end
     return n
@@ -779,7 +771,7 @@ local function rtexpr(expr)
 end
 
 -- Parse operand and return { mode, opsize, reg, xreg, xsc, disp, imm }.
-local function parseoperand(param)
+local function parseoperand(param, isqword)
   local t = {}
 
   local expr = param
@@ -867,7 +859,7 @@ local function parseoperand(param)
       t.disp = dispexpr(tailx)
     else
       -- imm or opsize*imm
-      local imm = toint(expr)
+      local imm = toint(expr, isqword)
       if not imm and sub(expr, 1, 1) == "*" and t.opsize then
 	imm = toint(sub(expr, 2))
 	if imm then
@@ -985,6 +977,7 @@ end
 --   "u"       Use VEX encoding, vvvv unused.
 --   "v"/"V"   Use VEX encoding, vvvv from 1st/2nd operand (the operand is
 --             removed from the list used by future characters).
+--   "w"       Use VEX encoding, vvvv from 3rd operand.
 --   "L"       Force VEX.L
 --
 -- All of the following characters force a flush of the opcode:
@@ -1566,8 +1559,8 @@ local map_op = {
   vrcpss_3 =	"rrro:F30FV53rM|rrx/ood:",
   vrsqrtps_2 =	"rmoy:0Fu52rM",
   vrsqrtss_3 =	"rrro:F30FV52rM|rrx/ood:",
-  vroundpd_3 =	"rmioy:660F3AV09rMU",
-  vroundps_3 =	"rmioy:660F3AV08rMU",
+  vroundpd_3 =	"rmioy:660F3Au09rMU",
+  vroundps_3 =	"rmioy:660F3Au08rMU",
   vroundsd_4 =	"rrrio:660F3AV0BrMU|rrxi/ooq:",
   vroundss_4 =	"rrrio:660F3AV0ArMU|rrxi/ood:",
   vshufpd_4 =	"rrmioy:660FVC6rMU",
@@ -1707,6 +1700,91 @@ local map_op = {
   -- Intel ADX
   adcx_2 =	"rmqd:660F38F6rM",
   adox_2 =	"rmqd:F30F38F6rM",
+
+  -- BMI1
+  andn_3 =	"rrmqd:0F38VF2rM",
+  bextr_3 =	"rmrqd:0F38wF7rM",
+  blsi_2 =	"rmqd:0F38vF33m",
+  blsmsk_2 =	"rmqd:0F38vF32m",
+  blsr_2 =	"rmqd:0F38vF31m",
+  tzcnt_2 =	"rmqdw:F30FBCrM",
+
+  -- BMI2
+  bzhi_3 =	"rmrqd:0F38wF5rM",
+  mulx_3 =	"rrmqd:F20F38VF6rM",
+  pdep_3 =	"rrmqd:F20F38VF5rM",
+  pext_3 =	"rrmqd:F30F38VF5rM",
+  rorx_3 =	"rmSqd:F20F3AuF0rMS",
+  sarx_3 =	"rmrqd:F30F38wF7rM",
+  shrx_3 =	"rmrqd:F20F38wF7rM",
+  shlx_3 =	"rmrqd:660F38wF7rM",
+
+  -- FMA3
+  vfmaddsub132pd_3 = "rrmoy:660F38VX96rM",
+  vfmaddsub132ps_3 = "rrmoy:660F38V96rM",
+  vfmaddsub213pd_3 = "rrmoy:660F38VXA6rM",
+  vfmaddsub213ps_3 = "rrmoy:660F38VA6rM",
+  vfmaddsub231pd_3 = "rrmoy:660F38VXB6rM",
+  vfmaddsub231ps_3 = "rrmoy:660F38VB6rM",
+
+  vfmsubadd132pd_3 = "rrmoy:660F38VX97rM",
+  vfmsubadd132ps_3 = "rrmoy:660F38V97rM",
+  vfmsubadd213pd_3 = "rrmoy:660F38VXA7rM",
+  vfmsubadd213ps_3 = "rrmoy:660F38VA7rM",
+  vfmsubadd231pd_3 = "rrmoy:660F38VXB7rM",
+  vfmsubadd231ps_3 = "rrmoy:660F38VB7rM",
+
+  vfmadd132pd_3 = "rrmoy:660F38VX98rM",
+  vfmadd132ps_3 = "rrmoy:660F38V98rM",
+  vfmadd132sd_3 = "rrro:660F38VX99rM|rrx/ooq:",
+  vfmadd132ss_3 = "rrro:660F38V99rM|rrx/ood:",
+  vfmadd213pd_3 = "rrmoy:660F38VXA8rM",
+  vfmadd213ps_3 = "rrmoy:660F38VA8rM",
+  vfmadd213sd_3 = "rrro:660F38VXA9rM|rrx/ooq:",
+  vfmadd213ss_3 = "rrro:660F38VA9rM|rrx/ood:",
+  vfmadd231pd_3 = "rrmoy:660F38VXB8rM",
+  vfmadd231ps_3 = "rrmoy:660F38VB8rM",
+  vfmadd231sd_3 = "rrro:660F38VXB9rM|rrx/ooq:",
+  vfmadd231ss_3 = "rrro:660F38VB9rM|rrx/ood:",
+
+  vfmsub132pd_3 = "rrmoy:660F38VX9ArM",
+  vfmsub132ps_3 = "rrmoy:660F38V9ArM",
+  vfmsub132sd_3 = "rrro:660F38VX9BrM|rrx/ooq:",
+  vfmsub132ss_3 = "rrro:660F38V9BrM|rrx/ood:",
+  vfmsub213pd_3 = "rrmoy:660F38VXAArM",
+  vfmsub213ps_3 = "rrmoy:660F38VAArM",
+  vfmsub213sd_3 = "rrro:660F38VXABrM|rrx/ooq:",
+  vfmsub213ss_3 = "rrro:660F38VABrM|rrx/ood:",
+  vfmsub231pd_3 = "rrmoy:660F38VXBArM",
+  vfmsub231ps_3 = "rrmoy:660F38VBArM",
+  vfmsub231sd_3 = "rrro:660F38VXBBrM|rrx/ooq:",
+  vfmsub231ss_3 = "rrro:660F38VBBrM|rrx/ood:",
+
+  vfnmadd132pd_3 = "rrmoy:660F38VX9CrM",
+  vfnmadd132ps_3 = "rrmoy:660F38V9CrM",
+  vfnmadd132sd_3 = "rrro:660F38VX9DrM|rrx/ooq:",
+  vfnmadd132ss_3 = "rrro:660F38V9DrM|rrx/ood:",
+  vfnmadd213pd_3 = "rrmoy:660F38VXACrM",
+  vfnmadd213ps_3 = "rrmoy:660F38VACrM",
+  vfnmadd213sd_3 = "rrro:660F38VXADrM|rrx/ooq:",
+  vfnmadd213ss_3 = "rrro:660F38VADrM|rrx/ood:",
+  vfnmadd231pd_3 = "rrmoy:660F38VXBCrM",
+  vfnmadd231ps_3 = "rrmoy:660F38VBCrM",
+  vfnmadd231sd_3 = "rrro:660F38VXBDrM|rrx/ooq:",
+  vfnmadd231ss_3 = "rrro:660F38VBDrM|rrx/ood:",
+
+  vfnmsub132pd_3 = "rrmoy:660F38VX9ErM",
+  vfnmsub132ps_3 = "rrmoy:660F38V9ErM",
+  vfnmsub132sd_3 = "rrro:660F38VX9FrM|rrx/ooq:",
+  vfnmsub132ss_3 = "rrro:660F38V9FrM|rrx/ood:",
+  vfnmsub213pd_3 = "rrmoy:660F38VXAErM",
+  vfnmsub213ps_3 = "rrmoy:660F38VAErM",
+  vfnmsub213sd_3 = "rrro:660F38VXAFrM|rrx/ooq:",
+  vfnmsub213ss_3 = "rrro:660F38VAFrM|rrx/ood:",
+  vfnmsub231pd_3 = "rrmoy:660F38VXBErM",
+  vfnmsub231ps_3 = "rrmoy:660F38VBErM",
+  vfnmsub231sd_3 = "rrro:660F38VXBFrM|rrx/ooq:",
+  vfnmsub231ss_3 = "rrro:660F38VBFrM|rrx/ood:",
 }
 
 ------------------------------------------------------------------------------
@@ -1796,7 +1874,7 @@ end
 
 ------------------------------------------------------------------------------
 
-local map_vexarg = { u = false, v = 1, V = 2 }
+local map_vexarg = { u = false, v = 1, V = 2, w = 3 }
 
 -- Process pattern string.
 local function dopattern(pat, args, sz, op, needrex)
@@ -1896,7 +1974,7 @@ local function dopattern(pat, args, sz, op, needrex)
 	local a = args[narg]
 	narg = narg + 1
 	local mode, imm = a.mode, a.imm
-	if mode == "iJ" and not match("iIJ", c) then
+	if mode == "iJ" and not match(x64 and "J" or "iIJ", c) then
 	  werror("bad operand size for label")
 	end
 	if c == "S" then
@@ -2088,24 +2166,18 @@ end
 local function op_data(params)
   if not params then return "imm..." end
   local sz = sub(params.op, 2, 2)
-  if sz == "a" then sz = addrsize end
+  if sz == "l" then sz = "d" elseif sz == "a" then sz = addrsize end
   for _,p in ipairs(params) do
-    local a = parseoperand(p)
+    local a = parseoperand(p, sz == "q")
     if sub(a.mode, 1, 1) ~= "i" or (a.opsize and a.opsize ~= sz) then
       werror("bad mode or size in `"..p.."'")
     end
     if a.mode == "iJ" then
-      if sz == 'q' then
-        wputlabel64("IMM_", a.imm, 1)
-      else
-        wputlabel("IMM_", a.imm, 1)
-      end
+      wputlabel("IMM_", a.imm, 1)
+    elseif sz == "q" then
+      wputqarg(a.imm)
     else
-      if sz == 'q' then
-        wputqarg(a.imm)
-      else
-        wputszarg(sz, a.imm)
-      end
+      wputszarg(sz, a.imm)
     end
     if secpos+2 > maxsecpos then wflush() end
   end
@@ -2115,7 +2187,11 @@ map_op[".byte_*"] = op_data
 map_op[".sbyte_*"] = op_data
 map_op[".word_*"] = op_data
 map_op[".dword_*"] = op_data
+map_op[".qword_*"] = op_data
 map_op[".aword_*"] = op_data
+map_op[".long_*"] = op_data
+map_op[".quad_*"] = op_data
+map_op[".addr_*"] = op_data
 
 ------------------------------------------------------------------------------
 

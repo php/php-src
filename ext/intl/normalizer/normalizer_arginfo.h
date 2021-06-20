@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b9ef4888cc32bd009fb87db52859953902454fc */
+ * Stub hash: 651065249a99f9ee50126d58223b8f4527e3fc09 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Normalizer_normalize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -31,3 +31,13 @@ static const zend_function_entry class_Normalizer_methods[] = {
 #endif
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Normalizer(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Normalizer", class_Normalizer_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

@@ -4,9 +4,10 @@ ldap_search() test
 Davide Mendolia <idaf1er@gmail.com>
 Patrick Allaert <patrickallaert@php.net>
 Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
@@ -45,9 +46,11 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(4) {
   ["count"]=>
@@ -212,9 +215,11 @@ array(4) {
 bool(true)
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(1) {
   ["count"]=>
@@ -226,9 +231,11 @@ array(1) {
 }
 array(2) {
   [0]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
   [1]=>
-  resource(%d) of type (ldap result)
+  object(LDAP\Result)#%d (0) {
+  }
 }
 array(1) {
   ["count"]=>

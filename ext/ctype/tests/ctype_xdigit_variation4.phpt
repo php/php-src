@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_xdigit() function : usage variations - heaxadecimal and octal values
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

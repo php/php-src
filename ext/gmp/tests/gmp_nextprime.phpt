@@ -1,8 +1,7 @@
 --TEST--
 gmp_nextprime()
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip";
-?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -25,7 +24,7 @@ try {
 try {
     $n = gmp_nextprime("");
     var_dump(gmp_strval($n));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {

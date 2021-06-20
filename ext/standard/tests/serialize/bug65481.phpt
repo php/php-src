@@ -35,6 +35,8 @@ $token = serialize($token);
 
 ?>
 Done
---EXPECT--
+--EXPECTF--
 Test
+
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Done

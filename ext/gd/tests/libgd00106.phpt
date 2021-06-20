@@ -1,9 +1,7 @@
 --TEST--
 libgd #106 (imagerectangle 1x1 draws 1x3)
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(10,10);

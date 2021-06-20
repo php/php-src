@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -109,7 +109,7 @@ typedef struct _zend_smm_shared_globals {
     /* Amount of shared memory allocated by garbage */
     size_t                     wasted_shared_memory;
     /* No more shared memory flag */
-    zend_bool                  memory_exhausted;
+    bool                  memory_exhausted;
     /* Saved Shared Allocator State */
     zend_shared_memory_state   shared_memory_state;
 	/* Pointer to the application's shared data structures */
@@ -139,8 +139,6 @@ void *zend_shared_memdup_free(void *source, size_t size);
 void *zend_shared_memdup_get_put(void *source, size_t size);
 void *zend_shared_memdup_put(void *source, size_t size);
 void *zend_shared_memdup(void *source, size_t size);
-void *zend_shared_memdup_arena_put(void *source, size_t size);
-void *zend_shared_memdup_arena(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 

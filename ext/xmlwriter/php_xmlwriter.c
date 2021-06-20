@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -252,7 +252,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 {
 	xmlTextWriterPtr ptr;
 	int retval;
-	zend_bool indent;
+	bool indent;
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &self, xmlwriter_class_entry_ce, &indent) == FAILURE) {
@@ -814,7 +814,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	char *name;
 	size_t name_len;
 	int retval;
-	zend_bool isparm;
+	bool isparm;
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osb", &self, xmlwriter_class_entry_ce, &name, &name_len, &isparm) == FAILURE) {
@@ -851,7 +851,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	int retval;
 	/* Optional parameters */
 	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
-	zend_bool pe = 0;
+	bool pe = 0;
 	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self;
 
@@ -985,7 +985,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) {
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr buffer;
-	zend_bool empty = 1;
+	bool empty = 1;
 	int output_bytes;
 	zval *self;
 
@@ -1032,16 +1032,13 @@ PHP_FUNCTION(xmlwriter_flush)
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(xmlwriter)
 {
-	zend_class_entry ce;
-
 	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
 	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
 	xmlwriter_object_handlers.free_obj = xmlwriter_object_free_storage;
 	xmlwriter_object_handlers.clone_obj = NULL;
-	INIT_CLASS_ENTRY(ce, "XMLWriter", class_XMLWriter_methods);
-	ce.create_object = xmlwriter_object_new;
-	xmlwriter_class_entry_ce = zend_register_internal_class(&ce);
+	xmlwriter_class_entry_ce = register_class_XMLWriter();
+	xmlwriter_class_entry_ce->create_object = xmlwriter_object_new;
 
 	return SUCCESS;
 }

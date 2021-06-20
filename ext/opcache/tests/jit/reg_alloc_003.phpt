@@ -1,13 +1,17 @@
 --TEST--
 Register Alloction 003: Reuse temporary register
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 opcache.protect_memory=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test($char_code) {

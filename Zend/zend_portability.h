@@ -113,6 +113,13 @@
 # define ZEND_UNREACHABLE() ZEND_ASSUME(0)
 #endif
 
+/* pseudo fallthrough keyword; */
+#if defined(__GNUC__) && __GNUC__ >= 7
+# define ZEND_FALLTHROUGH __attribute__((__fallthrough__))
+#else
+# define ZEND_FALLTHROUGH ((void)0)
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
@@ -274,6 +281,12 @@ char *alloca();
 # define ZEND_NORETURN
 #endif
 
+#if __has_attribute(force_align_arg_pointer)
+# define ZEND_STACK_ALIGNED __attribute__((force_align_arg_pointer))
+#else
+# define ZEND_STACK_ALIGNED
+#endif
+
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
@@ -335,7 +348,7 @@ char *alloca();
 #if (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
-	zend_bool name;
+	bool name;
 # define SET_ALLOCA_FLAG(name) \
 	name = 1
 # define do_alloca_ex(size, limit, use_heap) \

@@ -1,8 +1,9 @@
 --TEST--
 mysqli_debug() - all control string options supported by both mysqlnd and libmysql except oOaA
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_debug'))

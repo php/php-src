@@ -1,7 +1,7 @@
 --TEST--
 Inline HTML should not be split at partial PHP tags
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
+--EXTENSIONS--
+tokenizer
 --INI--
 short_open_tag=0
 --FILE--
