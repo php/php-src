@@ -59,10 +59,24 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 
 void validate_namedparameteralias_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+	zval alias;
+
 	if (attr->argc != 1) {
-		zend_error_noreturn(E_ERROR, "NameAlias::__construct(): Argument #1 ($alias) is required");
-		// TODO: more validation, must be string
+		zend_error_noreturn(E_ERROR, "NamedParameterAlias::__construct(): Argument #1 ($alias) is required");
 	}
+
+	if (FAILURE == zend_get_attribute_value(&alias, attr, 0, NULL)) {
+		return;
+	}
+
+	if (Z_TYPE(alias) != IS_STRING) {
+		zend_error_noreturn(E_ERROR,
+			"NamedParameterAlias::__construct(): Argument #1 ($alias) must be of type string, %s given",
+			zend_zval_type_name(&alias)
+		);
+	}
+
+	zval_ptr_dtor(&alias);
 }
 
 ZEND_METHOD(Attribute, __construct)
