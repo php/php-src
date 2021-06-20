@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -44,6 +44,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_smart_str.h"
 #include "zend_enum.h"
+#include "zend_fibers.h"
 #include "php_reflection_arginfo.h"
 
 /* Key used to avoid leaking addresses in ReflectionProperty::getId() */
@@ -91,6 +92,7 @@ PHPAPI zend_class_entry *reflection_attribute_ptr;
 PHPAPI zend_class_entry *reflection_enum_ptr;
 PHPAPI zend_class_entry *reflection_enum_unit_case_ptr;
 PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
+PHPAPI zend_class_entry *reflection_fiber_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
@@ -154,6 +156,7 @@ typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
 	REF_TYPE_GENERATOR,
+	REF_TYPE_FIBER,
 	REF_TYPE_PARAMETER,
 	REF_TYPE_TYPE,
 	REF_TYPE_PROPERTY,
@@ -188,16 +191,6 @@ static inline bool is_closure_invoke(zend_class_entry *ce, zend_string *lcname) 
 	return ce == zend_ce_closure
 		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
 }
-
-static void _default_get_name(zval *object, zval *return_value) /* {{{ */
-{
-	zval *name = reflection_prop_name(object);
-	if (Z_ISUNDEF_P(name)) {
-		RETURN_FALSE;
-	}
-	ZVAL_COPY(return_value, name);
-}
-/* }}} */
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
@@ -266,6 +259,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			break;
 		}
 		case REF_TYPE_GENERATOR:
+		case REF_TYPE_FIBER:
 		case REF_TYPE_CLASS_CONSTANT:
 		case REF_TYPE_OTHER:
 			break;
@@ -565,7 +559,7 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
-	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
+	char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
 	const char *type;
 
 	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
@@ -3630,15 +3624,24 @@ ZEND_METHOD(ReflectionClassConstant, __toString)
 	reflection_object *intern;
 	zend_class_constant *ref;
 	smart_str str = {0};
-	zval name;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ref);
-	_default_get_name(ZEND_THIS, &name);
-	_class_const_string(&str, Z_STRVAL(name), ref, "");
-	zval_ptr_dtor(&name);
+
+	zval *name = reflection_prop_name(ZEND_THIS);
+	if (Z_ISUNDEF_P(name)) {
+		zend_throw_error(NULL,
+			"Typed property ReflectionClassConstant::$name "
+			"must not be accessed before initialization");
+		RETURN_THROWS();
+	}
+	ZVAL_DEREF(name);
+	ZEND_ASSERT(Z_TYPE_P(name) == IS_STRING);
+
+	_class_const_string(&str, Z_STRVAL_P(name), ref, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
@@ -3649,7 +3652,16 @@ ZEND_METHOD(ReflectionClassConstant, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	zval *name = reflection_prop_name(ZEND_THIS);
+	if (Z_ISUNDEF_P(name)) {
+		zend_throw_error(NULL,
+			"Typed property ReflectionClassConstant::$name "
+			"must not be accessed before initialization");
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_DEREF(return_value, name);
 }
 /* }}} */
 
@@ -3662,7 +3674,7 @@ static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
-	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & mask);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & mask);
 }
 /* }}} */
 
@@ -3698,7 +3710,7 @@ ZEND_METHOD(ReflectionClassConstant, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(Z_ACCESS_FLAGS(ref->value));
+	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_ACC_PPP_MASK);
 }
 /* }}} */
 
@@ -3773,7 +3785,7 @@ ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & ZEND_CLASS_CONST_IS_CASE);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE);
 }
 
 /* {{{ reflection_class_object_ctor */
@@ -4521,7 +4533,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 			RETURN_THROWS();
 		}
 
-		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & filter) {
 			ZVAL_COPY_OR_DUP(&val, &constant->value);
 			zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
 		}
@@ -4551,7 +4563,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), name, constant) {
-		if (Z_ACCESS_FLAGS(constant->value) & filter) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & filter) {
 			zval class_const;
 			reflection_class_constant_factory(name, constant, &class_const);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
@@ -6591,7 +6603,7 @@ ZEND_METHOD(ReflectionEnum, hasCase)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(Z_ACCESS_FLAGS(class_const->value) & ZEND_CLASS_CONST_IS_CASE);
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(class_const) & ZEND_CLASS_CONST_IS_CASE);
 }
 
 ZEND_METHOD(ReflectionEnum, getCase)
@@ -6611,7 +6623,7 @@ ZEND_METHOD(ReflectionEnum, getCase)
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Case %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
-	if (!(Z_ACCESS_FLAGS(constant->value) & ZEND_CLASS_CONST_IS_CASE)) {
+	if (!(ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "%s::%s is not a case", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
@@ -6634,7 +6646,7 @@ ZEND_METHOD(ReflectionEnum, getCases)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
-		if (Z_ACCESS_FLAGS(constant->value) & ZEND_CLASS_CONST_IS_CASE) {
+		if (ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE) {
 			zval class_const;
 			reflection_enum_case_factory(ce, name, constant, &class_const);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &class_const);
@@ -6686,7 +6698,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, __construct)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(Z_ACCESS_FLAGS(ref->value) & ZEND_CLASS_CONST_IS_CASE)) {
+	if (!(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE)) {
 		zval *case_name = reflection_prop_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s is not a case", ZSTR_VAL(ref->ce->name), Z_STRVAL_P(case_name));
 		RETURN_THROWS();
@@ -6743,6 +6755,120 @@ ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
 	zval *member_p = zend_enum_fetch_case_value(Z_OBJ(ref->value));
 
 	ZVAL_COPY_OR_DUP(return_value, member_p);
+}
+
+/* {{{ proto ReflectionFiber::__construct(Fiber $fiber) */
+ZEND_METHOD(ReflectionFiber, __construct)
+{
+	zval *fiber, *object;
+	reflection_object *intern;
+
+	object = ZEND_THIS;
+	intern = Z_REFLECTION_P(object);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(fiber, zend_ce_fiber)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (intern->ce) {
+		zval_ptr_dtor(&intern->obj);
+	}
+
+	intern->ref_type = REF_TYPE_FIBER;
+	ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(fiber));
+	intern->ce = zend_ce_fiber;
+}
+/* }}} */
+
+ZEND_METHOD(ReflectionFiber, getFiber)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_OBJ_COPY(Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj));
+}
+
+#define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
+		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status & ZEND_FIBER_STATUS_FINISHED) { \
+			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
+			RETURN_THROWS(); \
+		} \
+	} while (0)
+
+ZEND_METHOD(ReflectionFiber, getTrace)
+{
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_execute_data *prev_execute_data;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options);
+	ZEND_PARSE_PARAMETERS_END();
+
+	REFLECTION_CHECK_VALID_FIBER(fiber);
+
+	prev_execute_data = fiber->stack_bottom->prev_execute_data;
+	fiber->stack_bottom->prev_execute_data = NULL;
+
+	if (EG(current_fiber) != fiber) {
+		// No need to replace current execute data if within the current fiber.
+		EG(current_execute_data) = fiber->execute_data;
+	}
+
+	zend_fetch_debug_backtrace(return_value, 0, options, 0);
+
+	EG(current_execute_data) = execute_data; // Restore original execute data.
+	fiber->stack_bottom->prev_execute_data = prev_execute_data; // Restore prev execute data on fiber stack.
+}
+
+ZEND_METHOD(ReflectionFiber, getExecutingLine)
+{
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_execute_data *prev_execute_data;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	REFLECTION_CHECK_VALID_FIBER(fiber);
+
+	if (EG(current_fiber) == fiber) {
+		prev_execute_data = execute_data->prev_execute_data;
+	} else {
+		prev_execute_data = fiber->execute_data->prev_execute_data;
+	}
+
+	RETURN_LONG(prev_execute_data->opline->lineno);
+}
+
+ZEND_METHOD(ReflectionFiber, getExecutingFile)
+{
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_execute_data *prev_execute_data;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	REFLECTION_CHECK_VALID_FIBER(fiber);
+
+	if (EG(current_fiber) == fiber) {
+		prev_execute_data = execute_data->prev_execute_data;
+	} else {
+		prev_execute_data = fiber->execute_data->prev_execute_data;
+	}
+
+	RETURN_STR_COPY(prev_execute_data->func->op_array.filename);
+}
+
+ZEND_METHOD(ReflectionFiber, getCallable)
+{
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (fiber == NULL || fiber->status & ZEND_FIBER_STATUS_FINISHED) {
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(&fiber->fci.function_name);
 }
 
 /* {{{ _reflection_write_property */
@@ -6862,6 +6988,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflection_enum_backed_case_ptr = register_class_ReflectionEnumBackedCase(reflection_enum_unit_case_ptr);
 	reflection_init_class_handlers(reflection_enum_backed_case_ptr);
+
+	reflection_fiber_ptr = register_class_ReflectionFiber();
+	reflection_init_class_handlers(reflection_fiber_ptr);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(attribute, "IS_INSTANCEOF", REFLECTION_ATTRIBUTE_IS_INSTANCEOF);
 

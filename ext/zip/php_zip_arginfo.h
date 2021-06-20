@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a50da348df01027594efd7c8ab7427c05ffea39e */
+ * Stub hash: d0f7d294c92a3d056e38abc92162c19e10329310 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -463,39 +463,39 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_class_implements(class_entry, 1, class_entry_Countable);
 
 	zval property_lastId_default_value;
-	ZVAL_NULL(&property_lastId_default_value);
+	ZVAL_UNDEF(&property_lastId_default_value);
 	zend_string *property_lastId_name = zend_string_init("lastId", sizeof("lastId") - 1, 1);
-	zend_declare_property_ex(class_entry, property_lastId_name, &property_lastId_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_lastId_name, &property_lastId_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_lastId_name);
 
 	zval property_status_default_value;
-	ZVAL_NULL(&property_status_default_value);
+	ZVAL_UNDEF(&property_status_default_value);
 	zend_string *property_status_name = zend_string_init("status", sizeof("status") - 1, 1);
-	zend_declare_property_ex(class_entry, property_status_name, &property_status_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_status_name, &property_status_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_status_name);
 
 	zval property_statusSys_default_value;
-	ZVAL_NULL(&property_statusSys_default_value);
+	ZVAL_UNDEF(&property_statusSys_default_value);
 	zend_string *property_statusSys_name = zend_string_init("statusSys", sizeof("statusSys") - 1, 1);
-	zend_declare_property_ex(class_entry, property_statusSys_name, &property_statusSys_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_statusSys_name, &property_statusSys_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_statusSys_name);
 
 	zval property_numFiles_default_value;
-	ZVAL_NULL(&property_numFiles_default_value);
+	ZVAL_UNDEF(&property_numFiles_default_value);
 	zend_string *property_numFiles_name = zend_string_init("numFiles", sizeof("numFiles") - 1, 1);
-	zend_declare_property_ex(class_entry, property_numFiles_name, &property_numFiles_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_numFiles_name, &property_numFiles_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_numFiles_name);
 
 	zval property_filename_default_value;
-	ZVAL_NULL(&property_filename_default_value);
+	ZVAL_UNDEF(&property_filename_default_value);
 	zend_string *property_filename_name = zend_string_init("filename", sizeof("filename") - 1, 1);
-	zend_declare_property_ex(class_entry, property_filename_name, &property_filename_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_filename_name, &property_filename_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_filename_name);
 
 	zval property_comment_default_value;
-	ZVAL_NULL(&property_comment_default_value);
+	ZVAL_UNDEF(&property_comment_default_value);
 	zend_string *property_comment_name = zend_string_init("comment", sizeof("comment") - 1, 1);
-	zend_declare_property_ex(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_comment_name);
 
 	return class_entry;

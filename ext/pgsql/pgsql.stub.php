@@ -475,8 +475,8 @@ function pg_get_result($connection) {}
 /** @param resource $result */
 function pg_result_status($result, int $mode = PGSQL_STATUS_LONG): string|int {}
 
-/** @param resource $result */
-function pg_get_notify($result, int $mode = PGSQL_ASSOC): array|false {}
+/** @param resource $connection */
+function pg_get_notify($connection, int $mode = PGSQL_ASSOC): array|false {}
 
 /** @param resource $connection */
 function pg_get_pid($connection): int {}

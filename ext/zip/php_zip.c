@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -859,10 +859,6 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 				ZVAL_EMPTY_STRING(rv);
 			}
 			break;
-		/* case IS_TRUE */
-		case IS_FALSE:
-			ZVAL_BOOL(rv, retint);
-			break;
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
@@ -893,6 +889,26 @@ static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name
 	return retval;
 }
 /* }}} */
+
+
+static zval *php_zip_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
+{
+	ze_zip_object *obj;
+	zip_prop_handler *hnd = NULL;
+
+	obj = php_zip_fetch_object(object);
+
+	if (obj->prop_handler != NULL) {
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
+	}
+
+	if (hnd != NULL) {
+		zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return &EG(error_zval);
+	}
+
+	return zend_std_write_property(object, name, value, cache_slot);
+}
 
 static zval *php_zip_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
@@ -2712,7 +2728,6 @@ PHP_METHOD(ZipArchive, extractTo)
 	zend_string *files_str = NULL;
 	HashTable *files_ht = NULL;
 
-	zval *zval_file = NULL;
 	php_stream_statbuf ssb;
 	char *pathto;
 	size_t pathto_len;
@@ -2749,7 +2764,8 @@ PHP_METHOD(ZipArchive, extractTo)
 			RETURN_FALSE;
 		}
 		for (i = 0; i < nelems; i++) {
-			if ((zval_file = zend_hash_index_find(files_ht, i)) != NULL) {
+			zval *zval_file;
+			if ((zval_file = zend_hash_index_find_deref(files_ht, i)) != NULL) {
 				switch (Z_TYPE_P(zval_file)) {
 					case IS_LONG:
 						break;
@@ -3029,6 +3045,7 @@ static PHP_MINIT_FUNCTION(zip)
 	zip_object_handlers.get_properties = php_zip_get_properties;
 	zip_object_handlers.read_property	= php_zip_read_property;
 	zip_object_handlers.has_property	= php_zip_has_property;
+	zip_object_handlers.write_property = php_zip_write_property;
 
 	zip_class_entry = register_class_ZipArchive(zend_ce_countable);
 	zip_class_entry->create_object = php_zip_object_new;

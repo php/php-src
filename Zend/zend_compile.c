@@ -127,16 +127,6 @@ static zend_brk_cont_element *get_next_brk_cont_element(void)
 	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
 }
 
-static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
-{
-	zend_property_info *property_info = Z_PTR_P(zv);
-
-	zend_string_release(property_info->name);
-	zend_type_release(property_info->type, /* persistent */ 1);
-	free(property_info);
-}
-/* }}} */
-
 static zend_string *zend_build_runtime_definition_key(zend_string *name, uint32_t start_lineno) /* {{{ */
 {
 	zend_string *filename = CG(active_op_array)->filename;
@@ -1651,9 +1641,9 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 /* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
 static bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
-	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
+	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
-	} else if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
+	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PRIVATE) {
 		return c->ce == scope;
 	} else {
 		zend_class_entry *ce = c->ce;
@@ -1867,7 +1857,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	zend_hash_init(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes);
+	zend_hash_init(&ce->properties_info, 8, NULL, NULL, persistent_hashes);
 	zend_hash_init(&ce->constants_table, 8, NULL, NULL, persistent_hashes);
 	zend_hash_init(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes);
 
@@ -7759,7 +7749,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 	zval value_zv;
 	zend_const_expr_to_zval(&value_zv, &const_enum_init_ast);
 	zend_class_constant *c = zend_declare_class_constant_ex(enum_class, enum_case_name, &value_zv, ZEND_ACC_PUBLIC, NULL);
-	Z_ACCESS_FLAGS(c->value) |= ZEND_CLASS_CONST_IS_CASE;
+	ZEND_CLASS_CONST_FLAGS(c) |= ZEND_CLASS_CONST_IS_CASE;
 	zend_ast_destroy(const_enum_init_ast);
 
 	zend_ast *attr_ast = ast->child[2];

@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -44,10 +44,6 @@ typedef struct _func_info_t {
 	{name, sizeof(name)-1, (MAY_BE_RC1 | (info)), NULL}
 #define FN(name, info) \
 	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | (info)), NULL}
-#define FR(name, info) \
-	{name, sizeof(name)-1, (MAY_BE_REF | (info)), NULL}
-#define FX(name, info) \
-	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | (info)), NULL}
 #define FC(name, callback) \
 	{name, sizeof(name)-1, 0, callback}
 
@@ -89,12 +85,9 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	}
 }
 
-#define UNKNOWN_INFO (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF)
-
 static const func_info_t func_infos[] = {
 	/* zend */
 	F1("zend_version",            MAY_BE_STRING),
-	FN("func_get_arg",            UNKNOWN_INFO),
 	FN("func_get_args",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars",          MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("get_class_methods",       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
@@ -211,7 +204,7 @@ static const func_info_t func_infos[] = {
 	F1("base64_decode",                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("base64_encode",                MAY_BE_STRING),
 	F1("password_hash",                MAY_BE_STRING),
-	F1("password_get_info",            MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("password_get_info",            MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("convert_uuencode",             MAY_BE_STRING),
 	F1("convert_uudecode",             MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pow",                          MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
@@ -249,14 +242,7 @@ static const func_info_t func_infos[] = {
 	F1("get_current_user",             MAY_BE_STRING),
 	F1("get_cfg_var",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
-	FN("call_user_func",               UNKNOWN_INFO),
-	FN("call_user_func_array",         UNKNOWN_INFO),
-	FN("call_user_method",             UNKNOWN_INFO),
-	FN("call_user_method_array",       UNKNOWN_INFO),
-	FN("forward_static_call",          UNKNOWN_INFO),
-	FN("forward_static_call_array",    UNKNOWN_INFO),
 	F1("serialize",                    MAY_BE_STRING),
-	FN("unserialize",                  UNKNOWN_INFO),
 	F1("var_export",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("print_r",                      MAY_BE_TRUE | MAY_BE_STRING),
 	F0("register_shutdown_function",   MAY_BE_NULL | MAY_BE_FALSE),
@@ -359,19 +345,10 @@ static const func_info_t func_infos[] = {
 	F0("usort",                        MAY_BE_TRUE),
 	F0("uasort",                       MAY_BE_TRUE),
 	F0("uksort",                       MAY_BE_TRUE),
-	FN("end",                          UNKNOWN_INFO),
-	FN("prev",                         UNKNOWN_INFO),
-	FN("next",                         UNKNOWN_INFO),
-	FN("reset",                        UNKNOWN_INFO),
-	FN("current",                      UNKNOWN_INFO),
-	FN("min",                          UNKNOWN_INFO),
-	FN("max",                          UNKNOWN_INFO),
 	F1("compact",                      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill_keys",              MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FC("range",                        zend_range_info),
-	FN("array_pop",                    UNKNOWN_INFO),
-	FN("array_shift",                  UNKNOWN_INFO),
 	F1("array_splice",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_slice",                  MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_replace",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -381,7 +358,6 @@ static const func_info_t func_infos[] = {
 	F1("array_count_values",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
 	F1("array_column",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_reverse",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	F1("array_reduce",                 UNKNOWN_INFO),
 	F1("array_flip",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("array_change_key_case",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FN("array_rand",                   MAY_BE_LONG | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
@@ -403,8 +379,6 @@ static const func_info_t func_infos[] = {
 	F1("array_filter",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_chunk",                  MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_combine",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	F1("pos",                          UNKNOWN_INFO),
-	F1("assert_options",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_OBJECT | MAY_BE_OBJECT),
 	F1("str_rot13",                    MAY_BE_STRING),
 	F1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("stream_bucket_make_writeable", MAY_BE_NULL | MAY_BE_OBJECT),
@@ -417,7 +391,7 @@ static const func_info_t func_infos[] = {
 	F1("strftime",                              MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gmstrftime",                            MAY_BE_FALSE | MAY_BE_STRING),
 	F1("localtime",                             MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
-	F1("getdate",                               MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("getdate",                               MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("date_create",                           MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("date_create_immutable",                 MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("date_create_from_format",               MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -460,7 +434,7 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_query",							MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_OBJECT),
 	F1("mysqli_get_charset", 					MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("mysqli_fetch_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F1("mysqli_fetch_assoc",					MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
+	F1("mysqli_fetch_assoc",					MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mysqli_fetch_all",						MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mysqli_fetch_object",					MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("mysqli_affected_rows",					MAY_BE_LONG | MAY_BE_STRING),
@@ -684,10 +658,9 @@ static const func_info_t func_infos[] = {
 	F1("session_encode",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/pgsql */
-	F1("pg_connect",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	FN("pg_connect",							MAY_BE_FALSE | MAY_BE_RESOURCE),
 	FN("pg_pconnect",							MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("pg_dbname",								MAY_BE_STRING),
-	F1("pg_last_error",							MAY_BE_STRING),
 	F1("pg_options",							MAY_BE_STRING),
 	F1("pg_port",								MAY_BE_STRING),
 	F1("pg_tty",								MAY_BE_STRING),
@@ -699,13 +672,11 @@ static const func_info_t func_infos[] = {
 	F1("pg_prepare",							MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("pg_execute",							MAY_BE_FALSE | MAY_BE_RESOURCE),
 	FN("pg_last_notice",						MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY ),
-	F1("pg_field_table",						MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
 	F1("pg_field_name",							MAY_BE_STRING),
-	F1("pg_field_type",							MAY_BE_STRING),
 	F1("pg_field_type_oid",						MAY_BE_LONG | MAY_BE_STRING),
 	F1("pg_fetch_result",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("pg_fetch_row",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
-	F1("pg_fetch_assoc",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
+	F1("pg_fetch_assoc",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_fetch_array",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("pg_fetch_object",						MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("pg_fetch_all",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
@@ -750,10 +721,8 @@ static const func_info_t func_infos[] = {
 	F1("exif_thumbnail",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/filter */
-	FN("filter_input",							UNKNOWN_INFO),
-	FN("filter_var",							UNKNOWN_INFO),
 	F1("filter_input_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
+	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/gettext */
@@ -839,13 +808,14 @@ static HashTable func_info;
 ZEND_API int zend_func_info_rid = -1;
 
 static uint32_t get_internal_func_info(
-		const zend_call_info *call_info, const zend_ssa *ssa, zend_string *lcname) {
-	if (call_info->callee_func->common.scope) {
+		const zend_call_info *call_info, const zend_ssa *ssa) {
+	zend_function *callee_func = call_info->callee_func;
+	if (callee_func->common.scope) {
 		/* This is a method, not a function. */
 		return 0;
 	}
 
-	zval *zv = zend_hash_find_ex(&func_info, lcname, 1);
+	zval *zv = zend_hash_find_ex(&func_info, callee_func->common.function_name, 1);
 	if (!zv) {
 		return 0;
 	}
@@ -868,9 +838,7 @@ ZEND_API uint32_t zend_get_func_info(
 	*ce_is_instanceof = 0;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2));
-
-		uint32_t internal_ret = get_internal_func_info(call_info, ssa, lcname);
+		uint32_t internal_ret = get_internal_func_info(call_info, ssa);
 #if !ZEND_DEBUG
 		if (internal_ret) {
 			return internal_ret;
@@ -882,15 +850,15 @@ ZEND_API uint32_t zend_get_func_info(
 
 #if ZEND_DEBUG
 		if (internal_ret) {
+			zend_string *name = callee_func->common.function_name;
 			/* Check whether the func_info information is a subset of the information we can
 			 * compute from the specified return type, otherwise it contains redundant types. */
 			if (internal_ret & ~ret) {
-				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(lcname));
+				fprintf(stderr, "Inaccurate func info for %s()\n", ZSTR_VAL(name));
 			}
-			/* Check whether the func info is completely redundant with arginfo.
-			 * Ignore UNKNOWN_INFO for now. */
-			if (internal_ret == ret && (internal_ret & MAY_BE_ANY) != MAY_BE_ANY) {
-				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(lcname));
+			/* Check whether the func info is completely redundant with arginfo. */
+			if (internal_ret == ret) {
+				fprintf(stderr, "Useless func info for %s()\n", ZSTR_VAL(name));
 			}
 			/* If the return type is not mixed, check that the types match exactly if we exclude
 			 * RC and array information. */
@@ -900,7 +868,7 @@ ZEND_API uint32_t zend_get_func_info(
 				/* Func info may contain "true" types as well as isolated "null" and "false". */
 				if (diff && !(diff == MAY_BE_FALSE && (ret & MAY_BE_FALSE))
 						&& (internal_ret_any & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
-					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(lcname));
+					fprintf(stderr, "Incorrect func info for %s()\n", ZSTR_VAL(name));
 				}
 			}
 			return internal_ret;

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -188,7 +188,6 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list);
 static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
@@ -284,6 +283,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	HashTable notices;  /* notice message for each connection */
 	zend_resource *default_link; /* default link when connection is omitted */
 	HashTable hashes; /* hashes for each connection */
+	HashTable field_oids;
+	HashTable table_oids;
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -433,6 +433,39 @@ PHP_FUNCTION(mysqli_fetch_array)
 PHP_FUNCTION(mysqli_fetch_assoc)
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 0);
+}
+/* }}} */
+
+/* {{{ Fetch a column from the result row  */
+PHP_FUNCTION(mysqli_fetch_column)
+{
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	zval 			row_array;
+	zend_long		col_no = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &col_no) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES*, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+
+	if (col_no < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	if (col_no >= mysql_num_fields(result)) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be less than the number of fields for this result set");
+		RETURN_THROWS();
+	}
+
+	php_mysqli_fetch_into_hash_aux(&row_array, result, MYSQLI_NUM);
+	if (Z_TYPE(row_array) != IS_ARRAY) {
+		zval_ptr_dtor_nogc(&row_array);
+		RETURN_FALSE;
+	}
+
+	ZVAL_COPY(return_value, zend_hash_index_find(Z_ARR(row_array), col_no));
+	zval_ptr_dtor_nogc(&row_array);
 }
 /* }}} */
 

@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -649,7 +649,7 @@ static int lsapi_execute_script(void)
     char *p;
     int len;
 	zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
-	file_handle->primary_script = 1;
+	file_handle.primary_script = true;
 
     p = argv0;
     *p++ = ':';
@@ -1335,9 +1335,9 @@ static int cli_main( int argc, char * argv[] )
                             file_handle.opened_path = NULL;
                             ret = php_lint_script(&file_handle);
                             if (ret==SUCCESS) {
-                                zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+                                zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
                             } else {
-                                zend_printf("Errors parsing %s\n", file_handle.filename);
+                                zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
                             }
 
                         } else {

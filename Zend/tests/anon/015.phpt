@@ -19,12 +19,15 @@ var_dump($d->foo(24));
 var_dump($c->foo());
 ?>
 --EXPECT--
-NULL
+array(1) {
+  [0]=>
+  int(42)
+}
 array(1) {
   [0]=>
   int(24)
 }
 array(1) {
   [0]=>
-  int(42)
+  int(24)
 }

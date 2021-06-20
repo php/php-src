@@ -1,5 +1,5 @@
 --TEST--
-Attempt to instantiate an IMAPConnection directly
+Attempt to instantiate an IMAP\Connection directly
 --SKIPIF--
 <?php
 extension_loaded('imap') or die('skip imap extension not available in this build');
@@ -7,9 +7,9 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 <?php
 
 try {
-    new IMAPConnection();
+    new IMAP\Connection();
 } catch (Error $ex) {
     echo "Exception: ", $ex->getMessage(), "\n";
 }
 --EXPECT--
-Exception: Cannot directly construct IMAPConnection, use imap_open() instead
+Exception: Cannot directly construct IMAP\Connection, use imap_open() instead

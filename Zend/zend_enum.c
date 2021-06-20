@@ -226,7 +226,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
-		if (!(Z_ACCESS_FLAGS(c->value) & ZEND_CLASS_CONST_IS_CASE)) {
+		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
 			continue;
 		}
 		zval *zv = &c->value;

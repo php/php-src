@@ -242,8 +242,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
 			zend_unexpected_extra_named_error();
 			break;
-		default:
-			ZEND_ASSERT(error_code != ZPP_ERROR_OK);
+		case ZPP_ERROR_FAILURE:
+			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -3231,6 +3233,7 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 	zend_class_entry *disabled_class;
 	zend_string *key;
 	zend_function *fn;
+	zend_property_info *prop;
 
 	key = zend_string_alloc(class_name_length, 0);
 	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
@@ -3253,6 +3256,13 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 		}
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&disabled_class->function_table);
+	ZEND_HASH_FOREACH_PTR(&disabled_class->properties_info, prop) {
+		if (prop->ce == disabled_class) {
+			zend_string_release(prop->name);
+			zend_type_release(prop->type, /* persistent */ 1);
+			free(prop);
+		}
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&disabled_class->properties_info);
 	return SUCCESS;
 }
@@ -4326,7 +4336,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
 	ZVAL_COPY_VALUE(&c->value, value);
-	Z_ACCESS_FLAGS(c->value) = access_type;
+	ZEND_CLASS_CONST_FLAGS(c) = access_type;
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;

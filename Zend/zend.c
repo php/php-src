@@ -34,6 +34,7 @@
 #include "zend_cpuinfo.h"
 #include "zend_attributes.h"
 #include "zend_observer.h"
+#include "zend_fibers.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -174,6 +175,17 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
+{
+	if (new_value) {
+		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	} else {
+		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 #if ZEND_DEBUG
 # define SIGNAL_CHECK_DEFAULT "1"
 #else
@@ -192,6 +204,8 @@ ZEND_INI_BEGIN()
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
+
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
@@ -716,7 +730,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		free(compiler_globals->function_table);
 	}
 	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
-		zend_hash_destroy(compiler_globals->class_table);
+		/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
+		zend_hash_graceful_reverse_destroy(compiler_globals->class_table);
 		free(compiler_globals->class_table);
 	}
 	if (compiler_globals->auto_globals != GLOBAL_AUTO_GLOBALS_TABLE) {
@@ -759,10 +774,14 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
+	executor_globals->current_fiber = NULL;
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
+	executor_globals->record_errors = false;
+	executor_globals->num_errors = 0;
+	executor_globals->errors = NULL;
 }
 /* }}} */
 
@@ -1108,7 +1127,8 @@ void zend_shutdown(void) /* {{{ */
 	virtual_cwd_shutdown();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
+	zend_hash_graceful_reverse_destroy(GLOBAL_CLASS_TABLE);
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
@@ -1333,6 +1353,20 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		ZEND_ASSERT(!(type & E_FATAL_ERRORS) && "Fatal error during SCCP");
 		EG(capture_warnings_during_sccp)++;
 		return;
+	}
+
+	if (EG(record_errors)) {
+		zend_error_info *info = emalloc(sizeof(zend_error_info));
+		info->type = type;
+		info->lineno = error_lineno;
+		info->filename = zend_string_copy(error_filename);
+		info->message = zend_string_copy(message);
+
+		/* This is very inefficient for a large number of errors.
+		 * Use pow2 realloc if it becomes a problem. */
+		EG(num_errors)++;
+		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info) * EG(num_errors));
+		EG(errors)[EG(num_errors)-1] = info;
 	}
 
 	/* Report about uncaught exception in case of fatal errors */
@@ -1571,6 +1605,31 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 	uint32_t lineno;
 	get_filename_lineno(type, &filename, &lineno);
 	zend_error_zstr_at(type, filename, lineno, message);
+}
+
+ZEND_API void zend_begin_record_errors(void)
+{
+	ZEND_ASSERT(!EG(record_errors) && "Error recoreding already enabled");
+	EG(record_errors) = true;
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
+}
+
+ZEND_API void zend_free_recorded_errors(void)
+{
+	if (!EG(num_errors)) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
+		zend_error_info *info = EG(errors)[i];
+		zend_string_release(info->filename);
+		zend_string_release(info->message);
+		efree(info);
+	}
+	efree(EG(errors));
+	EG(errors) = NULL;
+	EG(num_errors) = 0;
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */

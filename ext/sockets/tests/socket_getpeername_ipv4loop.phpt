@@ -15,7 +15,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
     $localhost = '127.0.0.1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$server) {
                 die('Unable to create AF_INET socket [server]');
         }
@@ -37,7 +37,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$client) {
                 die('Unable to create AF_INET socket [client]');
         }

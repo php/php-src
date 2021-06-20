@@ -69,6 +69,7 @@ MySQLPDOTest::skip();
     print "done!\n";
 ?>
 --EXPECTF--
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Lets see what the Serializeable interface makes our object behave like...
 myclass::__construct('Called by script') - note that it must not be called when unserializing
 myclass::serialize()
@@ -77,14 +78,22 @@ object(myclass)#%d (0) {
 }
 
 And now magic PDO using fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE)...
+
+Deprecated: PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
 object(myclass)#%d (0) {
 }
+
+Deprecated: PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
 object(myclass)#%d (0) {
 }
 
 And now PDO using setFetchMode(PDO::FETCH:CLASS|PDO::FETCH_SERIALIZE) + fetch()...
+
+Deprecated: PDOStatement::setFetchMode(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
+
+Deprecated: PDOStatement::fetch(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
 object(myclass)#%d (0) {
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c88ced859b9bc6775690361d932c4cec14cb0c64 */
+ * Stub hash: 949190bcdea7c4d889d0a7da190cf9aeb80ebaab */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -386,7 +386,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_result_status, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_get_notify, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
 

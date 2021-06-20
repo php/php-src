@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4ac7b33357082ac0103b125ec3ce1d389eccf5c7 */
+ * Stub hash: 39a8d1ff3f13e3c0263d7c56e5d42ab3a2314c88 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAPConnection, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
@@ -11,31 +11,31 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAPConnect
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_reopen, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, retries, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_close, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_num_msg, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_num_recent, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_headerinfo, 0, 2, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, from_length, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, subject_length, IS_LONG, 0, "0")
@@ -58,7 +58,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_rfc822_parse_adrlist, 0, 2,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_body, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -66,13 +66,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_fetchtext arginfo_imap_body
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_bodystruct, 0, 3, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, section, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_fetchbody, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, section, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
@@ -81,7 +81,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_fetchmime arginfo_imap_fetchbody
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_savebody, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, section, IS_STRING, 0, "\"\"")
@@ -91,22 +91,22 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_fetchheader arginfo_imap_body
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_fetchstructure, 0, 2, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_gc, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_expunge, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_delete, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -114,11 +114,11 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_undelete arginfo_imap_delete
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_check, 0, 1, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_listscan, 0, 4, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, reference, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
@@ -129,7 +129,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_scanmailbox arginfo_imap_listscan
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_mail_copy, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_nums, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
@@ -143,14 +143,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_mail_compose, 0, 2, MAY_BE_
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_createmailbox, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_imap_create arginfo_imap_createmailbox
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_renamemailbox, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -164,7 +164,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_unsubscribe arginfo_imap_createmailbox
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_append, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, folder, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_STRING, 1, "null")
@@ -188,17 +188,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_utf8, 0, 1, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_status, 0, 3, stdClass, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_imap_mailboxmsginfo, 0, 1, stdClass, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_setflag_full, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, sequence, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, flag, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
@@ -207,7 +207,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_clearflag_full arginfo_imap_setflag_full
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_sort, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, criteria, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, reverse, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
@@ -216,17 +216,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_sort, 0, 3, MAY_BE_ARRAY|MA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_uid, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_num, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_msgno, 0, 2, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, message_uid, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_list, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, reference, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -242,7 +242,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imap_getmailboxes arginfo_imap_list
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_fetch_overview, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, sequence, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -256,7 +256,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_last_error, 0, 0, MAY_BE_ST
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_search, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, criteria, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SE_FREE")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, charset, IS_STRING, 0, "\"\"")
@@ -283,7 +283,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_mime_header_decode, 0, 1, M
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_thread, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SE_FREE")
 ZEND_END_ARG_INFO()
 
@@ -294,21 +294,21 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_get_quota, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, quota_root, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_get_quotaroot, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_set_quota, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, quota_root, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox_size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -316,7 +316,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_setacl, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAPConnection, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, user_id, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, rights, IS_STRING, 0)
@@ -514,15 +514,15 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
-static const zend_function_entry class_IMAPConnection_methods[] = {
+static const zend_function_entry class_IMAP_Connection_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_IMAPConnection(void)
+static zend_class_entry *register_class_IMAP_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "IMAPConnection", class_IMAPConnection_methods);
+	INIT_NS_CLASS_ENTRY(ce, "IMAP", "Connection", class_IMAP_Connection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 

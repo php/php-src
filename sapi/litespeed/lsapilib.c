@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -2672,8 +2672,12 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
             ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = htonl( INADDR_LOOPBACK );
         else
         {
+#ifdef HAVE_INET_PTON
+            if (!inet_pton(AF_INET, p, &((struct sockaddr_in *)pAddr)->sin_addr))
+#else
             ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = inet_addr( p );
             if ( ((struct sockaddr_in *)pAddr)->sin_addr.s_addr == INADDR_BROADCAST)
+#endif
             {
                 doAddrInfo = 1;
             }

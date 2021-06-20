@@ -29,7 +29,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
-      i[34567]86*|x86*)
+      i[[34567]]86*|x86*)
         ;;
       *)
         AC_MSG_WARN([JIT not supported by host architecture])
@@ -52,7 +52,7 @@ if test "$PHP_OPCACHE" != "no"; then
         DASM_FLAGS="-D X64=1"
         DASM_ARCH="x86"
         ;;
-      i[34567]86*)
+      i[[34567]]86*)
         DASM_ARCH="x86"
         ;;
       x86*)

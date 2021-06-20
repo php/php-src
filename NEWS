@@ -54,7 +54,7 @@ PHP                                                                        NEWS
     (Paulius Sapragonas)
 
 - FTP:
-  . Convert resource<ftp> to object \FTPConnection. (Sara)
+  . Convert resource<ftp> to object \FTP\Connection. (Sara)
 
 - GD:
   . Convert resource<gd font> to object \GdFont. (Sara)
@@ -64,9 +64,9 @@ PHP                                                                        NEWS
   . Implemented FR #73385 (Add xxHash support). (Anatol)
 
 - LDAP:
-  . Convert resource<ldap link> to object \LDAP. (Máté)
-  . Convert resource<ldap result> to object \LDAPResult. (Máté)
-  . Convert resource<ldap result entry> to object \LDAPResultEntry. (Máté)
+  . Convert resource<ldap link> to object \LDAP\Connection. (Máté)
+  . Convert resource<ldap result> to object \LDAP\Result. (Máté)
+  . Convert resource<ldap result entry> to object \LDAP\ResultEntry. (Máté)
 
 - MySQLi:
   . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
@@ -88,12 +88,24 @@ PHP                                                                        NEWS
   . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
     fetching a BLOB). (Nikita)
 
+. PDO MySQL:
+  . Fixed bug#80908 (PDO::lastInsertId() return wrong). (matt)
+
+. PDO ODBC:
+  . Implement PDO_ATTR_SERVER_VERSION and PDO_ATTR_SERVER_INFO for
+    PDO::getAttribute(). (Calvin Buckley)
+
 . PDO SQLite:
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 
 - PSpell:
   . Convert resource<pspell> to object \PSpell. (Sara)
   . Convert resource<pspell config> to object \PSpellConfig. (Sara)
+
+- Sodium:
+  . Added the XChaCha20 stream cipher functions. (P.I.E. Security Team)
+  . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
+    (P.I.E. Security Team)
 
 - SPL:
   . Fixed bug #80724 (FilesystemIterator::FOLLOW_SYMLINKS remove KEY_AS_FILE

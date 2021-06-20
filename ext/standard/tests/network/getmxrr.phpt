@@ -7,6 +7,7 @@ if (getenv("SKIP_ONLINE_TESTS")) die("skip test requiring internet connection");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip: no Windows support');
 }
+if (getenv('SKIP_MSAN')) die('skip msan missing interceptor for dn_expand()');
 ?>
 --FILE--
 <?php

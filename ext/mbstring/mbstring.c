@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -2442,6 +2442,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		}
 		/* convert value */
 		ZEND_ASSERT(entry);
+try_again:
 		switch(Z_TYPE_P(entry)) {
 			case IS_STRING:
 				cval = php_mb_convert_encoding(
@@ -2466,6 +2467,9 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 					ZVAL_EMPTY_ARRAY(&entry_tmp);
 				}
 				break;
+			case IS_REFERENCE:
+				entry = Z_REFVAL_P(entry);
+				goto try_again;
 			case IS_OBJECT:
 			default:
 				if (key) {

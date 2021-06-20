@@ -19,6 +19,7 @@ try {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 C::serialize() must return a string or NULL
 Done

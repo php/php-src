@@ -37,45 +37,47 @@ PHP 8.1 UPGRADE NOTES
         //             is deprecated
 
     RFC: https://wiki.php.net/rfc/deprecate_null_to_scalar_internal_arg
-  . When a method using static variables is inherited, the inherited method
-    will now initialize the static variables to their original values, rather
-    than the values at the time of inheritance:
+  . When a method using static variables is inherited (but not overridden), the
+    inherited method will now share static variables with the parent method.
 
         class A {
-            public function counter() {
+            public static function counter() {
                 static $counter = 0;
                 $counter++;
                 return $counter;
             }
         }
+        class B extends A {}
 
-        var_dump((new A)->counter()); // int(1)
+        var_dump(A::counter()); // int(1)
+        var_dump(A::counter()); // int(2)
+        var_dump(B::counter()); // int(3), previously int(1)
+        var_dump(B::counter()); // int(4), previously int(2)
 
-        eval('class B extends A {}'); // eval() to prevent early binding.
-
-        var_dump((new B)->counter()); // int(1), previously int(2)
-        var_dump((new A)->counter()); // int(2)
-        var_dump((new B)->counter()); // int(2), previously int(3)
-
-    Previously the behavior would be different depending on whether A::counter()
-    was called before class B was declared, or after it was declared.
+    This means that static variables in methods now behave the same way as
+    static properties.
+    RFC: https://wiki.php.net/rfc/static_variable_inheritance
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
     instead of resources.
 
+- FTP:
+  . The FTP functions now accept and return, respectively, FTP\Connection objects
+    instead of resources.
+
 - IMAP:
-  . The IMAP functions now accept and return, respectively, IMAPConnection objects
+  . The IMAP functions now accept and return, respectively, IMAP\Connection objects
     instead of resources.
 
 - LDAP:
-  . The LDAP functions now accept and return, respectively, LDAP objects
+  . The LDAP functions now accept and return, respectively, LDAP\Connection objects
     instead of "ldap link" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAPResult objects
+  . The LDAP functions now accept and return, respectively, LDAP\Result objects
     instead of "ldap result" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAPResultEntry
+  . The LDAP functions now accept and return, respectively, LDAP\ResultEntry
     objects instead of "ldap result entry" resources. Return value checks using
     is_resource() should be replaced with checks for `false`.
 
@@ -153,6 +155,8 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/enumerations
   . Added support for never return type
     RFC: https://wiki.php.net/rfc/noreturn_type
+  . Added support for fibers.
+    RFC: https://wiki.php.net/rfc/fibers
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
@@ -226,6 +230,9 @@ PHP 8.1 UPGRADE NOTES
   . Binding in execute has been added to mysqli prepared statements.
     Parameters can now be passed to mysqli_stmt::execute as an array.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
+  . A new function has been added to mysqli_result called mysqli_fetch_column().
+    It allows for fetching single scalar values from the result set.
+    RFC: https://wiki.php.net/rfc/mysqli_fetch_column
 
 - PDO MySQL:
   . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
@@ -252,6 +259,13 @@ PHP 8.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Implementing the Serializable interface without also implementing
+    __serialize() and __unserialize() has been deprecated. You should either
+    implement the new methods (if you only support PHP 7.4 and higher) or
+    implement both (if you support older PHP versions as well).
+    RFC: https://wiki.php.net/rfc/phase_out_serializable
+
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
     version is meaningless as it hasn't been updated in more than a decade. Use
@@ -260,6 +274,10 @@ PHP 8.1 UPGRADE NOTES
     mysqli_get_client_info() function has been deprecated. Use
     mysqli_get_client_info() without any arguments to obtain the client
     library version information.
+
+- PDO:
+  . The PDO::FETCH_SERIALIZE mode has been deprecated.
+    RFC: https://wiki.php.net/rfc/phase_out_serializable
 
 ========================================
 5. Changed Functions
@@ -283,6 +301,10 @@ PHP 8.1 UPGRADE NOTES
   . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
 
+- PDO ODBC:
+  . PDO::getAttributes() with PDO::ATTR_SERVER_INFO and PDO::ATTR_SERVER_VERSION
+    now return values instead of throwing PDOException.
+
 ========================================
 6. New Functions
 ========================================
@@ -295,6 +317,34 @@ PHP 8.1 UPGRADE NOTES
   . Added fsync() and fdatasync(), which instruct the operating system to
     flush its buffers to physical storage.
     RFC: https://wiki.php.net/rfc/fsync_function
+
+- Sodium:
+  . Added the XChaCha20 stream cipher interface functions:
+
+    - sodium_crypto_stream_xchacha20()
+    - sodium_crypto_stream_xchacha20_keygen()
+    - sodium_crypto_stream_xchacha20_xor()
+
+  . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
+
+    Ristretto is a technique for constructing prime order elliptic curve groups with non-malleable encodings.
+    Ristretto255 implements Ristretto atop Curve25519.
+
+    - sodium_crypto_core_ristretto255_add()
+    - sodium_crypto_core_ristretto255_from_hash()
+    - sodium_crypto_core_ristretto255_is_valid_point()
+    - sodium_crypto_core_ristretto255_random()
+    - sodium_crypto_core_ristretto255_scalar_add()
+    - sodium_crypto_core_ristretto255_scalar_complement()
+    - sodium_crypto_core_ristretto255_scalar_invert()
+    - sodium_crypto_core_ristretto255_scalar_mul()
+    - sodium_crypto_core_ristretto255_scalar_negate()
+    - sodium_crypto_core_ristretto255_scalar_random()
+    - sodium_crypto_core_ristretto255_scalar_reduce()
+    - sodium_crypto_core_ristretto255_scalar_sub()
+    - sodium_crypto_core_ristretto255_sub()
+    - sodium_crypto_scalarmult_ristretto255()
+    - sodium_crypto_scalarmult_ristretto255_base()
 
 ========================================
 7. New Classes and Interfaces

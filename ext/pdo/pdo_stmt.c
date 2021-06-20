@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -845,8 +845,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					return 0;
 				}
 				if (!stmt->fetch.cls.fci.size) {
-					if (!do_fetch_class_prepare(stmt))
-					{
+					if (!do_fetch_class_prepare(stmt)) {
+						zval_ptr_dtor(return_value);
 						return 0;
 					}
 				}
@@ -1141,6 +1141,9 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 			ZEND_FALLTHROUGH;
 
 		case PDO_FETCH_CLASS:
+			if (flags & PDO_FETCH_SERIALIZE) {
+				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+			}
 			return 1;
 	}
 }
@@ -1197,12 +1200,10 @@ PHP_METHOD(PDOStatement, fetchObject)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	if (ctor_args) {
-		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-			ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
-		} else {
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-		}
+	if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+		ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
+	} else {
+		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 	}
 	if (ce) {
 		stmt->fetch.cls.ce = ce;

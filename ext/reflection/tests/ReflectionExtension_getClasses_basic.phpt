@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECT--
-array(22) {
+array(23) {
   ["ReflectionException"]=>
   object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -118,5 +118,10 @@ array(22) {
   object(ReflectionClass)#23 (1) {
     ["name"]=>
     string(24) "ReflectionEnumBackedCase"
+  }
+  ["ReflectionFiber"]=>
+  object(ReflectionClass)#24 (1) {
+    ["name"]=>
+    string(15) "ReflectionFiber"
   }
 }

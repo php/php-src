@@ -234,8 +234,8 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
 /* Flag to differentiate cases from constants.            |     |     |     */
-/* Stored in Z_ACCESS_FLAGS, must not conflict with       |     |     |     */
-/* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
+/* Must not conflict with ZEND_ACC_ visibility flags      |     |     |     */
+/* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 29...)                            |     |     |     */
@@ -393,11 +393,13 @@ typedef struct _zend_property_info {
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 typedef struct _zend_class_constant {
-	zval value; /* access flags and other constant flags are stored in reserved: zval.u2.access_flags */
+	zval value; /* flags are stored in u2 */
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;
 } zend_class_constant;
+
+#define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {

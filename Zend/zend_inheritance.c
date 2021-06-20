@@ -58,17 +58,6 @@ static void zend_type_copy_ctor(zend_type *type, bool persistent) {
 	}
 }
 
-static zend_property_info *zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
-{
-	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
-	memcpy(new_property_info, property_info, sizeof(zend_property_info));
-	zend_string_addref(new_property_info->name);
-	zend_type_copy_ctor(&new_property_info->type, /* persistent */ 1);
-
-	return new_property_info;
-}
-/* }}} */
-
 static zend_function *zend_duplicate_internal_function(zend_function *func, zend_class_entry *ce) /* {{{ */
 {
 	zend_function *new_function;
@@ -88,16 +77,7 @@ static zend_function *zend_duplicate_internal_function(zend_function *func, zend
 }
 /* }}} */
 
-static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ */
-{
-	zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-	memcpy(new_op_array, func, sizeof(zend_op_array));
-	zend_init_static_variables_map_ptr(new_op_array);
-	return (zend_function *) new_op_array;
-}
-/* }}} */
-
-static zend_always_inline zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce, bool is_interface) /* {{{ */
+static zend_always_inline zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce) /* {{{ */
 {
 	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
 		return zend_duplicate_internal_function(func, ce);
@@ -108,12 +88,7 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (EXPECTED(func->op_array.function_name)) {
 			zend_string_addref(func->op_array.function_name);
 		}
-		if (is_interface
-		 || EXPECTED(!func->op_array.static_variables)) {
-			/* reuse the same op_array structure */
-			return func;
-		}
-		return zend_duplicate_user_function(func);
+		return func;
 	}
 }
 /* }}} */
@@ -948,9 +923,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 
 	if (!check_only && child->common.prototype != proto && child_zv) {
 		do {
-			if (child->common.scope != ce
-			 && child->type == ZEND_USER_FUNCTION
-			 && !child->op_array.static_variables) {
+			if (child->common.scope != ce && child->type == ZEND_USER_FUNCTION) {
 				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 					/* Few parent interfaces contain the same method */
 					break;
@@ -1021,7 +994,7 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 
-		parent = zend_duplicate_function(parent, ce, is_interface);
+		parent = zend_duplicate_function(parent, ce);
 
 		if (!is_interface) {
 			_zend_hash_append_ptr(&ce->function_table, key, parent);
@@ -1116,12 +1089,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-			child_info = zend_duplicate_property_info_internal(parent_info);
-		} else {
-			child_info = parent_info;
-		}
-		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
+		_zend_hash_append_ptr(&ce->properties_info, key, parent_info);
 	}
 }
 /* }}} */
@@ -1178,11 +1146,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 
 	if (zv != NULL) {
 		c = (zend_class_constant*)Z_PTR_P(zv);
-		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
+		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PPP_MASK) > (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(parent_const->ce->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)), ZSTR_VAL(parent_const->ce->name), (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
-	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
+	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
@@ -2697,6 +2665,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					}
 					return ret;
 				}
+
+				/* Make sure warnings (such as deprecations) thrown during inheritance
+				 * will be recoreded in the inheritance cache. */
+				zend_begin_record_errors();
 			} else {
 				is_cacheable = 0;
 			}
@@ -2767,6 +2739,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	zend_build_properties_info_table(ce);
+	EG(record_errors) = false;
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
@@ -2812,6 +2785,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+	zend_free_recorded_errors();
 	if (traits_and_interfaces) {
 		free_alloca(traits_and_interfaces, use_heap);
 	}

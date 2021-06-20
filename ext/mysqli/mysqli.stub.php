@@ -159,7 +159,7 @@ class mysqli
     public function get_warnings() {}
 
     /**
-     * @return mysqli|false
+     * @return null|false
      */
     public function init() {}
 
@@ -427,6 +427,11 @@ class mysqli_result implements IteratorAggregate
     public function fetch_row() {}
 
     /**
+     * @alias mysqli_fetch_column
+     */
+    public function fetch_column(int $column = 0): null|int|float|string|false {}
+
+    /**
      * @return bool
      * @alias mysqli_field_seek
      */
@@ -663,6 +668,8 @@ function mysqli_fetch_assoc(mysqli_result $result): array|null|false {}
 function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
 function mysqli_fetch_row(mysqli_result $result): array|null|false {}
+
+function mysqli_fetch_column(mysqli_result $result, int $column = 0): null|int|float|string|false {}
 
 function mysqli_field_count(mysqli $mysql): int {}
 

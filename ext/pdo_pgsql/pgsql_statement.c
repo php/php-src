@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -51,19 +51,6 @@
 #define TIMESTAMPOID   1114
 #define VARCHARLABEL "varchar"
 #define VARCHAROID   1043
-
-#define PG_INT32_MIN	(-0x7FFFFFFF-1)
-#define PG_INT32_MAX	(0x7FFFFFFF)
-
-#if defined(_MSC_VER)
-# define strtoll(s, f, b) _atoi64(s)
-#elif !defined(HAVE_STRTOLL)
-# if defined(HAVE_ATOLL)
-#  define strtoll(s, f, b) atoll(s)
-# else
-#  define strtoll(s, f, b) strtol(s, f, b)
-# endif
-#endif
 
 
 
@@ -400,16 +387,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_formats[param->paramno] = 0;
 					}
 
-					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT) {
-						/* we need to check if the number requires bigints */
-						long long val = strtoll(Z_STRVAL_P(parameter), NULL, 10);
-
-						if (val > PG_INT32_MAX || val < PG_INT32_MIN) {
-							S->param_types[param->paramno] = INT8OID;
-						} else {
-							S->param_types[param->paramno] = INT4OID;
-						}
-					} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
 						S->param_types[param->paramno] = 0;
 						S->param_formats[param->paramno] = 1;
 					} else {

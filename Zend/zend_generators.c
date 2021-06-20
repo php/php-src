@@ -226,6 +226,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
 			|| CG(unclean_shutdown)) {
+		zend_generator_close(generator, 0);
 		return;
 	}
 
@@ -265,7 +266,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 			/* TODO: If we hit another yield inside try/finally,
 			 * should we also jump to the next finally block? */
-			return;
+			break;
 		} else if (op_num < try_catch->finally_end) {
 			zval *fast_call =
 				ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[try_catch->finally_end].op1.var);
@@ -284,6 +285,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 		try_catch_offset--;
 	}
+
+	zend_generator_close(generator, 0);
 }
 /* }}} */
 
