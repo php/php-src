@@ -125,9 +125,7 @@ typedef struct TLVDescriptor TLVDescriptor;
 /* Encoding of immediate. */
 #define MAX_IMM12       0xfff          // maximum value for imm12
 #define MAX_IMM16       0xffff         // maximum value for imm16
-#define CMP_IMM         MAX_IMM12      // cmp insn
 #define MOVZ_IMM        MAX_IMM16      // movz insn
-#define ADD_SUB_IMM     MAX_IMM12      // add/sub/adds/subs insn
 #define LDR_STR_PIMM64  (MAX_IMM12*8)  // ldr/str insn for 64-bit register: pimm is imm12 * 8
 #define LDR_STR_PIMM32  (MAX_IMM12*4)  // ldr/str insn for 32-bit register: pimm is imm12 * 4
 #define LDRB_STRB_PIMM  MAX_IMM12      // ldrb/strb insn
@@ -172,9 +170,13 @@ static bool arm64_may_use_adrp(const void *addr)
 	return 0;
 }
 
+/* Determine whether "val" falls into two allowed ranges:
+ *   Range 1: [0, 0xfff]
+ *   Range 2: LSL #12 to Range 1
+ * Used to guard the immediate encoding for add/adds/sub/subs/cmp/cmn instructions. */
 static bool arm64_may_encode_imm12(const int64_t val)
 {
-	return (val >= 0 && (val < (1<<12) || !(val & 0xffffffffff000fff)));
+	return (val >= 0 && (val <= MAX_IMM12 || !(val & 0xffffffffff000fff)));
 }
 
 /* Determine whether an immediate value can be encoded as the immediate operand of logical instructions. */
@@ -728,7 +730,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 
 /* Update IP with 32-bit immediate 'val'. */
 |.macro ADD_IP_WITH_CONST, val, tmp_reg
-||	ZEND_ASSERT(val >= 0 && val <= ADD_SUB_IMM);
+||	ZEND_ASSERT(arm64_may_encode_imm12((int64_t)(val)));
 ||	if (GCC_GLOBAL_REGS) {
 |		add IP, IP, #val
 ||	} else {
@@ -936,7 +938,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
  * the computation result is stored back into 'addr'.
  * Note: it should be guaranteed that 'val' can be encoded into add/sub instruction. */
 |.macro LONG_ADD_SUB_WITH_IMM, add_sub_ins, addr, val, tmp_reg1, tmp_reg2
-||	ZEND_ASSERT(val >= 0 && val <= ADD_SUB_IMM);
+||	ZEND_ASSERT(arm64_may_encode_imm12((int64_t)(val)));
 ||	if (Z_MODE(addr) == IS_MEM_ZVAL) {
 ||		if (((uint32_t)(Z_OFFSET(addr))) > LDR_STR_PIMM64) {
 |			LOAD_32BIT_VAL tmp_reg2, Z_OFFSET(addr)
@@ -8265,7 +8267,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	}
 
 	if (func) {
-		||	if (used_stack <= ADD_SUB_IMM) {
+		||	if (arm64_may_encode_imm12((int64_t)used_stack)) {
 		|		MEM_UPDATE_ZTS add, ldr, str, #used_stack, executor_globals, vm_stack_top, REG2, TMP1
 		||	} else {
 		|		LOAD_32BIT_VAL TMP1w, used_stack
@@ -9109,7 +9111,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
 					} else {
 						|	ldr REG0, EX->func
-						||	ZEND_ASSERT((num_args * sizeof(zend_op)) <= ADD_SUB_IMM);
+						||	ZEND_ASSERT(arm64_may_encode_imm12((int64_t)(num_args * sizeof(zend_op))));
 						if (GCC_GLOBAL_REGS) {
 							|	ldr IP, [REG0, #offsetof(zend_op_array, opcodes)]
 							if (num_args) {
@@ -9215,7 +9217,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	ble >3
 			|	// zval *var = EX_VAR_NUM(num_args);
 			|	add REG1, FP, REG1, lsl #4
-			||	ZEND_ASSERT(ZEND_CALL_FRAME_SLOT * sizeof(zval) <= ADD_SUB_IMM);
+			||	ZEND_ASSERT(arm64_may_encode_imm12((int64_t)(ZEND_CALL_FRAME_SLOT * sizeof(zval))));
 			|	add REG1, REG1, #(ZEND_CALL_FRAME_SLOT * sizeof(zval))
 			|2:
 			|	SET_Z_TYPE_INFO REG1, IS_UNDEF, TMP1w
