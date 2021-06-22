@@ -60,6 +60,9 @@ PHP 8.1 UPGRADE NOTES
   . Most non-final internal methods now require overriding methods to declare a
     compatible return type, otherwise a deprecated notice is emitted during
     inheritance validation.
+    In case the return type cannot be declared for an overriding method due to
+    PHP cross-version compatibility concerns, a `#[ReturnTypeWillChange]`
+    attribute can be added to silence the deprecation notice.
     RFC: https://wiki.php.net/rfc/internal_method_return_types
 
 - Fileinfo:
