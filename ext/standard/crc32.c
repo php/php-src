@@ -89,7 +89,7 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 # endif
 #endif
 
-uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
+PHPAPI uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 {
 #if HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
@@ -112,7 +112,7 @@ uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
+PHPAPI int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];
