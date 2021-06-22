@@ -23,10 +23,10 @@
 
 #define CRC32(crc, ch)	 (crc = (crc >> 8) ^ crc32tab[(crc ^ (ch)) & 0xff])
 
-uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
+PHPAPI uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
 
 /* Return FAILURE if stream reading fail */
-int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
+PHPAPI int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
 
 /* generated using the AUTODIN II polynomial
  *	x^32 + x^26 + x^23 + x^22 + x^16 +
