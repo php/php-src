@@ -239,27 +239,17 @@ PHP_FUNCTION(clamp)
 		Z_PARAM_NUMBER(zmax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval *result;
-
 	if (zend_compare(zmax, zmin) == -1) {
 		zend_argument_value_error(2, "cannot be greater than Argument #3 ($max)");
 		RETURN_THROWS();
 	}
 
 	if (zend_compare(zmax, zvalue) == -1) {
-		result = zmax;
+		RETURN_COPY(zmax);
 	} else if (zend_compare(zmin, zvalue) == -1) {
-		result = zvalue;
+		RETURN_COPY(zvalue);
 	} else {
-		result = zmin;
-	}
-
-	if (Z_TYPE_P(result) == IS_DOUBLE) {
-		RETURN_DOUBLE(Z_DVAL_P(result));
-	} else if (Z_TYPE_P(result) == IS_LONG) {
-		RETURN_LONG(Z_LVAL_P(result));
-	} else {
-		ZEND_ASSERT(0 && "Unexpected type");
+		RETURN_COPY(zmin);
 	}
 }
 /* }}} */
