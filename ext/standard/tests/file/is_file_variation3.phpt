@@ -18,7 +18,6 @@ function flatten($variable) {
 foreach([
   /* Invalid filenames */
   -2.34555,
-  " ",
   "",
   true,
   false,
@@ -36,7 +35,6 @@ foreach([
 ?>
 --EXPECT--
 float(-2.34555): 0
-string(1) " ": 0
 string(0) "": 0
 bool(true): 0
 bool(false): 0
