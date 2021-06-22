@@ -239,21 +239,16 @@ PHP_FUNCTION(clamp)
 		Z_PARAM_NUMBER(zmax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval check, max_lte, min_lte, *result;
+	zval *result;
 
-	is_smaller_function(&check, zmax, zmin);
-
-	if (Z_TYPE(check) == IS_TRUE) {
+	if (zend_compare(zmax, zmin) == -1) {
 		zend_argument_value_error(2, "cannot be greater than Argument #3 ($max)");
 		RETURN_THROWS();
 	}
 
-	is_smaller_or_equal_function(&max_lte, zmax, zvalue);
-	is_smaller_function(&min_lte, zmin, zvalue);
-
-	if (Z_TYPE(max_lte) == IS_TRUE) {
+	if (zend_compare(zmax, zvalue) == -1) {
 		result = zmax;
-	} else if (Z_TYPE(min_lte) == IS_TRUE) {
+	} else if (zend_compare(zmin, zvalue) == -1) {
 		result = zvalue;
 	} else {
 		result = zmin;
