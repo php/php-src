@@ -133,7 +133,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
-	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
+	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0, prev_pos = USEARCH_DONE;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
@@ -179,16 +179,28 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			STRPOS_CHECK_STATUS(status, "Invalid search offset");
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos, &status);
+		usearch_setOffset(src, last ? 0 : offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
 
 	if(last) {
-		char_pos = usearch_last(src, &status);
-		if(char_pos < offset_pos) {
-			/* last one is beyound our start offset */
-			char_pos = USEARCH_DONE;
+		if (offset >= 0) {
+			char_pos = usearch_last(src, &status);
+			if(char_pos < offset_pos) {
+				/* last one is beyond our start offset */
+				char_pos = USEARCH_DONE;
+			}			
+		} else {
+			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
+			do {
+				char_pos = usearch_next(src, &status);
+				if (char_pos == USEARCH_DONE || char_pos > offset_pos) {
+					char_pos = prev_pos;
+					break;
+				}
+				prev_pos = char_pos;
+			} while(1);
 		}
 	} else {
 		char_pos = usearch_next(src, &status);
