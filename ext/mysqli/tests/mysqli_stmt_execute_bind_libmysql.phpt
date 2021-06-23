@@ -23,15 +23,132 @@ $abc = 'abc';
 $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
 $stmt->bind_param('sss', ...[&$abc, 42, $id]);
 $stmt->execute();
-assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>'abc', 'num'=>'42']);
+unset($v1, $v2, $v3);
 $stmt = null;
 
 // 1. same as the control case, but skipping the middle-man (bind_param)
 $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
 try {
     $stmt->execute([&$abc, 42, $id]);
+    $stmt->bind_result($v1, $v2, $v3);
+    assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>null, 'anon'=>null, 'num'=>null]);
 } catch (ArgumentCountError $e) {
     echo '[001] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 2. param number has to match - missing 1 parameter
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute([&$abc, 42]);
+} catch (ValueError $e) {
+    echo '[001] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 3. Too many parameters 
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute([&$abc, null, $id, 24]);
+} catch (ValueError $e) {
+    echo '[002] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 4. param number has to match - missing all parameters
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute([]);
+} catch (ValueError $e) {
+    echo '[003] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 5. param number has to match - missing argument to execute()
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute();
+} catch (mysqli_sql_exception $e) {
+    echo '[004] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 6. wrong argument to execute()
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute(42);
+} catch (TypeError $e) {
+    echo '[005] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 7. objects are not arrays and are not accepted
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute((object)[&$abc, 42, $id]);
+} catch (TypeError $e) {
+    echo '[006] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 8. arrays by reference work too
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+$arr = [&$abc, 42, $id];
+$arr2 = &$arr;
+$stmt->execute($arr2);
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>'abc', 'num'=>'42']);
+unset($v1, $v2, $v3);
+$stmt = null;
+
+// 9. no placeholders in statement. nothing to bind in an empty array
+$stmt = $link->prepare('SELECT label FROM test WHERE id=1');
+$stmt->execute([]);
+$stmt->bind_result($v1);
+$stmt->fetch();
+assert(['label'=>$v1] === ['label'=>'a']);
+unset($v1);
+$stmt = null;
+
+// 10. once bound the values are persisted. Just like in PDO
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+$stmt->execute(['abc', 42, $id]);
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>'abc', 'num'=>'42']);
+unset($v1, $v2, $v3);
+$stmt->execute(); // no argument here. Values are already bound
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>'abc', 'num'=>'42']);
+unset($v1, $v2, $v3);
+try {
+    $stmt->execute([]); // no params here. PDO doesn't throw an error, but mysqli does
+} catch (ValueError $e) {
+    echo '[007] '.$e->getMessage()."\n";
+}
+$stmt = null;
+
+// 11. mixing binding styles not possible. Also, NULL should stay NULL when bound as string
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+$stmt->bind_param('sss', ...['abc', 42, null]);
+$stmt->execute([null, null, $id]);
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>null, 'num' => null]);
+unset($v1, $v2, $v3);
+$stmt = null;
+
+// 12. Only list arrays are allowed
+$stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
+try {
+    $stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
+} catch (ValueError $e) {
+    echo '[008] '.$e->getMessage()."\n";
 }
 $stmt = null;
 
@@ -42,4 +159,12 @@ mysqli_close($link);
 require_once "clean_table.inc";
 ?>
 --EXPECT--
-[001] Binding parameters in execute is not supported with libmysqlclient
+[001] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 2 present
+[002] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 4 present
+[003] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
+[004] No data supplied for parameters in prepared statement
+[005] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, int given
+[006] mysqli_stmt::execute(): Argument #1 ($params) must be of type ?array, stdClass given
+[007] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 0 present
+[008] mysqli_stmt::execute(): Argument #1 ($params) must be a list array
+
