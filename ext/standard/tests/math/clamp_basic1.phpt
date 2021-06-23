@@ -1,5 +1,5 @@
 --TEST--
-Test clamp() function : basic functionality
+Test clamp() function : basic functionality 01
 --FILE--
 <?php
 echo "*** Testing clamp() : basic functionality 01 ***\n";
