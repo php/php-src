@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
     (cmb)
+  . Fixed bug #68471 (IntlDateFormatter fails for "GMT+00:00" timezone). (cmb)
 
 - PCRE:
   . Fixed bug #81101 (PCRE2 10.37 shows unexpected result). (Anatol)
