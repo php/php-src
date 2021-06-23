@@ -8,7 +8,8 @@
  * 1. Redistributions of source code must retain the above copyright
  *    notice immediately at the beginning of the file, without modification,
  *    this list of conditions, and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
+ * 2. Redistributions in binary form must re
+ * produce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
  *
@@ -382,6 +383,9 @@ magic_setparam(struct magic_set *ms, int param, const void *val)
 	case MAGIC_PARAM_BYTES_MAX:
 		ms->bytes_max = *(const size_t *)val;
 		return 0;
+    case MAGIC_PARAM_ENCODING_MAX:
+        ms->encoding_max = *CAST(const size_t *, val);
+        return 0;
 	default:
 		errno = EINVAL;
 		return -1;
@@ -413,6 +417,9 @@ magic_getparam(struct magic_set *ms, int param, void *val)
 	case MAGIC_PARAM_BYTES_MAX:
 		*(size_t *)val = ms->bytes_max;
 		return 0;
+    case MAGIC_PARAM_ENCODING_MAX:
+        *(size_t *)val = ms->encoding_max;
+        return 0;
 	default:
 		errno = EINVAL;
 		return -1;
