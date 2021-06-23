@@ -148,6 +148,7 @@ int magic_errno(magic_t);
 #define MAGIC_PARAM_ELF_NOTES_MAX	4
 #define MAGIC_PARAM_REGEX_MAX		5
 #define	MAGIC_PARAM_BYTES_MAX		6
+#define	MAGIC_PARAM_ENCODING_MAX	7
 
 int magic_setparam(magic_t, int, const void *);
 int magic_getparam(magic_t, int, void *);
