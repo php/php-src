@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7c4df531cdb30ac4206f43f0d40098666466b9a6 */
+ * Stub hash: 1e2c3090490b59afcf468d485fd44ef7d005bf41 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -8,6 +8,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_bind, 0, 2, Closure
 	ZEND_ARG_OBJ_INFO(0, closure, Closure, 0)
 	ZEND_ARG_TYPE_INFO(0, newThis, IS_OBJECT, 1)
 	ZEND_ARG_TYPE_MASK(0, newScope, MAY_BE_OBJECT|MAY_BE_STRING|MAY_BE_NULL, "\"static\"")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure_isStatic, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_bindTo, 0, 1, Closure, 1)
@@ -27,6 +30,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Closure, __construct);
 ZEND_METHOD(Closure, bind);
+ZEND_METHOD(Closure, isStatic);
 ZEND_METHOD(Closure, bindTo);
 ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
@@ -35,6 +39,7 @@ ZEND_METHOD(Closure, fromCallable);
 static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(Closure, bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Closure, isStatic, arginfo_class_Closure_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, bindTo, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

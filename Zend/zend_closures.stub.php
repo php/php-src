@@ -13,6 +13,8 @@ final class Closure
         object|string|null $newScope = "static"
     ): ?Closure {}
 
+    public function isStatic(): bool {}
+
     public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?Closure {}
 
     public function call(object $newThis, mixed ...$args): mixed {}

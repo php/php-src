@@ -193,6 +193,17 @@ ZEND_METHOD(Closure, call)
 }
 /* }}} */
 
+ZEND_METHOD(Closure, isStatic) /* {{{ */
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
+	zend_function *func = &closure->func;
+
+	RETURN_BOOL(func->common.fn_flags & ZEND_ACC_STATIC);
+}
+/* }}} */
+
 static void do_closure_bind(zval *return_value, zval *zclosure, zval *newthis, zend_object *scope_obj, zend_string *scope_str)
 {
 	zend_class_entry *ce, *called_scope;
