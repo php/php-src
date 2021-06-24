@@ -642,6 +642,8 @@ class PharCommand extends CLICommand
             $dir = new InvertedRegexIterator($dir, $invregex);
         }
 
+        ini_set('pcre.jit', '0');
+
         try {
             foreach($dir as $file) {
                 if ((empty($stub) || $file->getRealPath() != $stub->getRealPath()) && !is_dir($file)) {
