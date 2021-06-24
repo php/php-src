@@ -28,7 +28,7 @@ test_clone();
 --EXPECTF--
 Fatal error: Uncaught Exception: No Cloneable in %sbug73288.php:%d
 Stack trace:
-#0 %s(%d): NoClone->__clone()
+#0 %s(%d): NoClone->__clone(Object(NoClone))
 #1 %s(%d): test_clone()
 #2 {main}
   thrown in %sbug73288.php on line %d

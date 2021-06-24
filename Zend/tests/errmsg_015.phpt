@@ -1,14 +1,14 @@
 --TEST--
-errmsg: __clone() cannot accept any arguments
+errmsg: __clone() cannot take more than 1 argument
 --FILE--
 <?php
 
 class test {
-    function __clone($var) {
+    function __clone($origThis, $var) {
     }
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Method test::__clone() cannot take arguments in %s on line %d
+Fatal error: Method test::__clone() cannot take more than 1 argument in %s on line %d
