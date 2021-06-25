@@ -6,11 +6,12 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite', strlen('sqlite'))) die('skip not relevant for sqlite driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for oci driver - Hyphen is not legal for bind names in Oracle DB');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'firebird', strlen('firebird'))) die('skip not relevant for firebird driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'odbc', strlen('odbc'))) die('skip not relevant for odbc driver');
+$dsn = (string) getenv('PDOTEST_DSN');
+if (!strncasecmp($dsn, 'sqlite', strlen('sqlite'))) die('skip not relevant for sqlite driver');
+if (!strncasecmp($dsn, 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
+if (!strncasecmp($dsn, 'oci', strlen('oci'))) die('skip not relevant for oci driver - Hyphen is not legal for bind names in Oracle DB');
+if (!strncasecmp($dsn, 'firebird', strlen('firebird'))) die('skip not relevant for firebird driver');
+if (!strncasecmp($dsn, 'odbc', strlen('odbc'))) die('skip not relevant for odbc driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

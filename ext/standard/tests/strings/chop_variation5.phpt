@@ -19,10 +19,12 @@ echo "*** Testing chop() : with miscellaneous arguments ***\n";
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chop() : with miscellaneous arguments ***
 string(9) "chop test"
 string(12) "chop test   "
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(17) "chop test        "
 string(9) "chop test"
 string(10) "chop test "

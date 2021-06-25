@@ -28,7 +28,7 @@ stripos() function test
 ?>
 
 DONE
---EXPECT--
+--EXPECTF--
 int(0)
 int(5)
 int(5)
@@ -43,13 +43,25 @@ bool(false)
 bool(false)
 int(0)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
 int(1)
 

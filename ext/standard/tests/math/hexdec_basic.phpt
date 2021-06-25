@@ -49,5 +49,9 @@ int(3215379)
 int(51446064)
 int(18279)
 int(70199)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)

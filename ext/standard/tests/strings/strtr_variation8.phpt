@@ -105,15 +105,23 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 11 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 14 --

@@ -59,14 +59,28 @@ bool(true)
 Warning: rename(-1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
 bool(false)
 -- testing '1' --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: rename(1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
 bool(false)
 -- testing '' --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)

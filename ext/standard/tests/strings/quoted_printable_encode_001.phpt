@@ -11,9 +11,11 @@ var_dump(quoted_printable_encode(false));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(0) ""
 string(4) "test"
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 Done

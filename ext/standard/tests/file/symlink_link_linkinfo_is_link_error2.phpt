@@ -48,11 +48,15 @@ bool(false)
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
@@ -60,6 +64,8 @@ bool(false)
 *** Testing is_link() for error conditions ***
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 Done

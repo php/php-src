@@ -830,8 +830,8 @@ PHP_SAPI    : " , PHP_SAPI , "
 PHP_VERSION : " , phpversion() , "
 ZEND_VERSION: " , zend_version() , "
 PHP_OS      : " , PHP_OS , " - " , php_uname() , "
-INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
-More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+INI actual  : " , realpath((string) get_cfg_var("cfg_file_path")) , "
+More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", (string) php_ini_scanned_files()) : "** not determined **"); ?>';
     save_text($info_file, $php_info);
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
@@ -2759,7 +2759,7 @@ $output
         if (strpos($log_format, 'S') !== false) {
             $env_lines = [];
             foreach ($env as $env_var => $env_val) {
-                $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
+                $env_lines[] = "export $env_var=" . (string) escapeshellarg($env_val ?? "");
             }
             $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH

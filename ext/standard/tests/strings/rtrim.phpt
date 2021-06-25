@@ -45,6 +45,8 @@ echo "Done\n";
 *** Output for Normal Behaviour ***
 string(10) "rtrim test"
 string(13) "rtrim test   "
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(18) "rtrim test        "
 string(10) "rtrim test"
 string(11) "rtrim test "

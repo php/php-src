@@ -26,6 +26,8 @@ var_dump(lstat('|'));
 ?>
 --EXPECTF--
 *** testing stat ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 
@@ -35,6 +37,8 @@ bool(false)
 Warning: stat(): stat failed for | in %s on line %d
 bool(false)
 *** testing lstat ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 

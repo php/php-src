@@ -65,7 +65,7 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stristr() function: with unexpected inputs for 'needle' argument ***
 -- Iteration 1 --
 bool(false)
@@ -88,12 +88,20 @@ stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 10 --
 stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 11 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(11) "Hello World"
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 -- Iteration 14 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(11) "Hello World"
 -- Iteration 15 --
 bool(false)

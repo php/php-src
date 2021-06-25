@@ -6,7 +6,8 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite2', strlen('sqlite2'))) die('skip not relevant for pdo_sqlite2 driver');
+$dsn = (string) getenv('PDOTEST_DSN');
+if (!strncasecmp($dsn, 'sqlite2', strlen('sqlite2'))) die('skip not relevant for pdo_sqlite2 driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

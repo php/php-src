@@ -30,6 +30,8 @@ echo "Done\n";
 
 -- Testing readfile() with invalid arguments --
 Path cannot be empty
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 Path cannot be empty
 
 -- Testing readfile() with non-existent file --

@@ -74,7 +74,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with various single quoted strings ***
 -- Iteration 1 --
 string(22) "lo123456he \x234 \101 "
@@ -110,9 +110,13 @@ bool(false)
 string(5) "\101 "
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 
 -- Iteration 14 --

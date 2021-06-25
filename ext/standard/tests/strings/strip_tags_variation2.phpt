@@ -82,7 +82,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(10) "helloworld"
@@ -107,12 +107,20 @@ string(10) "helloworld"
 -- Iteration 11 --
 string(10) "helloworld"
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "helloworld"
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "helloworld"
 -- Iteration 14 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "helloworld"
 -- Iteration 15 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "helloworld"
 -- Iteration 16 --
 string(10) "helloworld"

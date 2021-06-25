@@ -38,9 +38,12 @@ require_once('skipifconnectfailure.inc');
 <?php
 require_once("clean_table.inc");
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 a) [1065] Query was empty
 b) [1065] Query was empty
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 c) [1065] Query was empty
 c) [1065] Query was empty
 done!

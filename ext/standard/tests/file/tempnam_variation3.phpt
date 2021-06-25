@@ -81,10 +81,14 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 1 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified

@@ -213,9 +213,13 @@ string(31) "$$$$$$!!!!@@@@@@@ abcdef !!!***"
 string(13) "abcd%0abcdabcd"
 
 -- Iteration 6 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
 
 -- Iteration 7 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 
 *** Testing strtolower() with two different case strings ***

@@ -219,8 +219,12 @@ array(6) {
 -- Iteration 1 --
 string(59) "2TRUE0TRUE-639TRUE1TRUEPHPTRUETRUETRUE TRUEstring%0with%0...%0"
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(35) "2101-639111PHP111 1string%0with%0...%0"
 -- Iteration 3 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(27) "20-6391PHP string%0with%0...%0"
 -- Iteration 4 --
 implode(): Argument #1 ($separator) must be of type string, array given

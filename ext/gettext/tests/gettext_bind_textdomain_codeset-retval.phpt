@@ -9,10 +9,10 @@ gettext
 
     echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 string(5) "UTF-8"
 Done
---CREDITS--
-Florian Holzhauer fh-pt@fholzhauer.de
-PHP Testfest Berlin 2009-05-09

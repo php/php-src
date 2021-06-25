@@ -53,8 +53,12 @@ echo "Done\n";
 -- Iteration 1 --
 string(87) "2TRUE0TRUE-639TRUE-1.3444TRUE1TRUEPHPTRUETRUETRUE TRUE6999.99999999TRUEstring%0with%0...%0"
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(57) "2101-6391-1.3444111PHP111 16999.999999991string%0with%0...%0"
 -- Iteration 3 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(47) "20-639-1.34441PHP 6999.99999999string%0with%0...%0"
 -- Iteration 4 --
 join(): Argument #1 ($separator) must be of type string, array given

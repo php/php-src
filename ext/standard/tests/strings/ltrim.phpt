@@ -37,7 +37,7 @@ var_dump( ltrim(  12345  ) );                                   /* Scalar argume
 echo "\nDone\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Output for Error Conditions ***
 
  *** Using heredoc string ***
@@ -46,6 +46,8 @@ string(17) "ng heredoc string"
  *** Output for Normal Behaviour ***
 string(10) "ltrim test"
 string(13) "   ltrim test"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(18) "        ltrim test"
 string(10) "ltrim test"
 string(11) " ltrim test"

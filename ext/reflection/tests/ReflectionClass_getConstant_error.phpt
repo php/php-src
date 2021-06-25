@@ -12,8 +12,10 @@ var_dump($rc->getConstant(1));
 var_dump($rc->getConstant(1.5));
 var_dump($rc->getConstant(true));
 ?>
---EXPECT--
+--EXPECTF--
 Check invalid params:
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)

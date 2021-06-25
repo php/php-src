@@ -63,6 +63,8 @@ Deprecated: ReflectionClass::getMethod(): Passing null to parameter #1 ($name) o
 Method C::() does not exist
 Method C::1() does not exist
 Method C::1.5() does not exist
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 Method C::1() does not exist
 ReflectionClass::getMethod(): Argument #1 ($name) must be of type string, array given
 ReflectionClass::getMethod(): Argument #1 ($name) must be of type string, C given

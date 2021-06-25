@@ -51,10 +51,22 @@ string(17) "1050%s"
 string(27) "1050%s.%s"
 string(17) "1050%s"
 
-string(14) "1%s"
-string(24) "1%s.%s"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(14) "1%s"
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+string(24) "1%s.%s"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+string(14) "1%s"
+
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(13) "%s"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(23) "%s.%s"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(13) "%s"

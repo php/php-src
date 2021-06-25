@@ -51,6 +51,8 @@ string(5) "array"
 int(%d)
 string(5) "array"
 int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 string(5) "array"
 int(%d)

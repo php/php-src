@@ -26,7 +26,8 @@ var_dump(json_last_error());
 json_decode("\"\x00\"");
 var_dump(json_last_error());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 NULL
 int(4)
 NULL
@@ -35,6 +36,8 @@ int(0)
 int(0)
 int(1)
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
 int(0)
 int(5)

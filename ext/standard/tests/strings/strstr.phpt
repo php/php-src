@@ -224,6 +224,8 @@ string(73) "012033 -3.3445     NULL TRUE FALSE%0 abcd\xxyz %00 octal
 abcd$:Hello world"
 
 -- Iteration 15 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(72) "12033 -3.3445     NULL TRUE FALSE%0 abcd\xxyz %00 octal
 
 abcd$:Hello world"
@@ -244,6 +246,8 @@ string(72) "12033 -3.3445     NULL TRUE FALSE%0 abcd\xxyz %00 octal
 abcd$:Hello world"
 
 -- Iteration 19 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(85) "Hello world,012033 -3.3445     NULL TRUE FALSE%0 abcd\xxyz %00 octal
 
 abcd$:Hello world"

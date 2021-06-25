@@ -31,7 +31,10 @@ var_dump($db->getAttribute(PDO::ATTR_DEFAULT_STR_PARAM) === PDO::PARAM_STR_NATL)
 
 ?>
 --EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(3) "'1'"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(2) "''"
 string(4) "'42'"
 

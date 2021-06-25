@@ -46,9 +46,13 @@ foreach($r->getMethods() as $m)
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(19) "Comment for class A"
 string(15) "Method A::bla()"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 string(22) "* Comment for A::baz()"

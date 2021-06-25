@@ -45,8 +45,12 @@ Warning: fileperms(): stat failed for   in %s on line %d
 bool(false)
 bool(false)
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: fileperms(): stat failed for 1 in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 
 Warning: fileperms(): stat failed for 1234 in %s on line %d

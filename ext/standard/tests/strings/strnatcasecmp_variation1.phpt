@@ -38,8 +38,10 @@ str_dump("\x0", "\0");
 str_dump($a, $b);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strnatcasecmp() : variation ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
 int(1)
 int(-1)

@@ -20,8 +20,12 @@ bool(false)
 string(10) "aa%C3%B8aa"
 
 Notice: iconv(): Detected an incomplete multibyte character in input string in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 string(8) "%C3%B8aa"
 
 Notice: iconv(): Detected an incomplete multibyte character in input string in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""

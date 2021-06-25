@@ -27,9 +27,17 @@ foreach ( $variation_array as $var ) {
   var_dump(get_cfg_var( $var  ) );
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Test substituting argument 1 with boolean values ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)

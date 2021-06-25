@@ -120,10 +120,14 @@ string(45) "%0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(45) "%0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(45) "%0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 

@@ -49,8 +49,9 @@ $strings = array( "Hello, World",
 
 /* loop through to find the length of each string */
 for($i=0; $i<count($strings); $i++) {
+  $result = strlen($strings[$i]);
   echo "String length of '$strings[$i]' is => ";
-  var_dump( strlen($strings[$i]) );
+  var_dump($result);
 }
 
 
@@ -142,7 +143,11 @@ String length of '0' is => int(1)
 String length of '0' is => int(1)
 String length of '	' is => int(1)
 String length of '\t' is => int(2)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 String length of '1' is => int(1)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 String length of '' is => int(0)
 String length of 'Hello, World%0' is => int(13)
 String length of 'Hello%0World' is => int(11)

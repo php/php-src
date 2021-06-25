@@ -7,7 +7,8 @@ pdo
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for oci driver - cannot reexecute after closing cursors without reparse');
+$dsn = (string) getenv('PDOTEST_DSN');
+if (!strncasecmp($dsn, 'oci', strlen('oci'))) die('skip not relevant for oci driver - cannot reexecute after closing cursors without reparse');
 PDOTest::skip();
 ?>
 --FILE--

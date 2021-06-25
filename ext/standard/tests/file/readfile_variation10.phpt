@@ -47,8 +47,12 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 Warning: readfile(-1): Failed to open stream: %s in %s on line %d
 -- testing '1' --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: readfile(1): Failed to open stream: %s in %s on line %d
 -- testing '' --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ValueError: Path cannot be empty
 -- testing '' --
 ValueError: Path cannot be empty

@@ -20,10 +20,12 @@ var_dump( strrpos($empty_string, FALSE) );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
 int(0)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
 *** Done ***

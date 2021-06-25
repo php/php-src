@@ -73,7 +73,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing pathinfo() with miscellaneous input arguments ***
 -- Iteration 1 --
 array(3) {
@@ -130,6 +130,8 @@ string(6) "2.3456"
 string(4) "3456"
 string(1) "2"
 -- Iteration 5 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(3) {
   ["dirname"]=>
   string(1) "."
@@ -138,20 +140,38 @@ array(3) {
   ["filename"]=>
   string(1) "1"
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "."
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
 -- Iteration 6 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(2) {
   ["basename"]=>
   string(0) ""
   ["filename"]=>
   string(0) ""
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 -- Iteration 7 --
 array(3) {

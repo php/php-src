@@ -29,7 +29,7 @@ foreach( $misc_files as $misc_file ) {
   clearstatcache();
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() with invalid filenames ***
@@ -39,9 +39,17 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

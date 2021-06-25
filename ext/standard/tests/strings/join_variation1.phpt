@@ -82,7 +82,7 @@ for($index = 0; $index < count($values); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing join() : usage variations ***
 
 --- Testing join() by supplying different values for 'glue' argument ---
@@ -115,12 +115,20 @@ join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 14 --
 join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 15 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(17) "element11element2"
 -- Iteration 16 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "element1element2"
 -- Iteration 17 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(17) "element11element2"
 -- Iteration 18 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "element1element2"
 -- Iteration 19 --
 string(26) "element1testObjectelement2"

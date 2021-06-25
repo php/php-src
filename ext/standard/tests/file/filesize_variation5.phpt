@@ -15,6 +15,8 @@ echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing filesize(): usage variations ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 

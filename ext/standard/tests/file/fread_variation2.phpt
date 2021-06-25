@@ -25,7 +25,7 @@ function check_read($file_handle, $read_size, $expect_size) {
   $data_from_file = fread($file_handle, $read_size);
 
   // check if data read is of expected size
-  if ( strlen($data_from_file) == $expect_size)
+  if ($data_from_file === false || strlen($data_from_file) == $expect_size)
     echo "OK\n";
   else
     echo "Error reading file, total number of bytes read = ".strlen($data_from_file)."\n";

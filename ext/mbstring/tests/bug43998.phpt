@@ -29,7 +29,7 @@ foreach($inputs as $input) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 -- Iteration 1 --
 mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "12345" given
 mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "12345" given
@@ -39,11 +39,19 @@ mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "1.23456789E-
 mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "1.23456789E-9" given
 
 -- Iteration 3 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "1" given
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "1" given
 
 -- Iteration 4 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "" given
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "" given
 
 -- Iteration 5 --

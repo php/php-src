@@ -43,8 +43,12 @@ bool(false)
 Warning: readlink(): %s in %s on line %d
 bool(false)
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: readlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: readlink(): %s in %s on line %d
 bool(false)

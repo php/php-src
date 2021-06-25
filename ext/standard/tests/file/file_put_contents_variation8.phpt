@@ -57,8 +57,14 @@ echo "\n*** Done ***\n";
 -- Iteration 0 --
 9 bytes written to: '-1'
 -- Iteration 1 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 9 bytes written to: '1'
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ValueError: Path cannot be empty
 -- Iteration 3 --
 ValueError: Path cannot be empty

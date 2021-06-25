@@ -57,6 +57,8 @@ Warning: session_start(): Session cannot be started after headers have already b
 
 Warning: session_encode(): Cannot encode non-existent session in %s on line %d
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: session_decode(): Session data cannot be decoded when there is no active session in %s on line %d
 
 

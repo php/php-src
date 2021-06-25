@@ -18,8 +18,15 @@ $availableLocales = array(Locale::getDefault());
 var_dump(locale_lookup($availableLocales, false, true));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(5) "fr_fr"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(5) "en_us"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(5) "fr_fr"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(5) "de_de"
