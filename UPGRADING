@@ -193,6 +193,16 @@ PHP 8.1 UPGRADE NOTES
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
+  . Added certificate blob options when for libcurl >= 7.71.0:
+
+        CURLOPT_ISSUERCERT_BLOB
+        CURLOPT_PROXY_ISSUERCERT
+        CURLOPT_PROXY_ISSUERCERT_BLOB
+        CURLOPT_PROXY_SSLCERT_BLOB
+        CURLOPT_PROXY_SSLKEY_BLOB
+        CURLOPT_SSLCERT_BLOB
+        CURLOPT_SSLKEY_BLOB
+
   . Added CURLStringFile, which can be used to post a file from a string rather
     than a file:
 
