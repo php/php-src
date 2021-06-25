@@ -5,8 +5,8 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (stristr(mysqli_get_client_info(), 'mysqlnd')) {
-    die("skip: only applicable for libmysqlclient");
+if ($IS_MYSQLND) {
+    die("skip only applicable for libmysqlclient");
 }
 ?>
 --FILE--
