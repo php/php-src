@@ -17,6 +17,7 @@ test("1", "2");
 test("10", "2");
 test("1.0", "1.1");
 test("1.2", "1.0.1");
+test("1.2(message)", "1.2(message)");
 foreach ($special_forms as $f1) {
     foreach ($special_forms as $f2) {
     test("1.0$f1", "1.0$f2");
@@ -57,6 +58,7 @@ TESTING COMPARE
 10 > 2
 1.0 < 1.1
 1.2 > 1.0.1
+1.2(message) = 1.2(message)
 1.0-dev = 1.0-dev
 1.0-dev < 1.0a1
 1.0-dev < 1.0b1

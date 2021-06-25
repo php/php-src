@@ -179,13 +179,13 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 		}
 	}
 	if (compare == 0) {
-		if (n1 != NULL) {
+		if (n1 != NULL && *p1 != '\0') {
 			if (isdigit(*p1)) {
 				compare = 1;
 			} else {
 				compare = php_version_compare(p1, "#N#");
 			}
-		} else if (n2 != NULL) {
+		} else if (n2 != NULL && *p2 != '\0') {
 			if (isdigit(*p2)) {
 				compare = -1;
 			} else {
