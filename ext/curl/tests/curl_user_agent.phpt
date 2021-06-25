@@ -2,8 +2,8 @@
 Test curl.user_agent ini entry
 --INI--
 curl.user_agent=test/1.0
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
