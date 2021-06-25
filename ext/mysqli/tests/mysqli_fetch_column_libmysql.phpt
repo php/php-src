@@ -1,12 +1,11 @@
 --TEST--
 mysqli_fetch_column()
---EXTENSIONS--
-mysqli
 --SKIPIF--
 <?php
+require_once 'skipif.inc';
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
+if ($IS_MYSQLND) {
+    die("skip libmysql only test");
 }
 ?>
 --FILE--
@@ -24,8 +23,6 @@ var_dump(mysqli_fetch_column($res));
 print "[002]\n";
 var_dump(mysqli_fetch_column($res));
 
-
-$link->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true);
 
 $res = mysqli_query($link, "SELECT
     1 AS a,
@@ -123,25 +120,25 @@ string(1) "1"
 [002]
 bool(false)
 [003]
-int(1)
+string(1) "1"
 [004]
-int(2)
+string(1) "2"
 [005]
-int(3)
+string(1) "3"
 [006]
 NULL
 [007]
-int(1)
+string(1) "1"
 [008]
 string(4) "1.42"
 [009]
-float(1.42)
+string(4) "1.42"
 [010]
 mysqli_fetch_column(): Argument #2 ($column) must be greater than or equal to 0
 [011]
 mysqli_fetch_column(): Argument #2 ($column) must be less than the number of fields for this result set
 mysqli_result object is already closed
 [012]
-int(1)
+string(1) "1"
 [013]
 string(1) "b"
