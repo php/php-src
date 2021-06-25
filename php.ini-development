@@ -1920,7 +1920,7 @@ ldap.max_links = -1
 ; absolute path.
 ;curl.cainfo =
 
-; Define the User-Agent when using cURL for requests. PHP's default setting for this is empty.
+; Define the User-Agent when using cURL for requests. When this is empty or unset, curl's default user agent is used instead.
 ; See user_agent (without prefix) to set the User-Agent when using the HTTP wrapper (e.g. file_get_contents)
 ; https://php.net/curl-user-agent
 ;curl.user_agent="PHP"
