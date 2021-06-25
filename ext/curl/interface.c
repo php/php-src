@@ -1153,6 +1153,16 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_VERSION_ALTSVC);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+	REGISTER_CURL_CONSTANT(CURLOPT_ISSUERCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_ISSUERCERT);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_ISSUERCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_SSLCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_SSLKEY_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSLCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSLKEY_BLOB);
+#endif
+
 	REGISTER_CURL_CONSTANT(CURLOPT_SAFE_UPLOAD);
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
@@ -2521,6 +2531,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		case CURLOPT_PROXY_TLS13_CIPHERS:
 		case CURLOPT_TLS13_CIPHERS:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+		case CURLOPT_PROXY_ISSUERCERT:
+#endif
 		{
 			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
@@ -2922,6 +2935,29 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			}
 			ZVAL_COPY(&ch->handlers.fnmatch->func_name, zvalue);
 			break;
+
+		/* Curl blob options */
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+		case CURLOPT_ISSUERCERT_BLOB:
+		case CURLOPT_PROXY_ISSUERCERT_BLOB:
+		case CURLOPT_PROXY_SSLCERT_BLOB:
+		case CURLOPT_PROXY_SSLKEY_BLOB:
+		case CURLOPT_SSLCERT_BLOB:
+		case CURLOPT_SSLKEY_BLOB:
+			{
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+
+				struct curl_blob stblob;
+				stblob.data = ZSTR_VAL(str);
+				stblob.len = ZSTR_LEN(str);
+				stblob.flags = CURL_BLOB_COPY;
+				error = curl_easy_setopt(ch->cp, option, &stblob);
+
+				zend_tmp_string_release(tmp_str);
+			}
+			break;
+#endif
 
 		default:
 			if (is_array_config) {
