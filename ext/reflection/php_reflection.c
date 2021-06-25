@@ -3398,13 +3398,6 @@ ZEND_METHOD(ReflectionMethod, isProtected)
 }
 /* }}} */
 
-/* {{{ Returns whether this method is static */
-ZEND_METHOD(ReflectionMethod, isStatic)
-{
-	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
-}
-/* }}} */
-
 /* {{{ Returns whether this function is deprecated */
 ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated)
 {
@@ -3423,6 +3416,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, isGenerator)
 ZEND_METHOD(ReflectionFunctionAbstract, isVariadic)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
+}
+/* }}} */
+
+/* {{{ Returns whether this function is static */
+ZEND_METHOD(ReflectionFunctionAbstract, isStatic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
 }
 /* }}} */
 
