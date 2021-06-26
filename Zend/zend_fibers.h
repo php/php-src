@@ -54,8 +54,6 @@ void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
-typedef struct _zend_fiber zend_fiber;
-typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber_stack zend_fiber_stack;
 
 /* Encapsulates data needed for a context switch. */
