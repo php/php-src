@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECTF--
-assert(5 |> \_test == 99)
+assert(5 |> '_test' == 99)

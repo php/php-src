@@ -8590,29 +8590,12 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
  * evaluation order. */
 void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
 {
-	zend_ast *left_ast = ast->child[0];
-	zend_ast *right_ast = ast->child[1];
-	znode left_node, right_node;
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *name_ast = ast->child[1];
 
-	zend_compile_expr(&left_node, left_ast);
-	zend_compile_expr(&right_node, right_ast);
-
-	zend_compile_dynamic_call(result, left_ast, right_ast);
-
-/*
-	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
-		result->op_type = IS_CONST;
-		zend_ct_eval_greater(&result->u.constant, ast->kind,
-			&left_node.u.constant, &right_node.u.constant);
-		zval_ptr_dtor(&left_node.u.constant);
-		zval_ptr_dtor(&right_node.u.constant);
-		return;
-	}
-
-	zend_emit_op_tmp(result,
-		ast->kind == ZEND_AST_GREATER ? ZEND_IS_SMALLER : ZEND_IS_SMALLER_OR_EQUAL,
-		&right_node, &left_node);
-*/
+    zend_ast *call =  zend_ast_create(ZEND_AST_CALL, name_ast,
+	        zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast));
+	zend_compile_expr(result, call);
 }
 /* }}} */
 
