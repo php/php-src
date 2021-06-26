@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0alpha3
 
-
+- Core
+  . Fixed bug #81202 (powerpc64 build fails on fibers). (krakjoe)
 
 24 Jun 2021, PHP 8.1.0alpha2
 
