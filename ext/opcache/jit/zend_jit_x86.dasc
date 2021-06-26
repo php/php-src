@@ -3336,7 +3336,6 @@ mrm:
 	}
 }
 
-typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, int32_t unaligned_int32_t);
 
 static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size, const void *from_addr, const void *to_addr)
