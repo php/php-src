@@ -8586,6 +8586,36 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
+ * evaluation order. */
+void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *left_ast = ast->child[0];
+	zend_ast *right_ast = ast->child[1];
+	znode left_node, right_node;
+
+	zend_compile_expr(&left_node, left_ast);
+	zend_compile_expr(&right_node, right_ast);
+
+	zend_compile_dynamic_call(result, left_ast, right_ast);
+
+/*
+	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
+		result->op_type = IS_CONST;
+		zend_ct_eval_greater(&result->u.constant, ast->kind,
+			&left_node.u.constant, &right_node.u.constant);
+		zval_ptr_dtor(&left_node.u.constant);
+		zval_ptr_dtor(&right_node.u.constant);
+		return;
+	}
+
+	zend_emit_op_tmp(result,
+		ast->kind == ZEND_AST_GREATER ? ZEND_IS_SMALLER : ZEND_IS_SMALLER_OR_EQUAL,
+		&right_node, &left_node);
+*/
+}
+/* }}} */
+
 void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -9937,6 +9967,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
 			zend_compile_greater(result, ast);
+			return;
+		case ZEND_AST_PIPE:
+			zend_compile_pipe(result, ast);
 			return;
 		case ZEND_AST_UNARY_OP:
 			zend_compile_unary_op(result, ast);
