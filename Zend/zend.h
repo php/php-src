@@ -119,7 +119,13 @@ typedef struct _zend_class_dependency {
 } zend_class_dependency;
 
 typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
-typedef struct _zend_error_info zend_error_info;
+
+typedef struct _zend_error_info {
+	int type;
+	uint32_t lineno;
+	zend_string *filename;
+	zend_string *message;
+} zend_error_info;
 
 struct _zend_inheritance_cache_entry {
 	zend_inheritance_cache_entry *next;
@@ -381,13 +387,6 @@ typedef struct {
 	zend_error_handling_t  handling;
 	zend_class_entry       *exception;
 } zend_error_handling;
-
-typedef struct _zend_error_info {
-	int type;
-	uint32_t lineno;
-	zend_string *filename;
-	zend_string *message;
-} zend_error_info;
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_error_handling(zend_error_handling *current);

@@ -285,7 +285,6 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 
 typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
-typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, uintptr_t unaligned_uintptr_t);
 
 #define SECTALIGN(p, a) \
