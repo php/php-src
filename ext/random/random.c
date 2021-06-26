@@ -851,7 +851,7 @@ PHP_MINFO_FUNCTION(php_random)
 /* {{{ php_random_module_entry */
 zend_module_entry php_random_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"php_random",				/* Extension name */
+	"random",				/* Extension name */
 	NULL,					/* zend_function_entry */
 	PHP_MINIT(php_random),		/* PHP_MINIT - Module initialization */
 	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
