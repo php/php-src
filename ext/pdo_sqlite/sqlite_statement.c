@@ -299,7 +299,7 @@ static int pdo_sqlite_stmt_get_col(
 	}
 }
 
-static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
+static int pdo_sqlite_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	const char *str;
@@ -308,37 +308,27 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	if (!S->stmt) {
 		return FAILURE;
 	}
-	if(colno >= sqlite3_column_count(S->stmt)) {
-		/* error invalid column */
-		pdo_sqlite_error_stmt(stmt);
-		return FAILURE;
-	}
 
 	array_init(return_value);
 	array_init(&flags);
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
-			add_assoc_string(return_value, "native_type", "null");
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_NULL);
 			break;
 
 		case SQLITE_FLOAT:
-			add_assoc_string(return_value, "native_type", "double");
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_BLOB:
 			add_next_index_string(&flags, "blob");
-			/* TODO Check this is correct */
 			ZEND_FALLTHROUGH;
 		case SQLITE_TEXT:
-			add_assoc_string(return_value, "native_type", "string");
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 
 		case SQLITE_INTEGER:
-			add_assoc_string(return_value, "native_type", "integer");
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 	}
@@ -398,7 +388,7 @@ const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_param_hook,
 	NULL, /* set_attr */
 	pdo_sqlite_stmt_get_attribute, /* get_attr */
-	pdo_sqlite_stmt_col_meta,
+	pdo_sqlite_stmt_get_column_meta,
 	NULL, /* next_rowset */
 	pdo_sqlite_stmt_cursor_closer
 };

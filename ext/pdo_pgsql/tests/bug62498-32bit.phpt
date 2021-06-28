@@ -56,7 +56,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int2"
     ["name"]=>
     string(7) "int2col"
@@ -75,7 +75,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int4"
     ["name"]=>
     string(7) "int4col"
@@ -94,7 +94,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int8"
     ["name"]=>
     string(7) "int8col"
@@ -113,7 +113,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(7) "varchar"
     ["name"]=>
     string(9) "stringcol"
@@ -132,7 +132,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "bool"
     ["name"]=>
     string(7) "boolcol"
@@ -151,7 +151,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "date"
     ["name"]=>
     string(7) "datecol"
@@ -170,7 +170,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "text"
     ["name"]=>
     string(7) "textcol"
@@ -189,7 +189,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(9) "timestamp"
     ["name"]=>
     string(5) "tscol"
@@ -208,7 +208,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(5) "bytea"
     ["name"]=>
     string(8) "byteacol"

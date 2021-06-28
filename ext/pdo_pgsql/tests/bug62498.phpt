@@ -56,7 +56,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int2"
     ["pdo_type"]=>
     int(2)
@@ -75,7 +75,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int4"
     ["pdo_type"]=>
     int(2)
@@ -94,7 +94,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "int8"
     ["pdo_type"]=>
     int(2)
@@ -113,7 +113,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(7) "varchar"
     ["pdo_type"]=>
     int(3)
@@ -132,7 +132,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "bool"
     ["pdo_type"]=>
     int(1)
@@ -151,7 +151,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "date"
     ["pdo_type"]=>
     int(3)
@@ -170,7 +170,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(4) "text"
     ["pdo_type"]=>
     int(3)
@@ -189,7 +189,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(9) "timestamp"
     ["pdo_type"]=>
     int(3)
@@ -208,7 +208,7 @@ array(9) {
     int(%d)
     ["table"]=>
     string(13) "bugtest_62498"
-    ["native_type"]=>
+    ["pgsql:decl_type"]=>
     string(5) "bytea"
     ["pdo_type"]=>
     int(4)
