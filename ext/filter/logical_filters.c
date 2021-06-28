@@ -636,8 +636,8 @@ bad_url:
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->user != NULL && !is_userinfo_valid(url->user)
-		|| url->pass != NULL && !is_userinfo_valid(url->pass)
+	if ((url->user != NULL && !is_userinfo_valid(url->user))
+		|| (url->pass != NULL && !is_userinfo_valid(url->pass))
 	) {
 		php_url_free(url);
 		RETURN_VALIDATION_FAILED
