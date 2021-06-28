@@ -626,8 +626,17 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 	if (result[0] == isc_info_sql_records) {
 		unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
 
+		if (result_size > sizeof(result)) {
+			ret = -1;
+			goto free_statement;
+		}
 		while (result[i] != isc_info_end && i < result_size) {
 			short len = (short)isc_vax_integer(&result[i+1],2);
+			/* bail out on bad len */
+			if (len != 1 && len != 2 && len != 4) {
+				ret = -1;
+				goto free_statement;
+			}
 			if (result[i] != isc_info_req_select_count) {
 				ret += isc_vax_integer(&result[i+3],len);
 			}
@@ -901,14 +910,16 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 }
 /* }}} */
 
+#define INFO_BUF_LEN 512
+
 /* callback to used to report database server info */
 static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 {
 	if (arg) {
 		if (*(char*)arg) { /* second call */
-			strcat(arg, " ");
+			strlcat(arg, " ", INFO_BUF_LEN);
 		}
-		strcat(arg, s);
+		strlcat(arg, s, INFO_BUF_LEN);
 	}
 }
 /* }}} */
@@ -919,7 +930,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	switch (attr) {
-		char tmp[512];
+		char tmp[INFO_BUF_LEN];
 
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(val,dbh->auto_commit);
