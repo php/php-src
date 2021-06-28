@@ -678,7 +678,7 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
-# include "jit/zend_jit_gdb.c"
+# include "jit/zend_jit_gdb.h"
 # include "jit/zend_jit_perf_dump.c"
 #endif
 #ifdef HAVE_OPROFILE
