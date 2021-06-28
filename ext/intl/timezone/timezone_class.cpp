@@ -175,8 +175,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
 			outside_error, func);
 	} else {
-		UnicodeString	id,
-						gottenId;
+		UnicodeString	id;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
 		if (!try_convert_to_string(zv_timezone)) {
 			zval_ptr_dtor_str(&local_zv_tz);
@@ -203,7 +202,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
-		if (timeZone->getID(gottenId) != id) {
+		if (*timeZone == TimeZone::getUnknown()) {
 			spprintf(&message, 0, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
 			if (message) {
