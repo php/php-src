@@ -15,3 +15,4 @@ var_dump($formatter);
 --EXPECT--
 object(IntlDateFormatter)#1 (0) {
 }
+a
