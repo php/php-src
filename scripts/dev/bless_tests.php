@@ -21,7 +21,7 @@ foreach ($files as $path) {
     $phpt = file_get_contents($path);
     $out = file_get_contents($outPath);
 
-    if (false !== strpos($phpt, '--XFAIL--')) {
+    if (false !== strpos($phpt, '--XFAIL--') || preg_match('/die\([\'"]xfail/', $phpt)) {
         // Don't modify expected output of XFAIL tests
         continue;
     }
