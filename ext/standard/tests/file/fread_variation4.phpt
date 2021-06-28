@@ -502,12 +502,12 @@ OK
 int(0)
 bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expected : 0 bytes --
-int(1024)
+int(%r1024|1137%r)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
 Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
-int(1024)
+int(%r1024|1137%r)
 bool(false)
 -- File opened in mode x --
 -- Reading beyond filesize, expected : 1024 bytes --
@@ -553,11 +553,11 @@ OK
 int(0)
 bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expected : 0 bytes --
-int(1024)
+int(%r1024|1137%r)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
 Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 OK
-int(1024)
+int(%r1024|1137%r)
 bool(false)
 Done

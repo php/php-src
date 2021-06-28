@@ -68,14 +68,26 @@ bool(true)
 Warning: rename(-1,%safile.tmp): The system cannot find the file specified (code: 2) in %srename_variation13-win32.php on line %d
 bool(false)
 -- 1 testing '1' boolean --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: rename(1,%safile.tmp): The system cannot find the file specified (code: 2) in %srename_variation13-win32.php on line %d
 bool(false)
 -- 2 testing '' boolean --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: rename(%safile.tmp,): %r(Invalid argument|(The parameter is incorrect|The system cannot find the path specified) \(code: \d+\))%r in %srename_variation13-win32.php on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: rename(,%safile.tmp): %r(Invalid argument|(The parameter is incorrect|The system cannot find the path specified) \(code: \d+\))%r in %srename_variation13-win32.php on line %d
 bool(false)

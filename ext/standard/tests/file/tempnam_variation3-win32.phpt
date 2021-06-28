@@ -91,15 +91,27 @@ rmdir($file_path);
 -- Iteration 0 --
 OK
 -- Iteration 1 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 OK
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 OK
 -- Iteration 3 --
 OK
 -- Iteration 4 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation3-win32.php on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 Failed, not created in the correct directory %s vs %s
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 0
 -- Iteration 5 --
 tempnam(): Argument #2 ($prefix) must not contain any null bytes

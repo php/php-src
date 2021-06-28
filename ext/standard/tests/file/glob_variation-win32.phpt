@@ -380,18 +380,30 @@ array(0) {
 }
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(%d) "1"
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
 
@@ -445,6 +457,8 @@ array(1) {
   string(%d) "%s/glob_variation/wonder1"
 }
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 array(0) {
 }
 Done

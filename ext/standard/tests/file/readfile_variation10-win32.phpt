@@ -48,9 +48,13 @@ Warning: readfile(-1): Failed to open stream: No such file or directory in %s on
 
 -- Filename: TRUE --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: readfile(1): Failed to open stream: No such file or directory in %s on line %d
 
 -- Filename: FALSE --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ValueError: Path cannot be empty
 
 -- Filename: "" --

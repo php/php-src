@@ -2759,7 +2759,7 @@ $output
         if (strpos($log_format, 'S') !== false) {
             $env_lines = [];
             foreach ($env as $env_var => $env_val) {
-                $env_lines[] = "export $env_var=" . (string) escapeshellarg($env_val ?? "");
+                $env_lines[] = "export $env_var=" . escapeshellarg((string) ($env_val ?? ""));
             }
             $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH

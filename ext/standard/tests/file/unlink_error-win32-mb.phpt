@@ -59,8 +59,12 @@ Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: unlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 
 -- Testing unlink() on non-existent file --
