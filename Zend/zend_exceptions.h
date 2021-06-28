@@ -71,6 +71,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *exception, int 
 ZEND_NORETURN void zend_exception_uncaught_error(const char *prefix, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main);
 
+ZEND_API ZEND_COLD zend_object *zend_create_unwind_exit(void);
+ZEND_API ZEND_COLD zend_object *zend_create_graceful_exit(void);
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void);
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void);
 ZEND_API bool zend_is_unwind_exit(const zend_object *ex);

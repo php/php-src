@@ -539,9 +539,14 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
+	zval graceful_exit;
+	ZVAL_OBJ(&graceful_exit, zend_create_graceful_exit());
+
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, &graceful_exit, true);
+
+	zval_ptr_dtor(&graceful_exit);
 
 	if (transfer.flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
 		EG(exception) = Z_OBJ(transfer.value);
@@ -658,13 +663,6 @@ ZEND_METHOD(Fiber, suspend)
 	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
-
-	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
-		// This occurs when the fiber is GC'ed while suspended.
-		zval_ptr_dtor(&transfer.value);
-		zend_throw_graceful_exit();
-		RETURN_THROWS();
-	}
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
