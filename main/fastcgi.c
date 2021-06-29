@@ -154,12 +154,12 @@ typedef struct _fcgi_begin_request_rec {
 } fcgi_begin_request_rec;
 
 typedef struct _fcgi_end_request {
-    unsigned char appStatusB3;
-    unsigned char appStatusB2;
-    unsigned char appStatusB1;
-    unsigned char appStatusB0;
-    unsigned char protocolStatus;
-    unsigned char reserved[3];
+	unsigned char appStatusB3;
+	unsigned char appStatusB2;
+	unsigned char appStatusB1;
+	unsigned char appStatusB0;
+	unsigned char protocolStatus;
+	unsigned char reserved[3];
 } fcgi_end_request;
 
 typedef struct _fcgi_end_request_rec {

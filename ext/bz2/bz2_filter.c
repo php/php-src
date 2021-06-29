@@ -24,9 +24,9 @@
 /* {{{ data structure */
 
 enum strm_status {
-    PHP_BZ2_UNINITIALIZED,
-    PHP_BZ2_RUNNING,
-    PHP_BZ2_FINISHED
+	PHP_BZ2_UNINITIALIZED,
+	PHP_BZ2_RUNNING,
+	PHP_BZ2_FINISHED
 };
 
 typedef struct _php_bz2_filter_data {

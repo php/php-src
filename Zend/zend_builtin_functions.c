@@ -492,7 +492,7 @@ ZEND_FUNCTION(define)
 
 	if (non_cs) {
 		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
-    }
+	}
 
 	ZVAL_UNDEF(&val_free);
 
@@ -1018,7 +1018,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 		ce = zend_lookup_class(name);
 	}
 
- 	if (ce) {
+	if (ce) {
 		RETURN_BOOL(((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
 	} else {
 		RETURN_FALSE;

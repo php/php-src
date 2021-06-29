@@ -2086,11 +2086,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 			char *tmp = bptr;
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
 				tmp++;
-  			}
+			}
 			if (*tmp == enclosure) {
 				bptr = tmp;
 			}
-  		}
+		}
 
 		if (first_field && bptr == line_end) {
 			add_next_index_null(return_value);

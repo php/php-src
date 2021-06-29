@@ -2046,7 +2046,7 @@ static int calc_dimension(const char* str)
 	int i = 1;
 	while (*str != ']' && *str != '\0') {
 		if (*str == ',') {
-    		i++;
+			i++;
 		}
 		str++;
 	}
@@ -2097,26 +2097,26 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 	 			break;
 	 		}
 			ZVAL_DEREF(zdata);
- 			if (dimension == 1) {
- 				if (enc == NULL) {
+			if (dimension == 1) {
+				if (enc == NULL) {
 					xparam = master_to_xml(get_conversion(Z_TYPE_P(zdata)), zdata, style, xmlParam);
 				} else {
 					xparam = master_to_xml(enc, zdata, style, xmlParam);
 	 			}
 
 	 			if (type) {
- 					xmlNodeSetName(xparam, BAD_CAST(type->name));
- 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
+					xmlNodeSetName(xparam, BAD_CAST(type->name));
+				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
 					xmlSetNs(xparam, ns);
 				} else {
- 					xmlNodeSetName(xparam, BAD_CAST("item"));
- 				}
- 			} else {
- 				add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, zdata, style);
- 			}
- 			j++;
- 		} ZEND_HASH_FOREACH_END();
+					xmlNodeSetName(xparam, BAD_CAST("item"));
+				}
+			} else {
+				add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, zdata, style);
+			}
+			j++;
+		} ZEND_HASH_FOREACH_END();
 
 		if (dimension == 1) {
 	 		while (j < dims[0]) {
@@ -2124,42 +2124,42 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 				xmlAddChild(xmlParam, xparam);
 
 	 			if (type) {
- 					xmlNodeSetName(xparam, BAD_CAST(type->name));
- 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
+					xmlNodeSetName(xparam, BAD_CAST(type->name));
+				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
 					xmlSetNs(xparam, ns);
 				} else {
- 					xmlNodeSetName(xparam, BAD_CAST("item"));
- 				}
+					xmlNodeSetName(xparam, BAD_CAST("item"));
+				}
 
- 				j++;
- 			}
+				j++;
+			}
 		} else {
 	 		while (j < dims[0]) {
 				add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, NULL, style);
- 				j++;
- 			}
+				j++;
+			}
 		}
- 	} else {
+	} else {
 		for (j=0; j<dims[0]; j++) {
- 			if (dimension == 1) {
+			if (dimension == 1) {
 	 			xmlNodePtr xparam;
 
 				xparam = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 				xmlAddChild(xmlParam, xparam);
 	 			if (type) {
- 					xmlNodeSetName(xparam, BAD_CAST(type->name));
- 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
+					xmlNodeSetName(xparam, BAD_CAST(type->name));
+				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
 					xmlSetNs(xparam, ns);
 				} else {
- 					xmlNodeSetName(xparam, BAD_CAST("item"));
- 				}
- 			} else {
- 			  add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, NULL, style);
- 			}
+					xmlNodeSetName(xparam, BAD_CAST("item"));
+				}
+			} else {
+			  add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, NULL, style);
+			}
 		}
- 	}
+	}
 }
 
 static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)

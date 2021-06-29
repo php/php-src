@@ -306,10 +306,10 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	UChar32 codepoint = -1;
 	int32_t offset = 0;
 
-    UErrorCode status = U_ZERO_ERROR;
-    const UNormalizer2 *norm;
-    UChar decomposition[32];
-    int32_t decomposition_length;
+	UErrorCode status = U_ZERO_ERROR;
+	const UNormalizer2 *norm;
+	UChar decomposition[32];
+	int32_t decomposition_length;
 
 	zend_long form = NORMALIZER_DEFAULT;
 

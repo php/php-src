@@ -1294,7 +1294,7 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	}
 	sxe->xpath->node = nodeptr;
 
- 	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
+	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
 	if (ns != NULL) {
 		while (ns[nsnbr] != NULL) {
 			nsnbr++;

@@ -115,7 +115,7 @@ static zend_always_inline unsigned char *neon_base64_encode(const unsigned char 
 		inl -= 16 * 3;
 	} while (inl >= 16 * 3);
 
-        *left = inl;
+	*left = inl;
 	return out;
 }
 #endif /* __aarch64__ */
@@ -252,7 +252,7 @@ static zend_always_inline int php_base64_decode_impl(const unsigned char *in, si
 	if (inl >= 16 * 4) {
 		size_t left = 0;
 		j += neon_base64_decode(in, inl, out, &left);
-                i = inl - left;
+		i = inl - left;
 		in += i;
 		inl = left;
 	}

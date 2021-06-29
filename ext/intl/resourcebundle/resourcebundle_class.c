@@ -167,8 +167,8 @@ static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
-    bool    is_numeric = 0;
-	char         *pbuf;
+	bool        is_numeric = 0;
+	char        *pbuf;
 	ResourceBundle_object *rb;
 
 	rb = php_intl_resourcebundle_fetch_object(object);

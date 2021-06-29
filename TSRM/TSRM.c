@@ -229,11 +229,11 @@ TSRM_API void tsrm_shutdown(void)
 /* {{{ */
 /* environ lock api */
 TSRM_API void tsrm_env_lock(void) {
-    tsrm_mutex_lock(tsrm_env_mutex);
+	tsrm_mutex_lock(tsrm_env_mutex);
 }
 
 TSRM_API void tsrm_env_unlock(void) {
-    tsrm_mutex_unlock(tsrm_env_mutex);
+	tsrm_mutex_unlock(tsrm_env_mutex);
 } /* }}} */
 
 /* enlarge the arrays for the already active threads */
@@ -768,7 +768,7 @@ TSRM_API uint8_t tsrm_is_main_thread(void)
 
 TSRM_API uint8_t tsrm_is_shutdown(void)
 {/*{{{*/
-    return is_thread_shutdown;
+	return is_thread_shutdown;
 }/*}}}*/
 
 TSRM_API const char *tsrm_api_name(void)

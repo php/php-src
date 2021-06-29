@@ -1280,7 +1280,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	}
 #endif
 
-    /* TODO: move this to zend_cfg.c ? */
+	/* TODO: move this to zend_cfg.c ? */
 	if (!op_array->function_name) {
 		ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	}

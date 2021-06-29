@@ -201,7 +201,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 
 	*indpp = &P->indicator;
 
-    if (Z_ISREF(param->parameter))
+	if (Z_ISREF(param->parameter))
 		parameter = Z_REFVAL(param->parameter);
 	else
 		parameter = &param->parameter;

@@ -1150,7 +1150,7 @@ PHP_FUNCTION(odbc_cursor)
 	SQLUSMALLINT max_len;
 	SQLSMALLINT len;
 	char *cursorname;
-   	odbc_result *result;
+	odbc_result *result;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
@@ -2063,7 +2063,7 @@ PHP_FUNCTION(odbc_result_all)
 					break;
 			}
 		}
-   		php_printf("</tr>\n");
+		php_printf("</tr>\n");
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)

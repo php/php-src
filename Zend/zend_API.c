@@ -377,7 +377,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entr
 	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
 		ZSTR_VAL(func_name), arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
-    );
+	);
 	efree(message);
 	zend_string_release(func_name);
 }
@@ -1548,12 +1548,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties) /* {{{ */
 {
-    zval *prop, tmp;
-   	zend_string *key;
-   	zend_long h;
-   	zend_property_info *property_info;
+	zval *prop, tmp;
+	zend_string *key;
+	zend_long h;
+	zend_property_info *property_info;
 
-   	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
+	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
 			if (ZSTR_VAL(key)[0] == '\0') {
 				const char *class_name, *prop_name;

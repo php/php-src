@@ -61,9 +61,9 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 	xmlEntityPtr ret;
 
 	ret = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));
-    memset(ret, 0, sizeof(xmlEntity));
-    ret->type = XML_NOTATION_NODE;
-    ret->name = xmlStrdup(name);
+	memset(ret, 0, sizeof(xmlEntity));
+	ret->type = XML_NOTATION_NODE;
+	ret->name = xmlStrdup(name);
 	ret->ExternalID = xmlStrdup(ExternalID);
 	ret->SystemID = xmlStrdup(SystemID);
 	ret->length = 0;

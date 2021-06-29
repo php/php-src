@@ -2789,7 +2789,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	zend_object *zobj;
 	zend_string *name, *tmp_name;
 
-    if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
 			if (Z_ISREF_P(container) && Z_TYPE_P(Z_REFVAL_P(container)) == IS_OBJECT) {
 				container = Z_REFVAL_P(container);
@@ -3726,7 +3726,7 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 	i_init_func_execute_data(op_array, return_value, 1 EXECUTE_DATA_CC);
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
-    EX(opline) = opline;
+	EX(opline) = opline;
 	opline = orig_opline;
 #endif
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))

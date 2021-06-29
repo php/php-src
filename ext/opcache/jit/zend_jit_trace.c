@@ -491,7 +491,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-    jit_extension->func_info.num = 0;
+	jit_extension->func_info.num = 0;
 	jit_extension->func_info.flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
 		| ZEND_FUNC_JIT_ON_PROF_REQUEST
 		| ZEND_FUNC_JIT_ON_HOT_COUNTERS

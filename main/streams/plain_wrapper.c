@@ -1291,7 +1291,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 		if (errno == EXDEV) {
 			zend_stat_t sb;
 # if !defined(ZTS) && !defined(TSRM_WIN32)
-            /* not sure what to do in ZTS case, umask is not thread-safe */
+			/* not sure what to do in ZTS case, umask is not thread-safe */
 			int oldmask = umask(077);
 # endif
 			int success = 0;

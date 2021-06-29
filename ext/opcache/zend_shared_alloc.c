@@ -78,7 +78,7 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 	int val;
 
 #ifdef ZTS
-    zts_lock = tsrm_mutex_alloc();
+	zts_lock = tsrm_mutex_alloc();
 #endif
 
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);

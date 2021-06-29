@@ -124,7 +124,7 @@ static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign) /*
 
 static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
 {
-    return(__cvt(value, ndigit, decpt, sign, 1, 1));
+	return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
 /* }}} */
 
@@ -216,13 +216,13 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 			}
 			*dst++ = dec_point;
 			for (i = decpt; digits[i] != '\0'; i++) {
-                *dst++ = digits[i];
-            }
-        }
-        *dst = '\0';
-    }
-    zend_freedtoa(digits);
-    return (buf);
+				*dst++ = digits[i];
+			}
+		}
+		*dst = '\0';
+	}
+	zend_freedtoa(digits);
+	return (buf);
 }
 /* }}} */
 
@@ -547,7 +547,7 @@ typedef struct buf_area buffy;
  * to be printed.
  */
 #define FIX_PRECISION( adjust, precision, s, s_len )	\
-    if ( adjust )						\
+	if ( adjust )						\
 	while ( s_len < (size_t)precision )	\
 	{									\
 	    *--s = '0' ;					\

@@ -177,7 +177,7 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 #ifdef ZTS
 	php_tsrm_startup();
 # ifdef PHP_WIN32
- 	ZEND_TSRMLS_CACHE_UPDATE();
+	ZEND_TSRMLS_CACHE_UPDATE();
 # endif
 #endif
 

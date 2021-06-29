@@ -3283,7 +3283,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 	/* Use HTTP/1.1 with "Connection: close" by default */
 	if ((tmp = php_stream_context_get_option(context, "http", "protocol_version")) == NULL) {
-    	zval http_version;
+		zval http_version;
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);

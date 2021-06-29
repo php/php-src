@@ -237,14 +237,14 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-    if (field->decimals > 0 && field->decimals < 7) {
-        ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u.%0*u",
+	if (field->decimals > 0 && field->decimals < 7) {
+		ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u.%0*u",
 			(t.neg ? "-" : ""), t.hour, t.minute, t.second, field->decimals,
 			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
-    } else {
-         ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u",
+	} else {
+		 ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u",
 			(t.neg ? "-" : ""), t.hour, t.minute, t.second));
-    }
+	}
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -315,14 +315,14 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-    if (field->decimals > 0 && field->decimals < 7) {
+	if (field->decimals > 0 && field->decimals < 7) {
 		ZVAL_STR(zv, zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
 			t.year, t.month, t.day, t.hour, t.minute, t.second, field->decimals,
 			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
-    } else {
+	} else {
 		ZVAL_STR(zv,  zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u",
 			t.year, t.month, t.day, t.hour, t.minute, t.second));
-    }
+	}
 	DBG_VOID_RETURN;
 }
 /* }}} */

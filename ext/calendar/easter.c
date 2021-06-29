@@ -112,7 +112,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 	} else {							/* return the days after March 21 */
 	    result = easter;
 	}
-    ZVAL_LONG(return_value, result);
+	ZVAL_LONG(return_value, result);
 }
 
 /* {{{ Return the timestamp of midnight on Easter of a given year (defaults to current year) */

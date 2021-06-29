@@ -188,7 +188,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				}
 				break;
 		}
-    } else if (ssa_op->op1_def == var) {
+	} else if (ssa_op->op1_def == var) {
 		switch (opline->opcode) {
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
@@ -208,7 +208,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 		}
 	}
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
