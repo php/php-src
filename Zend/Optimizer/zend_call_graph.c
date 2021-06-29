@@ -106,6 +106,7 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
 				func_info->flags |= ZEND_FUNC_HAS_CALLS;
 				if (call_info) {
 					call_info->caller_call_opline = opline;
