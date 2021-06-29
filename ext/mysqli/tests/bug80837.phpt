@@ -35,5 +35,5 @@ $mysqli->close();
 <?php
 require_once "clean_table.inc";
 ?>
---EXPECTF--
+--EXPECT--
 Commands out of sync; you can't run this command now

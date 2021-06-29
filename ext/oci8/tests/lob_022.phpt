@@ -71,7 +71,7 @@ $statement = oci_parse($c, $drop);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 
 OCILob::save(): Argument #2 ($offset) must be greater than or equal to 0
 string(4) "data"

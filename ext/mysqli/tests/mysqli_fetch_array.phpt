@@ -287,7 +287,7 @@ require_once('skipifconnectfailure.inc');
 
     print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(4) {
   [0]=>

@@ -37,7 +37,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1: Import
 OCILob::savefile(): Argument #1 ($filename) must not contain any null bytes
 Test 2: Export
