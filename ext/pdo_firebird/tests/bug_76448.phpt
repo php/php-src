@@ -1,10 +1,10 @@
 --TEST--
 Bug #76448 (Stack buffer overflow in firebird_info_cb)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_firebird')) die("skip podo_firebird extension not available");
-if (!extension_loaded('sockets')) die("skip sockets extension not available");
-?>
+--EXTENSIONS--
+pdo_firebird
+sockets
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require_once "payload_server.inc";
