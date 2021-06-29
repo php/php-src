@@ -27,7 +27,7 @@ var_dump($value); // int(3)
 $value = $test->resume(2 * $value);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

@@ -24,7 +24,7 @@ $rounded_up_val = socket_get_option( $socket, SOL_TCP, TCP_DEFER_ACCEPT);
 socket_close($socket);
 var_dump($rounded_up_val > $initial_val); // Value rounded up by the kernel, might differ from kernel version/setting
 ?>
---EXPECTF--
+--EXPECT--
 *** Test with TCP_DEFER_ACCEPT with initial SYN/ACK 'timeout' value to rounded up one ***
 bool(true)
 bool(true)

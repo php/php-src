@@ -55,6 +55,6 @@ if (!$link->query('DROP TABLE IF EXISTS test')) {
 $link->close();
 unlink('bug77956.data');
 ?>
---EXPECTF--
+--EXPECT--
 [006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
 done

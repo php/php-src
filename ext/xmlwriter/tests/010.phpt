@@ -41,7 +41,7 @@ var_dump(file_get_contents($file));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

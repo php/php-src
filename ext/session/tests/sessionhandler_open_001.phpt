@@ -37,7 +37,7 @@ try {
 print "Done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Session is not active
 Session is not active
 Session is not active

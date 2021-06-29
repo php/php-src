@@ -48,7 +48,7 @@ while ($pipes) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 PIPE 1 << hello

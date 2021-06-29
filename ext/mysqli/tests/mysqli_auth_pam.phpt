@@ -129,5 +129,5 @@ max_execution_time=240
 	mysqli_query($link, 'DROP USER pamtest');
 	mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>
---EXPECTF--
+--EXPECT--
 done!

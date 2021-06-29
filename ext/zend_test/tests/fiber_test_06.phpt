@@ -28,7 +28,7 @@ var_dump($test->resume('10')); // NULL
 var_dump($fiber->resume('2')); // NULL
 
 ?>
---EXPECTF--
+--EXPECT--
 int(10)
 int(1)
 string(1) "1"

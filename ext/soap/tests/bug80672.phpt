@@ -11,5 +11,5 @@ try {
     print $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <>

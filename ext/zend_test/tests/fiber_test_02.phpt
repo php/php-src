@@ -16,7 +16,7 @@ var_dump($test->start()); // int(1)
 var_dump($test->resume(2)); // NULL
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 NULL

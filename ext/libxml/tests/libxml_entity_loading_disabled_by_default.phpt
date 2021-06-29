@@ -44,7 +44,7 @@ var_dump(strpos(parseXML4($xml), 'SECRET_DATA') === false);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
