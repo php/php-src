@@ -3008,8 +3008,10 @@ static zend_result accel_post_startup(void)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
-#if defined(HAVE_JIT) && !defined(ZEND_WIN32)
-				reattached = 1;
+#ifdef HAVE_JIT
+				if (sapi_module.name && strcmp(sapi_module.name, "apache2handler") == 0) {
+					reattached = 1;
+				}
 #endif
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
