@@ -1802,16 +1802,16 @@ ex_is_caught:
 			goto next;
 		}
 
-		/* not while in conditionals */
-		phpdbg_print_opline_ex(execute_data, 0);
-
 		/* perform seek operation */
 		if ((PHPDBG_G(flags) & PHPDBG_SEEK_MASK) && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
 			/* current address */
 			zend_ulong address = (zend_ulong) execute_data->opline;
 
 			if (PHPDBG_G(seek_ex) != execute_data) {
-				if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
+				if (PHPDBG_G(seek_ex)->prev_execute_data &&
+				    phpdbg_user_execute_data(PHPDBG_G(seek_ex)->prev_execute_data) == execute_data &&
+				    PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
+					phpdbg_print_opline_ex(execute_data, 0);
 					goto stepping;
 				}
 				goto next;
@@ -1856,6 +1856,9 @@ ex_is_caught:
 				}
 			}
 		}
+
+		/* not while in conditionals */
+		phpdbg_print_opline_ex(execute_data, 0);
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && (PHPDBG_G(flags) & PHPDBG_STEP_OPCODE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
 stepping:
