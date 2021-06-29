@@ -257,7 +257,9 @@ PHP_FUNCTION(gethostbynamel)
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
 		in = *(struct in_addr *) hp->h_addr_list[i];
 		add_next_index_string(return_value, inet_ntoa(in));
+		efree(hp->h_addr_list[i]);
 	}
+	efree(hp);
 }
 /* }}} */
 
@@ -267,6 +269,7 @@ static zend_string *php_gethostbyname(char *name)
 	struct hostent *hp;
 	struct in_addr in;
 	char *address;
+	int i;
 
 	hp = php_network_gethostbyname(name);
 
@@ -275,6 +278,11 @@ static zend_string *php_gethostbyname(char *name)
 	}
 
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
+
+	for(i = 0; hp->h_addr_list[i] != 0; i++) {
+		efree(hp->h_addr_list[i]);
+	}
+	efree(hp);
 
 	address = inet_ntoa(in);
 	return zend_string_init(address, strlen(address), 0);

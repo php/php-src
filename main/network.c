@@ -1274,91 +1274,51 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 }
 #endif
 
-#if defined(HAVE_GETHOSTBYNAME_R)
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+#if HAVE_GETADDRINFO
+struct hostent* gethostname_re (const char *host)
 {
-	struct hostent *hp;
-	int herr,res;
+    struct hostent *hp;
+    struct addrinfo hints, *result, *rp;
+    unsigned int nresults = 0;
+    char* nullp = NULL;
+	int i;
 
-	if (*hstbuflen == 0) {
-		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	}
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = PF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
 
-	while (( res =
-		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
-		&& (errno == ERANGE)) {
-		/* Enlarge the buffer. */
-		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
-	}
+    if (getaddrinfo(host, NULL, &hints, &result) != SUCCESS) {
+        return NULL;
+    }
 
-	if (res != SUCCESS) {
-		return NULL;
-	}
+    for (rp = result; rp != NULL; rp = rp->ai_next)
+        nresults++;
 
-	return hp;
+    hp = emalloc(sizeof(struct hostent));
+    hp->h_name = strdup(host);
+    hp->h_aliases = &nullp;
+    hp->h_addrtype = result->ai_family;
+    hp->h_addr_list = (char **) emalloc(nresults * sizeof(char *));
+    hp->h_length = sizeof(struct in_addr);
+
+    rp = result;
+    for (i = 0; i < nresults; i++) {
+        struct in_addr in = ((struct sockaddr_in*) rp->ai_addr)->sin_addr;
+        hp->h_addr_list[i] = emalloc(sizeof(struct in_addr));
+        memcpy(hp->h_addr_list[i], &in, sizeof(struct in_addr));
+        rp = rp->ai_next;
+    }
+    hp->h_addr_list[nresults] = NULL;
+	freeaddrinfo(result);
+    return hp;
 }
-#endif
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
-{
-	struct hostent *hp;
-	int herr;
-
-	if (*hstbuflen == 0) {
-		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	}
-
-	while ((NULL == ( hp =
-		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
-		&& (errno == ERANGE)) {
-		/* Enlarge the buffer. */
-		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
-	}
-	return hp;
-}
-#endif
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
-{
-	if (*hstbuflen == 0) {
-		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	} else {
-		if (*hstbuflen < sizeof(struct hostent_data)) {
-			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
-		}
-	}
-	memset((void *)(*tmphstbuf),0,*hstbuflen);
-
-	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
-		return NULL;
-	}
-
-	return hostbuf;
-}
-#endif
 #endif
 
 PHPAPI struct hostent*	php_network_gethostbyname(char *name) {
-#if !defined(HAVE_GETHOSTBYNAME_R)
+#if !defined(HAVE_GETADDRINFO)
 	return gethostbyname(name);
 #else
-	if (FG(tmp_host_buf)) {
-		free(FG(tmp_host_buf));
-	}
-
-	FG(tmp_host_buf) = NULL;
-	FG(tmp_host_buf_len) = 0;
-
-	memset(&FG(tmp_host_info), 0, sizeof(struct hostent));
-
-	return gethostname_re(name, &FG(tmp_host_info), &FG(tmp_host_buf), &FG(tmp_host_buf_len));
+	return gethostname_re(name);
 #endif
 }
 

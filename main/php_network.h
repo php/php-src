@@ -73,8 +73,12 @@ END_EXTERN_C()
 #include <sys/socket.h>
 #endif
 
-#ifdef HAVE_GETHOSTBYNAME_R
+#ifdef HAVE_GETADDRINFO
+#ifdef PHP_WIN32
+#include "win32/ws2tcpip.h" #TODO: does this work?
+#else
 #include <netdb.h>
+#endif
 #endif
 
 /* These are here, rather than with the win32 counterparts above,
