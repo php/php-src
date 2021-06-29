@@ -406,7 +406,15 @@ static PHP_INI_MH(OnUpdateTimeout)
 	}
 	zend_unset_timeout();
 	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
-	zend_set_timeout(EG(timeout_seconds), 0);
+	if (stage != PHP_INI_STAGE_DEACTIVATE) {
+		/*
+		 * If we're restoring INI values, we shouldn't reset the timer.
+		 * Otherwise, the timer is active when PHP is idle, such as the
+		 * the CLI web server or CGI. Running a script will re-activate
+		 * the timeout, so it's not needed to do so at script end.
+		 */
+		zend_set_timeout(EG(timeout_seconds), 0);
+	}
 	return SUCCESS;
 }
 /* }}} */

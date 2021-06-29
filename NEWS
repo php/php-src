@@ -7,8 +7,10 @@ PHP                                                                        NEWS
     (cmb, Nikita)
   . Fixed bug #81163 (incorrect handling of indirect vars in __sleep).
     (krakjoe)
-  . Fixed bug #81159 (Object to int warning when using an object as a string offset).
-    (girgias)
+  . Fixed bug #81159 (Object to int warning when using an object as a string
+    offset). (girgias)
+  . Fixed bug #80728 (PHP built-in web server resets timeout when it can kill
+    the process). (Calvin Buckley)
 
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
