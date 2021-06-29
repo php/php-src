@@ -757,7 +757,7 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 			buffer = estrdup(cmd);
 			free(cmd);
 #else
-            phpdbg_write("%s", phpdbg_get_prompt());
+			phpdbg_write("%s", phpdbg_get_prompt());
 			phpdbg_consume_stdin_line(buf);
 			buffer = estrdup(buf);
 #endif
@@ -797,7 +797,7 @@ PHPDBG_API void phpdbg_destroy_input(char **input) /*{{{ */
 } /* }}} */
 
 PHPDBG_API int phpdbg_ask_user_permission(const char *question) {
-    char buf[PHPDBG_MAX_CMD];
+	char buf[PHPDBG_MAX_CMD];
 	phpdbg_out("%s", question);
 	phpdbg_out(" (type y or n): ");
 

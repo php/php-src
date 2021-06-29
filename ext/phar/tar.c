@@ -202,8 +202,8 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 
 #ifndef HAVE_STRNLEN
 static size_t strnlen(const char *s, size_t maxlen) {
-        char *r = (char *)memchr(s, '\0', maxlen);
-        return r ? r-s : maxlen;
+	char *r = (char *)memchr(s, '\0', maxlen);
+	return r ? r-s : maxlen;
 }
 #endif
 

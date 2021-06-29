@@ -66,8 +66,8 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 	zend_object *new_obj_val;
 	Spoofchecker_object *sfo, *new_sfo;
 
-    sfo = php_intl_spoofchecker_fetch_object(object);
-    intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
+	sfo = php_intl_spoofchecker_fetch_object(object);
+	intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
 
 	new_obj_val = Spoofchecker_ce_ptr->create_object(object->ce);
 	new_sfo = php_intl_spoofchecker_fetch_object(new_obj_val);

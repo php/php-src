@@ -1146,7 +1146,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 		zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 		zval                      *data;
 
-        SPL_FETCH_SUB_ITERATOR(iterator, object);
+		SPL_FETCH_SUB_ITERATOR(iterator, object);
 		data = iterator->funcs->get_current_data(iterator);
 		if (data) {
 			ZVAL_COPY_DEREF(return_value, data);

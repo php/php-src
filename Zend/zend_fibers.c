@@ -615,7 +615,7 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-    if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
 		RETURN_THROWS();
 	}
@@ -657,7 +657,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-    ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;

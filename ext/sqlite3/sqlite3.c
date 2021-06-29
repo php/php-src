@@ -186,14 +186,14 @@ PHP_METHOD(SQLite3, close)
 	}
 
 	if (db_obj->initialised) {
-        zend_llist_clean(&(db_obj->free_list));
+		zend_llist_clean(&(db_obj->free_list));
 		if(db_obj->db) {
-            errcode = sqlite3_close(db_obj->db);
-            if (errcode != SQLITE_OK) {
-			    php_sqlite3_error(db_obj, "Unable to close database: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
-                RETURN_FALSE;
-		    }
-        }
+			errcode = sqlite3_close(db_obj->db);
+			if (errcode != SQLITE_OK) {
+				php_sqlite3_error(db_obj, "Unable to close database: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
+				RETURN_FALSE;
+			}
+		}
 		db_obj->initialised = 0;
 	}
 
@@ -1416,7 +1416,7 @@ PHP_METHOD(SQLite3Stmt, close)
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
 	if(stmt_obj->db_obj) {
-        	zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
+		zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
 	}
 
 	RETURN_TRUE;

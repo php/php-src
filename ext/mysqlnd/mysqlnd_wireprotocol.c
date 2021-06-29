@@ -417,7 +417,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		 /* backtrack one byte, the 0x0 at the end of the scramble in 5.1 and previous */
 		p--;
 
-    	/* Additional 16 bits for server capabilities */
+		/* Additional 16 bits for server capabilities */
 		DBG_INF_FMT("additional 5.5+ caps=%u\n", (uint32_t) uint2korr(pad_start));
 		packet->server_capabilities |= ((uint32_t) uint2korr(pad_start)) << 16;
 		/* And a length of the server scramble in one byte */

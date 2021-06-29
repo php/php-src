@@ -2168,11 +2168,11 @@ int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 	int					 t;
 #endif
 
-    retsock->bsd_socket = socket;
+	retsock->bsd_socket = socket;
 
-    /* determine family */
+	/* determine family */
 #ifdef SO_DOMAIN
-    if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
+	if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
 		retsock->type = type;
 	} else
 #endif
@@ -2183,18 +2183,18 @@ int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 		return 0;
 	}
 
-    /* determine blocking mode */
+	/* determine blocking mode */
 #ifndef PHP_WIN32
-    t = fcntl(socket, F_GETFL);
-    if (t == -1) {
+	t = fcntl(socket, F_GETFL);
+	if (t == -1) {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain blocking state", errno);
 		return 0;
-    } else {
-    	retsock->blocking = !(t & O_NONBLOCK);
-    }
+	} else {
+		retsock->blocking = !(t & O_NONBLOCK);
+	}
 #endif
 
-    return 1;
+	return 1;
 }
 
 /* {{{ Imports a stream that encapsulates a socket into a socket extension resource. */
@@ -2585,7 +2585,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 
 #ifdef PHP_WIN32
 
- /* {{{ Exports the network socket information suitable to be used in another process and returns the info id. */
+/* {{{ Exports the network socket information suitable to be used in another process and returns the info id. */
 PHP_FUNCTION(socket_wsaprotocol_info_export)
 {
 	WSAPROTOCOL_INFO wi;

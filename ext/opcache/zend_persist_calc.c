@@ -193,7 +193,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				&& !zend_shared_alloc_get_xlat_entry(&op_array->function_name)) {
 			zend_shared_alloc_register_xlat_entry(&op_array->function_name, old_name);
 		}
-    }
+	}
 
 	if (op_array->scope) {
 		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {

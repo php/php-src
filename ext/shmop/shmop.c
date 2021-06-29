@@ -66,7 +66,7 @@ typedef struct php_shmop
 	int shmatflg;
 	char *addr;
 	zend_long size;
-  zend_object std;
+	zend_object std;
 } php_shmop;
 
 zend_class_entry *shmop_ce;

@@ -1100,7 +1100,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 	 phpdbg_writeln("Libedit    no");
 # endif
 #else
-     phpdbg_writeln("Readline   unavailable");
+	phpdbg_writeln("Readline   unavailable");
 #endif
 
 	phpdbg_writeln("Exec       %s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");

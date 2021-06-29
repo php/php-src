@@ -61,10 +61,10 @@ PHP_METHOD(DOMDocumentFragment, __construct)
  needed for hack in appendXML due to libxml bug - no need to share this function */
 static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 {
-    xmlAttrPtr prop;
+	xmlAttrPtr prop;
 	xmlNodePtr cur;
 
-    if (tree) {
+	if (tree) {
 		if(tree->type == XML_ELEMENT_NODE) {
 			prop = tree->properties;
 			while (prop != NULL) {
@@ -87,7 +87,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 			}
 		}
 		tree->doc = doc;
-    }
+	}
 }
 /* }}} */
 

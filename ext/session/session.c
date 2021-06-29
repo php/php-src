@@ -1367,9 +1367,9 @@ static int php_session_send_cookie(void) /* {{{ */
 	}
 
 	if (PS(cookie_samesite)[0]) {
-    	smart_str_appends(&ncookie, COOKIE_SAMESITE);
-    	smart_str_appends(&ncookie, PS(cookie_samesite));
-    }
+		smart_str_appends(&ncookie, COOKIE_SAMESITE);
+		smart_str_appends(&ncookie, PS(cookie_samesite));
+	}
 
 	smart_str_0(&ncookie);
 
@@ -2327,7 +2327,7 @@ PHP_FUNCTION(session_create_id)
 				/* Detect collision and retry */
 				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == SUCCESS) {
 					zend_string_release_ex(new_id, 0);
-                    new_id = NULL;
+					new_id = NULL;
 					continue;
 				}
 				break;

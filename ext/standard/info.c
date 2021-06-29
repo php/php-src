@@ -776,7 +776,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -865,7 +865,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			} else {
 				descr = estrdup("disabled");
 			}
-            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			php_info_print_table_row(2, "Zend Multibyte Support", descr);
 			efree(descr);
 		}
 
@@ -962,7 +962,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
-        tsrm_env_unlock();
+		tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 

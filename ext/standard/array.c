@@ -1543,7 +1543,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
- 		}
+		}
 	}
 
 	RETURN_FALSE;

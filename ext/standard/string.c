@@ -1471,8 +1471,8 @@ PHP_FUNCTION(strtolower)
 static bool _is_basename_start(const char *start, const char *pos)
 {
 	if (pos - start >= 1
-     && *(pos-1) != '/'
-     && *(pos-1) != '\\') {
+	    && *(pos-1) != '/'
+	    && *(pos-1) != '\\') {
 		if (pos - start == 1) {
 			return 1;
 		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
@@ -5313,7 +5313,7 @@ PHP_FUNCTION(count_chars)
 					add_index_long(return_value, inx, chars[inx]);
 				}
 				break;
-  			case 2:
+			case 2:
 				if (chars[inx] == 0) {
 					add_index_long(return_value, inx, chars[inx]);
 				}
@@ -5323,7 +5323,7 @@ PHP_FUNCTION(count_chars)
 					retstr[retlen++] = inx;
 				}
 				break;
-  			case 4:
+			case 4:
 				if (chars[inx] == 0) {
 					retstr[retlen++] = inx;
 				}

@@ -1045,15 +1045,15 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 	if (!recursive) {
 		php_stream_printf(stream, "MKD %s\r\n", ZSTR_VAL(resource->path));
 		result = GET_FTP_RESULT(stream);
-    } else {
-        /* we look for directory separator from the end of string, thus hopefully reducing our work load */
-        char *p, *e, *buf;
+	} else {
+		/* we look for directory separator from the end of string, thus hopefully reducing our work load */
+		char *p, *e, *buf;
 
-        buf = estrndup(ZSTR_VAL(resource->path), ZSTR_LEN(resource->path));
-        e = buf + ZSTR_LEN(resource->path);
+		buf = estrndup(ZSTR_VAL(resource->path), ZSTR_LEN(resource->path));
+		e = buf + ZSTR_LEN(resource->path);
 
-        /* find a top level directory we need to create */
-        while ((p = strrchr(buf, '/'))) {
+		/* find a top level directory we need to create */
+		while ((p = strrchr(buf, '/'))) {
 			*p = '\0';
 			php_stream_printf(stream, "CWD %s\r\n", strlen(buf) ? buf : "/");
 			result = GET_FTP_RESULT(stream);
@@ -1088,7 +1088,7 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 		}
 
 		efree(buf);
-    }
+	}
 
 	php_url_free(resource);
 	php_stream_close(stream);

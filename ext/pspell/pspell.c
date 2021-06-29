@@ -55,7 +55,7 @@ static zend_class_entry *php_pspell_config_ce = NULL;
 static zend_object_handlers php_pspell_config_handlers;
 
 zend_module_entry pspell_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"pspell",
 	ext_functions,
 	PHP_MINIT(pspell),
@@ -615,7 +615,7 @@ PHP_FUNCTION(pspell_config_create)
 
 	pspell_config_replace(config, "language-tag", language);
 
- 	if (spelling_len) {
+	if (spelling_len) {
 		pspell_config_replace(config, "spelling", spelling);
 	}
 

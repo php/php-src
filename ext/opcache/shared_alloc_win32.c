@@ -54,14 +54,14 @@ static void zend_win_error_message(int type, char *msg, int err)
 	ev_msgs[0] = msg;
 	ev_msgs[1] = buf;
 	ReportEvent(h,				  // event log handle
-            EVENTLOG_ERROR_TYPE,  // event type
-            0,                    // category zero
-            err,				  // event identifier
-            NULL,                 // no user security identifier
-            2,                    // one substitution string
-            0,                    // no data
-            ev_msgs,              // pointer to string array
-            NULL);                // pointer to data
+	        EVENTLOG_ERROR_TYPE,  // event type
+	        0,                    // category zero
+	        err,				  // event identifier
+	        NULL,                 // no user security identifier
+	        2,                    // one substitution string
+	        0,                    // no data
+	        ev_msgs,              // pointer to string array
+	        NULL);                // pointer to data
 	DeregisterEventSource(h);
 
 	zend_accel_error(type, "%s", msg);

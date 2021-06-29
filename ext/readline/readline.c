@@ -82,7 +82,7 @@ PHP_MINIT_FUNCTION(readline)
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
-   	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
+	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
 PHP_MSHUTDOWN_FUNCTION(readline)
@@ -323,7 +323,7 @@ PHP_FUNCTION(readline_list_history)
 	}
 
 #elif defined(HAVE_LIBEDIT) /* libedit */
-    {
+	{
 		HISTORY_STATE *hs;
 		int i;
 
@@ -338,7 +338,7 @@ PHP_FUNCTION(readline_list_history)
 			}
 		}
 		free(hs);
-    }
+	}
 
 #else /* readline */
 	history = history_list();

@@ -80,7 +80,7 @@ static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **s
 
 	if (spoolbuf) *(*spoolbuf)++ = c;
 
-  	return c;
+	return c;
 }
 /* }}} */
 
@@ -108,7 +108,7 @@ static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 /* {{{ php_iptc_read_remaining */
 static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf)
 {
-  	while (php_iptc_get1(fp, spool, spoolbuf) != EOF) continue;
+	while (php_iptc_get1(fp, spool, spoolbuf) != EOF) continue;
 
 	return M_EOI;
 }
@@ -120,9 +120,9 @@ static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 	unsigned int  length;
 	int c1, c2;
 
-    if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
 
-    if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
 
 	length = (((unsigned char) c1) << 8) + ((unsigned char) c2);
 
@@ -138,30 +138,30 @@ static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 /* {{{ php_iptc_next_marker */
 static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf)
 {
-    int c;
+	int c;
 
-    /* skip unimportant stuff */
+	/* skip unimportant stuff */
 
-    c = php_iptc_get1(fp, spool, spoolbuf);
+	c = php_iptc_get1(fp, spool, spoolbuf);
 
 	if (c == EOF) return M_EOI;
 
-    while (c != 0xff) {
-        if ((c = php_iptc_get1(fp, spool, spoolbuf)) == EOF)
-            return M_EOI; /* we hit EOF */
-    }
+	while (c != 0xff) {
+		if ((c = php_iptc_get1(fp, spool, spoolbuf)) == EOF)
+			return M_EOI; /* we hit EOF */
+	}
 
-    /* get marker byte, swallowing possible padding */
-    do {
-        c = php_iptc_get1(fp, 0, 0);
+	/* get marker byte, swallowing possible padding */
+	do {
+		c = php_iptc_get1(fp, 0, 0);
 		if (c == EOF)
-            return M_EOI;       /* we hit EOF */
+			return M_EOI;       /* we hit EOF */
 		else
 		if (c == 0xff)
 			php_iptc_put1(fp, spool, (unsigned char)c, spoolbuf);
-    } while (c == 0xff);
+	} while (c == 0xff);
 
-    return (unsigned int) c;
+	return (unsigned int) c;
 }
 /* }}} */
 

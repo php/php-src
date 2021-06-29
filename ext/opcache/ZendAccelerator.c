@@ -214,7 +214,7 @@ static inline zend_string* accel_getcwd(void)
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason)
 {
 	if ((((double) ZSMMG(wasted_shared_memory)) / ZCG(accel_directives).memory_consumption) >= ZCG(accel_directives).max_wasted_percentage) {
- 		zend_accel_schedule_restart(reason);
+		zend_accel_schedule_restart(reason);
 	}
 }
 
@@ -936,7 +936,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 		SystemTimeToFileTime (&st, &utc_base_ft);
 		utc_base = (((unsigned __int64)utc_base_ft.dwHighDateTime) << 32) + utc_base_ft.dwLowDateTime;
-    }
+	}
 
 	if (file_handle->opened_path && GetFileAttributesEx(file_handle->opened_path->val, GetFileExInfoStandard, &fdata) != 0) {
 		unsigned __int64 ftime;
@@ -1145,16 +1145,16 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	ZSTR_LEN(&ZCG(key)) = 0;
 
 	/* CWD and include_path don't matter for absolute file names and streams */
-    if (IS_ABSOLUTE_PATH(path, path_length)) {
+	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		/* pass */
-    } else if (UNEXPECTED(is_stream_path(path))) {
+	} else if (UNEXPECTED(is_stream_path(path))) {
 		if (!is_cacheable_stream_path(path)) {
 			return NULL;
 		}
 		/* pass */
-    } else if (UNEXPECTED(!ZCG(accel_directives).use_cwd)) {
+	} else if (UNEXPECTED(!ZCG(accel_directives).use_cwd)) {
 		/* pass */
-    } else {
+	} else {
 		const char *include_path = NULL, *cwd = NULL;
 		int include_path_len = 0, cwd_len = 0;
 		zend_string *parent_script = NULL;
@@ -1703,9 +1703,9 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	accel_time_t timestamp = 0;
 	uint32_t orig_compiler_options = 0;
 
-    /* Try to open file */
-    if (file_handle->type == ZEND_HANDLE_FILENAME) {
-        if (accelerator_orig_zend_stream_open_function(file_handle) != SUCCESS) {
+	/* Try to open file */
+	if (file_handle->type == ZEND_HANDLE_FILENAME) {
+		if (accelerator_orig_zend_stream_open_function(file_handle) != SUCCESS) {
 			*op_array_p = NULL;
 			if (!EG(exception)) {
 				if (type == ZEND_REQUIRE) {
@@ -1715,8 +1715,8 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 				}
 			}
 			return NULL;
-    	}
-    }
+		}
+	}
 
 	/* check blacklist right after ensuring that file was opened */
 	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
@@ -1824,8 +1824,8 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
 
-    /* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
-       will have to ping the used auto global variables before execution */
+	/* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
+	   will have to ping the used auto global variables before execution */
 	if (PG(auto_globals_jit)) {
 		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals();
 	}
@@ -1924,26 +1924,25 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 
 int check_persistent_script_access(zend_persistent_script *persistent_script)
 {
-    char *phar_path, *ptr;
-    int ret;
-    if ((ZSTR_LEN(persistent_script->script.filename)<sizeof("phar://.phar")) ||
-         memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", sizeof("phar://")-1)) {
+	char *phar_path, *ptr;
+	int ret;
+	if ((ZSTR_LEN(persistent_script->script.filename)<sizeof("phar://.phar")) ||
+	    memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", sizeof("phar://")-1)) {
 
-        return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
+		return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
 
-    } else {
-        /* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
-        phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+sizeof("phar://")-1);
-        if ((ptr = strstr(phar_path, ".phar/")) != NULL)
-        {
-            *(ptr+sizeof(".phar/")-2) = 0; /* strip path inside .phar file */
-        }
-        ret = access(phar_path, R_OK) != 0;
-        efree(phar_path);
-        return ret;
-    }
+	} else {
+		/* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
+		phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+sizeof("phar://")-1);
+		if ((ptr = strstr(phar_path, ".phar/")) != NULL)
+		{
+			*(ptr+sizeof(".phar/")-2) = 0; /* strip path inside .phar file */
+		}
+		ret = access(phar_path, R_OK) != 0;
+		efree(phar_path);
+		return ret;
+	}
 }
-
 
 /* zend_compile() replacement */
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
@@ -2160,9 +2159,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		SHM_UNPROTECT();
 
 		/* Try and cache the script and assume that it is returned from_shared_memory.
-         * If it isn't compile_and_cache_file() changes the flag to 0
-         */
-       	from_shared_memory = 0;
+		 * If it isn't compile_and_cache_file() changes the flag to 0
+		 */
+		from_shared_memory = 0;
 		if (persistent_script) {
 			persistent_script = cache_script_in_shared_memory(persistent_script, key, &from_shared_memory);
 		}
@@ -2228,8 +2227,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-    /* Fetch jit auto globals used in the script before execution */
-    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
+	/* Fetch jit auto globals used in the script before execution */
+	if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
 		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 	}
 
@@ -2324,7 +2323,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_LINKED);
 
 	if (!ZCG(accelerator_enabled) ||
-        (ZCSG(restart_in_progress) && accel_restart_is_active())) {
+	    (ZCSG(restart_in_progress) && accel_restart_is_active())) {
 		return NULL;
 	}
 
@@ -2781,8 +2780,8 @@ static int accelerator_remove_cb(zend_extension *element1, zend_extension *eleme
 		element1->op_array_handler = NULL;
 
 #ifdef __DEBUG_MESSAGES__
-        fprintf(stderr, ACCELERATOR_PRODUCT_NAME " is disabled: %s\n", (zps_failure_reason ? zps_failure_reason : "unknown error"));
-        fflush(stderr);
+		fprintf(stderr, ACCELERATOR_PRODUCT_NAME " is disabled: %s\n", (zps_failure_reason ? zps_failure_reason : "unknown error"));
+		fflush(stderr);
 #endif
 	}
 
@@ -3457,7 +3456,7 @@ static void preload_shutdown(void)
 	zval *zv;
 
 #if 0
-    if (EG(zend_constants)) {
+	if (EG(zend_constants)) {
 		ZEND_HASH_REVERSE_FOREACH_VAL(EG(zend_constants), zv) {
 			zend_constant *c = Z_PTR_P(zv);
 			if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
@@ -3467,7 +3466,7 @@ static void preload_shutdown(void)
 	}
 #endif
 
-    if (EG(function_table)) {
+	if (EG(function_table)) {
 		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
 			zend_function *func = Z_PTR_P(zv);
 			if (func->type == ZEND_INTERNAL_FUNCTION) {
@@ -5094,7 +5093,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */
 #ifdef HAVE_JIT
-    accel_deactivate,                       /* per-script deactivation */
+	accel_deactivate,                       /* per-script deactivation */
 #else
 	NULL,									/* per-script deactivation */
 #endif

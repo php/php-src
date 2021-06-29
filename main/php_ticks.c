@@ -41,9 +41,9 @@ void php_shutdown_ticks(void)
 
 static int php_compare_tick_functions(void *elem1, void *elem2)
 {
-  struct st_tick_function *e1 = (struct st_tick_function *)elem1;
-  struct st_tick_function *e2 = (struct st_tick_function *)elem2;
-  return e1->func == e2->func && e1->arg == e2->arg;
+	struct st_tick_function *e1 = (struct st_tick_function *)elem1;
+	struct st_tick_function *e2 = (struct st_tick_function *)elem2;
+	return e1->func == e2->func && e1->arg == e2->arg;
 }
 
 PHPAPI void php_add_tick_function(void (*func)(int, void*), void * arg)

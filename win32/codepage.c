@@ -634,10 +634,10 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 	zend_string *subject;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-    	Z_PARAM_STR_OR_LONG(string_in_codepage, int_in_codepage)
-    	Z_PARAM_STR_OR_LONG(string_out_codepage, int_out_codepage)
-    	Z_PARAM_STR(subject)
-    ZEND_PARSE_PARAMETERS_END();
+		Z_PARAM_STR_OR_LONG(string_in_codepage, int_in_codepage)
+		Z_PARAM_STR_OR_LONG(string_out_codepage, int_out_codepage)
+		Z_PARAM_STR(subject)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
 		zend_argument_value_error(1, "is too long");

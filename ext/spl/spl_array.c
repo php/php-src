@@ -1155,7 +1155,7 @@ PHP_METHOD(ArrayObject, __construct)
 
 	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
 }
- /* }}} */
+/* }}} */
 
 /* {{{ Constructs a new array iterator from an array or object. */
 PHP_METHOD(ArrayIterator, __construct)
@@ -1179,7 +1179,7 @@ PHP_METHOD(ArrayIterator, __construct)
 
 	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
 }
- /* }}} */
+/* }}} */
 
 /* {{{ Set the class used in getIterator. */
 PHP_METHOD(ArrayObject, setIteratorClass)
@@ -1702,7 +1702,7 @@ PHP_METHOD(ArrayObject, unserialize)
 		if (*p != ';') {
 			goto outexcept;
 		}
-        ++p;
+		++p;
 	}
 
 	/* members */

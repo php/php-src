@@ -140,11 +140,11 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 {
-    if (!FG(wrapper_errors)) {
-        return NULL;
-    } else {
-        return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-    }
+	if (!FG(wrapper_errors)) {
+		return NULL;
+	} else {
+		return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
+	}
 }
 
 /* {{{ wrapper error reporting */
@@ -1121,8 +1121,8 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 {
 	ssize_t didwrite = 0;
 
- 	/* if we have a seekable stream we need to ensure that data is written at the
- 	 * current stream->position. This means invalidating the read buffer and then
+	/* if we have a seekable stream we need to ensure that data is written at the
+	 * current stream->position. This means invalidating the read buffer and then
 	 * performing a low-level seek */
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && stream->readpos != stream->writepos) {
 		stream->readpos = stream->writepos = 0;
@@ -1691,11 +1691,11 @@ void php_shutdown_stream_hashes(void)
 		FG(stream_filters) = NULL;
 	}
 
-    if (FG(wrapper_errors)) {
+	if (FG(wrapper_errors)) {
 		zend_hash_destroy(FG(wrapper_errors));
 		efree(FG(wrapper_errors));
 		FG(wrapper_errors) = NULL;
-    }
+	}
 }
 
 int php_init_stream_wrappers(int module_number)
@@ -1913,7 +1913,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	}
 
 	if (wrapper && wrapper->is_url &&
-        (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
+	    (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
 	    (!PG(allow_url_fopen) ||
 	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
 	       PG(in_user_include)) && !PG(allow_url_include)))) {

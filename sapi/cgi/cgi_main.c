@@ -155,7 +155,7 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
- 	{'T', 1, "timing"},
+	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -1083,7 +1083,7 @@ static int is_valid_path(const char *path)
 #define CGI_GETENV(name) \
 	((has_env) ? \
 		FCGI_GETENV(request, name) : \
-    	getenv(name))
+		getenv(name))
 
 #define CGI_PUTENV(name, value) \
 	((has_env) ? \
@@ -1228,8 +1228,8 @@ static void init_request_info(fcgi_request *request)
 			}
 
 			if (env_path_translated != NULL && env_redirect_url != NULL &&
- 			    env_path_translated != script_path_translated &&
- 			    strcmp(env_path_translated, script_path_translated) != 0) {
+			    env_path_translated != script_path_translated &&
+			    strcmp(env_path_translated, script_path_translated) != 0) {
 				/*
 				 * pretty much apache specific.  If we have a redirect_url
 				 * then our script_filename and script_name point to the

@@ -72,15 +72,15 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 			char chars[127];
 			int8_t chars_len = sizeof(chars);
 			UErrorCode uerror = U_ZERO_ERROR;
-            if(!objval->src) {
-                php_converter_throw_failure(objval, U_INVALID_STATE_ERROR, "Source Converter has not been initialized yet");
+			if(!objval->src) {
+				php_converter_throw_failure(objval, U_INVALID_STATE_ERROR, "Source Converter has not been initialized yet");
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
 				ZEND_TRY_ASSIGN_REF_LONG(error, U_INVALID_STATE_ERROR);
-                RETVAL_STRINGL(chars, chars_len);
-                return;
-            }
+				RETVAL_STRINGL(chars, chars_len);
+				return;
+			}
 
 			/* Yes, this is fairly wasteful at first glance,
 			 * but considering that the alternative is to store
@@ -197,7 +197,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		}
 		default:
 			php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR,
-                                                    "toUCallback() specified illegal type for substitution character");
+			                            "toUCallback() specified illegal type for substitution character");
 	}
 }
 /* }}} */
@@ -345,7 +345,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	}
 
 	ucnv_setToUCallBack(cnv, (UConverterToUCallback)php_converter_to_u_callback, (const void*)objval,
-                                 NULL, NULL, &error);
+	                    NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_setToUCallBack", error);
 		ret = 0;
@@ -353,7 +353,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 
 	error = U_ZERO_ERROR;
 	ucnv_setFromUCallBack(cnv, (UConverterFromUCallback)php_converter_from_u_callback, (const void*)objval,
-                                    NULL, NULL, &error);
+	                      NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_setFromUCallBack", error);
 		ret = 0;
@@ -364,9 +364,8 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 
 /* {{{ php_converter_set_encoding */
 static bool php_converter_set_encoding(php_converter_object *objval,
-                                            UConverter **pcnv,
-                                            const char *enc, size_t enc_len
-                                           ) {
+                                       UConverter **pcnv,
+                                       const char *enc, size_t enc_len) {
 	UErrorCode error = U_ZERO_ERROR;
 	UConverter *cnv = ucnv_open(enc, &error);
 
@@ -461,8 +460,8 @@ PHP_METHOD(UConverter, getSourceEncoding) {
 
 /* {{{ */
 PHP_METHOD(UConverter, getDestinationEncoding) {
-        php_converter_object *objval = CONV_GET(ZEND_THIS);
-        php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_converter_object *objval = CONV_GET(ZEND_THIS);
+	php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -701,7 +700,7 @@ PHP_METHOD(UConverter, reasonText) {
 
 /* {{{ */
 PHP_METHOD(UConverter, convert) {
-        php_converter_object *objval = CONV_GET(ZEND_THIS);
+	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *str;
 	size_t str_len;
 	zend_string *ret;

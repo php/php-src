@@ -394,7 +394,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	for(i=0; i<num_headers; i++) {
 		header = curl_pushheader_bynum(push_headers, i);
 		add_next_index_string(&headers, header);
-  	}
+	}
 
 	zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL);
 

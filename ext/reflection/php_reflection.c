@@ -3048,10 +3048,10 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 		zend_string *name = ZEND_TYPE_NAME(param->type);
 
 		if (ZSTR_HAS_CE_CACHE(name) && ZSTR_GET_CE_CACHE(name)) {
- 			append_type(return_value,
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CE(ZSTR_GET_CE_CACHE(name), 0, 0));
- 		} else {
- 			append_type(return_value,
+		} else {
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
 		}
 	} else if (ZEND_TYPE_HAS_CE(param->type)) {
@@ -6133,9 +6133,9 @@ ZEND_METHOD(ReflectionExtension, info)
 ZEND_METHOD(ReflectionExtension, isPersistent)
 {
 	reflection_object *intern;
-    zend_module_entry *module;
+	zend_module_entry *module;
 
-    if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(module);

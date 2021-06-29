@@ -1955,7 +1955,7 @@ static int php_register_extensions_bc(zend_module_entry *ptr, int count)
 	while (count--) {
 		if (zend_register_internal_module(ptr++) == NULL) {
 			return FAILURE;
- 		}
+		}
 	}
 	return SUCCESS;
 }
@@ -2342,7 +2342,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Don't leak errors from startup into the per-request phase. */
 	clear_last_error();
 	shutdown_memory_manager(1, 0);
- 	virtual_cwd_activate();
+	virtual_cwd_activate();
 
 	zend_interned_strings_switch_storage(1);
 
@@ -2482,13 +2482,13 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
 		}
 
- 		/* Only lookup the real file path and add it to the included_files list if already opened
+		/* Only lookup the real file path and add it to the included_files list if already opened
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
 		if (primary_file->filename &&
 			!zend_string_equals_literal(primary_file->filename, "Standard input code") &&
- 			primary_file->opened_path == NULL &&
- 			primary_file->type != ZEND_HANDLE_FILENAME
+			primary_file->opened_path == NULL &&
+			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			if (expand_filepath(ZSTR_VAL(primary_file->filename), realfile)) {
 				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);

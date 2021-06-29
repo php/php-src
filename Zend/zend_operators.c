@@ -3156,8 +3156,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num)
 	}
 }
 
-ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-    return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
+ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */
+{
+	return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
 }
 /* }}} */
 

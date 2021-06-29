@@ -89,7 +89,7 @@ ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object) /* {{{ *
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous) /* {{{ */
 {
-    zval *previous, *ancestor, *ex;
+	zval *previous, *ancestor, *ex;
 	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 

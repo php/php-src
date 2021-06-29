@@ -258,7 +258,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 
 	if (statement->has_descr && statement->columns) {
 		zend_hash_apply(statement->columns, php_oci_cleanup_pre_fetch);
-    }
+	}
 
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));

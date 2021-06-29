@@ -206,7 +206,7 @@ PHP_FUNCTION(posix_kill)
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
-  	}
+	}
 
 	RETURN_TRUE;
 }
