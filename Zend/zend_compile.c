@@ -3674,30 +3674,12 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 }
 /* }}} */
 
-void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
 
-	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
-		bool may_have_extra_named_args;
-		uint32_t arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
-
-		zend_do_extended_fcall_begin();
-
-		opline = &CG(active_op_array)->opcodes[opnum_init];
-		opline->extended_value = arg_count;
-
-		if (opline->opcode == ZEND_INIT_FCALL) {
-			opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
-		}
-
-		opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
-		if (may_have_extra_named_args) {
-			opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
-		}
-		zend_do_extended_fcall_end();
-	} else {
+	if (args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		opline = &CG(active_op_array)->opcodes[opnum_init];
 		opline->extended_value = 0;
 
@@ -3709,8 +3691,28 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
-		opline = zend_emit_op(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		zend_emit_op(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		return true;
 	}
+
+	bool may_have_extra_named_args;
+	uint32_t arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
+
+	zend_do_extended_fcall_begin();
+
+	opline = &CG(active_op_array)->opcodes[opnum_init];
+	opline->extended_value = arg_count;
+
+	if (opline->opcode == ZEND_INIT_FCALL) {
+		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
+	}
+
+	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
+	if (may_have_extra_named_args) {
+		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
+	}
+	zend_do_extended_fcall_end();
+	return false;
 }
 /* }}} */
 
@@ -4499,6 +4501,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	zend_op *opline;
 	zend_function *fbc = NULL;
 	bool nullsafe = ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL;
+	uint32_t short_circuiting_checkpoint = zend_short_circuiting_checkpoint();
 
 	if (is_this_fetch(obj_ast)) {
 		if (this_guaranteed_exists()) {
@@ -4547,7 +4550,12 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 	}
 
-	zend_compile_call_common(result, args_ast, fbc);
+	if (zend_compile_call_common(result, args_ast, fbc)) {
+		if (short_circuiting_checkpoint != zend_short_circuiting_checkpoint()) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot combine nullsafe operator with Closure creation");
+		}
+	}
 }
 /* }}} */
 
