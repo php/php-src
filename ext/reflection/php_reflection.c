@@ -6412,8 +6412,8 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 
 	GET_REFLECTION_OBJECT_PTR(attr);
 
-	smart_str_append_printf(&str, "Attribute [ ");
-	smart_str_append_printf(&str, "%s", ZSTR_VAL(attr->data->name));
+	smart_str_appends(&str, "Attribute [ ");
+	smart_str_append(&str, "%s", attr->data->name);
 	smart_str_append_printf(&str, " ]");
 
 	if (attr->data->argc > 0) {
