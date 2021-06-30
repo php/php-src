@@ -595,6 +595,17 @@ static inheritance_status zend_perform_covariant_type_check(
 	bool have_unresolved = false;
 
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+		if (proto_type_mask & MAY_BE_OBJECT) {
+			/* TODO We can't just return success here, because the class must be loaded. */
+		}
+		if (proto_type_mask & MAY_BE_ITERABLE) {
+			/* TODO */
+		}
+		if (proto_type_mask) {
+			/* An intersection type cannot be a subtype of other builtin types. */
+			return INHERITANCE_ERROR;
+		}
+
 		/* U_1&...&U_n < V_1&...&V_m if forall V_j. exists U_i. U_i < V_j.
 		 * U_1&...&U_n < V_1|...|V_m if exists V_j. exists U_i. U_i < V_j.
 		 * As such, we need to iterate over proto_type (V_j) first and use a different
@@ -612,8 +623,6 @@ static inheritance_status zend_perform_covariant_type_check(
 				proto_ce = ZEND_TYPE_CE(*single_type);
 				proto_class_name = proto_ce->name;
 			} else {
-				/* standard type */
-				ZEND_UNREACHABLE();
 				continue;
 			}
 
