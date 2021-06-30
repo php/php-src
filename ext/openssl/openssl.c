@@ -3524,10 +3524,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-	if (serial < LONG_MIN || serial > LONG_MAX) {
-		php_error_docref(NULL, E_WARNING, "serial out of range, will be truncated");
-	}
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
+#if defined(PHP_WIN32) && defined(ZEND_ENABLE_ZVAL_LONG64)
+	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
+#else
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+#endif
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 

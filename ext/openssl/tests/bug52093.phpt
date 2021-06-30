@@ -1,7 +1,10 @@
 --TEST--
-Bug #52093 (openssl_csr_sign silently truncates $serial)
+Bug #52093 (openssl_csr_sign truncates $serial)
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php
+if (!extension_loaded("openssl")) print "skip";
+if (PHP_INT_SIZE !== 8) die("skip this test is for 64bit platforms only");
+?>
 --FILE--
 <?php
 $dn = array(
@@ -14,8 +17,8 @@ $dn = array(
 
 $privkey = openssl_pkey_new();
 $csr = openssl_csr_new($dn, $privkey);
-var_dump(openssl_csr_sign($csr, null, $privkey, 365, [], PHP_INT_MAX));
+$cert = openssl_csr_sign($csr, null, $privkey, 365, [], PHP_INT_MAX);
+var_dump(openssl_x509_parse($cert)['serialNumber']);
 ?>
---EXPECTF--
-Warning: openssl_csr_sign(): serial out of range, will be truncated in %s on line %d
-resource(6) of type (OpenSSL X.509)
+--EXPECT--
+string(19) "9223372036854775807"
