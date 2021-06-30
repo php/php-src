@@ -231,11 +231,13 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
-/* We need to split the & token in two because otherwise Bison somehow lands
- * in a shift/reduce conflict for parameter intersection types */
+/* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
+ * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
+ * or shift to continue parsing an intersection type. */
 %token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
-// TODO Fix parse error message
-%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "'&''"
+/* Bison warns on duplicate token literals, so use a different dummy value here.
+ * It will be fixed up by zend_yytnamerr() later. */
+%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
 %token T_BAD_CHARACTER   "invalid character"
 
 /* Token used to force a parse error from the lexer */
@@ -1566,6 +1568,14 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				yystpcpy(yyres, "token \"\\\"");
 			}
 			return sizeof("token \"\\\"")-1;
+		}
+
+		/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
+		if (strcmp(toktype, "\"amp\"") == 0) {
+			if (yyres) {
+				yystpcpy(yyres, "token \"&\"");
+			}
+			return sizeof("token \"&\"")-1;
 		}
 
 		/* Avoid unreadable """ */
