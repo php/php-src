@@ -1743,7 +1743,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 		if (GCC_GLOBAL_REGS) {
 			|	add r4, SPAD // stack alignment
 			|	EXT_JMP handler, r0
-		} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+		} else {
 			|	mov FCARG1a, FP
 			|	EXT_CALL handler, r0
 			|	mov FP, aword T2 // restore FP
@@ -1754,12 +1754,6 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 			|	mov r0, 1 // ZEND_VM_ENTER
 			|1:
 			|	ret
-		} else {
-			|	mov FCARG1a, FP
-			|	mov FP, aword T2 // restore FP
-			|	mov RX, aword T3 // restore IP
-			|	add r4, NR_SPAD // stack alignment
-			|	EXT_JMP handler, r0
 		}
 	}
 
