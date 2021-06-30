@@ -9,6 +9,7 @@ include "skipif.inc";
 
 $code = <<<'EOF'
 var_dump(strncmp($_SERVER['REQUEST_URI'], "/overflow.php", strlen("/overflow.php")));
+var_dump(strlen($_SERVER['QUERY_STRING']));
 EOF;
 
 include "php_cli_server.inc";
@@ -41,3 +42,4 @@ X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 
 int(0)
+int(16413)
