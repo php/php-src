@@ -461,7 +461,7 @@ static inheritance_status zend_perform_covariant_class_type_check(
 
 static inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, zend_type fe_type,
-		zend_class_entry *proto_scope, zend_type proto_type, bool tentative) /* {{{ */
+		zend_class_entry *proto_scope, zend_type proto_type)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
@@ -502,7 +502,7 @@ static inheritance_status zend_perform_covariant_type_check(
 
 		if (added_types) {
 			/* Otherwise adding new types is illegal */
-			return tentative ? INHERITANCE_WARNING : INHERITANCE_ERROR;
+			return INHERITANCE_ERROR;
 		}
 	}
 
@@ -528,7 +528,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		}
 
 		if (status == INHERITANCE_ERROR) {
-			return tentative ? INHERITANCE_WARNING : INHERITANCE_ERROR;
+			return INHERITANCE_ERROR;
 		}
 		if (status != INHERITANCE_SUCCESS) {
 			all_success = 0;
@@ -557,7 +557,6 @@ static inheritance_status zend_perform_covariant_type_check(
 	} ZEND_TYPE_FOREACH_END();
 	return INHERITANCE_UNRESOLVED;
 }
-/* }}} */
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
 		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
@@ -576,7 +575,7 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 	/* Contravariant type check is performed as a covariant type check with swapped
 	 * argument order. */
 	return zend_perform_covariant_type_check(
-		proto_scope, proto_arg_info->type, fe_scope, fe_arg_info->type, 0);
+		proto_scope, proto_arg_info->type, fe_scope, fe_arg_info->type);
 }
 /* }}} */
 
@@ -678,15 +677,14 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_perform_covariant_type_check(
-			fe_scope, fe->common.arg_info[-1].type,
-			proto_scope, proto->common.arg_info[-1].type, ZEND_ARG_TYPE_IS_TENTATIVE(&proto->common.arg_info[-1]));
+			fe_scope, fe->common.arg_info[-1].type, proto_scope, proto->common.arg_info[-1].type);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
-			if (UNEXPECTED(local_status == INHERITANCE_ERROR || local_status == INHERITANCE_WARNING)) {
-				return local_status;
+			if (local_status == INHERITANCE_ERROR
+					&& ZEND_ARG_TYPE_IS_TENTATIVE(&proto->common.arg_info[-1])) {
+				local_status = INHERITANCE_WARNING;
 			}
-			ZEND_ASSERT(local_status == INHERITANCE_UNRESOLVED);
-			status = INHERITANCE_UNRESOLVED;
+			return local_status;
 		}
 	}
 
@@ -1077,9 +1075,9 @@ inheritance_status property_types_compatible(
 
 	/* Perform a covariant type check in both directions to determined invariance. */
 	inheritance_status status1 = zend_perform_covariant_type_check(
-		child_info->ce, child_info->type, parent_info->ce, parent_info->type, 0);
+		child_info->ce, child_info->type, parent_info->ce, parent_info->type);
 	inheritance_status status2 = zend_perform_covariant_type_check(
-		parent_info->ce, parent_info->type, child_info->ce, child_info->type, 0);
+		parent_info->ce, parent_info->type, child_info->ce, child_info->type);
 	if (status1 == INHERITANCE_SUCCESS && status2 == INHERITANCE_SUCCESS) {
 		return INHERITANCE_SUCCESS;
 	}
