@@ -403,9 +403,11 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	zend_hash_add_ptr(ht, class_name, ce);
 }
 
-static inheritance_status zend_perform_intersection_covariant_class_type_check(
-		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce,
+/* Check whether any type in fe_type is a subtype of the proto class.
+ * This is independently of whether fe_type is a union or intersection. */
+static inheritance_status zend_is_any_type_subtype_of_class(
 		zend_class_entry *fe_scope, zend_type fe_type,
+		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce,
 		bool register_unresolved)
 {
 	bool have_unresolved = false;
@@ -451,7 +453,7 @@ static inheritance_status zend_perform_intersection_covariant_class_type_check(
 }
 
 /* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
-static inheritance_status zend_perform_covariant_class_type_check(
+static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type) {
 	bool have_unresolved = 0;
@@ -589,15 +591,16 @@ static inheritance_status zend_perform_covariant_type_check(
 	}
 
 	zend_type *single_type;
-	bool all_success = true;
+	inheritance_status early_exit_status;
+	bool have_unresolved = false;
 
-	/* If the child type is an intersection type then we need to loop over
-	 * the parents first. For intersection types, loop over the parent types first
-	 * as the child can add types, however none of them can be a supertype of
-	 * a parent type. */
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
-		bool parent_union_has_unresolved = false;
-		/* First try to check whether we can succeed without resolving anything */
+		/* U_1&...&U_n < V_1&...&V_m if forall V_j. exists U_i. U_i < V_j.
+		 * U_1&...&U_n < V_1|...|V_m if exists V_j. exists U_i. U_i < V_j.
+		 * As such, we need to iterate over proto_type (V_j) first and use a different
+		 * quantifier depending on whether fe_type is a union or an intersection. */
+		early_exit_status =
+			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
 		ZEND_TYPE_FOREACH(proto_type, single_type) {
 			inheritance_status status;
 			zend_string *proto_class_name;
@@ -614,39 +617,22 @@ static inheritance_status zend_perform_covariant_type_check(
 				continue;
 			}
 
-			status = zend_perform_intersection_covariant_class_type_check(
-				proto_scope, proto_class_name, proto_ce,
-				fe_scope, fe_type, /* register_unresolved */ false);
-
-			/* If the parent is a union type then the intersection type must only be
-			 * a subtype of one of them */
-			if (ZEND_TYPE_IS_UNION(proto_type)) {
-				if (status == INHERITANCE_SUCCESS) {
-					return INHERITANCE_SUCCESS;
-				}
-				if (status == INHERITANCE_UNRESOLVED) {
-					all_success = false;
-				}
-			} else {
-				if (status == INHERITANCE_ERROR) {
-					return INHERITANCE_ERROR;
-				}
-				if (status != INHERITANCE_SUCCESS) {
-					ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
-					parent_union_has_unresolved = true;
-					all_success = false;
-				}
+			status = zend_is_any_type_subtype_of_class(
+				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce,
+				/* register_unresolved */ false);
+			if (status == early_exit_status) {
+				return status;
+			}
+			if (status == INHERITANCE_UNRESOLVED) {
+				have_unresolved = true;
 			}
 		} ZEND_TYPE_FOREACH_END();
-
-		/* Reaching this means either the child intersection type is a valid/unresolved
-		 * subtype of a parent single/intersection type, either it is an INvalid subtype
-		 * when the parent is a union or it is unresolved, we check which case this is */
-		if (ZEND_TYPE_IS_UNION(proto_type) && !parent_union_has_unresolved) {
-			return INHERITANCE_ERROR;
-		}
 	} else {
-		/* First try to check whether we can succeed without resolving anything */
+		/* U_1|...|U_n < V_1|...|V_m if forall U_i. exists V_j. U_i < V_j.
+		 * U_1|...|U_n < V_1&...&V_m if forall U_i. forall V_j. U_i < V_j.
+		 * We need to iterate over fe_type (U_i) first and the logic is independent of
+		 * whether proto_type is a union or intersection (only the inner check differs). */
+		early_exit_status = INHERITANCE_ERROR;
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
 			inheritance_status status;
 			zend_string *fe_class_name;
@@ -661,21 +647,20 @@ static inheritance_status zend_perform_covariant_type_check(
 				continue;
 			}
 
-			status = zend_perform_covariant_class_type_check(fe_scope,
-				fe_class_name, fe_ce, proto_scope, proto_type,
+			status = zend_is_class_subtype_of_type(
+				fe_scope, fe_class_name, fe_ce, proto_scope, proto_type,
 				/* register_unresolved */ false);
-			if (status == INHERITANCE_ERROR) {
-				return INHERITANCE_ERROR;
+			if (status == early_exit_status) {
+				return early_exit_status;
 			}
-			if (status != INHERITANCE_SUCCESS) {
-				all_success = 0;
+			if (status == INHERITANCE_UNRESOLVED) {
+				have_unresolved = true;
 			}
 		} ZEND_TYPE_FOREACH_END();
 	}
 
-	/* All individual checks succeeded, overall success */
-	if (all_success) {
-		return INHERITANCE_SUCCESS;
+	if (!have_unresolved) {
+		return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
 
 	register_unresolved_classes(fe_scope, fe_type);
