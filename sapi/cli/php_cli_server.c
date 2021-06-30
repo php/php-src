@@ -1629,7 +1629,7 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 	{
 		char *vpath;
 		size_t vpath_len;
-		if (client->request.vpath != NULL) {
+		if (UNEXPECTED(client->request.vpath != NULL)) {
 			return 1;
 		}
 		normalize_vpath(&vpath, &vpath_len, at, length, 1);
@@ -1642,7 +1642,7 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 static int php_cli_server_client_read_request_on_query_string(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	if (client->request.query_string == NULL) {
+	if (EXPECTED(client->request.query_string == NULL)) {
 		client->request.query_string = pestrndup(at, length, 1);
 		client->request.query_string_len = length;
 	} else {
@@ -1658,7 +1658,7 @@ static int php_cli_server_client_read_request_on_query_string(php_http_parser *p
 static int php_cli_server_client_read_request_on_url(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	if (client->request.request_uri == NULL) {
+	if (EXPECTED(client->request.request_uri == NULL)) {
 		client->request.request_method = parser->method;
 		client->request.request_uri = pestrndup(at, length, 1);
 		client->request.request_uri_len = length;
