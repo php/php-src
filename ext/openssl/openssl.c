@@ -3524,7 +3524,9 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-
+	if (serial < LONG_MIN || serial > LONG_MAX) {
+		php_error_docref(NULL, E_WARNING, "serial out of range, will be truncated");
+	}
 	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
