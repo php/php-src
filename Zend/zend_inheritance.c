@@ -403,13 +403,13 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	zend_hash_add_ptr(ht, class_name, ce);
 }
 
-/* Check whether any type in fe_type is a subtype of the proto class.
- * This is independently of whether fe_type is a union or intersection. */
-static inheritance_status zend_is_any_type_subtype_of_class(
+/* Check whether any type in the fe_type intersection type is a subtype of the proto class. */
+static inheritance_status zend_is_intersection_subtype_of_class(
 		zend_class_entry *fe_scope, zend_type fe_type,
 		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce,
 		bool register_unresolved)
 {
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(fe_type));
 	bool have_unresolved = false;
 	zend_type *single_type;
 
@@ -617,7 +617,7 @@ static inheritance_status zend_perform_covariant_type_check(
 				continue;
 			}
 
-			status = zend_is_any_type_subtype_of_class(
+			status = zend_is_intersection_subtype_of_class(
 				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce,
 				/* register_unresolved */ false);
 			if (status == early_exit_status) {
