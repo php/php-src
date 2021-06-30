@@ -1646,6 +1646,7 @@ static int php_cli_server_client_read_request_on_query_string(php_http_parser *p
 		client->request.query_string = pestrndup(at, length, 1);
 		client->request.query_string_len = length;
 	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
 		client->request.query_string = perealloc(client->request.query_string, client->request.query_string_len + length + 1, 1);
 		memcpy(client->request.query_string + client->request.query_string_len, at, length);
 		client->request.query_string_len += length;
@@ -1663,6 +1664,7 @@ static int php_cli_server_client_read_request_on_url(php_http_parser *parser, co
 		client->request.request_uri_len = length;
 	} else {
 		ZEND_ASSERT(client->request.request_method == parser->method);
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
 		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
 		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
 		client->request.request_uri_len += length;
