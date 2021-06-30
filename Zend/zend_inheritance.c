@@ -643,7 +643,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		 * subtype of a parent single/intersection type, either it is an INvalid subtype
 		 * when the parent is a union or it is unresolved, we check which case this is */
 		if (ZEND_TYPE_IS_UNION(proto_type) && !parent_union_has_unresolved) {
-			return tentative ? INHERITANCE_WARNING : INHERITANCE_ERROR;
+			return INHERITANCE_ERROR;
 		}
 	} else {
 		/* First try to check whether we can succeed without resolving anything */
