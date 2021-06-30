@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #80728 (PHP built-in web server resets timeout when it can kill
     the process). (Calvin Buckley)
+  . Fixed bug #73630 (Built-in Weberver - overwrite $_SERVER['request_uri']).
+    (cmb)
 
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
