@@ -450,6 +450,7 @@ static inheritance_status zend_perform_intersection_covariant_class_type_check(
 	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_ERROR;
 }
 
+/* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
 static inheritance_status zend_perform_covariant_class_type_check(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type) {
@@ -481,7 +482,8 @@ static inheritance_status zend_perform_covariant_class_type_check(
 	zend_type *single_type;
 
 	/* Traverse the list of parent types and check if the current child (FE)
-	 * class is the subtype of at least one of them */
+	 * class is the subtype of at least one of them (union) or all of them (intersection). */
+	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(proto_type);
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		zend_class_entry *proto_ce;
 		zend_string *proto_class_name = NULL;
@@ -489,7 +491,10 @@ static inheritance_status zend_perform_covariant_class_type_check(
 			proto_class_name =
 				resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
 			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
-				return INHERITANCE_SUCCESS;
+				if (!is_intersection) {
+					return INHERITANCE_SUCCESS;
+				}
+				continue;
 			}
 
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
@@ -499,69 +504,31 @@ static inheritance_status zend_perform_covariant_class_type_check(
 			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type */
+			ZEND_ASSERT(!is_intersection);
 			continue;
 		}
 
 		if (!fe_ce || !proto_ce) {
 			have_unresolved = 1;
-		} else if (unlinked_instanceof(fe_ce, proto_ce)) {
+			continue;
+		}
+		if (unlinked_instanceof(fe_ce, proto_ce)) {
 			track_class_dependency(fe_ce, fe_class_name);
 			track_class_dependency(proto_ce, proto_class_name);
-			return INHERITANCE_SUCCESS;
+			if (!is_intersection) {
+				return INHERITANCE_SUCCESS;
+			}
+		} else {
+			if (is_intersection) {
+				return INHERITANCE_ERROR;
+			}
 		}
 	} ZEND_TYPE_FOREACH_END();
 
-	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_ERROR;
-}
-
-/* checks that the child type (being unique) is a subtype of each member of the parent intersection */
-static inheritance_status zend_is_single_type_subtype_intersection(
-	zend_class_entry *fe_scope, zend_string *fe_class_name,
-	zend_class_entry *fe_ce, zend_class_entry *proto_scope,
-	zend_type proto_type, bool register_unresolved
-) {
-	bool have_unresolved = false;
-	zend_type *single_type;
-	zend_type_list *parent_intersection_types;
-
-	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(proto_type));
-
-	parent_intersection_types = ZEND_TYPE_LIST(proto_type);
-
-	ZEND_TYPE_LIST_FOREACH(parent_intersection_types, single_type) {
-		zend_class_entry *proto_ce;
-		zend_string *proto_class_name = NULL;
-		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			proto_class_name =
-				resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
-			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
-				continue;
-			}
-
-			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name, register_unresolved);
-			proto_ce = lookup_class(proto_scope, proto_class_name, register_unresolved);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name, register_unresolved);
-			proto_ce = ZEND_TYPE_CE(*single_type);
-		} else {
-			/* standard type cannot be part a subtype of an intersection type */
-			ZEND_UNREACHABLE();
-			continue;
-		}
-
-		if (!fe_ce || !proto_ce) {
-			have_unresolved = true;
-			continue;
-		}
-		if (!unlinked_instanceof(fe_ce, proto_ce)) {
-			return INHERITANCE_ERROR;
-		}
-
-		track_class_dependency(fe_ce, fe_class_name);
-		track_class_dependency(proto_ce, proto_class_name);
-	} ZEND_TYPE_LIST_FOREACH_END();
-
-	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_SUCCESS;
+	if (have_unresolved) {
+		return INHERITANCE_UNRESOLVED;
+	}
+	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
 static void register_unresolved_classes(zend_class_entry *scope, zend_type type) {
@@ -694,16 +661,9 @@ static inheritance_status zend_perform_covariant_type_check(
 				continue;
 			}
 
-			if (UNEXPECTED(ZEND_TYPE_IS_INTERSECTION(proto_type))) {
-				status = zend_is_single_type_subtype_intersection(fe_scope,
-						fe_class_name, fe_ce, proto_scope, proto_type,
-						/* register_unresolved */ false);
-			} else {
-				status = zend_perform_covariant_class_type_check(fe_scope,
-					fe_class_name, fe_ce, proto_scope, proto_type,
-					/* register_unresolved */ false);
-			}
-
+			status = zend_perform_covariant_class_type_check(fe_scope,
+				fe_class_name, fe_ce, proto_scope, proto_type,
+				/* register_unresolved */ false);
 			if (status == INHERITANCE_ERROR) {
 				return INHERITANCE_ERROR;
 			}
