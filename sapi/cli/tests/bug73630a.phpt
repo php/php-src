@@ -21,5 +21,5 @@ $path = "/" . str_repeat("x", 16400) . "//example.com";
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS . "$path"));
 ?>
 --EXPECTF--
-Warning: file_get_contents(http://%s//example.com): failed to open stream: HTTP request failed! in %s on line %d
+Warning: file_get_contents(http://%s//example.com): Failed to open stream: HTTP request failed! in %s on line %d
 bool(false)
