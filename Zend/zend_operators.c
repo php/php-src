@@ -1297,15 +1297,16 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-/* Returns SUCCESS/FAILURE/TYPES_NOT_HANDLED */
+/* Returns SUCCESS/TYPES_NOT_HANDLED/DIV_BY_ZERO */
 #define TYPES_NOT_HANDLED 1
+#define DIV_BY_ZERO 2
 static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 			/* Prevent overflow error/crash */
 			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
@@ -1319,31 +1320,25 @@ static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else {
 		return TYPES_NOT_HANDLED;
 	}
-division_by_0:
-	if (result != op1) {
-		ZVAL_UNDEF(result);
-	}
-	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-	return FAILURE;
 }
 /* }}} */
 
@@ -1353,8 +1348,12 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	ZVAL_DEREF(op2);
 
 	int retval = div_function_base(result, op1, op2);
-	if (retval != TYPES_NOT_HANDLED) {
-		return retval;
+	if (EXPECTED(retval == SUCCESS)) {
+		return SUCCESS;
+	}
+
+	if (UNEXPECTED(retval == DIV_BY_ZERO)) {
+		goto div_by_zero;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
@@ -1374,8 +1373,17 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	}
 
 	retval = div_function_base(result, &op1_copy, &op2_copy);
-	ZEND_ASSERT(retval != TYPES_NOT_HANDLED && "Types should be handled");
-	return retval;
+	if (retval == SUCCESS) {
+		return SUCCESS;
+	}
+
+div_by_zero:
+	ZEND_ASSERT(retval == DIV_BY_ZERO && "TYPES_NOT_HANDLED should not occur here");
+	if (result != op1) {
+		ZVAL_UNDEF(result);
+	}
+	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+	return FAILURE;
 }
 /* }}} */
 
