@@ -1500,6 +1500,9 @@ try_again:
 			if (!zend_is_long_compatible(Z_DVAL_P(op1), lval)) {
 				zend_incompatible_double_to_long_error(Z_DVAL_P(op1));
 				if (EG(exception)) {
+					if (result != op1) {
+						ZVAL_UNDEF(result);
+					}
 					return FAILURE;
 				}
 			}
