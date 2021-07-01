@@ -3323,17 +3323,13 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		opline->extended_value &= ~ZEND_FETCH_REF;
 		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
-		if (result != NULL) {
-			*result = target_node;
-		}
+		*result = target_node;
 	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
 		opline->extended_value &= ~ZEND_FETCH_REF;
 		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
-		if (result != NULL) {
-			*result = target_node;
-		}
+		*result = target_node;
 	} else {
 		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
 		opline->extended_value = flags;
@@ -3343,9 +3339,11 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
+	znode dummy_node;
 	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN_REF, var_ast,
 		zend_ast_create_znode(value_node));
-	zend_compile_expr(NULL, assign_ast);
+	zend_compile_expr(&dummy_node, assign_ast);
+	zend_do_free(&dummy_node);
 }
 /* }}} */
 
