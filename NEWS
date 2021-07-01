@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81101 (PCRE2 10.37 shows unexpected result). (Anatol)
 
+- Reflection:
+  . Fixed bug #81208 (Segmentation fault while create newInstance from
+    attribute). (Nikita)
+
 17 Jun 2021, PHP 8.0.8
 
 - Core:
