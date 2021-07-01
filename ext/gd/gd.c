@@ -34,6 +34,7 @@
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
+#include "php_memory_streams.h"
 #include "zend_object_handlers.h"
 #include "zend_interfaces.h"
 
@@ -1496,9 +1497,9 @@ static int _php_image_type (zend_string *data)
 		return PHP_GDIMG_TYPE_WEBP;
 	}
 
-	php_gd_image_reader reader = { .stream = NULL, .data = data, .data_pos = 0 };
+	php_stream *image_stream = php_stream_memory_open(TEMP_STREAM_READONLY, data);
 
-  if (php_is_image_avif(&reader)) {
+  if (php_is_image_avif(image_stream)) {
   	return PHP_GDIMG_TYPE_AVIF;
 	}
 

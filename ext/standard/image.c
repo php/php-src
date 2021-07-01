@@ -1178,29 +1178,6 @@ static uint32_t php_ntohl(uint32_t val) {
 }
 /* }}} */
 
-/* {{{ php_image_read_bytes 
- * A generalized function that reads bytes from an image_reader struct.
- * It can read either from a php_stream or a zend_string.
- */
-static size_t php_image_read_bytes(php_gd_image_reader * reader, char * buf, size_t count) {
-  if (reader->stream) {
-    return php_stream_read(reader->stream, buf, count);
-  }
-  
-  if (reader->data) {
-    if (ZSTR_LEN(reader->data) < reader->data_pos + count) {
-      return 0;
-    }
-
-    memcpy(buf, ZSTR_VAL(reader->data) + reader->data_pos, count);
-    reader->data_pos += count;
-    return count;
-  }
-
-  return 0;
-}
-/* }}} */
-
 /* {{{ php_is_image_avif
  * detect whether an image is of type AVIF
  * 
@@ -1216,18 +1193,18 @@ static size_t php_image_read_bytes(php_gd_image_reader * reader, char * buf, siz
  * Otherwise, well, it's not.
  * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
  */
-int php_is_image_avif(php_gd_image_reader * reader) {
+int php_is_image_avif(php_stream * stream) {
 	uint32_t header_size_reversed, header_size, i;
 	char box_type[4], brand[4];
 
-	if (php_image_read_bytes(reader, (char *) &header_size_reversed, 4) != 4) {
+	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
 		return 0;
 	}
 
 	header_size = php_ntohl(header_size_reversed);
 
 	/* If the box type isn't "ftyp", it can't be an AVIF image. */
-	if (php_image_read_bytes(reader, box_type, 4) != 4) {
+	if (php_stream_read(stream, box_type, 4) != 4) {
 		return 0;
 	}
 
@@ -1236,7 +1213,7 @@ int php_is_image_avif(php_gd_image_reader * reader) {
 	}
 	
 	/* If the major brand is "avif" or "avis", it's an AVIF image. */
-	if (php_image_read_bytes(reader, brand, 4) != 4) {
+	if (php_stream_read(stream, brand, 4) != 4) {
 		return 0;
 	}
 
@@ -1245,7 +1222,7 @@ int php_is_image_avif(php_gd_image_reader * reader) {
 	}
 
 	/* Skip the next four bytes, which are the "minor version". */
-	if (php_image_read_bytes(reader, brand, 4) != 4) {
+	if (php_stream_read(stream, brand, 4) != 4) {
 		return 0;
 	}
 
@@ -1253,7 +1230,7 @@ int php_is_image_avif(php_gd_image_reader * reader) {
 	   Note we've already read four groups of four bytes. */
 
 	for (i = 16; i < header_size; i += 4) {
-		if (php_image_read_bytes(reader, brand, 4) != 4) {
+		if (php_stream_read(stream, brand, 4) != 4) {
 			return 0;
 		}
 
@@ -1471,9 +1448,7 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 		return IMAGE_FILETYPE_JP2;
 	}
 
-	php_gd_image_reader reader = { .stream = stream, .data = NULL, .data_pos = 0 };
-
-	if (!php_stream_rewind(stream) && php_is_image_avif(&reader)) {
+	if (!php_stream_rewind(stream) && php_is_image_avif(stream)) {
 		return IMAGE_FILETYPE_AVIF;
 	}
 
