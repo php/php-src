@@ -8368,10 +8368,10 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
 						"strlen(): Passing null to parameter #1 ($string) of type string is deprecated");
+					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					if (UNEXPECTED(EG(exception))) {
 						HANDLE_EXCEPTION();
 					}
-					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					break;
 				}
 
