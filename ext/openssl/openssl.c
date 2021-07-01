@@ -3524,7 +3524,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-#if defined(PHP_WIN32) && defined(ZEND_ENABLE_ZVAL_LONG64)
+#if PHP_OPENSSL_API_VERSION >= 0x10100
 	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
 #else
 	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
