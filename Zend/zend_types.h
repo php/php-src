@@ -710,6 +710,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
 #define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
+#define IS_STR_LITERAL              (1<<10)
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
@@ -756,6 +757,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_IS_RECURSIVE_P(zv)        Z_IS_RECURSIVE(*(zv))
 #define Z_PROTECT_RECURSION_P(zv)   Z_PROTECT_RECURSION(*(zv))
 #define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
+
+#define Z_IS_LITERAL(zval)          (Z_TYPE(zval) == IS_STRING && ZSTR_IS_LITERAL(Z_STR(zval)))
+#define Z_IS_LITERAL_P(zv)          Z_IS_LITERAL(*(zv))
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)

@@ -397,6 +397,19 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
+/* {{{ Returns true if value is literal */
+PHP_FUNCTION(is_literal)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(Z_IS_LITERAL_P(value));
+}
+/* }}} */
+
 /* {{{ Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {

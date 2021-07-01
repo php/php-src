@@ -1144,6 +1144,8 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	zend_string  *str;
 	char         *cptr;
 	size_t        len = 0;
+	bool          literal = !ZSTR_LEN(glue) || ZSTR_IS_LITERAL(glue);
+
 	struct {
 		zend_string *str;
 		zend_long    lval;
@@ -1169,6 +1171,9 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 0;
 			ptr++;
+			if (UNEXPECTED(literal && !ZSTR_IS_LITERAL(Z_STR_P(tmp)))) {
+				literal = false;
+			}
 		} else if (UNEXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 			zend_long val = Z_LVAL_P(tmp);
 
@@ -1182,11 +1187,13 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 				val /= 10;
 				len++;
 			}
+			literal = false;
 		} else {
 			ptr->str = zval_get_string_func(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 1;
 			ptr++;
+			literal = false;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1219,6 +1226,9 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	}
 
 	free_alloca(strings, use_heap);
+	if (UNEXPECTED(literal)) {
+		ZSTR_SET_LITERAL(&str);
+	}
 	RETURN_NEW_STR(str);
 }
 /* }}} */
@@ -5241,6 +5251,10 @@ PHP_FUNCTION(str_repeat)
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
 	result_len = ZSTR_LEN(input_str) * mult;
+	
+	if (ZSTR_IS_LITERAL(input_str)) {
+		ZSTR_SET_LITERAL_FAST(result);
+	}
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (ZSTR_LEN(input_str) == 1) {
@@ -5518,6 +5532,7 @@ PHP_FUNCTION(str_pad)
 {
 	/* Input arguments */
 	zend_string *input;				/* Input string */
+	zend_string *pad_string = NULL;
 	zend_long pad_length;			/* Length to pad to */
 
 	/* Helper variables */
@@ -5527,12 +5542,13 @@ PHP_FUNCTION(str_pad)
 	zend_long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	size_t	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
+	bool literal = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(input)
 		Z_PARAM_LONG(pad_length)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(pad_str, pad_str_len)
+		Z_PARAM_STR(pad_string)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -5540,6 +5556,15 @@ PHP_FUNCTION(str_pad)
 	   we simply copy the input and return. */
 	if (pad_length < 0  || (size_t)pad_length <= ZSTR_LEN(input)) {
 		RETURN_STR_COPY(input);
+	}
+
+	if (pad_string) {
+		pad_str_len = ZSTR_LEN(pad_string);
+		pad_str = ZSTR_VAL(pad_string);
+
+		literal = ZSTR_IS_LITERAL(pad_string) && ZSTR_IS_LITERAL(input);
+	} else {
+		literal = ZSTR_IS_LITERAL(input);
 	}
 
 	if (pad_str_len == 0) {
@@ -5587,6 +5612,10 @@ PHP_FUNCTION(str_pad)
 		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+
+	if (UNEXPECTED(literal)) {
+		ZSTR_SET_LITERAL_FAST(result);
+	}
 
 	RETURN_NEW_STR(result);
 }
