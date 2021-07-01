@@ -6623,7 +6623,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
 			zval val;
 			if (FAILURE == zend_get_attribute_value(&val, attr->data, i, attr->scope)) {
-				attribute_ctor_cleanup(&obj, args, i, named_params);
+				attribute_ctor_cleanup(&obj, args, argc, named_params);
 				RETURN_THROWS();
 			}
 			if (attr->data->args[i].name) {
