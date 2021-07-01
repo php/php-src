@@ -31,7 +31,6 @@ PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_RandomNumberGenerator;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_MT19937;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
-PHPAPI zend_class_entry *random_ce_RandomInterface;
 PHPAPI zend_class_entry *random_ce_Random;
 
 static zend_object_handlers random_rng_xorshift128plus_object_handlers;
@@ -76,7 +75,7 @@ PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
 static uint32_t range32(php_random *random, uint32_t umax) {
 	uint32_t result, limit;
 
-	result = php_random_next(random, 0);
+	result = (uint32_t) php_random_next(random, 0);
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT32_MAX)) {
@@ -824,11 +823,8 @@ PHP_MINIT_FUNCTION(php_random)
 	random_rng_secure_object_handlers.free_obj = php_random_rng_common_free_obj;
 	random_rng_secure_object_handlers.clone_obj = NULL;
 
-	/* RandomInterface */
-	random_ce_RandomInterface = register_class_RandomInterface();
-
 	/* Random */
-	random_ce_Random = register_class_Random(random_ce_RandomInterface);
+	random_ce_Random = register_class_Random();
 	random_ce_Random->create_object = php_random_new;
 	memcpy(&random_php_random_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	random_php_random_object_handlers.offset = XtOffsetOf(php_random, std);

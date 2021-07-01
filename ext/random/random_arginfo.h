@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 78d56e3abb9b806a3994c6a34386d218f89f6f15 */
+ * Stub hash: 220e616b0cf229c79042e6fe78f11a04e285b75e */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -29,25 +29,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_NumberGenerator_Secure___construct, 
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_NumberGenerator_Secure_generate arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
-
-#define arginfo_class_RandomInterface_nextInt arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RandomInterface_getInt, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RandomInterface_getBytes, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RandomInterface_shuffleArray, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RandomInterface_shuffleString, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, Random\\NumberGenerator\\RandomNumberGenerator, 1, "null")
@@ -131,16 +112,6 @@ static const zend_function_entry class_Random_NumberGenerator_Secure_methods[] =
 };
 
 
-static const zend_function_entry class_RandomInterface_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(RandomInterface, nextInt, arginfo_class_RandomInterface_nextInt, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(RandomInterface, getInt, arginfo_class_RandomInterface_getInt, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(RandomInterface, getBytes, arginfo_class_RandomInterface_getBytes, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(RandomInterface, shuffleArray, arginfo_class_RandomInterface_shuffleArray, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(RandomInterface, shuffleString, arginfo_class_RandomInterface_shuffleString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_FE_END
-};
-
-
 static const zend_function_entry class_Random_methods[] = {
 	ZEND_ME(Random, __construct, arginfo_class_Random___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random, getNumberGenerator, arginfo_class_Random_getNumberGenerator, ZEND_ACC_PUBLIC)
@@ -197,24 +168,13 @@ static zend_class_entry *register_class_Random_NumberGenerator_Secure(zend_class
 	return class_entry;
 }
 
-static zend_class_entry *register_class_RandomInterface(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "RandomInterface", class_RandomInterface_methods);
-	class_entry = zend_register_internal_interface(&ce);
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class_Random(zend_class_entry *class_entry_RandomInterface)
+static zend_class_entry *register_class_Random(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Random", class_Random_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
-	zend_class_implements(class_entry, 1, class_entry_RandomInterface);
 
 	zval property_rng_default_value;
 	ZVAL_UNDEF(&property_rng_default_value);

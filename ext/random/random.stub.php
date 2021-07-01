@@ -71,25 +71,7 @@ namespace Random\NumberGenerator
 
 namespace
 {
-    interface RandomInterface
-    {
-        /** @tentative-return-type */
-        public function nextInt(): int;
-
-        /** @tentative-return-type */
-        public function getInt(int $min, int $max): int;
-        
-        /** @tentative-return-type */
-        public function getBytes(int $length): string;
-        
-        /** @tentative-return-type */
-        public function shuffleArray(array $array): array;
-        
-        /** @tentative-return-type */
-        public function shuffleString(string $string): string;
-    }
-
-    final class Random implements RandomInterface
+    final class Random
     {
         // FIXME: stub generator (gen_stub.php) does not supported.
         // private Random\NumberGenerator\RandomNumberGenerator $rng;
