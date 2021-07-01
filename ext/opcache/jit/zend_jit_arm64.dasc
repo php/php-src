@@ -2965,7 +2965,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 
 	end = (uint8_t*)code;
 	p = end + size;
-	while (p >= end) {
+	while (p > end) {
 		uint32_t *ins_ptr;
 		uint32_t ins;
 
