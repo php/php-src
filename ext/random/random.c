@@ -75,7 +75,7 @@ PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
 static uint32_t range32(php_random *random, uint32_t umax) {
 	uint32_t result, limit;
 
-	result = (uint32_t) php_random_next(random, 0);
+	result = php_random_next(random, 0);
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT32_MAX)) {
@@ -623,7 +623,7 @@ PHP_METHOD(Random, __construct)
 			NULL
 		);
 		/* No needed self-refcount */
-		rng->gc.refcount--;
+		GC_DELREF(rng);
 	}
 
 	ZVAL_OBJ(&zrng, rng);
@@ -721,7 +721,7 @@ PHP_METHOD(Random, getBytes)
 
 PHP_METHOD(Random, shuffleArray)
 {
-	php_random *random =  Z_RANDOM_P(ZEND_THIS);;
+	php_random *random =  Z_RANDOM_P(ZEND_THIS);
 	zval *array;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -741,10 +741,12 @@ PHP_METHOD(Random, shuffleString)
 		Z_PARAM_STR(string)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_STRINGL(ZSTR_VAL(string), ZSTR_LEN(string));
-	if (Z_STRLEN_P(return_value) > 1) {
-		php_random_string_shuffle(random, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value));
+	if (ZSTR_LEN(string) < 2) {
+		RETURN_STR_COPY(string);
 	}
+
+	RETVAL_STRINGL(ZSTR_VAL(string), ZSTR_LEN(string));
+	php_random_string_shuffle(random, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value));
 }
 
 PHP_METHOD(Random, __serialize)

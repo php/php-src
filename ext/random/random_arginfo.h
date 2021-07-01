@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 220e616b0cf229c79042e6fe78f11a04e285b75e */
+ * Stub hash: 84c3fc62aa9df6d63f363911c9eceeaeeacafa49 */
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___construct, 0, 0, 0)
@@ -10,10 +10,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_NumberGenerator_XorShift128Plus_generate arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___serialize, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___unserialize, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -37,8 +37,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Random_getNumberGenerator, 0, 0, Random\\NumberGenerator\\RandomNumberGenerator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_nextInt, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Random_nextInt arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_getInt, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
@@ -57,12 +56,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_shuffleString, 0, 1
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random___serialize, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Random___serialize arginfo_class_Random_NumberGenerator_XorShift128Plus___serialize
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random___unserialize, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Random___unserialize arginfo_class_Random_NumberGenerator_XorShift128Plus___unserialize
 
 
 ZEND_METHOD(Random_NumberGenerator_XorShift128Plus, __construct);
