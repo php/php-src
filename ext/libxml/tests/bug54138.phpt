@@ -1,8 +1,9 @@
 --TEST--
 Bug #54138 - DOMNode::getLineNo() doesn't return line number higher than 65535
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-if (!extension_loaded('dom')) die('skip dom extension not available');
 if (!defined('LIBXML_BIGLINES')) die('skip this test requires LIBXML_BIGLINES');
 ?>
 --FILE--

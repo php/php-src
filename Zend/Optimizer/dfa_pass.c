@@ -291,34 +291,41 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 }
 
 static inline bool can_elide_return_type_check(
-		zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
-	zend_arg_info *info = &op_array->arg_info[-1];
+		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
+	zend_arg_info *arg_info = &op_array->arg_info[-1];
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
-	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
-
-	/* TODO: It would be better to rewrite this without using def_info,
-	 * which may not be an exact representation of the type. */
-	if (use_info->type & MAY_BE_REF) {
+	uint32_t use_type = use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF);
+	if (use_type & MAY_BE_REF) {
 		return 0;
 	}
 
-	/* A type is possible that is not in the allowed types */
-	if ((use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~(def_info->type & MAY_BE_ANY)) {
-		return 0;
+	if (use_type & MAY_BE_UNDEF) {
+		use_type &= ~MAY_BE_UNDEF;
+		use_type |= MAY_BE_NULL;
 	}
 
-	/* These types are not represented exactly */
-	if (ZEND_TYPE_FULL_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE|MAY_BE_STATIC)) {
-		return 0;
+	uint32_t disallowed_types = use_type & ~ZEND_TYPE_PURE_MASK(arg_info->type);
+	if (!disallowed_types) {
+		/* Only contains allowed types. */
+		return true;
 	}
 
-	if (ZEND_TYPE_HAS_CLASS(info->type)) {
-		if (!use_info->ce || !def_info->ce || !safe_instanceof(use_info->ce, def_info->ce)) {
-			return 0;
-		}
+	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+		zend_type *single_type;
+		ZEND_TYPE_FOREACH(arg_info->type, single_type) {
+			if (ZEND_TYPE_HAS_NAME(*single_type)) {
+				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
+				zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
+				zend_string_release(lcname);
+				if (ce && safe_instanceof(use_info->ce, ce)) {
+					/* One of the class union types matched. */
+					return true;
+				}
+			}
+		} ZEND_TYPE_FOREACH_END();
 	}
 
-	return 1;
+	return false;
 }
 
 static bool opline_supports_assign_contraction(
@@ -1235,7 +1242,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && ssa->ops[op_1].op1_def == v
 				 && ssa->ops[op_1].op1_use >= 0
 				 && ssa->ops[op_1].op1_use_chain == -1
-				 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
+				 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
 

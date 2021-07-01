@@ -34,7 +34,7 @@
 
 /* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
 #define FETCH_DOUBLE_OPTION(var_name, option_name) \
-   	var_name = 0; \
+	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
@@ -46,7 +46,7 @@
 
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name) \
-   	var_name = 0; \
+	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
@@ -636,7 +636,9 @@ bad_url:
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->user != NULL && !is_userinfo_valid(url->user)) {
+	if ((url->user != NULL && !is_userinfo_valid(url->user))
+		|| (url->pass != NULL && !is_userinfo_valid(url->pass))
+	) {
 		php_url_free(url);
 		RETURN_VALIDATION_FAILED
 
@@ -768,7 +770,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 	/* check for bundled IPv4 */
 	ipv4 = memchr(str, '.', str_len);
 	if (ipv4) {
- 		while (ipv4 > str && *(ipv4-1) != ':') {
+		while (ipv4 > str && *(ipv4-1) != ':') {
 			ipv4--;
 		}
 

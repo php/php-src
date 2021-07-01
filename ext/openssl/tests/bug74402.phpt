@@ -1,8 +1,9 @@
 --TEST--
 Bug #74402 (segfault on random_bytes, bin3hex, openssl_seal)
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) print "skip";
 if (!in_array('AES256', openssl_get_cipher_methods(true))) print "skip";
 ?>
 --FILE--

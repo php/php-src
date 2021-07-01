@@ -40,7 +40,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   int(7)

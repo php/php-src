@@ -45,6 +45,7 @@ typedef enum {
 
 typedef enum {
 	ZEND_FIBER_TRANSFER_FLAG_ERROR = 1 << 0,
+	ZEND_FIBER_TRANSFER_FLAG_BAILOUT = 1 << 1
 } zend_fiber_transfer_flag;
 
 void zend_register_fiber_ce(void);
@@ -53,30 +54,16 @@ void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
-/* Encapsulates the fiber C stack with extension for debugging tools. */
-typedef struct _zend_fiber_stack {
-	void *pointer;
-	size_t size;
-
-#ifdef HAVE_VALGRIND
-	int valgrind;
-#endif
-
-#ifdef __SANITIZE_ADDRESS__
-	const void *prior_pointer;
-	size_t prior_size;
-#endif
-} zend_fiber_stack;
-
-typedef struct _zend_fiber zend_fiber;
-typedef struct _zend_fiber_context zend_fiber_context;
+typedef struct _zend_fiber_stack zend_fiber_stack;
 
 /* Encapsulates data needed for a context switch. */
 typedef struct _zend_fiber_transfer {
 	/* Fiber that will be switched to / has resumed us. */
 	zend_fiber_context *context;
+
 	/* Value to that should be send to (or was received from) a fiber. */
 	zval value;
+
 	/* Bitmask of flags defined in enum zend_fiber_transfer_flag. */
 	uint8_t flags;
 } zend_fiber_transfer;
@@ -85,43 +72,38 @@ typedef struct _zend_fiber_transfer {
  * and (optional) data before they return. */
 typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 
-/* Defined as a macro to allow anonymous embedding. */
-#define ZEND_FIBER_CONTEXT_FIELDS \
-	/* Handle to fiber state as needed by boost.context */ \
-	void *handle; \
-	/* Pointer that identifies the fiber type. */ \
-	void *kind; \
-	zend_fiber_coroutine function; \
-	zend_fiber_stack stack; \
-	zend_fiber_status status; \
-	zend_uchar flags
-
-/* Standalone context (used primarily as pointer type). */
 struct _zend_fiber_context {
-	ZEND_FIBER_CONTEXT_FIELDS;
-};
+	/* Handle to fiber state as needed by boost.context */
+	void *handle;
 
-/* Zend VM state that needs to be captured / restored during fiber context switch. */
-typedef struct _zend_fiber_vm_state {
-	zend_vm_stack vm_stack;
-	zval *vm_stack_top;
-	zval *vm_stack_end;
-	size_t vm_stack_page_size;
-	zend_execute_data *current_execute_data;
-	int error_reporting;
-	uint32_t jit_trace_num;
-	JMP_BUF *bailout;
-} zend_fiber_vm_state;
+	/* Pointer that identifies the fiber type. */
+	void *kind;
+
+	/* Entrypoint function of the fiber. */
+	zend_fiber_coroutine function;
+
+	/* Assigned C stack. */
+	zend_fiber_stack *stack;
+
+	/* Fiber status. */
+	zend_fiber_status status;
+};
 
 struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
 
-	/* Fiber context fields (embedded to avoid memory allocation). */
-	ZEND_FIBER_CONTEXT_FIELDS;
+	/* Flags are defined in enum zend_fiber_flag. */
+	uint8_t flags;
+
+	/* Native C fiber context. */
+	zend_fiber_context context;
 
 	/* Fiber that resumed us. */
 	zend_fiber_context *caller;
+
+	/* Fiber that suspended us. */
+	zend_fiber_context *previous;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;
@@ -142,42 +124,22 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
 
+ZEND_API void zend_fiber_switch_block(void);
+ZEND_API void zend_fiber_switch_unblock(void);
+ZEND_API bool zend_fiber_switch_blocked(void);
+
 END_EXTERN_C()
 
 static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context *context)
 {
 	ZEND_ASSERT(context->kind == zend_ce_fiber && "Fiber context does not belong to a Zend fiber");
 
-	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, handle));
+	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, context));
 }
 
 static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber *fiber)
 {
-	return (zend_fiber_context *) &fiber->handle;
-}
-
-static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
-{
-	state->vm_stack = EG(vm_stack);
-	state->vm_stack_top = EG(vm_stack_top);
-	state->vm_stack_end = EG(vm_stack_end);
-	state->vm_stack_page_size = EG(vm_stack_page_size);
-	state->current_execute_data = EG(current_execute_data);
-	state->error_reporting = EG(error_reporting);
-	state->jit_trace_num = EG(jit_trace_num);
-	state->bailout = EG(bailout);
-}
-
-static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
-{
-	EG(vm_stack) = state->vm_stack;
-	EG(vm_stack_top) = state->vm_stack_top;
-	EG(vm_stack_end) = state->vm_stack_end;
-	EG(vm_stack_page_size) = state->vm_stack_page_size;
-	EG(current_execute_data) = state->current_execute_data;
-	EG(error_reporting) = state->error_reporting;
-	EG(jit_trace_num) = state->jit_trace_num;
-	EG(bailout) = state->bailout;
+	return &fiber->context;
 }
 
 #endif

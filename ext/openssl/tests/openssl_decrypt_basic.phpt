@@ -1,7 +1,7 @@
 --TEST--
 openssl_decrypt() tests dependent on openssl_encrypt
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $data = "openssl_encrypt() and openssl_decrypt() tests";

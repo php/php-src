@@ -191,9 +191,9 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, z
 
 int zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
 {
-    zend_ulong hash_value;
-    zend_ulong index;
-    zend_accel_hash_entry *entry, *last_entry=NULL;
+	zend_ulong hash_value;
+	zend_ulong index;
+	zend_accel_hash_entry *entry, *last_entry=NULL;
 
 	hash_value = zend_string_hash_val(key);
 #ifndef ZEND_WIN32

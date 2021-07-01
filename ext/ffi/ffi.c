@@ -382,7 +382,7 @@ static ffi_type *zend_ffi_get_type(zend_ffi_type *type) /* {{{ */
 	zend_ffi_type_kind kind = type->kind;
 
 again:
-    switch (kind) {
+	switch (kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			return &ffi_type_float;
 		case ZEND_FFI_TYPE_DOUBLE:
@@ -685,7 +685,7 @@ static zend_always_inline int zend_ffi_zval_to_cdata(void *ptr, zend_ffi_type *t
 	zend_ffi_type_kind kind = type->kind;
 
 again:
-    switch (kind) {
+	switch (kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			dval = zval_get_double(value);
 			*(float*)ptr = dval;
@@ -1948,7 +1948,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 		return NULL;
 	}
 
-    switch (type->kind) {
+	switch (type->kind) {
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
@@ -2444,7 +2444,7 @@ static int zend_ffi_pass_arg(zval *arg, zend_ffi_type *type, ffi_type **pass_typ
 	ZVAL_DEREF(arg);
 
 again:
-    switch (kind) {
+	switch (kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			dval = zval_get_double(arg);
 			*pass_type = &ffi_type_float;
@@ -3160,7 +3160,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	if (fd < 0 || read(fd, code, code_size) != code_size) {
 		if (preload) {
 			zend_error(E_WARNING, "FFI: Failed pre-loading '%s', cannot read_file", filename);
-        } else {
+		} else {
 			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', cannot read_file", filename);
 		}
 		efree(code);
@@ -4594,27 +4594,27 @@ static ZEND_COLD zend_never_inline void zend_bad_array_access(zend_class_entry *
 
 static ZEND_COLD zval *zend_fake_read_dimension(zend_object *obj, zval *offset, int type, zval *rv) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 	return NULL;
 }
 /* }}} */
 
 static ZEND_COLD void zend_fake_write_dimension(zend_object *obj, zval *offset, zval *value) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 }
 /* }}} */
 
 static ZEND_COLD int zend_fake_has_dimension(zend_object *obj, zval *offset, int check_empty) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 	return 0;
 }
 /* }}} */
 
 static ZEND_COLD void zend_fake_unset_dimension(zend_object *obj, zval *offset) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 }
 /* }}} */
 
@@ -4626,28 +4626,28 @@ static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_class_entr
 
 static ZEND_COLD zval *zend_fake_read_property(zend_object *obj, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
-    zend_bad_property_access(obj->ce);
+	zend_bad_property_access(obj->ce);
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
 static ZEND_COLD zval *zend_fake_write_property(zend_object *obj, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
-    return value;
+	zend_bad_array_access(obj->ce);
+	return value;
 }
 /* }}} */
 
 static ZEND_COLD int zend_fake_has_property(zend_object *obj, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 	return 0;
 }
 /* }}} */
 
 static ZEND_COLD void zend_fake_unset_property(zend_object *obj, zend_string *member, void **cache_slot) /* {{{ */
 {
-    zend_bad_array_access(obj->ce);
+	zend_bad_array_access(obj->ce);
 }
 /* }}} */
 

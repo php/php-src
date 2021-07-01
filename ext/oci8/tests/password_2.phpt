@@ -1,8 +1,9 @@
 --TEST--
 oci_password_change() for persistent connections
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(__DIR__."/details.inc");
 if (empty($dbase)) die ("skip requires database connection string be set");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");

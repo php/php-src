@@ -56,7 +56,7 @@
 			zend_string_hash_val(str); \
 			zend_set_str_gc_flags(str); \
 		} \
-    } while (0)
+	} while (0)
 #define zend_accel_memdup_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
@@ -67,7 +67,7 @@
 			zend_string_hash_val(str); \
 			zend_set_str_gc_flags(str); \
 		} \
-    } while (0)
+	} while (0)
 #define zend_accel_store_interned_string(str) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_accel_store_string(str); \
@@ -522,12 +522,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		orig_literals = op_array->literals;
 #if ZEND_USE_ABS_CONST_ADDR
- 		p = zend_shared_memdup_put_free(op_array->literals, sizeof(zval) * op_array->last_literal);
+		p = zend_shared_memdup_put_free(op_array->literals, sizeof(zval) * op_array->last_literal);
 #else
- 		p = zend_shared_memdup_put(op_array->literals, sizeof(zval) * op_array->last_literal);
+		p = zend_shared_memdup_put(op_array->literals, sizeof(zval) * op_array->last_literal);
 #endif
- 		end = p + op_array->last_literal;
- 		op_array->literals = p;
+		end = p + op_array->last_literal;
+		op_array->literals = p;
 		while (p < end) {
 			zend_persist_zval(p);
 			p++;
@@ -774,15 +774,14 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 	}
 	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
 	zend_persist_op_array_ex(op_array, NULL);
-	if ((ce->ce_flags & ZEND_ACC_LINKED)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		}
-	} else {
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+		if (ce->ce_flags & ZEND_ACC_LINKED) {
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+			if (op_array->static_variables) {
+				ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+			}
+		} else {
 			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
@@ -870,6 +869,14 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
+			if ((ce->ce_flags & ZEND_ACC_LINKED)
+			 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+				ZEND_MAP_PTR_NEW(ce->mutable_data);
+			} else {
+				ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+			}
+		} else {
+			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		ce->inheritance_cache = NULL;
 
@@ -902,15 +909,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			for (i = 0; i < ce->default_properties_count; i++) {
 				zend_persist_zval(&ce->default_properties_table[i]);
 			}
-		}
-		if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
-		 && (ce->ce_flags & ZEND_ACC_LINKED)
-		 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-			ZEND_MAP_PTR_NEW(ce->mutable_data);
-		} else if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-			ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
-		} else {
-			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		if (ce->default_static_members_table) {
 			int i;
@@ -1133,7 +1131,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
 				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
 				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
-        	}
+			}
 		}
 	}
 
@@ -1245,13 +1243,13 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 
 	JIT_G(on) = 0;
 #endif
-    zend_hash_persist(class_table);
+	zend_hash_persist(class_table);
 	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		zend_accel_store_interned_string(p->key);
 		Z_CE(p->val) = zend_persist_class_entry(Z_CE(p->val));
 	} ZEND_HASH_FOREACH_END();
-    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
 		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 			ce = Z_PTR(p->val);
 			zend_update_parent_ce(ce);

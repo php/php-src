@@ -58,9 +58,9 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
 	} else {
- 		ce = zend_lookup_class(name);
- 	}
- 	if (ce == NULL) {
+		ce = zend_lookup_class(name);
+	}
+	if (ce == NULL) {
 		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
 		return NULL;
 	}
@@ -735,9 +735,14 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ spl_module_entry */
+static const zend_module_dep spl_deps[] = {
+	ZEND_MOD_REQUIRED("json")
+	ZEND_MOD_END
+};
+
 zend_module_entry spl_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	spl_deps,
 	"SPL",
 	ext_functions,
 	PHP_MINIT(spl),
@@ -748,4 +753,3 @@ zend_module_entry spl_module_entry = {
 	PHP_SPL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */

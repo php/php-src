@@ -1,10 +1,7 @@
 --TEST--
 Test parameter handling in socket_select().
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $sockets = array();

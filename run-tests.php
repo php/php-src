@@ -1851,6 +1851,7 @@ function run_test(string $php, $file, array $env): string
 
     $temp_filenames = null;
     $org_file = $file;
+    $orig_php = $php;
 
     if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
         $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
@@ -2046,7 +2047,8 @@ TEST $file
     $env['TZ'] = '';
 
     if ($test->sectionNotEmpty('ENV')) {
-        foreach (explode("\n", $test->getSection('ENV')) as $e) {
+        $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
             if (!empty($e[0]) && isset($e[1])) {
@@ -2064,7 +2066,7 @@ TEST $file
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {

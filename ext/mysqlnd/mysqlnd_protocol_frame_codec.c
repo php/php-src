@@ -135,8 +135,8 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 	do {
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
-		DBG_INF_FMT("to_be_sent=%u", to_be_sent);
-		DBG_INF_FMT("packets_sent=%u", packets_sent);
+		DBG_INF_FMT("to_be_sent=%zu", to_be_sent);
+		DBG_INF_FMT("packets_sent=%zu", packets_sent);
 		DBG_INF_FMT("compressed_envelope_packet_no=%u", pfc->data->compressed_envelope_packet_no);
 		DBG_INF_FMT("packet_no=%u", pfc->data->packet_no);
 #ifdef MYSQLND_COMPRESSION_ENABLED
@@ -200,7 +200,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 	/* Even for zero size payload we have to send a packet */
 	if (bytes_sent <= 0) {
-		DBG_ERR_FMT("Can't %u send bytes", count);
+		DBG_ERR_FMT("Can't %zu send bytes", count);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
 	DBG_RETURN(bytes_sent);
@@ -242,7 +242,7 @@ MYSQLND_METHOD(mysqlnd_pfc, read_compressed_packet_from_stream_and_fill_read_buf
 			goto end;
 		}
 	} else {
-		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %u bytes", net_payload_size);
+		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %zu bytes", net_payload_size);
 		pfc->data->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size);
 		if (FAIL == vio->data->m.network_read(vio, pfc->data->uncompressed_data->data, net_payload_size, conn_stats, error_info)) {
 			retval = FAIL;

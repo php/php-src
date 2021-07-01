@@ -882,7 +882,6 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 	/* do extra field for perms later */
 	if (entry->is_modified) {
-		uint32_t loc;
 		php_stream_filter *filter;
 		php_stream *efp;
 
@@ -915,9 +914,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		efp = phar_get_efp(entry, 0);
 		newcrc32 = ~0;
 
-		for (loc = 0;loc < entry->uncompressed_filesize; ++loc) {
-			CRC32(newcrc32, php_stream_getc(efp));
-		}
+		crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
 
 		entry->crc32 = ~newcrc32;
 		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);

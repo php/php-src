@@ -73,7 +73,7 @@ static void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 	TRACE_ALLOC_ENTER(mysqlnd_emalloc_name);
 	ret = emalloc_rel(REAL_SIZE(size));
 
-	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
+	TRACE_ALLOC_INF_FMT("size=%zu ptr=%p", size, ret);
 
 	if (collect_memory_statistics) {
 		*(size_t *) ret = size;
@@ -92,7 +92,7 @@ static void * _mysqlnd_pemalloc(size_t size, bool persistent MYSQLND_MEM_D)
 	TRACE_ALLOC_ENTER(mysqlnd_pemalloc_name);
 	ret = pemalloc_rel(REAL_SIZE(size), persistent);
 
-	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p persistent=%u", size, ret, persistent);
+	TRACE_ALLOC_INF_FMT("size=%zu ptr=%p persistent=%u", size, ret, persistent);
 
 	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_MALLOC_COUNT:STAT_MEM_EMALLOC_COUNT;
@@ -112,11 +112,11 @@ static void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	void *ret;
 	bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	TRACE_ALLOC_ENTER(mysqlnd_ecalloc_name);
-	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(FALSE));
+	TRACE_ALLOC_INF_FMT("before: %zu", zend_memory_usage(FALSE));
 	ret = ecalloc_rel(nmemb, REAL_SIZE(size));
 
-	TRACE_ALLOC_INF_FMT("after : %lu", zend_memory_usage(FALSE));
-	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
+	TRACE_ALLOC_INF_FMT("after : %zu", zend_memory_usage(FALSE));
+	TRACE_ALLOC_INF_FMT("size=%zu ptr=%p", size, ret);
 	if (collect_memory_statistics) {
 		*(size_t *) ret = size;
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_ECALLOC_COUNT, 1, STAT_MEM_ECALLOC_AMOUNT, size);
@@ -134,7 +134,7 @@ static void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, bool persistent
 	TRACE_ALLOC_ENTER(mysqlnd_pecalloc_name);
 	ret = pecalloc_rel(nmemb, REAL_SIZE(size), persistent);
 
-	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
+	TRACE_ALLOC_INF_FMT("size=%zu ptr=%p", size, ret);
 
 	if (collect_memory_statistics) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_CALLOC_COUNT:STAT_MEM_ECALLOC_COUNT;
@@ -155,7 +155,7 @@ static void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 	TRACE_ALLOC_ENTER(mysqlnd_erealloc_name);
-	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu, new_size=%lu", ptr, old_size, new_size);
+	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%zu, new_size=%zu", ptr, old_size, new_size);
 	ret = erealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size));
 
 	TRACE_ALLOC_INF_FMT("new_ptr=%p", (char*)ret);
@@ -175,7 +175,7 @@ static void * _mysqlnd_perealloc(void *ptr, size_t new_size, bool persistent MYS
 	bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 	TRACE_ALLOC_ENTER(mysqlnd_perealloc_name);
-	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%lu new_size=%lu   persistent=%u", ptr, old_size, new_size, persistent);
+	TRACE_ALLOC_INF_FMT("ptr=%p old_size=%zu new_size=%zu   persistent=%u", ptr, old_size, new_size, persistent);
 	ret = perealloc_rel(REAL_PTR(ptr), REAL_SIZE(new_size), persistent);
 
 	TRACE_ALLOC_INF_FMT("new_ptr=%p", (char*)ret);
@@ -209,7 +209,7 @@ static void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 	if (ptr) {
 		if (collect_memory_statistics) {
 			free_amount = *(size_t *)(((char*)ptr) - sizeof(size_t));
-			TRACE_ALLOC_INF_FMT("ptr=%p size=%u", ((char*)ptr) - sizeof(size_t), (unsigned int) free_amount);
+			TRACE_ALLOC_INF_FMT("ptr=%p size=%zu", ((char*)ptr) - sizeof(size_t), free_amount);
 		}
 		efree_rel(REAL_PTR(ptr));
 	}
@@ -240,7 +240,7 @@ static void _mysqlnd_pefree(void *ptr, bool persistent MYSQLND_MEM_D)
 	if (ptr) {
 		if (collect_memory_statistics) {
 			free_amount = *(size_t *)(((char*)ptr) - sizeof(size_t));
-			TRACE_ALLOC_INF_FMT("ptr=%p size=%u", ((char*)ptr) - sizeof(size_t), (unsigned int) free_amount);
+			TRACE_ALLOC_INF_FMT("ptr=%p size=%zu", ((char*)ptr) - sizeof(size_t), free_amount);
 		}
 		pefree_rel(REAL_PTR(ptr), persistent);
 	}

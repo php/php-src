@@ -1,8 +1,9 @@
 --TEST--
 Testing mb_ereg_search() function
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 function_exists('mb_ereg_search') or die("skip mb_ereg_search() is not available in this build");
 ?>
 --FILE--

@@ -1,12 +1,13 @@
 --TEST--
 mysqli fetch bigint values (ok to fail with 4.1.x)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
     if (PHP_INT_SIZE == 8) {
         echo 'skip test valid only for 32bit systems';
         exit;
     }
-    require_once('skipif.inc');
     require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

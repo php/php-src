@@ -1,7 +1,7 @@
 --TEST--
 Bug #76437 (token_get_all with TOKEN_PARSE flag fails to recognise close tag)
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 $tests = [

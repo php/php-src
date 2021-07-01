@@ -1,7 +1,7 @@
 --TEST--
 Exhaustive test of mUTF-7 (IMAP) encoding verification and conversion
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 include('encoding_tests.inc');

@@ -1,9 +1,7 @@
 --TEST--
 Phar: verify stub of specific length does not break __HALT_COMPILER(); scanning in php
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0

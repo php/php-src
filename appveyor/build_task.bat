@@ -45,25 +45,11 @@ if not exist "%DEPS_DIR%" (
 )
 if %errorlevel% neq 0 exit /b 3
 
-rem install libavif into dependency directory
-rem temporary workaround for libavif not being part of the official dependencies
-if not exist "%DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip" (
-	curl -fsSL -o %DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip https://windows.php.net/downloads/pecl/deps/libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip
-)
-if not exist "%DEPS_DIR%\lib\avif.lib" (
-	7z x %DEPS_DIR%\libavif-0.9.0-%PHP_SDK_VS%-%PHP_SDK_ARCH%.zip -o%DEPS_DIR%
-)
-
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
-
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap
-rem the following exts are tested via --EXTENSIONS--; update as necessary
-set EXT_EXCLUDE_FROM_TEST=bz2,exif,fileinfo,ffi,ftp,gd,gmp,soap,sodium,sqlite3,tidy,%EXT_EXCLUDE_FROM_TEST%
-if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 set CFLAGS=/W1 /WX
 
@@ -75,7 +61,7 @@ cmd /c configure.bat ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
-	--with-test-ini-ext-exclude=%EXT_EXCLUDE_FROM_TEST%
+	--disable-test-ini
 if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO

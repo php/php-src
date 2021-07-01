@@ -315,6 +315,11 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 		/* 2-byte (JIS X 0208 or 0212) character was truncated */
 		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 

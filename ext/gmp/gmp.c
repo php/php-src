@@ -1856,7 +1856,7 @@ ZEND_FUNCTION(gmp_com)
 /* {{{ Finds next prime of a */
 ZEND_FUNCTION(gmp_nextprime)
 {
-   gmp_unary_op(mpz_nextprime);
+	gmp_unary_op(mpz_nextprime);
 }
 /* }}} */
 
@@ -1883,10 +1883,10 @@ ZEND_FUNCTION(gmp_setbit)
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-    if (index / GMP_NUMB_BITS >= INT_MAX) {
+	if (index / GMP_NUMB_BITS >= INT_MAX) {
 		zend_argument_value_error(2, "must be less than %d * %d", INT_MAX, GMP_NUMB_BITS);
 		RETURN_THROWS();
-    }
+	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
 

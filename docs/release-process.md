@@ -180,7 +180,7 @@ explained at the end of this document in
 
     ```sh
     ssh lists.php.net
-    sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
+    sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
     ```
  6. For RCs, post tweet with release announcement (and link to news article on
     php.net) ([@official_php](https://twitter.com/official_php))

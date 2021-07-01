@@ -3220,8 +3220,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
+#else
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+#endif
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 

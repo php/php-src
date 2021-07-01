@@ -1,7 +1,7 @@
 --TEST--
 Bug #42112 (deleting a node produces memory corruption)
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<<EOXML

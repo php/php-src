@@ -1,7 +1,7 @@
 --TEST--
 Bug #72241: get_icu_value_internal out-of-bounds read
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $var1=str_repeat("A", 1000);

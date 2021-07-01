@@ -32,7 +32,11 @@ if (PHP_GD != "no") {
 			}
 		}
 		if (PHP_LIBAVIF != "no") {
-			if (CHECK_LIB("avif.lib", "gd", PHP_GD) &&
+			if (CHECK_LIB("avif_a.lib", "gd", PHP_GD) &&
+				CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
+				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
+			} else if (CHECK_LIB("avif.lib", "gd", PHP_GD) &&
 				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
 				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
 			} else {

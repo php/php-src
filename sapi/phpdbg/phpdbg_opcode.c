@@ -154,7 +154,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) 
 
 		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("opline", "line=\"%u\" opline=\"%p\" op=\"%s\" file=\"%s\"", "L%-5u %16p %s %s",
+			phpdbg_notice("L%-5u %16p %s %s",
 			   opline->lineno,
 			   opline,
 			   decode,
@@ -162,7 +162,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) 
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s\n",
+			phpdbg_log_internal(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s\n",
 				opline->lineno,
 				opline,
 				decode,

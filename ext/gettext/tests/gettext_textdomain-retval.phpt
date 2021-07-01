@@ -1,10 +1,10 @@
 --TEST--
 Check if textdomain() returns the new domain
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-    if (!extension_loaded("gettext")) {
-        die("skip\n");
-    }
+    
     if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
         die("skip en_US.UTF-8 locale not supported.");
     }

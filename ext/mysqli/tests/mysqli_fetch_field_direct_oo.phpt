@@ -1,8 +1,9 @@
 --TEST--
 $res->fetch_field_direct(s)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

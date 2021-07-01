@@ -2,6 +2,8 @@
 OO API: SNMP::setSecurity (errors)
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

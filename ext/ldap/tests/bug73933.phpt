@@ -1,9 +1,7 @@
 --TEST--
 Bug #73933 (error/segfault with ldap_mod_replace and opcache)
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 /* We are assuming 3333 is not connectable */

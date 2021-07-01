@@ -3048,10 +3048,10 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 		zend_string *name = ZEND_TYPE_NAME(param->type);
 
 		if (ZSTR_HAS_CE_CACHE(name) && ZSTR_GET_CE_CACHE(name)) {
- 			append_type(return_value,
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CE(ZSTR_GET_CE_CACHE(name), 0, 0));
- 		} else {
- 			append_type(return_value,
+		} else {
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
 		}
 	} else if (ZEND_TYPE_HAS_CE(param->type)) {
@@ -3398,13 +3398,6 @@ ZEND_METHOD(ReflectionMethod, isProtected)
 }
 /* }}} */
 
-/* {{{ Returns whether this method is static */
-ZEND_METHOD(ReflectionMethod, isStatic)
-{
-	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
-}
-/* }}} */
-
 /* {{{ Returns whether this function is deprecated */
 ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated)
 {
@@ -3423,6 +3416,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, isGenerator)
 ZEND_METHOD(ReflectionFunctionAbstract, isVariadic)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
+}
+/* }}} */
+
+/* {{{ Returns whether this function is static */
+ZEND_METHOD(ReflectionFunctionAbstract, isStatic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
 }
 /* }}} */
 
@@ -6133,9 +6133,9 @@ ZEND_METHOD(ReflectionExtension, info)
 ZEND_METHOD(ReflectionExtension, isPersistent)
 {
 	reflection_object *intern;
-    zend_module_entry *module;
+	zend_module_entry *module;
 
-    if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(module);
@@ -6370,7 +6370,7 @@ ZEND_METHOD(ReflectionReference, getId)
 	}
 
 	if (!REFLECTION_G(key_initialized)) {
-		if (php_random_bytes_throw(&REFLECTION_G(key_initialized), 16) == FAILURE) {
+		if (php_random_bytes_throw(&REFLECTION_G(key), 16) == FAILURE) {
 			RETURN_THROWS();
 		}
 
@@ -6623,7 +6623,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
 			zval val;
 			if (FAILURE == zend_get_attribute_value(&val, attr->data, i, attr->scope)) {
-				attribute_ctor_cleanup(&obj, args, i, named_params);
+				attribute_ctor_cleanup(&obj, args, argc, named_params);
 				RETURN_THROWS();
 			}
 			if (attr->data->args[i].name) {
@@ -6873,7 +6873,7 @@ ZEND_METHOD(ReflectionFiber, getFiber)
 }
 
 #define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
-		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status == ZEND_FIBER_STATUS_DEAD) { \
+		if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_INIT || fiber->context.status == ZEND_FIBER_STATUS_DEAD) { \
 			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
 			RETURN_THROWS(); \
 		} \
@@ -6895,7 +6895,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 	prev_execute_data = fiber->stack_bottom->prev_execute_data;
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	if (EG(current_fiber) != zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) != fiber) {
 		// No need to replace current execute data if within the current fiber.
 		EG(current_execute_data) = fiber->execute_data;
 	}
@@ -6915,7 +6915,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;
@@ -6933,7 +6933,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == zend_fiber_get_context(fiber)) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;
@@ -6948,7 +6948,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_DEAD) {
+	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
 		RETURN_THROWS();
 	}

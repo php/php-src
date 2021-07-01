@@ -1,7 +1,7 @@
 --TEST--
 oci8.old_oci_close_semantics Off
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=0
 --FILE--

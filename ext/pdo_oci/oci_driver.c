@@ -381,7 +381,7 @@ static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquote
 		*c++ = '\'';			/* add second quote */
 	}
 
-    /* Copy remainder and add enclosing quote */
+	/* Copy remainder and add enclosing quote */
 	strncpy(c, l, quotedlen-(c-quoted)-1);
 	quoted[quotedlen-1] = '\'';
 	quoted[quotedlen]   = '\0';
@@ -851,11 +851,11 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	}
 
 	/* Get max character width */
- 	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
- 	if (H->last_err) {
- 		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
- 		goto cleanup;
- 	}
+	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
+	if (H->last_err) {
+		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
+		goto cleanup;
+	}
 
 	dbh->methods = &oci_methods;
 	dbh->alloc_own_columns = 1;

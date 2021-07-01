@@ -2,8 +2,9 @@
 ldap_bind_ext() - Basic binding
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 <?php
 require_once('skipifcontrol.inc');

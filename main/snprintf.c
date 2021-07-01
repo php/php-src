@@ -124,7 +124,7 @@ static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign) /*
 
 static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
 {
-    return(__cvt(value, ndigit, decpt, sign, 1, 1));
+	return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
 /* }}} */
 
@@ -216,13 +216,13 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 			}
 			*dst++ = dec_point;
 			for (i = decpt; digits[i] != '\0'; i++) {
-                *dst++ = digits[i];
-            }
-        }
-        *dst = '\0';
-    }
-    zend_freedtoa(digits);
-    return (buf);
+				*dst++ = digits[i];
+			}
+		}
+		*dst = '\0';
+	}
+	zend_freedtoa(digits);
+	return (buf);
 }
 /* }}} */
 
@@ -547,7 +547,7 @@ typedef struct buf_area buffy;
  * to be printed.
  */
 #define FIX_PRECISION( adjust, precision, s, s_len )	\
-    if ( adjust )						\
+	if ( adjust )						\
 	while ( s_len < (size_t)precision )	\
 	{									\
 	    *--s = '0' ;					\
@@ -738,9 +738,15 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 #endif
 					break;
 				case 'p':
-					fmt++;
-					modifier = LM_PHP_INT_T;
+				{
+					char __next = *(fmt+1);
+					if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"printf \"p\" modifier is no longer supported, use ZEND_LONG_FMT");
+					}
+					modifier = LM_STD;
 					break;
+				}
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
@@ -803,9 +809,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							i_num = (wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							i_num = (wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -849,9 +852,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 								i_num = (wide_int) va_arg(ap, ptrdiff_t);
 								break;
 #endif
-							case LM_PHP_INT_T:
-								i_num = (wide_int) va_arg(ap, zend_long);
-								break;
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -898,9 +898,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -940,9 +937,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);

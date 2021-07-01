@@ -1,9 +1,7 @@
 --TEST--
 Bug #72362: OpenSSL Blowfish encryption is incorrect for short keys
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 var_dump(

@@ -1,7 +1,7 @@
 --TEST--
 Bug #73944: Dictionary option of intflate_init() does not work
---SKIPIF--
-<?php if(!extension_loaded('zlib')) die('skip zlib extension not loaded'); ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 

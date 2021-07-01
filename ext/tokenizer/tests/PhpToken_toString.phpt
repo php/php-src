@@ -1,5 +1,7 @@
 --TEST--
 PhpToken implements __toString()
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

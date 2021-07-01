@@ -1,8 +1,9 @@
 --TEST--
 Bug #76675 (Segfault with H2 server push write/writeheader handlers)
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (getenv("SKIP_ONLINE_TESTS")) {
     die("skip online test");
 }

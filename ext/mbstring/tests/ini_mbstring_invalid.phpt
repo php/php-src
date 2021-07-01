@@ -1,7 +1,7 @@
 --TEST--
 Invalid values for MBString INI settings
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.language=UNKNOWN_LANGUAGE
 mbstring.internal_encoding=UNKNOWN_ENCODING

@@ -1,11 +1,7 @@
 --TEST--
 Test gzcompress() function : error conditions
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 /*

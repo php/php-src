@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and default values
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $tmp = $default = 321;

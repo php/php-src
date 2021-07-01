@@ -1,10 +1,10 @@
 --TEST--
 IPv6 Loopback test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
+    
     require 'ipv6_skipif.inc';
 ?>
 --FILE--

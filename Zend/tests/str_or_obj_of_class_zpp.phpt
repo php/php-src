@@ -1,9 +1,7 @@
 --TEST--
 Test Z_PARAM_OBJ_OF_CLASS_OR_STR() and Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL
---SKIPIF--
-<?php
-if (!extension_loaded('zend_test')) die('skip zend_test extension not loaded');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

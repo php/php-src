@@ -3,14 +3,13 @@ Test if socket_set_option() works, option:SO_ACCEPTFILTER
 --DESCRIPTION--
 -wrong params
 -set/get params comparison
--l_linger not given
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
-if (strpos(PHP_OS, 'FreeBSD') === false) {
-	die('SKIP on non FreeBSD platforms');
+
+if (!defined("SO_ACCEPTFILTER")) {
+	die('SKIP on platforms not supporting SO_ACCEPTFILTER');
 }
 ?>
 --FILE--

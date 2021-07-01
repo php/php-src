@@ -2,12 +2,12 @@
 int socket_send ( resource $socket , string $buf , int $len , int $flags );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-if (!extension_loaded('sockets')) {
-  die('SKIP sockets extension not available.');
-}
+
 ?>
 --FILE--
 <?php

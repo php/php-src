@@ -1,8 +1,9 @@
 --TEST--
 Bug #55653 	PS crash with libmysql when binding same variable as param and out
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

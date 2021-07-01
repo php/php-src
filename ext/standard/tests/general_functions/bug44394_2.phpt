@@ -1,7 +1,7 @@
 --TEST--
 Bug #44394 (Last two bytes missing from output) with session.use_trans_id
---SKIPIF--
-<?php if (!extension_loaded("session")) print "skip"; ?>
+--EXTENSIONS--
+session
 --INI--
 session.name=PHPSESSID
 session.use_only_cookies=0

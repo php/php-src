@@ -10,9 +10,7 @@ $a->offsetUnset('x');
 echo $x;
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok
-
-Warning: Undefined array key "x" in %s on line %d
 ok
 ok

@@ -60,7 +60,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 {
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
-	DBG_INF_FMT("Freeing "PRIu64" row(s)", set->row_count);
+	DBG_INF_FMT("Freeing %" PRIu64 " row(s)", set->row_count);
 
 	mysqlnd_error_info_free_contents(&set->error_info);
 
@@ -177,7 +177,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 	MYSQLND_PACKET_EOF fields_eof;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
-	DBG_INF_FMT("stmt=%lu", stmt? stmt->stmt_id:0);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt? stmt->stmt_id:0);
 
 	ret = FAIL;
 	do {
@@ -834,7 +834,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES * const result, const uint64_t row)
 {
 	DBG_ENTER("mysqlnd_res::data_seek");
-	DBG_INF_FMT("row=%lu", row);
+	DBG_INF_FMT("row=%" PRIu64, row);
 
 	DBG_RETURN(result->stored_data? result->stored_data->m.data_seek(result->stored_data, row) : FAIL);
 }

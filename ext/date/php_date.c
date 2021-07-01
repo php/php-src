@@ -58,16 +58,16 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 PHPAPI time_t php_time(void)
 {
 #ifdef HAVE_GETTIMEOFDAY
-    struct timeval tm;
+	struct timeval tm;
 
-    if (UNEXPECTED(gettimeofday(&tm, NULL) != SUCCESS)) {
-        /* fallback, can't reasonably happen */
-        return time(NULL);
-    }
+	if (UNEXPECTED(gettimeofday(&tm, NULL) != SUCCESS)) {
+		/* fallback, can't reasonably happen */
+		return time(NULL);
+	}
 
-    return tm.tv_sec;
+	return tm.tv_sec;
 #else
-    return time(NULL);
+	return time(NULL);
 #endif
 }
 
@@ -1775,9 +1775,9 @@ static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n) 
 
 static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table, int *n) /* {{{ */
 {
-       *table = NULL;
-       *n = 0;
-       return zend_std_get_properties(object);
+	*table = NULL;
+	*n = 0;
+	return zend_std_get_properties(object);
 } /* }}} */
 
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
@@ -2090,11 +2090,11 @@ static zend_object *date_object_clone_period(zend_object *this_ptr) /* {{{ */
 		new_obj->current = timelib_time_clone(old_obj->current);
 	}
 	if (old_obj->end) {
-        new_obj->end = timelib_time_clone(old_obj->end);
-    }
-    if (old_obj->interval) {
-        new_obj->interval = timelib_rel_time_clone(old_obj->interval);
-    }
+		new_obj->end = timelib_time_clone(old_obj->end);
+	}
+	if (old_obj->interval) {
+		new_obj->interval = timelib_rel_time_clone(old_obj->interval);
+	}
 	return &new_obj->std;
 } /* }}} */
 
@@ -4269,27 +4269,27 @@ PHP_METHOD(DatePeriod, getStartDate)
 /* {{{ Get end date. */
 PHP_METHOD(DatePeriod, getEndDate)
 {
-        php_period_obj   *dpobj;
-        php_date_obj     *dateobj;
+	php_period_obj   *dpobj;
+	php_date_obj     *dateobj;
 
-        ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_NONE();
 
-        dpobj = Z_PHPPERIOD_P(ZEND_THIS);
+	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
-        if (!dpobj->end) {
-                return;
-        }
+	if (!dpobj->end) {
+		return;
+	}
 
-        php_date_instantiate(dpobj->start_ce, return_value);
-        dateobj = Z_PHPDATE_P(return_value);
-        dateobj->time = timelib_time_ctor();
-        *dateobj->time = *dpobj->end;
-        if (dpobj->end->tz_abbr) {
-                dateobj->time->tz_abbr = timelib_strdup(dpobj->end->tz_abbr);
-        }
-        if (dpobj->end->tz_info) {
-                dateobj->time->tz_info = dpobj->end->tz_info;
-        }
+	php_date_instantiate(dpobj->start_ce, return_value);
+	dateobj = Z_PHPDATE_P(return_value);
+	dateobj->time = timelib_time_ctor();
+	*dateobj->time = *dpobj->end;
+	if (dpobj->end->tz_abbr) {
+			dateobj->time->tz_abbr = timelib_strdup(dpobj->end->tz_abbr);
+	}
+	if (dpobj->end->tz_info) {
+			dateobj->time->tz_info = dpobj->end->tz_info;
+	}
 }
 /* }}} */
 

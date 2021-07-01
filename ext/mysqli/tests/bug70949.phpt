@@ -1,8 +1,9 @@
 --TEST--
 Bug #70949 (SQL Result Sets With NULL Can Cause Fatal Memory Errors)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND) {

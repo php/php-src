@@ -22,6 +22,7 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_worklist.h"
+#include "zend_optimizer_internal.h"
 
 /* The used range inference algorithm is described in:
  *     V. Campos, R. Rodrigues, I. de Assis Costa and F. Pereira.
@@ -2189,20 +2190,6 @@ static uint32_t binary_op_result_type(
 	return tmp;
 }
 
-static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) {
-	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
-	if (ce) {
-		return ce;
-	}
-
-	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
-		return ce;
-	}
-
-	return NULL;
-}
-
 static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 	uint32_t result_mask = type_mask & MAY_BE_ANY;
 	if (type_mask & MAY_BE_VOID) {
@@ -2223,29 +2210,40 @@ static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 	return result_mask;
 }
 
-ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
+static uint32_t zend_convert_type(const zend_script *script, zend_type type, zend_class_entry **pce)
 {
-	uint32_t tmp;
+	if (pce) {
+		*pce = NULL;
+	}
 
-	*pce = NULL;
-	if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+	if (!ZEND_TYPE_IS_SET(type)) {
 		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
 	}
 
-	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	uint32_t tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(type));
+	if (ZEND_TYPE_HAS_CLASS(type)) {
 		tmp |= MAY_BE_OBJECT;
-		/* As we only have space to store one CE, we use a plain object type for class unions. */
-		if (ZEND_TYPE_HAS_NAME(arg_info->type)) {
-			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
-			*pce = get_class_entry(script, lcname);
-			zend_string_release_ex(lcname, 0);
+		if (pce) {
+			/* As we only have space to store one CE,
+			 * we use a plain object type for class unions. */
+			if (ZEND_TYPE_HAS_CE(type)) {
+				*pce = ZEND_TYPE_CE(type);
+			} else if (ZEND_TYPE_HAS_NAME(type)) {
+				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
+				*pce = zend_optimizer_get_class_entry(script, lcname);
+				zend_string_release_ex(lcname, 0);
+			}
 		}
 	}
 	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	return tmp;
+}
+
+ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
+{
+	return zend_convert_type(script, arg_info->type, pce);
 }
 
 static zend_property_info *lookup_prop_info(zend_class_entry *ce, zend_string *name, zend_class_entry *scope) {
@@ -2320,7 +2318,7 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 			}
 		} else if (opline->op2_type == IS_CONST) {
 			zval *zv = CRT_CONSTANT(opline->op2);
-			ce = get_class_entry(script, Z_STR_P(zv + 1));
+			ce = zend_optimizer_get_class_entry(script, Z_STR_P(zv + 1));
 		}
 
 		if (ce) {
@@ -2336,29 +2334,14 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 
 static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_info *prop_info, zend_class_entry **pce)
 {
-	if (pce) {
-		*pce = NULL;
-	}
-	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
-		uint32_t type = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
-		if (ZEND_TYPE_HAS_CLASS(prop_info->type)) {
-			type |= MAY_BE_OBJECT;
-			if (pce) {
-				if (ZEND_TYPE_HAS_CE(prop_info->type)) {
-					*pce = ZEND_TYPE_CE(prop_info->type);
-				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
-					zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-					*pce = get_class_entry(script, lcname);
-					zend_string_release(lcname);
-				}
-			}
+	if (!prop_info) {
+		if (pce) {
+			*pce = NULL;
 		}
-		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			type |= MAY_BE_RC1 | MAY_BE_RCN;
-		}
-		return type;
+		return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
 	}
-	return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
+
+	return zend_convert_type(script, prop_info->type, pce);
 }
 
 static zend_always_inline int _zend_update_type_info(
@@ -2393,13 +2376,13 @@ static zend_always_inline int _zend_update_type_info(
 	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
 		|| !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))) {
 		tmp = 0;
-		if (ssa_op->result_def >= 0) {
+		if (ssa_op->result_def >= 0 && !(ssa_var_info[ssa_op->result_def].type & MAY_BE_REF)) {
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 		}
-		if (ssa_op->op1_def >= 0) {
+		if (ssa_op->op1_def >= 0 && !(ssa_var_info[ssa_op->op1_def].type & MAY_BE_REF)) {
 			UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 		}
-		if (ssa_op->op2_def >= 0) {
+		if (ssa_op->op2_def >= 0 && !(ssa_var_info[ssa_op->op2_def].type & MAY_BE_REF)) {
 			UPDATE_SSA_TYPE(tmp, ssa_op->op2_def);
 		}
 		return 1;
@@ -2491,6 +2474,10 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
 					tmp |= MAY_BE_RC1;
+					if (opline->extended_value == IS_ARRAY
+					 && (t1 & (MAY_BE_UNDEF|MAY_BE_NULL))) {
+						tmp |= MAY_BE_RCN;
+					}
 				}
 			}
 			if (opline->extended_value == IS_ARRAY) {
@@ -2500,7 +2487,7 @@ static zend_always_inline int _zend_update_type_info(
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | ((t1 & MAY_BE_ANY) ? MAY_BE_ARRAY_PACKED : 0);
+					tmp |= ((t1 & (MAY_BE_ANY - MAY_BE_NULL)) << MAY_BE_ARRAY_SHIFT) | ((t1 & (MAY_BE_ANY - MAY_BE_NULL)) ? MAY_BE_ARRAY_PACKED : 0);
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -3102,7 +3089,7 @@ static zend_always_inline int _zend_update_type_info(
 			} else if (opline->op2_type == IS_CONST) {
 				zval *zv = CRT_CONSTANT(opline->op2);
 				if (Z_TYPE_P(zv) == IS_STRING) {
-					ce = get_class_entry(script, Z_STR_P(zv+1));
+					ce = zend_optimizer_get_class_entry(script, Z_STR_P(zv+1));
 					UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
 				} else {
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->result_def);
@@ -3114,7 +3101,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_NEW:
 			tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_OBJECT;
 			if (opline->op1_type == IS_CONST &&
-			    (ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1))) != NULL) {
+			    (ce = zend_optimizer_get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_op->result_def);
 			} else if ((t1 & MAY_BE_CLASS) && ssa_op->op1_use >= 0 && ssa_var_info[ssa_op->op1_use].ce) {
 				UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_op->op1_use].ce, ssa_var_info[ssa_op->op1_use].is_instanceof, ssa_op->result_def);
@@ -3298,7 +3285,7 @@ static zend_always_inline int _zend_update_type_info(
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
 				    opline->opcode == ZEND_FETCH_DIM_RW ||
 				    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
-                    opline->opcode == ZEND_FETCH_LIST_W) {
+				    opline->opcode == ZEND_FETCH_LIST_W) {
 					if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 						if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
 							tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);

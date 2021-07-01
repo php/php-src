@@ -1,13 +1,14 @@
 --TEST--
 Optimizer: Pass Registration
+--EXTENSIONS--
+opcache
+zend_test
 --SKIPIF--
 <?php
 if (getenv("SKIP_REPEAT")) {
     die("skip pass registration does not need repeat");
 }
 ?>
---EXTENSIONS--
-opcache
 --INI--
 opcache.enable_cli=1
 opcache.file_cache=

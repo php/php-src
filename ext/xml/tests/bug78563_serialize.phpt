@@ -1,7 +1,7 @@
 --TEST--
 Bug #78563: parsers should not be serializable
---SKIPIF--
-<?php include("skipif.inc"); ?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 

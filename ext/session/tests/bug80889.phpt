@@ -1,5 +1,7 @@
 --TEST--
 Bug #80889 (Cannot set save handler when save_handler is invalid)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

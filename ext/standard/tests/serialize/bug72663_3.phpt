@@ -1,7 +1,7 @@
 --TEST--
 Bug #72663 (3): If unserialization fails, don't initialize the session with the result
---SKIPIF--
-<?php if (!extension_loaded('session')) die('skip Session extension required'); ?>
+--EXTENSIONS--
+session
 --INI--
 session.serialize_handler=php_serialize
 --FILE--

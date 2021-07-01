@@ -1,7 +1,8 @@
 --TEST--
 Bug#59597 NumberFormatter::parse() with TYPE_INT64 results in a 32 bit integer
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php

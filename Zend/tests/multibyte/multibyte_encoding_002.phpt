@@ -1,11 +1,7 @@
 --TEST--
 Zend Multibyte and UTF-8 BOM
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 internal_encoding=iso-8859-1

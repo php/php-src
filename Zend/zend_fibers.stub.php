@@ -23,7 +23,7 @@ final class Fiber
 
     public function getReturn(): mixed {}
 
-    public static function this(): ?Fiber {}
+    public static function getCurrent(): ?Fiber {}
 
     public static function suspend(mixed $value = null): mixed {}
 }

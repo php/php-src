@@ -1,8 +1,9 @@
 --TEST--
 PAM: SHA-256, option: MYSQLI_SERVER_PUBLIC_KEY
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 ob_start();

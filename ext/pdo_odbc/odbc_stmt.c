@@ -615,7 +615,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		rc = SQLBindCol(S->stmt, colno+1,
 			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
 			S->cols[colno].data,
- 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
+			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_stmt_error("SQLBindCol");

@@ -147,7 +147,7 @@ PHP_FUNCTION(shm_attach)
 	if (shm_size < 1) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
-  	}
+	}
 
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {

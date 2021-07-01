@@ -1,7 +1,7 @@
 --TEST--
 Phar: test to ensure phar.readonly cannot be circumvented
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

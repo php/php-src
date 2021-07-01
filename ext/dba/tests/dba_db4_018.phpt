@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 with persistent connections
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

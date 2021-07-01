@@ -1,7 +1,7 @@
 --TEST--
 readline_completion_function(): Basic test
---SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); ?>
+--EXTENSIONS--
+readline
 --FILE--
 <?php
 

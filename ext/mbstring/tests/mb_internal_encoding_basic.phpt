@@ -1,10 +1,7 @@
 --TEST--
 Test mb_internal_encoding() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

@@ -387,7 +387,7 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 	return 0;
 }
 
-static zend_always_inline zend_bool may_be_refcounted(uint32_t type) {
+static zend_always_inline bool may_be_refcounted(uint32_t type) {
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 

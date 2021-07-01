@@ -338,16 +338,16 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					modifier = LM_SIZE_T;
 #endif
 					break;
-				case 'p': {
-						char __next = *(fmt+1);
-						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
-							fmt++;
-							modifier = LM_PHP_INT_T;
-						} else {
-							modifier = LM_STD;
-						}
+				case 'p':
+				{
+					char __next = *(fmt+1);
+					if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
+						zend_error_noreturn(E_CORE_ERROR,
+							"printf \"p\" modifier is no longer supported, use ZEND_LONG_FMT");
 					}
+					modifier = LM_STD;
 					break;
+				}
 				case 'h':
 					fmt++;
 					if (*fmt == 'h') {
@@ -410,9 +410,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							i_num = (wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							i_num = (wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -456,9 +453,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 								i_num = (wide_int) va_arg(ap, ptrdiff_t);
 								break;
 #endif
-							case LM_PHP_INT_T:
-								i_num = (wide_int) va_arg(ap, zend_long);
-								break;
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -504,9 +498,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
@@ -547,9 +538,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
 							break;
 #endif
-						case LM_PHP_INT_T:
-							ui_num = (u_wide_int) va_arg(ap, zend_ulong);
-							break;
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);

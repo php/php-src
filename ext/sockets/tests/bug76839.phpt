@@ -1,12 +1,11 @@
 --TEST--
 Bug #76839: socket_recvfrom may return an invalid 'from' address on MacOS
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
     die('skip not valid for Windows.');
-}
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
 }
 --FILE--
 <?php

@@ -284,9 +284,9 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 static void
 _unparsed_entity_decl_handler(void *user,
                               const xmlChar *name,
-							  const xmlChar *pub_id,
-							  const xmlChar *sys_id,
-							  const xmlChar *notation)
+                              const xmlChar *pub_id,
+                              const xmlChar *sys_id,
+                              const xmlChar *notation)
 {
 	XML_Parser parser = (XML_Parser) user;
 

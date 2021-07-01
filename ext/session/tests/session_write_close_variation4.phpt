@@ -1,5 +1,7 @@
 --TEST--
 Test session_write_close() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

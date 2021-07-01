@@ -1,5 +1,7 @@
 --TEST--
 Bug #72197 pg_lo_create arbitrary read
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

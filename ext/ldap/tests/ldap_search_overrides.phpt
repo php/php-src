@@ -3,9 +3,10 @@ ldap_search() test - test that overrides aren't permanent
 --CREDITS--
 Tyson Andre <tandre@ifwe.co>
 # Based on ldap_search_basic.phpt
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--

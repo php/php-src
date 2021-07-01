@@ -9,9 +9,6 @@
 include("config.inc");
 include("lcmess.inc");
 
-if (!extension_loaded("pgsql")) {
-    die("skip pgsql extension not loaded\n");
-}
 if (getenv("SKIP_REPEAT")) {
     // pgsql tests are order-dependent.
     // We should probably change that, but in the meantime do not allow repetition.

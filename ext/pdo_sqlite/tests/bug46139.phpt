@@ -1,9 +1,7 @@
 --TEST--
 Bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

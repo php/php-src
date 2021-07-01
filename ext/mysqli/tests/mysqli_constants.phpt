@@ -1,9 +1,7 @@
 --TEST--
 Constants exported by ext/mysqli
---SKIPIF--
-<?php
-require_once 'skipif.inc';
-?>
+--EXTENSIONS--
+mysqli
 --INI--
 mysqli.allow_local_infile=1
 --FILE--

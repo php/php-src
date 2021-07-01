@@ -1,10 +1,10 @@
 --TEST--
 Multicast support: IPv6 receive options
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 if (!defined('IPPROTO_IPV6')) {
     die('skip IPv6 not available.');
 }

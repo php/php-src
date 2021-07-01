@@ -1,9 +1,13 @@
 --TEST--
 Bug #77935: Crash in mysqlnd_fetch_stmt_row_cursor when calling an SP with a cursor
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+if (!$IS_MYSQLND) {
+    die("skip mysqlnd only test");
+}
 ?>
 --FILE--
 <?php

@@ -1569,6 +1569,9 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 	{
 		char *vpath;
 		size_t vpath_len;
+		if (UNEXPECTED(client->request.vpath != NULL)) {
+			return 1;
+		}
 		normalize_vpath(&vpath, &vpath_len, at, length, 1);
 		client->request.vpath = vpath;
 		client->request.vpath_len = vpath_len;
@@ -1579,17 +1582,34 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 static int php_cli_server_client_read_request_on_query_string(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.query_string = pestrndup(at, length, 1);
-	client->request.query_string_len = length;
+	if (EXPECTED(client->request.query_string == NULL)) {
+		client->request.query_string = pestrndup(at, length, 1);
+		client->request.query_string_len = length;
+	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.query_string = perealloc(client->request.query_string, client->request.query_string_len + length + 1, 1);
+		memcpy(client->request.query_string + client->request.query_string_len, at, length);
+		client->request.query_string_len += length;
+		client->request.query_string[client->request.query_string_len] = '\0';
+	}
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_url(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.request_method = parser->method;
-	client->request.request_uri = pestrndup(at, length, 1);
-	client->request.request_uri_len = length;
+	if (EXPECTED(client->request.request_uri == NULL)) {
+		client->request.request_method = parser->method;
+		client->request.request_uri = pestrndup(at, length, 1);
+		client->request.request_uri_len = length;
+	} else {
+		ZEND_ASSERT(client->request.request_method == parser->method);
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
+		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
+		client->request.request_uri_len += length;
+		client->request.request_uri[client->request.request_uri_len] = '\0';
+	}
 	return 0;
 }
 

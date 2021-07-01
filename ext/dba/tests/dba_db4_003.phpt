@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 File Creation open("c") with existing file
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

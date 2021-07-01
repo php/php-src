@@ -429,7 +429,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 
 static HashTable* dom_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
-       return dom_get_debug_info_helper(object, is_temp);
+	return dom_get_debug_info_helper(object, is_temp);
 }
 /* }}} */
 
@@ -440,7 +440,7 @@ void *php_dom_export_node(zval *object) /* {{{ */
 
 	intern = (php_libxml_node_object *) Z_DOMOBJ_P(object);
 	if (intern->node) {
-  		nodep = intern->node->node;
+		nodep = intern->node->node;
 	}
 
 	return nodep;
@@ -1244,7 +1244,7 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 		nodep = nodep->parent;
 	}
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} end dom_hierarchy */
 

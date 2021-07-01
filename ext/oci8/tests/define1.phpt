@@ -1,7 +1,7 @@
 --TEST--
 oci_define_by_name()
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -49,7 +49,7 @@ oci8_test_sql_execute($c, $stmtarray);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 oci_define_by_name(): Argument #2 ($column) cannot be empty

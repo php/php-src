@@ -2036,10 +2036,10 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "local_cert", sizeof("local_cert")-1)) != NULL &&
 		    Z_TYPE_P(tmp) == IS_STRING) {
-		  if (!context) {
-  			context = php_stream_context_alloc();
-		  }
- 			php_stream_context_set_option(context, "ssl", "local_cert", tmp);
+			if (!context) {
+				context = php_stream_context_alloc();
+			}
+			php_stream_context_set_option(context, "ssl", "local_cert", tmp);
 			if ((tmp = zend_hash_str_find(ht, "passphrase", sizeof("passphrase")-1)) != NULL &&
 			    Z_TYPE_P(tmp) == IS_STRING) {
 				php_stream_context_set_option(context, "ssl", "passphrase", tmp);
@@ -2092,7 +2092,7 @@ PHP_METHOD(SoapClient, __construct)
 		if ((tmp = zend_hash_str_find(ht, "features", sizeof("features")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_LONG) {
 			add_property_long(this_ptr, "_features", Z_LVAL_P(tmp));
-	    }
+		}
 
 		if ((tmp = zend_hash_str_find(ht, "connection_timeout", sizeof("connection_timeout")-1)) != NULL) {
 			if (Z_TYPE_P(tmp) != IS_LONG) {
@@ -2255,9 +2255,9 @@ static void do_soap_call(zend_execute_data *execute_data,
 {
 	zval *tmp;
 	zval *trace;
- 	sdlPtr sdl = NULL;
- 	sdlPtr old_sdl = NULL;
- 	sdlFunctionPtr fn;
+	sdlPtr sdl = NULL;
+	sdlPtr old_sdl = NULL;
+	sdlFunctionPtr fn;
 	xmlDocPtr request = NULL;
 	int ret = FALSE;
 	int soap_version;
@@ -2297,7 +2297,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		FETCH_TYPEMAP_RES(typemap,tmp);
 	}
 
- 	clear_soap_fault(this_ptr);
+	clear_soap_fault(this_ptr);
 
 	SOAP_GLOBAL(soap_version) = soap_version;
 	old_sdl = SOAP_GLOBAL(sdl);
@@ -2328,8 +2328,8 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	zend_try {
 	 	if (sdl != NULL) {
- 			fn = get_function(sdl, function);
- 			if (fn != NULL) {
+			fn = get_function(sdl, function);
+			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
 				bool one_way = 0;
 
@@ -2345,12 +2345,12 @@ static void do_soap_call(zend_execute_data *execute_data,
 				}
 				if (binding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
- 					request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers);
+					request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers);
 	 				ret = do_request(this_ptr, request, location, fnb->soapAction, soap_version, one_way, &response);
- 				} else {
+				} else {
 	 				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers);
 	 				ret = do_request(this_ptr, request, location, NULL, soap_version, one_way, &response);
- 				}
+				}
 
 				xmlFreeDoc(request);
 				request = NULL;

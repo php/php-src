@@ -43,7 +43,7 @@ zend_module_entry ctype_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ctype),
-    PHP_CTYPE_VERSION,
+	PHP_CTYPE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

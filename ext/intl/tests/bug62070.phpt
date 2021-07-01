@@ -1,7 +1,8 @@
 --TEST--
 Bug #62070: Collator::getSortKey() returns garbage
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
 --FILE--
 <?php

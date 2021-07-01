@@ -2,8 +2,8 @@
 Basic UConverter::convert() usage
 --INI--
 intl.error_level = E_WARNING
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $c = new UConverter('utf-8', "\x80");

@@ -1,7 +1,7 @@
 --TEST--
 Bug #72793: xml_parser_free leaks mem when execute xml_set_object
---SKIPIF--
-<?php include("skipif.inc"); ?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 

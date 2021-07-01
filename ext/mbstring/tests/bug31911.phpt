@@ -1,7 +1,7 @@
 --TEST--
 Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo mb_decode_mimeheader("Works: =?iso-8859-1?q?=3F=3F=3F?=");

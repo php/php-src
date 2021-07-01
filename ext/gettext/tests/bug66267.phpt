@@ -1,10 +1,10 @@
 --TEST--
 #66265: gettext doesn't switch locales within the same script
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-if (!extension_loaded("gettext")) {
-    die("skip\n");
-}
+
 if (PHP_ZTS) {
     /* this is supposed to fail on the TS build at least on Windows,
     should be even XFAIL till it's fixed there */

@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : usage variations - pass different character classes to see they match correctly
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 version_compare(MB_ONIGURUMA_VERSION, '6.1.0', '>=') or die("skip requires oniguruma >= 6.1.0");
 ?>

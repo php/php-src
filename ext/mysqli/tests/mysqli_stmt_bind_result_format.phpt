@@ -1,8 +1,9 @@
 --TEST--
 Playing with SELECT FORMAT(...) AS _format - see also bugs.php.net/42378
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

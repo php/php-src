@@ -491,7 +491,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-    jit_extension->func_info.num = 0;
+	jit_extension->func_info.num = 0;
 	jit_extension->func_info.flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
 		| ZEND_FUNC_JIT_ON_PROF_REQUEST
 		| ZEND_FUNC_JIT_ON_HOT_COUNTERS
@@ -4883,36 +4883,45 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
-							for (j = 0 ; j < op_array->last_var; j++) {
-								uint32_t info;
-								zend_uchar type;
-
-								info = zend_ssa_cv_info(op_array, op_array_ssa, j);
-								type = STACK_TYPE(stack, j);
-								info = zend_jit_trace_type_to_info_ex(type, info);
-								if (opline->op1_type == IS_CV
-								 && EX_VAR_TO_NUM(opline->op1.var) == j
-								 && !(op1_info & (MAY_BE_REF|MAY_BE_OBJECT))) {
-									if (JIT_G(current_frame)
-									 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
-										continue;
-									} else {
-										info |= MAY_BE_NULL;
-									}
+							if (op_array->last_var > 100) {
+								/* To many CVs to unroll */
+								if (!zend_jit_free_cvs(&dasm_state)) {
+									goto jit_failure;
 								}
-								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-									if (!left_frame) {
-										left_frame = 1;
-									    if (!zend_jit_leave_frame(&dasm_state)) {
+								left_frame = 1;
+							}
+							if (!left_frame) {
+								for (j = 0 ; j < op_array->last_var; j++) {
+									uint32_t info;
+									zend_uchar type;
+
+									info = zend_ssa_cv_info(op_array, op_array_ssa, j);
+									type = STACK_TYPE(stack, j);
+									info = zend_jit_trace_type_to_info_ex(type, info);
+									if (opline->op1_type == IS_CV
+									 && EX_VAR_TO_NUM(opline->op1.var) == j
+									 && !(op1_info & (MAY_BE_REF|MAY_BE_OBJECT))) {
+										if (JIT_G(current_frame)
+										 && TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+											continue;
+										} else {
+											info |= MAY_BE_NULL;
+										}
+									}
+									if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+										if (!left_frame) {
+											left_frame = 1;
+										    if (!zend_jit_leave_frame(&dasm_state)) {
+												goto jit_failure;
+										    }
+										}
+										if (!zend_jit_free_cv(&dasm_state, info, j)) {
 											goto jit_failure;
-									    }
-									}
-									if (!zend_jit_free_cv(&dasm_state, info, j)) {
-										goto jit_failure;
-									}
-									if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
-										if (info & MAY_BE_RC1) {
-											may_throw = 1;
+										}
+										if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
+											if (info & MAY_BE_RC1) {
+												may_throw = 1;
+											}
 										}
 									}
 								}
@@ -6422,11 +6431,11 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
 	if (opline) {
-		zend_jit_set_ip(&dasm_state, opline);
 		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
 			/* prevent endless loop */
 			original_handler = 1;
 		}
+		zend_jit_set_ip_ex(&dasm_state, opline, original_handler);
 	}
 
 	zend_jit_trace_return(&dasm_state, original_handler);

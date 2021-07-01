@@ -1,5 +1,7 @@
 --TEST--
 Bug #44618 (Fetching may rely on uninitialized data)
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

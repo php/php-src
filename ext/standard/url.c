@@ -587,7 +587,7 @@ PHP_FUNCTION(urldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -649,7 +649,7 @@ PHP_FUNCTION(rawurldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 

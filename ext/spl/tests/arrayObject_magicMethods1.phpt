@@ -170,8 +170,6 @@ object(ArrayObject)#2 (1) {
 }
 
 --> Unset existent, non-existent and dynamic:
-
-Warning: Undefined array key "nonexistent" in %s on line %d
   Original wrapped object:
 object(UsesMagic)#1 (3) {
   ["b"]=>

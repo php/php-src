@@ -1,6 +1,7 @@
 --TEST--
 Bug #68547 (Exif Header component value check error)
 --EXTENSIONS--
+mbstring
 exif
 --FILE--
 <?php

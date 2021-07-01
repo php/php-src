@@ -242,7 +242,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 static void php_dl_error(const char *filename)
 {
-    php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
+	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
 }
 
 PHPAPI void *php_load_shlib(const char *path, char **errp)
@@ -254,9 +254,9 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
-    php_dl_error(filename);
+	php_dl_error(filename);
 
-    return FAILURE;
+	return FAILURE;
 }
 
 #endif
@@ -264,12 +264,12 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 /* {{{ php_dl */
 PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
 {
-    /* Load extension */
-    if (php_load_extension(file, type, start_now) == FAILURE) {
-        RETVAL_FALSE;
-    } else {
-        RETVAL_TRUE;
-    }
+	/* Load extension */
+	if (php_load_extension(file, type, start_now) == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
 }
 /* }}} */
 
@@ -280,5 +280,5 @@ PHP_MINFO_FUNCTION(dl)
 #else
 #define PHP_DL_SUPPORT_STATUS "unavailable"
 #endif
-    php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
+	php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
 }

@@ -678,7 +678,7 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
-# include "jit/zend_jit_gdb.c"
+# include "jit/zend_jit_gdb.h"
 # include "jit/zend_jit_perf_dump.c"
 #endif
 #ifdef HAVE_OPROFILE
@@ -1280,7 +1280,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	}
 #endif
 
-    /* TODO: move this to zend_cfg.c ? */
+	/* TODO: move this to zend_cfg.c ? */
 	if (!op_array->function_name) {
 		ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	}
@@ -3525,18 +3525,27 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (!zend_jit_label(&dasm_state, jit_return_label)) {
 								goto jit_failure;
 							}
-							for (j = 0 ; j < op_array->last_var; j++) {
-								uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
+							if (op_array->last_var > 100) {
+								/* To many CVs to unroll */
+								if (!zend_jit_free_cvs(&dasm_state)) {
+									goto jit_failure;
+								}
+								left_frame = 1;
+							}
+							if (!left_frame) {
+								for (j = 0 ; j < op_array->last_var; j++) {
+									uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
 
-								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-									if (!left_frame) {
-										left_frame = 1;
-									    if (!zend_jit_leave_frame(&dasm_state)) {
+									if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+										if (!left_frame) {
+											left_frame = 1;
+										    if (!zend_jit_leave_frame(&dasm_state)) {
+												goto jit_failure;
+										    }
+										}
+										if (!zend_jit_free_cv(&dasm_state, info, j)) {
 											goto jit_failure;
-									    }
-									}
-									if (!zend_jit_free_cv(&dasm_state, info, j)) {
-										goto jit_failure;
+										}
 									}
 								}
 							}

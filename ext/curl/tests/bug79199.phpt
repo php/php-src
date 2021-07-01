@@ -1,9 +1,7 @@
 --TEST--
 Bug #79199 (curl_copy_handle() memory leak)
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) die('skip curl extension not available');
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $mem_old = 0;

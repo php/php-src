@@ -1,9 +1,7 @@
 --TEST--
 Bug #50728 (All PDOExceptions hardcode 'code' property to 0)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 try {

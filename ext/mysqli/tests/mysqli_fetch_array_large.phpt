@@ -1,9 +1,10 @@
 --TEST--
 mysqli_fetch_array() - large packages (to test compression)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

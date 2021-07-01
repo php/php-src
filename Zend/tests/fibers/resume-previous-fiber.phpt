@@ -4,7 +4,7 @@ Resume previous fiber
 <?php
 
 $fiber = new Fiber(function (): void {
-    $fiber1 = Fiber::this();
+    $fiber1 = Fiber::getCurrent();
 
     $fiber2 = new Fiber(function () use ($fiber1): void {
         $fiber1->resume();

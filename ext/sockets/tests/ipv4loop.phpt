@@ -1,11 +1,7 @@
 --TEST--
 IPv4 Loopback test
---SKIPIF--
-<?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
     /* Setup socket server */

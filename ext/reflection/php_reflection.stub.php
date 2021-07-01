@@ -45,6 +45,9 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function isVariadic(): bool {}
 
     /** @tentative-return-type */
+    public function isStatic(): bool {}
+
+    /** @tentative-return-type */
     public function getClosureThis(): ?object {}
 
     /** @tentative-return-type */
@@ -174,9 +177,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     /** @tentative-return-type */
     public function isFinal(): bool {}
-
-    /** @tentative-return-type */
-    public function isStatic(): bool {}
 
     /** @tentative-return-type */
     public function isConstructor(): bool {}

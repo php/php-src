@@ -48,7 +48,6 @@
 #include "filters/mbfilter_euc_kr.h"
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
-#include "filters/mbfilter_sjis_open.h"
 #include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_sjis_mac.h"
 #include "filters/mbfilter_sjis_2004.h"
@@ -114,7 +113,6 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_sjis,
 	&mbfl_encoding_eucjp_win,
 	&mbfl_encoding_eucjp2004,
-	&mbfl_encoding_sjis_open,
  	&mbfl_encoding_sjis_docomo,
  	&mbfl_encoding_sjis_kddi,
  	&mbfl_encoding_sjis_sb,

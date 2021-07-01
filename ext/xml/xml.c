@@ -125,10 +125,10 @@ typedef struct {
 
 
 enum php_xml_option {
-    PHP_XML_OPTION_CASE_FOLDING = 1,
-    PHP_XML_OPTION_TARGET_ENCODING,
-    PHP_XML_OPTION_SKIP_TAGSTART,
-    PHP_XML_OPTION_SKIP_WHITE
+	PHP_XML_OPTION_CASE_FOLDING = 1,
+	PHP_XML_OPTION_TARGET_ENCODING,
+	PHP_XML_OPTION_SKIP_TAGSTART,
+	PHP_XML_OPTION_SKIP_WHITE
 };
 
 /* {{{ dynamically loadable module stuff */
@@ -191,10 +191,10 @@ static const zend_module_dep xml_deps[] = {
 
 zend_module_entry xml_module_entry = {
 #ifdef LIBXML_EXPAT_COMPAT
-    STANDARD_MODULE_HEADER_EX, NULL,
+	STANDARD_MODULE_HEADER_EX, NULL,
 	xml_deps,
 #else
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 #endif
 	"xml",                /* extension name */
 	ext_functions,        /* extension function list */
@@ -203,11 +203,11 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request startup function */
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
-    PHP_XML_VERSION,
-    PHP_MODULE_GLOBALS(xml), /* globals descriptor */
-    PHP_GINIT(xml),          /* globals ctor */
-    NULL,                    /* globals dtor */
-    NULL,                    /* post deactivate */
+	PHP_XML_VERSION,
+	PHP_MODULE_GLOBALS(xml), /* globals descriptor */
+	PHP_GINIT(xml),          /* globals ctor */
+	NULL,                    /* globals dtor */
+	NULL,                    /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -1040,7 +1040,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	object_init_ex(return_value, xml_parser_ce);
 	parser = Z_XMLPARSER_P(return_value);
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
-                                         &php_xml_mem_hdlrs, (XML_Char*)ns_param);
+	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;

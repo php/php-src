@@ -1,8 +1,9 @@
 --TEST--
 mysqli_pconnect() - mysqli.allow_persistent = 0
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 die("skip TODO - we need to add a user level way to check if CHANGE_USER gets called by pconnect");

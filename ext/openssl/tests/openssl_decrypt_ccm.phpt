@@ -1,9 +1,9 @@
 --TEST--
 openssl_decrypt() with CCM cipher algorithm tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
     die("skip: aes-256-ccm not available");
 ?>

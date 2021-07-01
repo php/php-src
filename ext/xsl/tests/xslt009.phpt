@@ -1,10 +1,8 @@
 --TEST--
 Test 9: Stream Wrapper XPath-Document()
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
+--EXTENSIONS--
+zlib
+xsl
 --FILE--
 <?php
 echo "Test 9: Stream Wrapper XPath-Document()";

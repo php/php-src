@@ -255,10 +255,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 	zval *retval = _zend_hash_index_find(ht, idx);
 
 	if (!retval) {
-		if (UNEXPECTED(zend_undefined_offset_write(ht, idx) == FAILURE)) {
-			return NULL;
-		}
-		retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
+		retval = zend_undefined_offset_write(ht, idx);
 	}
 	return retval;
 }
@@ -268,13 +265,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 	zval *retval = zend_hash_find_ex(ht, str, 1);
 	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
-		zend_string_addref(str);
-		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-			zend_string_release(str);
-			return NULL;
-		}
-		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
-		zend_string_release(str);
+		retval = zend_undefined_index_write(ht, str);
 	}
 	return retval;
 }
@@ -300,10 +291,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
 			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-					return NULL;
-				}
-				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
+				retval = zend_undefined_index_write(ht, str);
 			}
 			return retval;
 		}
@@ -312,13 +300,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 	retval = zend_hash_find(ht, str);
 	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
-		zend_string_addref(str);
-		if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
-			zend_string_release(str);
-			return NULL;
-		}
-		retval = zend_hash_add_new(ht, str, &EG(uninitialized_zval));
-		zend_string_release(str);
+		retval = zend_undefined_index_write(ht, str);
 	}
 	return retval;
 }
@@ -619,13 +601,7 @@ str_index:
 	retval = zend_hash_find(ht, offset_key);
 	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
-		zend_string_addref(offset_key);
-		if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
-			zend_string_release(offset_key);
-			return NULL;
-		}
-		retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-		zend_string_release(offset_key);
+		retval = zend_undefined_index_write(ht, offset_key);
 	}
 	return retval;
 
@@ -634,11 +610,7 @@ num_index:
 	return retval;
 
 num_undef:
-	if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
-		return NULL;
-	}
-	retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-	return retval;
+	return zend_undefined_offset_write(ht, hval);
 }
 
 static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim)

@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL escape functions
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

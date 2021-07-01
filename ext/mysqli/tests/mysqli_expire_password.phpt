@@ -1,8 +1,9 @@
 --TEST--
 MySQL 5.6 / MariaDB 10.4.3 EXPIRE PASSWORD protocol change
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('connect.inc');
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {

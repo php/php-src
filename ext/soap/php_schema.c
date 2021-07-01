@@ -1886,8 +1886,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		attr = attr->next;
 	}
 	if (newAttr->form == XSD_FORM_DEFAULT) {
- 		xmlNodePtr parent = attrType->parent;
- 		while (parent) {
+		xmlNodePtr parent = attrType->parent;
+		while (parent) {
 			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "attributeFormDefault");
@@ -1899,7 +1899,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				break;
 			}
 			parent = parent->parent;
-  	}
+		}
 		if (parent == NULL) {
 			newAttr->form = XSD_FORM_UNQUALIFIED;
 		}

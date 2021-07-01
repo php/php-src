@@ -1,5 +1,7 @@
 --TEST--
 DBA TCADB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'tcadb';
