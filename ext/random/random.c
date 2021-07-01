@@ -24,20 +24,20 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
-#include "php_random_module.h"
+#include "php_random.h"
 #include "random_arginfo.h"
 
-PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_RandomNumberGenerator;
-PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_XorShift128Plus;
-PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_MT19937;
-PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_Secure;
-PHPAPI zend_class_entry *php_random_ce_RandomInterface;
-PHPAPI zend_class_entry *php_random_ce_Random;
+PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_RandomNumberGenerator;
+PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
+PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_MT19937;
+PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
+PHPAPI zend_class_entry *random_ce_RandomInterface;
+PHPAPI zend_class_entry *random_ce_Random;
 
-static zend_object_handlers php_random_rng_xorshift128plus_object_handlers;
-static zend_object_handlers php_random_rng_mt19937_object_handlers;
-static zend_object_handlers php_random_rng_secure_object_handlers;
-static zend_object_handlers php_random_php_random_object_handlers;
+static zend_object_handlers random_rng_xorshift128plus_object_handlers;
+static zend_object_handlers random_rng_mt19937_object_handlers;
+static zend_object_handlers random_rng_secure_object_handlers;
+static zend_object_handlers random_php_random_object_handlers;
 
 static inline uint64_t php_random_rng_next(php_random_rng *rng, bool truncate)
 {
@@ -52,7 +52,7 @@ static inline uint64_t php_random_rng_next(php_random_rng *rng, bool truncate)
 	return ret;
 }
 
-uint64_t php_random_next(php_random *random, bool truncate)
+PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
 {
 	zval retval;
 	zend_object *rng;
@@ -139,7 +139,7 @@ static uint64_t range64(php_random *random, uint64_t umax) {
 }
 #endif
 
-zend_long php_random_range(php_random *random, zend_long min, zend_long max)
+PHPAPI zend_long php_random_range(php_random *random, zend_long min, zend_long max)
 {
 	zend_ulong umax = max - min;
 
@@ -152,7 +152,7 @@ zend_long php_random_range(php_random *random, zend_long min, zend_long max)
 	return (zend_long) (range32(random, umax) + min);
 }
 
-void php_random_array_data_shuffle(php_random *random, zval *array)
+PHPAPI void php_random_array_data_shuffle(php_random *random, zval *array)
 {
 	uint32_t idx, j, n_elems, n_left;
 	Bucket *p, temp;
@@ -231,7 +231,7 @@ void php_random_array_data_shuffle(php_random *random, zval *array)
 	}
 }
 
-void php_random_string_shuffle(php_random *random, char *str, zend_long len)
+PHPAPI void php_random_string_shuffle(php_random *random, char *str, zend_long len)
 {
 	zend_long n_elems, rnd_idx, n_left;
 	char temp;
@@ -366,8 +366,8 @@ const php_random_rng_algo php_random_rng_algo_xorshift128plus = {
 	xorshift128plus_unserialize
 };
 
-static zend_object *php_random_rng_xorshfit128plus_new(zend_class_entry *ce) {
-	return php_random_rng_common_init(ce, &php_random_rng_algo_xorshift128plus, &php_random_rng_xorshift128plus_object_handlers);
+static zend_object *php_random_rng_xorshift128plus_new(zend_class_entry *ce) {
+	return php_random_rng_common_init(ce, &php_random_rng_algo_xorshift128plus, &random_rng_xorshift128plus_object_handlers);
 }
 
 #define MT19937_N             (624)
@@ -471,7 +471,7 @@ const php_random_rng_algo php_random_rng_algo_mt19937 = {
 };
 
 static zend_object *php_random_rng_mt19937_new(zend_class_entry *ce) {
-	return php_random_rng_common_init(ce, &php_random_rng_algo_mt19937, &php_random_rng_mt19937_object_handlers);
+	return php_random_rng_common_init(ce, &php_random_rng_algo_mt19937, &random_rng_mt19937_object_handlers);
 }
 
 static uint64_t secure_generate(void *state) {
@@ -492,7 +492,7 @@ const php_random_rng_algo php_random_rng_algo_secure = {
 };
 
 static zend_object *php_random_rng_secure_new(zend_class_entry *ce) {
-	return php_random_rng_common_init(ce, &php_random_rng_algo_secure, &php_random_rng_secure_object_handlers);
+	return php_random_rng_common_init(ce, &php_random_rng_algo_secure, &random_rng_secure_object_handlers);
 }
 
 static zend_object *php_random_new(zend_class_entry *ce) {
@@ -500,7 +500,7 @@ static zend_object *php_random_new(zend_class_entry *ce) {
 
 	zend_object_std_init(&random->std, ce);
 	object_properties_init(&random->std, ce);
-	random->std.handlers = &php_random_php_random_object_handlers;
+	random->std.handlers = &random_php_random_object_handlers;
 
 	return &random->std;
 }
@@ -613,13 +613,13 @@ PHP_METHOD(Random, __construct)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(rng, php_random_ce_Random_NumberGenerator_RandomNumberGenerator);
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(rng, random_ce_Random_NumberGenerator_RandomNumberGenerator);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!rng) {
-		rng = php_random_rng_xorshfit128plus_new(php_random_ce_Random_NumberGenerator_XorShift128Plus);
+		rng = php_random_rng_xorshift128plus_new(random_ce_Random_NumberGenerator_XorShift128Plus);
 		zend_call_known_instance_method_with_0_params(
-			php_random_ce_Random_NumberGenerator_XorShift128Plus->constructor,
+			random_ce_Random_NumberGenerator_XorShift128Plus->constructor,
 			rng,
 			NULL
 		);
@@ -781,7 +781,7 @@ PHP_METHOD(Random, __unserialize)
 	object_properties_load(&random->std, Z_ARRVAL_P(members_zv));
 
 	prng = zend_read_property(random->std.ce, &random->std, "rng", sizeof("rng") - 1, 0, NULL);
-	if (Z_TYPE_P(prng) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(prng), php_random_ce_Random_NumberGenerator_RandomNumberGenerator)) {
+	if (Z_TYPE_P(prng) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(prng), random_ce_Random_NumberGenerator_RandomNumberGenerator)) {
 		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
 		RETURN_THROWS();
 	}
@@ -796,44 +796,44 @@ PHP_METHOD(Random, __unserialize)
 PHP_MINIT_FUNCTION(php_random)
 {
 	/* Random\NumberGenerator\RandomNumberGenerator */
-	php_random_ce_Random_NumberGenerator_RandomNumberGenerator = register_class_Random_NumberGenerator_RandomNumberGenerator();
+	random_ce_Random_NumberGenerator_RandomNumberGenerator = register_class_Random_NumberGenerator_RandomNumberGenerator();
 
 	/* Random\NumberGenerator\XorShift128Plus */
-	php_random_ce_Random_NumberGenerator_XorShift128Plus = register_class_Random_NumberGenerator_XorShift128Plus(php_random_ce_Random_NumberGenerator_RandomNumberGenerator);
-	php_random_ce_Random_NumberGenerator_XorShift128Plus->create_object = php_random_rng_xorshfit128plus_new;
-	memcpy(&php_random_rng_xorshift128plus_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	php_random_rng_xorshift128plus_object_handlers.offset = XtOffsetOf(php_random_rng, std);
-	php_random_rng_xorshift128plus_object_handlers.free_obj = php_random_rng_common_free_obj;
-	php_random_rng_xorshift128plus_object_handlers.clone_obj = php_random_rng_common_clone_obj;
+	random_ce_Random_NumberGenerator_XorShift128Plus = register_class_Random_NumberGenerator_XorShift128Plus(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_XorShift128Plus->create_object = php_random_rng_xorshift128plus_new;
+	memcpy(&random_rng_xorshift128plus_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	random_rng_xorshift128plus_object_handlers.offset = XtOffsetOf(php_random_rng, std);
+	random_rng_xorshift128plus_object_handlers.free_obj = php_random_rng_common_free_obj;
+	random_rng_xorshift128plus_object_handlers.clone_obj = php_random_rng_common_clone_obj;
 
 	/* Random\NumberGenerator\MT19937 */
-	php_random_ce_Random_NumberGenerator_MT19937 = register_class_Random_NumberGenerator_MT19937(php_random_ce_Random_NumberGenerator_RandomNumberGenerator);
-	php_random_ce_Random_NumberGenerator_MT19937->create_object = php_random_rng_mt19937_new;
-	memcpy(&php_random_rng_mt19937_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	php_random_rng_mt19937_object_handlers.offset = XtOffsetOf(php_random_rng, std);
-	php_random_rng_mt19937_object_handlers.free_obj = php_random_rng_common_free_obj;
-	php_random_rng_mt19937_object_handlers.clone_obj = php_random_rng_common_clone_obj;
+	random_ce_Random_NumberGenerator_MT19937 = register_class_Random_NumberGenerator_MT19937(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_MT19937->create_object = php_random_rng_mt19937_new;
+	memcpy(&random_rng_mt19937_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	random_rng_mt19937_object_handlers.offset = XtOffsetOf(php_random_rng, std);
+	random_rng_mt19937_object_handlers.free_obj = php_random_rng_common_free_obj;
+	random_rng_mt19937_object_handlers.clone_obj = php_random_rng_common_clone_obj;
 
 	/* Random\NumberGenerator\Secure */
-	php_random_ce_Random_NumberGenerator_Secure = register_class_Random_NumberGenerator_Secure(php_random_ce_Random_NumberGenerator_RandomNumberGenerator);
-	php_random_ce_Random_NumberGenerator_Secure->create_object = php_random_rng_secure_new;
-	php_random_ce_Random_NumberGenerator_Secure->serialize = zend_class_serialize_deny;
-	php_random_ce_Random_NumberGenerator_Secure->unserialize = zend_class_unserialize_deny;
-	memcpy(&php_random_rng_secure_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	php_random_rng_secure_object_handlers.offset = XtOffsetOf(php_random_rng, std);
-	php_random_rng_secure_object_handlers.free_obj = php_random_rng_common_free_obj;
-	php_random_rng_secure_object_handlers.clone_obj = NULL;
+	random_ce_Random_NumberGenerator_Secure = register_class_Random_NumberGenerator_Secure(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_Secure->create_object = php_random_rng_secure_new;
+	random_ce_Random_NumberGenerator_Secure->serialize = zend_class_serialize_deny;
+	random_ce_Random_NumberGenerator_Secure->unserialize = zend_class_unserialize_deny;
+	memcpy(&random_rng_secure_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	random_rng_secure_object_handlers.offset = XtOffsetOf(php_random_rng, std);
+	random_rng_secure_object_handlers.free_obj = php_random_rng_common_free_obj;
+	random_rng_secure_object_handlers.clone_obj = NULL;
 
 	/* RandomInterface */
-	php_random_ce_RandomInterface = register_class_RandomInterface();
+	random_ce_RandomInterface = register_class_RandomInterface();
 
 	/* Random */
-	php_random_ce_Random = register_class_Random(php_random_ce_RandomInterface);
-	php_random_ce_Random->create_object = php_random_new;
-	memcpy(&php_random_php_random_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	php_random_php_random_object_handlers.offset = XtOffsetOf(php_random, std);
-	php_random_php_random_object_handlers.free_obj = php_random_free_obj;
-	php_random_php_random_object_handlers.clone_obj = NULL;
+	random_ce_Random = register_class_Random(random_ce_RandomInterface);
+	random_ce_Random->create_object = php_random_new;
+	memcpy(&random_php_random_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	random_php_random_object_handlers.offset = XtOffsetOf(php_random, std);
+	random_php_random_object_handlers.free_obj = php_random_free_obj;
+	random_php_random_object_handlers.clone_obj = NULL;
 
 	return SUCCESS;
 }
@@ -848,8 +848,8 @@ PHP_MINFO_FUNCTION(php_random)
 }
 /* }}} */
 
-/* {{{ php_random_module_entry */
-zend_module_entry php_random_module_entry = {
+/* {{{ random_module_entry */
+zend_module_entry random_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"random",				/* Extension name */
 	NULL,					/* zend_function_entry */

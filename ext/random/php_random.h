@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef PHP_RANDOM_MODULE_H
-#define PHP_RANDOM_MODULE_H
+#ifndef PHP_RANDOM_H_MODULE
+#define PHP_RANDOM_H_MODULE
 
-extern zend_module_entry php_random_module_entry;
-#define phpext_random_ptr &php_random_module_entry
+extern zend_module_entry random_module_entry;
+#define phpext_random_ptr &random_module_entry
 
 extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_RandomNumberGenerator;
 extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_XorShift128Plus;
@@ -64,4 +64,4 @@ PHPAPI zend_long php_random_range(php_random *random, zend_long min, zend_long m
 PHPAPI void php_random_array_data_shuffle(php_random *random, zval *array);
 PHPAPI void php_random_string_shuffle(php_random *random, char *str, zend_long len);
 
-#endif	/* PHP_RANDOM_MODULE_H */
+#endif	/* PHP_RANDOM_H_MODULE */
