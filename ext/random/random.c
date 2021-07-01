@@ -40,9 +40,7 @@ static zend_object_handlers random_php_random_object_handlers;
 
 static inline uint64_t php_random_rng_next(php_random_rng *rng, bool truncate)
 {
-	uint64_t ret;
-
-	ret = rng->algo->generate(rng->state);
+	uint64_t ret = rng->algo->generate(rng->state);
 
 	if (truncate) {
 		ret = (zend_long) (ret >> 1);
@@ -274,7 +272,7 @@ static void php_random_rng_common_free_obj(zend_object *object) {
 		efree(rng->state);
 	}
 
-	zend_object_std_dtor(&rng->std);
+	zend_object_std_dtor(object);
 }
 
 static zend_object *php_random_rng_common_clone_obj(zend_object *old_object) {
