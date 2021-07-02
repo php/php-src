@@ -20,12 +20,11 @@
 extern zend_module_entry random_module_entry;
 #define phpext_random_ptr &random_module_entry
 
-extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_RandomNumberGenerator;
-extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_XorShift128Plus;
-extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_MT19937;
-extern PHPAPI zend_class_entry *php_random_ce_Random_NumberGenerator_Secure;
-extern PHPAPI zend_class_entry *php_random_ce_RandomInterface;
-extern PHPAPI zend_class_entry *php_random_ce_Random;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_MT19937;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
+extern PHPAPI zend_class_entry *random_ce_Random;
 
 typedef struct _php_random_rng_algo {
 	const size_t generate_size;
