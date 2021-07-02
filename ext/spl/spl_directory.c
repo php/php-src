@@ -2053,10 +2053,10 @@ PHP_METHOD(SplFileObject, __construct)
 	/* spl_filesystem_file_open() can generate E_WARNINGs which we want to promote to exceptions */
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 	zend_result retval = spl_filesystem_file_open(intern, use_include_path);
-    zend_restore_error_handling(&error_handling);
-    if (retval == FAILURE) {
+	zend_restore_error_handling(&error_handling);
+	if (retval == FAILURE) {
 		RETURN_THROWS();
-    }
+	}
 
 	path_len = strlen(intern->u.file.stream->orig_path);
 

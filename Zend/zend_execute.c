@@ -560,18 +560,16 @@ static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_prop
 	return prop;
 }
 
-static zend_never_inline ZEND_COLD bool zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
 	if (UNEXPECTED(EG(exception) != NULL)) {
-		return 0;
+		return &EG(uninitialized_zval);
 	}
 
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
 	Z_TRY_ADDREF_P(value_ptr);
-	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-
-	return 1;
+	return zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
@@ -2789,7 +2787,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	zend_object *zobj;
 	zend_string *name, *tmp_name;
 
-    if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
 			if (Z_ISREF_P(container) && Z_TYPE_P(Z_REFVAL_P(container)) == IS_OBJECT) {
 				container = Z_REFVAL_P(container);
@@ -2910,10 +2908,8 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 				   (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 				   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-			if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-					variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-				variable_ptr = &EG(uninitialized_zval);
-			}
+			variable_ptr = zend_wrong_assign_to_variable_reference(
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			zend_property_info *prop_info = NULL;
 
@@ -3726,7 +3722,7 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *
 	i_init_func_execute_data(op_array, return_value, 1 EXECUTE_DATA_CC);
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
-    EX(opline) = opline;
+	EX(opline) = opline;
 	opline = orig_opline;
 #endif
 #if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))

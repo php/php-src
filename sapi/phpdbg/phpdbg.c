@@ -1162,9 +1162,9 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #else
-    struct sigaction signal_struct;
-    signal_struct.sa_sigaction = phpdbg_signal_handler;
-    signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+	struct sigaction signal_struct;
+	signal_struct.sa_sigaction = phpdbg_signal_handler;
+	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
 #endif
 
 phpdbg_main:
@@ -1411,8 +1411,8 @@ phpdbg_main:
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_mm_heap *mm_heap;
 #ifdef _WIN32
-    EXCEPTION_POINTERS *xp;
-    __try {
+	EXCEPTION_POINTERS *xp;
+	__try {
 #endif
 
 		if (show_version || show_help) {
@@ -1522,7 +1522,7 @@ phpdbg_main:
 		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
 		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
 #endif
-        zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
+		zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
 
 
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);

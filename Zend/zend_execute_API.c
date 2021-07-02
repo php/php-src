@@ -1274,7 +1274,7 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
 #ifndef ZTS
-    if (EG(timed_out)) {
+	if (EG(timed_out)) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
 		uint32_t error_lineno = 0;
@@ -1302,7 +1302,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 			zend_quiet_write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
 		}
 		_exit(124);
-    }
+	}
 #endif
 
 	if (zend_on_timeout) {
@@ -1538,7 +1538,7 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string 
 
 ZEND_API zend_result zend_delete_global_variable(zend_string *name) /* {{{ */
 {
-    return zend_hash_del_ind(&EG(symbol_table), name);
+	return zend_hash_del_ind(&EG(symbol_table), name);
 }
 /* }}} */
 

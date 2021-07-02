@@ -1040,7 +1040,7 @@ PHP_METHOD(XMLReader, XML)
 
 	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
 
-    if (inputbfr != NULL) {
+	if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
 #ifdef HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);

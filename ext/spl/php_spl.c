@@ -58,9 +58,9 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
 	} else {
- 		ce = zend_lookup_class(name);
- 	}
- 	if (ce == NULL) {
+		ce = zend_lookup_class(name);
+	}
+	if (ce == NULL) {
 		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
 		return NULL;
 	}

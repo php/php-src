@@ -3285,7 +3285,7 @@ static zend_always_inline int _zend_update_type_info(
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
 				    opline->opcode == ZEND_FETCH_DIM_RW ||
 				    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
-                    opline->opcode == ZEND_FETCH_LIST_W) {
+				    opline->opcode == ZEND_FETCH_LIST_W) {
 					if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 						if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
 							tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);

@@ -59,12 +59,12 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	valid_T = (zend_bitset) zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 	map_T = (int *) zend_arena_alloc(&ctx->arena, T * sizeof(int));
 
-    end = op_array->opcodes;
-    opline = &op_array->opcodes[op_array->last - 1];
+	end = op_array->opcodes;
+	opline = &op_array->opcodes[op_array->last - 1];
 
-    /* Find T definition points */
-    while (opline >= end) {
-        if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+	/* Find T definition points */
+	while (opline >= end) {
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 			start_of_T[VAR_NUM(opline->result.var) - offset] = opline;
 		}
 		opline--;
@@ -73,10 +73,10 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	zend_bitset_clear(valid_T, bitset_len);
 	zend_bitset_clear(taken_T, bitset_len);
 
-    end = op_array->opcodes;
-    opline = &op_array->opcodes[op_array->last - 1];
+	end = op_array->opcodes;
+	opline = &op_array->opcodes[op_array->last - 1];
 
-    while (opline >= end) {
+	while (opline >= end) {
 		if ((opline->op1_type & (IS_VAR | IS_TMP_VAR))) {
 			currT = VAR_NUM(opline->op1.var) - offset;
 			if (opline->opcode == ZEND_ROPE_END) {

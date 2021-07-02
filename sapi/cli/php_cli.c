@@ -1244,7 +1244,7 @@ int main(int argc, char *argv[])
 				if (ini_path_override) {
 					free(ini_path_override);
 				}
- 				ini_path_override = strdup(php_optarg);
+				ini_path_override = strdup(php_optarg);
 				break;
 			case 'n':
 				ini_ignore = 1;

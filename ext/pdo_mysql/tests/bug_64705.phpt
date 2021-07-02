@@ -11,5 +11,5 @@ try {
   var_dump(!empty($e->errorInfo) && is_array($e->errorInfo));
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

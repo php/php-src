@@ -2613,10 +2613,10 @@ PHP_FUNCTION(pg_lo_read)
 /* {{{ Write a large object */
 PHP_FUNCTION(pg_lo_write)
 {
-  	zval *pgsql_id;
-  	zend_string *str;
-  	zend_long z_len;
-  	bool z_len_is_null = 1;
+	zval *pgsql_id;
+	zend_string *str;
+	zend_long z_len;
+	bool z_len_is_null = 1;
 	size_t nbytes;
 	size_t len;
 	pgLofp *pgsql;
@@ -2654,7 +2654,7 @@ PHP_FUNCTION(pg_lo_write)
 /* {{{ Read a large object and send straight to browser */
 PHP_FUNCTION(pg_lo_read_all)
 {
-  	zval *pgsql_id;
+	zval *pgsql_id;
 	int tbytes;
 	volatile int nbytes;
 	char buf[PGSQL_LO_READ_BUF_SIZE];
@@ -5815,7 +5815,7 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 /* }}} */
 
 /* {{{ php_pgsql_select */
- PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};

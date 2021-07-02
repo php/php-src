@@ -100,36 +100,36 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 /* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
-        static struct {
-                int code;
-                const char *msg;
-        } values[] = {
+	static struct {
+		int code;
+		const char *msg;
+	} values[] = {
 #  ifdef EAI_ADDRFAMILY
-                {EAI_ADDRFAMILY, "Address family for hostname not supported"},
+		{EAI_ADDRFAMILY, "Address family for hostname not supported"},
 #  endif
-                {EAI_AGAIN, "Temporary failure in name resolution"},
-                {EAI_BADFLAGS, "Bad value for ai_flags"},
-                {EAI_FAIL, "Non-recoverable failure in name resolution"},
-                {EAI_FAMILY, "ai_family not supported"},
-                {EAI_MEMORY, "Memory allocation failure"},
+		{EAI_AGAIN, "Temporary failure in name resolution"},
+		{EAI_BADFLAGS, "Bad value for ai_flags"},
+		{EAI_FAIL, "Non-recoverable failure in name resolution"},
+		{EAI_FAMILY, "ai_family not supported"},
+		{EAI_MEMORY, "Memory allocation failure"},
 #  ifdef EAI_NODATA
-                {EAI_NODATA, "No address associated with hostname"},
+		{EAI_NODATA, "No address associated with hostname"},
 #  endif
-                {EAI_NONAME, "Name or service not known"},
-                {EAI_SERVICE, "Servname not supported for ai_socktype"},
-                {EAI_SOCKTYPE, "ai_socktype not supported"},
-                {EAI_SYSTEM, "System error"},
-                {0, NULL}
-        };
-        int i;
+		{EAI_NONAME, "Name or service not known"},
+		{EAI_SERVICE, "Servname not supported for ai_socktype"},
+		{EAI_SOCKTYPE, "ai_socktype not supported"},
+		{EAI_SYSTEM, "System error"},
+		{0, NULL}
+	};
+	int i;
 
-        for (i = 0; values[i].msg != NULL; i++) {
-                if (values[i].code == code) {
-                        return (char *)values[i].msg;
-                }
-        }
+	for (i = 0; values[i].msg != NULL; i++) {
+		if (values[i].code == code) {
+			return (char *)values[i].msg;
+		}
+	}
 
-        return "Unknown error";
+	return "Unknown error";
 }
 /* }}} */
 #endif
@@ -285,9 +285,9 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #ifdef PHP_WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
-     save = TRUE; ioctlsocket(sock, FIONBIO, &save)
+	save = TRUE; ioctlsocket(sock, FIONBIO, &save)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
-	 ioctlsocket(sock, FIONBIO, &save)
+	ioctlsocket(sock, FIONBIO, &save)
 #else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \

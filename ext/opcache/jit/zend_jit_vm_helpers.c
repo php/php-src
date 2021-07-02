@@ -771,7 +771,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			opline = EX(opline);
 #endif
 
-            op_array = &EX(func)->op_array;
+			op_array = &EX(func)->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)

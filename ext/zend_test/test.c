@@ -243,7 +243,7 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type)
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
-    if (zend_string_equals_literal_ci(name, "test")) {
+	if (zend_string_equals_literal_ci(name, "test")) {
 	    zend_internal_function *fptr;
 
 	    if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
@@ -260,7 +260,7 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	    fptr->handler = ZEND_FN(zend_test_func);
 
 	    return (zend_function*)fptr;
-    }
+	}
 	return zend_std_get_method(object, name, key);
 }
 
@@ -471,11 +471,11 @@ ZEND_GET_MODULE(zend_test)
 
 PHP_ZEND_TEST_API struct bug79096 bug79096(void)
 {
-  struct bug79096 b;
+	struct bug79096 b;
 
-  b.a = 1;
-  b.b = 1;
-  return b;
+	b.a = 1;
+	b.b = 1;
+	return b;
 }
 
 PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
@@ -503,5 +503,5 @@ typedef struct bug80847_02 {
 PHP_ZEND_TEST_API bug80847_02 ffi_bug80847(bug80847_02 s) {
 	s.a.b += 10;
 	s.a.c -= 10.0;
-    return s;
+	return s;
 }

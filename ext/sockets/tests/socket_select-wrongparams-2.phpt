@@ -15,7 +15,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 socket_select(): At least one array argument must be passed
 --CREDITS--
 Till Klampaeckel, till@php.net

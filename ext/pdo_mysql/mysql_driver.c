@@ -464,7 +464,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			if (lval < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
- 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = lval;

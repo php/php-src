@@ -264,9 +264,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 			php_stream_close(stream);
 			stream = NULL;
 		}
- 	 	smart_str_free(&soap_headers);
+		smart_str_free(&soap_headers);
 
- 	 	if (stream) {
+		if (stream) {
 			zend_string *http_headers = get_http_headers(stream);
 			if (http_headers) {
 				zend_string_free(http_headers);
@@ -278,7 +278,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		/* enable SSL transport layer */
 		if (stream) {
 			/* if a stream is created without encryption, check to see if SSL method parameter is specified and use
- 			   proper encrypyion method based on constants defined in soap.c */
+			   proper encrypyion method based on constants defined in soap.c */
 			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1)) != NULL &&
 				Z_TYPE_P(tmp) == IS_LONG) {
@@ -318,17 +318,17 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 
 static int in_domain(const char *host, const char *domain)
 {
-  if (domain[0] == '.') {
-    int l1 = strlen(host);
-    int l2 = strlen(domain);
-    if (l1 > l2) {
-    	return strcmp(host+l1-l2,domain) == 0;
-    } else {
-      return 0;
-    }
-  } else {
-    return strcmp(host,domain) == 0;
-  }
+	if (domain[0] == '.') {
+		int l1 = strlen(host);
+		int l2 = strlen(domain);
+		if (l1 > l2) {
+			return strcmp(host+l1-l2,domain) == 0;
+		} else {
+			return 0;
+		}
+	} else {
+		return strcmp(host,domain) == 0;
+	}
 }
 
 int make_http_soap_request(zval        *this_ptr,
@@ -493,14 +493,14 @@ try_again:
 		      (!use_ssl && !zend_string_equals_literal(orig->scheme, "https"))) &&
 		     zend_string_equals(orig->host, phpurl->host) &&
 		     orig->port == phpurl->port))) {
-    } else {
+		} else {
 			php_stream_close(stream);
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1);
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 			stream = NULL;
 			use_proxy = 0;
-    }
+		}
 	}
 
 	/* Check if keep-alive connection is still opened */
@@ -1480,7 +1480,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						}
 						len_size += len_read;
 	 					http_buf_size += len_read;
- 					}
+					}
 
 					/* Eat up '\r' '\n' */
 					ch = php_stream_getc(stream);
@@ -1494,7 +1494,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						}
 						return NULL;
 					}
- 				}
+				}
 			} else {
 				/* Something wrong in chunked encoding */
 				if (http_buf) {

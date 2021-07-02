@@ -346,7 +346,7 @@ static php_output_handler *php_zlib_output_handler_init(const char *handler_name
 		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 	}
 
-    ZLIBG(handler_registered) = 1;
+	ZLIBG(handler_registered) = 1;
 
 	if ((h = php_output_handler_create_internal(handler_name, handler_name_len, php_zlib_output_handler, chunk_size, flags))) {
 		php_output_handler_set_context(h, php_zlib_output_handler_context_init(), php_zlib_output_handler_context_dtor);
@@ -1417,10 +1417,10 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 static PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(compression_coding) = 0;
-    if (!ZLIBG(handler_registered)) {
-        ZLIBG(output_compression) = ZLIBG(output_compression_default);
-        php_zlib_output_compression_start();
-    }
+	if (!ZLIBG(handler_registered)) {
+		ZLIBG(output_compression) = ZLIBG(output_compression_default);
+		php_zlib_output_compression_start();
+	}
 
 	return SUCCESS;
 }
@@ -1430,9 +1430,9 @@ static PHP_RINIT_FUNCTION(zlib)
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
 	php_zlib_cleanup_ob_gzhandler_mess();
-    ZLIBG(handler_registered) = 0;
+	ZLIBG(handler_registered) = 0;
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1458,7 +1458,7 @@ static PHP_GINIT_FUNCTION(zlib)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	zlib_globals->ob_gzhandler = NULL;
-    zlib_globals->handler_registered = 0;
+	zlib_globals->handler_registered = 0;
 }
 /* }}} */
 

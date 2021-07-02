@@ -59,7 +59,7 @@ fclose($pipes[0]);
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 STDOUT << hello

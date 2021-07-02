@@ -678,7 +678,7 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm.c"
 #ifndef _WIN32
-# include "jit/zend_jit_gdb.c"
+# include "jit/zend_jit_gdb.h"
 # include "jit/zend_jit_perf_dump.c"
 #endif
 #ifdef HAVE_OPROFILE
@@ -1280,7 +1280,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	}
 #endif
 
-    /* TODO: move this to zend_cfg.c ? */
+	/* TODO: move this to zend_cfg.c ? */
 	if (!op_array->function_name) {
 		ssa->cfg.flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 	}

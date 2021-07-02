@@ -474,7 +474,7 @@ static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *
 		default:
 			zend_type_error("Illegal offset type");
 			return FAILURE;
- 	}
+	}
 	return SUCCESS;
 }
 

@@ -16,6 +16,6 @@ $fiber->pipeTo(function (int $result): void {
 var_dump($fiber->start());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 NULL

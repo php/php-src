@@ -425,7 +425,9 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
+		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
 		zval_ptr_dtor(&fiber->fci.function_name);
+		ZVAL_UNDEF(&fiber->fci.function_name);
 
 		if (EG(exception)) {
 			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
@@ -516,9 +518,8 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 {
-	zend_fiber *fiber;
+	zend_fiber *fiber = emalloc(sizeof(zend_fiber));
 
-	fiber = emalloc(sizeof(zend_fiber));
 	memset(fiber, 0, sizeof(zend_fiber));
 
 	zend_object_std_init(&fiber->std, ce);
@@ -538,9 +539,14 @@ static void zend_fiber_object_destroy(zend_object *object)
 	zend_object *exception = EG(exception);
 	EG(exception) = NULL;
 
+	zval graceful_exit;
+	ZVAL_OBJ(&graceful_exit, zend_create_graceful_exit());
+
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
+	zend_fiber_transfer transfer = zend_fiber_resume(fiber, &graceful_exit, true);
+
+	zval_ptr_dtor(&graceful_exit);
 
 	if (transfer.flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
 		EG(exception) = Z_OBJ(transfer.value);
@@ -565,14 +571,23 @@ static void zend_fiber_object_free(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	if (fiber->context.status == ZEND_FIBER_STATUS_INIT) {
-		// Fiber was never started, so we need to release the reference to the callback.
-		zval_ptr_dtor(&fiber->fci.function_name);
-	}
-
+	zval_ptr_dtor(&fiber->fci.function_name);
 	zval_ptr_dtor(&fiber->result);
 
 	zend_object_std_dtor(&fiber->std);
+}
+
+static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *num)
+{
+	zend_fiber *fiber = (zend_fiber *) object;
+	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
+
+	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+	zend_get_gc_buffer_add_zval(buf, &fiber->result);
+
+	zend_get_gc_buffer_use(buf, table, num);
+
+	return NULL;
 }
 
 ZEND_METHOD(Fiber, __construct)
@@ -590,12 +605,9 @@ ZEND_METHOD(Fiber, __construct)
 ZEND_METHOD(Fiber, start)
 {
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
-	zval *params;
-	uint32_t param_count;
-	zend_array *named_params;
 
 	ZEND_PARSE_PARAMETERS_START(0, -1)
-		Z_PARAM_VARIADIC_WITH_NAMED(params, param_count, named_params);
+		Z_PARAM_VARIADIC_WITH_NAMED(fiber->fci.params, fiber->fci.param_count, fiber->fci.named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(zend_fiber_switch_blocked())) {
@@ -603,14 +615,10 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-    if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
 		RETURN_THROWS();
 	}
-
-	fiber->fci.params = params;
-	fiber->fci.param_count = param_count;
-	fiber->fci.named_params = named_params;
 
 	if (!zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
 		RETURN_THROWS();
@@ -649,19 +657,12 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-    ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
-
-	if (fiber->flags & ZEND_FIBER_FLAG_DESTROYED) {
-		// This occurs when the fiber is GC'ed while suspended.
-		zval_ptr_dtor(&transfer.value);
-		zend_throw_graceful_exit();
-		RETURN_THROWS();
-	}
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -827,6 +828,7 @@ void zend_register_fiber_ce(void)
 	zend_fiber_handlers = std_object_handlers;
 	zend_fiber_handlers.dtor_obj = zend_fiber_object_destroy;
 	zend_fiber_handlers.free_obj = zend_fiber_object_free;
+	zend_fiber_handlers.get_gc = zend_fiber_object_gc;
 	zend_fiber_handlers.clone_obj = NULL;
 
 	zend_ce_fiber_error = register_class_FiberError(zend_ce_error);

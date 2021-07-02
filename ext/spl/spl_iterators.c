@@ -160,16 +160,18 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(&iter->intern.data);
 	zend_object_iterator      *sub_iter;
 
-	while (object->level > 0) {
-		if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
-			sub_iter = object->iterators[object->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
+	if (object->iterators) {
+		while (object->level > 0) {
+			if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
+				sub_iter = object->iterators[object->level].iterator;
+				zend_iterator_dtor(sub_iter);
+				zval_ptr_dtor(&object->iterators[object->level].zobject);
+			}
+			object->level--;
 		}
-		object->level--;
+		object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
+		object->level = 0;
 	}
-	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
-	object->level = 0;
 
 	zval_ptr_dtor(&iter->intern.data);
 }
@@ -905,6 +907,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 			object->level--;
 		}
 		efree(object->iterators);
+		object->iterators = NULL;
 	}
 
 	zend_object_std_dtor(&object->std);
@@ -928,7 +931,7 @@ static HashTable *spl_RecursiveIteratorIterator_get_gc(zend_object *obj, zval **
 	if (object->iterators) {
 		for (int level = 0; level <= object->level; level++) {
 			zend_get_gc_buffer_add_zval(gc_buffer, &object->iterators[level].zobject);
-			zend_get_gc_buffer_add_obj(gc_buffer, &object->iterators[object->level].iterator->std);
+			zend_get_gc_buffer_add_obj(gc_buffer, &object->iterators[level].iterator->std);
 		}
 	}
 
@@ -1146,7 +1149,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 		zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 		zval                      *data;
 
-        SPL_FETCH_SUB_ITERATOR(iterator, object);
+		SPL_FETCH_SUB_ITERATOR(iterator, object);
 		data = iterator->funcs->get_current_data(iterator);
 		if (data) {
 			ZVAL_COPY_DEREF(return_value, data);

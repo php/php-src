@@ -426,17 +426,17 @@ ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 
 static uint32_t zend_array_recalc_elements(HashTable *ht)
 {
-       zval *val;
-       uint32_t num = ht->nNumOfElements;
+	zval *val;
+	uint32_t num = ht->nNumOfElements;
 
-	   ZEND_HASH_FOREACH_VAL(ht, val) {
-		   if (Z_TYPE_P(val) == IS_INDIRECT) {
-			   if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
-				   num--;
-			   }
-		   }
-       } ZEND_HASH_FOREACH_END();
-       return num;
+	ZEND_HASH_FOREACH_VAL(ht, val) {
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
+				num--;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return num;
 }
 /* }}} */
 
@@ -1872,7 +1872,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_fu
 
 ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *argument)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	int result;
 
@@ -1955,7 +1955,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 
 ZEND_API void ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	zval *new_entry, *data;
 
@@ -2170,7 +2170,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 
 ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	zval *t, *s;
 
@@ -2393,9 +2393,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, Ha
 			}
 		}
 		*pos = ht->nNumUsed;
- 		return SUCCESS;
+		return SUCCESS;
 	} else {
- 		return FAILURE;
+		return FAILURE;
 	}
 }
 

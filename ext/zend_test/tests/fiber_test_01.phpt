@@ -20,7 +20,7 @@ var_dump($value); // NULL
 var_dump($fiber->getReturn()); // int(1)
 
 ?>
---EXPECTF--
+--EXPECT--
 int(123)
 int(246)
 NULL

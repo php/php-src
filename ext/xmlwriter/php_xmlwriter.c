@@ -446,13 +446,13 @@ PHP_FUNCTION(xmlwriter_write_element)
 	if (ptr) {
 		if (!content) {
 			retval = xmlTextWriterStartElement(ptr, (xmlChar *)name);
-            if (retval == -1) {
-                RETURN_FALSE;
-            }
+			if (retval == -1) {
+				RETURN_FALSE;
+			}
 			xmlTextWriterEndElement(ptr);
-            if (retval == -1) {
-                RETURN_FALSE;
-            }
+			if (retval == -1) {
+				RETURN_FALSE;
+			}
 		} else {
 			retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
 		}

@@ -134,12 +134,12 @@ ZEND_INI_MH(OnUpdateDecode)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("exif.encode_unicode",          "ISO-8859-15", PHP_INI_ALL, OnUpdateEncode, encode_unicode,    zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_unicode_motorola", "UCS-2BE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_be, zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_unicode_intel",    "UCS-2LE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_le, zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.encode_jis",              "",            PHP_INI_ALL, OnUpdateEncode, encode_jis,        zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_jis_motorola",     "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_be,     zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_jis_intel",        "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_le,     zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.encode_unicode",          "ISO-8859-15", PHP_INI_ALL, OnUpdateEncode, encode_unicode,    zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_unicode_motorola", "UCS-2BE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_be, zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_unicode_intel",    "UCS-2LE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_le, zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.encode_jis",              "",            PHP_INI_ALL, OnUpdateEncode, encode_jis,        zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_jis_motorola",     "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_be,     zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_jis_intel",        "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_le,     zend_exif_globals, exif_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -4654,7 +4654,7 @@ PHP_FUNCTION(exif_read_data)
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Width",  ImageInfo.Thumbnail.width);
 	}
-   	EFREE_IF(sections_str);
+	EFREE_IF(sections_str);
 
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Adding image infos");
@@ -4779,7 +4779,7 @@ PHP_FUNCTION(exif_imagetype)
 	char *imagefile;
 	size_t imagefile_len;
 	php_stream * stream;
- 	int itype = 0;
+	int itype = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &imagefile, &imagefile_len) == FAILURE) {
 		RETURN_THROWS();

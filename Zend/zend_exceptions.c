@@ -89,7 +89,7 @@ ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object) /* {{{ *
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous) /* {{{ */
 {
-    zval *previous, *ancestor, *ex;
+	zval *previous, *ancestor, *ex;
 	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 
@@ -1002,10 +1002,20 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 }
 /* }}} */
 
+ZEND_API ZEND_COLD zend_object *zend_create_unwind_exit(void)
+{
+	return zend_objects_new(&zend_ce_unwind_exit);
+}
+
+ZEND_API ZEND_COLD zend_object *zend_create_graceful_exit(void)
+{
+	return zend_objects_new(&zend_ce_graceful_exit);
+}
+
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_unwind_exit);
+	EG(exception) = zend_create_unwind_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }
@@ -1013,7 +1023,7 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_graceful_exit);
+	EG(exception) = zend_create_graceful_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }

@@ -384,14 +384,14 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		} else {
 			V_BOOL(dstvar) = V_BOOL(srcvar);
 		}
-        break;
+		break;
 
 	case VT_BSTR:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_BSTRREF(dstvar) = V_BSTR(srcvar);
 		} else {
 			V_BSTR(dstvar) = V_BSTR(srcvar);
-        }
+		}
 		break;
 
 	case VT_UNKNOWN:

@@ -236,7 +236,7 @@ static dba_handler handler[] = {
 	DBA_HND(cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_CDB_BUILTIN
-    DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
+	DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_DB1
 	DBA_HND(db1, DBA_LOCK_ALL) /* No lock in lib */
@@ -404,7 +404,7 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
+	STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -448,10 +448,10 @@ PHP_MINFO_FUNCTION(dba)
 	for(hptr = handler; hptr->name; hptr++) {
 		smart_str_appends(&handlers, hptr->name);
 		smart_str_appendc(&handlers, ' ');
- 	}
+	}
 
 	php_info_print_table_start();
- 	php_info_print_table_row(2, "DBA support", "enabled");
+	php_info_print_table_row(2, "DBA support", "enabled");
 	if (handlers.s) {
 		smart_str_0(&handlers);
 		php_info_print_table_row(2, "Supported handlers", ZSTR_VAL(handlers.s));
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(dba_handlers)
 		} else {
 			add_next_index_string(return_value, hptr->name);
 		}
- 	}
+	}
 }
 /* }}} */
 

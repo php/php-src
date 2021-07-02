@@ -17,6 +17,6 @@ if ($pid == 0) {
   exit;
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test with no flags ***
 child

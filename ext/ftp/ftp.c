@@ -1428,8 +1428,8 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 int
 my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	zend_long		size, sent;
-    int         n;
+	zend_long size, sent;
+	int       n;
 
 	size = len;
 	while (size) {

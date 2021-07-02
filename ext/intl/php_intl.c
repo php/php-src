@@ -98,8 +98,8 @@ const char *intl_locale_get_default( void )
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
-    STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_BOOLEAN("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
@@ -250,15 +250,15 @@ PHP_MINIT_FUNCTION( intl )
 PHP_MSHUTDOWN_FUNCTION( intl )
 {
 	const char *cleanup;
-    /* For the default locale php.ini setting */
-    UNREGISTER_INI_ENTRIES();
+	/* For the default locale php.ini setting */
+	UNREGISTER_INI_ENTRIES();
 
 	cleanup = getenv(EXPLICIT_CLEANUP_ENV_VAR);
-    if (cleanup != NULL && !(cleanup[0] == '0' && cleanup[1] == '\0')) {
+	if (cleanup != NULL && !(cleanup[0] == '0' && cleanup[1] == '\0')) {
 		u_cleanup();
-    }
+	}
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -306,7 +306,7 @@ PHP_MINFO_FUNCTION( intl )
 	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
-    /* For the default locale php.ini setting */
-    DISPLAY_INI_ENTRIES() ;
+	/* For the default locale php.ini setting */
+	DISPLAY_INI_ENTRIES() ;
 }
 /* }}} */

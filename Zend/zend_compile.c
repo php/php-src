@@ -757,7 +757,7 @@ void zend_do_free(znode *op1) /* {{{ */
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
 				if ((opline->opcode == ZEND_FETCH_LIST_R ||
-                     opline->opcode == ZEND_FETCH_LIST_W) &&
+				     opline->opcode == ZEND_FETCH_LIST_W) &&
 				    opline->op1_type == IS_VAR &&
 				    opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -3323,17 +3323,13 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		opline->extended_value &= ~ZEND_FETCH_REF;
 		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
-		if (result != NULL) {
-			*result = target_node;
-		}
+		*result = target_node;
 	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
 		opline->extended_value &= ~ZEND_FETCH_REF;
 		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
-		if (result != NULL) {
-			*result = target_node;
-		}
+		*result = target_node;
 	} else {
 		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
 		opline->extended_value = flags;
@@ -3343,9 +3339,11 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
+	znode dummy_node;
 	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN_REF, var_ast,
 		zend_ast_create_znode(value_node));
-	zend_compile_expr(NULL, assign_ast);
+	zend_compile_expr(&dummy_node, assign_ast);
+	zend_do_free(&dummy_node);
 }
 /* }}} */
 
@@ -3819,7 +3817,7 @@ static zend_result zend_compile_func_is_scalar(znode *result, zend_ast_list *arg
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-    opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
+	opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
 	return SUCCESS;
 }
 

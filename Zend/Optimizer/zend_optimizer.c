@@ -645,7 +645,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					ZEND_ASSERT(opline->op1.var == var);
 
 					break;
-				  }
+				}
 				default:
 					break;
 			}

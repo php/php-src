@@ -5461,10 +5461,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
 						"strlen(): Passing null to parameter #1 ($string) of type string is deprecated");
+					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					if (UNEXPECTED(EG(exception))) {
 						HANDLE_EXCEPTION();
 					}
-					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					break;
 				}
 
@@ -14648,10 +14648,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
 						"strlen(): Passing null to parameter #1 ($string) of type string is deprecated");
+					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					if (UNEXPECTED(EG(exception))) {
 						HANDLE_EXCEPTION();
 					}
-					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					break;
 				}
 
@@ -27112,9 +27112,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
-		}
+		variable_ptr = zend_wrong_assign_to_variable_reference(
+			variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
@@ -30329,9 +30328,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
-		}
+		variable_ptr = zend_wrong_assign_to_variable_reference(
+			variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
@@ -38691,10 +38689,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
 						"strlen(): Passing null to parameter #1 ($string) of type string is deprecated");
+					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					if (UNEXPECTED(EG(exception))) {
 						HANDLE_EXCEPTION();
 					}
-					ZVAL_LONG(EX_VAR(opline->result.var), 0);
 					break;
 				}
 
@@ -45963,9 +45961,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
-		}
+		variable_ptr = zend_wrong_assign_to_variable_reference(
+			variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
@@ -50010,9 +50007,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
-		}
+		variable_ptr = zend_wrong_assign_to_variable_reference(
+			variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}

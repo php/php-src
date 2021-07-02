@@ -33,5 +33,5 @@ ldap_delete($link, "cn=userref,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'isc
 ldap_delete($link, "cn=userref2,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'iscritical' => TRUE]]);
 remove_dummy_data($link, $base);
 ?>
---EXPECTF--
+--EXPECT--
 int(2)

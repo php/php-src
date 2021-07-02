@@ -105,9 +105,9 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 }
 
 static inline unsigned mph_hash(unsigned d, unsigned x) {
-    x ^= d;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    return x;
+	x ^= d;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	return x;
 }
 
 #define CODE_NOT_FOUND ((unsigned) -1)

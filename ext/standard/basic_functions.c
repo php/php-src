@@ -551,8 +551,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
 
- 	BG(page_uid) = -1;
- 	BG(page_gid) = -1;
+	BG(page_uid) = -1;
+	BG(page_gid) = -1;
 	return SUCCESS;
 }
 /* }}} */
@@ -773,7 +773,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		}
 	}
 #else
-    tsrm_env_lock();
+	tsrm_env_lock();
 
 	/* system method returns a const */
 	char *ptr = getenv(str);
@@ -782,7 +782,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		result = zend_string_init(ptr, strlen(ptr), 0);
 	}
 
-    tsrm_env_unlock();
+	tsrm_env_unlock();
 	return result;
 #endif
 }
@@ -1061,10 +1061,10 @@ PHP_FUNCTION(getopt)
 		int pos = 0;
 		zval *entry;
 
- 		if (Z_TYPE_P(args) != IS_ARRAY) {
- 			RETURN_FALSE;
- 		}
- 		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
+		if (Z_TYPE_P(args) != IS_ARRAY) {
+			RETURN_FALSE;
+		}
+		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
 
 		/* Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL */
