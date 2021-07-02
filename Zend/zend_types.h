@@ -614,10 +614,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
+#define GC_FLAGS_MASK				0x000007f0
+#define GC_INFO_MASK				0xfffff800
 #define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+#define GC_INFO_SHIFT				11
 
 static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
@@ -704,9 +704,10 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_ARRAY_PERSISTENT			GC_PERSISTENT
 
 /* object flags (zval.value->gc.u.flags) */
-#define IS_OBJ_WEAKLY_REFERENCED	GC_PERSISTENT
+#define IS_OBJ_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
 #define IS_OBJ_FREE_CALLED			(1<<9)
+#define IS_OBJ_WEAKLY_REFERENCED	(1<<10)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 

@@ -8,6 +8,7 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Enum_;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
@@ -479,6 +480,33 @@ class PropertyName {
     public function __toString()
     {
         return $this->class->toString() . "::$" . $this->property;
+    }
+}
+
+interface ConstName {
+    public function __toString(): string;
+}
+
+class ClassConstantName implements ConstName {
+    /** @var Name */
+    public $class;
+    /** @var string */
+    public $const;
+
+    public function __construct(Name $class, string $const)
+    {
+        $this->class = $class;
+        $this->const = $const;
+    }
+
+    public function getEnumObjectName()
+    {
+        return "enum_" . implode('_', $this->class->parts) . "_{$this->const}";
+    }
+
+    public function __toString(): string
+    {
+        return $this->class->toString() . "::" . $this->const;
     }
 }
 
@@ -995,6 +1023,99 @@ class FuncInfo {
     }
 }
 
+class ConstInfo
+{
+    /** @var ConstName */
+    public $name;
+    /** @var int */
+    public $flags;
+    /** @var Expr|null */
+    public $value;
+    /** @var string|null */
+    public $cond;
+
+    const MODIFIER_CASE = 0x1000;
+
+    public function __construct(ConstName $name, int $flags, ?Expr $value, ?string $cond)
+    {
+        $this->name = $name;
+        $this->flags = $flags;
+        $this->value = $value;
+        $this->cond = $cond;
+    }
+
+    public function evaluateValue(&$valueConstant = false) {
+        if ($this->value === null) {
+            if (!($this->flags & self::MODIFIER_CASE)) {
+                throw new Exception("Constant $this->name has no value");
+            }
+
+            return null;
+        }
+        $evaluator = new ConstExprEvaluator(
+            function (Expr $expr) use (&$valueConstant) {
+                if ($expr instanceof Expr\ConstFetch && !($this->flags & self::MODIFIER_CASE)) {
+                    $valueConstant = true;
+                    return null;
+                }
+
+                throw new Exception("Constant $this->name has an unsupported value");
+            }
+        );
+        return $evaluator->evaluateDirectly($this->value);
+    }
+
+    public function getDeclaration(): string {
+        $code = "";
+
+        if ($this->flags & self::MODIFIER_CASE) {
+            $code .= "static zend_object *{$this->name->getEnumObjectName()};\n";
+        }
+
+        return $code;
+    }
+
+    public function getRegistration(): string {
+        $code = "";
+
+        $constName = $this->name->const;
+
+        $valueConstant = false;
+        $value = $this->evaluateValue($valueConstant);
+        $type = $value === null ? "undefined" : getType($value);
+
+        if ($valueConstant) {
+            echo "Skipping code generation for constant $this->name, because it has a constant default value\n";
+            return "";
+        }
+
+        if ($this->flags & self::MODIFIER_CASE) {
+            $suffix = "";
+            $additionalParams = "";
+            switch ($type) {
+                case "integer":
+                    $suffix = "_long";
+                    $additionalParams = ", $value";
+                    break;
+
+                case "string":
+                    $suffix = "_string";
+                    $additionalParams = ', "' . addcslashes($value, '\\"') . '"';
+                    break;
+            }
+            if ($this->cond) {
+                $code .= "#if {$this->cond}\n";
+            }
+            $code .= "\t{$this->name->getEnumObjectName()} = zend_add_enum_case$suffix(class_entry, \"{$constName}\"$additionalParams);\n";
+            if ($this->cond) {
+                $code .= "#endif\n";
+            }
+        }
+
+        return $code;
+    }
+}
+
 class PropertyInfo
 {
     /** @var PropertyName */
@@ -1180,6 +1301,8 @@ class ClassInfo {
     /** @var string */
     public $type;
     /** @var string|null */
+    public $backingType;
+    /** @var string|null */
     public $alias;
     /** @var bool */
     public $isDeprecated;
@@ -1193,12 +1316,15 @@ class ClassInfo {
     public $propertyInfos;
     /** @var FuncInfo[] */
     public $funcInfos;
+    /** @var ConstInfo[] */
+    public $constInfos;
 
     /**
      * @param Name[] $extends
      * @param Name[] $implements
      * @param PropertyInfo[] $propertyInfos
      * @param FuncInfo[] $funcInfos
+     * @param ConstInfo[] $constInfos
      */
     public function __construct(
         Name $name,
@@ -1210,7 +1336,8 @@ class ClassInfo {
         array $extends,
         array $implements,
         array $propertyInfos,
-        array $funcInfos
+        array $funcInfos,
+        array $constInfos
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -1222,6 +1349,24 @@ class ClassInfo {
         $this->implements = $implements;
         $this->propertyInfos = $propertyInfos;
         $this->funcInfos = $funcInfos;
+        $this->constInfos = $constInfos;
+
+        if ($this->type == "enum") {
+            $this->backingType = "UNDEF";
+            foreach ($this->constInfos as $const) {
+                if ($const->flags & ConstInfo::MODIFIER_CASE) {
+                    switch (gettype($const->evaluateValue())) {
+                        case "integer":
+                            $this->backingType = "LONG";
+                            break;
+                        case "string":
+                            $this->backingType = "STRING";
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public function getRegistration(): string
@@ -1239,20 +1384,25 @@ class ClassInfo {
         $code = "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
 
         $code .= "{\n";
-        $code .= "\tzend_class_entry ce, *class_entry;\n\n";
-        if (count($this->name->parts) > 1) {
-            $className = $this->name->getLast();
-            $namespace = addslashes((string) $this->name->slice(0, -1));
-
-            $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+        if ($this->type == "enum") {
+            $escapedStringName = addslashes((string) $this->name);
+            $code .= "\tzend_class_entry *class_entry = zend_register_internal" . ($this->backingType == "UNDEF" ? "" : "_backed") . "_enum_ex(\"$escapedStringName\", " . ($this->backingType == "UNDEF" ? "" : "IS_$this->backingType, ") . "class_{$escapedName}_methods);\n";
         } else {
-            $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
-        }
+            $code .= "\tzend_class_entry ce, *class_entry;\n\n";
+            if (count($this->name->parts) > 1) {
+                $className = $this->name->getLast();
+                $namespace = addslashes((string) $this->name->slice(0, -1));
 
-        if ($this->type === "class" || $this->type === "trait") {
-            $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
-        } else {
-            $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
+                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+            } else {
+                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+            }
+
+            if ($this->type === "class" || $this->type === "trait") {
+                $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
+            } else {
+                $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
+            }
         }
         if ($this->getFlagsAsString()) {
             $code .= "\tclass_entry->ce_flags |= " . $this->getFlagsAsString() . ";\n";
@@ -1271,6 +1421,10 @@ class ClassInfo {
 
         if ($this->alias) {
             $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "_", $this->alias) . "\", class_entry);\n";
+        }
+
+        foreach ($this->constInfos as $const) {
+            $code .= $const->getRegistration();
         }
 
         foreach ($this->propertyInfos as $property) {
@@ -1604,8 +1758,9 @@ function parseProperty(
 /**
  * @param PropertyInfo[] $properties
  * @param FuncInfo[] $methods
+ * @param ConstInfo[] $constants
  */
-function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array $methods): ClassInfo {
+function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array $methods, array $constants): ClassInfo {
     $flags = $class instanceof Class_ ? $class->flags : 0;
     $comment = $class->getDocComment();
     $alias = null;
@@ -1635,19 +1790,22 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
         $implements = $class->implements;
     } elseif ($class instanceof Interface_) {
         $extends = $class->extends;
+    } elseif ($class instanceof Enum_) {
+        $implements = $class->implements;
     }
 
     return new ClassInfo(
         $name,
         $flags,
-        $class instanceof Class_ ? "class" : ($class instanceof Interface_ ? "interface" : "trait"),
+        $class instanceof Class_ ? "class" : ($class instanceof Interface_ ? "interface" : ($class instanceof Enum_ ? "enum" : "trait")),
         $alias,
         $isDeprecated,
         $isStrictProperties,
         $extends,
         $implements,
         $properties,
-        $methods
+        $methods,
+        $constants
     );
 }
 
@@ -1725,13 +1883,14 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             $className = $stmt->namespacedName;
             $propertyInfos = [];
             $methodInfos = [];
+            $constantInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
                     continue;
                 }
 
-                if (!$classStmt instanceof Stmt\ClassMethod && !$classStmt instanceof Stmt\Property) {
+                if (!$classStmt instanceof Stmt\ClassMethod && !$classStmt instanceof Stmt\Property && !$classStmt instanceof Stmt\EnumCase) {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
@@ -1740,12 +1899,15 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     $classFlags = $stmt->flags;
                 }
 
-                $flags = $classStmt->flags;
+                $flags = 0;
+                if (!$classStmt instanceof Stmt\EnumCase) {
+                    $flags = $classStmt->flags;
+                }
                 if ($stmt instanceof Stmt\Interface_) {
                     $flags |= Class_::MODIFIER_ABSTRACT;
                 }
 
-                if (!($flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                if (!($flags & Class_::VISIBILITY_MODIFIER_MASK) && !$classStmt instanceof Stmt\EnumCase) {
                     throw new Exception("Visibility modifier is required");
                 }
 
@@ -1768,10 +1930,17 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         $classStmt,
                         $cond
                     );
+                } else if ($classStmt instanceof Stmt\EnumCase) {
+                    $constantInfos[] = new ConstInfo(
+                        new ClassConstantName($className, $classStmt->name->toString()),
+                        ConstInfo::MODIFIER_CASE,
+                        $classStmt->expr,
+                        $cond
+                    );
                 }
             }
 
-            $fileInfo->classInfos[] = parseClass($className, $stmt, $propertyInfos, $methodInfos);
+            $fileInfo->classInfos[] = parseClass($className, $stmt, $propertyInfos, $methodInfos, $constantInfos);
             continue;
         }
 
@@ -2013,6 +2182,13 @@ function generateClassEntryCode(FileInfo $fileInfo): string {
     $code = "";
 
     foreach ($fileInfo->classInfos as $class) {
+        $declarationCode = "";
+        foreach ($class->constInfos as $constant) {
+            $declarationCode .= $constant->getDeclaration();
+        }
+        if ($declarationCode) {
+            $code .= "\n$declarationCode";
+        }
         $code .= "\n" . $class->getRegistration();
     }
 
@@ -2277,7 +2453,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.9.0";
+    $version = "4.11.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);

@@ -185,6 +185,7 @@ void init_executor(void) /* {{{ */
 	EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
 	EG(persistent_functions_count) = EG(function_table)->nNumUsed;
 	EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
+	EG(persistent_objects) = (zend_object *) ecalloc(sizeof(zend_object), zend_objects_persistent_handle_counter);
 
 	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
 
@@ -431,6 +432,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_destroy(&EG(user_error_handlers));
 		zend_stack_destroy(&EG(user_exception_handlers));
+		efree(EG(persistent_objects));
 		zend_objects_store_destroy(&EG(objects_store));
 		if (EG(in_autoload)) {
 			zend_hash_destroy(EG(in_autoload));
