@@ -11,7 +11,7 @@ foreach (include __DIR__ . DIRECTORY_SEPARATOR . 'number_generator' . DIRECTORY_
     $rngs[] = new $klass();
 }
 
-class UserRNG implements Random\NumberGenerator\RandomNumberGenerator
+class UserRNG implements Random\NumberGenerator
 {
     protected int $current = 0;
 

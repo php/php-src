@@ -8,7 +8,7 @@ foreach (include __DIR__ . DIRECTORY_SEPARATOR . 'common.inc' as $klass => $is_c
     $rngs[] = new $klass();
 }
 
-class UserRNG implements Random\NumberGenerator\RandomNumberGenerator
+class UserRNG implements Random\NumberGenerator
 {
     protected int $current = 0;
 
@@ -20,7 +20,7 @@ class UserRNG implements Random\NumberGenerator\RandomNumberGenerator
 $rngs[] = new UserRNG();
 
 foreach ($rngs as $rng) {
-    if (!$rng instanceof Random\NumberGenerator\RandomNumberGenerator) {
+    if (!$rng instanceof Random\NumberGenerator) {
         die('failure: ' . $rng::class);
     }
 }

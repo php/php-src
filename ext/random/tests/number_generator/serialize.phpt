@@ -12,7 +12,7 @@ foreach (include __DIR__ . DIRECTORY_SEPARATOR . 'common.inc' as $klass => $is_c
     $rngs[] = new $klass();
 }
 
-class UserRNG implements Random\NumberGenerator\RandomNumberGenerator
+class UserRNG implements Random\NumberGenerator
 {
     protected int $current = 0;
 

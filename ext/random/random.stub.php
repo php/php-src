@@ -3,14 +3,17 @@
 /** @generate-class-entries */
 /** @generate-function-entries */
 
-namespace Random\NumberGenerator
+namespace Random
 {
-    interface RandomNumberGenerator
+    interface NumberGenerator
     {
         public function generate(): int;
     }
+}
 
-    class XorShift128Plus implements RandomNumberGenerator
+namespace Random\NumberGenerator
+{
+    class XorShift128Plus implements Random\NumberGenerator
     {
         public function __construct(?int $seed = null) {}
 
@@ -21,7 +24,7 @@ namespace Random\NumberGenerator
         public function __unserialize(array $data): void {}
     }
 
-    class MT19937 implements RandomNumberGenerator
+    class MT19937 implements Random\NumberGenerator
     {
         /** @implementation-alias Random\NumberGenerator\XorShift128Plus::__construct */
         public function __construct(?int $seed = null) {}
@@ -36,7 +39,7 @@ namespace Random\NumberGenerator
         public function __unserialize(array $data): void {}
     }
 
-    class Secure implements RandomNumberGenerator
+    class Secure implements Random\NumberGenerator
     {
         public function __construct() {}
 
@@ -53,8 +56,8 @@ namespace
         // private Random\NumberGenerator\RandomNumberGenerator $rng;
         private mixed $rng;
 
-        public function __construct(?Random\NumberGenerator\RandomNumberGenerator $rng = null) {}
-        public function getNumberGenerator(): Random\NumberGenerator\RandomNumberGenerator {}
+        public function __construct(?Random\NumberGenerator $rng = null) {}
+        public function getNumberGenerator(): Random\NumberGenerator {}
         public function nextInt(): int {}
         public function getInt(int $min, int $max): int {}
         public function getBytes(int $length): string {}

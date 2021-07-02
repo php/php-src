@@ -27,7 +27,7 @@
 #include "php_random.h"
 #include "random_arginfo.h"
 
-PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_RandomNumberGenerator;
+PHPAPI zend_class_entry *random_ce_Random_NumberGenerator;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_MT19937;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
@@ -610,7 +610,7 @@ PHP_METHOD(Random, __construct)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(rng, random_ce_Random_NumberGenerator_RandomNumberGenerator);
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(rng, random_ce_Random_NumberGenerator);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!rng) {
@@ -780,7 +780,7 @@ PHP_METHOD(Random, __unserialize)
 	object_properties_load(&random->std, Z_ARRVAL_P(members_zv));
 
 	prng = zend_read_property(random->std.ce, &random->std, "rng", sizeof("rng") - 1, 0, NULL);
-	if (Z_TYPE_P(prng) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(prng), random_ce_Random_NumberGenerator_RandomNumberGenerator)) {
+	if (Z_TYPE_P(prng) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(prng), random_ce_Random_NumberGenerator)) {
 		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
 		RETURN_THROWS();
 	}
@@ -792,13 +792,13 @@ PHP_METHOD(Random, __unserialize)
 }
 
 /* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(php_random)
+PHP_MINIT_FUNCTION(random)
 {
 	/* Random\NumberGenerator\RandomNumberGenerator */
-	random_ce_Random_NumberGenerator_RandomNumberGenerator = register_class_Random_NumberGenerator_RandomNumberGenerator();
+	random_ce_Random_NumberGenerator = register_class_Random_NumberGenerator();
 
 	/* Random\NumberGenerator\XorShift128Plus */
-	random_ce_Random_NumberGenerator_XorShift128Plus = register_class_Random_NumberGenerator_XorShift128Plus(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_XorShift128Plus = register_class_Random_NumberGenerator_XorShift128Plus(random_ce_Random_NumberGenerator);
 	random_ce_Random_NumberGenerator_XorShift128Plus->create_object = php_random_rng_xorshift128plus_new;
 	memcpy(&random_rng_xorshift128plus_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	random_rng_xorshift128plus_object_handlers.offset = XtOffsetOf(php_random_rng, std);
@@ -806,7 +806,7 @@ PHP_MINIT_FUNCTION(php_random)
 	random_rng_xorshift128plus_object_handlers.clone_obj = php_random_rng_common_clone_obj;
 
 	/* Random\NumberGenerator\MT19937 */
-	random_ce_Random_NumberGenerator_MT19937 = register_class_Random_NumberGenerator_MT19937(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_MT19937 = register_class_Random_NumberGenerator_MT19937(random_ce_Random_NumberGenerator);
 	random_ce_Random_NumberGenerator_MT19937->create_object = php_random_rng_mt19937_new;
 	memcpy(&random_rng_mt19937_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	random_rng_mt19937_object_handlers.offset = XtOffsetOf(php_random_rng, std);
@@ -814,7 +814,7 @@ PHP_MINIT_FUNCTION(php_random)
 	random_rng_mt19937_object_handlers.clone_obj = php_random_rng_common_clone_obj;
 
 	/* Random\NumberGenerator\Secure */
-	random_ce_Random_NumberGenerator_Secure = register_class_Random_NumberGenerator_Secure(random_ce_Random_NumberGenerator_RandomNumberGenerator);
+	random_ce_Random_NumberGenerator_Secure = register_class_Random_NumberGenerator_Secure(random_ce_Random_NumberGenerator);
 	random_ce_Random_NumberGenerator_Secure->create_object = php_random_rng_secure_new;
 	random_ce_Random_NumberGenerator_Secure->serialize = zend_class_serialize_deny;
 	random_ce_Random_NumberGenerator_Secure->unserialize = zend_class_unserialize_deny;
@@ -836,7 +836,7 @@ PHP_MINIT_FUNCTION(php_random)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(php_random)
+PHP_MINFO_FUNCTION(random)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Random support", "enabled");
@@ -849,11 +849,11 @@ zend_module_entry random_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"random",				/* Extension name */
 	NULL,					/* zend_function_entry */
-	PHP_MINIT(php_random),		/* PHP_MINIT - Module initialization */
+	PHP_MINIT(random),		/* PHP_MINIT - Module initialization */
 	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
 	NULL,					/* PHP_RINIT - Request initialization */
 	NULL,					/* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(php_random),		/* PHP_MINFO - Module info */
+	PHP_MINFO(random),		/* PHP_MINFO - Module info */
 	PHP_VERSION,			/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
@@ -863,5 +863,5 @@ zend_module_entry random_module_entry = {
 # ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 # endif
-ZEND_GET_MODULE(php_random)
+ZEND_GET_MODULE(random)
 #endif

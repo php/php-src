@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 84c3fc62aa9df6d63f363911c9eceeaeeacafa49 */
+ * Stub hash: d5e46edb28ce2e3f864ff0fc30e95d3b778a9d06 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_generate, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Random_NumberGenerator_XorShift128Plus_generate arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
+#define arginfo_class_Random_NumberGenerator_XorShift128Plus_generate arginfo_class_Random_NumberGenerator_generate
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_XorShift128Plus___serialize, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -19,7 +19,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_NumberGenerator_MT19937___construct arginfo_class_Random_NumberGenerator_XorShift128Plus___construct
 
-#define arginfo_class_Random_NumberGenerator_MT19937_generate arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
+#define arginfo_class_Random_NumberGenerator_MT19937_generate arginfo_class_Random_NumberGenerator_generate
 
 #define arginfo_class_Random_NumberGenerator_MT19937___serialize arginfo_class_Random_NumberGenerator_XorShift128Plus___serialize
 
@@ -28,16 +28,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_NumberGenerator_Secure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Random_NumberGenerator_Secure_generate arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
+#define arginfo_class_Random_NumberGenerator_Secure_generate arginfo_class_Random_NumberGenerator_generate
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random___construct, 0, 0, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, Random\\NumberGenerator\\RandomNumberGenerator, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, rng, Random\\NumberGenerator, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Random_getNumberGenerator, 0, 0, Random\\NumberGenerator\\RandomNumberGenerator, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Random_getNumberGenerator, 0, 0, Random\\NumberGenerator, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Random_nextInt arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate
+#define arginfo_class_Random_nextInt arginfo_class_Random_NumberGenerator_generate
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_getInt, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
@@ -77,8 +77,8 @@ ZEND_METHOD(Random, __serialize);
 ZEND_METHOD(Random, __unserialize);
 
 
-static const zend_function_entry class_Random_NumberGenerator_RandomNumberGenerator_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(Random_NumberGenerator_RandomNumberGenerator, generate, arginfo_class_Random_NumberGenerator_RandomNumberGenerator_generate, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+static const zend_function_entry class_Random_NumberGenerator_methods[] = {
+	ZEND_ABSTRACT_ME_WITH_FLAGS(Random_NumberGenerator, generate, arginfo_class_Random_NumberGenerator_generate, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
@@ -121,45 +121,45 @@ static const zend_function_entry class_Random_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_Random_NumberGenerator_RandomNumberGenerator(void)
+static zend_class_entry *register_class_Random_NumberGenerator(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random\\NumberGenerator", "RandomNumberGenerator", class_Random_NumberGenerator_RandomNumberGenerator_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "NumberGenerator", class_Random_NumberGenerator_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Random_NumberGenerator_XorShift128Plus(zend_class_entry *class_entry_Random_NumberGenerator_RandomNumberGenerator)
+static zend_class_entry *register_class_Random_NumberGenerator_XorShift128Plus(zend_class_entry *class_entry_Random_NumberGenerator_Random_NumberGenerator)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\NumberGenerator", "XorShift128Plus", class_Random_NumberGenerator_XorShift128Plus_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_RandomNumberGenerator);
+	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_Random_NumberGenerator);
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Random_NumberGenerator_MT19937(zend_class_entry *class_entry_Random_NumberGenerator_RandomNumberGenerator)
+static zend_class_entry *register_class_Random_NumberGenerator_MT19937(zend_class_entry *class_entry_Random_NumberGenerator_Random_NumberGenerator)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\NumberGenerator", "MT19937", class_Random_NumberGenerator_MT19937_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_RandomNumberGenerator);
+	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_Random_NumberGenerator);
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Random_NumberGenerator_Secure(zend_class_entry *class_entry_Random_NumberGenerator_RandomNumberGenerator)
+static zend_class_entry *register_class_Random_NumberGenerator_Secure(zend_class_entry *class_entry_Random_NumberGenerator_Random_NumberGenerator)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\NumberGenerator", "Secure", class_Random_NumberGenerator_Secure_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_RandomNumberGenerator);
+	zend_class_implements(class_entry, 1, class_entry_Random_NumberGenerator_Random_NumberGenerator);
 
 	return class_entry;
 }
