@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     the process). (Calvin Buckley)
   . Fixed bug #73630 (Built-in Weberver - overwrite $_SERVER['request_uri']).
     (cmb)
+  . Fixed bug #80173 (Using return value of zend_assign_to_variable() is not
+    safe). (Nikita)
 
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
