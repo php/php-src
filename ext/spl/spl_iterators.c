@@ -928,7 +928,7 @@ static HashTable *spl_RecursiveIteratorIterator_get_gc(zend_object *obj, zval **
 	if (object->iterators) {
 		for (int level = 0; level <= object->level; level++) {
 			zend_get_gc_buffer_add_zval(gc_buffer, &object->iterators[level].zobject);
-			zend_get_gc_buffer_add_obj(gc_buffer, &object->iterators[object->level].iterator->std);
+			zend_get_gc_buffer_add_obj(gc_buffer, &object->iterators[level].iterator->std);
 		}
 	}
 

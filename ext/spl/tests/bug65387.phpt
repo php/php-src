@@ -51,6 +51,12 @@ $it = new RecursiveArrayIterator([1, 2, 3]);
 $it2 = new RecursiveIteratorIterator($it);
 $it[] = $it2;
 
+// Recursive iterator at level>0.
+$it = new RecursiveArrayIterator([[1]]);
+$it2 = new RecursiveIteratorIterator($it);
+$it[] = $it2;
+$it2->next();
+
 ?>
 ===DONE===
 --EXPECT--
