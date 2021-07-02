@@ -134,9 +134,10 @@ static void spl_fixedarray_copy_ctor(spl_fixedarray *to, spl_fixedarray *from)
 {
 	zend_long size = from->size;
 	spl_fixedarray_init(to, size);
-
-	zval *begin = from->elements, *end = from->elements + size;
-	spl_fixedarray_copy_range(to, 0, begin, end);
+	if (size != 0) {
+		zval *begin = from->elements, *end = from->elements + size;
+		spl_fixedarray_copy_range(to, 0, begin, end);
+	}
 }
 
 /* Destructs the elements in the range [from, to).
