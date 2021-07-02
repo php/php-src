@@ -160,16 +160,18 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(&iter->intern.data);
 	zend_object_iterator      *sub_iter;
 
-	while (object->level > 0) {
-		if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
-			sub_iter = object->iterators[object->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
+	if (object->iterators) {
+		while (object->level > 0) {
+			if (!Z_ISUNDEF(object->iterators[object->level].zobject)) {
+				sub_iter = object->iterators[object->level].iterator;
+				zend_iterator_dtor(sub_iter);
+				zval_ptr_dtor(&object->iterators[object->level].zobject);
+			}
+			object->level--;
 		}
-		object->level--;
+		object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
+		object->level = 0;
 	}
-	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
-	object->level = 0;
 
 	zval_ptr_dtor(&iter->intern.data);
 }
@@ -905,6 +907,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 			object->level--;
 		}
 		efree(object->iterators);
+		object->iterators = NULL;
 	}
 
 	zend_object_std_dtor(&object->std);
