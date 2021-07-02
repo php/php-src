@@ -38,18 +38,12 @@ static zend_object_handlers random_rng_mt19937_object_handlers;
 static zend_object_handlers random_rng_secure_object_handlers;
 static zend_object_handlers random_php_random_object_handlers;
 
-static inline uint64_t php_random_rng_next(php_random_rng *rng, bool truncate)
+static inline uint64_t php_random_rng_next(php_random_rng *rng)
 {
-	uint64_t ret = rng->algo->generate(rng->state);
-
-	if (truncate) {
-		ret = (zend_long) (ret >> 1);
-	}
-
-	return ret;
+	return rng->algo->generate(rng->state);
 }
 
-PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
+PHPAPI uint64_t php_random_next(php_random *random)
 {
 	zval retval;
 	zend_object *rng;
@@ -57,7 +51,7 @@ PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
 	zend_function *rng_func;
 
 	if (random->rng) {
-		return php_random_rng_next(random->rng, truncate);
+		return php_random_rng_next(random->rng);
 	}
 
 	rng = Z_OBJ_P(zend_read_property(random->std.ce, &random->std, "rng", sizeof("rng") - 1, 0, NULL));
@@ -73,7 +67,7 @@ PHPAPI uint64_t php_random_next(php_random *random, bool truncate)
 static uint32_t range32(php_random *random, uint32_t umax) {
 	uint32_t result, limit;
 
-	result = php_random_next(random, 0);
+	result = php_random_next(random);
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT32_MAX)) {
@@ -93,7 +87,7 @@ static uint32_t range32(php_random *random, uint32_t umax) {
 
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
-		result = php_random_next(random, 0);
+		result = php_random_next(random);
 	}
 
 	return result % umax;
@@ -103,9 +97,9 @@ static uint32_t range32(php_random *random, uint32_t umax) {
 static uint64_t range64(php_random *random, uint64_t umax) {
 	uint64_t result, limit;
 
-	result = php_random_next(random, 0);
+	result = php_random_next(random);
 	if (random->rng && random->rng->algo->generate_size == sizeof(uint32_t)) {
-		result = (result << sizeof(uint32_t)) | php_random_next(random, 0);
+		result = (result << sizeof(uint32_t)) | php_random_next(random);
 	}
 
 	/* Special case where no modulus is required */
@@ -126,9 +120,9 @@ static uint64_t range64(php_random *random, uint64_t umax) {
 
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
-		result = php_random_next(random, 0);
+		result = php_random_next(random);
 		if (random->rng && random->rng->algo->generate_size == sizeof(uint32_t)) {
-			result = (result << sizeof(uint32_t)) | php_random_next(random, 0);
+			result = (result << sizeof(uint32_t)) | php_random_next(random);
 		}
 	}
 
@@ -536,7 +530,7 @@ PHP_METHOD(Random_NumberGenerator_XorShift128Plus, generate)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	
-	RETURN_LONG((zend_long) php_random_rng_next(rng, 1));
+	RETURN_LONG((zend_long) php_random_rng_next(rng));
 }
 
 PHP_METHOD(Random_NumberGenerator_XorShift128Plus, __serialize)
@@ -657,7 +651,7 @@ PHP_METHOD(Random, nextInt)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG((zend_long) php_random_next(random, 1));
+	RETURN_LONG((zend_long) php_random_next(random));
 }
 
 PHP_METHOD(Random, getInt)
@@ -700,9 +694,9 @@ PHP_METHOD(Random, getBytes)
 	ret = zend_string_alloc(size, 0);
 
 	while (generated_bytes <= size) {
-		buf = php_random_next(random, 0);
+		buf = php_random_next(random);
 		if (random->rng && random->rng->algo->generate_size == sizeof(uint32_t)) {
-			buf = (buf << 32) | php_random_next(random, 0);
+			buf = (buf << 32) | php_random_next(random);
 		}
 		bytes = (uint8_t *) &buf;
 		for (i = 0; i < (sizeof(uint64_t) / sizeof(uint8_t)); i ++) {

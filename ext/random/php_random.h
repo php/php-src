@@ -58,7 +58,7 @@ static inline php_random *php_random_from_obj(zend_object *obj) {
 
 #define Z_RANDOM_P(zval) php_random_from_obj(Z_OBJ_P(zval))
 
-PHPAPI uint64_t php_random_next(php_random *random, bool shift);
+PHPAPI uint64_t php_random_next(php_random *random);
 PHPAPI zend_long php_random_range(php_random *random, zend_long min, zend_long max);
 PHPAPI void php_random_array_data_shuffle(php_random *random, zval *array);
 PHPAPI void php_random_string_shuffle(php_random *random, char *str, zend_long len);
