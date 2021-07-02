@@ -1427,6 +1427,7 @@ next:
 }
 
 static void zend_get_gc_buffer_release(void);
+static void zend_gc_root_tmpvars(void);
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
@@ -1465,9 +1466,8 @@ rerun_gc:
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
 			gc_stack_free(&stack);
-			zend_get_gc_buffer_release();
 			GC_G(gc_active) = 0;
-			return 0;
+			goto finish;
 		}
 
 		zend_fiber_switch_block();
@@ -1627,7 +1627,9 @@ rerun_gc:
 		goto rerun_gc;
 	}
 
+finish:
 	zend_get_gc_buffer_release();
+	zend_gc_root_tmpvars();
 	return count;
 }
 
@@ -1659,6 +1661,40 @@ static void zend_get_gc_buffer_release() {
 	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
 	efree(gc_buffer->start);
 	gc_buffer->start = gc_buffer->end = gc_buffer->cur = NULL;
+}
+
+/* TMPVAR operands are destroyed using zval_ptr_dtor_nogc(), because they usually cannot contain
+ * cycles. However, there are some rare exceptions where this is possible, in which case we rely
+ * on the producing code to root the value. If a GC run occurs between the rooting and consumption
+ * of the value, we would end up leaking it. To avoid this, root all live TMPVAR values here. */
+static void zend_gc_root_tmpvars(void) {
+	zend_execute_data *ex = EG(current_execute_data);
+	for (; ex; ex = ex->prev_execute_data) {
+		zend_function *func = ex->func;
+		if (!func || !ZEND_USER_CODE(func->type)) {
+			continue;
+		}
+
+		uint32_t op_num = ex->opline - ex->func->op_array.opcodes;
+		for (uint32_t i = 0; i < func->op_array.last_live_range; i++) {
+			const zend_live_range *range = &func->op_array.live_range[i];
+			if (range->start > op_num) {
+				break;
+			}
+			if (range->end <= op_num) {
+				continue;
+			}
+
+			uint32_t kind = range->var & ZEND_LIVE_MASK;
+			if (kind == ZEND_LIVE_TMPVAR) {
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+				zval *var = ZEND_CALL_VAR(ex, var_num);
+				if (Z_REFCOUNTED_P(var)) {
+					gc_check_possible_root(Z_COUNTED_P(var));
+				}
+			}
+		}
+	}
 }
 
 #ifdef ZTS

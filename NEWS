@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81202 (powerpc64 build fails on fibers). (krakjoe)
+  . Fixed bug #80072 (Cyclic unserialize in TMPVAR operand may leak). (Nikita)
 
 - Curl:
   . Fixed bug #81085 (Support CURLOPT_SSLCERT_BLOB for cert strings).
