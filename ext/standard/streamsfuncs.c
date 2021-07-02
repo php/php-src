@@ -1029,6 +1029,10 @@ PHP_FUNCTION(stream_context_set_option)
 			zend_argument_value_error(3, "cannot be null when argument #2 ($wrapper_or_options) is a string");
 			RETURN_THROWS();
 		}
+		if (!zvalue) {
+			zend_argument_value_error(4, "must be provided when argument #2 ($wrapper_or_options) is a string");
+			RETURN_THROWS();
+		}
 
 		RETURN_BOOL(php_stream_context_set_option(context, ZSTR_VAL(wrappername), optionname, zvalue) == SUCCESS);
 	}
