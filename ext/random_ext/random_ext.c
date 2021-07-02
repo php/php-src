@@ -24,8 +24,8 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
-#include "php_random.h"
-#include "random_arginfo.h"
+#include "php_random_ext.h"
+#include "random_ext_arginfo.h"
 
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator;
 PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
@@ -786,7 +786,7 @@ PHP_METHOD(Random, __unserialize)
 }
 
 /* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(random)
+PHP_MINIT_FUNCTION(random_ext)
 {
 	/* Random\NumberGenerator\RandomNumberGenerator */
 	random_ce_Random_NumberGenerator = register_class_Random_NumberGenerator();
@@ -830,7 +830,7 @@ PHP_MINIT_FUNCTION(random)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(random)
+PHP_MINFO_FUNCTION(random_ext)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Random support", "enabled");
@@ -843,11 +843,11 @@ zend_module_entry random_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"random",				/* Extension name */
 	NULL,					/* zend_function_entry */
-	PHP_MINIT(random),		/* PHP_MINIT - Module initialization */
+	PHP_MINIT(random_ext),	/* PHP_MINIT - Module initialization */
 	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
 	NULL,					/* PHP_RINIT - Request initialization */
 	NULL,					/* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(random),		/* PHP_MINFO - Module info */
+	PHP_MINFO(random_ext),	/* PHP_MINFO - Module info */
 	PHP_VERSION,			/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
@@ -857,5 +857,5 @@ zend_module_entry random_module_entry = {
 # ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 # endif
-ZEND_GET_MODULE(random)
+ZEND_GET_MODULE(random_ext)
 #endif

@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef PHP_RANDOM_H_MODULE
-#define PHP_RANDOM_H_MODULE
+#ifndef PHP_RANDOM_EXT_H
+#define PHP_RANDOM_EXT_H
 
 extern zend_module_entry random_module_entry;
-#define phpext_random_ptr &random_module_entry
+#define phpext_random_ext_ptr &random_module_entry
 
 extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator;
 extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
