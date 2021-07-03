@@ -241,12 +241,12 @@ PHP_FUNCTION(clamp)
 
 	if (Z_TYPE_P(zmin) == IS_DOUBLE) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(zmin)))) {
-			zend_argument_type_error(2, "cannot be of type NaN");
+			zend_argument_type_error(2, "cannot be of type NAN");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zmax) == IS_DOUBLE) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(zmax)))) {
-			zend_argument_type_error(3, "cannot be of type NaN");
+			zend_argument_type_error(3, "cannot be of type NAN");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zvalue) == IS_DOUBLE) {

@@ -34,8 +34,8 @@ var_dump(clamp(NAN, 0, 2));
 *** Testing clamp() : basic functionality 02 ***
 float(0)
 int(0)
-clamp(): Argument #2 ($min) cannot be of type NaN
-clamp(): Argument #2 ($min) cannot be of type NaN
+clamp(): Argument #2 ($min) cannot be of type NAN
+clamp(): Argument #2 ($min) cannot be of type NAN
 int(2)
 int(10)
 float(24)
@@ -51,5 +51,5 @@ int(0)
 
 Deprecated: clamp(): Passing null to parameter #2 ($min) of type int|float is deprecated in %s on line %d
 int(0)
-clamp(): Argument #3 ($max) cannot be of type NaN
+clamp(): Argument #3 ($max) cannot be of type NAN
 float(NAN)
