@@ -8593,8 +8593,24 @@ void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast *name_ast = ast->child[1];
 
-    zend_ast *call =  zend_ast_create(ZEND_AST_CALL, name_ast,
-	        zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast));
+	/*
+	znode expr_node, name_node;
+
+	expr_node = *zend_ast_get_znode(expr_ast);
+
+	zend_ast *call = zend_ast_create(ZEND_AST_CALL, name_ast, zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_node));
+	zend_compile_expr(result, call);
+	*/
+//	zend_compile_expr(&expr_node, expr_ast);
+//	zend_compile_expr(&name_node, name_ast);
+
+// This doesn't work.  Need to do something with SEND_VAR_EX, Levi says.
+//  3v4l.org/IOJQg/vld#output
+//	zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, &name_node);
+	//zend_compile_call_common(result, name_ast, NULL);
+
+   //This version works, but evaluates out of order.
+	zend_ast *call =  zend_ast_create(ZEND_AST_CALL, name_ast, zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast));
 	zend_compile_expr(result, call);
 }
 /* }}} */
