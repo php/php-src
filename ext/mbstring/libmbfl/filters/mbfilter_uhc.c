@@ -92,10 +92,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-int
-mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, w = 0, flag = 0;
+	int w = 0, flag = 0;
 
 	switch (filter->status) {
 	case 0:
@@ -105,15 +104,13 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
 	case 1: /* dbcs second byte */
 		filter->status = 0;
-		c1 = filter->cache;
+		int c1 = filter->cache;
 
 		if (c1 >= 0x81 && c1 <= 0xa0 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0x81)*190 + (c - 0x41);
@@ -141,71 +138,15 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 			}
 		}
 
-		if (flag > 0) {
-			if (w <= 0) {
-				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_UHC;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+		if (flag <= 0 || w <= 0) {
+			w = (c1 << 8) | c | MBFL_WCSPLANE_UHC;
 		}
+		CK((*filter->output_function)(w, filter->data));
 		break;
 
 	default:
 		filter->status = 0;
 		break;
-	}
-
-	return c;
-}
-
-int
-mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
-{
-	int c1, s = 0;
-
-	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
-		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
-	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
-		s = ucs_a2_uhc_table[c - ucs_a2_uhc_table_min];
-	} else if (c >= ucs_a3_uhc_table_min && c < ucs_a3_uhc_table_max) {
-		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
-	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
-		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
-	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
-		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
-	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
-		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
-	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
-		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
-	}
-
-	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_UHC) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-		if (c == 0) {
-			s = 0;
-		} else if (s <= 0) {
-			s = -1;
-		}
-	}
-
-	if (s >= 0) {
-		if (s < 0x80) { /* latin */
-			CK((*filter->output_function)(s, filter->data));
-		} else {
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
-		}
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -223,4 +164,42 @@ static int mbfl_filt_conv_uhc_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+int mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
+{
+	int s = 0;
+
+	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
+		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
+	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
+		s = ucs_a2_uhc_table[c - ucs_a2_uhc_table_min];
+	} else if (c >= ucs_a3_uhc_table_min && c < ucs_a3_uhc_table_max) {
+		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
+	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
+		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
+	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
+		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
+	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
+		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
+	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
+		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
+	}
+
+	if (s == 0 && c != 0) {
+		s = -1;
+	}
+
+	if (s >= 0) {
+		if (s < 0x80) { /* latin */
+			CK((*filter->output_function)(s, filter->data));
+		} else {
+			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
+			CK((*filter->output_function)(s & 0xff, filter->data));
+		}
+	} else {
+		CK(mbfl_filt_conv_illegal_output(c, filter));
+	}
+
+	return c;
 }
