@@ -30,8 +30,8 @@ test:
      ; (after optimizer)
      ; %s:2-8
 0000 CV0($var) = RECV 1
-0001 T2 = TYPE_CHECK (string) CV0($var)
-0002 JMPZ T2 0004
+0001 T2 = TYPE_CHECK TYPE [null, bool, long, double, array, object, resource] CV0($var)
+0002 JMPNZ T2 0004
 0003 JMP 0005
 0004 RETURN null
 0005 INIT_FCALL 1 %d string("var_dump")
