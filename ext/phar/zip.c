@@ -851,10 +851,10 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	PHAR_SET_16(perms.size, sizeof(perms) - 4);
 	PHAR_SET_16(perms.perms, entry->flags & PHAR_ENT_PERM_MASK);
 	{
-		uint32_t crc = (uint32_t) ~0;
+		uint32_t crc = (uint32_t) php_crc32_bulk_init();
 		CRC32(crc, perms.perms[0]);
 		CRC32(crc, perms.perms[1]);
-		PHAR_SET_32(perms.crc32, ~crc);
+		PHAR_SET_32(perms.crc32, php_crc32_bulk_end(crc));
 	}
 
 	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -912,11 +912,11 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		}
 
 		efp = phar_get_efp(entry, 0);
-		newcrc32 = ~0;
+		newcrc32 = php_crc32_bulk_init();
 
-		crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
+		php_crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
 
-		entry->crc32 = ~newcrc32;
+		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);
 		PHAR_SET_32(local.uncompsize, entry->uncompressed_filesize);
 
