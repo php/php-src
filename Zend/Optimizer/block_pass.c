@@ -441,6 +441,137 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_TYPE_CHECK:
+				/* Optimize checks such as e === true, e !== true, e !== false, etc. when e is from an opcode that only results in booleans */
+				/* If opcache combines ZEND_TYPE_CHECKs into is_true_or_string($x) in the future, this is designed to properly handle that. */
+				if (((opline->extended_value & MAY_BE_FALSE) != 0) ^ ((opline->extended_value & MAY_BE_TRUE) != 0)) {
+					if (opline->op1_type == IS_TMP_VAR &&
+							!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
+						src = VAR_SOURCE(opline->op1);
+						if (src) {
+							switch (src->opcode) {
+								case ZEND_BOOL_NOT:
+									VAR_SOURCE(opline->op1) = NULL;
+									COPY_NODE(opline->op1, src->op1);
+									opline->opcode = (opline->extended_value & MAY_BE_FALSE) ? ZEND_BOOL : ZEND_BOOL_NOT;
+									MAKE_NOP(src);
+									++(*opt_count);
+									goto optimize_bool;
+								case ZEND_BOOL:
+									VAR_SOURCE(opline->op1) = NULL;
+									COPY_NODE(opline->op1, src->op1);
+									opline->opcode = (opline->extended_value & MAY_BE_FALSE) ? ZEND_BOOL_NOT : ZEND_BOOL;
+									MAKE_NOP(src);
+									++(*opt_count);
+									goto optimize_bool;
+								case ZEND_IS_EQUAL:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										src->opcode = ZEND_IS_NOT_EQUAL;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_IS_NOT_EQUAL:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										src->opcode = ZEND_IS_EQUAL;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_IS_IDENTICAL:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										src->opcode = ZEND_IS_NOT_IDENTICAL;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_IS_NOT_IDENTICAL:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										src->opcode = ZEND_IS_IDENTICAL;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_TYPE_CHECK:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										if (src->extended_value == MAY_BE_RESOURCE || src->extended_value == (MAY_BE_ANY - MAY_BE_RESOURCE)) {
+											/* is_resource() is a special case - it returns false if the resource is closed. Don't convert to/from it. */
+											break;
+										}
+										src->extended_value = MAY_BE_ANY - src->extended_value;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_IS_SMALLER:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										zend_uchar tmp_type;
+										uint32_t tmp;
+
+										src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
+										tmp_type = src->op1_type;
+										src->op1_type = src->op2_type;
+										src->op2_type = tmp_type;
+										tmp = src->op1.num;
+										src->op1.num = src->op2.num;
+										src->op2.num = tmp;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_IS_SMALLER_OR_EQUAL:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										zend_uchar tmp_type;
+										uint32_t tmp;
+
+										src->opcode = ZEND_IS_SMALLER;
+										tmp_type = src->op1_type;
+										src->op1_type = src->op2_type;
+										src->op2_type = tmp_type;
+										tmp = src->op1.num;
+										src->op1.num = src->op2.num;
+										src->op2.num = tmp;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+								case ZEND_ISSET_ISEMPTY_CV:
+								case ZEND_ISSET_ISEMPTY_VAR:
+								case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+								case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+								case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+								case ZEND_INSTANCEOF:
+								case ZEND_DEFINED:
+								case ZEND_IN_ARRAY:
+								case ZEND_ARRAY_KEY_EXISTS:
+									if (opline->extended_value & MAY_BE_FALSE) {
+										break;
+									}
+									COPY_NODE(src->result, opline->result);
+									SET_VAR_SOURCE(src);
+									MAKE_NOP(opline);
+									++(*opt_count);
+									break;
+							}
+						}
+					}
+				}
+				break;
+
 			case ZEND_BOOL:
 			case ZEND_BOOL_NOT:
 			optimize_bool:
