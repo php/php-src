@@ -54,6 +54,7 @@ function http_server($socket_string, array $files, &$output = null) {
 		// read headers
 
 		$content_length = 0;
+		$keep_alive = false;
 
 		stream_set_blocking($sock, 0);
 		while (!feof($sock)) {
@@ -70,6 +71,8 @@ function http_server($socket_string, array $files, &$output = null) {
 
 				if (preg_match('#^Content-Length\s*:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
 					$content_length = (int) $matches[1];
+				} elseif (preg_match('#^Connection\s*:\s*keep-alive\s*$#i', $line, $matches)) {
+					$keep_alive = true;
 				}
 			}
 		}
@@ -85,6 +88,10 @@ function http_server($socket_string, array $files, &$output = null) {
 
 		$fd = fopen($file, 'rb');
 		stream_copy_to_stream($fd, $sock);
+
+		if ($keep_alive) {
+			sleep(2);
+		}
 
 		fclose($sock);
 	}

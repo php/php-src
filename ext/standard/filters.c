@@ -1760,6 +1760,7 @@ typedef struct _php_consumed_filter_data {
 	size_t consumed;
 	zend_off_t offset;
 	uint8_t persistent;
+	size_t length;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1790,6 +1791,9 @@ static php_stream_filter_status_t consumed_filter_filter(
 		php_stream_seek(stream, data->offset + data->consumed, SEEK_SET);
 	}
 	data->consumed += consumed;
+	if (data->consumed >= data->length) {
+		stream->eof = 1;
+	}
 
 	return PSFS_PASS_ON;
 }
@@ -1822,6 +1826,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	data->persistent = persistent;
 	data->consumed = 0;
 	data->offset = ~0;
+	data->length = filterparams == NULL ? (size_t) -1 : Z_LVAL_P(filterparams);
 	fops = &consumed_filter_ops;
 
 	return php_stream_filter_alloc(fops, data, persistent);
@@ -1851,9 +1856,10 @@ typedef struct _php_chunked_filter_data {
 	size_t chunk_size;
 	php_chunked_filter_state state;
 	int persistent;
+	zend_bool dechunk;
 } php_chunked_filter_data;
 
-static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
+static size_t php_dechunk_ex(char *buf, size_t len, php_chunked_filter_data *data, zend_bool dechunk)
 {
 	char *p = buf;
 	char *end = p + len;
@@ -1920,7 +1926,7 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				}
 			case CHUNK_BODY:
 				if ((size_t) (end - p) >= data->chunk_size) {
-					if (p != out) {
+					if (dechunk && p != out) {
 						memmove(out, p, data->chunk_size);
 					}
 					out += data->chunk_size;
@@ -1931,7 +1937,7 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 						return out_len;
 					}
 				} else {
-					if (p != out) {
+					if (dechunk && p != out) {
 						memmove(out, p, end - p);
 					}
 					data->chunk_size -= end - p;
@@ -1961,7 +1967,7 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				p = end;
 				continue;
 			case CHUNK_ERROR:
-				if (p != out) {
+				if (dechunk && p != out) {
 					memmove(out, p, end - p);
 				}
 				out_len += end - p;
@@ -1969,6 +1975,11 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 		}
 	}
 	return out_len;
+}
+
+static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
+{
+	return php_dechunk_ex(buf, len, data, 1);
 }
 
 static php_stream_filter_status_t php_chunked_filter(
@@ -1987,12 +1998,20 @@ static php_stream_filter_status_t php_chunked_filter(
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		consumed += bucket->buflen;
-		bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);
+		if (data->dechunk) {
+			bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);
+		} else {
+			(void) php_dechunk_ex(bucket->buf, bucket->buflen, data, 0);
+		}
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
+	}
+
+	if (data->state == CHUNK_TRAILER) {
+		stream->eof = 1;
 	}
 
 	return PSFS_PASS_ON;
@@ -2026,6 +2045,7 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	data->state = CHUNK_SIZE_START;
 	data->chunk_size = 0;
 	data->persistent = persistent;
+	data->dechunk = filterparams == NULL || zend_is_true(filterparams);
 	fops = &chunked_filter_ops;
 
 	return php_stream_filter_alloc(fops, data, persistent);
