@@ -239,6 +239,22 @@ PHP_FUNCTION(clamp)
 		Z_PARAM_NUMBER(zmax)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (Z_TYPE_P(zmin) == IS_DOUBLE) {
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(zmin)))) {
+			zend_argument_type_error(2, "cannot be of type NaN");
+			RETURN_THROWS();
+		}
+	} else if (Z_TYPE_P(zmax) == IS_DOUBLE) {
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(zmax)))) {
+			zend_argument_type_error(3, "cannot be of type NaN");
+			RETURN_THROWS();
+		}
+	} else if (Z_TYPE_P(zvalue) == IS_DOUBLE) {
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(zvalue)))) {
+			RETURN_COPY(zvalue);
+		}
+	}
+
 	if (zend_compare(zmax, zmin) == -1) {
 		zend_argument_value_error(2, "cannot be greater than Argument #3 ($max)");
 		RETURN_THROWS();
