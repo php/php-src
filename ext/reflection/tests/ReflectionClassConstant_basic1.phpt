@@ -140,7 +140,7 @@ bool(false)
 Reflecting on class constant TestClass::FINAL
 
 __toString():
-string(41) "Constant [ public string FINAL ] { foo }
+string(47) "Constant [ final public string FINAL ] { foo }
 "
 getName():
 string(5) "FINAL"
@@ -155,7 +155,7 @@ bool(false)
 isFinal():
 bool(true)
 getModifiers():
-int(1)
+int(33)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>

@@ -24,4 +24,4 @@ new FooBar;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot inherit previously-inherited or override constant c from interface ia in %s on line %d
+Fatal error: Cannot inherit previously-inherited or override constant FooBar::c from interface ia in %s on line %d

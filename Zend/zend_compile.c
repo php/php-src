@@ -7364,7 +7364,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 
 		if (UNEXPECTED((flags & ZEND_ACC_PRIVATE) && (flags & ZEND_ACC_FINAL))) {
 			zend_error_noreturn(
-				E_COMPILE_ERROR, "Private constant %s::%s cannot be final as it is never overridden",
+				E_COMPILE_ERROR, "Private constant %s::%s cannot be final as it is not visible to other classes",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name)
 			);
 		}
