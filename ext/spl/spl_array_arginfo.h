@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a4bc5ec5a95aae6bfa53988316cfa396f4f9fb92 */
+ * Stub hash: 89f431b33667e7ee6538a2a50ed7aabcf0449d36 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -8,13 +8,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_offsetExists, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_offsetGet arginfo_class_ArrayObject_offsetExists
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 

@@ -148,7 +148,7 @@ class FilesystemIterator extends DirectoryIterator
     /** @return string */
     public function key() {}
 
-    /** @return string|SplFileInfo|self */
+    /** @return string|SplFileInfo|FilesystemIterator */
     public function current() {}
 
     /** @return int */
@@ -211,7 +211,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return int|false */
     public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
-    /** @return bool|null */
+    /** @return void */
     public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return array */
@@ -238,7 +238,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return int */
     public function fpassthru() {}
 
-    /** @return array|int|false|null */
+    /** @return array|int|null */
     public function fscanf(string $format, mixed &...$vars) {}
 
     /** @return int|false */
@@ -274,7 +274,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return bool */
     public function hasChildren() {}
 
-    /** @return null */
+    /** @return RecursiveIterator|null */
     public function getChildren() {}
 
     /** @return void */
