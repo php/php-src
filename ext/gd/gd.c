@@ -1499,8 +1499,12 @@ static int _php_image_type (zend_string *data)
 
 	php_stream *image_stream = php_stream_memory_open(TEMP_STREAM_READONLY, data);
 
-  if (php_is_image_avif(image_stream)) {
-  	return PHP_GDIMG_TYPE_AVIF;
+  if (image_stream != NULL) {
+		if (php_is_image_avif(image_stream)) {
+  		return PHP_GDIMG_TYPE_AVIF;
+		}
+
+		php_stream_close(image_stream);
 	}
 
 	gdIOCtx *io_ctx;

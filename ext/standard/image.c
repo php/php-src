@@ -1197,6 +1197,10 @@ int php_is_image_avif(php_stream * stream) {
 	uint32_t header_size_reversed, header_size, i;
 	char box_type[4], brand[4];
 
+	if (stream == NULL) {
+		return 0;
+	}
+
 	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
 		return 0;
 	}
