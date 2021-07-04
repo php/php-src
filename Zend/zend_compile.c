@@ -8590,27 +8590,19 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
  * evaluation order. */
 void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
 {
-	// Convenience variables to give meaningful names.
 	zend_ast *expr_ast = ast->child[0];
-	zend_ast *name_ast = ast->child[1];
+	zend_ast *func_ast = ast->child[1];
 
-	// AST wrapper to hold the opcodes for the LHS expression.
 	znode expr_node;
 
-	// Evaluate the LHS first. (Or rather, generate the
-	// opcodes that will evaluate the LHS.
 	zend_compile_expr(&expr_node, expr_ast);
 
-	// Wrap the LHS back up into an AST, and replace the RHS
-	// with a call operation that wraps the original RHS expression.
 	zend_ast *call =  zend_ast_create(ZEND_AST_CALL,
-		name_ast,
+		func_ast,
 		zend_ast_create_list(1,
 		ZEND_AST_ARG_LIST,
 			zend_ast_create_znode(&expr_node)));
 
-	// Compile all of that back down to opcodes and save
-	// to the result znode.
 	zend_compile_expr(result, call);
 }
 /* }}} */
