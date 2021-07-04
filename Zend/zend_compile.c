@@ -8590,27 +8590,27 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
  * evaluation order. */
 void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
 {
+	// Convenience variables to give meaningful names.
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast *name_ast = ast->child[1];
 
-	/*
-	znode expr_node, name_node;
+	// AST wrapper to hold the opcodes for the LHS expression.
+	znode expr_node;
 
-	expr_node = *zend_ast_get_znode(expr_ast);
+	// Evaluate the LHS first. (Or rather, generate the
+	// opcodes that will evaluate the LHS.
+	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_ast *call = zend_ast_create(ZEND_AST_CALL, name_ast, zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_node));
-	zend_compile_expr(result, call);
-	*/
-//	zend_compile_expr(&expr_node, expr_ast);
-//	zend_compile_expr(&name_node, name_ast);
+	// Wrap the LHS back up into an AST, and replace the RHS
+	// with a call operation that wraps the original RHS expression.
+	zend_ast *call =  zend_ast_create(ZEND_AST_CALL,
+		name_ast,
+		zend_ast_create_list(1,
+		ZEND_AST_ARG_LIST,
+			zend_ast_create_znode(&expr_node)));
 
-// This doesn't work.  Need to do something with SEND_VAR_EX, Levi says.
-//  3v4l.org/IOJQg/vld#output
-//	zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, &name_node);
-	//zend_compile_call_common(result, name_ast, NULL);
-
-   //This version works, but evaluates out of order.
-	zend_ast *call =  zend_ast_create(ZEND_AST_CALL, name_ast, zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast));
+	// Compile all of that back down to opcodes and save
+	// to the result znode.
 	zend_compile_expr(result, call);
 }
 /* }}} */
