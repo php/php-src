@@ -80,7 +80,7 @@ static char *create_name_with_username(char *name)
 	*(p++) = '@';
 	p += strlcpy(p, sapi_module.name, 21);
 	*(p++) = '@';
-	memcpy(p, accel_system_id, 32);
+	memcpy(p, zend_system_id, 32);
 	p += 32;
 	*(p++) = '\0';
 	ZEND_ASSERT(p - newname <= sizeof(newname));
