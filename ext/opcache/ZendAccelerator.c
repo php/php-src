@@ -3009,9 +3009,7 @@ static zend_result accel_post_startup(void)
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
 #ifdef HAVE_JIT
-				if (sapi_module.name && strcmp(sapi_module.name, "apache2handler") == 0) {
-					reattached = 1;
-				}
+				reattached = 1;
 #endif
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
