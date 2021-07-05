@@ -1154,10 +1154,7 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
  * Simply return 0 for everything.
  */
 static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	struct gfxinfo * result;
-
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-	return result;
+	return ecalloc(1, sizeof(struct gfxinfo));
 }
 /* }}} */
 
