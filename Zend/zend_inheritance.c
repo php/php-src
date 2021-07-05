@@ -606,6 +606,10 @@ static inheritance_status zend_perform_covariant_type_check(
 	bool have_unresolved = false;
 
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+		/* Currently, for object type any class name would be allowed here.
+		 * We still perform a class lookup for forward-compatibility reasons,
+		 * as we may have named types in the future that are not classes
+		 * (such as enums or typedefs). */
 		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_ITERABLE)) {
 			bool any_class = (proto_type_mask & MAY_BE_OBJECT) != 0;
 			ZEND_TYPE_FOREACH(fe_type, single_type) {
