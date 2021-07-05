@@ -277,12 +277,6 @@ static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-static ZEND_COLD zend_never_inline void zend_readonly_property_modification_error(
-		zend_class_entry *ce, zend_string *member) {
-	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",
-		ZSTR_VAL(ce->name), ZSTR_VAL(member));
-}
-
 static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
 		zend_class_entry *ce, zend_string *member, zend_class_entry *scope, const char *operation) {
 	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
@@ -595,7 +589,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
 					&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
 				if (Z_TYPE_P(retval) != IS_OBJECT) {
-					zend_readonly_property_modification_error(prop_info->ce, name);
+					zend_readonly_property_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
 				}
 			}
@@ -781,7 +775,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			if (UNEXPECTED(prop_info)) {
 				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 					Z_TRY_DELREF_P(value);
-					zend_readonly_property_modification_error(prop_info->ce, name);
+					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
