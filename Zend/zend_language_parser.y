@@ -262,7 +262,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
-%type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
+%type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair array_pair_key_prefix
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
@@ -1411,20 +1411,24 @@ non_empty_array_pair_list:
 			{ $$ = zend_ast_create_list(1, ZEND_AST_ARRAY, $1); }
 ;
 
+array_pair_key_prefix:
+		expr T_DOUBLE_ARROW { $$ = $1; }
+	|	identifier ':'      { $$ = $1; }
+
 array_pair:
-		expr T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+		array_pair_key_prefix expr
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $2, $1); }
 	|	expr
 			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
-	|	expr T_DOUBLE_ARROW '&' variable
-			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $4, $1); }
+	|	array_pair_key_prefix '&' variable
+			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $3, $1); }
 	|	'&' variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
 	|	T_ELLIPSIS expr
 			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
-	|	expr T_DOUBLE_ARROW T_LIST '(' array_pair_list ')'
-			{ $5->attr = ZEND_ARRAY_SYNTAX_LIST;
-			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
+	|	array_pair_key_prefix T_LIST '(' array_pair_list ')'
+			{ $4->attr = ZEND_ARRAY_SYNTAX_LIST;
+			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $4, $1); }
 	|	T_LIST '(' array_pair_list ')'
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST;
 			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, NULL); }

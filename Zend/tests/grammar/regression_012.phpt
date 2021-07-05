@@ -9,4 +9,4 @@ class A {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "foreach", expecting "]" in %s on line %d
+Parse error: syntax error, unexpected token "]", expecting ":" in %s on line %d
