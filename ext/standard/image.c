@@ -1190,7 +1190,7 @@ static uint32_t php_ntohl(uint32_t val) {
  * Otherwise, well, it's not.
  * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
  */
-int php_is_image_avif(php_stream * stream) {
+bool php_is_image_avif(php_stream * stream) {
 	uint32_t header_size_reversed, header_size, i;
 	char box_type[4], brand[4];
 
@@ -1363,6 +1363,7 @@ PHP_FUNCTION(image_type_to_extension)
 			break;
 		case IMAGE_FILETYPE_AVIF:
 			imgext = ".avif";
+			break;
 	}
 
 	if (imgext) {
