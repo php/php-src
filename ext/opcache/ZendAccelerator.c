@@ -1853,6 +1853,9 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_persistent_script *persistent_script;
 	zend_op_array *op_array = NULL;
+	int is_should_release_outside = 0;
+	zend_arena *arena = NULL;
+	void *checkpoint;
 	int from_memory; /* if the script we've got is stored in SHM */
 
 	if (is_stream_path(ZSTR_VAL(file_handle->filename)) &&
@@ -1876,7 +1879,7 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
-	persistent_script = zend_file_cache_script_load(file_handle);
+	persistent_script = zend_file_cache_script_load(file_handle ,&is_should_release_outside,&arena,&checkpoint);
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	if (persistent_script) {
@@ -1907,8 +1910,11 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
 			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 		}
-
-		return zend_accel_load_script(persistent_script, 1);
+		op_array = zend_accel_load_script(persistent_script, 1);
+		if(is_should_release_outside){
+		    zend_arena_release(&arena, checkpoint);
+		}
+		return op_array;
 	}
 
 	persistent_script = opcache_compile_file(file_handle, type, &op_array);
@@ -1950,6 +1956,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	zend_persistent_script *persistent_script = NULL;
 	zend_string *key = NULL;
 	int from_shared_memory; /* if the script we've got is stored in SHM */
+	zend_op_array *op_array = NULL;
+	int is_should_release_outside = 0;
+	zend_arena *arena = NULL;
+	void *checkpoint  = NULL;
 
 	if (!file_handle->filename || !ZCG(accelerator_enabled)) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
@@ -2131,7 +2141,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 	/* Check the second level cache */
 	if (!persistent_script && ZCG(accel_directives).file_cache) {
-		persistent_script = zend_file_cache_script_load(file_handle);
+		persistent_script = zend_file_cache_script_load(file_handle,&is_should_release_outside,&arena,&checkpoint);
 	}
 
 	/* If script was not found or invalidated by validate_timestamps */
@@ -2231,8 +2241,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
 		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
 	}
-
-	return zend_accel_load_script(persistent_script, from_shared_memory);
+	op_array = zend_accel_load_script(persistent_script, from_shared_memory);
+	if(from_shared_memory && is_should_release_outside){
+		zend_arena_release(&arena, checkpoint);
+	}
+	return op_array;
 }
 
 static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_cache_find(zend_inheritance_cache_entry *entry, zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, bool *needs_autoload_ptr)

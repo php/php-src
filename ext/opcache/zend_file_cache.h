@@ -20,7 +20,7 @@
 #define ZEND_FILE_CACHE_H
 
 int zend_file_cache_script_store(zend_persistent_script *script, int in_shm);
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle);
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle,int *is_should_release_outside,zend_arena **arena_ptr,void **checkpoint_ptr);
 void zend_file_cache_invalidate(zend_string *full_path);
 
 #endif /* ZEND_FILE_CACHE_H */
