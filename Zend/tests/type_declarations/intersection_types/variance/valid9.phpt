@@ -13,5 +13,5 @@ class Test2 extends Test {
 
 ?>
 ===DONE===
---EXPECTF--
-Fatal error: Could not check compatibility between Test2::method(): X&Y and Test::method(): object, because class X is not available in %s on line %d
+--EXPECT--
+===DONE===
