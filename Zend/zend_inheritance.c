@@ -606,31 +606,24 @@ static inheritance_status zend_perform_covariant_type_check(
 	bool have_unresolved = false;
 
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
-		/* As an intersection type can only be composed of class types (checked at compile stage),
-		 * it is trivially covariant to the object type.
-		 * Handle this case separately to ensure it never requires class loading. */
-		if (proto_type_mask & MAY_BE_OBJECT) {
-			return INHERITANCE_SUCCESS;
-		}
-
-		// TODO: Make "iterable" an alias of "array|Traversable" instead,
-		// so this special cases will be handled automatically.
-		if (proto_type_mask & MAY_BE_ITERABLE) {
+		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_ITERABLE)) {
+			bool any_class = (proto_type_mask & MAY_BE_OBJECT) != 0;
 			ZEND_TYPE_FOREACH(fe_type, single_type) {
 				zend_class_entry *fe_ce;
 				zend_string *fe_class_name = get_class_from_type(&fe_ce, fe_scope, *single_type);
-
-				ZEND_ASSERT(fe_class_name);
+				if (!fe_class_name) {
+					continue;
+				}
 				if (!fe_ce) {
 					fe_ce = lookup_class(fe_scope, fe_class_name);
 				}
-				if (!fe_ce) {
+				if (fe_ce) {
+					if (any_class || unlinked_instanceof(fe_ce, zend_ce_traversable)) {
+						track_class_dependency(fe_ce, fe_class_name);
+						return INHERITANCE_SUCCESS;
+					}
+				} else {
 					have_unresolved = true;
-					continue;
-				}
-				if (unlinked_instanceof(fe_ce, zend_ce_traversable)) {
-					track_class_dependency(fe_ce, fe_class_name);
-					return INHERITANCE_SUCCESS;
 				}
 			} ZEND_TYPE_FOREACH_END();
 		}
