@@ -73,7 +73,7 @@ static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
 		arg_info = op_array->arg_info - 1;
 	}
 
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
 			return ZEND_TYPE_LIST(arg_info->type)->num_types;
 		}

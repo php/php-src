@@ -109,7 +109,7 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
  * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
- * ZEND_TYPE_HAS_ONLY_MASK() - checks if type-hint refer to standard type only
+ * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
  * ZEND_TYPE_HAS_CLASS()     - checks if type-hint contains some class
  * ZEND_TYPE_HAS_CE()        - checks if type-hint contains some class as zend_class_entry *
  * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
@@ -148,15 +148,21 @@ typedef struct {
 /* TODO: bit 21 is not used */
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
+/* Whether the type list is an intersection type */
+#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
+/* Whether the type is a union type */
+#define _ZEND_TYPE_UNION_BIT (1u << 18)
 /* Type mask excluding the flags above. */
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << 20) - 1)
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
-#define ZEND_TYPE_HAS_CLASS(t) \
+/* If a type is complex it means it's either a list with a union or intersection,
+ * or the void pointer is a CE/Name */
+#define ZEND_TYPE_IS_COMPLEX(t) \
 	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
 
 #define ZEND_TYPE_HAS_CE(t) \
@@ -167,6 +173,12 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+
+#define ZEND_TYPE_IS_INTERSECTION(t) \
+	((((t).type_mask) & _ZEND_TYPE_INTERSECTION_BIT) != 0)
+
+#define ZEND_TYPE_IS_UNION(t) \
+	((((t).type_mask) & _ZEND_TYPE_UNION_BIT) != 0)
 
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)

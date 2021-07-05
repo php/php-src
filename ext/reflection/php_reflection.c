@@ -79,6 +79,7 @@ PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_named_type_ptr;
+PHPAPI zend_class_entry *reflection_intersection_type_ptr;
 PHPAPI zend_class_entry *reflection_union_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
@@ -1319,22 +1320,40 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 }
 /* }}} */
 
+typedef enum {
+	NAMED_TYPE = 0,
+	UNION_TYPE = 1,
+	INTERSECTION_TYPE = 2
+} reflection_type_kind;
+
 /* For backwards compatibility reasons, we need to return T|null style unions
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
-static bool is_union_type(zend_type type) {
-	if (ZEND_TYPE_HAS_LIST(type)) {
-		return 1;
-	}
+static reflection_type_kind get_type_kind(zend_type type) {
 	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
-	if (ZEND_TYPE_HAS_CLASS(type)) {
-		return type_mask_without_null != 0;
+
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		if (ZEND_TYPE_IS_INTERSECTION(type)) {
+			return INTERSECTION_TYPE;
+		}
+		ZEND_ASSERT(ZEND_TYPE_IS_UNION(type));
+		return UNION_TYPE;
 	}
-	if (type_mask_without_null == MAY_BE_BOOL) {
-		return 0;
+
+	if (ZEND_TYPE_IS_COMPLEX(type)) {
+		if (type_mask_without_null != 0) {
+			return UNION_TYPE;
+		}
+		return NAMED_TYPE;
+	}
+	if (type_mask_without_null == MAY_BE_BOOL || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
+		return NAMED_TYPE;
 	}
 	/* Check that only one bit is set. */
-	return (type_mask_without_null & (type_mask_without_null - 1)) != 0;
+	if ((type_mask_without_null & (type_mask_without_null - 1)) != 0) {
+		return UNION_TYPE;
+	}
+	return NAMED_TYPE;
 }
 
 /* {{{ reflection_type_factory */
@@ -1342,14 +1361,26 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 {
 	reflection_object *intern;
 	type_reference *reference;
-	bool is_union = is_union_type(type);
+	reflection_type_kind type_kind = get_type_kind(type);
 	bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
 
-	reflection_instantiate(is_union && !is_mixed ? reflection_union_type_ptr : reflection_named_type_ptr, object);
+	switch (type_kind) {
+		case INTERSECTION_TYPE:
+			reflection_instantiate(reflection_intersection_type_ptr, object);
+			break;
+		case UNION_TYPE:
+			reflection_instantiate(reflection_union_type_ptr, object);
+			break;
+		case NAMED_TYPE:
+			reflection_instantiate(reflection_named_type_ptr, object);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->type = type;
-	reference->legacy_behavior = legacy_behavior && !is_union && !is_mixed;
+	reference->legacy_behavior = legacy_behavior && type_kind == NAMED_TYPE && !is_mixed;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 
@@ -3094,6 +3125,27 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (type_mask & MAY_BE_NULL) {
 		append_type_mask(return_value, MAY_BE_NULL);
 	}
+}
+/* }}} */
+
+/* {{{ Returns the types that are part of this intersection type */
+ZEND_METHOD(ReflectionIntersectionType, getTypes)
+{
+	reflection_object *intern;
+	type_reference *param;
+	zend_type *list_type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	ZEND_ASSERT(ZEND_TYPE_HAS_LIST(param->type));
+
+	array_init(return_value);
+	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+		append_type(return_value, *list_type);
+	} ZEND_TYPE_LIST_FOREACH_END();
 }
 /* }}} */
 
@@ -7016,6 +7068,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
 	reflection_init_class_handlers(reflection_union_type_ptr);
+
+	reflection_intersection_type_ptr = register_class_ReflectionIntersectionType(reflection_type_ptr);
+	reflection_init_class_handlers(reflection_intersection_type_ptr);
 
 	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
 	reflection_init_class_handlers(reflection_method_ptr);

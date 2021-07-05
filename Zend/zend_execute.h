@@ -76,7 +76,8 @@ ZEND_API ZEND_COLD void zend_verify_return_error(
 ZEND_API ZEND_COLD void zend_verify_never_error(
 		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
-ZEND_API bool zend_value_instanceof_static(zval *zv);
+ZEND_API bool zend_check_user_type_slow(
+		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type);
 
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
@@ -458,7 +459,6 @@ ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *p
 			} \
 		} \
 	} while (0)
-
 
 END_EXTERN_C()
 
