@@ -667,7 +667,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			inheritance_status status = zend_is_class_subtype_of_type(
 				fe_scope, fe_class_name, fe_ce, proto_scope, proto_type);
 			if (status == early_exit_status) {
-				return early_exit_status;
+				return status;
 			}
 			if (status == INHERITANCE_UNRESOLVED) {
 				have_unresolved = true;
