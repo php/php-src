@@ -628,7 +628,6 @@ gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
-//TODO: we may not need all of these
 void gdImageAvif(gdImagePtr im, FILE *outfile);
 void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
 void *gdImageAvifPtr(gdImagePtr im, int *size);

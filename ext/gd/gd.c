@@ -31,8 +31,10 @@
 #include <math.h>
 #include "SAPI.h"
 #include "php_gd.h"
+#include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
+#include "php_memory_streams.h"
 #include "zend_object_handlers.h"
 #include "zend_interfaces.h"
 
@@ -145,7 +147,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(void);
-static int _php_image_type(char data[12]);
+static int _php_image_type(zend_string *data);
 
 /* output streaming (formerly gd_ctx.c) */
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
@@ -1469,42 +1471,54 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
 }
 /* }}} */
 
-/* {{{ _php_image_type */
+/* {{{ _php_image_type
+ * Based on ext/standard/image.c
+ */
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
-static int _php_image_type (char data[12])
+static int _php_image_type(zend_string *data)
 {
-	/* Based on ext/standard/image.c */
-
-	if (data == NULL) {
+	if (ZSTR_LEN(data) < 12) {
+		/* Handle this the same way as an unknown image type. */
 		return -1;
 	}
 
-	if (!memcmp(data, php_sig_gd2, sizeof(php_sig_gd2))) {
+	if (!memcmp(ZSTR_VAL(data), php_sig_gd2, sizeof(php_sig_gd2))) {
 		return PHP_GDIMG_TYPE_GD2;
-	} else if (!memcmp(data, php_sig_jpg, sizeof(php_sig_jpg))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_jpg, sizeof(php_sig_jpg))) {
 		return PHP_GDIMG_TYPE_JPG;
-	} else if (!memcmp(data, php_sig_png, sizeof(php_sig_png))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_png, sizeof(php_sig_png))) {
 		return PHP_GDIMG_TYPE_PNG;
-	} else if (!memcmp(data, php_sig_gif, sizeof(php_sig_gif))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_gif, sizeof(php_sig_gif))) {
 		return PHP_GDIMG_TYPE_GIF;
-	} else if (!memcmp(data, php_sig_bmp, sizeof(php_sig_bmp))) {
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_bmp, sizeof(php_sig_bmp))) {
 		return PHP_GDIMG_TYPE_BMP;
-	} else if(!memcmp(data, php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
+	} else if(!memcmp(ZSTR_VAL(data), php_sig_riff, sizeof(php_sig_riff)) && !memcmp(ZSTR_VAL(data) + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
 		return PHP_GDIMG_TYPE_WEBP;
 	}
-	else {
-		gdIOCtx *io_ctx;
-		io_ctx = gdNewDynamicCtxEx(8, data, 0);
-		if (io_ctx) {
-			if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
-				io_ctx->gd_free(io_ctx);
-				return PHP_GDIMG_TYPE_WBM;
-			} else {
-				io_ctx->gd_free(io_ctx);
-			}
+
+	php_stream *image_stream = php_stream_memory_open(TEMP_STREAM_READONLY, data);
+
+	if (image_stream != NULL) {
+		bool is_avif = php_is_image_avif(image_stream);
+		php_stream_close(image_stream);
+
+		if (is_avif) {
+			return PHP_GDIMG_TYPE_AVIF;
 		}
 	}
+
+	gdIOCtx *io_ctx;
+	io_ctx = gdNewDynamicCtxEx(8, ZSTR_VAL(data), 0);
+	if (io_ctx) {
+		if (_php_ctx_getmbi(io_ctx) == 0 && _php_ctx_getmbi(io_ctx) >= 0) {
+			io_ctx->gd_free(io_ctx);
+			return PHP_GDIMG_TYPE_WBM;
+		} else {
+			io_ctx->gd_free(io_ctx);
+		}
+	}
+
 	return -1;
 }
 /* }}} */
@@ -1540,21 +1554,12 @@ PHP_FUNCTION(imagecreatefromstring)
 	zend_string *data;
 	gdImagePtr im;
 	int imtype;
-	char sig[12];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZSTR_LEN(data) < sizeof(sig)) {
-		/* Handle this the same way as an unknown image type. */
-		php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
-		RETURN_FALSE;
-	}
-
-	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
-
-	imtype = _php_image_type(sig);
+	imtype = _php_image_type(data);
 
 	switch (imtype) {
 		case PHP_GDIMG_TYPE_JPG:
