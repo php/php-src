@@ -62,6 +62,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_DOUBLE_ARROW
 %precedence T_YIELD_FROM
 %precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
+%left T_PIPE
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -231,6 +232,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "|>"
 %token T_BAD_CHARACTER   "invalid character"
 
 /* Token used to force a parse error from the lexer */
@@ -1114,6 +1116,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
+	|	expr T_PIPE expr
+			{ $$ = zend_ast_create(ZEND_AST_CALL, $3, zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1) ); $$->attr = ZEND_CALL_SYNTAX_PIPE; }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr
