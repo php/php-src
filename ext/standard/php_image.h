@@ -55,6 +55,6 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 
 PHPAPI char * php_image_type_to_mime_type(int image_type);
 
-PHPAPI int php_is_image_avif(php_stream * stream);
+PHPAPI bool php_is_image_avif(php_stream *stream);
 
 #endif /* PHP_IMAGE_H */
