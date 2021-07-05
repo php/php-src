@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81101 (PCRE2 10.37 shows unexpected result). (Anatol)
 
+- Standard:
+  . Fixed bug #81223 (flock() only locks first byte of file). (cmb)
+
 01 Jul 2021, PHP 7.4.21
 
 - Core:
