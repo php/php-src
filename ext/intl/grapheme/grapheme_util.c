@@ -133,7 +133,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
-	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0, prev_pos = USEARCH_DONE;
+	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
@@ -193,6 +193,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			}			
 		} else {
 			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
+			int32_t prev_pos = USEARCH_DONE;
 			do {
 				char_pos = usearch_next(src, &status);
 				if (char_pos == USEARCH_DONE || char_pos > offset_pos) {
