@@ -179,7 +179,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			STRPOS_CHECK_STATUS(status, "Invalid search offset");
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos + (last && offset < 0), &status);
+		usearch_setOffset(src, last ? 0 : offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
@@ -192,9 +192,15 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 				char_pos = USEARCH_DONE;
 			}			
 		} else {
-			usearch_setAttribute(src, USEARCH_OVERLAP, USEARCH_ON, &status);
-			STRPOS_CHECK_STATUS(status, "Error setting overlap flag");
-			char_pos = usearch_previous(src, &status);
+			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
+			do {
+				char_pos = usearch_next(src, &status);
+				if (char_pos == USEARCH_DONE || char_pos > offset_pos) {
+					char_pos = prev_pos;
+					break;
+				}
+				prev_pos = char_pos;
+			} while(1);
 		}
 	} else {
 		char_pos = usearch_next(src, &status);
