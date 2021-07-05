@@ -726,6 +726,8 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
 			return 1;
+		} else if (UNEXPECTED(EG(exception))) {
+			return 0;
 		}
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
