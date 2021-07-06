@@ -1252,7 +1252,7 @@ PHP_METHOD(ArrayObject, exchangeArray)
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
