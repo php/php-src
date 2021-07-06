@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2b767e32f29ee44fd02746365b452a7c3a3a2d1b */
+ * Stub hash: 190ba57ae032939117a3484f6437c4ca6059cff2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -93,7 +93,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FFI_CType_getEnumKind arginfo_class_FFI_CType_getKind
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getArrayType, 0, 0, FFI\\FFI\\CType, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getArrayType, 0, 0, FFI\\CType, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_FFI_CType_getArrayLength arginfo_class_FFI_CType_getKind
@@ -107,7 +107,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getStructFieldOf
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getStructFieldType, 0, 1, FFI\\FFI\\CType, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getStructFieldType, 0, 1, FFI\\CType, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -117,7 +117,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FFI_CType_getFuncArgsCount arginfo_class_FFI_CType_getKind
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncArgType, 0, 1, FFI\\FFI\\CType, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncArgType, 0, 1, FFI\\CType, 0)
 	ZEND_ARG_TYPE_INFO(0, n, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

@@ -72,27 +72,28 @@ final class CData {
 }
 
 final class CType {
-    public function getName() : string {}
-    public function getKind() : int {}
-    public function getSize() : int {}
-    public function getAlignment() : int {}
-    public function getAttr() : int {}
+    public function getName(): string {}
 
-    public function getEnumKind() : int {}
+    public function getKind(): int {}
+    public function getSize(): int {}
+    public function getAlignment(): int {}
+    public function getAttr(): int {}
 
-    public function getArrayType() : FFI\CType {}
-    public function getArrayLength() : int {}
+    public function getEnumKind(): int {}
 
-    public function getPointerType() : FFI\CType {}
+    public function getArrayType(): CType {}
+    public function getArrayLength(): int {}
 
-    public function getStructFieldNames() : array {}
-    public function getStructFieldOffset(string $name) : int {}
-    public function getStructFieldType(string $name) : FFI\CType {}
+    public function getPointerType(): CType {}
 
-    public function getFuncABI() : int {}
-    public function getFuncRetType() : FFI\CType {}
-    public function getFuncArgsCount() : int {}
-    public function getFuncArgType(int $n) : FFI\CType {}
+    public function getStructFieldNames(): array {}
+    public function getStructFieldOffset(string $name): int {}
+    public function getStructFieldType(string $name): CType {}
+
+    public function getFuncABI(): int {}
+    public function getFuncRetType(): CType {}
+    public function getFuncArgsCount(): int {}
+    public function getFuncArgType(int $n): CType {}
 }
 
 class Exception extends \Error {
