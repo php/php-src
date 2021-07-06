@@ -1648,7 +1648,7 @@ static bool do_inherit_constant_check(
 		);
 	}
 
-	if (old_constant->ce != parent_constant->ce && (old_constant->ce->ce_flags & ZEND_ACC_INTERFACE)) {
+	if (old_constant->ce != parent_constant->ce && old_constant->ce != ce) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s::%s from interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(iface->name));
 	}
 
