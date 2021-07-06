@@ -78,7 +78,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     /** @return Iterator */
     public function getIterator() {}
 
-    /** @return array|null */
+    /** @return array */
     public function exchangeArray(array|object $array) {}
 
     /** @return void */
