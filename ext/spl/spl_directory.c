@@ -2345,7 +2345,9 @@ PHP_METHOD(SplFileObject, fgetcsv)
 	case 0:
 		break;
 	}
-	spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value);
+	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
