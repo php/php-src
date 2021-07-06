@@ -77,11 +77,11 @@ final class CType {
     public function getKind(): int {}
     public function getSize(): int {}
     public function getAlignment(): int {}
-    public function getAttr(): int {}
+    public function getAttributes(): int {}
 
     public function getEnumKind(): int {}
 
-    public function getArrayType(): CType {}
+    public function getArrayElementType(): CType {}
     public function getArrayLength(): int {}
 
     public function getPointerType(): CType {}
@@ -91,8 +91,8 @@ final class CType {
     public function getStructFieldType(string $name): CType {}
 
     public function getFuncABI(): int {}
-    public function getFuncRetType(): CType {}
-    public function getFuncArgsCount(): int {}
+    public function getFuncReturnType(): CType {}
+    public function getFuncArgCount(): int {}
     public function getFuncArgType(int $n): CType {}
 }
 

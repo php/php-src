@@ -4513,7 +4513,7 @@ ZEND_METHOD(FFI_CType, getAlignment) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getAttr) /* {{{ */
+ZEND_METHOD(FFI_CType, getAttributes) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_type *type;
@@ -4545,7 +4545,7 @@ ZEND_METHOD(FFI_CType, getEnumKind) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getArrayType) /* {{{ */
+ZEND_METHOD(FFI_CType, getArrayElementType) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_type *type;
@@ -4708,7 +4708,7 @@ ZEND_METHOD(FFI_CType, getFuncABI) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getFuncRetType) /* {{{ */
+ZEND_METHOD(FFI_CType, getFuncReturnType) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_ctype *ret;
@@ -4730,7 +4730,7 @@ ZEND_METHOD(FFI_CType, getFuncRetType) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getFuncArgsCount) /* {{{ */
+ZEND_METHOD(FFI_CType, getFuncArgCount) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_type *type;

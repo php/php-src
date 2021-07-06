@@ -18,7 +18,7 @@ var_dump($x->getEnumKind() === $x::TYPE_UINT8);
 $x = FFI::type("char[5]");
 var_dump($x->getKind() === $x::TYPE_ARRAY);
 var_dump($x->getSize());
-var_dump($x->getArrayType()->getKind() === $x::TYPE_CHAR);
+var_dump($x->getArrayElementType()->getKind() === $x::TYPE_CHAR);
 var_dump($x->getArrayLength());
 
 $x = FFI::type("void*");
@@ -27,7 +27,7 @@ var_dump($x->getPointerType()->getKind() === $x::TYPE_VOID);
 
 $x = FFI::type("struct {double x; double y;}");
 var_dump($x->getKind() === $x::TYPE_STRUCT);
-var_dump(($x->getAttr() & $x::ATTR_UNION) != 0);
+var_dump(($x->getAttributes() & $x::ATTR_UNION) != 0);
 var_dump($x->getStructFieldNames());
 var_dump($x->getStructFieldOffset("x"));
 var_dump($x->getStructFieldOffset("y"));
@@ -36,7 +36,7 @@ var_dump($x->getStructFieldType("y")->getKind() == $x::TYPE_DOUBLE);
 
 $x = FFI::type("union {double x; double y;}");
 var_dump($x->getKind() === $x::TYPE_STRUCT);
-var_dump(($x->getAttr() & $x::ATTR_UNION) != 0);
+var_dump(($x->getAttributes() & $x::ATTR_UNION) != 0);
 var_dump($x->getStructFieldNames());
 var_dump($x->getStructFieldOffset("x"));
 var_dump($x->getStructFieldOffset("y"));
@@ -46,8 +46,8 @@ var_dump($x->getStructFieldType("y")->getKind() == $x::TYPE_DOUBLE);
 $x = FFI::type("void (*)(double,int32_t)");
 var_dump($x->getKind() === $x::TYPE_POINTER);
 var_dump($x->getPointerType()->getKind() === $x::TYPE_FUNC);
-var_dump($x->getPointerType()->getFuncRetType()->getKind() === $x::TYPE_VOID);
-var_dump($x->getPointerType()->getFuncArgsCount());
+var_dump($x->getPointerType()->getFuncReturnType()->getKind() === $x::TYPE_VOID);
+var_dump($x->getPointerType()->getFuncArgCount());
 var_dump($x->getPointerType()->getFuncArgType(0)->getKind() === $x::TYPE_DOUBLE);
 var_dump($x->getPointerType()->getFuncArgType(1)->getKind() === $x::TYPE_SINT32);
 ?>
