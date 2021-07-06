@@ -58,6 +58,12 @@ PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 		RETURN_THROWS(); \
 	}
 
+#define CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern) \
+	if (!(intern)->u.dir.dirp) { \
+		zend_throw_error(NULL, "Object not initialized"); \
+		RETURN_THROWS(); \
+	}
+
 static void spl_filesystem_file_free_line(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->u.file.current_line) {
@@ -768,10 +774,9 @@ PHP_METHOD(DirectoryIterator, rewind)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	intern->u.dir.index = 0;
-	if (intern->u.dir.dirp) {
-		php_stream_rewinddir(intern->u.dir.dirp);
-	}
+	php_stream_rewinddir(intern->u.dir.dirp);
 	spl_filesystem_dir_read(intern);
 }
 /* }}} */
@@ -785,11 +790,8 @@ PHP_METHOD(DirectoryIterator, key)
 		RETURN_THROWS();
 	}
 
-	if (intern->u.dir.dirp) {
-		RETURN_LONG(intern->u.dir.index);
-	} else {
-		RETURN_FALSE;
-	}
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
+	RETURN_LONG(intern->u.dir.index);
 }
 /* }}} */
 
@@ -799,6 +801,8 @@ PHP_METHOD(DirectoryIterator, current)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(Z_SPLFILESYSTEM_P(ZEND_THIS));
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 /* }}} */
@@ -813,6 +817,7 @@ PHP_METHOD(DirectoryIterator, next)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	intern->u.dir.index++;
 	do {
 		spl_filesystem_dir_read(intern);
@@ -835,6 +840,7 @@ PHP_METHOD(DirectoryIterator, seek)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	if (intern->u.dir.index > pos) {
 		/* we first rewind */
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_rewind, "rewind", NULL);
@@ -862,6 +868,7 @@ PHP_METHOD(DirectoryIterator, valid)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_BOOL(intern->u.dir.entry.d_name[0] != '\0');
 }
 /* }}} */
@@ -920,6 +927,7 @@ PHP_METHOD(DirectoryIterator, getFilename)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_STRING(intern->u.dir.entry.d_name);
 }
 /* }}} */
@@ -981,6 +989,7 @@ PHP_METHOD(DirectoryIterator, getExtension)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0);
 
 	p = zend_memrchr(ZSTR_VAL(fname), '.', ZSTR_LEN(fname));
@@ -1038,6 +1047,7 @@ PHP_METHOD(DirectoryIterator, getBasename)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), suffix, slen);
 
 	RETVAL_STR(fname);
@@ -1116,6 +1126,7 @@ PHP_METHOD(DirectoryIterator, isDot)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
