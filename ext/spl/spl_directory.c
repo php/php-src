@@ -1948,26 +1948,29 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		}
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
 			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
-		} else {
-			zend_execute_data *execute_data = EG(current_execute_data);
-			zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
-		if (!Z_ISUNDEF(retval)) {
-			if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
-				intern->u.file.current_line_num++;
-			}
-			spl_filesystem_file_free_line(intern);
-			if (Z_TYPE(retval) == IS_STRING) {
-				intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-				intern->u.file.current_line_len = Z_STRLEN(retval);
-			} else {
-				ZVAL_COPY_DEREF(&intern->u.file.current_zval, &retval);
-			}
-			zval_ptr_dtor(&retval);
-			return SUCCESS;
-		} else {
+
+		zend_execute_data *execute_data = EG(current_execute_data);
+		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
+		if (Z_ISUNDEF(retval)) {
 			return FAILURE;
 		}
+
+		if (Z_TYPE(retval) != IS_STRING) {
+			zend_type_error("getCurrentLine(): Return value must be of type string, %s returned",
+				zend_zval_type_name(&retval));
+			zval_ptr_dtor(&retval);
+			return FAILURE;
+		}
+
+		if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
+			intern->u.file.current_line_num++;
+		}
+		spl_filesystem_file_free_line(intern);
+		intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+		intern->u.file.current_line_len = Z_STRLEN(retval);
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
 	} else {
 		return spl_filesystem_file_read(intern, silent);
 	}
