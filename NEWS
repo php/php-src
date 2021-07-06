@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #81208 (Segmentation fault while create newInstance from
     attribute). (Nikita)
 
+- Standard:
+  . Fixed bug #81223 (flock() only locks first byte of file). (cmb)
+
 17 Jun 2021, PHP 8.0.8
 
 - Core:
