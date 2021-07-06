@@ -560,30 +560,25 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
-	char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
-	const char *type;
-
 	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
 		return;
 	}
 
-	type = zend_zval_type_name(&c->value);
-
+	const char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
+	const char *type = zend_zval_type_name(&c->value);
+	smart_str_append_printf(str, "%sConstant [ %s %s %s ] { ",
+		indent, visibility, type, name);
 	if (Z_TYPE(c->value) == IS_ARRAY) {
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { Array }\n",
-						indent, visibility, type, name);
+		smart_str_appends(str, "Array");
 	} else if (Z_TYPE(c->value) == IS_OBJECT) {
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { Object }\n",
-						indent, visibility, type, name);
+		smart_str_appends(str, "Object");
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(&c->value, &tmp_value_str);
-
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
-						indent, visibility, type, name, ZSTR_VAL(value_str));
-
+		smart_str_append(str, value_str);
 		zend_tmp_string_release(tmp_value_str);
 	}
+	smart_str_appends(str, " }\n");
 }
 /* }}} */
 
