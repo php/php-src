@@ -8,12 +8,12 @@ var_dump(clamp(0, 0.0, 2));
 var_dump(clamp(0.0, 0, 2));
 try {
     var_dump(clamp(0.0, NAN, 2));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump(clamp(INF, NAN, 2));
-} catch (\TypeError $e) {
+    var_dump(clamp(1, 0, NAN));
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump(clamp(0x10, 0x01, 2));
@@ -25,7 +25,7 @@ var_dump(clamp(0.0, null, null));
 var_dump(clamp(0.0, null, false));
 try {
     var_dump(clamp(INF, false, NAN));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump(clamp(NAN, 0, 2));
@@ -34,8 +34,8 @@ var_dump(clamp(NAN, 0, 2));
 *** Testing clamp() : basic functionality 02 ***
 float(0)
 int(0)
-clamp(): Argument #2 ($min) cannot be of type NAN
-clamp(): Argument #2 ($min) cannot be of type NAN
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 int(2)
 int(10)
 float(24)
@@ -51,5 +51,5 @@ int(0)
 
 Deprecated: clamp(): Passing null to parameter #2 ($min) of type int|float is deprecated in %s on line %d
 int(0)
-clamp(): Argument #3 ($max) cannot be of type NAN
-float(NAN)
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+int(0)
