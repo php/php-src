@@ -405,7 +405,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4], (int32_t)args[5]);
 	}
 
-	// TODO Make void?
 	RETURN_TRUE;
 }
 
@@ -614,7 +613,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 
 	uint8_t result = co->ucal->getMinimalDaysInFirstWeek();
 	INTL_METHOD_CHECK_STATUS(co,
-		"intlcal_get_first_day_of_week: Call to ICU method has failed");
+		"intlcal_get_first_day_of_week: Call to ICU method has failed"); /* TODO Is it really a failure? */
 
 	RETURN_LONG((zend_long)result);
 }
@@ -910,7 +909,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 
 	co->ucal->setRepeatedWallTimeOption((UCalendarWallTimeOption)option);
 
-	// TODO Return void?
 	RETURN_TRUE;
 }
 
@@ -935,7 +933,6 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 	co->ucal->setSkippedWallTimeOption((UCalendarWallTimeOption)option);
 
-	// TODO Return void?
 	RETURN_TRUE;
 }
 

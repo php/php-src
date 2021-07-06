@@ -1,45 +1,50 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d5b34913965434a4015e2b6ac7288edbbafc3f3 */
+ * Stub hash: c55f45648d120c74b84018da9786d49d9c203639 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_MessageFormatter_create arginfo_class_MessageFormatter___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_MessageFormatter_create, 0, 2, MessageFormatter, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_format, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MessageFormatter_format, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_formatMessage, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MessageFormatter_formatMessage, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_parse, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MessageFormatter_parse, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_parseMessage, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MessageFormatter_parseMessage, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_setPattern, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_MessageFormatter_setPattern, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter_getPattern, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MessageFormatter_getPattern, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_MessageFormatter_getLocale arginfo_class_MessageFormatter_getPattern
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_MessageFormatter_getLocale, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_MessageFormatter_getErrorCode arginfo_class_MessageFormatter_getPattern
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_MessageFormatter_getErrorCode, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_MessageFormatter_getErrorMessage arginfo_class_MessageFormatter_getPattern
+#define arginfo_class_MessageFormatter_getErrorMessage arginfo_class_MessageFormatter_getLocale
 
 
 ZEND_METHOD(MessageFormatter, __construct);

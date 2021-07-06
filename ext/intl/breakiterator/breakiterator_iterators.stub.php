@@ -4,6 +4,6 @@
 
 class IntlPartsIterator extends IntlIterator
 {
-    /** @return IntlBreakIterator */
-    public function getBreakIterator() {}
+    /** @tentative-return-type */
+    public function getBreakIterator(): IntlBreakIterator {}
 }

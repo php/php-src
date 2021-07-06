@@ -1,22 +1,26 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6b873a68045fb5cf75e23991a3c77aa01a8893ee */
+ * Stub hash: a0c2cf74b0d2e8309f0cd39fd9969d14586d0988 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_setDefault, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_getPrimaryLanguage arginfo_class_Locale_setDefault
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getPrimaryLanguage, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_getScript arginfo_class_Locale_setDefault
+#define arginfo_class_Locale_getScript arginfo_class_Locale_getPrimaryLanguage
 
-#define arginfo_class_Locale_getRegion arginfo_class_Locale_setDefault
+#define arginfo_class_Locale_getRegion arginfo_class_Locale_getPrimaryLanguage
 
-#define arginfo_class_Locale_getKeywords arginfo_class_Locale_setDefault
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getKeywords, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_getDisplayScript, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getDisplayScript, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -29,30 +33,32 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Locale_getDisplayVariant arginfo_class_Locale_getDisplayScript
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_composeLocale, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_composeLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_parseLocale arginfo_class_Locale_setDefault
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_parseLocale, 0, 1, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_getAllVariants arginfo_class_Locale_setDefault
+#define arginfo_class_Locale_getAllVariants arginfo_class_Locale_parseLocale
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_filterMatches, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_filterMatches, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_INFO(0, languageTag, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, canonicalize, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_lookup, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_lookup, 0, 2, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, languageTag, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, canonicalize, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, defaultLocale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_canonicalize arginfo_class_Locale_setDefault
+#define arginfo_class_Locale_canonicalize arginfo_class_Locale_getPrimaryLanguage
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_acceptFromHttp, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_acceptFromHttp, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
