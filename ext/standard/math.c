@@ -246,10 +246,10 @@ PHP_FUNCTION(clamp)
 
 	if (zend_compare(zmax, zvalue) == -1) {
 		RETURN_COPY(zmax);
-	} else if (zend_compare(zmin, zvalue) == -1) {
-		RETURN_COPY(zvalue);
-	} else {
+	} else if (zend_compare(zvalue, zmin) == -1) {
 		RETURN_COPY(zmin);
+	} else {
+		RETURN_COPY(zvalue);
 	}
 }
 /* }}} */

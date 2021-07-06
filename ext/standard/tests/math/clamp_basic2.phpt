@@ -32,8 +32,8 @@ var_dump(clamp(NAN, 0, 2));
 ?>
 --EXPECTF--
 *** Testing clamp() : basic functionality 02 ***
-float(0)
 int(0)
+float(0)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
 int(2)
@@ -42,14 +42,14 @@ float(24)
 float(23.45)
 
 Deprecated: clamp(): Passing null to parameter #2 ($min) of type int|float is deprecated in %s on line %d
-int(0)
+float(0)
 
 Deprecated: clamp(): Passing null to parameter #2 ($min) of type int|float is deprecated in %s on line %d
 
 Deprecated: clamp(): Passing null to parameter #3 ($max) of type int|float is deprecated in %s on line %d
-int(0)
+float(0)
 
 Deprecated: clamp(): Passing null to parameter #2 ($min) of type int|float is deprecated in %s on line %d
-int(0)
+float(0)
 clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-int(0)
+float(NAN)
