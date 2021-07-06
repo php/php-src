@@ -1901,7 +1901,6 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
-	zval *value;
 
 	do {
 		ret = spl_filesystem_file_read(intern, 1);
@@ -1918,8 +1917,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
-			value = &intern->u.file.current_zval;
-			ZVAL_COPY_DEREF(return_value, value);
+			ZVAL_COPY(return_value, &intern->u.file.current_zval);
 		}
 	}
 	return ret;
@@ -1953,9 +1951,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 				intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 				intern->u.file.current_line_len = Z_STRLEN(retval);
 			} else {
-				zval *value = &retval;
-
-				ZVAL_COPY_DEREF(&intern->u.file.current_zval, value);
+				ZVAL_COPY_DEREF(&intern->u.file.current_zval, &retval);
 			}
 			zval_ptr_dtor(&retval);
 			return SUCCESS;
@@ -2185,10 +2181,8 @@ PHP_METHOD(SplFileObject, current)
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		zval *value = &intern->u.file.current_zval;
-
-		ZVAL_COPY_DEREF(return_value, value);
-		return;
+		ZEND_ASSERT(!Z_ISREF(intern->u.file.current_zval));
+		RETURN_COPY(&intern->u.file.current_zval);
 	}
 	RETURN_FALSE;
 } /* }}} */
