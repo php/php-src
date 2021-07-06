@@ -47,9 +47,9 @@ struct fpm_worker_pool_s {
 #endif
 };
 
-struct fpm_worker_pool_s *fpm_worker_pool_alloc();
+struct fpm_worker_pool_s *fpm_worker_pool_alloc(void);
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp);
-int fpm_worker_pool_init_main();
+int fpm_worker_pool_init_main(void);
 
 void fpm_worker_pool_free_limit_extensions(char **limit_extensions);
 

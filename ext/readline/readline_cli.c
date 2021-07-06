@@ -743,7 +743,7 @@ this extension sharedto offer compatibility.
 #define GET_SHELL_CB(cb) \
 	do { \
 		(cb) = NULL; \
-		cli_shell_callbacks_t *(*get_callbacks)(); \
+		cli_shell_callbacks_t *(*get_callbacks)(void); \
 		get_callbacks = dlsym(RTLD_DEFAULT, "php_cli_get_shell_callbacks"); \
 		if (get_callbacks) { \
 			(cb) = get_callbacks(); \

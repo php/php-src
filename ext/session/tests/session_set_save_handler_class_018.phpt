@@ -3,6 +3,8 @@ Test session_set_save_handler() function: class with validate_sid
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -15,7 +17,7 @@ echo "*** Testing session_set_save_handler() function: class with validate_sid *
 class MySession2 extends SessionHandler {
     public $path;
 
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         if (!$path) {
             $path = sys_get_temp_dir();
         }
@@ -23,23 +25,23 @@ class MySession2 extends SessionHandler {
         return true;
     }
 
-    public function close() {
+    public function close(): bool {
         return true;
     }
 
-    public function read($id) {
+    public function read($id): string|false {
         return (string)@file_get_contents($this->path . $id);
     }
 
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         return file_put_contents($this->path . $id, $data)===FALSE ? FALSE : TRUE ;
     }
 
-    public function destroy($id) {
+    public function destroy($id): bool {
         @unlink($this->path . $id);
     }
 
-    public function gc($maxlifetime) {
+    public function gc($maxlifetime): int|false {
         foreach (glob($this->path . '*') as $filename) {
             if (filemtime($filename) + $maxlifetime < time()) {
                 @unlink($filename);
@@ -48,11 +50,11 @@ class MySession2 extends SessionHandler {
         return true;
     }
 
-    public function create_sid() {
+    public function create_sid(): string {
         return pathinfo(__FILE__)['filename'];
     }
 
-    public function validate_sid($id) {
+    public function validate_sid($id): bool {
         return pathinfo(__FILE__)['filename']===$id;
     }
 }

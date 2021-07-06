@@ -1,8 +1,9 @@
 --TEST--
 Bug #72399 (Use-After-Free in MBString (search_re))
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-require 'skipif.inc';
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

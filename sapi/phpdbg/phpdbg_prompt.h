@@ -58,8 +58,7 @@ PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit);
 PHPDBG_COMMAND(watch);
 PHPDBG_COMMAND(next);
-PHPDBG_COMMAND(eol);
-PHPDBG_COMMAND(wait); /* }}} */
+PHPDBG_COMMAND(eol); /* }}} */
 
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */

@@ -1,8 +1,9 @@
 --TEST--
 PAM auth plugin
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('connect.inc');
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
@@ -128,5 +129,5 @@ max_execution_time=240
 	mysqli_query($link, 'DROP USER pamtest');
 	mysqli_query($link, 'DROP USER pamtest@localhost');
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -2,9 +2,10 @@
 Testing imagecreatetruecolor() of GD library
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded("gd")) die("skip GD not present");
     if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
 --FILE--

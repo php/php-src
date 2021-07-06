@@ -199,6 +199,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print(" => ");
 			}
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
@@ -775,7 +776,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -864,7 +865,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			} else {
 				descr = estrdup("disabled");
 			}
-            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			php_info_print_table_row(2, "Zend Multibyte Support", descr);
 			efree(descr);
 		}
 
@@ -961,7 +962,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
-        tsrm_env_unlock();
+		tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 

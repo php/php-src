@@ -11,13 +11,13 @@ STR;
 var_dump(unserialize($str));
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   object(SplObjectStorage)#1 (1) {
     ["storage":"SplObjectStorage":private]=>
     array(1) {
-      ["%s"]=>
+      [0]=>
       array(2) {
         ["obj"]=>
         object(stdClass)#2 (0) {

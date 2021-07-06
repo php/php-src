@@ -640,7 +640,7 @@ void php_oci_define_hash_dtor(zval *data)
 
 	zval_ptr_dtor(&define->val);
 
-    efree(define);
+	efree(define);
 }
 /* }}} */
 
@@ -1885,7 +1885,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		} else {
 			RETURN_FALSE;
 		}
-    }
+	}
 #endif /* OCI_MAJOR_VERSION */
 
 	if (placeholder == NULL) {
@@ -2046,7 +2046,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus);
 		iserror = 1;
 		goto exit_create_spool;
- 	}
+	}
 	/* }}} */
 
 	/* {{{ Set the edition attribute on the auth handle */

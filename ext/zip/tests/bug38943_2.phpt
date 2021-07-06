@@ -1,9 +1,7 @@
 --TEST--
 #38943, properties in extended class cannot be set (5.3)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 include 'bug38943.inc';

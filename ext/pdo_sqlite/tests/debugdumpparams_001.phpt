@@ -1,9 +1,7 @@
 --TEST--
 Testing PDOStatement::debugDumpParams() with bound params
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

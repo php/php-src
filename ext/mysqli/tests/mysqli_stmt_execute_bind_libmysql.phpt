@@ -1,11 +1,12 @@
 --TEST--
 mysqli_stmt_execute() - bind in execute - not supported with libmysql
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
 require_once 'skipifconnectfailure.inc';
-if (stristr(mysqli_get_client_info(), 'mysqlnd')) {
-    die("skip: only applicable for libmysqlclient");
+if ($IS_MYSQLND) {
+    die("skip only applicable for libmysqlclient");
 }
 ?>
 --FILE--
@@ -22,7 +23,9 @@ $abc = 'abc';
 $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
 $stmt->bind_param('sss', ...[&$abc, 42, $id]);
 $stmt->execute();
-assert($stmt->get_result()->fetch_assoc() === ['label'=>'a', 'anon'=>'abc', 'num' => '42']);
+$stmt->bind_result($v1, $v2, $v3);
+$stmt->fetch();
+assert(['label'=>$v1, 'anon'=>$v2, 'num'=>$v3] === ['label'=>'a', 'anon'=>'abc', 'num'=>'42']);
 $stmt = null;
 
 // 1. same as the control case, but skipping the middle-man (bind_param)

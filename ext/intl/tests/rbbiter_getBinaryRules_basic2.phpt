@@ -1,7 +1,8 @@
 --TEST--
 IntlRuleBasedBreakIterator::getBinaryRules(): basic test icu >= 61.1 && icu < 68.1
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '61.1') < 0) print 'skip ICU >= 61.1 only'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '68.1') >= 0) die('skip for ICU < 68.1'); ?>
 --FILE--

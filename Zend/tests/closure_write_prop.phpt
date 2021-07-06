@@ -19,4 +19,4 @@ try {
 
 ?>
 --EXPECT--
-Closure object cannot have properties
+Cannot create dynamic property Closure::$b

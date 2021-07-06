@@ -1,8 +1,9 @@
 --TEST--
 mysqli_query() - unicode (cyrillic)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 require_once('table.inc');

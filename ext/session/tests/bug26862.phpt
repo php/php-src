@@ -1,5 +1,7 @@
 --TEST--
 Bug #26862 (ob_flush() before output_reset_rewrite_vars() results in data loss)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

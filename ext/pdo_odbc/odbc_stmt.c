@@ -318,9 +318,16 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 					/* MS Access, for instance, doesn't support SQLDescribeParam,
 					 * so we need to guess */
-					sqltype = PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
-									SQL_LONGVARBINARY :
-									SQL_LONGVARCHAR;
+					switch (PDO_PARAM_TYPE(param->param_type)) {
+						case PDO_PARAM_INT:
+							sqltype = SQL_INTEGER;
+							break;
+						case PDO_PARAM_LOB:
+							sqltype = SQL_LONGVARBINARY;
+							break;
+						default:
+							sqltype = SQL_LONGVARCHAR;
+					}
 					precision = 4000;
 					scale = 5;
 					nullable = 1;
@@ -608,7 +615,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		rc = SQLBindCol(S->stmt, colno+1,
 			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
 			S->cols[colno].data,
- 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
+			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_stmt_error("SQLBindCol");

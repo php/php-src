@@ -47,7 +47,7 @@ foreach($file_content_types as $file_content_type) {
 
    echo "-- Testing ftruncate(): truncate file to half of its current size --\n";
    /* truncate it to half of its current size */
-   $new_size = filesize($filename)/2;
+   $new_size = (int)(filesize($filename)/2);
    var_dump( filesize($filename) );  // current filesize
    var_dump( ftell($file_handle) );
    var_dump( ftruncate($file_handle, $new_size) ); // truncate it

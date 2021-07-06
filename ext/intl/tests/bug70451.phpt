@@ -1,7 +1,7 @@
 --TEST--
 Bug #70451 IntlChar::charFromName() not consistent with C library or HHVM
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump(IntlChar::charFromName("RECYCLING SYMBOL FOR TYPE-1 PLASTICS"));

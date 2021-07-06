@@ -47,6 +47,7 @@
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
 #include "dateformat/dateformat_data.h"
+#include "dateformat/datepatterngenerator_class.h"
 
 #include "resourcebundle/resourcebundle_class.h"
 
@@ -97,8 +98,8 @@ const char *intl_locale_get_default( void )
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
-    STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_BOOLEAN("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
@@ -187,6 +188,9 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose DateFormat constants to PHP scripts */
 	dateformat_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
+	/* Register 'IntlDateTimeFormatter' PHP class */
+	dateformat_register_IntlDatePatternGenerator_class(  );
+
 	/* Register 'ResourceBundle' PHP class */
 	resourcebundle_register_class( );
 
@@ -246,15 +250,15 @@ PHP_MINIT_FUNCTION( intl )
 PHP_MSHUTDOWN_FUNCTION( intl )
 {
 	const char *cleanup;
-    /* For the default locale php.ini setting */
-    UNREGISTER_INI_ENTRIES();
+	/* For the default locale php.ini setting */
+	UNREGISTER_INI_ENTRIES();
 
 	cleanup = getenv(EXPLICIT_CLEANUP_ENV_VAR);
-    if (cleanup != NULL && !(cleanup[0] == '0' && cleanup[1] == '\0')) {
+	if (cleanup != NULL && !(cleanup[0] == '0' && cleanup[1] == '\0')) {
 		u_cleanup();
-    }
+	}
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -302,7 +306,7 @@ PHP_MINFO_FUNCTION( intl )
 	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
-    /* For the default locale php.ini setting */
-    DISPLAY_INI_ENTRIES() ;
+	/* For the default locale php.ini setting */
+	DISPLAY_INI_ENTRIES() ;
 }
 /* }}} */

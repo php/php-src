@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @strict-properties */
 final class Closure
 {
     private function __construct() {}

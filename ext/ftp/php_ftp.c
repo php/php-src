@@ -93,6 +93,8 @@ static void ftp_object_destroy(zend_object *zobj) {
 	if (obj->ftp) {
 		ftp_close(obj->ftp);
 	}
+
+	zend_object_std_dtor(zobj);
 }
 
 PHP_MINIT_FUNCTION(ftp)
@@ -116,7 +118,7 @@ PHP_MINIT_FUNCTION(ftp)
 	memcpy(&ftp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ftp_object_handlers.offset = XtOffsetOf(php_ftp_object, std);
 	ftp_object_handlers.get_constructor = ftp_object_get_constructor;
-	ftp_object_handlers.dtor_obj = ftp_object_destroy;
+	ftp_object_handlers.free_obj = ftp_object_destroy;
 	ftp_object_handlers.clone_obj = NULL;
 
 	REGISTER_LONG_CONSTANT("FTP_ASCII",  FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);

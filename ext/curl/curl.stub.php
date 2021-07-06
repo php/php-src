@@ -25,14 +25,11 @@ function curl_errno(CurlHandle $handle): int {}
 
 function curl_error(CurlHandle $handle): string {}
 
-#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 function curl_escape(CurlHandle $handle, string $string): string|false {}
 
 function curl_unescape(CurlHandle $handle, string $string): string|false {}
 
 function curl_multi_setopt(CurlMultiHandle $multi_handle, int $option, mixed $value): bool {}
-
-#endif
 
 function curl_exec(CurlHandle $handle): string|bool {}
 
@@ -64,9 +61,7 @@ function curl_multi_select(CurlMultiHandle $multi_handle, float $timeout = 1.0):
 
 function curl_multi_strerror(int $error_code): ?string {}
 
-#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 function curl_pause(CurlHandle $handle, int $flags): int {}
-#endif
 
 function curl_reset(CurlHandle $handle): void {}
 

@@ -1,7 +1,7 @@
 --TEST--
 Phar: set alias with invalid alias containing / \ : or ;
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

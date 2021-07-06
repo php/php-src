@@ -1,8 +1,9 @@
 --TEST--
 TLSv1.1 and TLSv1.2 bitwise stream crypto flag assignment
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 DBA CDB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'cdb';

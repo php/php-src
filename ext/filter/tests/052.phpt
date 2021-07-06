@@ -1,7 +1,7 @@
 --TEST--
 filter_var() / filter_var_array() and passed data integrity
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 function filter_cb($var)

@@ -23,7 +23,7 @@
 # define HAVE_DISASM 1
 # include <capstone/capstone.h>
 # define HAVE_CAPSTONE_ITER 1
-#else
+#elif ZEND_JIT_TARGET_X86
 # define HAVE_DISASM 1
 # define DISASM_INTEL_SYNTAX 0
 
@@ -37,6 +37,8 @@
 # endif
 # include "jit/libudis86/udis86.c"
 #endif /* HAVE_CAPSTONE */
+
+#ifdef HAVE_DISASM
 
 static void zend_jit_disasm_add_symbol(const char *name,
                                        uint64_t    addr,
@@ -225,6 +227,7 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 {
 	unsigned int i;
 
+#if ZEND_JIT_TARGET_X86
 	if (cs_insn_group(cs, insn, X86_GRP_JUMP)) {
 		for (i = 0; i < insn->detail->x86.op_count; i++) {
 			if (insn->detail->x86.operands[i].type == X86_OP_IMM) {
@@ -232,6 +235,16 @@ static uint64_t zend_jit_disasm_branch_target(csh cs, const cs_insn *insn)
 			}
 		}
 	}
+#elif ZEND_JIT_TARGET_ARM64
+	if (cs_insn_group(cs, insn, ARM64_GRP_JUMP)
+	 || insn->id == ARM64_INS_BL
+	 || insn->id == ARM64_INS_ADR) {
+		for (i = 0; i < insn->detail->arm64.op_count; i++) {
+			if (insn->detail->arm64.operands[i].type == ARM64_OP_IMM)
+				return insn->detail->arm64.operands[i].imm;
+		}
+	}
+#endif
 
 	return 0;
 }
@@ -310,24 +323,25 @@ static int zend_jit_disasm(const char    *name,
 #endif
 
 #ifdef HAVE_CAPSTONE
-# if defined(__x86_64__) || defined(_WIN64)
+# if ZEND_JIT_TARGET_X86
+#  if defined(__x86_64__) || defined(_WIN64)
 	if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK)
 		return 0;
-	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
-#  if DISASM_INTEL_SYNTAX
-	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
 #  else
-	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
-#  endif
-# else
 	if (cs_open(CS_ARCH_X86, CS_MODE_32, &cs) != CS_ERR_OK)
 		return 0;
+#  endif
 	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
 #  if DISASM_INTEL_SYNTAX
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_INTEL);
 #  else
 	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
 #  endif
+# elif ZEND_JIT_TARGET_ARM64
+	if (cs_open(CS_ARCH_ARM64, CS_MODE_ARM, &cs) != CS_ERR_OK)
+		return 0;
+	cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+	cs_option(cs, CS_OPT_SYNTAX, CS_OPT_SYNTAX_ATT);
 # endif
 #else
 	ud_init(&ud);
@@ -431,9 +445,15 @@ static int zend_jit_disasm(const char    *name,
 		}
 
 # ifdef HAVE_CAPSTONE_ITER
+		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
+			fprintf(stderr, "    %" PRIx64 ":", insn->address);
+		}
 		fprintf(stderr, "\t%s ", insn->mnemonic);
 		p = insn->op_str;
 # else
+		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
+			fprintf(stderr, "    %" PRIx64 ":", insn[i].address);
+		}
 		fprintf(stderr, "\t%s ", insn[i].mnemonic);
 		p = insn[i].op_str;
 # endif
@@ -533,6 +553,9 @@ static int zend_jit_disasm(const char    *name,
 				}
 			}
 		}
+		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) {
+			fprintf(stderr, "    %" PRIx64 ":", ud_insn_off(&ud));
+		}
 		fprintf(stderr, "\t%s\n", ud_insn_asm(&ud));
 	}
 #endif
@@ -564,6 +587,11 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(symbol_table);
 	REGISTER_EG(jit_trace_num);
 #undef  REGISTER_EG
+#define REGISTER_CG(n)  \
+	zend_jit_disasm_add_symbol("CG("#n")", \
+		(uint64_t)(uintptr_t)&compiler_globals.n, sizeof(compiler_globals.n))
+	REGISTER_CG(map_ptr_base);
+#undef  REGISTER_CG
 #endif
 
 	/* Register JIT helper functions */
@@ -743,3 +771,5 @@ static void zend_jit_disasm_shutdown(void)
 		JIT_G(symbols) = NULL;
 	}
 }
+
+#endif /* HAVE_DISASM */

@@ -118,7 +118,6 @@ do {																			\
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
-BEGIN_EXTERN_C()
 
 static void strip_underscores(char *str, size_t *len)
 {
@@ -587,7 +586,6 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
-END_EXTERN_C()
 
 static zend_op_array *zend_compile(int type)
 {
@@ -811,7 +809,6 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 }
 
 
-BEGIN_EXTERN_C()
 zend_result highlight_file(const char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zend_lex_state original_lex_state;
@@ -905,7 +902,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 
 static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
 {
-	register char *s, *t;
+	char *s, *t;
 	char *end;
 
 	if (len <= 1) {
@@ -1277,7 +1274,7 @@ static zend_result exit_nesting(char closing)
 	return SUCCESS;
 }
 
-static zend_result check_nesting_at_end()
+static zend_result check_nesting_at_end(void)
 {
 	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
 		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
@@ -1857,6 +1854,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
+<ST_IN_SCRIPTING>"&"{TABS_AND_SPACES}("$"|"...") {
+	yyless(1);
+	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
+}
+
+<ST_IN_SCRIPTING>"&" {
+	RETURN_TOKEN(T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG);
+}
+
 <ST_IN_SCRIPTING>"]"|")" {
 	/* Check that ] and ) match up properly with a preceding [ or ( */
 	RETURN_EXIT_NESTING_TOKEN(yytext[0]);
@@ -2427,7 +2433,7 @@ inline_char_handler:
 
 
 <ST_IN_SCRIPTING>b?['] {
-	register char *s, *t;
+	char *s, *t;
 	char *end;
 	int bprefix = (yytext[0] != '\'') ? 1 : 0;
 

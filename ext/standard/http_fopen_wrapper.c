@@ -313,10 +313,10 @@ finish:
 			php_stream_close(stream);
 			stream = NULL;
 		}
- 	 	smart_str_free(&header);
+		smart_str_free(&header);
 
- 	 	if (stream) {
- 	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
+		if (stream) {
+			char header_line[HTTP_HEADER_BLOCK_SIZE];
 
 			/* get response header */
 			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL) {

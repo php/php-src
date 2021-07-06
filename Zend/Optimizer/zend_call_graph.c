@@ -35,7 +35,7 @@ static void zend_op_array_calc(zend_op_array *op_array, void *context)
 static void zend_op_array_collect(zend_op_array *op_array, void *context)
 {
 	zend_call_graph *call_graph = context;
-    zend_func_info *func_info = call_graph->func_infos + call_graph->op_arrays_count;
+	zend_func_info *func_info = call_graph->func_infos + call_graph->op_arrays_count;
 
 	ZEND_SET_FUNC_INFO(op_array, func_info);
 	call_graph->op_arrays[call_graph->op_arrays_count] = op_array;

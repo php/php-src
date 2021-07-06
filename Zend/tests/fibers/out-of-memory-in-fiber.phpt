@@ -1,7 +1,7 @@
 --TEST--
 Out of Memory in a fiber
 --INI--
-memory_limit=10K
+memory_limit=2M
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {

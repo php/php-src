@@ -1,7 +1,7 @@
 --TEST--
 Phar: PHP bug #72321: invalid free in phar_extract_file()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 chdir(__DIR__);

@@ -11,6 +11,6 @@ $fragment = new DOMDocumentFragment();
 $fragment->__construct();
 var_dump($fragment);
 ?>
---EXPECTF--
-object(DOMDocumentFragment)#%d (%d) {
+--EXPECT--
+object(DOMDocumentFragment)#1 (0) {
 }

@@ -28,7 +28,7 @@
 #include <errno.h>
 
 static int fpm_event_kqueue_init(int max);
-static int fpm_event_kqueue_clean();
+static int fpm_event_kqueue_clean(void);
 static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_kqueue_add(struct fpm_event_s *ev);
 static int fpm_event_kqueue_remove(struct fpm_event_s *ev);
@@ -52,7 +52,7 @@ static int kfd = 0;
 /*
  * Return the module configuration
  */
-struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_kqueue_module(void) /* {{{ */
 {
 #ifdef HAVE_KQUEUE
 	return &kqueue_module;

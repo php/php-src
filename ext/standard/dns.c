@@ -429,8 +429,8 @@ PHP_FUNCTION(dns_check_record)
 		RETURN_FALSE;
 	}
 #elif defined(HAVE_RES_NSEARCH)
-    memset(&state, 0, sizeof(state));
-    if (res_ninit(handle)) {
+	memset(&state, 0, sizeof(state));
+	if (res_ninit(handle)) {
 			RETURN_FALSE;
 	}
 #else
@@ -481,11 +481,11 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	CHECKCP(dlen);
-    if (dlen == 0) {
-        /* No data in the response - nothing to do */
-        return NULL;
-    }
-    if (type_to_fetch != DNS_T_ANY && type != type_to_fetch) {
+	if (dlen == 0) {
+		/* No data in the response - nothing to do */
+		return NULL;
+	}
+	if (type_to_fetch != DNS_T_ANY && type != type_to_fetch) {
 		cp += dlen;
 		return cp;
 	}
@@ -1100,8 +1100,8 @@ PHP_FUNCTION(dns_get_mx)
 		RETURN_FALSE;
 	}
 #elif defined(HAVE_RES_NSEARCH)
-    memset(&state, 0, sizeof(state));
-    if (res_ninit(handle)) {
+	memset(&state, 0, sizeof(state));
+	if (res_ninit(handle)) {
 			RETURN_FALSE;
 	}
 #else

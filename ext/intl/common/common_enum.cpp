@@ -295,7 +295,6 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
-	IntlIterator_handlers.dtor_obj = zend_objects_destroy_object;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
 
 }

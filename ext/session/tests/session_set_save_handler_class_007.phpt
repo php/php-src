@@ -3,6 +3,8 @@ Test session_set_save_handler() : manual shutdown, reopen
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -26,11 +28,11 @@ class MySession extends SessionHandler {
         echo "(#$this->num) finish called $id\n";
         session_write_close();
     }
-    public function write($id, $data) {
+    public function write($id, $data): bool {
         echo "(#$this->num) writing $id = $data\n";
         return parent::write($id, $data);
     }
-    public function close() {
+    public function close(): bool {
         $id = session_id();
         echo "(#$this->num) closing $id\n";
         return parent::close();

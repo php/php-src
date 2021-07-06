@@ -1,8 +1,9 @@
 --TEST--
 Test posix_getgrgid() function : error conditions
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
-if(!extension_loaded("posix")) die("skip - POSIX extension not loaded");
 if (getenv('SKIP_ASAN')) die('skip LSan crashes when firebird is loaded');
 ?>
 --FILE--

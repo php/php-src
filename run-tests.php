@@ -296,7 +296,6 @@ function main(): void
         'precision=14',
         'serialize_precision=-1',
         'memory_limit=128M',
-        'log_errors_max_len=0',
         'opcache.fast_shutdown=0',
         'opcache.file_update_protection=0',
         'opcache.revalidate_freq=0',
@@ -861,9 +860,22 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
     @unlink($info_file);
 
-    // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    // load list of enabled and loadable extensions
+    save_text($info_file, <<<'PHP'
+        <?php
+        echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions()));
+        $ext_dir = ini_get("extension_dir");
+        foreach (scandir($ext_dir) as $file) {
+            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                continue;
+            }
+            $ext = $matches[1];
+            if (!extension_loaded($ext) && @dl($file)) {
+                echo ",", $ext;
+            }
+        }
+        ?>
+    PHP);
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -1452,7 +1464,7 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
     $startTime = microtime(true);
     for ($i = 1; $i <= $workers; $i++) {
         $proc = proc_open(
-            $thisPHP . ' ' . escapeshellarg($thisScript),
+            [$thisPHP, $thisScript],
             [], // Inherit our stdin, stdout and stderr
             $pipes,
             null,
@@ -1666,6 +1678,7 @@ escape:
                                 'E_USER_NOTICE',
                                 'E_STRICT', // TODO Cleanup when removed from Zend Engine.
                                 'E_RECOVERABLE_ERROR',
+                                'E_DEPRECATED',
                                 'E_USER_DEPRECATED'
                             ];
                             $error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
@@ -1838,6 +1851,7 @@ function run_test(string $php, $file, array $env): string
 
     $temp_filenames = null;
     $org_file = $file;
+    $orig_php = $php;
 
     if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
         $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
@@ -2033,7 +2047,8 @@ TEST $file
     $env['TZ'] = '';
 
     if ($test->sectionNotEmpty('ENV')) {
-        foreach (explode("\n", $test->getSection('ENV')) as $e) {
+        $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
             if (!empty($e[0]) && isset($e[1])) {
@@ -2051,7 +2066,7 @@ TEST $file
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -2615,6 +2630,7 @@ COMMAND $cmd
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
+            $wanted_re = str_replace('%0', '\x00', $wanted_re);
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
@@ -2741,9 +2757,14 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
+            $env_lines = [];
+            foreach ($env as $env_var => $env_val) {
+                $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
+            }
+            $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH
 #!/bin/sh
-
+{$exported_environment}
 case "$1" in
 "gdb")
     gdb --args {$orig_cmd}

@@ -154,16 +154,16 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 
 	handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
 
-    if (handler != NULL) {
+	if (handler != NULL) {
 		xmlCharEncCloseFunc(handler);
 		if (docp->encoding != NULL) {
 			xmlFree((xmlChar *)docp->encoding);
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
-    } else {
+	} else {
 		zend_value_error("Invalid document encoding");
 		return FAILURE;
-    }
+	}
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;
@@ -1166,8 +1166,8 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 
 static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t source_len, size_t options) /* {{{ */
 {
-    xmlDocPtr ret;
-    xmlParserCtxtPtr ctxt = NULL;
+	xmlDocPtr ret;
+	xmlParserCtxtPtr ctxt = NULL;
 	dom_doc_propsptr doc_props;
 	dom_object *intern;
 	php_libxml_ref_obj *document = NULL;

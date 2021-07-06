@@ -1,8 +1,9 @@
 --TEST--
 Exhaustive test of ISO-2022-JP-2004 encoding verification and conversion
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--

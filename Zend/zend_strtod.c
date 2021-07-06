@@ -292,10 +292,6 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #include "math.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef CONST
 #ifdef KR_headers
 #define CONST /* blank */
@@ -527,12 +523,6 @@ BCinfo { int dp0, dp1, dplen, dsign, e0, inexact, nd, nd0, rounding, scale, uflc
 #endif
 
 #define Kmax 7
-
-#ifdef __cplusplus
-extern "C" double strtod(const char *s00, char **se);
-extern "C" char *dtoa(double d, int mode, int ndigits,
-			int *decpt, int *sign, char **rve);
-#endif
 
  struct
 Bigint {
@@ -4553,7 +4543,3 @@ static void free_p5s(void)
 	}
 	FREE_DTOA_LOCK(1)
 }
-
-#ifdef __cplusplus
-}
-#endif

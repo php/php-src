@@ -1,8 +1,9 @@
 --TEST--
 Specifying non-default syntax in mb_ereg_search()
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 if (!function_exists("mb_regex_search")) die("skip mb_regex_search() is not defined");
 ?>
 --FILE--

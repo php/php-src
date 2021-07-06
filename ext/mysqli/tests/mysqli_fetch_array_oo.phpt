@@ -1,8 +1,9 @@
 --TEST--
 mysqli->fetch_array()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -282,7 +283,7 @@ require_once('skipifconnectfailure.inc');
 <?php
     require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(4) {
   [0]=>

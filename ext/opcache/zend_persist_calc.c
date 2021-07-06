@@ -193,7 +193,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				&& !zend_shared_alloc_get_xlat_entry(&op_array->function_name)) {
 			zend_shared_alloc_register_xlat_entry(&op_array->function_name, old_name);
 		}
-    }
+	}
 
 	if (op_array->scope) {
 		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
@@ -246,7 +246,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		uint32_t num_args = op_array->num_args;
 		uint32_t i;
 
-		num_args = op_array->num_args;
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
@@ -331,7 +330,6 @@ static void zend_persist_class_method_calc(zval *zv)
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_IMMUTABLE)
-	 && !op_array->static_variables
 	 && !ZCG(current_persistent_script)->corrupted
 	 && zend_accel_in_shm(op_array)) {
 		zend_shared_alloc_register_xlat_entry(op_array, op_array);

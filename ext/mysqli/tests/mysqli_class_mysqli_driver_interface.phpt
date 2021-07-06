@@ -1,9 +1,7 @@
 --TEST--
 Interface of the class mysqli_driver
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
 

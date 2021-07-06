@@ -1,9 +1,7 @@
 --TEST--
 Bug #74625 (Integer overflow in oci_bind_array_by_name)
---SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
-?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 require(__DIR__.'/connect.inc');

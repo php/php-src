@@ -5,10 +5,14 @@ Required parameter after optional is deprecated
 
 function test($testA = null, $testB = null, $testC) {}
 function test2(Type $test2A = null, $test2B = null, $test2C) {}
-function test3(Type $test3A = null, Type2 $test3B = null, $test3C) {}
+function test3(Type $test3A = null, ?Type2 $test3B = null, $test3C) {}
 
 ?>
 --EXPECTF--
-Deprecated: Required parameter $testC follows optional parameter $testA in %s on line %d
+Deprecated: Optional parameter $testA declared before required parameter $testC is implicitly treated as a required parameter in %s on line %d
 
-Deprecated: Required parameter $test2C follows optional parameter $test2B in %s on line %d
+Deprecated: Optional parameter $testB declared before required parameter $testC is implicitly treated as a required parameter in %s on line %d
+
+Deprecated: Optional parameter $test2B declared before required parameter $test2C is implicitly treated as a required parameter in %s on line %d
+
+Deprecated: Optional parameter $test3B declared before required parameter $test3C is implicitly treated as a required parameter in %s on line %d

@@ -1,5 +1,7 @@
 --TEST--
 Bug #73273: session_unset() empties values from all variables in which is $_session stored
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

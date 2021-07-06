@@ -1367,7 +1367,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 
 	while (c < e) {
 		if (islower(*c)) {
-			register unsigned char *r;
+			unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 			if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1432,7 +1432,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 
 		while (c < e) {
 			if (isupper(*c)) {
-				register unsigned char *r;
+				unsigned char *r;
 				zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
 				if (c != (unsigned char*)ZSTR_VAL(s)) {
@@ -1471,8 +1471,8 @@ PHP_FUNCTION(strtolower)
 static bool _is_basename_start(const char *start, const char *pos)
 {
 	if (pos - start >= 1
-     && *(pos-1) != '/'
-     && *(pos-1) != '\\') {
+	    && *(pos-1) != '/'
+	    && *(pos-1) != '\\') {
 		if (pos - start == 1) {
 			return 1;
 		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
@@ -1764,8 +1764,8 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 /* {{{ php_strspn */
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p = s1, *spanp;
-	register char c = *p;
+	const char *p = s1, *spanp;
+	char c = *p;
 
 cont:
 	for (spanp = s2; p != s1_end && spanp != s2_end;) {
@@ -1781,8 +1781,8 @@ cont:
 /* {{{ php_strcspn */
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	register const char *p, *spanp;
-	register char c = *s1;
+	const char *p, *spanp;
+	char c = *s1;
 
 	for (p = s1;;) {
 		spanp = s2;
@@ -2667,8 +2667,8 @@ PHP_FUNCTION(ucwords)
 {
 	zend_string *str;
 	char *delims = " \t\r\n\f\v";
-	register char *r;
-	register const char *r_end;
+	char *r;
+	const char *r_end;
 	size_t delims_len = 6;
 	char mask[256];
 
@@ -3648,7 +3648,7 @@ typedef void (*php_stripslashes_func_t)(zend_string *);
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_addslashes_func_t resolve_addslashes() {
+static php_addslashes_func_t resolve_addslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
 	}
@@ -3657,7 +3657,7 @@ static php_addslashes_func_t resolve_addslashes() {
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_stripslashes_func_t resolve_stripslashes() {
+static php_stripslashes_func_t resolve_stripslashes(void) {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
 	}
@@ -5313,7 +5313,7 @@ PHP_FUNCTION(count_chars)
 					add_index_long(return_value, inx, chars[inx]);
 				}
 				break;
-  			case 2:
+			case 2:
 				if (chars[inx] == 0) {
 					add_index_long(return_value, inx, chars[inx]);
 				}
@@ -5323,7 +5323,7 @@ PHP_FUNCTION(count_chars)
 					retstr[retlen++] = inx;
 				}
 				break;
-  			case 4:
+			case 4:
 				if (chars[inx] == 0) {
 					retstr[retlen++] = inx;
 				}
@@ -5331,7 +5331,7 @@ PHP_FUNCTION(count_chars)
 		}
 	}
 
-	if (mymode >= 3 && mymode <= 4) {
+	if (mymode == 3 || mymode == 4) {
 		RETURN_STRINGL(retstr, retlen);
 	}
 }

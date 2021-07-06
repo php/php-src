@@ -1,8 +1,9 @@
 --TEST--
 Bug #71514 (Bad dba_replace condition because of wrong API usage)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-if (!extension_loaded('dba')) die('skip dba extension not available');
 if (!in_array('inifile', dba_handlers())) die('skip inifile handler not available');
 ?>
 --FILE--

@@ -31,6 +31,15 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
+#ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
+# define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
+#endif
+
+struct {
+	zend_optimizer_pass_t pass[ZEND_OPTIMIZER_MAX_REGISTERED_PASSES];
+	int last;
+} zend_optimizer_registered_passes = {{NULL}, 0};
+
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
 	zval_ptr_dtor_nogc(zvalue);
@@ -50,19 +59,12 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 
 int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
 {
-	binary_op_type binary_op = get_binary_op(opcode);
-	int er, ret;
-
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
 	}
 
-	er = EG(error_reporting);
-	EG(error_reporting) = 0;
-	ret = binary_op(result, op1, op2);
-	EG(error_reporting) = er;
-
-	return ret;
+	binary_op_type binary_op = get_binary_op(opcode);
+	return binary_op(result, op1, op2);
 }
 /* }}} */
 
@@ -71,11 +73,7 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 	unary_op_type unary_op = get_unary_op(opcode);
 
 	if (unary_op) {
-		if (opcode == ZEND_BW_NOT
-		 && Z_TYPE_P(op1) != IS_LONG
-		 && Z_TYPE_P(op1) != IS_DOUBLE
-		 && Z_TYPE_P(op1) != IS_STRING) {
-			/* produces "Unsupported operand types" exception */
+		if (zend_unary_op_produces_error(opcode, op1)) {
 			return FAILURE;
 		}
 		return unary_op(result, op1);
@@ -647,7 +645,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					ZEND_ASSERT(opline->op1.var == var);
 
 					break;
-				  }
+				}
 				default:
 					break;
 			}
@@ -756,24 +754,26 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 	}
 }
 
+zend_class_entry *zend_optimizer_get_class_entry(const zend_script *script, zend_string *lcname) {
+	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
+	if (ce) {
+		return ce;
+	}
+
+	ce = zend_hash_find_ptr(CG(class_table), lcname);
+	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
+		return ce;
+	}
+
+	return NULL;
+}
+
 static zend_class_entry *get_class_entry_from_op1(
 		zend_script *script, zend_op_array *op_array, zend_op *opline) {
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
-			zend_string *class_name = Z_STR_P(op1 + 1);
-			zend_class_entry *ce;
-			if (script && (ce = zend_hash_find_ptr(&script->class_table, class_name))) {
-				return ce;
-			} else if ((ce = zend_hash_find_ptr(EG(class_table), class_name))) {
-				if (ce->type == ZEND_INTERNAL_CLASS) {
-					return ce;
-				} else if (ce->type == ZEND_USER_CLASS &&
-						   ce->info.user.filename &&
-						   ce->info.user.filename == op_array->filename) {
-					return ce;
-				}
-			}
+			return zend_optimizer_get_class_entry(script, Z_STR_P(op1 + 1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
@@ -1413,6 +1413,16 @@ static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
 	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 }
 
+static void zend_optimizer_call_registered_passes(zend_script *script, void *ctx) {
+	for (int i = 0; i < zend_optimizer_registered_passes.last; i++) {
+		if (!zend_optimizer_registered_passes.pass[i]) {
+			continue;
+		}
+
+		zend_optimizer_registered_passes.pass[i](script, ctx);
+	}
+}
+
 ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	zend_class_entry *ce;
@@ -1552,6 +1562,8 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
+	zend_optimizer_call_registered_passes(script, &ctx);
+
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 			(ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_foreach_op_array(script, step_dump_after_optimizer, NULL);
@@ -1563,6 +1575,27 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	zend_arena_destroy(ctx.arena);
 
 	return 1;
+}
+
+ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass)
+{
+	if (!pass) {
+		return -1;
+	}
+
+	if (zend_optimizer_registered_passes.last == ZEND_OPTIMIZER_MAX_REGISTERED_PASSES) {
+		return -1;	
+	}
+
+	zend_optimizer_registered_passes.pass[
+		zend_optimizer_registered_passes.last++] = pass;
+
+	return zend_optimizer_registered_passes.last;
+}
+
+ZEND_API void zend_optimizer_unregister_pass(int idx)
+{
+	zend_optimizer_registered_passes.pass[idx-1] = NULL;
 }
 
 int zend_optimizer_startup(void)

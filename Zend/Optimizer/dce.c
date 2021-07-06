@@ -234,14 +234,22 @@ static inline bool may_have_side_effects(
 			}
 			return 0;
 		case ZEND_BIND_STATIC:
-			if (op_array->static_variables
-			 && (opline->extended_value & ZEND_BIND_REF) != 0) {
-				zval *value =
-					(zval*)((char*)op_array->static_variables->arData +
-						(opline->extended_value & ~ZEND_BIND_REF));
-				if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-					/* AST may contain undefined constants */
+			if (op_array->static_variables) {
+				/* Implicit and Explicit bind static is effectively prologue of closure so
+				   report it has side effects like RECV, RECV_INIT; This allows us to
+				   reflect on the closure and discover used variable at runtime */
+				if ((opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 					return 1;
+				}
+
+				if ((opline->extended_value & ZEND_BIND_REF) != 0) {
+					zval *value =
+						(zval*)((char*)op_array->static_variables->arData +
+							(opline->extended_value & ~ZEND_BIND_REF));
+					if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
+						/* AST may contain undefined constants */
+						return 1;
+					}
 				}
 			}
 			return 0;
@@ -379,7 +387,7 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 	return 0;
 }
 
-static zend_always_inline zend_bool may_be_refcounted(uint32_t type) {
+static zend_always_inline bool may_be_refcounted(uint32_t type) {
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
 }
 

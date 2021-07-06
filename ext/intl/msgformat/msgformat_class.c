@@ -62,6 +62,8 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
 	zend_object *new_obj;
 
 	mfo = php_intl_messageformatter_fetch_object(object);
+	intl_error_reset(INTL_DATA_ERROR_P(mfo));
+
 	new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
 	new_mfo = php_intl_messageformatter_fetch_object(new_obj);
 	/* clone standard parts */

@@ -1,7 +1,7 @@
 --TEST--
 Bug #77423 (parse_url() will deliver a wrong host to user)
---SKIPIF--
-<?php if (!function_exists('filter_var')) { echo "skip requires filter\n"; } ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $urls = array(

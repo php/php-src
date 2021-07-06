@@ -2089,12 +2089,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#else\n");
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
-                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
-                        out($f,$m[1]."memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
-                        out($f,$m[1]."if (zend_touch_vm_stack_data) {\n");
-                        out($f,$m[1]."\tzend_touch_vm_stack_data(&vm_stack_data);\n");
-                        out($f,$m[1]."}\n");
-                        out($f,"#endif\n");
                     }
                     break;
                 case "INTERNAL_LABELS":
@@ -2114,6 +2108,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         if ($kind == ZEND_VM_KIND_HYBRID) {
                             out($f,$prolog."\tmemset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));\n");
                             out($f,$prolog."\thybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;\n");
+	                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+	                        out($f,$prolog."\tmemset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
+	                        out($f,"#endif\n");
+	                        out($f,$prolog."\tif (zend_touch_vm_stack_data) {\n");
+	                        out($f,$prolog."\t\tzend_touch_vm_stack_data(&vm_stack_data);\n");
+	                        out($f,$prolog."\t}\n");
                             out($f,$prolog."\tgoto HYBRID_HALT_LABEL;\n");
                         } else {
                             out($f,$prolog."\treturn;\n");

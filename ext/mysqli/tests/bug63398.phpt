@@ -1,8 +1,9 @@
 --TEST--
 Bug #63398 (Segfault when polling closed link)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND) {
     die("skip mysqlnd only test");

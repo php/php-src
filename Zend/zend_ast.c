@@ -465,7 +465,7 @@ static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *
 			zend_hash_index_update(Z_ARRVAL_P(result), 1, expr);
 			break;
 		case IS_DOUBLE:
-			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
+			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval_safe(Z_DVAL_P(offset)), expr);
 			break;
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
@@ -474,7 +474,7 @@ static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *
 		default:
 			zend_type_error("Illegal offset type");
 			return FAILURE;
- 	}
+	}
 	return SUCCESS;
 }
 
@@ -1457,6 +1457,16 @@ static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int in
 		}
 		return;
 	}
+	if (ast->kind == ZEND_AST_TYPE_INTERSECTION) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			if (i != 0) {
+				smart_str_appendc(str, '&');
+			}
+			zend_ast_export_type(str, list->child[i], indent);
+		}
+		return;
+	}
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
 		smart_str_appendc(str, '?');
 	}
@@ -2201,8 +2211,8 @@ simple_list:
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			APPEND_DEFAULT_VALUE(2);
 		case ZEND_AST_ENUM_CASE:
-			if (ast->child[2]) {
-				zend_ast_export_attributes(str, ast->child[2], indent, 1);
+			if (ast->child[3]) {
+				zend_ast_export_attributes(str, ast->child[3], indent, 1);
 			}
 			smart_str_appends(str, "case ");
 			zend_ast_export_name(str, ast->child[0], 0, indent);
@@ -2329,13 +2339,11 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 		ast->child[2] = attr;
 		break;
 	case ZEND_AST_PARAM:
+	case ZEND_AST_ENUM_CASE:
 		ast->child[3] = attr;
 		break;
 	case ZEND_AST_CLASS_CONST_GROUP:
 		ast->child[1] = attr;
-		break;
-	case ZEND_AST_ENUM_CASE:
-		ast->child[2] = attr;
 		break;
 	EMPTY_SWITCH_DEFAULT_CASE()
 	}

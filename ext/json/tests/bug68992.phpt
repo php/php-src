@@ -4,7 +4,7 @@ Bug #68992 (json_encode stacks exceptions thrown by JsonSerializable classes)
 <?php
 
 class MyClass implements JsonSerializable {
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         throw new Exception('Not implemented!');
     }
 }

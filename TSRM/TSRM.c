@@ -229,11 +229,11 @@ TSRM_API void tsrm_shutdown(void)
 /* {{{ */
 /* environ lock api */
 TSRM_API void tsrm_env_lock(void) {
-    tsrm_mutex_lock(tsrm_env_mutex);
+	tsrm_mutex_lock(tsrm_env_mutex);
 }
 
 TSRM_API void tsrm_env_unlock(void) {
-    tsrm_mutex_unlock(tsrm_env_mutex);
+	tsrm_mutex_unlock(tsrm_env_mutex);
 } /* }}} */
 
 /* enlarge the arrays for the already active threads */
@@ -741,6 +741,21 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	asm ("leal _tsrm_ls_cache@ntpoff,%0"
           : "=r" (ret));
 	return ret;
+#elif defined(__aarch64__)
+	size_t ret;
+
+# ifdef __APPLE__
+	// Points to struct TLVDecriptor for _tsrm_ls_cache in macOS.
+	asm("adrp %0, #__tsrm_ls_cache@TLVPPAGE\n\t"
+	    "ldr %0, [%0, #__tsrm_ls_cache@TLVPPAGEOFF]"
+	     : "=r" (ret));
+# else
+	asm("mov %0, xzr\n\t"
+	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
+	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
+	     : "=r" (ret));
+# endif
+	return ret;
 #else
 	return 0;
 #endif
@@ -753,7 +768,7 @@ TSRM_API uint8_t tsrm_is_main_thread(void)
 
 TSRM_API uint8_t tsrm_is_shutdown(void)
 {/*{{{*/
-    return is_thread_shutdown;
+	return is_thread_shutdown;
 }/*}}}*/
 
 TSRM_API const char *tsrm_api_name(void)

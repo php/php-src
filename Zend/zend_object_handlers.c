@@ -738,7 +738,8 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			}
 
 found:
-			zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
+			variable_ptr = zend_assign_to_variable(
+				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
 			goto exit;
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
@@ -1330,13 +1331,6 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		}
 	} while (0);
 
-#ifdef MBO_0
-	/* right now this function is used for non static method lookup too */
-	/* Is the function static */
-	if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
-		zend_error_noreturn(E_ERROR, "Cannot call non-static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(fbc->common.function_name));
-	}
-#endif
 	if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = zend_get_executed_scope();
 		if (UNEXPECTED(fbc->common.scope != scope)) {

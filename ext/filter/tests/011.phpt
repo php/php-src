@@ -2,8 +2,8 @@
 filter_input()
 --INI--
 precision=14
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --GET--
 a=<b>test</b>&b=http://example.com
 --POST--

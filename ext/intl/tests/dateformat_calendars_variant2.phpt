@@ -2,9 +2,9 @@
 IntlDateFormatter, calendars and time zone
 --INI--
 date.timezone=Atlantic/Azores
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl'))	die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '54.1') >=  0) die('skip for ICU < 54.1'); ?>
 --FILE--

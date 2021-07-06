@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_escape_bytea() functions (hex format)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

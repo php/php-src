@@ -1,10 +1,10 @@
 --TEST--
 recvmsg(): receive SCM_CREDENTIALS messages
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-die('skip sockets extension not available.');
-}
+
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
 die('skip not for Microsoft Windows');
 }

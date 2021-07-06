@@ -1,11 +1,7 @@
 --TEST--
 Test if socket_recvfrom() receives data sent by socket_sendto() via IPv4 UDP
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);

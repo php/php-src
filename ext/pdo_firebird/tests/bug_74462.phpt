@@ -1,7 +1,11 @@
 --TEST--
 PDO_Firebird: Bug #74462 Returns only NULLs for boolean fields
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require 'testdb.inc';

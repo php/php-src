@@ -333,22 +333,18 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_nu
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, char *error) /* {{{ */
 {
-	if (EG(exception)) {
-		return;
+	if (!EG(exception)) {
+		zend_argument_type_error(num, "must be a valid callback, %s", error);
 	}
-
-	zend_argument_type_error(num, "must be a valid callback, %s", error);
 	efree(error);
 }
 /* }}} */
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_or_null_error(uint32_t num, char *error) /* {{{ */
 {
-	if (EG(exception)) {
-		return;
+	if (!EG(exception)) {
+		zend_argument_type_error(num, "must be a valid callback or null, %s", error);
 	}
-
-	zend_argument_type_error(num, "must be a valid callback or null, %s", error);
 	efree(error);
 }
 /* }}} */
@@ -377,7 +373,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entr
 	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
 		ZSTR_VAL(func_name), arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
-    );
+	);
 	efree(message);
 	zend_string_release(func_name);
 }
@@ -503,7 +499,18 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			return 0;
 		} else {
-			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(arg));
+			if (UNEXPECTED(!zend_is_long_compatible(Z_DVAL_P(arg), lval))) {
+				/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+				if (arg_num != (uint32_t)-1) {
+					zend_incompatible_double_to_long_error(Z_DVAL_P(arg));
+				}
+				if (UNEXPECTED(EG(exception))) {
+					return 0;
+				}
+			}
+			*dest = lval;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
@@ -511,14 +518,27 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest,
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
+				zend_long lval;
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
 					return 0;
-				} else {
-					*dest = zend_dval_to_lval(d);
 				}
+
+				lval = zend_dval_to_lval(d);
+				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError */
+				if (UNEXPECTED(!zend_is_long_compatible(d, lval))) {
+					/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+					 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+					if (arg_num != (uint32_t)-1) {
+						zend_incompatible_string_to_long_error(Z_STR_P(arg));
+					}
+					if (UNEXPECTED(EG(exception))) {
+						return 0;
+					}
+				}
+				*dest = lval;
 			} else {
 				return 0;
 			}
@@ -1020,7 +1040,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 	bool have_varargs = 0;
 	bool have_optional_args = 0;
 	zval **varargs = NULL;
-	int *n_varargs = NULL;
+	uint32_t *n_varargs = NULL;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -1115,11 +1135,11 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 		}
 
 		if (*type_spec == '*' || *type_spec == '+') {
-			int num_varargs = num_args + 1 - post_varargs;
+			uint32_t num_varargs = num_args + 1 - post_varargs;
 
 			/* eat up the passed in storage even if it won't be filled in with varargs */
 			varargs = va_arg(*va, zval **);
-			n_varargs = va_arg(*va, int *);
+			n_varargs = va_arg(*va, uint32_t *);
 			type_spec++;
 
 			if (num_varargs > 0) {
@@ -1524,12 +1544,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties) /* {{{ */
 {
-    zval *prop, tmp;
-   	zend_string *key;
-   	zend_long h;
-   	zend_property_info *property_info;
+	zval *prop, tmp;
+	zend_string *key;
+	zend_long h;
+	zend_property_info *property_info;
 
-   	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
+	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
 			if (ZSTR_VAL(key)[0] == '\0') {
 				const char *class_name, *prop_name;
@@ -1971,7 +1991,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), value);
+			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 			break;
 		default:
 			zend_type_error("Illegal offset type");
@@ -2404,14 +2424,14 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 		return;
 	}
 
-	bool has_class_type = ZEND_TYPE_HAS_CLASS(fptr->common.arg_info[-1].type);
+	bool is_complex_type = ZEND_TYPE_IS_COMPLEX(fptr->common.arg_info[-1].type);
 	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & ~return_type;
 	if (extra_types & MAY_BE_STATIC) {
 		extra_types &= ~MAY_BE_STATIC;
-		has_class_type = 1;
+		is_complex_type = true;
 	}
 
-	if (extra_types || (has_class_type && return_type != MAY_BE_OBJECT)) {
+	if (extra_types || (is_complex_type && return_type != MAY_BE_OBJECT)) {
 		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
 			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
@@ -2748,7 +2768,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 			reg_function->common.arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
-				if (ZEND_TYPE_HAS_CLASS(new_arg_info[i].type)) {
+				if (ZEND_TYPE_IS_COMPLEX(new_arg_info[i].type)) {
 					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
 						&& "Should be stored as simple name");
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);

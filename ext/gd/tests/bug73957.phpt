@@ -1,8 +1,9 @@
 --TEST--
 Bug #73957 (signed integer conversion in imagescale())
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only');
 ?>
 --FILE--

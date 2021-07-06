@@ -1,7 +1,7 @@
 --TEST--
 Phar: rename_dir and mount test
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0

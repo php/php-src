@@ -536,10 +536,22 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_LISTENQLEN",       SO_LISTENQLEN,        CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_USER_COOKIE",       SO_USER_COOKIE,        CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SO_ACCEPTFILTER
+	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER",       SO_ACCEPTFILTER,        CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_DONTTRUNC
+	REGISTER_LONG_CONSTANT("SO_DONTTRUNC",       SO_DONTTRUNC,        CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_WANTMORE
+	REGISTER_LONG_CONSTANT("SO_WANTMORE",       SO_WANTMORE,        CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef TCP_DEFER_ACCEPT
+	REGISTER_LONG_CONSTANT("TCP_DEFER_ACCEPT",   TCP_DEFER_ACCEPT,    CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_CS | CONST_PERSISTENT);
@@ -1818,6 +1830,23 @@ PHP_FUNCTION(socket_get_option)
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
 				return;
+#ifdef SO_ACCEPTFILTER
+			case SO_ACCEPTFILTER: {
+
+				struct accept_filter_arg af = {0};
+				optlen = sizeof(af);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&af, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				add_assoc_string(return_value, "af_name", af.af_name);
+				return;
+			}
+#endif
 		}
 	}
 
@@ -1954,6 +1983,20 @@ PHP_FUNCTION(socket_set_option)
 				opt_ptr = "";
 				optlen = 0;
 			}
+			break;
+		}
+#endif
+
+#ifdef SO_ACCEPTFILTER
+		case SO_ACCEPTFILTER: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
+				RETURN_FALSE;
+			}
+			struct accept_filter_arg af = {0};
+			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			opt_ptr = &af;
+			optlen = sizeof(af);
 			break;
 		}
 #endif
@@ -2125,11 +2168,11 @@ int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 	int					 t;
 #endif
 
-    retsock->bsd_socket = socket;
+	retsock->bsd_socket = socket;
 
-    /* determine family */
+	/* determine family */
 #ifdef SO_DOMAIN
-    if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
+	if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
 		retsock->type = type;
 	} else
 #endif
@@ -2140,18 +2183,18 @@ int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 		return 0;
 	}
 
-    /* determine blocking mode */
+	/* determine blocking mode */
 #ifndef PHP_WIN32
-    t = fcntl(socket, F_GETFL);
-    if (t == -1) {
+	t = fcntl(socket, F_GETFL);
+	if (t == -1) {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain blocking state", errno);
 		return 0;
-    } else {
-    	retsock->blocking = !(t & O_NONBLOCK);
-    }
+	} else {
+		retsock->blocking = !(t & O_NONBLOCK);
+	}
 #endif
 
-    return 1;
+	return 1;
 }
 
 /* {{{ Imports a stream that encapsulates a socket into a socket extension resource. */
@@ -2542,7 +2585,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 
 #ifdef PHP_WIN32
 
- /* {{{ Exports the network socket information suitable to be used in another process and returns the info id. */
+/* {{{ Exports the network socket information suitable to be used in another process and returns the info id. */
 PHP_FUNCTION(socket_wsaprotocol_info_export)
 {
 	WSAPROTOCOL_INFO wi;

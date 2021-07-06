@@ -3,9 +3,10 @@ mysqli_get_connection_stats()
 --INI--
 mysqlnd.collect_statistics="1"
 mysqlnd.collect_memory_statistics="1"
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?PHP
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_connection_stats')) {
     die("skip only available with mysqlnd");

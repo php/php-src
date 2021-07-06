@@ -12,12 +12,14 @@ foreach ($attributes as $attribute) {
 
     $a = $attribute->newInstance();
     var_dump(get_class($a));
-    var_dump($a->flags == Attribute::TARGET_ALL);
+    var_dump($a->flags == Attribute::TARGET_CLASS);
 }
 ?>
 --EXPECT--
 string(9) "Attribute"
-array(0) {
+array(1) {
+  [0]=>
+  int(1)
 }
 string(9) "Attribute"
 bool(true)

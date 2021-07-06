@@ -95,13 +95,6 @@ typedef int gid_t;
 typedef char * caddr_t;
 typedef int pid_t;
 
-# ifndef PHP_DEBUG
-#  ifdef inline
-#   undef inline
-#  endif
-#  define inline		__inline
-# endif
-
 # define M_TWOPI        (M_PI * 2.0)
 # define off_t			_off_t
 
@@ -333,7 +326,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 {
 	zend_replace_error_handling(error_handling, exception_class, NULL);
 }
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
+static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
 
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 

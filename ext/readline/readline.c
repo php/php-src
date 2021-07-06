@@ -82,7 +82,7 @@ PHP_MINIT_FUNCTION(readline)
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
-   	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
+	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
 PHP_MSHUTDOWN_FUNCTION(readline)
@@ -323,7 +323,7 @@ PHP_FUNCTION(readline_list_history)
 	}
 
 #elif defined(HAVE_LIBEDIT) /* libedit */
-    {
+	{
 		HISTORY_STATE *hs;
 		int i;
 
@@ -338,7 +338,7 @@ PHP_FUNCTION(readline_list_history)
 			}
 		}
 		free(hs);
-    }
+	}
 
 #else /* readline */
 	history = history_list();
@@ -452,12 +452,12 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {
-				matches = malloc(sizeof(char *) * 2);
+				/* libedit will read matches[2] */
+				matches = calloc(sizeof(char *), 3);
 				if (!matches) {
 					return NULL;
 				}
 				matches[0] = strdup("");
-				matches[1] = NULL;
 			}
 		}
 	}

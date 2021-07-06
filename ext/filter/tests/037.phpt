@@ -1,7 +1,7 @@
 --TEST--
 GET and data callback tests
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --GET--
 a=1&b=2
 --FILE--

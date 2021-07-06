@@ -96,6 +96,7 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      uint32_t       var,
                                      zval          *val);
 zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline);
+zend_class_entry *zend_optimizer_get_class_entry(const zend_script *script, zend_string *lcname);
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx);

@@ -13,6 +13,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   b. ext/pdo
   c. ext/standard
   d. ext/pgsql
+  e. ext/pcre
 
 ========================
 1. Internal API changes
@@ -22,6 +23,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
        spl_ce_Stringable, spl_ce_Traversable alias class entries have been removed in favor of zend_ce_aggregate,
        zend_ce_arrayaccess, zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_stringable,
        zend_ce_traversable.
+     - The ZVAL_NEW_ARR() macro has been removed. Use array_init() or ZVAL_ARR
+       with zend_new_array() instead.
   b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
       - zend_file_handle.filename now is zend_string*
       - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
@@ -37,6 +40,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
         destructors zend_destroy_file_handle() and zend_file_handle_dtor().
       - zend_ini_scanner_globals.filename now is zend_string*
   c. Added the zend_get_opcode_id() function, which is intended to get opcode id from name.
+  d. Removed support for "p" modifier (%pd, %pu, etc) in PHP's printf
+     implementations. Use ZEND_LONG_FMT and ZEND_ULONG_FMT instead.
 
 ========================
 2. Build system changes
@@ -103,3 +108,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
     - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
       php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() now accept a
       zend_string* instead of a char* for the table name.
+
+  e. ext/pcre
+    - Bundled PCRE2 is at version 10.37. The most important diff to the previous
+      version is the JIT support on the S390 platform.

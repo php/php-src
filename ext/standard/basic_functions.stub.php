@@ -329,7 +329,7 @@ function ini_get_all(?string $extension = null, bool $details = true): array|fal
 function ini_set(string $option, string|int|float|bool|null $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $option, string $value): string|false {}
+function ini_alter(string $option, string|int|float|bool|null $value): string|false {}
 
 function ini_restore(string $option): void {}
 
@@ -439,7 +439,9 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 function net_get_interfaces(): array|false {}
+#endif
 
 /* ftok.c */
 

@@ -1,8 +1,9 @@
 --TEST--
 Bind with SQLT_NUM
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
 if (!(isset($matches[0]) && $matches[0] <= 11)) {
     die("skip works only with Oracle 11 or earlier version of Oracle client libraries");

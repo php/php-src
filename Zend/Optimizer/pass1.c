@@ -119,12 +119,12 @@ constant_binary_op:
 				} else if (opline->extended_value == ZEND_MOD
 				 || opline->extended_value == ZEND_SL
 				 || opline->extended_value == ZEND_SR) {
-					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-						/* don't optimize if it should produce a runtime numeric string error */
-						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
-							&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
-							convert_to_long(&ZEND_OP2_LITERAL(opline));
+					zval *op2 = &ZEND_OP2_LITERAL(opline);
+					if (Z_TYPE_P(op2) != IS_LONG) {
+						if (!zend_is_op_long_compatible(op2)) {
+							break;
 						}
+						convert_to_long(op2);
 					}
 				} else if (opline->extended_value == ZEND_CONCAT) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
@@ -238,12 +238,9 @@ constant_binary_op:
 						zend_string_equals_ci(Z_STR(ZEND_OP1_LITERAL(opline)), op_array->scope->name)) {
 						ce = op_array->scope;
 					} else {
-						if ((ce = zend_hash_find_ptr(EG(class_table),
-								Z_STR(op_array->literals[opline->op1.constant + 1]))) == NULL ||
-								(ce->type == ZEND_INTERNAL_CLASS &&
-								 ce->info.internal.module->type != MODULE_PERSISTENT) ||
-								(ce->type == ZEND_USER_CLASS &&
-								 ce->info.user.filename != op_array->filename)) {
+						ce = zend_optimizer_get_class_entry(
+							ctx->script, Z_STR(op_array->literals[opline->op1.constant + 1]));
+						if (!ce) {
 							break;
 						}
 					}

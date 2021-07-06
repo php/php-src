@@ -1,7 +1,7 @@
 --TEST--
 datefmt_get_timetype_code()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

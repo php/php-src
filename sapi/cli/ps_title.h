@@ -31,7 +31,7 @@ extern int get_ps_title(int* displen, const char** string);
 
 extern const char* ps_title_errno(int rc);
 
-extern int is_ps_title_available();
+extern int is_ps_title_available(void);
 
 extern void cleanup_ps_args(char **argv);
 

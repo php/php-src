@@ -1,9 +1,7 @@
 --TEST--
 bug #49634 (Segfault throwing an exception in a XSL registered function)
---SKIPIF--
-<?php
-extension_loaded("xsl") or die("skip need ext/xsl");
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 

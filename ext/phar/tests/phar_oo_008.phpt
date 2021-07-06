@@ -1,7 +1,7 @@
 --TEST--
 Phar object: iterating via SplFileObject
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -65,7 +65,7 @@ class MyCSVFile2 extends SplFileObject
     function getCurrentLine()
     {
         echo __METHOD__ . "\n";
-        return parent::fgetcsv(',', '"');
+        return implode('|', parent::fgetcsv(',', '"'));
     }
 }
 
@@ -75,7 +75,7 @@ $v = $phar['a.csv'];
 echo "===6===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . $d . "\n";
 }
 
 ?>

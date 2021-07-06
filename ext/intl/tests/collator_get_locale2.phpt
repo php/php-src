@@ -1,7 +1,8 @@
 --TEST--
 get_locale() icu >= 4.8
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 <?php if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
@@ -19,7 +20,6 @@ function ut_main()
         -100,
         -9999999999999,
         9999999999999,
-        1.2,
     );
 
     $coll = ut_coll_create( 'en_US' );
@@ -48,4 +48,3 @@ Locale of type 100 is false
 Locale of type -100 is false
 Locale of type -9999999999999 is false
 Locale of type 9999999999999 is false
-Locale of type 1.2 is 'en_US'

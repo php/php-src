@@ -32,8 +32,8 @@ extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 
 
 enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_data, const unsigned int flags, bool * fetched_anything);
 
-void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
-void _mysqlnd_init_ps_fetch_subsystem();
+void _mysqlnd_init_ps_subsystem(void);/* This one is private, mysqlnd_library_init() will call it */
+void _mysqlnd_init_ps_fetch_subsystem(void);
 
 void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row, unsigned int byte_count);
 

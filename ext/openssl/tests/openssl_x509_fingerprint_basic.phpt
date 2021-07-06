@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_fingerprint() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip"); ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

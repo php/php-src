@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_get_result()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_stmt_get_result'))
     die('skip mysqli_stmt_get_result not available');

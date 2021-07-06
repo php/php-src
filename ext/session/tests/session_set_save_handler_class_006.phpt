@@ -3,6 +3,8 @@ Test session_set_save_handler() : using objects in close
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -21,7 +23,7 @@ class MySession7_Foo {
 
 class MySession7 extends SessionHandler {
     public $foo;
-    public function close() {
+    public function close(): bool {
         var_dump($this->foo);
         @var_dump($GLOBALS['bar']);
         return parent::close();

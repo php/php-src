@@ -1,5 +1,7 @@
 --TEST--
 setting hash_function to sha512 and hash_bits_per_character > 4 should not crash
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

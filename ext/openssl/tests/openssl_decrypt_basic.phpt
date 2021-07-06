@@ -1,7 +1,7 @@
 --TEST--
 openssl_decrypt() tests dependent on openssl_encrypt
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $data = "openssl_encrypt() and openssl_decrypt() tests";
@@ -10,7 +10,7 @@ $password = "openssl";
 
 $ivlen = openssl_cipher_iv_length($method);
 $iv    = '';
-srand(time() + ((microtime(true) * 1000000) % 1000000));
+srand(time() + ((int)(microtime(true) * 1000000) % 1000000));
 while(strlen($iv) < $ivlen) $iv .= chr(rand(0,255));
 
 $encrypted = openssl_encrypt($data, $method, $password, 0, $iv);

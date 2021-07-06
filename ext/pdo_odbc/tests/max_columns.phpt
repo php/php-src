@@ -1,8 +1,9 @@
 --TEST--
 PDO ODBC varying character with max/no length
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>

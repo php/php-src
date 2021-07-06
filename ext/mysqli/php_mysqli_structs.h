@@ -26,14 +26,6 @@
 #undef LIST
 #endif
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 #ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"
@@ -190,7 +182,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
 	(Z_MYSQLI_P(__zval))->ptr = __ptr;
 
-#define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
+#define MYSQLI_RETVAL_RESOURCE(__ptr, __ce) \
 	RETVAL_OBJ(mysqli_objects_new(__ce)); \
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value)
 

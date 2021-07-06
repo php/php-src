@@ -1,8 +1,9 @@
 --TEST--
 Exhaustive test of ISO-2022-JP-MS text encoding
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
@@ -54,7 +55,7 @@ foreach ([0x8790, 0x8791, 0x8792, 0x8795, 0x8796, 0x8797, 0x879A, 0x879B, 0x879C
 $udcChars = array();
 for ($cp = 0xE000; $cp < (0xE000 + (20 * 94)); $cp++) {
   $i = $cp - 0xE000;
-  $bytes = ((($i / 94) + 0x7F - 0x5E) << 8) + (($i % 94) + 0x21);
+  $bytes = (( (int)($i / 94) + 0x7F - 0x5E) << 8) + (($i % 94) + 0x21);
   $udcChars[pack('n', $bytes)] = pack('N', $cp);
 }
 

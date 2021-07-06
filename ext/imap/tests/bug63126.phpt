@@ -1,9 +1,9 @@
 --TEST--
 imap_open() DISABLE_AUTHENTICATOR ignores array param
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-
 require_once(__DIR__. '/setup/imap_include.inc');
 
 $in = @imap_open(IMAP_SERVER_DEBUG, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD, OP_HALFOPEN, 1);

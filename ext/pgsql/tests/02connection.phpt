@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL connection
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -54,4 +56,5 @@ pg_close($db);
 
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql link%s)
+object(PgSql\Connection)#%d (0) {
+}

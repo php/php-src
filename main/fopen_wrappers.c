@@ -101,6 +101,11 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 			*end = '\0';
 			end++;
 		}
+		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || IS_SLASH(ptr[2]))) {
+			/* Don't allow paths with a leading .. path component to be set at runtime */
+			efree(pathbuf);
+			return FAILURE;
+		}
 		if (php_check_open_basedir_ex(ptr, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
 			efree(pathbuf);
@@ -197,6 +202,10 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 #else
 			path_tmp[path_len - 1] = '\0';
 #endif
+		}
+		if (*path_tmp == '\0') {
+			/* Do not pass an empty string to realpath(), as this will resolve to CWD. */
+			break;
 		}
 		nesting_level++;
 	}
@@ -449,12 +458,22 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 }
 /* }}} */
 
+static zend_string *tsrm_realpath_str(const char *path) {
+	char *realpath = tsrm_realpath(path, NULL);
+	if (!realpath) {
+		return NULL;
+	}
+	zend_string *realpath_str = zend_string_init(realpath, strlen(realpath), 0);
+	efree(realpath);
+	return realpath_str;
+}
+
 /* {{{ php_resolve_path
  * Returns the realpath for given filename according to include path
  */
 PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_length, const char *path)
 {
-	char resolved_path[MAXPATHLEN];
+	zend_string *resolved_path;
 	char trypath[MAXPATHLEN];
 	const char *ptr, *end, *p;
 	const char *actual_path;
@@ -470,8 +489,8 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	if ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/')) {
 		wrapper = php_stream_locate_url_wrapper(filename, &actual_path, STREAM_OPEN_FOR_INCLUDE);
 		if (wrapper == &php_plain_files_wrapper) {
-			if (tsrm_realpath(actual_path, resolved_path)) {
-				return zend_string_init(resolved_path, strlen(resolved_path), 0);
+			if ((resolved_path = tsrm_realpath_str(actual_path))) {
+				return resolved_path;
 			}
 		}
 		return NULL;
@@ -490,11 +509,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 #endif
 	    !path ||
 	    !*path) {
-		if (tsrm_realpath(filename, resolved_path)) {
-			return zend_string_init(resolved_path, strlen(resolved_path), 0);
-		} else {
-			return NULL;
-		}
+		return tsrm_realpath_str(filename);
 	}
 
 	ptr = path;
@@ -550,8 +565,8 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 				continue;
 			}
 		}
-		if (tsrm_realpath(actual_path, resolved_path)) {
-			return zend_string_init(resolved_path, strlen(resolved_path), 0);
+		if ((resolved_path = tsrm_realpath_str(actual_path))) {
+			return resolved_path;
 		}
 	} /* end provided path */
 
@@ -591,9 +606,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 				}
 			}
 
-			if (tsrm_realpath(actual_path, resolved_path)) {
-				return zend_string_init(resolved_path, strlen(resolved_path), 0);
-			}
+			return tsrm_realpath_str(actual_path);
 		}
 	}
 
@@ -688,7 +701,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 /* {{{ php_strip_url_passwd */
 PHPAPI char *php_strip_url_passwd(char *url)
 {
-	register char *p, *url_start;
+	char *p, *url_start;
 
 	if (url == NULL) {
 		return "";

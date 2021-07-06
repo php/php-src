@@ -33,7 +33,6 @@ error_reporting  =  E_ALL
 display_errors = On
 display_startup_errors = Off
 log_errors = Off
-log_errors_max_len = 1024
 ignore_repeated_errors = Off
 ignore_repeated_source = Off
 report_memleaks = On
@@ -69,7 +68,7 @@ foreach($newdirs as $newdir) {
 --EXPECTF--
 *** Testing parse_ini_file() : variation ***
 New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
-array(10) {
+array(9) {
   ["error_reporting"]=>
   string(5) "32767"
   ["display_errors"]=>
@@ -78,8 +77,6 @@ array(10) {
   string(0) ""
   ["log_errors"]=>
   string(0) ""
-  ["log_errors_max_len"]=>
-  string(4) "1024"
   ["ignore_repeated_errors"]=>
   string(0) ""
   ["ignore_repeated_source"]=>

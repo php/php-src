@@ -105,7 +105,7 @@ object(MyStorage)#%d (5) {
   int(3)
   ["storage":"SplObjectStorage":private]=>
   array(2) {
-    ["%s"]=>
+    [0]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
@@ -121,7 +121,7 @@ object(MyStorage)#%d (5) {
       ["inf"]=>
       NULL
     }
-    ["%s"]=>
+    [1]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
@@ -173,7 +173,7 @@ object(MyStorage)#%d (5) {
   int(3)
   ["storage":"SplObjectStorage":private]=>
   array(2) {
-    ["%s"]=>
+    [0]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {
@@ -189,7 +189,7 @@ object(MyStorage)#%d (5) {
       ["inf"]=>
       NULL
     }
-    ["%s"]=>
+    [1]=>
     array(2) {
       ["obj"]=>
       object(TestClass)#%d (4) {

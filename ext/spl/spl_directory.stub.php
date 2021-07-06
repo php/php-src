@@ -122,7 +122,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return int|false */
+    /** @return int */
     public function key() {}
 
     /** @return DirectoryIterator */

@@ -1,7 +1,7 @@
 --TEST--
 Phar: unable to process zip (zip spanning multiple archives)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {

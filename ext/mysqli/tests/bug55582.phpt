@@ -1,8 +1,9 @@
 --TEST--
 Bug #55582 mysqli_num_rows() returns always 0 for unbuffered, when mysqlnd is used
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 ?>

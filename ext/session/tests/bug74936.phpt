@@ -1,5 +1,7 @@
 --TEST--
 Bug #74936 session_cache_expire() triggers a warning in read mode.
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
 include('skipif.inc');

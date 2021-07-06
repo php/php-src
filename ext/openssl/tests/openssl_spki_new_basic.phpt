@@ -1,9 +1,7 @@
 --TEST--
 openssl_spki_new() test for creating SPKI string
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

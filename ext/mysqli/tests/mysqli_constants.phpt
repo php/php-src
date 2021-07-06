@@ -1,9 +1,7 @@
 --TEST--
 Constants exported by ext/mysqli
---SKIPIF--
-<?php
-require_once 'skipif.inc';
-?>
+--EXTENSIONS--
+mysqli
 --INI--
 mysqli.allow_local_infile=1
 --FILE--
@@ -182,7 +180,7 @@ if ($IS_MYSQLND) {
     $expected_constants["MYSQLI_TYPE_JSON"]	= true;
 }
 
-if ($version > 80210 || $IS_MYSQLND) {
+if ($version > 80021 || $IS_MYSQLND) {
     $expected_constants['MYSQLI_OPT_LOAD_DATA_LOCAL_DIR'] = true;
 }
 

@@ -1,7 +1,7 @@
 --TEST--
 PDO_sqlite: Testing PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

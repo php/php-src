@@ -1,11 +1,9 @@
 --TEST--
 jpeg <--> gd1/gd2 conversion test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
-    }
-
     if (!function_exists("imagecreatefromjpeg") || !function_exists("imagejpeg")) {
         die("skip jpeg support unavailable");
     }

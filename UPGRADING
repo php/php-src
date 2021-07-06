@@ -57,6 +57,16 @@ PHP 8.1 UPGRADE NOTES
     This means that static variables in methods now behave the same way as
     static properties.
     RFC: https://wiki.php.net/rfc/static_variable_inheritance
+  . Most non-final internal methods now require overriding methods to declare a
+    compatible return type, otherwise a deprecated notice is emitted during
+    inheritance validation.
+    In case the return type cannot be declared for an overriding method due to
+    PHP cross-version compatibility concerns, a `#[ReturnTypeWillChange]`
+    attribute can be added to silence the deprecation notice.
+    RFC: https://wiki.php.net/rfc/internal_method_return_types
+  . Added support for intersection types.
+    They cannot be combined with union types.
+    RFC: https://wiki.php.net/rfc/pure-intersection-types
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
@@ -96,6 +106,7 @@ PHP 8.1 UPGRADE NOTES
   . Classes extending mysqli_stmt::execute() will be required to specify the
     additional parameter now.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
+  . mysqli::connect() will now return true instead of null on success.
 
 - MySQLnd:
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
@@ -120,6 +131,25 @@ PHP 8.1 UPGRADE NOTES
     types. You can restore the previous behavior by enabling the
     PDO::ATTR_STRINGIFY_FETCHES option.
 
+- PgSQL:
+  . The PgSQL functions now accept and return, respectively, \PgSql\Connection
+    objects instead of "pgsql link" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The PgSQL functions now accept and return, respectively, \PgSql\Result
+    objects instead of "pgsql result" resources. Return value checks using
+    is_resource() should be replaced with checks for `false`.
+  . The PgSQL functions now accept and return, respectively, \PgSql\Lob
+    objects instead of "pgsql large object" resources. Return value checks
+    using is_resource() should be replaced with checks for `false`.
+
+- PSpell:
+  . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
+    instead of "pspell" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . The PSpell functions now accept and return, respectively, PSpell\Config objects
+    instead of "pspell config" resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+
 - Standard:
   . version_compare() no longer accepts undocumented operator abbreviations.
   . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),
@@ -139,6 +169,7 @@ PHP 8.1 UPGRADE NOTES
 - SPL:
   . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
     define a custom eol sequence, the default remains the same and is "\n".
+  . SplFixedArray will now be JSON encoded like an array.
 
 ========================================
 2. New Features
@@ -157,9 +188,24 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/noreturn_type
   . Added support for fibers.
     RFC: https://wiki.php.net/rfc/fibers
+  . File uploads now provide an additional full_path key, which contains the
+    full path (rather than just the basename) of the uploaded file. This is
+    intended for use in conjunction with "upload webkitdirectory".
+  . It is now allowed to specify named arguments after an argument unpack, e.g.
+    foo(...$args, named: $arg).
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
+  . Added certificate blob options when for libcurl >= 7.71.0:
+
+        CURLOPT_ISSUERCERT_BLOB
+        CURLOPT_PROXY_ISSUERCERT
+        CURLOPT_PROXY_ISSUERCERT_BLOB
+        CURLOPT_PROXY_SSLCERT_BLOB
+        CURLOPT_PROXY_SSLKEY_BLOB
+        CURLOPT_SSLCERT_BLOB
+        CURLOPT_SSLKEY_BLOB
+
   . Added CURLStringFile, which can be used to post a file from a string rather
     than a file:
 
@@ -173,6 +219,10 @@ PHP 8.1 UPGRADE NOTES
     pm.max_spawn_rate. It allows to start number of children in a faster rate
     when dynamic pm is selected. The default value is 32 which was the previous
     hard coded value.
+
+- GD:
+  . Avif support is now available through the imagecreatefromavif() and
+    imageavif() functions, if libgd has been built with avif support.
 
 - hash:
   . The following functions have changed signatures:
@@ -255,6 +305,15 @@ PHP 8.1 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . Using -a without the readline extension will now result in an error.
+    Previously, -a without readline had the same behavior as calling php without
+    any arguments, apart from printing an additional "Interactive mode enabled"
+    message. This mode was not, in fact, interactive.
+
+- phpdbg:
+  . Remote functionality from phpdbg has been removed.
+
 ========================================
 4. Deprecated Functionality
 ========================================
@@ -265,6 +324,11 @@ PHP 8.1 UPGRADE NOTES
     implement the new methods (if you only support PHP 7.4 and higher) or
     implement both (if you support older PHP versions as well).
     RFC: https://wiki.php.net/rfc/phase_out_serializable
+  . Implicit conversion of floats to integers that result in loss of precision,
+    e.g. a truncation from 1.9 to 1, is deprecated. This affects array keys,
+    int parameter and return types, and operators working on integers.
+    RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
+  . returning a non-array from __sleep will raise a warning
 
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
@@ -313,6 +377,12 @@ PHP 8.1 UPGRADE NOTES
   . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
     RFC: https://wiki.php.net/rfc/is_list
 
+- pcntl:
+  . Added pcntl_rfork for FreeBSD variants
+
+- Reflection:
+  . Added ReflectionFunctionAbstract::getClosureUsedVariables
+
 - Standard:
   . Added fsync() and fdatasync(), which instruct the operating system to
     flush its buffers to physical storage.
@@ -350,6 +420,10 @@ PHP 8.1 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Intl:
+  . Added IntlDatePatternGenerator to dynamically generate patterns to use with IntlDateFormatter.
+    RFC: https://wiki.php.net/rfc/intldatetimepatterngenerator
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
@@ -364,6 +438,9 @@ PHP 8.1 UPGRADE NOTES
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
+
+- Sockets:
+  . FreeBSD defines SO_ACCEPTFILTER
 
 - Standard:
   . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
@@ -380,9 +457,15 @@ PHP 8.1 UPGRADE NOTES
     constant is still available for backwards-compatibility reasons, but may
     be deprecated/removed in the future.
 
+- Sockets:
+  . TCP_DEFER_ACCEPT socket option added where available.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- The log_errors_max_len ini setting has been removed. It no longer had an
+  effect since PHP 8.0.
 
 ========================================
 12. Windows Support

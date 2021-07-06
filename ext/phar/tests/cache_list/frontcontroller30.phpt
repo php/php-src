@@ -2,8 +2,8 @@
 Phar front controller with weird SCRIPT_NAME [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller30.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/huh?
 REQUEST_URI=/huh?

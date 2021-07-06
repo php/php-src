@@ -1,5 +1,7 @@
 --TEST--
 bind LONG RAW field
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

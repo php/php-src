@@ -1,5 +1,7 @@
 --TEST--
 rewriter uses arg_separator.output for modifying URLs
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -266,12 +266,23 @@ static PHP_INI_MH(OnSetSerializePrecision)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
+	size_t value;
 	if (new_value) {
-		PG(memory_limit) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		value = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	} else {
-		PG(memory_limit) = Z_L(1)<<30;		/* effectively, no limit */
+		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	zend_set_memory_limit(PG(memory_limit));
+	if (zend_set_memory_limit(value) == FAILURE) {
+		/* When the memory limit is reset to the original level during deactivation, we may be
+		 * using more memory than the original limit while shutdown is still in progress.
+		 * Ignore a failure for now, and set the memory limit when the memory manager has been
+		 * shut down and the minimal amount of memory is used. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+			return FAILURE;
+		}
+	}
+	PG(memory_limit) = value;
 	return SUCCESS;
 }
 /* }}} */
@@ -396,7 +407,15 @@ static PHP_INI_MH(OnUpdateTimeout)
 	}
 	zend_unset_timeout();
 	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
-	zend_set_timeout(EG(timeout_seconds), 0);
+	if (stage != PHP_INI_STAGE_DEACTIVATE) {
+		/*
+		 * If we're restoring INI values, we shouldn't reset the timer.
+		 * Otherwise, the timer is active when PHP is idle, such as the
+		 * the CLI web server or CGI. Running a script will re-activate
+		 * the timeout, so it's not needed to do so at script end.
+		 */
+		zend_set_timeout(EG(timeout_seconds), 0);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -662,7 +681,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_ALL,		OnUpdateBool,			implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("log_errors_max_len",	 "1024",		PHP_INI_ALL,		OnUpdateLong,			log_errors_max_len,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
@@ -1138,7 +1156,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
-static void clear_last_error() {
+static void clear_last_error(void) {
 	if (PG(last_error_message)) {
 		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1229,6 +1247,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_message) = zend_string_copy(message);
 		PG(last_error_file) = zend_string_copy(error_filename);
 		PG(last_error_lineno) = error_lineno;
+	}
+
+	if (zend_alloc_in_memory_limit_error_reporting()) {
+		php_output_discard_all();
 	}
 
 	/* display/log the error if necessary */
@@ -1779,19 +1801,7 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		bool send_buffer = SG(request_info).headers_only ? 0 : 1;
-
-		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-			(size_t)PG(memory_limit) < zend_memory_usage(1)
-		) {
-			send_buffer = 0;
-		}
-
-		if (!send_buffer) {
-			php_output_discard_all();
-		} else {
-			php_output_end_all();
-		}
+		php_output_end_all();
 	} zend_end_try();
 
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
@@ -1853,6 +1863,10 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
+
+	/* Reset memory limit, as the reset during INI_STAGE_DEACTIVATE may have failed.
+	 * At this point, no memory beyond a single chunk should be in use. */
+	zend_set_memory_limit(PG(memory_limit));
 
 	/* 16. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
@@ -1949,7 +1963,7 @@ static int php_register_extensions_bc(zend_module_entry *ptr, int count)
 	while (count--) {
 		if (zend_register_internal_module(ptr++) == NULL) {
 			return FAILURE;
- 		}
+		}
 	}
 	return SUCCESS;
 }
@@ -2336,7 +2350,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Don't leak errors from startup into the per-request phase. */
 	clear_last_error();
 	shutdown_memory_manager(1, 0);
- 	virtual_cwd_activate();
+	virtual_cwd_activate();
 
 	zend_interned_strings_switch_storage(1);
 
@@ -2476,13 +2490,13 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
 		}
 
- 		/* Only lookup the real file path and add it to the included_files list if already opened
+		/* Only lookup the real file path and add it to the included_files list if already opened
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
 		if (primary_file->filename &&
 			!zend_string_equals_literal(primary_file->filename, "Standard input code") &&
- 			primary_file->opened_path == NULL &&
- 			primary_file->type != ZEND_HANDLE_FILENAME
+			primary_file->opened_path == NULL &&
+			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			if (expand_filepath(ZSTR_VAL(primary_file->filename), realfile)) {
 				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);

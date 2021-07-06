@@ -1,10 +1,10 @@
 --TEST--
 socket_import_stream: effects of closing
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
   die("skip Not Valid for Windows");
 }

@@ -1,5 +1,7 @@
 --TEST--
 Bug #42596 (session.save_path MODE option will not set "write" bit for group or world)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
     if(substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");

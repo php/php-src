@@ -19,7 +19,7 @@ class IntlDateFormatter
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
-     * @return IntlDateFormatter|null
+     * @tentative-return-type
      * @alias datefmt_create
      */
     public static function create(
@@ -29,125 +29,125 @@ class IntlDateFormatter
         $timezone = null,
         IntlCalendar|int|null $calendar = null,
         ?string $pattern = null
-    ) {}
+    ): ?IntlDateFormatter {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_datetype
      */
-    public function getDateType() {}
+    public function getDateType(): int|false {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_timetype
      */
-    public function getTimeType() {}
+    public function getTimeType(): int|false {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_calendar
      */
-    public function getCalendar() {}
+    public function getCalendar(): int|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_set_calendar
      */
-    public function setCalendar(IntlCalendar|int|null $calendar) {}
+    public function setCalendar(IntlCalendar|int|null $calendar): bool {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_timezone_id
      */
-    public function getTimeZoneId() {}
+    public function getTimeZoneId(): string|false {}
 
     /**
-     * @return IntlCalendar|false|null
+     * @tentative-return-type
      * @alias datefmt_get_calendar_object
      */
-    public function getCalendarObject() {}
+    public function getCalendarObject(): IntlCalendar|false|null {}
 
     /**
-     * @return IntlTimeZone|false
+     * @tentative-return-type
      * @alias datefmt_get_timezone
      */
-    public function getTimeZone() {}
+    public function getTimeZone(): IntlTimeZone|false {}
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
-     * @return bool|null
+     * @tentative-return-type
      * @alias datefmt_set_timezone
      */
-    public function setTimeZone($timezone) {}
+    public function setTimeZone($timezone): ?bool {} // TODO return true on success
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_set_pattern
      */
-    public function setPattern(string $pattern) {}
+    public function setPattern(string $pattern): bool {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_pattern
      */
-    public function getPattern() {}
+    public function getPattern(): string|false {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_locale
      */
-    public function getLocale(int $type = ULOC_ACTUAL_LOCALE) {}
+    public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias datefmt_set_lenient
      */
-    public function setLenient(bool $lenient) {}
+    public function setLenient(bool $lenient): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_is_lenient
      */
-    public function isLenient() {}
+    public function isLenient(): bool {}
 
     /**
      * @param IntlCalendar|DateTimeInterface|array|string|int|float $datetime
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_format
      */
-    public function format($datetime) {}
+    public function format($datetime): string|false {}
 
     /**
      * @param IntlCalendar|DateTime $datetime
      * @param array|int|string|null $format
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_format_object
      */
-    public static function formatObject($datetime, $format = null, ?string $locale = null) {}
+    public static function formatObject($datetime, $format = null, ?string $locale = null): string|false {}
 
     /**
      * @param int $offset
-     * @return int|float|false
+     * @tentative-return-type
      * @alias datefmt_parse
      */
-    public function parse(string $string, &$offset = null) {}
+    public function parse(string $string, &$offset = null): int|float|false {}
 
     /**
      * @param int $offset
-     * @return array|false
+     * @tentative-return-type
      * @alias datefmt_localtime
      */
-    public function localtime(string $string, &$offset = null) {}
+    public function localtime(string $string, &$offset = null): array|false {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias datefmt_get_error_code
      */
-    public function getErrorCode() {}
+    public function getErrorCode(): int {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias datefmt_get_error_message
      */
-    public function getErrorMessage() {}
+    public function getErrorMessage(): string {}
 }

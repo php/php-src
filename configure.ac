@@ -258,6 +258,17 @@ case $host_alias in
     ;;
 esac
 
+dnl Detect musl libc
+AC_MSG_CHECKING([whether we are using musl libc])
+if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
+then
+  AC_MSG_RESULT(yes)
+  CPPFLAGS="$CPPFLAGS -D__MUSL__"
+else
+  AC_MSG_RESULT(no)
+fi
+
+
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
 
@@ -1189,8 +1200,8 @@ AS_CASE([$host_cpu],
   [x86*|amd*|i?86*|pentium], [fiber_cpu="i386"],
   [aarch64*|arm64*], [fiber_cpu="arm64"],
   [arm*], [fiber_cpu="arm32"],
-  [ppc64*], [fiber_cpu="ppc64"],
-  [powerpc*], [fiber_cpu="ppc32"],
+  [ppc64*|powerpc64*], [fiber_cpu="ppc64"],
+  [ppc*|powerpc*], [fiber_cpu="ppc32"],
   [s390x*], [fiber_cpu="s390x"],
   [mips64*], [fiber_cpu="mips64"],
   [mips*], [fiber_cpu="mips32"],
@@ -1208,7 +1219,7 @@ AS_CASE([$fiber_cpu],
   [arm64], [fiber_asm_file_prefix="arm64_aapcs"],
   [arm32], [fiber_asm_file_prefix="arm_aapcs"],
   [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
-  [ppc32], [fiber_asm_file_prefix="ppc_sysv"],
+  [ppc32], [fiber_asm_file_prefix="ppc32_sysv"],
   [s390x], [fiber_asm_file_prefix="s390x_sysv"],
   [mips64], [fiber_asm_file_prefix="mips64_n64"],
   [mips32], [fiber_asm_file_prefix="mips32_o32"],
@@ -1524,6 +1535,9 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
+dnl This needs to be passed explicitly to allow scan-build compiler overrides.
+PHP_SET_LIBTOOL_VARIABLE([--tag CC])
+
 test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
 test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
 SHARED_LIBTOOL='$(LIBTOOL)'
@@ -1556,6 +1570,7 @@ PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_call_graph.h \
     zend_cfg.h \
+    zend_dfg.h \
     zend_dump.h \
     zend_func_info.h \
     zend_inference.h \

@@ -1,5 +1,7 @@
 --TEST--
 Test session_write_close() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

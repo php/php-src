@@ -383,8 +383,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 
-    ctxp->namespaces = ns;
-    ctxp->nsNr = nsnbr;
+	ctxp->namespaces = ns;
+	ctxp->nsNr = nsnbr;
 
 	xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;

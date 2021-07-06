@@ -1,5 +1,7 @@
 --TEST--
 Bug #72195 (pg_pconnect/pg_connect cause use-after-free)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

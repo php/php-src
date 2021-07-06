@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL old api
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

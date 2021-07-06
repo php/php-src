@@ -1,5 +1,7 @@
 --TEST--
 Bug #71683 Null pointer dereference in zend_hash_str_find_bucket
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

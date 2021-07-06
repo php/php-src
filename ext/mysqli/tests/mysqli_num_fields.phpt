@@ -1,8 +1,9 @@
 --TEST--
 mysqli_num_fields()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

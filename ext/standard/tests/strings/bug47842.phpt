@@ -23,8 +23,8 @@ printf("printf 64-bit signed int '18446744073709551615' (2^64)-1 = %u\n", 184467
 
 echo "Done\n";
 ?>
---EXPECTF--
-%aTest
+--EXPECT--
+-Test
 sscanf 32-bit signed int '2147483647'           (2^31)-1 = 2147483647
 sscanf 32-bit unsign int '4294967295'           (2^32)-1 = 4294967295
 sscanf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807

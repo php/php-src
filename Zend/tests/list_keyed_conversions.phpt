@@ -21,6 +21,7 @@ list(STDIN => $resource) = [];
 
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 string(0) ""
 int(1)
 int(0)

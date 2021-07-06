@@ -72,8 +72,8 @@ PHPDBG_API void phpdbg_set_prompt(const char*);
 PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
 /* {{{ Console size */
-PHPDBG_API int phpdbg_get_terminal_width(void);
-PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
+PHPDBG_API uint32_t phpdbg_get_terminal_width(void);
+PHPDBG_API uint32_t phpdbg_get_terminal_height(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 
@@ -90,8 +90,6 @@ PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent,
 PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, bool silent, void *arg);
 
 int phpdbg_is_auto_global(char *name, int len);
-
-PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
 
 char *phpdbg_short_zval_print(zval *zv, int maxlen);
 

@@ -1,9 +1,7 @@
 --TEST--
 PDO Common: Bug #44159: SQLite variant
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) die('skip PDO SQLite not available');
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $pdo = new PDO("sqlite:".__DIR__."/foo.db");

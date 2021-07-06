@@ -1,8 +1,7 @@
 --TEST--
 Check that IMAP\Connection is declared final
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 

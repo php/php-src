@@ -50,18 +50,6 @@ PHP_RINIT_FUNCTION(spl);
 PHP_RSHUTDOWN_FUNCTION(spl);
 PHP_MINFO_FUNCTION(spl);
 
-
-ZEND_BEGIN_MODULE_GLOBALS(spl)
-	zend_string *autoload_extensions;
-	HashTable   *autoload_functions;
-	intptr_t     hash_mask_handle;
-	intptr_t     hash_mask_handlers;
-	int          hash_mask_init;
-ZEND_END_MODULE_GLOBALS(spl)
-
-ZEND_EXTERN_MODULE_GLOBALS(spl)
-#define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
-
 PHPAPI zend_string *php_spl_object_hash(zend_object *obj);
 
 #endif /* PHP_SPL_H */

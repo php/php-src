@@ -106,21 +106,21 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 /* }}} */
 
 static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
 {
-    if (sa->sa_family == AF_INET) {
-        return ntohs(((struct sockaddr_in*)sa)->sin_port);
-    }
+	if (sa->sa_family == AF_INET) {
+		return ntohs(((struct sockaddr_in*)sa)->sin_port);
+	}
 
-    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+	return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
 }
 /* }}} */
 

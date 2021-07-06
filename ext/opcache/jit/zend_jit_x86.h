@@ -88,6 +88,7 @@ typedef struct _zend_jit_registers_buf {
 } zend_jit_registers_buf;
 
 #define ZREG_FIRST_FPR ZREG_XMM0
+#define ZREG_COPY      ZREG_R0
 
 #define ZREG_RAX ZREG_R0
 #define ZREG_RCX ZREG_R1
@@ -112,6 +113,8 @@ typedef struct _zend_jit_registers_buf {
 #define ZREG_RX  ZREG_IP
 
 typedef uint32_t zend_regset;
+
+#define ZEND_REGSET_64BIT 0
 
 #ifdef _WIN64
 # define ZEND_REGSET_FIXED \

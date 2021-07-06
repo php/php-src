@@ -209,7 +209,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_stream_bucket *bucket = buckets_in->head;
+		php_stream_bucket *bucket;
 
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		while ((bucket = buckets_in->head)) {

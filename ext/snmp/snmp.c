@@ -928,41 +928,55 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
 		s->securityAuthProto = usmHMACMD5AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-	} else
+		return true;
+	}
 #endif
+
 	if (zend_string_equals_literal_ci(prot, "SHA")) {
 		s->securityAuthProto = usmHMACSHA1AuthProtocol;
 		s->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
-	} else {
-		zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
-		return false;
+		return true;
 	}
-	return true;
+
+	zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
+	return false;
 }
 /* }}} */
 
 /* {{{ Set the security protocol in the snmpv3 session */
 static bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
+#ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
 		s->securityPrivProto = usmDESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+		return true;
+	}
+#endif
+
 #ifdef HAVE_AES
-	} else if (zend_string_equals_literal_ci(prot, "AES128")
-		|| zend_string_equals_literal_ci(prot, "AES")
-	) {
+	if (zend_string_equals_literal_ci(prot, "AES128")
+			|| zend_string_equals_literal_ci(prot, "AES")) {
 		s->securityPrivProto = usmAESPrivProtocol;
 		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
-#endif
-	} else {
-#ifdef HAVE_AES
-		zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
-#else
-		zend_value_error("Security protocol must be \"DES\"");
-#endif
-		return false;
+		return true;
 	}
-	return true;
+#endif
+
+#ifdef HAVE_AES
+# ifndef NETSNMP_DISABLE_DES
+	zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
+# else
+	zend_value_error("Security protocol must be one of \"AES128\", or \"AES\"");
+# endif
+#else
+# ifndef NETSNMP_DISABLE_DES
+	zend_value_error("Security protocol must be \"DES\"");
+# else
+	zend_value_error("No security protocol supported");
+# endif
+#endif
+	return false;
 }
 /* }}} */
 
@@ -1667,29 +1681,36 @@ zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, v
 }
 /* }}} */
 
-/* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
-   Generic object property writer */
+/* {{{ Generic object property writer */
 zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	php_snmp_object *obj;
-	php_snmp_prop_handler *hnd;
+	php_snmp_object *obj = php_snmp_fetch_object(object);
+	php_snmp_prop_handler *hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
-	obj = php_snmp_fetch_object(object);
-	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
-
-	if (hnd && hnd->write_func) {
-		hnd->write_func(obj, value);
-		/*
-		if (!PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) == 0) {
-			Z_ADDREF_P(value);
-			zval_ptr_dtor(&value);
+	if (hnd) {
+		if (!hnd->write_func) {
+			zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			return &EG(error_zval);
 		}
-		*/
-	} else {
-		value = zend_std_write_property(object, name, value, cache_slot);
+
+		zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
+		if (prop && ZEND_TYPE_IS_SET(prop->type)) {
+			zval tmp;
+			ZVAL_COPY(&tmp, value);
+			if (!zend_verify_property_type(prop, &tmp,
+						ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+				zval_ptr_dtor(&tmp);
+				return &EG(error_zval);
+			}
+			hnd->write_func(obj, &tmp);
+			zval_ptr_dtor(&tmp);
+		} else {
+			hnd->write_func(obj, value);
+		}
+		return value;
 	}
 
-	return value;
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 /* }}} */
 
@@ -1762,6 +1783,16 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 }
 /* }}} */
 
+static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	php_snmp_prop_handler *hnd = zend_hash_find_ptr(&php_snmp_properties, name);
+	if (hnd == NULL) {
+		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	}
+
+	return NULL;
+}
+
 /* {{{ */
 static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 {
@@ -1821,14 +1852,6 @@ PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
-static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval)
-{
-	zend_throw_error(NULL, "SNMP::$info property is read-only");
-	return FAILURE;
-}
-/* }}} */
-
-/* {{{ */
 static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval;
@@ -1841,7 +1864,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 	lval = zval_get_long(newval);
 
 	if (lval <= 0) {
-		zend_value_error("max_oids must be greater than 0 or null");
+		zend_value_error("SNMP::$max_oids must be greater than 0 or null");
 		return FAILURE;
 	}
 	snmp_object->max_oids = lval;
@@ -1924,8 +1947,11 @@ static void free_php_snmp_properties(zval *el)  /* {{{ */
 #define PHP_SNMP_PROPERTY_ENTRY_RECORD(name) \
 	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	php_snmp_write_##name }
 
+#define PHP_SNMP_READONLY_PROPERTY_ENTRY_RECORD(name) \
+	{ "" #name "",		sizeof("" #name "") - 1,	php_snmp_read_##name,	NULL }
+
 const php_snmp_prop_handler php_snmp_property_entries[] = {
-	PHP_SNMP_PROPERTY_ENTRY_RECORD(info),
+	PHP_SNMP_READONLY_PROPERTY_ENTRY_RECORD(info),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(max_oids),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
@@ -1961,6 +1987,7 @@ PHP_MINIT_FUNCTION(snmp)
 	memcpy(&php_snmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_snmp_object_handlers.read_property = php_snmp_read_property;
 	php_snmp_object_handlers.write_property = php_snmp_write_property;
+	php_snmp_object_handlers.get_property_ptr_ptr = php_snmp_get_property_ptr_ptr;
 	php_snmp_object_handlers.has_property = php_snmp_has_property;
 	php_snmp_object_handlers.get_properties = php_snmp_get_properties;
 	php_snmp_object_handlers.get_gc = php_snmp_get_gc;

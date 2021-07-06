@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strrpos() function : mb_strrpos offset is byte count for negative values
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

@@ -79,6 +79,7 @@ PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_named_type_ptr;
+PHPAPI zend_class_entry *reflection_intersection_type_ptr;
 PHPAPI zend_class_entry *reflection_union_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
@@ -559,30 +560,25 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
-	char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
-	const char *type;
-
 	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
 		return;
 	}
 
-	type = zend_zval_type_name(&c->value);
-
+	const char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
+	const char *type = zend_zval_type_name(&c->value);
+	smart_str_append_printf(str, "%sConstant [ %s %s %s ] { ",
+		indent, visibility, type, name);
 	if (Z_TYPE(c->value) == IS_ARRAY) {
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { Array }\n",
-						indent, visibility, type, name);
+		smart_str_appends(str, "Array");
 	} else if (Z_TYPE(c->value) == IS_OBJECT) {
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { Object }\n",
-						indent, visibility, type, name);
+		smart_str_appends(str, "Object");
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(&c->value, &tmp_value_str);
-
-		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
-						indent, visibility, type, name, ZSTR_VAL(value_str));
-
+		smart_str_append(str, value_str);
 		zend_tmp_string_release(tmp_value_str);
 	}
+	smart_str_appends(str, " }\n");
 }
 /* }}} */
 
@@ -849,8 +845,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	}
 	_function_parameter_string(str, fptr, ZSTR_VAL(param_indent.s));
 	smart_str_free(&param_indent);
-	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		smart_str_append_printf(str, "  %s- Return [ ", indent);
+	if ((fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		smart_str_append_printf(str, "  %s- %s [ ", indent, ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]) ? "Tentative return" : "Return");
 		if (ZEND_TYPE_IS_SET(fptr->common.arg_info[-1].type)) {
 			zend_string *type_str = zend_type_to_string(fptr->common.arg_info[-1].type);
 			smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
@@ -1319,22 +1315,40 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 }
 /* }}} */
 
+typedef enum {
+	NAMED_TYPE = 0,
+	UNION_TYPE = 1,
+	INTERSECTION_TYPE = 2
+} reflection_type_kind;
+
 /* For backwards compatibility reasons, we need to return T|null style unions
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
-static bool is_union_type(zend_type type) {
-	if (ZEND_TYPE_HAS_LIST(type)) {
-		return 1;
-	}
+static reflection_type_kind get_type_kind(zend_type type) {
 	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
-	if (ZEND_TYPE_HAS_CLASS(type)) {
-		return type_mask_without_null != 0;
+
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		if (ZEND_TYPE_IS_INTERSECTION(type)) {
+			return INTERSECTION_TYPE;
+		}
+		ZEND_ASSERT(ZEND_TYPE_IS_UNION(type));
+		return UNION_TYPE;
 	}
-	if (type_mask_without_null == MAY_BE_BOOL) {
-		return 0;
+
+	if (ZEND_TYPE_IS_COMPLEX(type)) {
+		if (type_mask_without_null != 0) {
+			return UNION_TYPE;
+		}
+		return NAMED_TYPE;
+	}
+	if (type_mask_without_null == MAY_BE_BOOL || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
+		return NAMED_TYPE;
 	}
 	/* Check that only one bit is set. */
-	return (type_mask_without_null & (type_mask_without_null - 1)) != 0;
+	if ((type_mask_without_null & (type_mask_without_null - 1)) != 0) {
+		return UNION_TYPE;
+	}
+	return NAMED_TYPE;
 }
 
 /* {{{ reflection_type_factory */
@@ -1342,14 +1356,26 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 {
 	reflection_object *intern;
 	type_reference *reference;
-	bool is_union = is_union_type(type);
+	reflection_type_kind type_kind = get_type_kind(type);
 	bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
 
-	reflection_instantiate(is_union && !is_mixed ? reflection_union_type_ptr : reflection_named_type_ptr, object);
+	switch (type_kind) {
+		case INTERSECTION_TYPE:
+			reflection_instantiate(reflection_intersection_type_ptr, object);
+			break;
+		case UNION_TYPE:
+			reflection_instantiate(reflection_union_type_ptr, object);
+			break;
+		case NAMED_TYPE:
+			reflection_instantiate(reflection_named_type_ptr, object);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->type = type;
-	reference->legacy_behavior = legacy_behavior && !is_union && !is_mixed;
+	reference->legacy_behavior = legacy_behavior && type_kind == NAMED_TYPE && !is_mixed;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 
@@ -1663,6 +1689,55 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 	}
 }
 /* }}} */
+
+/* {{{ Returns an associative array containing the closures lexical scope variables */
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
+{
+	reflection_object *intern;
+	const zend_function *closure_func;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT();
+
+	array_init(return_value);
+	if (!Z_ISUNDEF(intern->obj)) {
+		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+		if (closure_func == NULL ||
+			closure_func->type != ZEND_USER_FUNCTION ||
+			closure_func->op_array.static_variables == NULL) {
+			return;
+		}
+
+		const zend_op_array *ops = &closure_func->op_array;
+
+		HashTable *static_variables = ZEND_MAP_PTR_GET(ops->static_variables_ptr);
+
+		if (!static_variables) {
+			return;
+		}
+
+		zend_op *opline = ops->opcodes + ops->num_args;
+
+		for (; opline->opcode == ZEND_BIND_STATIC; opline++)  {
+			if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
+				continue;
+			}
+
+			Bucket *bucket = (Bucket*)
+				(((char*)static_variables->arData) +
+				(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
+
+			if (Z_ISUNDEF(bucket->val)) {
+				continue;
+			}
+
+			zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
+			Z_TRY_ADDREF(bucket->val);
+		}
+	}
+} /* }}} */
 
 /* {{{ Returns a dynamically created closure for the function */
 ZEND_METHOD(ReflectionFunction, getClosure)
@@ -2999,10 +3074,10 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 		zend_string *name = ZEND_TYPE_NAME(param->type);
 
 		if (ZSTR_HAS_CE_CACHE(name) && ZSTR_GET_CE_CACHE(name)) {
- 			append_type(return_value,
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CE(ZSTR_GET_CE_CACHE(name), 0, 0));
- 		} else {
- 			append_type(return_value,
+		} else {
+			append_type(return_value,
 				(zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
 		}
 	} else if (ZEND_TYPE_HAS_CE(param->type)) {
@@ -3045,6 +3120,27 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (type_mask & MAY_BE_NULL) {
 		append_type_mask(return_value, MAY_BE_NULL);
 	}
+}
+/* }}} */
+
+/* {{{ Returns the types that are part of this intersection type */
+ZEND_METHOD(ReflectionIntersectionType, getTypes)
+{
+	reflection_object *intern;
+	type_reference *param;
+	zend_type *list_type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	ZEND_ASSERT(ZEND_TYPE_HAS_LIST(param->type));
+
+	array_init(return_value);
+	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+		append_type(return_value, *list_type);
+	} ZEND_TYPE_LIST_FOREACH_END();
 }
 /* }}} */
 
@@ -3349,13 +3445,6 @@ ZEND_METHOD(ReflectionMethod, isProtected)
 }
 /* }}} */
 
-/* {{{ Returns whether this method is static */
-ZEND_METHOD(ReflectionMethod, isStatic)
-{
-	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
-}
-/* }}} */
-
 /* {{{ Returns whether this function is deprecated */
 ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated)
 {
@@ -3374,6 +3463,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, isGenerator)
 ZEND_METHOD(ReflectionFunctionAbstract, isVariadic)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
+}
+/* }}} */
+
+/* {{{ Returns whether this function is static */
+ZEND_METHOD(ReflectionFunctionAbstract, isStatic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
 }
 /* }}} */
 
@@ -3449,7 +3545,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETVAL_BOOL(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE);
+	RETVAL_BOOL((fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
 }
 /* }}} */
 
@@ -3465,7 +3561,43 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (!(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+	if (!(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
+		RETURN_NULL();
+	}
+
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
+}
+/* }}} */
+
+/* {{{ Return whether the function has a return type */
+ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	RETVAL_BOOL(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
+}
+/* }}} */
+
+/* {{{ Returns the return type associated with the function */
+ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (!(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
 		RETURN_NULL();
 	}
 
@@ -6048,9 +6180,9 @@ ZEND_METHOD(ReflectionExtension, info)
 ZEND_METHOD(ReflectionExtension, isPersistent)
 {
 	reflection_object *intern;
-    zend_module_entry *module;
+	zend_module_entry *module;
 
-    if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(module);
@@ -6285,7 +6417,7 @@ ZEND_METHOD(ReflectionReference, getId)
 	}
 
 	if (!REFLECTION_G(key_initialized)) {
-		if (php_random_bytes_throw(&REFLECTION_G(key_initialized), 16) == FAILURE) {
+		if (php_random_bytes_throw(&REFLECTION_G(key), 16) == FAILURE) {
 			RETURN_THROWS();
 		}
 
@@ -6538,7 +6670,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
 			zval val;
 			if (FAILURE == zend_get_attribute_value(&val, attr->data, i, attr->scope)) {
-				attribute_ctor_cleanup(&obj, args, i, named_params);
+				attribute_ctor_cleanup(&obj, args, argc, named_params);
 				RETURN_THROWS();
 			}
 			if (attr->data->args[i].name) {
@@ -6788,7 +6920,7 @@ ZEND_METHOD(ReflectionFiber, getFiber)
 }
 
 #define REFLECTION_CHECK_VALID_FIBER(fiber) do { \
-		if (fiber == NULL || fiber->status == ZEND_FIBER_STATUS_INIT || fiber->status & ZEND_FIBER_STATUS_FINISHED) { \
+		if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_INIT || fiber->context.status == ZEND_FIBER_STATUS_DEAD) { \
 			zend_throw_error(NULL, "Cannot fetch information from a fiber that has not been started or is terminated"); \
 			RETURN_THROWS(); \
 		} \
@@ -6810,7 +6942,7 @@ ZEND_METHOD(ReflectionFiber, getTrace)
 	prev_execute_data = fiber->stack_bottom->prev_execute_data;
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	if (EG(current_fiber) != fiber) {
+	if (EG(active_fiber) != fiber) {
 		// No need to replace current execute data if within the current fiber.
 		EG(current_execute_data) = fiber->execute_data;
 	}
@@ -6830,7 +6962,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == fiber) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;
@@ -6848,7 +6980,7 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 
 	REFLECTION_CHECK_VALID_FIBER(fiber);
 
-	if (EG(current_fiber) == fiber) {
+	if (EG(active_fiber) == fiber) {
 		prev_execute_data = execute_data->prev_execute_data;
 	} else {
 		prev_execute_data = fiber->execute_data->prev_execute_data;
@@ -6863,7 +6995,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (fiber == NULL || fiber->status & ZEND_FIBER_STATUS_FINISHED) {
+	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
 		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
 		RETURN_THROWS();
 	}
@@ -6931,6 +7063,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
 	reflection_init_class_handlers(reflection_union_type_ptr);
+
+	reflection_intersection_type_ptr = register_class_ReflectionIntersectionType(reflection_type_ptr);
+	reflection_init_class_handlers(reflection_intersection_type_ptr);
 
 	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
 	reflection_init_class_handlers(reflection_method_ptr);

@@ -54,16 +54,25 @@
 # include <X11/xpm.h>
 #endif
 
-
 #include "gd_compat.h"
 
-#include <gd.h>
-#include <gd_errors.h>
-#include <gdfontt.h>  /* 1 Tiny font */
-#include <gdfonts.h>  /* 2 Small font */
-#include <gdfontmb.h> /* 3 Medium bold font */
-#include <gdfontl.h>  /* 4 Large font */
-#include <gdfontg.h>  /* 5 Giant font */
+#ifdef HAVE_GD_BUNDLED
+# include "libgd/gd.h"
+# include "libgd/gd_errors.h"
+# include "libgd/gdfontt.h"  /* 1 Tiny font */
+# include "libgd/gdfonts.h"  /* 2 Small font */
+# include "libgd/gdfontmb.h" /* 3 Medium bold font */
+# include "libgd/gdfontl.h"  /* 4 Large font */
+# include "libgd/gdfontg.h"  /* 5 Giant font */
+#else
+# include <gd.h>
+# include <gd_errors.h>
+# include <gdfontt.h>  /* 1 Tiny font */
+# include <gdfonts.h>  /* 2 Small font */
+# include <gdfontmb.h> /* 3 Medium bold font */
+# include <gdfontl.h>  /* 4 Large font */
+# include <gdfontg.h>  /* 5 Giant font */
+#endif
 
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 # include <ft2build.h>
@@ -135,7 +144,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
-static gdIOCtx *create_output_context();
+static gdIOCtx *create_output_context(void);
 static int _php_image_type(char data[12]);
 
 /* output streaming (formerly gd_ctx.c) */
@@ -215,7 +224,7 @@ void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
 }
 
-static void php_gd_object_minit_helper()
+static void php_gd_object_minit_helper(void)
 {
 	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
@@ -361,6 +370,7 @@ PHP_MINIT_FUNCTION(gd)
 
 	REGISTER_INI_ENTRIES();
 
+	REGISTER_LONG_CONSTANT("IMG_AVIF", PHP_IMG_AVIF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_GIF", PHP_IMG_GIF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", PHP_IMG_JPG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPEG", PHP_IMG_JPEG, CONST_CS | CONST_PERSISTENT);
@@ -591,6 +601,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_BMP
 	php_info_print_table_row(2, "BMP Support", "enabled");
 #endif
+#ifdef HAVE_GD_AVIF
+	php_info_print_table_row(2, "AVIF Support", "enabled");
+#endif
 #ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
 #endif
@@ -644,6 +657,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "BMP Support", 1);
 #else
 	add_assoc_bool(return_value, "BMP Support", 0);
+#endif
+#ifdef HAVE_GD_AVIF
+	add_assoc_bool(return_value, "AVIF Support", 1);
+#else
+	add_assoc_bool(return_value, "AVIF Support", 0);
 #endif
 #ifdef HAVE_GD_TGA
 	add_assoc_bool(return_value, "TGA Read Support", 1);
@@ -1397,7 +1415,7 @@ PHP_FUNCTION(imagecreate)
 }
 /* }}} */
 
-/* {{{ Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM */
+/* {{{ Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM, etc */
 PHP_FUNCTION(imagetypes)
 {
 	int ret = 0;
@@ -1420,6 +1438,9 @@ PHP_FUNCTION(imagetypes)
 #endif
 #ifdef HAVE_GD_TGA
 	ret |= PHP_IMG_TGA;
+#endif
+#ifdef HAVE_GD_AVIF
+	ret |= PHP_IMG_AVIF;
 #endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1576,6 +1597,15 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 #else
 			php_error_docref(NULL, E_WARNING, "No WEBP support in this PHP build");
+			RETURN_FALSE;
+#endif
+
+		case PHP_GDIMG_TYPE_AVIF:
+#ifdef HAVE_GD_AVIF
+			im = _php_image_create_from_string(data, "AVIF", gdImageCreateFromAvifCtx);
+			break;
+#else
+			php_error_docref(NULL, E_WARNING, "No AVIF support in this PHP build");
 			RETURN_FALSE;
 #endif
 
@@ -1758,6 +1788,15 @@ PHP_FUNCTION(imagecreatefromxbm)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm, NULL);
 }
 /* }}} */
+
+#ifdef HAVE_GD_AVIF
+/* {{{ Create a new image from AVIF file or URL */
+PHP_FUNCTION(imagecreatefromavif)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF", gdImageCreateFromAvif, gdImageCreateFromAvifCtx);
+}
+/* }}} */
+#endif /* HAVE_GD_AVIF */
 
 #ifdef HAVE_GD_XPM
 /* {{{ Create a new image from XPM file or URL */
@@ -1985,6 +2024,15 @@ PHP_FUNCTION(imagewebp)
 }
 /* }}} */
 #endif /* HAVE_GD_WEBP */
+
+#ifdef HAVE_GD_AVIF
+/* {{{ Output AVIF image to browser or file */
+PHP_FUNCTION(imageavif)
+{
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF", gdImageAvifCtx);
+}
+/* }}} */
+#endif /* HAVE_GD_AVIF */
 
 #ifdef HAVE_GD_JPG
 /* {{{ Output JPEG image to browser or file */
@@ -4168,7 +4216,7 @@ static gdIOCtx *create_output_context() {
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
 	zval *imgind;
-	zend_long quality = -1, basefilter = -1;
+	zend_long quality = -1, basefilter = -1, speed = -1;
 	gdImagePtr im;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
@@ -4179,6 +4227,10 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	} else if (image_type == PHP_GDIMG_TYPE_PNG) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else if (image_type == PHP_GDIMG_TYPE_AVIF) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &speed) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
@@ -4207,6 +4259,12 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				quality = 80;
 			}
 			(*func_p)(im, ctx, (int) quality);
+			break;
+		case PHP_GDIMG_TYPE_AVIF:
+			if (speed == -1) {
+				speed = 6;
+			}
+			(*func_p)(im, ctx, (int) quality, (int) speed);
 			break;
 		case PHP_GDIMG_TYPE_PNG:
 			(*func_p)(im, ctx, (int) quality, (int) basefilter);

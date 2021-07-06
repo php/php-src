@@ -459,7 +459,7 @@ static int php_htoi(char *s)
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
-	register unsigned char c;
+	unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
 	zend_string *start;
@@ -587,7 +587,7 @@ PHP_FUNCTION(urldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -649,7 +649,7 @@ PHP_FUNCTION(rawurldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 

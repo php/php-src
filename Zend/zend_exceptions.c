@@ -89,7 +89,7 @@ ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object) /* {{{ *
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous) /* {{{ */
 {
-    zval *previous, *ancestor, *ex;
+	zval *previous, *ancestor, *ex;
 	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 
@@ -600,29 +600,13 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 }
 /* }}} */
 
-/* {{{ Obtain the backtrace for the exception as a string (instead of an array) */
-ZEND_METHOD(Exception, getTraceAsString)
-{
-	zval *trace, *frame, rv;
+ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main) {
 	zend_ulong index;
-	zval *object;
-	zend_class_entry *base_ce;
-	smart_str str = {0};
+	zval *frame;
 	uint32_t num = 0;
+	smart_str str = {0};
 
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	object = ZEND_THIS;
-	base_ce = i_get_exception_base(Z_OBJ_P(object));
-
-	trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	/* Type should be guaranteed by property type. */
-	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(trace, index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
 			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
@@ -631,12 +615,33 @@ ZEND_METHOD(Exception, getTraceAsString)
 		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
 	} ZEND_HASH_FOREACH_END();
 
-	smart_str_appendc(&str, '#');
-	smart_str_append_long(&str, num);
-	smart_str_appends(&str, " {main}");
-	smart_str_0(&str);
+	if (include_main) {
+		smart_str_appendc(&str, '#');
+		smart_str_append_long(&str, num);
+		smart_str_appends(&str, " {main}");
+	}
 
-	RETURN_NEW_STR(str.s);
+	smart_str_0(&str);
+	return str.s ? str.s : ZSTR_EMPTY_ALLOC();
+}
+
+/* {{{ Obtain the backtrace for the exception as a string (instead of an array) */
+ZEND_METHOD(Exception, getTraceAsString)
+{
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval *object = ZEND_THIS;
+	zend_class_entry *base_ce = i_get_exception_base(Z_OBJ_P(object));
+	zval rv;
+	zval *trace = zend_read_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	/* Type should be guaranteed by property type. */
+	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
+	RETURN_NEW_STR(zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true));
 }
 /* }}} */
 
@@ -963,6 +968,22 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 }
 /* }}} */
 
+ZEND_NORETURN void zend_exception_uncaught_error(const char *format, ...) {
+	va_list va;
+	va_start(va, format);
+	zend_string *prefix = zend_vstrpprintf(0, format, va);
+	va_end(va);
+
+	ZEND_ASSERT(EG(exception));
+	zval exception_zv;
+	ZVAL_OBJ_COPY(&exception_zv, EG(exception));
+	zend_clear_exception();
+
+	zend_string *exception_str = zval_get_string(&exception_zv);
+	zend_error_noreturn(E_ERROR,
+		"%s: Uncaught %s", ZSTR_VAL(prefix), ZSTR_VAL(exception_str));
+}
+
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
 	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
@@ -981,10 +1002,20 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 }
 /* }}} */
 
+ZEND_API ZEND_COLD zend_object *zend_create_unwind_exit(void)
+{
+	return zend_objects_new(&zend_ce_unwind_exit);
+}
+
+ZEND_API ZEND_COLD zend_object *zend_create_graceful_exit(void)
+{
+	return zend_objects_new(&zend_ce_graceful_exit);
+}
+
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_unwind_exit);
+	EG(exception) = zend_create_unwind_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }
@@ -992,7 +1023,7 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_graceful_exit);
+	EG(exception) = zend_create_graceful_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }

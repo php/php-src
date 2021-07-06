@@ -832,7 +832,7 @@ PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 	xsl_object *intern;
 	zend_long securityPrefs, oldSecurityPrefs;
 
- 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &securityPrefs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &securityPrefs) == FAILURE) {
 		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);

@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL import large object with given oid
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");
@@ -93,5 +95,5 @@ Invalid OID value passed
 OID value must be of type string|int, bool given
 OID value must be of type string|int, array given
 OID value must be of type string|int, stdClass given
-OID value must be of type string|int, resource given
+OID value must be of type string|int, PgSql\Connection given
 OK

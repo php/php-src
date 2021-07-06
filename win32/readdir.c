@@ -21,10 +21,6 @@
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 DIR *opendir(const char *dir)
 {/*{{{*/
 	DIR *dp;
@@ -196,7 +192,3 @@ int rewinddir(DIR *dp)
 
 	return 0;
 }/*}}}*/
-
-#ifdef __cplusplus
-}
-#endif

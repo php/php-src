@@ -1,8 +1,9 @@
 --TEST--
 Bug #63398 (Segfault when calling fetch_object on a use_result and DB pointer has closed)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND) {
     die("skip mysqlnd only test");

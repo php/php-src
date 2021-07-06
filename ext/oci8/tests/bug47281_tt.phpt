@@ -1,5 +1,7 @@
 --TEST--
 Bug #47281 ($php_errormsg is limited in size of characters)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs: shorter message length in TimesTen

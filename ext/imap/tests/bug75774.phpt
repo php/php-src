@@ -1,9 +1,7 @@
 --TEST--
 Bug #75774 imap_append HeapCorruction
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 

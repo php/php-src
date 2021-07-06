@@ -1,8 +1,9 @@
 --TEST--
 Phar: test edge cases of intercepted functions when the underlying phar archive has been unlinkArchive()d
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");
-if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
+<?php if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
 ?>
 --INI--
 phar.readonly=0

@@ -804,7 +804,7 @@ PHP_FUNCTION(stream_select)
 			zend_argument_value_error(4, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		} else if (usec < 0) {
-			zend_argument_value_error(4, "must be greater than or equal to 0");
+			zend_argument_value_error(5, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
 
@@ -1027,6 +1027,10 @@ PHP_FUNCTION(stream_context_set_option)
 	} else {
 		if (!optionname) {
 			zend_argument_value_error(3, "cannot be null when argument #2 ($wrapper_or_options) is a string");
+			RETURN_THROWS();
+		}
+		if (!zvalue) {
+			zend_argument_value_error(4, "must be provided when argument #2 ($wrapper_or_options) is a string");
 			RETURN_THROWS();
 		}
 

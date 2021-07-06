@@ -492,7 +492,7 @@ ZEND_FUNCTION(define)
 
 	if (non_cs) {
 		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
-    }
+	}
 
 	ZVAL_UNDEF(&val_free);
 
@@ -923,9 +923,9 @@ ZEND_FUNCTION(method_exists)
 		func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
 		if (func != NULL) {
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				/* Returns true to the fake Closure's __invoke */
+				/* Returns true for the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
-					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
+					&& zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME));
 
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);
@@ -933,6 +933,12 @@ ZEND_FUNCTION(method_exists)
 			}
 			RETURN_TRUE;
 		}
+	} else {
+	    /* Returns true for fake Closure::__invoke */
+	    if (ce == zend_ce_closure
+	        && zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME)) {
+	        RETURN_TRUE;
+	    }
 	}
 	RETURN_FALSE;
 }
@@ -1012,7 +1018,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 		ce = zend_lookup_class(name);
 	}
 
- 	if (ce) {
+	if (ce) {
 		RETURN_BOOL(((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
 	} else {
 		RETURN_FALSE;
@@ -1637,33 +1643,12 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 }
 /* }}} */
 
-void debug_print_backtrace_args(smart_str *str, zval *arg_array) /* {{{ */
-{
-	zend_string *name;
-	zval *tmp;
-	int i = 0;
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(arg_array), name, tmp) {
-		if (i++) {
-			smart_str_appends(str, ", ");
-		}
-		if (name) {
-			smart_str_append(str, name);
-			smart_str_appends(str, ": ");
-		}
-		zend_print_flat_zval_r_to_buf(str, tmp);
-	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
-
 /* {{{ */
 ZEND_FUNCTION(debug_print_backtrace)
 {
 	zend_long options = 0;
 	zend_long limit = 0;
-	zval backtrace, *frame;
-	zend_long frame_no;
-	smart_str str = {0};
+	zval backtrace;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		RETURN_THROWS();
@@ -1671,48 +1656,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 	zend_fetch_debug_backtrace(&backtrace, 1, options, limit);
 	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARR(backtrace), frame_no, frame) {
-		ZEND_ASSERT(Z_TYPE_P(frame) == IS_ARRAY);
-		zval *function = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FUNCTION), 1);
-		zval *class = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_CLASS), 1);
-		zval *type = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_TYPE), 1);
-		zval *file = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_FILE), 1);
-		zval *line = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_LINE), 1);
-		zval *args = zend_hash_find_ex(Z_ARR_P(frame), ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 
-		smart_str_append_printf(&str, "#%-2d ", (int) frame_no);
-		if (class) {
-			ZEND_ASSERT(Z_TYPE_P(class) == IS_STRING);
-			ZEND_ASSERT(type && Z_TYPE_P(type) == IS_STRING);
-			/* Cut off anonymous class names at null byte. */
-			smart_str_appends(&str, Z_STRVAL_P(class));
-			smart_str_append(&str, Z_STR_P(type));
-		}
-		smart_str_append(&str, Z_STR_P(function));
-		smart_str_appendc(&str, '(');
-		if (args) {
-			ZEND_ASSERT(Z_TYPE_P(args) == IS_ARRAY);
-			debug_print_backtrace_args(&str, args);
-		}
-		smart_str_appendc(&str, ')');
-		if (file) {
-			ZEND_ASSERT(Z_TYPE_P(file) == IS_STRING);
-			ZEND_ASSERT(line && Z_TYPE_P(line) == IS_LONG);
-			smart_str_appends(&str, " called at [");
-			smart_str_append(&str, Z_STR_P(file));
-			smart_str_appendc(&str, ':');
-			smart_str_append_long(&str, Z_LVAL_P(line));
-			smart_str_appendc(&str, ']');
-		}
-		smart_str_appendc(&str, '\n');
-	} ZEND_HASH_FOREACH_END();
+	zend_string *str = zend_trace_to_string(Z_ARRVAL(backtrace), /* include_main */ false);
+	ZEND_WRITE(ZSTR_VAL(str), ZSTR_LEN(str));
+	zend_string_release(str);
 	zval_ptr_dtor(&backtrace);
-
-	smart_str_0(&str);
-	if (str.s) {
-		ZEND_WRITE(ZSTR_VAL(str.s), ZSTR_LEN(str.s));
-	}
-	smart_str_free(&str);
 }
 
 /* }}} */

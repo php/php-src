@@ -27,10 +27,16 @@
  *
  */
 
+/* UHC was introduced by MicroSoft in Windows 95, and is also known as CP949.
+ * It is the same as EUC-KR, but with 8,822 additional characters added to
+ * complete all the characters in the Johab charset. */
+
 #include "mbfilter.h"
 #include "mbfilter_uhc.h"
 #define UNICODE_TABLE_UHC_DEF
 #include "unicode_table_uhc.h"
+
+static int mbfl_filt_conv_uhc_wchar_flush(mbfl_convert_filter *filter);
 
 static const unsigned char mblen_table_uhc[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -70,7 +76,7 @@ const struct mbfl_convert_vtbl vtbl_uhc_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_uhc_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_uhc_wchar_flush,
 	NULL,
 };
 
@@ -86,33 +92,27 @@ const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * UHC => wchar
- */
-int
-mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, w = 0, flag = 0;
+	int w = 0, flag = 0;
 
 	switch (filter->status) {
 	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
+		if (c >= 0 && c < 0x80) { /* latin */
 			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0x80 && c < 0xff && c != 0xc9) {	/* dbcs lead byte */
+		} else if (c > 0x80 && c < 0xfe && c != 0xc9) { /* dbcs lead byte */
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
-	case 1:		/* dbcs second byte */
+	case 1: /* dbcs second byte */
 		filter->status = 0;
-		c1 = filter->cache;
+		int c1 = filter->cache;
 
-		if ( c1 >= 0x81 && c1 <= 0xa0){
+		if (c1 >= 0x81 && c1 <= 0xa0 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0x81)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc1_ucs_table_size) {
 				flag = 1;
@@ -120,7 +120,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 			} else {
 				w = 0;
 			}
-		} else if ( c1 >= 0xa1 && c1 <= 0xc6){
+		} else if (c1 >= 0xa1 && c1 <= 0xc6 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0xa1)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc2_ucs_table_size) {
 				flag = 2;
@@ -128,7 +128,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 			} else {
 				w = 0;
 			}
-		} else if ( c1 >= 0xc7 && c1 <= 0xfe){
+		} else if (c1 >= 0xc7 && c1 < 0xfe && c >= 0xa1 && c <= 0xfe) {
 			w = (c1 - 0xc7)*94 + (c - 0xa1);
 			if (w >= 0 && w < uhc3_ucs_table_size) {
 				flag = 3;
@@ -137,23 +137,11 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 				w = 0;
 			}
 		}
-		if (flag > 0){
-			if (w <= 0) {
-				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_UHC;
-			}
-			CK((*filter->output_function)(w, filter->data));
-		} else {
-			if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-				CK((*filter->output_function)(c, filter->data));
-			} else {
-				w = (c1 << 8) | c;
-				w &= MBFL_WCSGROUP_MASK;
-				w |= MBFL_WCSGROUP_THROUGH;
-				CK((*filter->output_function)(w, filter->data));
-			}
+
+		if (flag <= 0 || w <= 0) {
+			w = (c1 << 8) | c | MBFL_WCSPLANE_UHC;
 		}
+		CK((*filter->output_function)(w, filter->data));
 		break;
 
 	default:
@@ -164,15 +152,24 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-/*
- * wchar => UHC
- */
-int
-mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
+static int mbfl_filt_conv_uhc_wchar_flush(mbfl_convert_filter *filter)
 {
-	int c1, s;
+	if (filter->status == 1) {
+		/* 2-byte character was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
 
-	s = 0;
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
+}
+
+int mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
+{
+	int s = 0;
+
 	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
 		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
 	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
@@ -188,19 +185,13 @@ mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
 		s = ucs_r2_uhc_table[c - ucs_r2_uhc_table_min];
 	}
-	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_UHC) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
-		if (c == 0) {
-			s = 0;
-		} else if (s <= 0) {
-			s = -1;
-		}
+
+	if (s == 0 && c != 0) {
+		s = -1;
 	}
+
 	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
+		if (s < 0x80) { /* latin */
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));

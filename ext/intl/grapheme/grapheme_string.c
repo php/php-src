@@ -739,7 +739,7 @@ PHP_FUNCTION(grapheme_extract)
 			ZVAL_DEREF(next);
 			/* initialize next */
 			zval_ptr_dtor(next);
-            ZVAL_LONG(next, lstart);
+			ZVAL_LONG(next, lstart);
 		}
 	}
 
@@ -794,7 +794,7 @@ PHP_FUNCTION(grapheme_extract)
 	 */
 
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
-        size_t nsize = MIN(size, str_len);
+		size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}

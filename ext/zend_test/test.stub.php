@@ -24,10 +24,13 @@ class _ZendTestClass implements _ZendTestInterface {
     public function __toString(): string {}
 
     public function returnsStatic(): static {}
+
+    public function returnsThrowable(): Throwable {}
 }
 
 class _ZendTestChildClass extends _ZendTestClass
 {
+    public function returnsThrowable(): Exception {}
 }
 
 trait _ZendTestTrait {

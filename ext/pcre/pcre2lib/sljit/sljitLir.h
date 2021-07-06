@@ -24,8 +24,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SLJIT_LIR_H_
-#define _SLJIT_LIR_H_
+#ifndef SLJIT_LIR_H_
+#define SLJIT_LIR_H_
 
 /*
    ------------------------------------------------------------------------
@@ -70,15 +70,21 @@
       - pass --smc-check=all argument to valgrind, since JIT is a "self-modifying code"
 */
 
-#if !(defined SLJIT_NO_DEFAULT_CONFIG && SLJIT_NO_DEFAULT_CONFIG)
+#if (defined SLJIT_HAVE_CONFIG_PRE && SLJIT_HAVE_CONFIG_PRE)
+#include "sljitConfigPre.h"
+#endif /* SLJIT_HAVE_CONFIG_PRE */
+
 #include "sljitConfig.h"
-#endif
 
 /* The following header file defines useful macros for fine tuning
 sljit based code generators. They are listed in the beginning
 of sljitConfigInternal.h */
 
 #include "sljitConfigInternal.h"
+
+#if (defined SLJIT_HAVE_CONFIG_POST && SLJIT_HAVE_CONFIG_POST)
+#include "sljitConfigPost.h"
+#endif /* SLJIT_HAVE_CONFIG_POST */
 
 #ifdef __cplusplus
 extern "C" {
@@ -385,6 +391,7 @@ struct sljit_compiler {
 	struct sljit_put_label *last_put_label;
 
 	void *allocator_data;
+	void *exec_allocator_data;
 	struct sljit_memory_fragment *buf;
 	struct sljit_memory_fragment *abuf;
 
@@ -451,9 +458,9 @@ struct sljit_compiler {
 	sljit_sw cache_argw;
 #endif
 
-#if (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
-	sljit_s32 cache_arg;
-	sljit_sw cache_argw;
+#if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+	/* Need to allocate register save area to make calls. */
+	sljit_s32 have_save_area;
 #endif
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
@@ -485,10 +492,12 @@ struct sljit_compiler {
    custom memory managers. This pointer is passed to SLJIT_MALLOC
    and SLJIT_FREE macros. Most allocators (including the default
    one) ignores this value, and it is recommended to pass NULL
-   as a dummy value for allocator_data.
+   as a dummy value for allocator_data. The exec_allocator_data
+   has the same purpose but this one is passed to SLJIT_MALLOC_EXEC /
+   SLJIT_MALLOC_FREE functions.
 
    Returns NULL if failed. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data, void *exec_allocator_data);
 
 /* Frees everything except the compiled machine code. */
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_compiler(struct sljit_compiler *compiler);
@@ -535,7 +544,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 /* Free executable code. */
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code);
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data);
 
 /*
    When the protected executable allocator is used the JIT code is mapped
@@ -699,7 +708,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
 */
 
 /*
-   IMPORATNT NOTE: memory access MUST be naturally aligned except
+   IMPORTANT NOTE: memory access MUST be naturally aligned unless
                    SLJIT_UNALIGNED macro is defined and its value is 1.
 
      length | alignment
@@ -741,6 +750,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
    mips:   [reg+imm], -65536 <= imm <= 65535
    sparc:  [reg+imm], -4096 <= imm <= 4095
            [reg+reg] is supported
+   s390x:  [reg+imm], -2^19 <= imm < 2^19
+           [reg+reg] is supported
+           Write-back is not supported
 */
 
 /* Macros for specifying operand types. */
@@ -1405,12 +1417,6 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void);
 /* Portable helper function to get an offset of a member. */
 #define SLJIT_OFFSETOF(base, member) ((sljit_sw)(&((base*)0x10)->member) - 0x10)
 
-#if (defined SLJIT_UTIL_GLOBAL_LOCK && SLJIT_UTIL_GLOBAL_LOCK)
-/* This global lock is useful to compile common functions. */
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void);
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void);
-#endif
-
 #if (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK)
 
 /* The sljit_stack structure and its manipulation functions provides
@@ -1538,4 +1544,4 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *com
 } /* extern "C" */
 #endif
 
-#endif /* _SLJIT_LIR_H_ */
+#endif /* SLJIT_LIR_H_ */

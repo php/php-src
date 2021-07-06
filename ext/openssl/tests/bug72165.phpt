@@ -1,9 +1,7 @@
 --TEST--
 Bug #72165 Null pointer dereference - openssl_csr_new
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $var0 = array(0 => "hello", 1 => "world");

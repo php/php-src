@@ -2,10 +2,12 @@
 Phar - Bug #71625 - Crash in php7.dll
 --INI--
 phar.readonly=0
+--EXTENSIONS--
+phar
+zlib
 --SKIPIF--
 <?php
 
-if (!extension_loaded("phar") || !extension_loaded("zlib")) die("skip");
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }

@@ -1,5 +1,7 @@
 --TEST--
 Bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name())
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

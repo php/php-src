@@ -51,7 +51,7 @@ static int npollfds = 0;
 
 #endif /* HAVE_DEVPOLL */
 
-struct fpm_event_module_s *fpm_event_devpoll_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_devpoll_module(void) /* {{{ */
 {
 #ifdef HAVE_DEVPOLL
 	return &devpoll_module;

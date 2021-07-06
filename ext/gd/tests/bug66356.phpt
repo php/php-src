@@ -1,9 +1,7 @@
 --TEST--
 Bug #66356 (Heap Overflow Vulnerability in imagecrop())
---SKIPIF--
-<?php
-    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $img = imagecreatetruecolor(10, 10);

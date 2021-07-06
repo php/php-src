@@ -1,11 +1,16 @@
 --TEST--
 Bug #58756: w.r.t MessageFormatter
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '51.2') < 0)
+
+if (version_compare(INTL_ICU_VERSION, '51.2') < 0) {
     die('skip for ICU >= 51.2');
+}
+if (str_contains(PHP_OS, 'FreeBSD')) {
+    die('xfail Fails on FreeBSD for unknown reason');
+}
 ?>
 --FILE--
 <?php

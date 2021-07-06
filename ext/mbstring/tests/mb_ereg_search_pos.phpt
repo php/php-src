@@ -1,8 +1,9 @@
 --TEST--
 mb_ereg_search_pos() # a test for the basic function of mb_ereg_search_pos
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 if (!function_exists("mb_regex_encoding")) die("skip mb_regex_encoding() is not defined");
 ?>
 --FILE--

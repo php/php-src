@@ -346,13 +346,13 @@ static inline unsigned int get_next_char(
 	}
 
 	*cursor = pos;
-  	return this_char;
+	return this_char;
 }
 /* }}} */
 
 /* {{{ php_next_utf8_char
  * Public interface for get_next_char used with UTF-8 */
- PHPAPI unsigned int php_next_utf8_char(
+PHPAPI unsigned int php_next_utf8_char(
 		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,

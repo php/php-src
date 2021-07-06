@@ -1,7 +1,8 @@
 --TEST--
 IntlRuleBasedBreakIterator::getRules(): basic test icu >= 68.1
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '68.1') < 0) die('skip for ICU >= 68.1'); ?>
 --FILE--
 <?php

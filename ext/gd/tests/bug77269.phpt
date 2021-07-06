@@ -1,8 +1,9 @@
 --TEST--
 Bug #77269 (Potential unsigned underflow in gdImageScale)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --INI--

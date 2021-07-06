@@ -54,14 +54,14 @@ static void zend_win_error_message(int type, char *msg, int err)
 	ev_msgs[0] = msg;
 	ev_msgs[1] = buf;
 	ReportEvent(h,				  // event log handle
-            EVENTLOG_ERROR_TYPE,  // event type
-            0,                    // category zero
-            err,				  // event identifier
-            NULL,                 // no user security identifier
-            2,                    // one substitution string
-            0,                    // no data
-            ev_msgs,              // pointer to string array
-            NULL);                // pointer to data
+	        EVENTLOG_ERROR_TYPE,  // event type
+	        0,                    // category zero
+	        err,				  // event identifier
+	        NULL,                 // no user security identifier
+	        2,                    // one substitution string
+	        0,                    // no data
+	        ev_msgs,              // pointer to string array
+	        NULL);                // pointer to data
 	DeregisterEventSource(h);
 
 	zend_accel_error(type, "%s", msg);
@@ -71,8 +71,19 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32 + 21];
-	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, zend_system_id);
+	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + 1];
+	char *p = newname;
+	p += strlcpy(newname, name, MAXPATHLEN + 1);
+	*(p++) = '@';
+	memcpy(p, accel_uname_id, 32);
+	p += 32;
+	*(p++) = '@';
+	p += strlcpy(p, sapi_module.name, 21);
+	*(p++) = '@';
+	memcpy(p, zend_system_id, 32);
+	p += 32;
+	*(p++) = '\0';
+	ZEND_ASSERT(p - newname <= sizeof(newname));
 
 	return newname;
 }

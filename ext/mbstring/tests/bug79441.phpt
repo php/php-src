@@ -1,7 +1,7 @@
 --TEST--
 Bug #79441 Segfault in mb_chr() if internal encoding is unsupported
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

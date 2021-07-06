@@ -303,8 +303,17 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 			return 0;
 		case IS_TRUE:
 			return 1;
-		case IS_DOUBLE:
-			return zend_dval_to_lval(Z_DVAL_P(op));
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_P(op);
+			zend_long lval = zend_dval_to_lval(dval);
+			if (!zend_is_long_compatible(dval, lval)) {
+				zend_incompatible_double_to_long_error(dval);
+				if (UNEXPECTED(EG(exception))) {
+					*failed = 1;
+				}
+			}
+			return lval;
+		}
 		case IS_STRING:
 			{
 				zend_uchar type;
@@ -333,7 +342,14 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					 return zend_dval_to_lval_cap(dval);
+					lval = zend_dval_to_lval_cap(dval);
+					if (!zend_is_long_compatible(dval, lval)) {
+						zend_incompatible_string_to_long_error(Z_STR_P(op));
+						if (UNEXPECTED(EG(exception))) {
+							*failed = 1;
+						}
+					}
+					return lval;
 				}
 			}
 		case IS_OBJECT:
@@ -792,7 +808,16 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op) /* {{{ */
+ZEND_API void ZEND_COLD zend_incompatible_double_to_long_error(double d)
+{
+	zend_error_unchecked(E_DEPRECATED, "Implicit conversion from float %.*H to int loses precision", -1, d);
+}
+ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string *s)
+{
+	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
+}
+
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -806,8 +831,16 @@ try_again:
 			return Z_RES_HANDLE_P(op);
 		case IS_LONG:
 			return Z_LVAL_P(op);
-		case IS_DOUBLE:
-			return zend_dval_to_lval(Z_DVAL_P(op));
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_P(op);
+			zend_long lval = zend_dval_to_lval(dval);
+			if (UNEXPECTED(is_strict)) {
+				if (!zend_is_long_compatible(dval, lval)) {
+					zend_incompatible_double_to_long_error(dval);
+				}
+			}
+			return lval;
+		}
 		case IS_STRING:
 			{
 				zend_uchar type;
@@ -823,7 +856,14 @@ try_again:
 					 * We use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					 return zend_dval_to_lval_cap(dval);
+					 /* Most usages are expected to not be (int) casts */
+					lval = zend_dval_to_lval_cap(dval);
+					if (UNEXPECTED(is_strict)) {
+						if (!zend_is_long_compatible(dval, lval)) {
+							zend_incompatible_string_to_long_error(Z_STR_P(op));
+						}
+					}
+					return lval;
 				}
 			}
 		case IS_ARRAY:
@@ -1257,15 +1297,16 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-/* Returns SUCCESS/FAILURE/TYPES_NOT_HANDLED */
+/* Returns SUCCESS/TYPES_NOT_HANDLED/DIV_BY_ZERO */
 #define TYPES_NOT_HANDLED 1
+#define DIV_BY_ZERO 2
 static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 			/* Prevent overflow error/crash */
 			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
@@ -1279,31 +1320,25 @@ static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
 		if (Z_DVAL_P(op2) == 0) {
-			goto division_by_0;
+			return DIV_BY_ZERO;
 		}
 		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 		return SUCCESS;
 	} else {
 		return TYPES_NOT_HANDLED;
 	}
-division_by_0:
-	if (result != op1) {
-		ZVAL_UNDEF(result);
-	}
-	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
-	return FAILURE;
 }
 /* }}} */
 
@@ -1313,8 +1348,12 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	ZVAL_DEREF(op2);
 
 	int retval = div_function_base(result, op1, op2);
-	if (retval != TYPES_NOT_HANDLED) {
-		return retval;
+	if (EXPECTED(retval == SUCCESS)) {
+		return SUCCESS;
+	}
+
+	if (UNEXPECTED(retval == DIV_BY_ZERO)) {
+		goto div_by_zero;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
@@ -1334,8 +1373,17 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 	}
 
 	retval = div_function_base(result, &op1_copy, &op2_copy);
-	ZEND_ASSERT(retval != TYPES_NOT_HANDLED && "Types should be handled");
-	return retval;
+	if (retval == SUCCESS) {
+		return SUCCESS;
+	}
+
+div_by_zero:
+	ZEND_ASSERT(retval == DIV_BY_ZERO && "TYPES_NOT_HANDLED should not occur here");
+	if (result != op1) {
+		ZVAL_UNDEF(result);
+	}
+	zend_throw_error(zend_ce_division_by_zero_error, "Division by zero");
+	return FAILURE;
 }
 /* }}} */
 
@@ -1455,9 +1503,20 @@ try_again:
 		case IS_LONG:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
 			return SUCCESS;
-		case IS_DOUBLE:
-			ZVAL_LONG(result, ~zend_dval_to_lval(Z_DVAL_P(op1)));
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op1));
+			if (!zend_is_long_compatible(Z_DVAL_P(op1), lval)) {
+				zend_incompatible_double_to_long_error(Z_DVAL_P(op1));
+				if (EG(exception)) {
+					if (result != op1) {
+						ZVAL_UNDEF(result);
+					}
+					return FAILURE;
+				}
+			}
+			ZVAL_LONG(result, ~lval);
 			return SUCCESS;
+		}
 		case IS_STRING: {
 			size_t i;
 
@@ -2683,13 +2742,13 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 
 ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length) /* {{{ */
 {
-	register const unsigned char *p = (const unsigned char*)source;
-	register const unsigned char *end = p + length;
+	const unsigned char *p = (const unsigned char*)source;
+	const unsigned char *end = p + length;
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
 			char *res = (char*)emalloc(length + 1);
-			register unsigned char *r;
+			unsigned char *r;
 
 			if (p != (const unsigned char*)source) {
 				memcpy(res, source, p - (const unsigned char*)source);
@@ -3108,8 +3167,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num)
 	}
 }
 
-ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-    return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
+ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */
+{
+	return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
 }
 /* }}} */
 
@@ -3280,8 +3340,8 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
-	register size_t i;
-	register const char *p;
+	size_t i;
+	const char *p;
 
 	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;
@@ -3314,8 +3374,8 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
-	register size_t i;
-	register const char *p;
+	size_t i;
+	const char *p;
 
 	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;

@@ -24,9 +24,9 @@
 /* {{{ data structure */
 
 enum strm_status {
-    PHP_BZ2_UNINITIALIZED,
-    PHP_BZ2_RUNNING,
-    PHP_BZ2_FINISHED
+	PHP_BZ2_UNINITIALIZED,
+	PHP_BZ2_RUNNING,
+	PHP_BZ2_FINISHED
 };
 
 typedef struct _php_bz2_filter_data {
@@ -267,8 +267,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 
 	if (flags & PSFS_FLAG_FLUSH_CLOSE || ((flags & PSFS_FLAG_FLUSH_INC) && !data->is_flushed)) {
 		/* Spit it out! */
-		status = BZ_FINISH_OK;
-		while (status == BZ_FINISH_OK) {
+		do  {
 			status = BZ2_bzCompress(&(data->strm), (flags & PSFS_FLAG_FLUSH_CLOSE ? BZ_FINISH : BZ_FLUSH));
 			data->is_flushed = 1;
 			if (data->strm.avail_out < data->outbuf_len) {
@@ -280,7 +279,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
 			}
-		}
+		} while (status == (flags & PSFS_FLAG_FLUSH_CLOSE ? BZ_FINISH_OK : BZ_FLUSH_OK));
 	}
 
 	if (bytes_consumed) {

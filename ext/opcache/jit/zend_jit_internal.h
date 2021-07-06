@@ -14,11 +14,14 @@
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
+   |          Hao Sun <hao.sun@arm.com>                                   |
    +----------------------------------------------------------------------+
 */
 
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
+
+#include "zend_bitset.h"
 
 /* Register Set */
 #define ZEND_REGSET_EMPTY 0
@@ -26,11 +29,24 @@
 #define ZEND_REGSET_IS_EMPTY(regset) \
 	(regset == ZEND_REGSET_EMPTY)
 
+#define ZEND_REGSET_IS_SINGLETON(regset) \
+	(regset && !(regset & (regset - 1)))
+
+#if (!ZEND_REGSET_64BIT)
 #define ZEND_REGSET(reg) \
 	(1u << (reg))
+#else
+#define ZEND_REGSET(reg) \
+	(1ull << (reg))
+#endif
 
+#if (!ZEND_REGSET_64BIT)
 #define ZEND_REGSET_INTERVAL(reg1, reg2) \
 	(((1u << ((reg2) - (reg1) + 1)) - 1) << (reg1))
+#else
+#define ZEND_REGSET_INTERVAL(reg1, reg2) \
+	(((1ull << ((reg2) - (reg1) + 1)) - 1) << (reg1))
+#endif
 
 #define ZEND_REGSET_IN(regset, reg) \
 	(((regset) & ZEND_REGSET(reg)) != 0)
@@ -50,15 +66,13 @@
 #define ZEND_REGSET_DIFFERENCE(set1, set2) \
 	((set1) & ~(set2))
 
-#ifndef _WIN32
-# if (ZREG_NUM <= 32)
+#if !defined(_WIN32)
+# if (!ZEND_REGSET_64BIT)
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
-# elif(ZREG_NUM <= 64)
+# else
 #  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctzll(set))
 #  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63))
-# else
-#  errir "Too many registers"
 # endif
 #else
 # include <intrin.h>
@@ -77,7 +91,7 @@ uint32_t __inline __zend_jit_clz(uint32_t value) {
 	return 32;
 }
 # define ZEND_REGSET_FIRST(set) ((zend_reg)__zend_jit_ctz(set))
-# define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31)))
+# define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31))
 #endif
 
 #define ZEND_REGSET_FOREACH(set, reg) \
@@ -438,7 +452,7 @@ typedef enum _zend_jit_trace_op {
 #define IS_TRACE_INDIRECT  (1<<6)
 
 #define ZEND_JIT_TRACE_FAKE_INIT_CALL    0x00000100
-#define ZEND_JIT_TRACE_RETRUN_VALUE_USED 0x00000100
+#define ZEND_JIT_TRACE_RETURN_VALUE_USED 0x00000100
 
 #define ZEND_JIT_TRACE_MAX_SSA_VAR       0x7ffffe
 #define ZEND_JIT_TRACE_SSA_VAR_SHIFT     9
@@ -709,6 +723,74 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 		ZEND_UNREACHABLE();
 		return 0;
 	}
+}
+
+/* Instruction cache flush */
+#ifndef JIT_CACHE_FLUSH
+#  if ZEND_JIT_TARGET_ARM64
+#    if ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_builtin(__builtin___clear_cache))
+#      define JIT_CACHE_FLUSH(from, to) __builtin___clear_cache((char*)(from), (char*)(to))
+#    else
+#      error "Missing builtin to flush instruction cache for AArch64"
+#    endif
+#  else /* Not required to implement on archs with unified caches */
+#    define JIT_CACHE_FLUSH(from, to)
+#  endif
+#endif /* !JIT_CACHE_FLUSH */
+
+/* bit helpers */
+
+static zend_always_inline bool zend_long_is_power_of_two(zend_long x)
+{
+	return (x > 0) && !(x & (x - 1));
+}
+
+static zend_always_inline uint32_t zend_long_floor_log2(zend_long x)
+{
+	ZEND_ASSERT(zend_long_is_power_of_two(x));
+	return zend_ulong_ntz(x);
+}
+
+/* from http://aggregate.org/MAGIC/ */
+static zend_always_inline uint32_t ones32(uint32_t x)
+{
+	x -= ((x >> 1) & 0x55555555);
+	x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+	x = (((x >> 4) + x) & 0x0f0f0f0f);
+	x += (x >> 8);
+	x += (x >> 16);
+	return x & 0x0000003f;
+}
+
+static zend_always_inline uint32_t floor_log2(uint32_t x)
+{
+	ZEND_ASSERT(x != 0);
+	x |= (x >> 1);
+	x |= (x >> 2);
+	x |= (x >> 4);
+	x |= (x >> 8);
+	x |= (x >> 16);
+	return ones32(x) - 1;
+}
+
+static zend_always_inline bool is_power_of_two(uint32_t x)
+{
+	return !(x & (x - 1)) && x != 0;
+}
+
+static zend_always_inline bool has_concrete_type(uint32_t value_type)
+{
+	return is_power_of_two (value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
+}
+
+static zend_always_inline uint32_t concrete_type(uint32_t value_type)
+{
+	return floor_log2(value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
+}
+
+static zend_always_inline bool is_signed(double d)
+{
+	return (((unsigned char*)&d)[sizeof(double)-1] & 0x80) != 0;
 }
 
 #endif /* ZEND_JIT_INTERNAL_H */

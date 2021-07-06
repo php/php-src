@@ -1,9 +1,7 @@
 --TEST--
 Test posix_getpgid() function : basic functionality
---SKIPIF--
-<?php
-    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
   echo "Basic test of posix_getpgid function\n";

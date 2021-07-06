@@ -2,6 +2,8 @@
 IntlDateFormatter::create() with default date and time types
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 

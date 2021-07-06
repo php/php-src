@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5e165fe25d6d13824da9d7c5f0a089ee11626689 */
+ * Stub hash: e99b1e4a81bff12f44d22075d4b9f3f4627b1050 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, IntlBreakIterator, 0)
 ZEND_END_ARG_INFO()
 
 

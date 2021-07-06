@@ -478,7 +478,7 @@ php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl)
 	return (php_stream*)SSL_get_ex_data(ssl, ssl_stream_data_index);
 }
 
-int php_openssl_get_ssl_stream_data_index()
+int php_openssl_get_ssl_stream_data_index(void)
 {
 	return ssl_stream_data_index;
 }
@@ -938,7 +938,7 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 #else
 #define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
 
-static inline void php_openssl_rand_add_timeval()  /* {{{ */
+static inline void php_openssl_rand_add_timeval(void)  /* {{{ */
 {
 	struct timeval tv;
 
@@ -3220,8 +3220,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
+#else
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+#endif
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 

@@ -359,6 +359,7 @@ static void lsapi_enable_core_dump(void)
     int  mib[2];
     size_t len;
 
+#if !defined(__OpenBSD__)
     len = 2;
     if ( sysctlnametomib("kern.sugid_coredump", mib, &len) == 0 )
     {
@@ -367,6 +368,15 @@ static void lsapi_enable_core_dump(void)
             perror( "sysctl: Failed to set 'kern.sugid_coredump', "
                     "core dump may not be available!");
     }
+#else
+    int set = 3;
+    len = sizeof(set);
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_NOSUIDCOREDUMP;
+    if (sysctl(mib, 2, NULL, 0, &set, len) == 0) {
+	    s_enable_core_dump = 1;
+    }
+#endif
 
 
 #endif
@@ -1944,7 +1954,7 @@ ssize_t LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, size_t len )
 }
 
 
-#if defined(__FreeBSD__ ) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__ )
 ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 {
     ssize_t ret;
@@ -1956,6 +1966,40 @@ ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
         *off += ret;
     }
     return ret;
+}
+#endif
+
+#if defined(__OpenBSD__) || defined(__NetBSD__)
+ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
+{
+    ssize_t ret;
+    off_t written = 0;
+    const size_t bufsiz = 16384;
+    unsigned char in[bufsiz] = {0};
+
+    if (lseek(fdIn, *off, SEEK_SET) == -1) {
+        return -1;
+    }
+
+    while (size > 0) {
+	    size_t tor = size > sizeof(in) ? sizeof(in) : size;
+	    ssize_t c = read(fdIn, in, tor);
+	    if (c <= 0) {
+		    goto end;
+	    }
+
+	    ssize_t w = write(fdOut, in, c);
+	    if (w != c) {
+		    goto end;
+	    }
+
+	    written += w;
+	    size -= c;
+    }
+
+end:
+    *off += written;
+    return 0;
 }
 #endif
 

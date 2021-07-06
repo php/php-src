@@ -1,11 +1,7 @@
 --TEST--
 Bug #73147: Use After Free in PHP7 unserialize()
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-        exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

@@ -23,6 +23,7 @@ function skipFunction($function): bool {
      || $function === 'mail'
      || $function === 'mb_send_mail'
      || $function === 'pcntl_fork'
+     || $function === 'pcntl_rfork'
      || $function === 'posix_kill'
      || $function === 'posix_setrlimit'
      || $function === 'sapi_windows_generate_ctrl_event'

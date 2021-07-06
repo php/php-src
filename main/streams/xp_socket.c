@@ -163,7 +163,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	if (sock->is_blocked) {
 		php_sock_stream_wait_for_data(stream, sock);
 		if (sock->timeout_event)
-			return 0;
+			return -1;
 	}
 
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);

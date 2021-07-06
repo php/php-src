@@ -3,10 +3,8 @@ zip_open() error conditions
 --CREDITS--
 Birgitte Kvarme <bitta@redpill-linpro.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 echo "Test case 1:";

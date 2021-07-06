@@ -1,11 +1,7 @@
 --TEST--
 Test function gzread() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 // note that gzread is an alias to fread. parameter checking tests will be

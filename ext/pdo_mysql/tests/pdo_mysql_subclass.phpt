@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDOStatement->execute()/fetch(), Non-SELECT
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -19,12 +20,12 @@ MySQLPDOTest::skip();
                 return call_user_func_array(array($this, 'parent::__construct'), func_get_args());
             }
 
-            public function exec($statement) {
+            public function exec($statement): int|false {
                 $this->protocol();
                 return parent::exec($statement);
             }
 
-            public function query(...$args) {
+            public function query(...$args): PDOStatement|false {
                 $this->protocol();
                 return parent::query(...$args);
             }

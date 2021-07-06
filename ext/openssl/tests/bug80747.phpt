@@ -1,9 +1,10 @@
 --TEST--
 Bug #80747: Providing RSA key size < 512 generates key that crash PHP
 --FILE--
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSL >= v1.1.0 required");
 ?>
 --FILE--

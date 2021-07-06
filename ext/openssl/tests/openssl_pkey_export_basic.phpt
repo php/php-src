@@ -1,9 +1,9 @@
 --TEST--
 openssl_pkey_export() with EC key
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!defined('OPENSSL_KEYTYPE_EC'))
     die("skip no EC available");
 ?>

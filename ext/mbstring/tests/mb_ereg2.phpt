@@ -1,8 +1,9 @@
 --TEST--
 mb_ereg() returning matches
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 if (!function_exists("mb_ereg")) print "skip mb_ereg() not available";
 ?>
 --FILE--

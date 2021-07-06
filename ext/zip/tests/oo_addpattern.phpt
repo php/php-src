@@ -4,10 +4,8 @@ ZipArchive::addPattern() method
 Sammy Kaye Powers <sammyk@sammykmedia.com>
 w/Kenzo over the shoulder
 #phptek Chicago 2014
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 include __DIR__ . '/utils.inc';

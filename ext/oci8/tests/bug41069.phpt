@@ -1,5 +1,7 @@
 --TEST--
 Bug #41069 (Oracle crash with certain data over a DB-link when prefetch memory limit used - Oracle bug 6039623)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

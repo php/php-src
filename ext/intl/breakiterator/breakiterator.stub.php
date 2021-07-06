@@ -4,67 +4,67 @@
 
 class IntlBreakIterator implements IteratorAggregate
 {
-    /** @return IntlBreakIterator|null */
-    public static function createCharacterInstance(?string $locale = null) {}
+    /** @tentative-return-type */
+    public static function createCharacterInstance(?string $locale = null): ?IntlBreakIterator {}
 
-    /** @return IntlCodePointBreakIterator */
-    public static function createCodePointInstance() {}
+    /** @tentative-return-type */
+    public static function createCodePointInstance(): IntlCodePointBreakIterator {}
 
-    /** @return IntlBreakIterator|null */
-    public static function createLineInstance(?string $locale = null) {}
+    /** @tentative-return-type */
+    public static function createLineInstance(?string $locale = null): ?IntlBreakIterator {}
 
-    /** @return IntlBreakIterator|null */
-    public static function createSentenceInstance(?string $locale = null) {}
+    /** @tentative-return-type */
+    public static function createSentenceInstance(?string $locale = null): ?IntlBreakIterator {}
 
-    /** @return IntlBreakIterator|null */
-    public static function createTitleInstance(?string $locale = null) {}
+    /** @tentative-return-type */
+    public static function createTitleInstance(?string $locale = null): ?IntlBreakIterator {}
 
-    /** @return IntlBreakIterator|null */
-    public static function createWordInstance(?string $locale = null) {}
+    /** @tentative-return-type */
+    public static function createWordInstance(?string $locale = null): ?IntlBreakIterator {}
 
     private function __construct() {}
 
-    /** @return int */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): int {}
 
-    /** @return int */
-    public function first() {}
+    /** @tentative-return-type */
+    public function first(): int {}
 
-    /** @return int */
-    public function following(int $offset) {}
+    /** @tentative-return-type */
+    public function following(int $offset): int {}
 
-    /** @return int */
-    public function getErrorCode() {}
+    /** @tentative-return-type */
+    public function getErrorCode(): int {}
 
-    /** @return string|false */
-    public function getErrorMessage() {}
+    /** @tentative-return-type */
+    public function getErrorMessage(): string {}
 
-    /** @return string */
-    public function getLocale(int $type) {}
+    /** @tentative-return-type */
+    public function getLocale(int $type): string|false {}
 
-    /** @return IntlPartsIterator */
-    public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL) {}
+    /** @tentative-return-type */
+    public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL): IntlPartsIterator {}
 
-    /** @return string|null */
-    public function getText() {}
+    /** @tentative-return-type */
+    public function getText(): ?string {}
 
-    /** @return bool */
-    public function isBoundary(int $offset) {}
+    /** @tentative-return-type */
+    public function isBoundary(int $offset): bool {}
 
-    /** @return int */
-    public function last() {}
+    /** @tentative-return-type */
+    public function last(): int {}
 
-    /** @return int */
-    public function next(?int $offset = null) {}
+    /** @tentative-return-type */
+    public function next(?int $offset = null): int {}
 
-    /** @return int */
-    public function preceding(int $offset) {}
+    /** @tentative-return-type */
+    public function preceding(int $offset): int {}
 
-    /** @return int */
-    public function previous() {}
+    /** @tentative-return-type */
+    public function previous(): int {}
 
-    /** @return bool|null */
-    public function setText(string $text) {}
+    /** @tentative-return-type */
+    public function setText(string $text): ?bool {} // TODO return false instead of null in case of failure
 
     public function getIterator(): Iterator {}
 }
@@ -73,21 +73,21 @@ class IntlRuleBasedBreakIterator extends IntlBreakIterator
 {
     public function __construct(string $rules, bool $compiled = false) {}
 
-    /** @return string|false */
-    public function getBinaryRules() {}
+    /** @tentative-return-type */
+    public function getBinaryRules(): string|false {}
 
-    /** @return string|false */
-    public function getRules() {}
+    /** @tentative-return-type */
+    public function getRules(): string|false {}
 
-    /** @return int */
-    public function getRuleStatus() {}
+    /** @tentative-return-type */
+    public function getRuleStatus(): int {}
 
-    /** @return array|false */
-    public function getRuleStatusVec() {}
+    /** @tentative-return-type */
+    public function getRuleStatusVec(): array|false {}
 }
 
 class IntlCodePointBreakIterator extends IntlBreakIterator
 {
-    /** @return int */
-    public function getLastCodePoint() {}
+    /** @tentative-return-type */
+    public function getLastCodePoint(): int {}
 }

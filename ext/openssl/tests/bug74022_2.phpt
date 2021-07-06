@@ -1,9 +1,7 @@
 --TEST--
 Bug #74022 PHP Fast CGI crashes when reading from a pfx file with valid password, multiple extra certs
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 function test($p12_contents, $password) {

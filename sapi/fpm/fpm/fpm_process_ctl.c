@@ -63,7 +63,7 @@ static int fpm_pctl_timeout_set(int sec) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_exit() /* {{{ */
+static void fpm_pctl_exit(void) /* {{{ */
 {
 	zlog(ZLOG_NOTICE, "exiting, bye-bye!");
 
@@ -75,7 +75,7 @@ static void fpm_pctl_exit() /* {{{ */
 
 #define optional_arg(c) (saved_argc > c ? ", \"" : ""), (saved_argc > c ? saved_argv[c] : ""), (saved_argc > c ? "\"" : "")
 
-static void fpm_pctl_exec() /* {{{ */
+static void fpm_pctl_exec(void) /* {{{ */
 {
 	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
 	if (0 > fpm_signals_block()) {
@@ -106,7 +106,7 @@ static void fpm_pctl_exec() /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_action_last() /* {{{ */
+static void fpm_pctl_action_last(void) /* {{{ */
 {
 	switch (fpm_state) {
 		case FPM_PCTL_STATE_RELOADING:
@@ -172,7 +172,7 @@ void fpm_pctl_kill_all(int signo) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_action_next() /* {{{ */
+static void fpm_pctl_action_next(void) /* {{{ */
 {
 	int sig, timeout;
 
