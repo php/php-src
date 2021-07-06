@@ -19,4 +19,4 @@ class C2 extends C implements I
 
 ?>
 --EXPECTF--
-Fatal error: Cannot inherit previously-inherited or override constant C2::C from interface I in %s on line %d
+Fatal error: Class C2 inherits both C::C and I::C, which is ambiguous in %s on line %d
