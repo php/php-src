@@ -103,7 +103,7 @@ PHPAPI int php_flock(int fd, int operation)
  */
 {
 	HANDLE hdl = (HANDLE) _get_osfhandle(fd);
-	DWORD low = 1, high = 0;
+	DWORD low = 0xFFFFFFFF, high = 0xFFFFFFFF;
 	OVERLAPPED offset =
 	{0, 0, 0, 0, NULL};
 	DWORD err;
