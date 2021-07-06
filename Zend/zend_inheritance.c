@@ -1630,18 +1630,15 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 /* }}} */
 
 static bool do_inherit_constant_check(
-	zend_class_entry *ce, HashTable *child_constants_table, zend_class_constant *parent_constant,
+	zend_class_entry *ce, zend_class_constant *parent_constant,
 	zend_string *name, const zend_class_entry *iface
 ) {
-	zval *zv = zend_hash_find_ex(child_constants_table, name, 1);
-	zend_class_constant *old_constant;
-
+	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
 	if (zv == NULL) {
 		return true;
 	}
 
-	old_constant = (zend_class_constant*)Z_PTR_P(zv);
-
+	zend_class_constant *old_constant = Z_PTR_P(zv);
 	if ((ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
 			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name), ZSTR_VAL(iface->name), ZSTR_VAL(name)
@@ -1658,7 +1655,7 @@ static bool do_inherit_constant_check(
 
 static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	if (do_inherit_constant_check(ce, &ce->constants_table, c, name, iface)) {
+	if (do_inherit_constant_check(ce, c, name, iface)) {
 		zend_class_constant *ct;
 		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1724,8 +1721,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			do_inherit_constant_check(ce, &iface->constants_table, c, key, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+			do_inherit_constant_check(ce, c, key, iface);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
@@ -1769,8 +1766,8 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 					return;
 				}
 				/* skip duplications */
-				ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-					do_inherit_constant_check(ce, &iface->constants_table, c, key, iface);
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+					do_inherit_constant_check(ce, c, key, iface);
 				} ZEND_HASH_FOREACH_END();
 
 				iface = NULL;
