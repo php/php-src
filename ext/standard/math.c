@@ -245,11 +245,11 @@ PHP_FUNCTION(clamp)
 	}
 
 	if (zend_compare(zmax, zvalue) == -1) {
-		RETURN_COPY(zmax);
+		RETURN_COPY_VALUE(zmax);
 	} else if (zend_compare(zvalue, zmin) == -1) {
-		RETURN_COPY(zmin);
+		RETURN_COPY_VALUE(zmin);
 	} else {
-		RETURN_COPY(zvalue);
+		RETURN_COPY_VALUE(zvalue);
 	}
 }
 /* }}} */
