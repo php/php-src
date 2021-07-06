@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d8e686125cf213e019c1d706867e3c178fa057d2 */
+ * Stub hash: 2564122a201ca462ee35ead1562c94da3ea3c8a3 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -396,6 +396,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_isProtected arginfo_class_ReflectionFunctionAbstract_inNamespace
 
+#define arginfo_class_ReflectionClassConstant_isFinal arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionClassConstant_getModifiers arginfo_class_ReflectionFunctionAbstract_getNumberOfParameters
 
 #define arginfo_class_ReflectionClassConstant_getDeclaringClass arginfo_class_ReflectionMethod_getDeclaringClass
@@ -736,6 +738,7 @@ ZEND_METHOD(ReflectionClassConstant, getValue);
 ZEND_METHOD(ReflectionClassConstant, isPublic);
 ZEND_METHOD(ReflectionClassConstant, isPrivate);
 ZEND_METHOD(ReflectionClassConstant, isProtected);
+ZEND_METHOD(ReflectionClassConstant, isFinal);
 ZEND_METHOD(ReflectionClassConstant, getModifiers);
 ZEND_METHOD(ReflectionClassConstant, getDeclaringClass);
 ZEND_METHOD(ReflectionClassConstant, getDocComment);
@@ -1015,6 +1018,7 @@ static const zend_function_entry class_ReflectionClassConstant_methods[] = {
 	ZEND_ME(ReflectionClassConstant, isPublic, arginfo_class_ReflectionClassConstant_isPublic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, isPrivate, arginfo_class_ReflectionClassConstant_isPrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, isProtected, arginfo_class_ReflectionClassConstant_isProtected, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, isFinal, arginfo_class_ReflectionClassConstant_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getModifiers, arginfo_class_ReflectionClassConstant_getModifiers, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getDeclaringClass, arginfo_class_ReflectionClassConstant_getDeclaringClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getDocComment, arginfo_class_ReflectionClassConstant_getDocComment, ZEND_ACC_PUBLIC)

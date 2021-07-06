@@ -7270,7 +7270,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 
 		if (flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
-				"the final modifier is allowed only for methods and classes",
+				"the final modifier is allowed only for methods, classes, and class constants",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
@@ -7358,8 +7358,15 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
 
-		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_FINAL))) {
+		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT))) {
 			zend_check_const_and_trait_alias_attr(flags, "constant");
+		}
+
+		if (UNEXPECTED((flags & ZEND_ACC_PRIVATE) && (flags & ZEND_ACC_FINAL))) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "Private constant %s::%s cannot be final as it is not visible to other classes",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name)
+			);
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast_ptr);

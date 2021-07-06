@@ -565,9 +565,10 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 	}
 
 	const char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
+	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
 	const char *type = zend_zval_type_name(&c->value);
-	smart_str_append_printf(str, "%sConstant [ %s %s %s ] { ",
-		indent, visibility, type, name);
+	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
+		indent, final, visibility, type, name);
 	if (Z_TYPE(c->value) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else if (Z_TYPE(c->value) == IS_OBJECT) {
@@ -3831,18 +3832,25 @@ ZEND_METHOD(ReflectionClassConstant, isProtected)
 }
 /* }}} */
 
+/* Returns whether this constant is final */
+ZEND_METHOD(ReflectionClassConstant, isFinal)
+{
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+
 /* {{{ Returns a bitfield of the access modifiers for this constant */
 ZEND_METHOD(ReflectionClassConstant, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_constant *ref;
+	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_PPP_MASK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_ACC_PPP_MASK);
+	RETURN_LONG(ZEND_CLASS_CONST_FLAGS(ref) & keep_flags);
 }
 /* }}} */
 
@@ -7102,6 +7110,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_FINAL", ZEND_ACC_FINAL);
 
 	reflection_extension_ptr = register_class_ReflectionExtension(reflector_ptr);
 	reflection_init_class_handlers(reflection_extension_ptr);

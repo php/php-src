@@ -4331,12 +4331,12 @@ ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *na
 }
 /* }}} */
 
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int flags, zend_string *doc_comment) /* {{{ */
 {
 	zend_class_constant *c;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		if (access_type != ZEND_ACC_PUBLIC) {
+		if (!(flags & ZEND_ACC_PUBLIC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	}
@@ -4356,7 +4356,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
 	ZVAL_COPY_VALUE(&c->value, value);
-	ZEND_CLASS_CONST_FLAGS(c) = access_type;
+	ZEND_CLASS_CONST_FLAGS(c) = flags;
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;

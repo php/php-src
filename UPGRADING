@@ -67,6 +67,8 @@ PHP 8.1 UPGRADE NOTES
   . Added support for intersection types.
     They cannot be combined with union types.
     RFC: https://wiki.php.net/rfc/pure-intersection-types
+  . Added support for the final modifier for class constants.
+    RFC: https://wiki.php.net/rfc/final_class_const
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
