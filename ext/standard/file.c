@@ -2047,10 +2047,10 @@ PHP_FUNCTION(fgetcsv)
 
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
 {
-	char *temp, *tptr, *bptr, *line_end, *limit;
+	char *temp, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
 	int inc_len;
-	bool first_field = 1;
+	bool first_field = true;
 
 	ZEND_ASSERT((escape_char >= 0 && escape_char <= UCHAR_MAX) || escape_char == PHP_CSV_NO_ESCAPE);
 
@@ -2062,9 +2062,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
 	bptr = buf;
-	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
-	line_end_len = buf_len - (size_t)(tptr - buf);
-	line_end = limit = tptr;
+	line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
+	line_end_len = buf_len - (size_t)(limit - buf);
 
 	/* reserve workspace for building each individual field */
 	temp_len = buf_len;
@@ -2078,8 +2077,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 	do {
 		char *comp_end, *hunk_begin;
-
-		tptr = temp;
+		char *tptr = temp;
 
 		inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 		if (inc_len == 1) {
@@ -2096,7 +2094,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 			add_next_index_null(return_value);
 			break;
 		}
-		first_field = 0;
+		first_field = false;
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (inc_len != 0 && *bptr == enclosure) {
 			int state = 0;
@@ -2122,10 +2120,6 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 								ZEND_FALLTHROUGH;
 
 							case 0: {
-								char *new_buf;
-								size_t new_len;
-								char *new_temp;
-
 								if (hunk_begin != line_end) {
 									memcpy(tptr, hunk_begin, bptr - hunk_begin);
 									tptr += (bptr - hunk_begin);
@@ -2138,7 +2132,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 								if (stream == NULL) {
 									goto quit_loop_2;
-								} else if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+								}
+
+								size_t new_len;
+								char *new_buf = php_stream_get_line(stream, NULL, 0, &new_len);
+								if (!new_buf) {
 									/* we've got an unterminated enclosure,
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
@@ -2150,8 +2148,9 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 									RETVAL_FALSE;
 									goto out;
 								}
+
 								temp_len += new_len;
-								new_temp = erealloc(temp, temp_len);
+								char *new_temp = erealloc(temp, temp_len);
 								tptr = new_temp + (size_t)(tptr - temp);
 								temp = new_temp;
 
