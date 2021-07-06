@@ -4628,7 +4628,7 @@ ZEND_METHOD(FFI_CType, getStructFieldNames) /* {{{ */
 	ht = zend_new_array(zend_hash_num_elements(&type->record.fields));
 	RETVAL_ARR(ht);
 	ZEND_HASH_FOREACH_STR_KEY(&type->record.fields, name) {
-		ZVAL_STR(&zv, name);
+		ZVAL_STR_COPY(&zv, name);
 		zend_hash_next_index_insert_new(ht, &zv);
 	} ZEND_HASH_FOREACH_END();
 }
