@@ -1320,98 +1320,13 @@ check_indirect:
 	return ref;
 }
 
-static zend_always_inline bool zend_jit_verify_type_common(zval *arg, zend_arg_info *arg_info, void **cache_slot)
-{
-	uint32_t type_mask;
-
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
-		zend_class_entry *ce;
-		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			zend_type *list_type;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
-				if (*cache_slot) {
-					ce = *cache_slot;
-				} else {
-					zend_string *name = ZEND_TYPE_NAME(*list_type);
-
-					if (ZSTR_HAS_CE_CACHE(name)) {
-						ce = ZSTR_GET_CE_CACHE(name);
-						if (!ce) {
-							ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-							if (!ce) {
-								cache_slot++;
-								continue;
-							}
-						}
-					} else {
-						ce = zend_fetch_class(name,
-							ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-						if (!ce) {
-							cache_slot++;
-							continue;
-						}
-					}
-					*cache_slot = ce;
-				}
-				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-					return 1;
-				}
-				cache_slot++;
-			} ZEND_TYPE_LIST_FOREACH_END();
-		} else {
-			if (EXPECTED(*cache_slot)) {
-				ce = (zend_class_entry *) *cache_slot;
-			} else {
-				zend_string *name = ZEND_TYPE_NAME(arg_info->type);
-
-				if (ZSTR_HAS_CE_CACHE(name)) {
-					ce = ZSTR_GET_CE_CACHE(name);
-					if (!ce) {
-						ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-						if (UNEXPECTED(!ce)) {
-							goto builtin_types;
-						}
-					}
-				} else {
-					ce = zend_fetch_class(name,
-						ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-					if (UNEXPECTED(!ce)) {
-						goto builtin_types;
-					}
-				}
-				*cache_slot = (void *) ce;
-			}
-			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return 1;
-			}
-		}
-	}
-
-builtin_types:
-	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
-	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
-		return 1;
-	}
-	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
-		return 1;
-	}
-	return 0;
-}
-
 static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
 	void **cache_slot = CACHE_ADDR(opline->extended_value);
-	bool ret;
-
-	ret = zend_jit_verify_type_common(arg, arg_info, cache_slot);
+	bool ret = zend_check_user_type_slow(
+		&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return 0;
@@ -1421,7 +1336,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 
 static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
-	if (UNEXPECTED(!zend_jit_verify_type_common(arg, arg_info, cache_slot))) {
+	if (UNEXPECTED(!zend_check_user_type_slow(
+			&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ true))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }

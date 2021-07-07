@@ -2424,14 +2424,14 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 		return;
 	}
 
-	bool has_class_type = ZEND_TYPE_HAS_CLASS(fptr->common.arg_info[-1].type);
+	bool is_complex_type = ZEND_TYPE_IS_COMPLEX(fptr->common.arg_info[-1].type);
 	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & ~return_type;
 	if (extra_types & MAY_BE_STATIC) {
 		extra_types &= ~MAY_BE_STATIC;
-		has_class_type = 1;
+		is_complex_type = true;
 	}
 
-	if (extra_types || (has_class_type && return_type != MAY_BE_OBJECT)) {
+	if (extra_types || (is_complex_type && return_type != MAY_BE_OBJECT)) {
 		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
 			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
@@ -2768,7 +2768,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 			reg_function->common.arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
-				if (ZEND_TYPE_HAS_CLASS(new_arg_info[i].type)) {
+				if (ZEND_TYPE_IS_COMPLEX(new_arg_info[i].type)) {
 					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
 						&& "Should be stored as simple name");
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
@@ -4331,12 +4331,12 @@ ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *na
 }
 /* }}} */
 
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int flags, zend_string *doc_comment) /* {{{ */
 {
 	zend_class_constant *c;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		if (access_type != ZEND_ACC_PUBLIC) {
+		if (!(flags & ZEND_ACC_PUBLIC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	}
@@ -4356,7 +4356,7 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
 	ZVAL_COPY_VALUE(&c->value, value);
-	ZEND_CLASS_CONST_FLAGS(c) = access_type;
+	ZEND_CLASS_CONST_FLAGS(c) = flags;
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;

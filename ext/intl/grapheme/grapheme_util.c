@@ -157,16 +157,29 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			goto finish;
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos, &status);
+		usearch_setOffset(src, last ? 0 : offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
 
 	if(last) {
-		char_pos = usearch_last(src, &status);
-		if(char_pos < offset_pos) {
-			/* last one is beyound our start offset */
-			char_pos = USEARCH_DONE;
+		if (offset >= 0) {
+			char_pos = usearch_last(src, &status);
+			if(char_pos < offset_pos) {
+				/* last one is beyond our start offset */
+				char_pos = USEARCH_DONE;
+			}			
+		} else {
+			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
+			int32_t prev_pos = USEARCH_DONE;
+			do {
+				char_pos = usearch_next(src, &status);
+				if (char_pos == USEARCH_DONE || char_pos > offset_pos) {
+					char_pos = prev_pos;
+					break;
+				}
+				prev_pos = char_pos;
+			} while(1);
 		}
 	} else {
 		char_pos = usearch_next(src, &status);

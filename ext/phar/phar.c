@@ -2373,7 +2373,7 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
  */
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip) /* {{{ */
 {
-	uint32_t crc = ~0;
+	uint32_t crc = php_crc32_bulk_init();
 	int len = idata->internal_file->uncompressed_filesize, ret;
 	php_stream *fp = idata->fp;
 	phar_entry_info *entry = idata->internal_file;
@@ -2439,11 +2439,11 @@ int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, 
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
-	ret = crc32_stream_bulk_update(&crc, fp, len);
+	ret = php_crc32_stream_bulk_update(&crc, fp, len);
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
-	if (SUCCESS == ret && ~crc == crc32) {
+	if (SUCCESS == ret && php_crc32_bulk_end(crc) == crc32) {
 		entry->is_crc_checked = 1;
 		return SUCCESS;
 	} else {
@@ -2793,9 +2793,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			}
 			return EOF;
 		}
-		newcrc32 = ~0;
-		crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize);
-		entry->crc32 = ~newcrc32;
+		newcrc32 = php_crc32_bulk_init();
+		php_crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize);
+		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		entry->is_crc_checked = 1;
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
 			/* not compressed */

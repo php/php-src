@@ -17,9 +17,9 @@ function intlcal_get_now(): float {}
 
 function intlcal_get_available_locales(): array {}
 
-function intlcal_get(IntlCalendar $calendar, int $field): int {}
+function intlcal_get(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_time(IntlCalendar $calendar): float {}
+function intlcal_get_time(IntlCalendar $calendar): float|false {}
 
 function intlcal_set_time(IntlCalendar $calendar, float $timestamp): bool {}
 
@@ -39,35 +39,35 @@ function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
 function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
 
-function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int {}
+function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
-function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int {}
+function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int|false {}
 
-function intlcal_get_first_day_of_week(IntlCalendar $calendar): int {}
+function intlcal_get_first_day_of_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_locale(IntlCalendar $calendar, int $type): string {}
+function intlcal_get_locale(IntlCalendar $calendar, int $type): string|false {}
 
-function intlcal_get_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int {}
+function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
 function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
 
-function intlcal_get_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_time_zone(IntlCalendar $calendar): IntlTimeZone|false {}
 
 function intlcal_get_type(IntlCalendar $calendar): string {}
 
-function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int {}
+function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int|false {}
 
 function intlcal_in_daylight_time(IntlCalendar $calendar): bool {}
 
@@ -330,7 +330,7 @@ function msgfmt_format_message(string $locale, string $pattern, array $values): 
 
 function msgfmt_parse(MessageFormatter $formatter, string $string): array|false {}
 
-function msgfmt_parse_message(string $locale, string $pattern, string $message): array|false {}
+function msgfmt_parse_message(string $locale, string $pattern, string $message): array|false|null {}
 
 function msgfmt_set_pattern(MessageFormatter $formatter, string $pattern): bool {}
 
@@ -344,7 +344,7 @@ function msgfmt_get_error_message(MessageFormatter $formatter): string {}
 
 /* normalizer */
 
-function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
+function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false|null {}
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 

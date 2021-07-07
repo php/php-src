@@ -51,6 +51,10 @@ function getClassUnion(): stdClass|FooBar {
     return new stdClass;
 }
 
+function getClassIntersection(): Traversable&Countable {
+    return new ArrayObject;
+}
+
 ?>
 --EXPECTF--
 $_main:
@@ -64,6 +68,16 @@ getClassUnion:
      ; (after optimizer)
      ; %s
 0000 V0 = NEW 0 string("stdClass")
+0001 DO_FCALL
+0002 RETURN V0
+LIVE RANGES:
+     0: 0001 - 0002 (new)
+
+getClassIntersection:
+     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (after optimizer)
+     ; %s
+0000 V0 = NEW 0 string("ArrayObject")
 0001 DO_FCALL
 0002 RETURN V0
 LIVE RANGES:

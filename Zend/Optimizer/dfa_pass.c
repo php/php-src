@@ -310,19 +310,23 @@ static inline bool can_elide_return_type_check(
 		return true;
 	}
 
-	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
 		zend_type *single_type;
+		/* For intersection: result==false is failure, default is success.
+		 * For union: result==true is success, default is failure. */
+		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(arg_info->type);
 		ZEND_TYPE_FOREACH(arg_info->type, single_type) {
 			if (ZEND_TYPE_HAS_NAME(*single_type)) {
 				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
 				zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
 				zend_string_release(lcname);
-				if (ce && safe_instanceof(use_info->ce, ce)) {
-					/* One of the class union types matched. */
-					return true;
+				bool result = ce && safe_instanceof(use_info->ce, ce);
+				if (result == !is_intersection) {
+					return result;
 				}
 			}
 		} ZEND_TYPE_FOREACH_END();
+		return is_intersection;
 	}
 
 	return false;

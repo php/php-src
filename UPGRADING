@@ -64,6 +64,11 @@ PHP 8.1 UPGRADE NOTES
     PHP cross-version compatibility concerns, a `#[ReturnTypeWillChange]`
     attribute can be added to silence the deprecation notice.
     RFC: https://wiki.php.net/rfc/internal_method_return_types
+  . Added support for intersection types.
+    They cannot be combined with union types.
+    RFC: https://wiki.php.net/rfc/pure-intersection-types
+  . Added support for the final modifier for class constants.
+    RFC: https://wiki.php.net/rfc/final_class_const
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
@@ -307,7 +312,7 @@ PHP 8.1 UPGRADE NOTES
     Previously, -a without readline had the same behavior as calling php without
     any arguments, apart from printing an additional "Interactive mode enabled"
     message. This mode was not, in fact, interactive.
-    
+
 - phpdbg:
   . Remote functionality from phpdbg has been removed.
 
@@ -453,7 +458,7 @@ PHP 8.1 UPGRADE NOTES
     MYSQLI_REFRESH_SLAVE, in line with an upstream change in MySQL. The old
     constant is still available for backwards-compatibility reasons, but may
     be deprecated/removed in the future.
-    
+
 - Sockets:
   . TCP_DEFER_ACCEPT socket option added where available.
 

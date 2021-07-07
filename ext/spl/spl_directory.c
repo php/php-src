@@ -58,6 +58,12 @@ PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 		RETURN_THROWS(); \
 	}
 
+#define CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern) \
+	if (!(intern)->u.dir.dirp) { \
+		zend_throw_error(NULL, "Object not initialized"); \
+		RETURN_THROWS(); \
+	}
+
 static void spl_filesystem_file_free_line(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->u.file.current_line) {
@@ -768,10 +774,9 @@ PHP_METHOD(DirectoryIterator, rewind)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	intern->u.dir.index = 0;
-	if (intern->u.dir.dirp) {
-		php_stream_rewinddir(intern->u.dir.dirp);
-	}
+	php_stream_rewinddir(intern->u.dir.dirp);
 	spl_filesystem_dir_read(intern);
 }
 /* }}} */
@@ -785,11 +790,8 @@ PHP_METHOD(DirectoryIterator, key)
 		RETURN_THROWS();
 	}
 
-	if (intern->u.dir.dirp) {
-		RETURN_LONG(intern->u.dir.index);
-	} else {
-		RETURN_FALSE;
-	}
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
+	RETURN_LONG(intern->u.dir.index);
 }
 /* }}} */
 
@@ -799,6 +801,8 @@ PHP_METHOD(DirectoryIterator, current)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(Z_SPLFILESYSTEM_P(ZEND_THIS));
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 /* }}} */
@@ -813,6 +817,7 @@ PHP_METHOD(DirectoryIterator, next)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	intern->u.dir.index++;
 	do {
 		spl_filesystem_dir_read(intern);
@@ -835,6 +840,7 @@ PHP_METHOD(DirectoryIterator, seek)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	if (intern->u.dir.index > pos) {
 		/* we first rewind */
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_rewind, "rewind", NULL);
@@ -862,6 +868,7 @@ PHP_METHOD(DirectoryIterator, valid)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_BOOL(intern->u.dir.entry.d_name[0] != '\0');
 }
 /* }}} */
@@ -920,6 +927,7 @@ PHP_METHOD(DirectoryIterator, getFilename)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_STRING(intern->u.dir.entry.d_name);
 }
 /* }}} */
@@ -981,6 +989,7 @@ PHP_METHOD(DirectoryIterator, getExtension)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0);
 
 	p = zend_memrchr(ZSTR_VAL(fname), '.', ZSTR_LEN(fname));
@@ -1038,6 +1047,7 @@ PHP_METHOD(DirectoryIterator, getBasename)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), suffix, slen);
 
 	RETVAL_STR(fname);
@@ -1116,6 +1126,7 @@ PHP_METHOD(DirectoryIterator, isDot)
 		RETURN_THROWS();
 	}
 
+	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
 	RETURN_BOOL(spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
@@ -1900,29 +1911,26 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
-	int ret = SUCCESS;
-	zval *value;
-
 	do {
-		ret = spl_filesystem_file_read(intern, 1);
-	} while (ret == SUCCESS && !intern->u.file.current_line_len && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
-
-	if (ret == SUCCESS) {
-		size_t buf_len = intern->u.file.current_line_len;
-		char *buf = estrndup(intern->u.file.current_line, buf_len);
-
-		if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-			zval_ptr_dtor(&intern->u.file.current_zval);
-			ZVAL_UNDEF(&intern->u.file.current_zval);
+		int ret = spl_filesystem_file_read(intern, 1);
+		if (ret != SUCCESS) {
+			return ret;
 		}
+	} while (!intern->u.file.current_line_len && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
 
-		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
-		if (return_value) {
-			value = &intern->u.file.current_zval;
-			ZVAL_COPY_DEREF(return_value, value);
-		}
+	size_t buf_len = intern->u.file.current_line_len;
+	char *buf = estrndup(intern->u.file.current_line, buf_len);
+
+	if (!Z_ISUNDEF(intern->u.file.current_zval)) {
+		zval_ptr_dtor(&intern->u.file.current_zval);
+		ZVAL_UNDEF(&intern->u.file.current_zval);
 	}
-	return ret;
+
+	php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
+	if (return_value) {
+		ZVAL_COPY(return_value, &intern->u.file.current_zval);
+	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1940,28 +1948,29 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		}
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
 			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
-		} else {
-			zend_execute_data *execute_data = EG(current_execute_data);
-			zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
-		if (!Z_ISUNDEF(retval)) {
-			if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
-				intern->u.file.current_line_num++;
-			}
-			spl_filesystem_file_free_line(intern);
-			if (Z_TYPE(retval) == IS_STRING) {
-				intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-				intern->u.file.current_line_len = Z_STRLEN(retval);
-			} else {
-				zval *value = &retval;
 
-				ZVAL_COPY_DEREF(&intern->u.file.current_zval, value);
-			}
-			zval_ptr_dtor(&retval);
-			return SUCCESS;
-		} else {
+		zend_execute_data *execute_data = EG(current_execute_data);
+		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
+		if (Z_ISUNDEF(retval)) {
 			return FAILURE;
 		}
+
+		if (Z_TYPE(retval) != IS_STRING) {
+			zend_type_error("getCurrentLine(): Return value must be of type string, %s returned",
+				zend_zval_type_name(&retval));
+			zval_ptr_dtor(&retval);
+			return FAILURE;
+		}
+
+		if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
+			intern->u.file.current_line_num++;
+		}
+		spl_filesystem_file_free_line(intern);
+		intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+		intern->u.file.current_line_len = Z_STRLEN(retval);
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
 	} else {
 		return spl_filesystem_file_read(intern, silent);
 	}
@@ -2185,10 +2194,8 @@ PHP_METHOD(SplFileObject, current)
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		zval *value = &intern->u.file.current_zval;
-
-		ZVAL_COPY_DEREF(return_value, value);
-		return;
+		ZEND_ASSERT(!Z_ISREF(intern->u.file.current_zval));
+		RETURN_COPY(&intern->u.file.current_zval);
 	}
 	RETURN_FALSE;
 } /* }}} */
@@ -2306,41 +2313,43 @@ PHP_METHOD(SplFileObject, fgetcsv)
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+		RETURN_THROWS();
+	}
 
-		CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-		switch(ZEND_NUM_ARGS())
-		{
-		case 3:
-			if (esc_len > 1) {
-				zend_argument_value_error(3, "must be empty or a single character");
-				RETURN_THROWS();
-			}
-			if (esc_len == 0) {
-				escape = PHP_CSV_NO_ESCAPE;
-			} else {
-				escape = (unsigned char) esc[0];
-			}
-			ZEND_FALLTHROUGH;
-		case 2:
-			if (e_len != 1) {
-				zend_argument_value_error(2, "must be a single character");
-				RETURN_THROWS();
-			}
-			enclosure = enclo[0];
-			ZEND_FALLTHROUGH;
-		case 1:
-			if (d_len != 1) {
-				zend_argument_value_error(1, "must be a single character");
-				RETURN_THROWS();
-			}
-			delimiter = delim[0];
-			ZEND_FALLTHROUGH;
-		case 0:
-			break;
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (esc_len > 1) {
+			zend_argument_value_error(3, "must be empty or a single character");
+			RETURN_THROWS();
 		}
-		spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value);
+		if (esc_len == 0) {
+			escape = PHP_CSV_NO_ESCAPE;
+		} else {
+			escape = (unsigned char) esc[0];
+		}
+		ZEND_FALLTHROUGH;
+	case 2:
+		if (e_len != 1) {
+			zend_argument_value_error(2, "must be a single character");
+			RETURN_THROWS();
+		}
+		enclosure = enclo[0];
+		ZEND_FALLTHROUGH;
+	case 1:
+		if (d_len != 1) {
+			zend_argument_value_error(1, "must be a single character");
+			RETURN_THROWS();
+		}
+		delimiter = delim[0];
+		ZEND_FALLTHROUGH;
+	case 0:
+		break;
+	}
+	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value) == FAILURE) {
+		RETURN_FALSE;
 	}
 }
 /* }}} */

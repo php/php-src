@@ -71,8 +71,19 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32 + 21];
-	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, zend_system_id);
+	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + 1];
+	char *p = newname;
+	p += strlcpy(newname, name, MAXPATHLEN + 1);
+	*(p++) = '@';
+	memcpy(p, accel_uname_id, 32);
+	p += 32;
+	*(p++) = '@';
+	p += strlcpy(p, sapi_module.name, 21);
+	*(p++) = '@';
+	memcpy(p, zend_system_id, 32);
+	p += 32;
+	*(p++) = '\0';
+	ZEND_ASSERT(p - newname <= sizeof(newname));
 
 	return newname;
 }

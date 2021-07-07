@@ -1457,6 +1457,16 @@ static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int in
 		}
 		return;
 	}
+	if (ast->kind == ZEND_AST_TYPE_INTERSECTION) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			if (i != 0) {
+				smart_str_appendc(str, '&');
+			}
+			zend_ast_export_type(str, list->child[i], indent);
+		}
+		return;
+	}
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
 		smart_str_appendc(str, '?');
 	}

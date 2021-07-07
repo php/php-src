@@ -403,14 +403,64 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 	zend_hash_add_ptr(ht, class_name, ce);
 }
 
-static inheritance_status zend_perform_covariant_class_type_check(
+/* Check whether any type in the fe_type intersection type is a subtype of the proto class. */
+static inheritance_status zend_is_intersection_subtype_of_class(
+		zend_class_entry *fe_scope, zend_type fe_type,
+		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(fe_type));
+	bool have_unresolved = false;
+	zend_type *single_type;
+
+	/* Traverse the list of child types and check that at least one is
+	 * a subtype of the parent type being checked */
+	ZEND_TYPE_FOREACH(fe_type, single_type) {
+		zend_class_entry *fe_ce;
+		zend_string *fe_class_name = NULL;
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			fe_class_name =
+				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
+			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
+				return INHERITANCE_SUCCESS;
+			}
+
+			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
+			fe_ce = lookup_class(fe_scope, fe_class_name);
+		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
+			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
+			fe_ce = ZEND_TYPE_CE(*single_type);
+		} else {
+			/* standard type in an intersection type is impossible,
+			 * because it would be a fatal compile error */
+			ZEND_UNREACHABLE();
+			continue;
+		}
+
+		if (!fe_ce || !proto_ce) {
+			have_unresolved = true;
+			continue;
+		}
+		if (unlinked_instanceof(fe_ce, proto_ce)) {
+			track_class_dependency(fe_ce, fe_class_name);
+			track_class_dependency(proto_ce, proto_class_name);
+			return INHERITANCE_SUCCESS;
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_ERROR;
+}
+
+/* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
+static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
 		zend_class_entry *proto_scope, zend_type proto_type) {
 	bool have_unresolved = 0;
+
+	/* If the parent has 'object' as a return type, any class satisfies the co-variant check */
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		/* Currently, any class name would be allowed here. We still perform a class lookup
 		 * for forward-compatibility reasons, as we may have named types in the future that
-		 * are not classes (such as enums or typedefs). */
+		 * are not classes (such as typedefs). */
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
 			have_unresolved = 1;
@@ -430,6 +480,10 @@ static inheritance_status zend_perform_covariant_class_type_check(
 	}
 
 	zend_type *single_type;
+
+	/* Traverse the list of parent types and check if the current child (FE)
+	 * class is the subtype of at least one of them (union) or all of them (intersection). */
+	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(proto_type);
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		zend_class_entry *proto_ce;
 		zend_string *proto_class_name = NULL;
@@ -437,7 +491,10 @@ static inheritance_status zend_perform_covariant_class_type_check(
 			proto_class_name =
 				resolve_class_name(proto_scope, ZEND_TYPE_NAME(*single_type));
 			if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
-				return INHERITANCE_SUCCESS;
+				if (!is_intersection) {
+					return INHERITANCE_SUCCESS;
+				}
+				continue;
 			}
 
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
@@ -446,19 +503,45 @@ static inheritance_status zend_perform_covariant_class_type_check(
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
+			/* standard type */
+			ZEND_ASSERT(!is_intersection);
 			continue;
 		}
 
 		if (!fe_ce || !proto_ce) {
 			have_unresolved = 1;
-		} else if (unlinked_instanceof(fe_ce, proto_ce)) {
+			continue;
+		}
+		if (unlinked_instanceof(fe_ce, proto_ce)) {
 			track_class_dependency(fe_ce, fe_class_name);
 			track_class_dependency(proto_ce, proto_class_name);
-			return INHERITANCE_SUCCESS;
+			if (!is_intersection) {
+				return INHERITANCE_SUCCESS;
+			}
+		} else {
+			if (is_intersection) {
+				return INHERITANCE_ERROR;
+			}
 		}
 	} ZEND_TYPE_FOREACH_END();
 
-	return have_unresolved ? INHERITANCE_UNRESOLVED : INHERITANCE_ERROR;
+	if (have_unresolved) {
+		return INHERITANCE_UNRESOLVED;
+	}
+	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+}
+
+static zend_string *get_class_from_type(
+		zend_class_entry **ce, zend_class_entry *scope, zend_type single_type) {
+	if (ZEND_TYPE_HAS_NAME(single_type)) {
+		*ce = NULL;
+		return resolve_class_name(scope, ZEND_TYPE_NAME(single_type));
+	}
+	if (ZEND_TYPE_HAS_CE(single_type)) {
+		*ce = ZEND_TYPE_CE(single_type);
+		return (*ce)->name;
+	}
+	return NULL;
 }
 
 static void register_unresolved_classes(zend_class_entry *scope, zend_type type) {
@@ -519,35 +602,85 @@ static inheritance_status zend_perform_covariant_type_check(
 	}
 
 	zend_type *single_type;
-	bool all_success = 1;
+	inheritance_status early_exit_status;
+	bool have_unresolved = false;
 
-	/* First try to check whether we can succeed without resolving anything */
-	ZEND_TYPE_FOREACH(fe_type, single_type) {
-		inheritance_status status;
-		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *fe_class_name =
-				resolve_class_name(fe_scope, ZEND_TYPE_NAME(*single_type));
-			status = zend_perform_covariant_class_type_check(
-				fe_scope, fe_class_name, NULL, proto_scope, proto_type);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			zend_class_entry *fe_ce = ZEND_TYPE_CE(*single_type);
-			status = zend_perform_covariant_class_type_check(
-				fe_scope, fe_ce->name, fe_ce, proto_scope, proto_type);
-		} else {
-			continue;
+	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+		/* Currently, for object type any class name would be allowed here.
+		 * We still perform a class lookup for forward-compatibility reasons,
+		 * as we may have named types in the future that are not classes
+		 * (such as typedefs). */
+		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_ITERABLE)) {
+			bool any_class = (proto_type_mask & MAY_BE_OBJECT) != 0;
+			ZEND_TYPE_FOREACH(fe_type, single_type) {
+				zend_class_entry *fe_ce;
+				zend_string *fe_class_name = get_class_from_type(&fe_ce, fe_scope, *single_type);
+				if (!fe_class_name) {
+					continue;
+				}
+				if (!fe_ce) {
+					fe_ce = lookup_class(fe_scope, fe_class_name);
+				}
+				if (fe_ce) {
+					if (any_class || unlinked_instanceof(fe_ce, zend_ce_traversable)) {
+						track_class_dependency(fe_ce, fe_class_name);
+						return INHERITANCE_SUCCESS;
+					}
+				} else {
+					have_unresolved = true;
+				}
+			} ZEND_TYPE_FOREACH_END();
 		}
 
-		if (status == INHERITANCE_ERROR) {
-			return INHERITANCE_ERROR;
-		}
-		if (status != INHERITANCE_SUCCESS) {
-			all_success = 0;
-		}
-	} ZEND_TYPE_FOREACH_END();
+		/* U_1&...&U_n < V_1&...&V_m if forall V_j. exists U_i. U_i < V_j.
+		 * U_1&...&U_n < V_1|...|V_m if exists V_j. exists U_i. U_i < V_j.
+		 * As such, we need to iterate over proto_type (V_j) first and use a different
+		 * quantifier depending on whether fe_type is a union or an intersection. */
+		early_exit_status =
+			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
+		ZEND_TYPE_FOREACH(proto_type, single_type) {
+			zend_class_entry *proto_ce;
+			zend_string *proto_class_name =
+				get_class_from_type(&proto_ce, proto_scope, *single_type);
+			if (!proto_class_name) {
+				continue;
+			}
 
-	/* All individual checks succeeded, overall success */
-	if (all_success) {
-		return INHERITANCE_SUCCESS;
+			inheritance_status status = zend_is_intersection_subtype_of_class(
+				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
+			if (status == early_exit_status) {
+				return status;
+			}
+			if (status == INHERITANCE_UNRESOLVED) {
+				have_unresolved = true;
+			}
+		} ZEND_TYPE_FOREACH_END();
+	} else {
+		/* U_1|...|U_n < V_1|...|V_m if forall U_i. exists V_j. U_i < V_j.
+		 * U_1|...|U_n < V_1&...&V_m if forall U_i. forall V_j. U_i < V_j.
+		 * We need to iterate over fe_type (U_i) first and the logic is independent of
+		 * whether proto_type is a union or intersection (only the inner check differs). */
+		early_exit_status = INHERITANCE_ERROR;
+		ZEND_TYPE_FOREACH(fe_type, single_type) {
+			zend_class_entry *fe_ce;
+			zend_string *fe_class_name = get_class_from_type(&fe_ce, fe_scope, *single_type);
+			if (!fe_class_name) {
+				continue;
+			}
+
+			inheritance_status status = zend_is_class_subtype_of_type(
+				fe_scope, fe_class_name, fe_ce, proto_scope, proto_type);
+			if (status == early_exit_status) {
+				return status;
+			}
+			if (status == INHERITANCE_UNRESOLVED) {
+				have_unresolved = true;
+			}
+		} ZEND_TYPE_FOREACH_END();
+	}
+
+	if (!have_unresolved) {
+		return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
 
 	register_unresolved_classes(fe_scope, fe_type);
@@ -1204,6 +1337,13 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)), ZSTR_VAL(parent_const->ce->name), (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
+
+		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_FINAL))) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
+			);
+		}
 	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1489,25 +1629,37 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 }
 /* }}} */
 
-static bool do_inherit_constant_check(HashTable *child_constants_table, zend_class_constant *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
-{
-	zval *zv = zend_hash_find_ex(child_constants_table, name, 1);
-	zend_class_constant *old_constant;
-
-	if (zv != NULL) {
-		old_constant = (zend_class_constant*)Z_PTR_P(zv);
-		if (old_constant->ce != parent_constant->ce) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface->name));
-		}
-		return 0;
+static bool do_inherit_constant_check(
+	zend_class_entry *ce, zend_class_constant *parent_constant, zend_string *name
+) {
+	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
+	if (zv == NULL) {
+		return true;
 	}
-	return 1;
+
+	zend_class_constant *old_constant = Z_PTR_P(zv);
+	if ((ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
+			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
+			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name)
+		);
+	}
+
+	if (old_constant->ce != parent_constant->ce && old_constant->ce != ce) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Class %s inherits both %s::%s and %s::%s, which is ambiguous",
+			ZSTR_VAL(ce->name),
+			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
+			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name));
+	}
+
+	return false;
 }
 /* }}} */
 
 static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
+	if (do_inherit_constant_check(ce, c, name)) {
 		zend_class_constant *ct;
 		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1573,8 +1725,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-			do_inherit_constant_check(&iface->constants_table, c, key, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+			do_inherit_constant_check(ce, c, key);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
@@ -1618,8 +1770,8 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 					return;
 				}
 				/* skip duplications */
-				ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
-					do_inherit_constant_check(&iface->constants_table, c, key, iface);
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+					do_inherit_constant_check(ce, c, key);
 				} ZEND_HASH_FOREACH_END();
 
 				iface = NULL;

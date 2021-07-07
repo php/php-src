@@ -89,7 +89,7 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 # endif
 #endif
 
-PHPAPI uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
+PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 {
 #if HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
@@ -112,7 +112,7 @@ PHPAPI uint32_t crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-PHPAPI int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
+PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];
@@ -123,7 +123,7 @@ PHPAPI int crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 
 		n = php_stream_read(fp, buf, n);
 		if (n > 0) {
-			*crc = crc32_bulk_update(*crc, buf, n);
+			*crc = php_crc32_bulk_update(*crc, buf, n);
 			handled += n;
 		} else { /* EOF */
 			return FAILURE;
@@ -138,17 +138,14 @@ PHP_FUNCTION(crc32)
 {
 	char *p;
 	size_t nr;
-	uint32_t crcinit = 0;
-	uint32_t crc;
+	uint32_t crc = php_crc32_bulk_init();
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(p, nr)
 	ZEND_PARSE_PARAMETERS_END();
 
-	crc = crcinit^0xFFFFFFFF;
+	crc = php_crc32_bulk_update(crc, p, nr);
 
-	crc = crc32_bulk_update(crc, p, nr);
-
-	RETURN_LONG(crc^0xFFFFFFFF);
+	RETURN_LONG(php_crc32_bulk_end(crc));
 }
 /* }}} */

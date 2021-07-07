@@ -87,7 +87,8 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
 	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",    IMAGE_FILETYPE_WEBP,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",    IMAGE_FILETYPE_AVIF,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -1148,6 +1149,99 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ php_handle_avif
+ * There's no simple way to get this information - so, for now, this is unsupported.
+ * Simply return 0 for everything.
+ */
+static struct gfxinfo *php_handle_avif(php_stream * stream) {
+	return ecalloc(1, sizeof(struct gfxinfo));
+}
+/* }}} */
+
+/* {{{ php_ntohl
+ * Convert a big-endian network uint32 to host order - 
+ * which may be either little-endian or big-endian.
+ * Thanks to Rob Pike via Joe Drago:
+ * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
+ */
+static uint32_t php_ntohl(uint32_t val) {
+	uint8_t data[4];
+
+	memcpy(&data, &val, sizeof(data));
+	return ((uint32_t)data[3] << 0) |
+		((uint32_t)data[2] << 8) |
+		((uint32_t)data[1] << 16) |
+		((uint32_t)data[0] << 24);
+}
+/* }}} */
+
+/* {{{ php_is_image_avif
+ * detect whether an image is of type AVIF
+ * 
+ * An AVIF image will start off a header "box".
+ * This starts with with a four-byte integer containing the number of bytes in the filetype box.
+ * This must be followed by the string "ftyp".
+ * Next comes a four-byte string indicating the "major brand".
+ * If that's "avif" or "avis", this is an AVIF image.
+ * Next, there's a four-byte "minor version" field, which we can ignore.
+ * Next comes an array of four-byte strings containing "compatible brands".
+ * These extend to the end of the box.
+ * If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
+ * Otherwise, well, it's not.
+ * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
+ */
+bool php_is_image_avif(php_stream * stream) {
+	uint32_t header_size_reversed, header_size, i;
+	char box_type[4], brand[4];
+
+	ZEND_ASSERT(stream != NULL);
+
+	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
+		return 0;
+	}
+
+	header_size = php_ntohl(header_size_reversed);
+
+	/* If the box type isn't "ftyp", it can't be an AVIF image. */
+	if (php_stream_read(stream, box_type, 4) != 4) {
+		return 0;
+	}
+
+	if (memcmp(box_type, "ftyp", 4)) {
+		return 0;
+	}
+	
+	/* If the major brand is "avif" or "avis", it's an AVIF image. */
+	if (php_stream_read(stream, brand, 4) != 4) {
+		return 0;
+	}
+
+	if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
+		return 1;
+	}
+
+	/* Skip the next four bytes, which are the "minor version". */
+	if (php_stream_read(stream, brand, 4) != 4) {
+		return 0;
+	}
+
+	/* Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
+	   Note we've already read four groups of four bytes. */
+
+	for (i = 16; i < header_size; i += 4) {
+		if (php_stream_read(stream, brand, 4) != 4) {
+			return 0;
+		}
+
+		if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
@@ -1183,6 +1277,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/vnd.microsoft.icon";
 		case IMAGE_FILETYPE_WEBP:
 			return "image/webp";
+		case IMAGE_FILETYPE_AVIF:
+			return "image/avif";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1265,6 +1361,9 @@ PHP_FUNCTION(image_type_to_extension)
 		case IMAGE_FILETYPE_WEBP:
 			imgext = ".webp";
 			break;
+		case IMAGE_FILETYPE_AVIF:
+			imgext = ".avif";
+			break;
 	}
 
 	if (imgext) {
@@ -1277,7 +1376,7 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filetype)
+PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetype)
 {
 	char tmp[12];
 	int twelve_bytes_read;
@@ -1349,17 +1448,24 @@ PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filety
 		return IMAGE_FILETYPE_JP2;
 	}
 
+	if (!php_stream_rewind(stream) && php_is_image_avif(stream)) {
+		return IMAGE_FILETYPE_AVIF;
+	}
+
 /* AFTER ALL ABOVE FAILED */
 	if (php_get_wbmp(stream, NULL, 1)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
+
 	if (!twelve_bytes_read) {
 		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
+
 	if (php_get_xbm(stream, NULL)) {
 		return IMAGE_FILETYPE_XBM;
 	}
+
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
@@ -1430,6 +1536,9 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			result = php_handle_webp(stream);
+			break;
+		case IMAGE_FILETYPE_AVIF:
+			result = php_handle_avif(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:

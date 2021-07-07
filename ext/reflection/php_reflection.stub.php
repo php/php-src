@@ -475,6 +475,8 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isFinal(): bool {}
+
     /** @tentative-return-type */
     public function getModifiers(): int {}
 
@@ -596,6 +598,11 @@ class ReflectionUnionType extends ReflectionType
     public function getTypes(): array {}
 }
 
+class ReflectionIntersectionType extends ReflectionType
+{
+    public function getTypes(): array {}
+}
+
 class ReflectionExtension implements Reflector
 {
     public string $name;
@@ -680,13 +687,15 @@ final class ReflectionReference
     private function __construct() {}
 }
 
-final class ReflectionAttribute
+final class ReflectionAttribute implements Reflector
 {
     public function getName(): string {}
     public function getTarget(): int {}
     public function isRepeated(): bool {}
     public function getArguments(): array {}
     public function newInstance(): object {}
+
+    public function __toString(): string {}
 
     private function __clone(): void {}
 

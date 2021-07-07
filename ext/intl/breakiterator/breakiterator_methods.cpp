@@ -63,7 +63,6 @@ static void _breakiter_factory(const char *func_name,
 
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status);
-	// Todo check if this can happen?
 	if (U_FAILURE(status)) {
 		spprintf(&msg, 0, "%s: error creating BreakIterator",
 				func_name);

@@ -10,7 +10,7 @@ class MyConverter extends UConverter {
   /**
    * Called during conversion from source encoding to internal UChar representation
    */
-  public function toUCallback($reason, $source, $codeUnits, &$error) {
+  public function toUCallback($reason, $source, $codeUnits, &$error): string|int|array|null {
     echo "toUCallback(", UConverter::reasonText($reason), ", ...)\n";
     return parent::toUCallback($reason, $source, $codeUnits, $error);
   }
@@ -18,7 +18,7 @@ class MyConverter extends UConverter {
   /**
    * Called during conversion from internal UChar to destination encoding
    */
-  public function fromUCallback($reason, $source, $codePoint, &$error) {
+  public function fromUCallback($reason, $source, $codePoint, &$error): string|int|array|null {
     echo "fromUCallback(", UConverter::reasonText($reason), ", ...)\n";
     return parent::fromUCallback($reason, $source, $codePoint, $error);
   }

@@ -7,80 +7,80 @@ class Collator
     public function __construct(string $locale) {}
 
     /**
-     * @return Collator|null
+     * @tentative-return-type
      * @alias collator_create
      */
-    public static function create(string $locale) {}
+    public static function create(string $locale): ?Collator {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias collator_compare
      */
-    public function compare(string $string1, string $string2) {}
+    public function compare(string $string1, string $string2): int|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias collator_sort
      */
-    public function sort(array &$array, int $flags = Collator::SORT_REGULAR) {}
+    public function sort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias collator_sort_with_sort_keys
      */
-    public function sortWithSortKeys(array &$array) {}
+    public function sortWithSortKeys(array &$array): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias collator_asort
      */
-    public function asort(array &$array, int $flags = Collator::SORT_REGULAR) {}
+    public function asort(array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias collator_get_attribute
      */
-    public function getAttribute(int $attribute) {}
+    public function getAttribute(int $attribute): int|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias collator_set_attribute
      */
-    public function setAttribute(int $attribute, int $value) {}
+    public function setAttribute(int $attribute, int $value): bool {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias collator_get_strength
      */
-    public function getStrength() {}
+    public function getStrength(): int {}
 
     /**
      * @return bool
      * @alias collator_set_strength
      */
-    public function setStrength(int $strength) {}
+    public function setStrength(int $strength) {} // TODO make return type void
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias collator_get_locale
      */
-    public function getLocale(int $type) {}
+    public function getLocale(int $type): string|false {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias collator_get_error_code
      */
-    public function getErrorCode() {}
+    public function getErrorCode(): int|false {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias collator_get_error_message
      */
-    public function getErrorMessage() {}
+    public function getErrorMessage(): string|false {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias collator_get_sort_key
      */
-    public function getSortKey(string $string) {}
+    public function getSortKey(string $string): string|false {}
 }

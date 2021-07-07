@@ -65,7 +65,7 @@ class MyCSVFile2 extends SplFileObject
     function getCurrentLine()
     {
         echo __METHOD__ . "\n";
-        return parent::fgetcsv(',', '"');
+        return implode('|', parent::fgetcsv(',', '"'));
     }
 }
 
@@ -75,7 +75,7 @@ $v = $phar['a.csv'];
 echo "===6===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . $d . "\n";
 }
 
 ?>

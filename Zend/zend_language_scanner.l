@@ -1854,6 +1854,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
+<ST_IN_SCRIPTING>"&"{TABS_AND_SPACES}("$"|"...") {
+	yyless(1);
+	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
+}
+
+<ST_IN_SCRIPTING>"&" {
+	RETURN_TOKEN(T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG);
+}
+
 <ST_IN_SCRIPTING>"]"|")" {
 	/* Check that ] and ) match up properly with a preceding [ or ( */
 	RETURN_EXIT_NESTING_TOKEN(yytext[0]);
