@@ -22412,7 +22412,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -23360,7 +23360,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -23477,7 +23477,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -23594,7 +23594,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -23710,7 +23710,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -24551,7 +24551,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
@@ -24965,7 +24965,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -25918,7 +25918,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -26035,7 +26035,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -26152,7 +26152,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -26268,7 +26268,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -26706,7 +26706,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
@@ -27156,7 +27156,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -27308,7 +27308,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -27425,7 +27425,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -27542,7 +27542,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -27658,7 +27658,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -28895,7 +28895,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -29843,7 +29843,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -29960,7 +29960,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -30077,7 +30077,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -30193,7 +30193,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -30704,7 +30704,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
@@ -39496,7 +39496,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -40707,7 +40707,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -40824,7 +40824,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -40941,7 +40941,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -41057,7 +41057,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -41816,7 +41816,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
@@ -43125,7 +43125,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -44335,7 +44335,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -44452,7 +44452,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -44569,7 +44569,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -44685,7 +44685,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -45263,7 +45263,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
@@ -45892,7 +45892,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -46170,7 +46170,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -46287,7 +46287,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -46404,7 +46404,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -46520,7 +46520,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -48157,7 +48157,7 @@ assign_dim_op_new_array:
 				ZVAL_UNDEFINED_OP1();
 			}
 			if (Z_TYPE_P(container) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
@@ -49363,7 +49363,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -49480,7 +49480,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -49597,7 +49597,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -49713,7 +49713,7 @@ try_assign_dim_array:
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
 			if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-				zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+				zend_false_to_array_deprecated();
 			}
 
 			if (Z_ISREF_P(orig_object_ptr)
@@ -50364,7 +50364,7 @@ num_index_dim:
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
 			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
-			zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
+			zend_false_to_array_deprecated();
 		}
 	} while (0);
 
