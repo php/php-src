@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #80173 (Using return value of zend_assign_to_variable() is not
     safe). (Nikita)
+  . Fixed bug #73226 (--r[fcez] always return zero exit code). (cmb)
 
 - Intl:
   . Fixed bug #72809 (Locale::lookup() wrong result with canonicalize option).
