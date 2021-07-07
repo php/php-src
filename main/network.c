@@ -430,30 +430,27 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 	for (sal = psal; *sal != NULL; sal++) {
 		sa = *sal;
 
-		/* create a socket for this address */
-		sock = socket(sa->sa_family, socktype, 0);
-
-		if (sock == SOCK_ERR) {
-			continue;
-		}
-
 		switch (sa->sa_family) {
 #if HAVE_GETADDRINFO && HAVE_IPV6
 			case AF_INET6:
-				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
 				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
 				socklen = sizeof(struct sockaddr_in6);
 				break;
 #endif
 			case AF_INET:
-				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
 				((struct sockaddr_in *)sa)->sin_port = htons(port);
 				socklen = sizeof(struct sockaddr_in);
 				break;
 			default:
-				/* Unknown family */
-				socklen = 0;
-				sa = NULL;
+				/* Unsupported family, skip to the next */
+				continue;
+		}
+
+		/* create a socket for this address */
+		sock = socket(sa->sa_family, socktype, 0);
+
+		if (sock == SOCK_ERR) {
+			continue;
 		}
 
 		if (sa) {
@@ -825,6 +822,31 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	for (sal = psal; !fatal && *sal != NULL; sal++) {
 		sa = *sal;
 
+		switch (sa->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+			case AF_INET6:
+				if (!bindto || strchr(bindto, ':')) {
+					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+					socklen = sizeof(struct sockaddr_in6);
+				} else {
+					/* Expect IPV4 address, skip to the next */
+					continue;
+				}
+				break;
+#endif
+			case AF_INET:
+				((struct sockaddr_in *)sa)->sin_port = htons(port);
+				socklen = sizeof(struct sockaddr_in);
+				if (bindto && strchr(bindto, ':')) {
+					/* IPV4 sock can not bind to IPV6 address */
+					bindto = NULL;
+				}
+				break;
+			default:
+				/* Unsupported family, skip to the next */
+				continue;
+		}
+
 		/* create a socket for this address */
 		sock = socket(sa->sa_family, socktype, 0);
 
@@ -832,80 +854,47 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			continue;
 		}
 
-		switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
-			case AF_INET6:
-				if (!bindto || strchr(bindto, ':')) {
-					((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
-					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
-					socklen = sizeof(struct sockaddr_in6);
-				} else {
-					socklen = 0;
-					sa = NULL;
-				}
-				break;
-#endif
-			case AF_INET:
-				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
-				((struct sockaddr_in *)sa)->sin_port = htons(port);
-				socklen = sizeof(struct sockaddr_in);
-				break;
-			default:
-				/* Unknown family */
-				socklen = 0;
-				sa = NULL;
-		}
-
 		if (sa) {
 			/* make a connection attempt */
 
 			if (bindto) {
-				struct sockaddr *local_address = NULL;
-				int local_address_len = 0;
-
-				if (sa->sa_family == AF_INET) {
-					if (strchr(bindto,':')) {
-						goto skip_bind;
-					}
-					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
-
-					local_address = (struct sockaddr*)in4;
-					local_address_len = sizeof(struct sockaddr_in);
-
-					in4->sin_family = sa->sa_family;
-					in4->sin_port = htons(bindport);
-#ifdef HAVE_INET_PTON
-					if (!inet_pton(AF_INET, bindto, &in4->sin_addr)) {
-#else
-					if (!inet_aton(bindto, &in4->sin_addr)) {
+				struct {
+					int len;
+					union {
+						struct sockaddr common;
+						struct sockaddr_in in4;
+#if HAVE_IPV6 && HAVE_INET_PTON
+						struct sockaddr_in6 in6;
 #endif
-						php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
-						goto skip_bind;
+					};
+				} local_address;
+
+				local_address.len = 0;
+				if (sa->sa_family == AF_INET) {
+#ifdef HAVE_INET_PTON
+					if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
+#else
+					if (inet_aton(bindto, &local_address.in4.sin_addr)) {
+#endif
+						local_address.len = sizeof(struct sockaddr_in);
+						local_address.in4.sin_family = sa->sa_family;
+						local_address.in4.sin_port = htons(bindport);
+						memset(&(local_address.in4.sin_zero), 0, sizeof(local_address.in4.sin_zero));
 					}
-					memset(&(in4->sin_zero), 0, sizeof(in4->sin_zero));
 				}
 #if HAVE_IPV6 && HAVE_INET_PTON
-				 else { /* IPV6 */
-					struct sockaddr_in6 *in6 = emalloc(sizeof(struct sockaddr_in6));
-
-					local_address = (struct sockaddr*)in6;
-					local_address_len = sizeof(struct sockaddr_in6);
-
-					in6->sin6_family = sa->sa_family;
-					in6->sin6_port = htons(bindport);
-					if (inet_pton(AF_INET6, bindto, &in6->sin6_addr) < 1) {
-						php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
-						goto skip_bind;
+				else { /* IPV6 */
+					if (inet_pton(AF_INET6, bindto, &local_address.in6.sin6_addr) == 1) {
+						local_address.len = sizeof(struct sockaddr_in6);
+						local_address.in6.sin6_family = sa->sa_family;
+						local_address.in6.sin6_port = htons(bindport);
 					}
 				}
 #endif
-
-				if (!local_address || bind(sock, local_address, local_address_len)) {
+				if (local_address.len == 0) {
+					php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
+				} else if (bind(sock, &local_address.common, local_address.len)) {
 					php_error_docref(NULL, E_WARNING, "Failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
-				}
-skip_bind:
-				if (local_address) {
-					efree(local_address);
 				}
 			}
 			/* free error string received during previous iteration (if any) */
