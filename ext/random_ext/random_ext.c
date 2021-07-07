@@ -506,7 +506,7 @@ PHP_METHOD(Random_NumberGenerator_XorShift128Plus, __construct)
 {
 	php_random_rng *rng = Z_RANDOM_RNG_P(ZEND_THIS);
 	zend_long seed;
-	bool is_null = 0;
+	bool is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
