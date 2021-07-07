@@ -818,6 +818,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		/* On Windows this function may be code page dependent. */
 		|| zend_string_equals_literal(name, "dirname")
 #endif
+		|| zend_string_equals_literal(name, "explode")
 		|| zend_string_equals_literal(name, "imagetypes")
 		|| zend_string_equals_literal(name, "in_array")
 		|| zend_string_equals_literal(name, "implode")
