@@ -63,4 +63,4 @@ PHPAPI zend_long php_random_range(php_random *random, zend_long min, zend_long m
 PHPAPI void php_random_array_data_shuffle(php_random *random, zval *array);
 PHPAPI void php_random_string_shuffle(php_random *random, char *str, zend_long len);
 
-#endif	/* PHP_RANDOM_H_MODULE */
+#endif	/* PHP_RANDOM_EXT_H */

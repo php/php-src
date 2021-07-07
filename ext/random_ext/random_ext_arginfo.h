@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d5f5afc735100bce1a76f2a16522c5832a65b2f0 */
+ * Stub hash: 72e03ec3a21486d6426fc0658f0c133247da141f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_generate, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

@@ -53,7 +53,7 @@ namespace
     final class Random
     {
         // FIXME: stub generator (gen_stub.php) does not supported.
-        // private Random\NumberGenerator\RandomNumberGenerator $rng;
+        // private Random\NumberGeneratorm $rng;
         private mixed $rng;
 
         public function __construct(?Random\NumberGenerator $rng = null) {}
