@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d5e46edb28ce2e3f864ff0fc30e95d3b778a9d06 */
+ * Stub hash: d5f5afc735100bce1a76f2a16522c5832a65b2f0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_NumberGenerator_generate, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -37,8 +37,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Random_getNumberGenerator, 0, 0, Random\\NumberGenerator, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Random_nextInt arginfo_class_Random_NumberGenerator_generate
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_getInt, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
@@ -68,7 +66,6 @@ ZEND_METHOD(Random_NumberGenerator_XorShift128Plus, __unserialize);
 ZEND_METHOD(Random_NumberGenerator_Secure, __construct);
 ZEND_METHOD(Random, __construct);
 ZEND_METHOD(Random, getNumberGenerator);
-ZEND_METHOD(Random, nextInt);
 ZEND_METHOD(Random, getInt);
 ZEND_METHOD(Random, getBytes);
 ZEND_METHOD(Random, shuffleArray);
@@ -111,7 +108,6 @@ static const zend_function_entry class_Random_NumberGenerator_Secure_methods[] =
 static const zend_function_entry class_Random_methods[] = {
 	ZEND_ME(Random, __construct, arginfo_class_Random___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random, getNumberGenerator, arginfo_class_Random_getNumberGenerator, ZEND_ACC_PUBLIC)
-	ZEND_ME(Random, nextInt, arginfo_class_Random_nextInt, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random, getInt, arginfo_class_Random_getInt, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random, getBytes, arginfo_class_Random_getBytes, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random, shuffleArray, arginfo_class_Random_shuffleArray, ZEND_ACC_PUBLIC)

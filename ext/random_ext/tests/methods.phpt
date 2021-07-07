@@ -22,8 +22,8 @@ $rngs[] = new UserRNG();
 foreach ($rngs as $rng) {
     $instance = new Random($rng);
 
-    // nextInt
-    $instance->nextInt();
+    // getNumberGenerator
+    $instance->getNumberGenerator();
 
     // getInt
     for ($i = 0; $i < 100; $i++) {

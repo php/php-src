@@ -26,10 +26,10 @@ $rngs[] = new UserRNG();
 foreach ($rngs as $rng) {
     $instance = new Random($rng);
 
-    $instance->nextInt();
+    $instance->getNumberGenerator()->generate();
     $clone_instance = unserialize(serialize($instance));
 
-    if ($instance->nextInt() !== $clone_instance->nextInt()) {
+    if ($instance->getNumberGenerator()->generate() !== $clone_instance->getNumberGenerator()->generate()) {
         die('failure: ' . $instnace->getNumberGenerator()::class);
     }
 }

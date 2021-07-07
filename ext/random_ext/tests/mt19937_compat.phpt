@@ -9,7 +9,7 @@ $random = new Random(new Random\NumberGenerator\MT19937($seed));
 
 for ($i = 0; $i < 20000; $i++) {
     $mt_rand_ret = mt_rand();
-    $random_ret = $random->nextInt() >> 1;
+    $random_ret = $random->getNumberGenerator()->generate() >> 1;
 
     if ($mt_rand_ret !== $random_ret) {
         die("failure: mt_rand_ret: ${mt_rand_ret} random_ret: ${random_ret} i: ${i}");

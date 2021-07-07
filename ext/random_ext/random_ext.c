@@ -645,15 +645,6 @@ PHP_METHOD(Random, getNumberGenerator)
 	RETURN_OBJ(Z_OBJ_P(zrng));
 }
 
-PHP_METHOD(Random, nextInt)
-{
-	php_random *random = Z_RANDOM_P(ZEND_THIS);
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	RETURN_LONG((zend_long) php_random_next(random));
-}
-
 PHP_METHOD(Random, getInt)
 {
 	php_random *random = Z_RANDOM_P(ZEND_THIS);

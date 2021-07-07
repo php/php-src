@@ -58,7 +58,6 @@ namespace
 
         public function __construct(?Random\NumberGenerator $rng = null) {}
         public function getNumberGenerator(): Random\NumberGenerator {}
-        public function nextInt(): int {}
         public function getInt(int $min, int $max): int {}
         public function getBytes(int $length): string {}
         public function shuffleArray(array $array): array {}
