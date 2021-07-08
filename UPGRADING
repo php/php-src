@@ -337,6 +337,12 @@ PHP 8.1 UPGRADE NOTES
     favor of date_sun_info().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Hash:
+  . The mhash(), mhash_keygen_s2k(), mhash_count(), mhash_get_block_size() and
+    mhash_get_hash_name() functions are deprecated. Use the hash_*() APIs
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Intl:
   . Calling IntlCalendar::roll() with bool argument is deprecated. Pass 1 and -1
     instead of true and false respectively.
