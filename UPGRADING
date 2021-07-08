@@ -332,6 +332,11 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
   . returning a non-array from __sleep will raise a warning
 
+- Date:
+  . The date_sunrise() and date_sunset() functions have been deprecated in
+    favor of date_sun_info().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
     version is meaningless as it hasn't been updated in more than a decade. Use

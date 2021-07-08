@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8bc76a5db3a225746daffe29c0b8404cf971452 */
+ * Stub hash: fbec11a67d5cc04667a012f25894f0d9e18833a6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -597,8 +597,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(date_interval_format, arginfo_date_interval_format)
 	ZEND_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
 	ZEND_FE(date_default_timezone_get, arginfo_date_default_timezone_get)
-	ZEND_FE(date_sunrise, arginfo_date_sunrise)
-	ZEND_FE(date_sunset, arginfo_date_sunset)
+	ZEND_DEP_FE(date_sunrise, arginfo_date_sunrise)
+	ZEND_DEP_FE(date_sunset, arginfo_date_sunset)
 	ZEND_FE(date_sun_info, arginfo_date_sun_info)
 	ZEND_FE_END
 };
