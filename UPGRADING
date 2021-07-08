@@ -350,6 +350,10 @@ PHP 8.1 UPGRADE NOTES
     instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- IMAP:
+  . The NIL constant has been deprecated. Use 0 instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Intl:
   . Calling IntlCalendar::roll() with bool argument is deprecated. Pass 1 and -1
     instead of true and false respectively.

@@ -23,7 +23,7 @@ try {
 }
 
 try {
-    imap_open('', '', '', NIL, -1);
+    imap_open('', '', '', 0, -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

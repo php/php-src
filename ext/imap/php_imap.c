@@ -491,7 +491,7 @@ PHP_MINIT_FUNCTION(imap)
 	imap_object_handlers.clone_obj = NULL;
 
 	/* lets allow NIL */
-	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS | CONST_DEPRECATED);
 
 	/* plug in our gets */
 	mail_parameters(NIL, SET_GETS, (void *) NIL);
