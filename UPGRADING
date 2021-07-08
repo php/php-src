@@ -364,6 +364,10 @@ PHP 8.1 UPGRADE NOTES
     parent::init() with parent::__construct().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- ODBC:
+  . odbc_result_all() has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - PDO:
   . The PDO::FETCH_SERIALIZE mode has been deprecated.
     RFC: https://wiki.php.net/rfc/phase_out_serializable
