@@ -337,6 +337,11 @@ PHP 8.1 UPGRADE NOTES
     favor of date_sun_info().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Intl:
+  . Calling IntlCalendar::roll() with bool argument is deprecated. Pass 1 and -1
+    instead of true and false respectively.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Mbstring:
   . Calling mb_check_encoding() without an argument is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
