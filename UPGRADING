@@ -355,9 +355,12 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/phase_out_serializable
 
 - Standard:
-  . Calling  key(), current(), next(), prev(), reset(), or end() on objects
+  . Calling key(), current(), next(), prev(), reset(), or end() on objects
     is deprecated. Instead cast the object to array first, or make use of
     ArrayIterator.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+  . The FILE_BINARY and FILE_TEXT constants are deprecated. They already had
+    no effect previously.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 ========================================
