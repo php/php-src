@@ -6532,6 +6532,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		}
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+
+		if (ZEND_TYPE_CONTAINS_CODE(arg_infos[-1].type, IS_VOID)
+				&& (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_DEPRECATED, "Returning by reference from a void function is deprecated");
+		}
 	} else {
 		if (list->children == 0) {
 			return;
