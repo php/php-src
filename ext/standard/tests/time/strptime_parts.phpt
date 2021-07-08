@@ -47,20 +47,26 @@ var_dump($res["tm_year"]);
 
 setlocale(LC_ALL, $orig);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : basic functionality ***
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(20)
 int(1)
 int(10)
 int(2)
 int(6)
 int(63)
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(20)
 int(1)
 int(10)
 int(2)
 int(6)
 int(163)
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(0)
 int(1)
 int(10)

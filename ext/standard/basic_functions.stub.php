@@ -396,6 +396,7 @@ function crypt(string $string, string $salt): string {}
 /* datetime.c */
 
 #if HAVE_STRPTIME
+/** @deprecated */
 function strptime(string $timestamp, string $format): array|false {}
 #endif
 

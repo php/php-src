@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0a3e894735529e3fefc305cbd12f99c9b0ec3f6 */
+ * Stub hash: aa585d759aa844227ea32a15a7382bb0f9c6b9e3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3020,7 +3020,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(crc32, arginfo_crc32)
 	ZEND_FE(crypt, arginfo_crypt)
 #if HAVE_STRPTIME
-	ZEND_FE(strptime, arginfo_strptime)
+	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
 #if defined(HAVE_GETHOSTNAME)
 	ZEND_FE(gethostname, arginfo_gethostname)

@@ -31,8 +31,10 @@ var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : basic functionality ***
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -53,6 +55,8 @@ array(9) {
   ["unparsed"]=>
   string(4) " GMT"
 }
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -73,6 +77,8 @@ array(9) {
   ["unparsed"]=>
   string(0) ""
 }
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
