@@ -392,6 +392,9 @@ PHP 8.1 UPGRADE NOTES
     instead (for locale-independent parsing) or IntlDateFormatter::parse() (for
     locale-dependent parsing).
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+  . The auto_detect_line_endings ini setting has been deprecated. If necessary,
+    handle "\r" line breaks manually instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
   . The FILE_BINARY and FILE_TEXT constants are deprecated. They already had
     no effect previously.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1

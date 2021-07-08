@@ -16,7 +16,8 @@ var_dump(fgets($stdin));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: auto_detect_line_endings is deprecated in %s on line %d
 string(2) "on"
 string(8) "fooBar1"
 string(8) "fooBar2"
