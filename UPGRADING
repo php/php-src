@@ -337,6 +337,11 @@ PHP 8.1 UPGRADE NOTES
     favor of date_sun_info().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Filter:
+  . The FILTER_SANITIZE_STRING and FILTER_SANITIZE_STRIPPED filters have been
+    deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Hash:
   . The mhash(), mhash_keygen_s2k(), mhash_count(), mhash_get_block_size() and
     mhash_get_hash_name() functions are deprecated. Use the hash_*() APIs

@@ -7,7 +7,7 @@ filter
 $flags = FILTER_FLAG_ENCODE_AMP|FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_ENCODE_HIGH;
 
 for ($i = 0; $i < 256; $i++) {
-    var_dump(filter_var(chr($i), FILTER_SANITIZE_STRING, array("flags" => $flags)));
+    var_dump(filter_var(chr($i), FILTER_UNSAFE_RAW, array("flags" => $flags)));
 }
 ?>
 --EXPECT--
@@ -45,12 +45,12 @@ string(5) "&#30;"
 string(5) "&#31;"
 string(1) " "
 string(1) "!"
-string(5) "&#34;"
+string(1) """
 string(1) "#"
 string(1) "$"
 string(1) "%"
 string(5) "&#38;"
-string(5) "&#39;"
+string(1) "'"
 string(1) "("
 string(1) ")"
 string(1) "*"
@@ -71,7 +71,7 @@ string(1) "8"
 string(1) "9"
 string(1) ":"
 string(1) ";"
-string(0) ""
+string(1) "<"
 string(1) "="
 string(1) ">"
 string(1) "?"
