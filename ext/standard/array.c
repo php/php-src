@@ -1041,16 +1041,36 @@ PHP_FUNCTION(uksort)
 }
 /* }}} */
 
+static inline HashTable *get_ht_for_iap(zval *zv, bool separate) {
+	if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
+		return Z_ARRVAL_P(zv);
+	}
+
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+	php_error_docref(NULL, E_DEPRECATED,
+		"Calling %s() on an object is deprecated", get_active_function_name());
+
+	zend_object *zobj = Z_OBJ_P(zv);
+	if (separate && zobj->properties && UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+		if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+			GC_DELREF(zobj->properties);
+		}
+		zobj->properties = zend_array_dup(zobj->properties);
+	}
+	return zobj->handlers->get_properties(zobj);
+}
+
 /* {{{ Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
-	HashTable *array;
+	zval *array_zv;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
 	zend_hash_internal_pointer_end(array);
 
 	if (USED_RET()) {
@@ -1070,13 +1090,14 @@ PHP_FUNCTION(end)
 /* {{{ Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
-	HashTable *array;
+	zval *array_zv;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
 	zend_hash_move_backwards(array);
 
 	if (USED_RET()) {
@@ -1096,13 +1117,14 @@ PHP_FUNCTION(prev)
 /* {{{ Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
-	HashTable *array;
+	zval *array_zv;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
 	zend_hash_move_forward(array);
 
 	if (USED_RET()) {
@@ -1122,13 +1144,14 @@ PHP_FUNCTION(next)
 /* {{{ Set array argument's internal pointer to the first element and return it */
 PHP_FUNCTION(reset)
 {
-	HashTable *array;
+	zval *array_zv;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
 	zend_hash_internal_pointer_reset(array);
 
 	if (USED_RET()) {
@@ -1148,13 +1171,14 @@ PHP_FUNCTION(reset)
 /* {{{ Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
-	HashTable *array;
+	zval *array_zv;
 	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT(array)
+		Z_PARAM_ARRAY_OR_OBJECT(array_zv)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
 	if ((entry = zend_hash_get_current_data(array)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -1170,12 +1194,13 @@ PHP_FUNCTION(current)
 /* {{{ Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
-	HashTable *array;
+	zval *array_zv;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT(array)
+		Z_PARAM_ARRAY_OR_OBJECT(array_zv)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
 	zend_hash_get_current_key_zval(array, return_value);
 }
 /* }}} */

@@ -350,6 +350,12 @@ PHP 8.1 UPGRADE NOTES
   . The PDO::FETCH_SERIALIZE mode has been deprecated.
     RFC: https://wiki.php.net/rfc/phase_out_serializable
 
+- Standard:
+  . Calling  key(), current(), next(), prev(), reset(), or end() on objects
+    is deprecated. Instead cast the object to array first, or make use of
+    ArrayIterator.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 ========================================
 5. Changed Functions
 ========================================
