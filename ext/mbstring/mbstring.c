@@ -3953,6 +3953,9 @@ PHP_FUNCTION(mb_check_encoding)
 	} else if (input_str) {
 		RETURN_BOOL(php_mb_check_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), encoding));
 	} else {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Calling mb_check_encoding() without argument is deprecated");
+
 		/* FIXME: Actually check all inputs, except $_FILES file content. */
 		RETURN_BOOL(MBSTRG(illegalchars) == 0);
 	}

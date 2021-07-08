@@ -337,6 +337,10 @@ PHP 8.1 UPGRADE NOTES
     favor of date_sun_info().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Mbstring:
+  . Calling mb_check_encoding() without an argument is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - MySQLi:
   . The mysqli_driver::$driver_version property has been deprecated. The driver
     version is meaningless as it hasn't been updated in more than a decade. Use
