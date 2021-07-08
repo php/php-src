@@ -381,7 +381,39 @@ static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object
 static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 {
 	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
-	return Z_OBJ_P(o1) != Z_OBJ_P(o2);
+
+	zend_closure *lhs = (zend_closure*) Z_OBJ_P(o1);
+	zend_closure *rhs = (zend_closure*) Z_OBJ_P(o2);
+
+	if (!((lhs->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && (rhs->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE))) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (Z_TYPE(lhs->this_ptr) != Z_TYPE(rhs->this_ptr)) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (Z_TYPE(lhs->this_ptr) == IS_OBJECT && Z_OBJ(lhs->this_ptr) != Z_OBJ(rhs->this_ptr)) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (lhs->called_scope != rhs->called_scope) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (lhs->func.type != rhs->func.type) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (lhs->func.common.scope != rhs->func.common.scope) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (!zend_string_equals(lhs->func.common.function_name, rhs->func.common.function_name)) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	return 0;
 }
 /* }}} */
 

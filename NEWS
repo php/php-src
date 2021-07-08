@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
  . Fixed bug #81238 (Fiber support missing for Solaris Sparc). (trowski)
+ . Fixed bug #81237 (Comparison of fake closures doesn't work). (krakjoe)
 
 - Reflection:
  . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)
