@@ -158,7 +158,10 @@ class mysqli
      */
     public function get_warnings(): mysqli_warning|false {}
 
-    /** @return bool|null */
+    /**
+     * @deprecated
+     * @return bool|null
+     * */
     public function init() {}
 
     /**

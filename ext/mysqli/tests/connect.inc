@@ -92,7 +92,7 @@
                 $flags = ($enable_env_flags) ? $connect_flags : 0;
 
                 if ($flags !== false) {
-                    parent::init();
+                    parent::__construct();
                     $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
                 } else {
                     parent::__construct($host, $user, $passwd, $db, $port, $socket);

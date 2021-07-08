@@ -360,6 +360,9 @@ PHP 8.1 UPGRADE NOTES
     mysqli_get_client_info() function has been deprecated. Use
     mysqli_get_client_info() without any arguments to obtain the client
     library version information.
+  . The mysqli::init() method has been deprecated. Replace calls to
+    parent::init() with parent::__construct().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - PDO:
   . The PDO::FETCH_SERIALIZE mode has been deprecated.

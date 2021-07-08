@@ -8,12 +8,15 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+require_once("connect.inc");
 
-    $mysqli = new mysqli();
-    $mysqli->init();
-    $mysqli->init();
-    echo "done";
+$mysqli = new mysqli();
+$mysqli->init();
+$mysqli->init();
+echo "done";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method mysqli::init() is deprecated in %s on line %d
+
+Deprecated: Method mysqli::init() is deprecated in %s on line %d
 done

@@ -13,7 +13,7 @@ require_once('skipifconnectfailure.inc');
     class test extends mysqli
     {
         public function __construct($host, $user, $passwd, $db, $port, $socket) {
-            parent::init();
+            parent::__construct();
             parent::real_connect($host, $user, $passwd, $db, $port, $socket);
         }
     }
