@@ -14,7 +14,7 @@ echo "*** Testing ctype_cntrl() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-    if (ctype_cntrl($i)) {
+    if (ctype_cntrl(chr($i))) {
         echo "character code $i is control character\n";
     }
 }

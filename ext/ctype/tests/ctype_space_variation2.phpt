@@ -14,7 +14,7 @@ echo "*** Testing ctype_space() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
-    if (ctype_space($c)) {
+    if (ctype_space(chr($c))) {
         echo "character code $c is a space character\n";
     }
 }

@@ -334,6 +334,16 @@ PHP 8.1 UPGRADE NOTES
   . Returning by reference from a void function is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Ctype:
+  . Passing a non-string value to ctype_*() functions is deprecated. A future
+    version of PHP will make ctype_*() accept a string argument, which means
+    that either only strings will be accepted (strict_types=1) or inputs may be
+    converted to string (strict_types=0). In particular, using ctype_*($cp) to
+    check whether an ASCII codepoint given as integer satisfies a given ctype
+    predicate will no longer be supported. Instead ctype_*(chr($cp)) should be
+    used.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Date:
   . The date_sunrise() and date_sunset() functions have been deprecated in
     favor of date_sun_info().

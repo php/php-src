@@ -69,6 +69,21 @@ static void ctype_impl(
 		Z_PARAM_ZVAL(c)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (Z_TYPE_P(c) == IS_STRING) {
+		char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c);
+		if (e == p) {
+			RETURN_FALSE;
+		}
+		while (p < e) {
+			if (!iswhat((int)*(unsigned char *)(p++))) {
+				RETURN_FALSE;
+			}
+		}
+		RETURN_TRUE;
+	}
+
+	php_error_docref(NULL, E_DEPRECATED,
+		"Argument of type %s will be interpreted as string in the future", zend_zval_type_name(c));
 	if (Z_TYPE_P(c) == IS_LONG) {
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) {
 			RETURN_BOOL(iswhat((int)Z_LVAL_P(c)));
@@ -79,17 +94,6 @@ static void ctype_impl(
 		} else {
 			RETURN_BOOL(allow_minus);
 		}
-	} else if (Z_TYPE_P(c) == IS_STRING) {
-		char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c);
-		if (e == p) {
-			RETURN_FALSE;
-		}
-		while (p < e) {
-			if(!iswhat((int)*(unsigned char *)(p++))) {
-				RETURN_FALSE;
-			}
-		}
-		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
