@@ -3,7 +3,7 @@ Bug #39873 (number_format() breaks with locale & decimal points)
 --SKIPIF--
 <?php
 if (!setlocale(LC_ALL, "ita","it","Italian","it_IT","it_IT.ISO8859-1","it_IT.ISO_8859-1")) {
-        die("skip locale needed for this test is not supported on this platform");
+    die("skip requires locale ['ita','it','Italian','it_IT','it_IT.ISO8859-1','it_IT.ISO_8859-1']");
 }
 ?>
 --FILE--

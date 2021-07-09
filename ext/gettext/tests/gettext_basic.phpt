@@ -13,6 +13,7 @@ gettext
 <?php
 
 chdir(__DIR__);
+putenv('LANGUAGE=');
 putenv('LC_ALL=fi_FI');
 setlocale(LC_ALL, 'fi_FI');
 bindtextdomain ("messages", "./locale");

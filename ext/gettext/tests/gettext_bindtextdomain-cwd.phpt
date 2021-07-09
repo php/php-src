@@ -16,6 +16,7 @@ if (getenv('SKIP_REPEAT')) {
 <?php
 $base_dir = __DIR__;
 chdir($base_dir);
+putenv('LANGUAGE=');
 putenv('LC_ALL=en_US.UTF-8');
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('messages',null);

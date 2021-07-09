@@ -3,7 +3,7 @@ Bug #72330 (CSV fields incorrectly split if escape char followed by UTF chars)
 --SKIPIF--
 <?php
 if (setlocale(LC_ALL, "en_US.utf8", "en_AU.utf8", "ko_KR.utf8", "zh_CN.utf8", "de_DE.utf8", "es_EC.utf8", "fr_FR.utf8", "ja_JP.utf8", "el_GR.utf8", "nl_NL.utf8") === false) {
-    die('skip available locales not usable');
+    die("skip requires locale ['en_US.utf8', 'en_AU.utf8', 'ko_KR.utf8', 'zh_CN.utf8', 'de_DE.utf8', 'es_EC.utf8', 'fr_FR.utf8', 'ja_JP.utf8', 'el_GR.utf8', 'nl_NL.utf8']");
 }
 ?>
 --FILE--

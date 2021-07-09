@@ -51,6 +51,7 @@ steps:
                        sendmail \
                        firebird-dev \
                        ${{ parameters.packages }}
+      sudo locale-gen de_DE en_US fi_FI fr_FR fr_FR@euro is_IS it_IT pt_PT ru_RU.KOI8-R sv_SE
     displayName: 'APT'
   - script: |
       mkdir /opt/oracle

@@ -11,6 +11,7 @@ if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
 --FILE--
 <?php
 chdir(__DIR__);
+putenv('LANGUAGE=');
 putenv('LC_MESSAGES=en_US.UTF-8');
 setlocale(LC_MESSAGES, 'en_US.UTF-8');
 putenv('LC_ALL=en_US.UTF-8');
