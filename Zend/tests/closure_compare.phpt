@@ -73,7 +73,7 @@ printf("foo::traitMethod != baz::traitMethod: %s\n", $closures[0] != $closures[1
 $closures[0] = Closure::fromCallable([$foo, "nonAliasMethod"]);
 $closures[1] = Closure::fromCallable([$foo, "aliasMethod"]);
 
-printf("foo::aliasMethod != baz::nonAliasMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
+printf("foo::aliasMethod != foo::nonAliasMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
 
 $closures[0] = Closure::fromCallable([$foo, "exists"]);
 $closures[1] = Closure::fromCallable([$foo, "exists"]);
