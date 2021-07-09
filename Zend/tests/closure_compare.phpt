@@ -111,7 +111,7 @@ strlen != strrev: OK
 foo::existsStatic != bar::existsStatic: OK
 foo#0::exists != foo#1::exists: OK
 foo::traitMethod != baz::traitMethod: OK
-foo::aliasMethod != baz::nonAliasMethod: OK
+foo::aliasMethod != foo::nonAliasMethod: OK
 foo::exists == foo::exists: OK
 foo::method == foo::method: OK
 foo::method != bar::method: OK

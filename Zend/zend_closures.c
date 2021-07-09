@@ -389,7 +389,11 @@ static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 		return ZEND_UNCOMPARABLE;
 	}
 
-	if (Z_OBJ(lhs->this_ptr) != Z_OBJ(rhs->this_ptr)) {
+	if (Z_TYPE(lhs->this_ptr) != Z_TYPE(rhs->this_ptr)) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (Z_TYPE(lhs->this_ptr) == IS_OBJECT && Z_OBJ(lhs->this_ptr) != Z_OBJ(rhs->this_ptr)) {
 		return ZEND_UNCOMPARABLE;
 	}
 
