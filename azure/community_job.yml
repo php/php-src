@@ -42,7 +42,7 @@ jobs:
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
         cd framework
         git rev-parse HEAD
-        php7.4 /usr/bin/composer install --no-progress
+        php8.0 /usr/bin/composer install --no-progress
         # Hack to disable a test that hangs on azure
         sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
         export USE_ZEND_ALLOC=0
@@ -56,8 +56,8 @@ jobs:
         git clone https://github.com/symfony/symfony.git --depth=1
         cd symfony
         git rev-parse HEAD
-        php7.4 /usr/bin/composer install --no-progress
-        php7.4 ./phpunit install
+        php8.0 /usr/bin/composer install --no-progress
+        php8.0 ./phpunit install
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
@@ -89,7 +89,7 @@ jobs:
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
-        php7.4 /usr/bin/composer install --no-progress
+        php8.0 /usr/bin/composer install --no-progress
         php ./phpunit
         if [ $? -gt 128 ]; then
           exit 1
@@ -97,7 +97,7 @@ jobs:
       displayName: 'Test PHPUnit'
       condition: or(succeeded(), failed())
     - script: |
-        php7.4 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
+        php8.0 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo
         git rev-parse HEAD
         export USE_ZEND_ALLOC=0
