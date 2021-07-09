@@ -295,7 +295,17 @@ typedef struct st_mysqlnd_packet_cached_sha2_result {
 	unsigned int 	error_no;
 } MYSQLND_PACKET_CACHED_SHA2_RESULT;
 
+typedef struct st_mysqlnd_packet_sasl_pk_request {
+    MYSQLND_PACKET_HEADER			header;
+    zend_uchar                      *data;
+    size_t                          data_len;
+} MYSQLND_PACKET_SASL_PK_REQUEST;
 
+typedef struct  st_mysqlnd_packet_sasl_pk_request_response {
+    MYSQLND_PACKET_HEADER	header;
+    zend_uchar 				*data;
+    size_t					data_len;
+} MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE;
 
 zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length);
