@@ -428,11 +428,19 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 	return ret;
 } /* }}} */
 
-HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
+static HashTable *mysqli_object_get_properties_for(zval *object, zend_prop_purpose purpose) /* {{{ */
 {
 	mysqli_object *obj = Z_MYSQLI_P(object);
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
+
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
@@ -447,7 +455,6 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	*is_temp = 1;
 	return retval;
 }
 
@@ -585,7 +592,8 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
-	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
+	mysqli_object_handlers.get_properties_for = mysqli_object_get_properties_for;
+
 	memcpy(&mysqli_object_driver_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));
 	mysqli_object_driver_handlers.free_obj = mysqli_driver_free_storage;
 	memcpy(&mysqli_object_link_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));
