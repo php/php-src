@@ -430,6 +430,22 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 	for (sal = psal; *sal != NULL; sal++) {
 		sa = *sal;
 
+		switch (sa->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+			case AF_INET6:
+				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+				socklen = sizeof(struct sockaddr_in6);
+				break;
+#endif
+			case AF_INET:
+				((struct sockaddr_in *)sa)->sin_port = htons(port);
+				socklen = sizeof(struct sockaddr_in);
+				break;
+			default:
+				/* Unsupported family, skip to the next */
+				continue;
+		}
+
 		/* create a socket for this address */
 		sock = socket(sa->sa_family, socktype, 0);
 
@@ -437,61 +453,40 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 			continue;
 		}
 
-		switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
-			case AF_INET6:
-				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
-				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
-				socklen = sizeof(struct sockaddr_in6);
-				break;
-#endif
-			case AF_INET:
-				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
-				((struct sockaddr_in *)sa)->sin_port = htons(port);
-				socklen = sizeof(struct sockaddr_in);
-				break;
-			default:
-				/* Unknown family */
-				socklen = 0;
-				sa = NULL;
-		}
-
-		if (sa) {
-			/* attempt to bind */
+		/* attempt to bind */
 
 #ifdef SO_REUSEADDR
-			setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
 #endif
 #ifdef IPV6_V6ONLY
-			if (sockopts & STREAM_SOCKOP_IPV6_V6ONLY) {
-				int ipv6_val = !!(sockopts & STREAM_SOCKOP_IPV6_V6ONLY_ENABLED);
-				setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&ipv6_val, sizeof(sockoptval));
-			}
+		if (sockopts & STREAM_SOCKOP_IPV6_V6ONLY) {
+			int ipv6_val = !!(sockopts & STREAM_SOCKOP_IPV6_V6ONLY_ENABLED);
+			setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&ipv6_val, sizeof(sockoptval));
+		}
 #endif
 #ifdef SO_REUSEPORT
-			if (sockopts & STREAM_SOCKOP_SO_REUSEPORT) {
-				setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&sockoptval, sizeof(sockoptval));
-			}
+		if (sockopts & STREAM_SOCKOP_SO_REUSEPORT) {
+			setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&sockoptval, sizeof(sockoptval));
+		}
 #endif
 #ifdef SO_BROADCAST
-			if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
-				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
-			}
+		if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
+			setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&sockoptval, sizeof(sockoptval));
+		}
 #endif
 #ifdef TCP_NODELAY
-			if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
-				setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
-			}
+		if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+			setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
+		}
 #endif
 
-			n = bind(sock, sa, socklen);
+		n = bind(sock, sa, socklen);
 
-			if (n != SOCK_CONN_ERR) {
-				goto bound;
-			}
-
-			err = php_socket_errno();
+		if (n != SOCK_CONN_ERR) {
+			goto bound;
 		}
+
+		err = php_socket_errno();
 
 		closesocket(sock);
 	}
@@ -825,6 +820,31 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	for (sal = psal; !fatal && *sal != NULL; sal++) {
 		sa = *sal;
 
+		switch (sa->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+			case AF_INET6:
+				if (!bindto || strchr(bindto, ':')) {
+					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+					socklen = sizeof(struct sockaddr_in6);
+				} else {
+					/* Expect IPV4 address, skip to the next */
+					continue;
+				}
+				break;
+#endif
+			case AF_INET:
+				((struct sockaddr_in *)sa)->sin_port = htons(port);
+				socklen = sizeof(struct sockaddr_in);
+				if (bindto && strchr(bindto, ':')) {
+					/* IPV4 sock can not bind to IPV6 address */
+					bindto = NULL;
+				}
+				break;
+			default:
+				/* Unsupported family, skip to the next */
+				continue;
+		}
+
 		/* create a socket for this address */
 		sock = socket(sa->sa_family, socktype, 0);
 
@@ -832,141 +852,103 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			continue;
 		}
 
-		switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
-			case AF_INET6:
-				if (!bindto || strchr(bindto, ':')) {
-					((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
-					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
-					socklen = sizeof(struct sockaddr_in6);
-				} else {
-					socklen = 0;
-					sa = NULL;
-				}
-				break;
-#endif
-			case AF_INET:
-				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
-				((struct sockaddr_in *)sa)->sin_port = htons(port);
-				socklen = sizeof(struct sockaddr_in);
-				break;
-			default:
-				/* Unknown family */
-				socklen = 0;
-				sa = NULL;
-		}
-
-		if (sa) {
 			/* make a connection attempt */
 
-			if (bindto) {
-				struct sockaddr *local_address = NULL;
-				int local_address_len = 0;
-
-				if (sa->sa_family == AF_INET) {
-					if (strchr(bindto,':')) {
-						goto skip_bind;
-					}
-					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
-
-					local_address = (struct sockaddr*)in4;
-					local_address_len = sizeof(struct sockaddr_in);
-
-					in4->sin_family = sa->sa_family;
-					in4->sin_port = htons(bindport);
-#ifdef HAVE_INET_PTON
-					if (!inet_pton(AF_INET, bindto, &in4->sin_addr)) {
-#else
-					if (!inet_aton(bindto, &in4->sin_addr)) {
-#endif
-						php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
-						goto skip_bind;
-					}
-					memset(&(in4->sin_zero), 0, sizeof(in4->sin_zero));
-				}
+		if (bindto) {
+			union {
+				struct sockaddr common;
+				struct sockaddr_in in4;
 #if HAVE_IPV6 && HAVE_INET_PTON
-				 else { /* IPV6 */
-					struct sockaddr_in6 *in6 = emalloc(sizeof(struct sockaddr_in6));
-
-					local_address = (struct sockaddr*)in6;
-					local_address_len = sizeof(struct sockaddr_in6);
-
-					in6->sin6_family = sa->sa_family;
-					in6->sin6_port = htons(bindport);
-					if (inet_pton(AF_INET6, bindto, &in6->sin6_addr) < 1) {
-						php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
-						goto skip_bind;
-					}
-				}
+				struct sockaddr_in6 in6;
 #endif
+			} local_address;
+			int local_address_len = 0;
 
-				if (!local_address || bind(sock, local_address, local_address_len)) {
-					php_error_docref(NULL, E_WARNING, "Failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
-				}
-skip_bind:
-				if (local_address) {
-					efree(local_address);
+			if (sa->sa_family == AF_INET) {
+#ifdef HAVE_INET_PTON
+				if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
+#else
+				if (inet_aton(bindto, &local_address.in4.sin_addr)) {
+#endif
+					local_address_len = sizeof(struct sockaddr_in);
+					local_address.in4.sin_family = sa->sa_family;
+					local_address.in4.sin_port = htons(bindport);
+					memset(&(local_address.in4.sin_zero), 0, sizeof(local_address.in4.sin_zero));
 				}
 			}
-			/* free error string received during previous iteration (if any) */
-			if (error_string && *error_string) {
-				zend_string_release_ex(*error_string, 0);
-				*error_string = NULL;
+#if HAVE_IPV6 && HAVE_INET_PTON
+			else { /* IPV6 */
+				if (inet_pton(AF_INET6, bindto, &local_address.in6.sin6_addr) == 1) {
+					local_address_len = sizeof(struct sockaddr_in6);
+					local_address.in6.sin6_family = sa->sa_family;
+					local_address.in6.sin6_port = htons(bindport);
+				}
 			}
+#endif
+			if (local_address_len == 0) {
+				php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
+			} else if (bind(sock, &local_address.common, local_address_len)) {
+				php_error_docref(NULL, E_WARNING, "Failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
+			}
+		}
+		/* free error string received during previous iteration (if any) */
+		if (error_string && *error_string) {
+			zend_string_release_ex(*error_string, 0);
+			*error_string = NULL;
+		}
 
 #ifdef SO_BROADCAST
-			{
-				int val = 1;
-				if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
-					setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
-				}
+		{
+			int val = 1;
+			if (sockopts & STREAM_SOCKOP_SO_BROADCAST) {
+				setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
 			}
+		}
 #endif
 
 #ifdef TCP_NODELAY
-			{
-				int val = 1;
-				if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
-					setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&val, sizeof(val));
-				}
+		{
+			int val = 1;
+			if (sockopts & STREAM_SOCKOP_TCP_NODELAY) {
+				setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&val, sizeof(val));
 			}
+		}
 #endif
-			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
-					timeout ? &working_timeout : NULL,
-					error_string, error_code);
+		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
+				timeout ? &working_timeout : NULL,
+				error_string, error_code);
 
-			if (n != -1) {
-				goto connected;
-			}
+		if (n != -1) {
+			goto connected;
+		}
 
-			/* adjust timeout for next attempt */
+		/* adjust timeout for next attempt */
 #if HAVE_GETTIMEOFDAY
-			if (timeout) {
-				gettimeofday(&time_now, NULL);
+		if (timeout) {
+			gettimeofday(&time_now, NULL);
 
-				if (!timercmp(&time_now, &limit_time, <)) {
-					/* time limit expired; don't attempt any further connections */
-					fatal = 1;
-				} else {
-					/* work out remaining time */
-					sub_times(limit_time, time_now, &working_timeout);
-				}
-			}
-#else
-			if (error_code && *error_code == PHP_TIMEOUT_ERROR_VALUE) {
-				/* Don't even bother trying to connect to the next alternative;
-				 * we have no way to determine how long we have already taken
-				 * and it is quite likely that the next attempt will fail too. */
+			if (!timercmp(&time_now, &limit_time, <)) {
+				/* time limit expired; don't attempt any further connections */
 				fatal = 1;
 			} else {
-				/* re-use the same initial timeout.
-				 * Not the best thing, but in practice it should be good-enough */
-				if (timeout) {
-					memcpy(&working_timeout, timeout, sizeof(working_timeout));
-				}
+				/* work out remaining time */
+				sub_times(limit_time, time_now, &working_timeout);
 			}
-#endif
 		}
+#else
+		if (error_code && *error_code == PHP_TIMEOUT_ERROR_VALUE) {
+			/* Don't even bother trying to connect to the next alternative;
+				* we have no way to determine how long we have already taken
+				* and it is quite likely that the next attempt will fail too. */
+			fatal = 1;
+		} else {
+			/* re-use the same initial timeout.
+				* Not the best thing, but in practice it should be good-enough */
+			if (timeout) {
+				memcpy(&working_timeout, timeout, sizeof(working_timeout));
+			}
+		}
+#endif
 
 		closesocket(sock);
 	}
