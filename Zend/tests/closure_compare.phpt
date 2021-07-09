@@ -64,7 +64,7 @@ $closures[1] = Closure::fromCallable([$baz, "traitMethod"]);
 
 printf("foo::traitMethod != baz::traitMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
 
-$closures[0] = Closure::fromCallable([$foo, "traitMetod"]);
+$closures[0] = Closure::fromCallable([$foo, "traitMethod"]);
 $closures[1] = Closure::fromCallable([$foo, "aliasMethod"]);
 
 printf("foo::traitMethod != foo::aliasMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
