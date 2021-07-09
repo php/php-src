@@ -29,9 +29,9 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
+#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
 # include <sys/param.h>
-# if __FreeBSD__ && __FreeBSD_version > 1200000
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700)
 #  include <sys/random.h>
 # endif
 #endif
@@ -99,8 +99,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000)
-	/* Linux getrandom(2) syscall or FreeBSD getrandom(2) function*/
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700)
+	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
