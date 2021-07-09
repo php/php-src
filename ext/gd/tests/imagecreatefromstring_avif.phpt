@@ -4,9 +4,12 @@ imagecreatefromstring() - AVIF format
 gd
 --SKIPIF--
 <?php
-  if (!(imagetypes() & IMG_AVIF)) {
+if (!(imagetypes() & IMG_AVIF)) {
     die('skip AVIF support required');
-  }
+}
+if (str_contains(PHP_OS, "FreeBSD")) {
+    die("xfail Currently failing on FreeBSD CI");
+}
 ?>
 --FILE--
 <?php
