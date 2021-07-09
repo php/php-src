@@ -405,10 +405,6 @@ static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 		return ZEND_UNCOMPARABLE;
 	}
 
-	if (lhs->func.type == ZEND_USER_FUNCTION) {
-		return lhs->func.op_array.opcodes != rhs->func.op_array.opcodes;
-	}
-
 	if (!zend_string_equals(lhs->func.common.function_name, rhs->func.common.function_name)) {
 		return ZEND_UNCOMPARABLE;
 	}
