@@ -1307,32 +1307,37 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		lc_function_name = zend_string_tolower(function_name);
 	}
 
+	zend_function *fbc;
 	zval *func = zend_hash_find(&ce->function_table, lc_function_name);
-	if (UNEXPECTED(!func)) {
-		if (UNEXPECTED(!key)) {
-			zend_string_release_ex(lc_function_name, 0);
-		}
-		return get_static_method_fallback(ce, function_name);
-	}
-
-	zend_function *fbc = Z_FUNC_P(func);
-	if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_class_entry *scope = zend_get_executed_scope();
-		if (UNEXPECTED(fbc->common.scope != scope)) {
-			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
-				if (!fallback_fbc) {
-					zend_bad_method_call(fbc, function_name, scope);
+	if (EXPECTED(func)) {
+		fbc = Z_FUNC_P(func);
+		if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
+			zend_class_entry *scope = zend_get_executed_scope();
+			if (UNEXPECTED(fbc->common.scope != scope)) {
+				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
+				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+					zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+					if (!fallback_fbc) {
+						zend_bad_method_call(fbc, function_name, scope);
+					}
+					fbc = fallback_fbc;
 				}
-				fbc = fallback_fbc;
 			}
 		}
+	} else {
+		fbc = get_static_method_fallback(ce, function_name);
 	}
 
-	if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-		zend_abstract_method_call(fbc);
-		fbc = NULL;
+	if (EXPECTED(fbc)) {
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			zend_abstract_method_call(fbc);
+			fbc = NULL;
+		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+			zend_error(E_DEPRECATED,
+				"Calling static trait method %s::%s is deprecated, "
+				"it should only be called on a class using the trait",
+				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+		}
 	}
 
 	if (UNEXPECTED(!key)) {
@@ -1426,6 +1431,13 @@ undeclared_property:
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));
 		return NULL;
+	}
+
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
+		zend_error(E_DEPRECATED,
+			"Accessing static trait property %s::$%s is deprecated, "
+			"it should only be accessed on a class using the trait",
+			ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));
 	}
 
 	return ret;

@@ -330,6 +330,10 @@ PHP 8.1 UPGRADE NOTES
     e.g. a truncation from 1.9 to 1, is deprecated. This affects array keys,
     int parameter and return types, and operators working on integers.
     RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
+  . Calling a static method or accessing a static property directly on a trait
+    is deprecated. Static methods and properties should only be accessed on a
+    class using the trait.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
   . Returning a non-array from __sleep will raise a warning
   . Returning by reference from a void function is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
