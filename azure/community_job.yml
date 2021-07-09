@@ -48,7 +48,7 @@ jobs:
         echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
-        git clone https://github.com/laravel/framework.git --branch=master --depth=1
+        git clone https://github.com/laravel/framework.git --branch=8.x --depth=1
         cd framework
         php7.4 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
