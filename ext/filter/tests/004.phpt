@@ -4,6 +4,7 @@ GET/POST/REQUEST Test with filtered data
 filter
 --INI--
 filter.default=special_chars
+error_reporting=E_ALL&~E_DEPRECATED
 --POST--
 d="quotes"&e=\slash
 --GET--

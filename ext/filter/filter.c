@@ -107,6 +107,9 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	for (i = 0; i < size; ++i) {
 		if ((strcasecmp(ZSTR_VAL(new_value), filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
+			if (IF_G(default_filter) != FILTER_DEFAULT) {
+				zend_error(E_DEPRECATED, "The filter.default ini setting is deprecated");
+			}
 			return SUCCESS;
 		}
 	}

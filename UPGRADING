@@ -360,6 +360,8 @@ PHP 8.1 UPGRADE NOTES
   . The FILTER_SANITIZE_STRING and FILTER_SANITIZE_STRIPPED filters have been
     deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+  . The filter.default ini setting is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - Hash:
   . The mhash(), mhash_keygen_s2k(), mhash_count(), mhash_get_block_size() and

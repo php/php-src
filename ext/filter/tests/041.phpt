@@ -5,6 +5,7 @@ filter
 --INI--
 filter.default=stripped
 filter.default_flags=0
+error_reporting=E_ALL&~E_DEPRECATED
 --COOKIE--
 abc=dir; def=true; abc=root; xyz="foo bar";
 --FILE--
