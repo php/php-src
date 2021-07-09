@@ -385,10 +385,6 @@ static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 	zend_closure *lhs = (zend_closure*) Z_OBJ_P(o1);
 	zend_closure *rhs = (zend_closure*) Z_OBJ_P(o2);
 
-	if (lhs == rhs) {
-	    return SUCCESS;
-	}
-
 	if (!((lhs->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && (rhs->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE))) {
 		return ZEND_UNCOMPARABLE;
 	}
