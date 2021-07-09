@@ -359,6 +359,9 @@ PHP 8.1 UPGRADE NOTES
   . The date_sunrise() and date_sunset() functions have been deprecated in
     favor of date_sun_info().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+  . The strftime() and gmstrftime() functions have been deprecated in favor of
+    date()/DateTime::format() (for locale-independent formatting) or
+    IntlDateFormatter::format() (for locale-dependent formatting).
 
 - Filter:
   . The FILTER_SANITIZE_STRING and FILTER_SANITIZE_STRIPPED filters have been

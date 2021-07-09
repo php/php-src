@@ -20,8 +20,10 @@ function gmmktime(
 
 function checkdate(int $month, int $day, int $year): bool {}
 
+/** @deprecated */
 function strftime(string $format, ?int $timestamp = null): string|false {}
 
+/** @deprecated */
 function gmstrftime(string $format, ?int $timestamp = null): string|false {}
 
 function time(): int {}

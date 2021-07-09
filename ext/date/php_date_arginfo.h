@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fbec11a67d5cc04667a012f25894f0d9e18833a6 */
+ * Stub hash: bc0634c149cda640616f7ecd7e173a0d6497a911 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -559,8 +559,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mktime, arginfo_mktime)
 	ZEND_FE(gmmktime, arginfo_gmmktime)
 	ZEND_FE(checkdate, arginfo_checkdate)
-	ZEND_FE(strftime, arginfo_strftime)
-	ZEND_FE(gmstrftime, arginfo_gmstrftime)
+	ZEND_DEP_FE(strftime, arginfo_strftime)
+	ZEND_DEP_FE(gmstrftime, arginfo_gmstrftime)
 	ZEND_FE(time, arginfo_time)
 	ZEND_FE(localtime, arginfo_localtime)
 	ZEND_FE(getdate, arginfo_getdate)
