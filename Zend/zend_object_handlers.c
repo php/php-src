@@ -1300,39 +1300,24 @@ static zend_always_inline zend_function *get_static_method_fallback(
 
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
-	zend_function *fbc = NULL;
 	zend_string *lc_function_name;
-	zend_class_entry *scope;
-
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
 	} else {
 		lc_function_name = zend_string_tolower(function_name);
 	}
 
-	do {
-		zval *func = zend_hash_find(&ce->function_table, lc_function_name);
-		if (EXPECTED(func != NULL)) {
-			fbc = Z_FUNC_P(func);
-		} else if (ce->constructor
-			&& ZSTR_LEN(lc_function_name) == ZSTR_LEN(ce->name)
-			&& zend_binary_strncasecmp(ZSTR_VAL(lc_function_name), ZSTR_LEN(lc_function_name), ZSTR_VAL(ce->name), ZSTR_LEN(lc_function_name), ZSTR_LEN(lc_function_name)) == 0
-			/* Only change the method to the constructor if the constructor isn't called __construct
-			 * we check for __ so we can be binary safe for lowering, we should use ZEND_CONSTRUCTOR_FUNC_NAME
-			 */
-			&& (ZSTR_VAL(ce->constructor->common.function_name)[0] != '_'
-				|| ZSTR_VAL(ce->constructor->common.function_name)[1] != '_')) {
-			fbc = ce->constructor;
-		} else {
-			if (UNEXPECTED(!key)) {
-				zend_string_release_ex(lc_function_name, 0);
-			}
-			return get_static_method_fallback(ce, function_name);
+	zval *func = zend_hash_find(&ce->function_table, lc_function_name);
+	if (UNEXPECTED(!func)) {
+		if (UNEXPECTED(!key)) {
+			zend_string_release_ex(lc_function_name, 0);
 		}
-	} while (0);
+		return get_static_method_fallback(ce, function_name);
+	}
 
+	zend_function *fbc = Z_FUNC_P(func);
 	if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
-		scope = zend_get_executed_scope();
+		zend_class_entry *scope = zend_get_executed_scope();
 		if (UNEXPECTED(fbc->common.scope != scope)) {
 			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
