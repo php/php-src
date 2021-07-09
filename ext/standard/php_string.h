@@ -28,6 +28,12 @@ PHP_MINIT_FUNCTION(nl_langinfo);
 #if ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
 #endif
+#if ZEND_INTRIN_AVX2_FUNC_PTR
+PHP_MINIT_FUNCTION(str_rot13_intrin);
+#endif
+#if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR
+PHP_MINIT_FUNCTION(strrev_intrin);
+#endif
 
 #define strnatcmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
