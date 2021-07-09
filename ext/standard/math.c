@@ -228,6 +228,32 @@ PHP_FUNCTION(abs)
 }
 /* }}} */
 
+/* {{{ Return the given value if in range of min and max */
+PHP_FUNCTION(clamp)
+{
+	zval *zvalue, *zmin, *zmax;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_NUMBER(zvalue)
+		Z_PARAM_NUMBER(zmin)
+		Z_PARAM_NUMBER(zmax)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_compare(zmin, zmax) > 0) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(zmax, zvalue) == -1) {
+		RETURN_COPY_VALUE(zmax);
+	} else if (zend_compare(zvalue, zmin) == -1) {
+		RETURN_COPY_VALUE(zmin);
+	} else {
+		RETURN_COPY_VALUE(zvalue);
+	}
+}
+/* }}} */
+
 /* {{{ Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
 {
