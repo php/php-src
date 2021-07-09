@@ -413,7 +413,7 @@ static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 		return ZEND_UNCOMPARABLE;
 	}
 
-	return SUCCESS;
+	return 0;
 }
 /* }}} */
 
