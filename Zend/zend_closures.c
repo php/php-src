@@ -561,20 +561,15 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 		for (i = 0; i < num_args; i++) {
 			zend_string *name;
 			zval info;
-			if (arg_info->name) {
-				if (zstr_args) {
-					name = zend_strpprintf(0, "%s$%s",
-							ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-							ZSTR_VAL(arg_info->name));
-				} else {
-					name = zend_strpprintf(0, "%s$%s",
-							ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-							((zend_internal_arg_info*)arg_info)->name);
-				}
-			} else {
-				name = zend_strpprintf(0, "%s$param%d",
+			ZEND_ASSERT(arg_info->name && "Argument should have name");
+			if (zstr_args) {
+				name = zend_strpprintf(0, "%s$%s",
 						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						i + 1);
+						ZSTR_VAL(arg_info->name));
+			} else {
+				name = zend_strpprintf(0, "%s$%s",
+						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
+						((zend_internal_arg_info*)arg_info)->name);
 			}
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
