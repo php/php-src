@@ -25,15 +25,9 @@ trait MethodTrait {
     public function traitMethod(){}
 }
 
-trait AliasTrait {
-    public function nonAliasMethod() {}
-}
-
 class Foo {
-    use MethodTrait;
-    
-    use AliasTrait { 
-        AliasTrait::nonAliasMethod as aliasMethod; 
+    use MethodTrait {
+        MethodTrait::traitMethod as aliasMethod;
     }
 
     public function __call($method, $args) {
@@ -70,10 +64,10 @@ $closures[1] = Closure::fromCallable([$baz, "traitMethod"]);
 
 printf("foo::traitMethod != baz::traitMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
 
-$closures[0] = Closure::fromCallable([$foo, "nonAliasMethod"]);
+$closures[0] = Closure::fromCallable([$foo, "traitMetod"]);
 $closures[1] = Closure::fromCallable([$foo, "aliasMethod"]);
 
-printf("foo::aliasMethod != foo::nonAliasMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
+printf("foo::traitMethod != foo::aliasMethod: %s\n", $closures[0] != $closures[1] ? "OK" : "FAIL");
 
 $closures[0] = Closure::fromCallable([$foo, "exists"]);
 $closures[1] = Closure::fromCallable([$foo, "exists"]);
@@ -111,7 +105,7 @@ strlen != strrev: OK
 foo::existsStatic != bar::existsStatic: OK
 foo#0::exists != foo#1::exists: OK
 foo::traitMethod != baz::traitMethod: OK
-foo::aliasMethod != foo::nonAliasMethod: OK
+foo::traitMethod != foo::aliasMethod: OK
 foo::exists == foo::exists: OK
 foo::method == foo::method: OK
 foo::method != bar::method: OK
