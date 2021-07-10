@@ -72,6 +72,11 @@ struct _zend_fiber_stack {
 	const void *asan_pointer;
 	size_t asan_size;
 #endif
+
+#ifdef ZEND_FIBER_UCONTEXT
+	/* Embedded ucontext to avoid unnecessary memory allocations. */
+	ucontext_t ucontext;
+#endif
 };
 
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
@@ -315,7 +320,8 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 	}
 
 #ifdef ZEND_FIBER_UCONTEXT
-	ucontext_t *handle = emalloc(sizeof(ucontext_t));
+	ucontext_t *handle = &context->stack->ucontext;
+
 	getcontext(handle);
 
 	handle->uc_stack.ss_size = context->stack->size;
@@ -346,10 +352,6 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_fiber_stack_free(context->stack);
-
-#ifdef ZEND_FIBER_UCONTEXT
-	efree(context->handle);
-#endif
 }
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
@@ -883,13 +885,13 @@ void zend_fiber_init(void)
 {
 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
 
-#ifdef __SANITIZE_ADDRESS__
-	// Main fiber context stack is only accessed if ASan is enabled.
+#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
+	// Main fiber stack is only needed if ASan or ucontext is enabled.
 	context->stack = emalloc(sizeof(zend_fiber_stack));
-#endif
 
 #ifdef ZEND_FIBER_UCONTEXT
-	context->handle = emalloc(sizeof(ucontext_t));
+	context->handle = &context->stack->ucontext;
+#endif
 #endif
 
 	context->status = ZEND_FIBER_STATUS_RUNNING;
@@ -903,11 +905,7 @@ void zend_fiber_init(void)
 
 void zend_fiber_shutdown(void)
 {
-#ifdef ZEND_FIBER_UCONTEXT
-	efree(EG(main_fiber_context)->handle);
-#endif
-
-#ifdef __SANITIZE_ADDRESS__
+#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
 	efree(EG(main_fiber_context)->stack);
 #endif
 
