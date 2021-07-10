@@ -17,14 +17,14 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val boolean)');
-$db->exec('INSERT INTO test VALUES(1, 1)');
-$db->exec('INSERT INTO test VALUES(2, 0)');
+$db->exec('INSERT INTO test VALUES(1, TRUE)');
+$db->exec('INSERT INTO test VALUES(2, FALSE)');
 
 $gmp = gmp_init('20', 10);
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-$s = $db->prepare('SELECT id FROM test WHERE val = :bool');
-$s->bindValue(':bool', $gmp, PDO::PARAM_BOOL);
+$s = $db->prepare('SELECT id FROM test WHERE val = :bval');
+$s->bindValue(':bval', $gmp, PDO::PARAM_BOOL);
 
 try {
     $s->execute();
@@ -34,4 +34,5 @@ try {
 ?>
 ==DONE==
 --EXPECT--
+Object of class GMP could not be converted to bool
 ==DONE==
