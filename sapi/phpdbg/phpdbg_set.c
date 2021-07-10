@@ -35,7 +35,6 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b", PHPDBG_ASYNC_SAFE),
 #endif
-	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s", 0),
 	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b", PHPDBG_ASYNC_SAFE),
@@ -196,35 +195,6 @@ PHPDBG_SET(colors) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 #endif
-
-PHPDBG_SET(oplog) /* {{{ */
-{
-	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_notice("Oplog %s", PHPDBG_G(oplog) ? "on" : "off");
-	} else switch (param->type) {
-		case STR_PARAM: {
-			/* open oplog */
-			FILE *old = PHPDBG_G(oplog);
-
-			PHPDBG_G(oplog) = fopen(param->str, "w+");
-			if (!PHPDBG_G(oplog)) {
-				phpdbg_error("Failed to open %s for oplog", param->str);
-				PHPDBG_G(oplog) = old;
-			} else {
-				if (old) {
-					phpdbg_notice("Closing previously open oplog");
-					fclose(old);
-				}
-
-				phpdbg_notice("Successfully opened oplog %s", param->str);
-			}
-		} break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */
 
 PHPDBG_SET(quiet) /* {{{ */
 {

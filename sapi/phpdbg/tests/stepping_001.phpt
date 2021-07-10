@@ -20,37 +20,28 @@ prompt> [Breakpoint #0 in ZEND_THROW at %s:4, hits: 1]
 >00004: 	throw new Exception;
  00005: }
  00006: 
-prompt> [L0 %s HANDLE_EXCEPTION                                                                       %s]
->00004: 	throw new Exception;
+prompt> >00004: 	throw new Exception;
  00005: }
  00006: 
-prompt> [L0 %s HANDLE_EXCEPTION                                                                       %s]
-[L9 %s CATCH<%d>                "Exception"                               $e                   %s]
->00008: 	foo();
+prompt> >00008: 	foo();
  00009: } catch (Exception $e) {
- 00010: 	echo "ok";
-prompt> [L10 %s ECHO                    "ok"                                                           %s]
->00010: 	echo "ok";
+ 00010: 	echo "ok\n";
+prompt> >00010: 	echo "ok\n";
  00011: } finally {
- 00012: 	echo " ... ok";
+ 00012: 	echo " ... ok\n";
 prompt> ok
-[L11 %s FAST_CALL               J7                                        ~%d                   %s]
 >00011: } finally {
- 00012: 	echo " ... ok";
+ 00012: 	echo " ... ok\n";
  00013: }
-prompt> [L12 %s ECHO                    " ... ok"                                                      %s]
->00012: 	echo " ... ok";
+prompt> >00012: 	echo " ... ok\n";
  00013: }
  00014: 
 prompt>  ... ok
-[L12 %s FAST_RET                ~%d                                                             %s]
-[L11 %s JMP                     J9                                                             %s]
 >00011: } finally {
- 00012: 	echo " ... ok";
+ 00012: 	echo " ... ok\n";
  00013: }
-prompt> [L14 %s RETURN<-1>              1                                                              %s]
->00014: 
-prompt> 
+prompt> >00014: 
+prompt>
 --FILE--
 <?php
 
@@ -61,7 +52,7 @@ function foo() {
 try {
 	foo();
 } catch (Exception $e) {
-	echo "ok";
+	echo "ok\n";
 } finally {
-	echo " ... ok";
+	echo " ... ok\n";
 }

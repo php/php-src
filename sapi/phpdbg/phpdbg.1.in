@@ -49,10 +49,6 @@ Override .phpgdbinit location (implies -I)
 .B \-I
 Ignore .phpdbginit (default init file)
 .TP
-.B \-O \fIfile\fR
-Set oplog output to
-.IR file
-.TP
 .B \-r
 Jump straight to run
 .TP

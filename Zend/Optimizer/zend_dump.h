@@ -27,6 +27,7 @@
 #define ZEND_DUMP_CFG                  (1<<2)
 #define ZEND_DUMP_SSA                  (1<<3)
 #define ZEND_DUMP_LIVE_RANGES          (1<<4)
+#define ZEND_DUMP_LINE_NUMBERS         (1<<5)
 
 BEGIN_EXTERN_C()
 

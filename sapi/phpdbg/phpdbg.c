@@ -122,7 +122,6 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->in_execution = 0;
 	pg->bp_count = 0;
 	pg->flags = PHPDBG_DEFAULT_FLAGS;
-	pg->oplog = NULL;
 	memset(pg->io, 0, sizeof(pg->io));
 	pg->frame.num = 0;
 	pg->sapi_name_ptr = NULL;
@@ -197,11 +196,6 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(exec)) {
 		free(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
-	}
-
-	if (PHPDBG_G(oplog)) {
-		fclose(PHPDBG_G(oplog));
-		PHPDBG_G(oplog) = NULL;
 	}
 
 	if (PHPDBG_G(oplog_list)) {
@@ -1134,8 +1128,6 @@ int main(int argc, char **argv) /* {{{ */
 	char *init_file;
 	size_t init_file_len;
 	bool init_file_default;
-	char *oplog_file;
-	size_t oplog_file_len;
 	uint64_t flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
@@ -1186,8 +1178,6 @@ phpdbg_main:
 	init_file = NULL;
 	init_file_len = 0;
 	init_file_default = 1;
-	oplog_file = NULL;
-	oplog_file_len = 0;
 	flags = PHPDBG_DEFAULT_FLAGS;
 	is_exit = 0;
 	php_optarg = NULL;
@@ -1278,13 +1268,6 @@ phpdbg_main:
 				init_file_len = strlen(php_optarg);
 				if (init_file_len) {
 					init_file = strdup(php_optarg);
-				}
-			} break;
-
-			case 'O': { /* set oplog output */
-				oplog_file_len = strlen(php_optarg);
-				if (oplog_file_len) {
-					oplog_file = strdup(php_optarg);
 				}
 			} break;
 
@@ -1442,9 +1425,6 @@ phpdbg_main:
 			if (exec) {
 				free(exec);
 			}
-			if (oplog_file) {
-				free(oplog_file);
-			}
 			if (init_file) {
 				free(init_file);
 			}
@@ -1533,15 +1513,6 @@ phpdbg_main:
 		PHPDBG_G(php_stdiop_write) = php_stream_stdio_ops.write;
 		php_stream_stdio_ops.write = phpdbg_stdiop_write;
 #endif
-
-		if (oplog_file) { /* open oplog */
-			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
-			if (!PHPDBG_G(oplog)) {
-				phpdbg_error("Failed to open oplog %s", oplog_file);
-			}
-			free(oplog_file);
-			oplog_file = NULL;
-		}
 
 		{
 			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
@@ -1757,7 +1728,6 @@ phpdbg_out:
 				settings->exec = zend_strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 				settings->exec_len = PHPDBG_G(exec_len);
 			}
-			settings->oplog = PHPDBG_G(oplog);
 			settings->prompt[0] = PHPDBG_G(prompt)[0];
 			settings->prompt[1] = PHPDBG_G(prompt)[1];
 			memcpy(ZEND_VOIDP(settings->colors), PHPDBG_G(colors), sizeof(settings->colors));

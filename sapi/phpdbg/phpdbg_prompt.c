@@ -1107,7 +1107,6 @@ PHPDBG_COMMAND(info) /* {{{ */
 	phpdbg_writeln("Compiled   %s", PHPDBG_G(ops) ? "yes" : "no");
 	phpdbg_writeln("Stepping   %s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 	phpdbg_writeln("Quietness  %s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-	phpdbg_writeln("Oplog      %s", PHPDBG_G(oplog) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
 		phpdbg_writeln("Opcodes    %d", PHPDBG_G(ops)->last);
