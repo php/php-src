@@ -102,28 +102,60 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return NULL;
 	}
 
-	if (IS_SLASH(path[0])) {
-		return path + 1;
+	if (path_len == 1 && (path[0] == '.' || IS_SLASH(path[0]) || path[0] == ':')) {
+		return NULL;
 	}
 
 	i = path_len;
 
 	while (1) {
-		while (i > 0 && !IS_SLASH(path[i])) {
+		while (i > 0 && !(IS_SLASH(path[i]) || path[i] == ':')) {
 			i--;
 		}
 
 		if (!i) {
-			return path;
+			if (IS_SLASH(path[0]) || path[0] == ':') {
+				path_begin = path + 1;
+			} else {
+				path_begin = path;
+			}
+			break;
 		}
 
-		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
-			/* i is the position of . or :, add 1 for / */
+		if (i == 1 && path[i] == ':') {
 			path_begin = path + i + 1;
 			break;
 		}
+
+		if (i >= 1 && path[i - 1] == ':') {
+			path_begin = path + i + 1;
+			break;
+		}
+
+		if (i == 2 && path[i - 2] == '.' && path[i - 1] == '.') {
+			path_begin = path + 3;
+			break;
+		}
+
+		if (i >= 3 && IS_SLASH(path[i - 3]) && path[i - 2] == '.' && path[i - 1] == '.') {
+			path_begin = path + i + 1;
+			break;
+		}
+
 		i--;
 	}
+
+#ifdef PHP_WIN32
+	if (path[path_len - 1] == '.') {
+		path[path_len - 1] = '_';
+	}
+
+	for (i = 1; i < path_len; i++) {
+		if (IS_SLASH(path[i]) && path[i - 1] == '.') {
+			 path[i - 1] = '_';
+		}
+	}
+#endif
 
 	return path_begin;
 }
