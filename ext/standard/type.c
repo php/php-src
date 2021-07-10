@@ -220,7 +220,6 @@ PHP_FUNCTION(boolval)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Need to do explicit exception check? */
 	RETURN_BOOL(zend_is_true(value));
 }
 /* }}} */
