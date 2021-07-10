@@ -8201,7 +8201,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if (Z_MODE(op1_addr) == IS_CONST_ZVAL) {
-	    /* zend_is_true() cannot fail as op1 cannot be an object */
+		/* zend_is_true() cannot fail as op1 cannot be an object */
 		if (zend_is_true(Z_ZV(op1_addr))) {
 			/* Always TRUE */
 			if (set_bool) {
