@@ -8320,7 +8320,8 @@ ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 
-	return 0;
+	/* Objects might throw a type error if they cannot be converted to bool */
+	return Z_TYPE_P(op) == IS_OBJECT;
 }
 
 static inline bool zend_try_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op) /* {{{ */
