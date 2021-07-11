@@ -1189,11 +1189,13 @@ fi
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
+AC_ARG_ENABLE([fiber-asm],
+  [AS_HELP_STRING([--disable-fiber-asm],
+    [Disable the use of boost fiber assembly files])],
+  [fiber_asm=$enableval], [fiber_asm='yes'])
+
 PHP_HELP_SEPARATOR([Zend:])
 PHP_CONFIGURE_PART(Configuring Zend)
-
-AC_MSG_CHECKING(for fiber switching context)
-fibers="yes"
 
 AS_CASE([$host_cpu],
   [x86_64*|amd64*], [fiber_cpu="x86_64"],
@@ -1231,14 +1233,23 @@ if test "$fiber_os" = 'mac'; then
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
   fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
-  fibers="no"
+  fiber_asm="no"
 fi
 
-if test "$fibers" = 'yes'; then
+if test "$fiber_asm" = 'yes'; then
+  AC_MSG_CHECKING([for fiber switching context])
+  AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
   AC_MSG_RESULT([$fiber_asm_file])
 else
-  AC_MSG_ERROR([Unable to determine platform!])
+  if test "$fiber_os" = 'mac'; then
+    AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
+  fi
+  AC_CHECK_HEADER(ucontext.h, [
+    AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
+  ], [
+       AC_MSG_ERROR([fibers not available on this platform])
+  ])
 fi
 
 LIBZEND_BASIC_CHECKS

@@ -73,7 +73,7 @@ typedef struct _zend_fiber_transfer {
 typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 
 struct _zend_fiber_context {
-	/* Handle to fiber state as needed by boost.context */
+	/* Pointer to boost.context or ucontext_t data. */
 	void *handle;
 
 	/* Pointer that identifies the fiber type. */

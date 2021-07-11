@@ -72,6 +72,11 @@ struct _zend_fiber_stack {
 	const void *asan_pointer;
 	size_t asan_size;
 #endif
+
+#ifdef ZEND_FIBER_UCONTEXT
+	/* Embedded ucontext to avoid unnecessary memory allocations. */
+	ucontext_t ucontext;
+#endif
 };
 
 /* Zend VM state that needs to be captured / restored during fiber context switch. */
@@ -113,6 +118,10 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(active_fiber) = state->active_fiber;
 }
 
+#ifdef ZEND_FIBER_UCONTEXT
+# include <ucontext.h>
+ZEND_TLS zend_fiber_transfer *transfer_data;
+#else
 /* boost_context_data is our customized definition of struct transfer_t as
  * provided by boost.context in fcontext.hpp:
  *
@@ -130,7 +139,8 @@ typedef struct {
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
 extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *data);
+extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+#endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
 static zend_class_entry *zend_ce_fiber_error;
@@ -244,20 +254,29 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 
 	efree(stack);
 }
-
+#ifdef ZEND_FIBER_UCONTEXT
+static ZEND_NORETURN void zend_fiber_trampoline(void)
+#else
 static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+#endif
 {
-	zend_fiber_context *from = data.transfer->context;
+	/* Initialize transfer struct with a copy of passed data. */
+#ifdef ZEND_FIBER_UCONTEXT
+	zend_fiber_transfer transfer = *transfer_data;
+#else
+	zend_fiber_transfer transfer = *data.transfer;
+#endif
+
+	zend_fiber_context *from = transfer.context;
 
 #ifdef __SANITIZE_ADDRESS__
 	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
 #endif
 
-	/* Get a hold of the context that resumed us and update its handle to allow for symmetric coroutines. */
+#ifndef ZEND_FIBER_UCONTEXT
+	/* Get the context that resumed us and update its handle to allow for symmetric coroutines. */
 	from->handle = data.handle;
-
-	/* Initialize transfer struct with a copy of passed data. */
-	zend_fiber_transfer transfer = *data.transfer;
+#endif
 
 	/* Ensure that previous fiber will be cleaned up (needed by symmetric coroutines). */
 	if (from->status == ZEND_FIBER_STATUS_DEAD) {
@@ -300,11 +319,26 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 		return false;
 	}
 
+#ifdef ZEND_FIBER_UCONTEXT
+	ucontext_t *handle = &context->stack->ucontext;
+
+	getcontext(handle);
+
+	handle->uc_stack.ss_size = context->stack->size;
+	handle->uc_stack.ss_sp = context->stack->pointer;
+	handle->uc_stack.ss_flags = 0;
+	handle->uc_link = NULL;
+
+	makecontext(handle, (void (*)(void)) zend_fiber_trampoline, 0);
+
+	context->handle = handle;
+#else
 	// Stack grows down, calculate the top of the stack. make_fcontext then shifts pointer to lower 16-byte boundary.
 	void *stack = (void *) ((uintptr_t) context->stack->pointer + context->stack->size);
 
 	context->handle = make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
 	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
+#endif
 
 	context->kind = kind;
 	context->function = coroutine;
@@ -363,14 +397,26 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 		to->stack->asan_size);
 #endif
 
+#ifdef ZEND_FIBER_UCONTEXT
+	transfer_data = transfer;
+
+	swapcontext(from->handle, to->handle);
+
+	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
+	*transfer = *transfer_data;
+#else
 	boost_context_data data = jump_fcontext(to->handle, transfer);
 
 	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
 	*transfer = *data.transfer;
+#endif
 
-	/* Get a hold of the context that resumed us and update its handle to allow for symmetric coroutines. */
 	to = transfer->context;
+
+#ifndef ZEND_FIBER_UCONTEXT
+	/* Get the context that resumed us and update its handle to allow for symmetric coroutines. */
 	to->handle = data.handle;
+#endif
 
 #ifdef __SANITIZE_ADDRESS__
 	__sanitizer_finish_switch_fiber(fake_stack, &to->stack->asan_pointer, &to->stack->asan_size);
@@ -839,9 +885,13 @@ void zend_fiber_init(void)
 {
 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
 
-#ifdef __SANITIZE_ADDRESS__
-	// Main fiber context stack is only accessed if ASan is enabled.
+#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
+	// Main fiber stack is only needed if ASan or ucontext is enabled.
 	context->stack = emalloc(sizeof(zend_fiber_stack));
+
+#ifdef ZEND_FIBER_UCONTEXT
+	context->handle = &context->stack->ucontext;
+#endif
 #endif
 
 	context->status = ZEND_FIBER_STATUS_RUNNING;
@@ -855,9 +905,10 @@ void zend_fiber_init(void)
 
 void zend_fiber_shutdown(void)
 {
-#ifdef __SANITIZE_ADDRESS__
+#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
 	efree(EG(main_fiber_context)->stack);
 #endif
+
 	efree(EG(main_fiber_context));
 
 	zend_fiber_switch_block();
