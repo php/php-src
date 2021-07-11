@@ -260,8 +260,6 @@ static ZEND_NORETURN void zend_fiber_trampoline(void)
 static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 #endif
 {
-	zend_fiber_context *context = EG(current_fiber_context);
-
 	/* Initialize transfer struct with a copy of passed data. */
 #ifdef ZEND_FIBER_UCONTEXT
 	zend_fiber_transfer transfer = *transfer_data;
@@ -271,19 +269,21 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
 
 	zend_fiber_context *from = transfer.context;
 
+#ifdef __SANITIZE_ADDRESS__
+	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
+#endif
+
 #ifndef ZEND_FIBER_UCONTEXT
 	/* Get the context that resumed us and update its handle to allow for symmetric coroutines. */
 	from->handle = data.handle;
-#endif
-
-#ifdef __SANITIZE_ADDRESS__
-	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
 #endif
 
 	/* Ensure that previous fiber will be cleaned up (needed by symmetric coroutines). */
 	if (from->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_fiber_destroy_context(from);
 	}
+
+	zend_fiber_context *context = EG(current_fiber_context);
 
 	context->function(&transfer);
 	context->status = ZEND_FIBER_STATUS_DEAD;
