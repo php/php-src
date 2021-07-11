@@ -1242,6 +1242,9 @@ if test "$fiber_asm" = 'yes'; then
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
   AC_MSG_RESULT([$fiber_asm_file])
 else
+  if test "$fiber_os" = 'mac'; then
+    AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
+  fi
   AC_CHECK_HEADER(ucontext.h, [
     AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
   ], [
