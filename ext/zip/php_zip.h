@@ -71,7 +71,8 @@ static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
-php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC);
+php_stream *php_stream_zip_open_ex(const char *filename, const char *path, const char *mode, const char *password STREAMS_DC);
+#define php_stream_zip_open(filename, path, mode) php_stream_zip_open_ex(filename, path, mode STREAMS_CC);
 
 extern const php_stream_wrapper php_stream_zip_wrapper;
 

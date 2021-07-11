@@ -2780,10 +2780,12 @@ static ZIPARCHIVE_METHOD(getStream)
 	zend_string *filename;
 	php_stream *stream;
 	ze_zip_object *obj;
+	char *password = NULL;
+	size_t password_len;
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|s!", &filename, &password, &password_len) == FAILURE) {
 		return;
 	}
 
@@ -2793,7 +2795,7 @@ static ZIPARCHIVE_METHOD(getStream)
 
 	obj = Z_ZIP_P(self);
 
-	stream = php_stream_zip_open(obj->filename, ZSTR_VAL(filename), mode STREAMS_CC);
+	stream = php_stream_zip_open_ex(obj->filename, ZSTR_VAL(filename), mode, password STREAMS_CC);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
 	} else {
@@ -2918,6 +2920,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_getstream, 0, 0, 1)
 	ZEND_ARG_INFO(0, entryname)
+	ZEND_ARG_INFO(0, password)
 ZEND_END_ARG_INFO()
 
 #ifdef ZIP_OPSYS_DEFAULT

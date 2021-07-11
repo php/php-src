@@ -210,7 +210,7 @@ const php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC)
+php_stream *php_stream_zip_open_ex(const char *filename, const char *path, const char *mode, const char *password STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
 	int err = 0;
@@ -234,6 +234,14 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 			return NULL;
 		}
 
+		if (password != NULL) {
+			if (zip_set_default_password(stream_za, password) != 0) {
+				php_error_docref(NULL, E_WARNING, "password could not be set");
+				zip_close(stream_za);
+				return NULL;
+			}
+		}
+
 		zf = zip_fopen(stream_za, path, 0);
 		if (zf) {
 			self = emalloc(sizeof(*self));
@@ -254,7 +262,6 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 	} else {
 		return stream;
 	}
-
 }
 /* }}} */
 
