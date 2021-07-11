@@ -71,25 +71,25 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/final_class_const
 
 - Fileinfo:
-  . The fileinfo functions now accept and return, respectively, finfo objects
+  . The fileinfo functions now accept and return finfo objects
     instead of resources.
 
 - FTP:
-  . The FTP functions now accept and return, respectively, FTP\Connection objects
+  . The FTP functions now accept and return FTP\Connection objects
     instead of resources.
 
 - IMAP:
-  . The IMAP functions now accept and return, respectively, IMAP\Connection objects
+  . The IMAP functions now accept and return IMAP\Connection objects
     instead of resources.
 
 - LDAP:
-  . The LDAP functions now accept and return, respectively, LDAP\Connection objects
+  . The LDAP functions now accept and return LDAP\Connection objects
     instead of "ldap link" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAP\Result objects
+  . The LDAP functions now accept and return LDAP\Result objects
     instead of "ldap result" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAP\ResultEntry
+  . The LDAP functions now accept and return LDAP\ResultEntry
     objects instead of "ldap result entry" resources. Return value checks using
     is_resource() should be replaced with checks for `false`.
 
@@ -134,13 +134,13 @@ PHP 8.1 UPGRADE NOTES
     PDO::ATTR_STRINGIFY_FETCHES option.
 
 - PgSQL:
-  . The PgSQL functions now accept and return, respectively, \PgSql\Connection
+  . The PgSQL functions now accept and return \PgSql\Connection
     objects instead of "pgsql link" resources. Return value checks using
     is_resource() should be replaced with checks for `false`.
-  . The PgSQL functions now accept and return, respectively, \PgSql\Result
+  . The PgSQL functions now accept and return \PgSql\Result
     objects instead of "pgsql result" resources. Return value checks using
     is_resource() should be replaced with checks for `false`.
-  . The PgSQL functions now accept and return, respectively, \PgSql\Lob
+  . The PgSQL functions now accept and return \PgSql\Lob
     objects instead of "pgsql large object" resources. Return value checks
     using is_resource() should be replaced with checks for `false`.
   . Not passing the connection argument to PgSQL functions and using the
@@ -148,10 +148,10 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - PSpell:
-  . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
+  . The PSpell functions now accept and return PSpell\Dictionary objects
     instead of "pspell" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
-  . The PSpell functions now accept and return, respectively, PSpell\Config objects
+  . The PSpell functions now accept and return PSpell\Config objects
     instead of "pspell config" resources. Return value checks using is_resource()
     should be replaced with checks for `false`.
 
