@@ -741,9 +741,7 @@ void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b,
 	}
 
 	zend_dump_op(op_array, b, opline, dump_flags &~ ZEND_DUMP_LINE_NUMBERS, ssa, ssa_op);
-	if (!(dump_flags & ZEND_DUMP_NO_LINE_END)) {
-		fprintf(stderr, "\n");
-	}
+	fprintf(stderr, "\n");
 }
 
 static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)
