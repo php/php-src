@@ -22,7 +22,6 @@
 #include "zend_types.h"
 
 void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags);
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags);
 
 typedef struct _phpdbg_oplog_entry phpdbg_oplog_entry;
 struct _phpdbg_oplog_entry {

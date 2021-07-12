@@ -25,7 +25,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
 {
 	if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) && (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 		zend_dump_op_line(&EX(func)->op_array, NULL, EX(opline), ZEND_DUMP_LINE_NUMBERS, NULL);
@@ -43,9 +43,4 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) 
 		PHPDBG_G(oplog_cur)->next = cur;
 		PHPDBG_G(oplog_cur) = cur;
 	}
-} /* }}} */
-
-void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
-{
-	phpdbg_print_opline_ex(execute_data, ignore_flags);
 } /* }}} */

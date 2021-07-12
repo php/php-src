@@ -1675,7 +1675,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
-			phpdbg_print_opline_ex(execute_data, 0);
+			phpdbg_print_opline(execute_data, 0);
 			goto next;
 		}
 
@@ -1719,7 +1719,7 @@ ex_is_caught:
 		}
 
 		/* not while in conditionals */
-		phpdbg_print_opline_ex(execute_data, 0);
+		phpdbg_print_opline(execute_data, 0);
 
 		/* perform seek operation */
 		if ((PHPDBG_G(flags) & PHPDBG_SEEK_MASK) && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
