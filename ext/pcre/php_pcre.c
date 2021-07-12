@@ -1716,7 +1716,7 @@ matched:
 			}
 
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, 0);
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -1802,14 +1802,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
@@ -1956,7 +1954,7 @@ matched:
 			ZEND_ASSERT(eval_result);
 			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, 0);
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -2013,14 +2011,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
