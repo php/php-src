@@ -32,6 +32,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	timelib_time *swp;
 	timelib_sll dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
 	timelib_time_offset *trans = NULL;
+	bool normalize = 0;
 
 
 	rt = timelib_rel_time_ctor();
@@ -127,8 +128,14 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 				rt->d--;
 				rt->h = 24;
 			}
+		} else {
+			normalize = 1;
 		}
 	} else {
+		normalize = 1;
+	}
+
+	if (normalize) {
 		/* Then for all the others */
 		rt->h -= dst_h_corr + (two->dst - one->dst);
 		rt->i -= dst_m_corr;
