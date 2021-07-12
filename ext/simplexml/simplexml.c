@@ -234,7 +234,12 @@ static zval *sxe_prop_dim_read(zend_object *object, zval *member, bool elements,
 		goto long_dim;
 	} else {
 		ZVAL_DEREF(member);
-		if (Z_TYPE_P(member) == IS_LONG) {
+		if (Z_TYPE_P(member) == IS_LONG || Z_TYPE_P(member) == IS_DOUBLE) {
+			if (Z_TYPE_P(member) == IS_DOUBLE) {
+				ZVAL_LONG(&tmp_zv, (long) Z_DVAL_P(member));
+				member = &tmp_zv;
+			}
+
 			if (sxe->iter.type != SXE_ITER_ATTRLIST) {
 long_dim:
 				attribs = 0;
@@ -412,7 +417,12 @@ static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, 
 		goto long_dim;
 	} else {
 		ZVAL_DEREF(member);
-		if (Z_TYPE_P(member) == IS_LONG) {
+		if (Z_TYPE_P(member) == IS_LONG || Z_TYPE_P(member) == IS_DOUBLE) {
+			if (Z_TYPE_P(member) == IS_DOUBLE) {
+				ZVAL_LONG(&tmp_zv, (long) Z_DVAL_P(member));
+				member = &tmp_zv;
+			}
+
 			if (sxe->iter.type != SXE_ITER_ATTRLIST) {
 long_dim:
 				attribs = 0;
