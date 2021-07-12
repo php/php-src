@@ -896,7 +896,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	{
 		char *tmp = getenv("USE_ZEND_DTRACE");
 
-		if (tmp && zend_atoi(tmp, 0)) {
+		if (tmp && ZEND_ATOL(tmp)) {
 			zend_dtrace_enabled = 1;
 			zend_compile_file = dtrace_compile_file;
 			zend_execute_ex = dtrace_execute_ex;
