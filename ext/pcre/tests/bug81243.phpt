@@ -1,5 +1,5 @@
 --TEST--
-
+Bug #81243 (Too much memory is allocated for preg_replace())
 --FILE--
 <?php
 $test_string = str_repeat('Eins zwei drei', 2000);
