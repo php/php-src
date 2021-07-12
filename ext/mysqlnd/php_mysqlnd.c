@@ -157,9 +157,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
-	zend_long long_value;
-
-	ZEND_ATOL(long_value, ZSTR_VAL(new_value));
+	zend_long long_value = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 		return FAILURE;
 	}

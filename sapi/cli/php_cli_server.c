@@ -2382,7 +2382,7 @@ static void php_cli_server_startup_workers() {
 	}
 
 #if HAVE_FORK
-	ZEND_ATOL(php_cli_server_workers_max, workers);
+	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
 

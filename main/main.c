@@ -236,9 +236,7 @@ static PHP_INI_MH(OnSetFacility)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetPrecision)
 {
-	zend_long i;
-
-	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	zend_long i = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (i >= -1) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -251,9 +249,7 @@ static PHP_INI_MH(OnSetPrecision)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetSerializePrecision)
 {
-	zend_long i;
-
-	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	zend_long i = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (i >= -1) {
 		PG(serialize_precision) = i;
 		return SUCCESS;
@@ -402,11 +398,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
+		EG(timeout_seconds) = ZEND_ATOL(ZSTR_VAL(new_value));
 		return SUCCESS;
 	}
 	zend_unset_timeout();
-	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
+	EG(timeout_seconds) = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (stage != PHP_INI_STAGE_DEACTIVATE) {
 		/*
 		 * If we're restoring INI values, we shouldn't reset the timer.
@@ -423,8 +419,6 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* {{{ php_get_display_errors_mode() helper function */
 static zend_uchar php_get_display_errors_mode(zend_string *value)
 {
-	zend_uchar mode;
-
 	if (!value) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
@@ -446,7 +440,7 @@ static zend_uchar php_get_display_errors_mode(zend_string *value)
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
-	ZEND_ATOL(mode, ZSTR_VAL(value));
+	zend_uchar mode = ZEND_ATOL(ZSTR_VAL(value));
 	if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}

@@ -308,7 +308,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	}
 	H->pgoid = PQoidValue(res);
 	if (qs == PGRES_COMMAND_OK) {
-		ZEND_ATOL(ret, PQcmdTuples(res));
+		ret = ZEND_ATOL(PQcmdTuples(res));
 	} else {
 		ret = Z_L(0);
 	}

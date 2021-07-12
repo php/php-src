@@ -246,7 +246,7 @@ stmt_retry:
 	}
 
 	if (status == PGRES_COMMAND_OK) {
-		ZEND_ATOL(stmt->row_count, PQcmdTuples(S->result));
+		stmt->row_count = ZEND_ATOL(PQcmdTuples(S->result));
 		H->pgoid = PQoidValue(S->result);
 	} else {
 		stmt->row_count = (zend_long)PQntuples(S->result);
@@ -272,14 +272,14 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (ZSTR_VAL(param->name)[0] == '$') {
-						ZEND_ATOL(param->paramno, ZSTR_VAL(param->name) + 1);
+						param->paramno = ZEND_ATOL(ZSTR_VAL(param->name) + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						zend_string *namevar;
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find_ptr(stmt->bound_param_map,
 								param->name)) != NULL) {
-							ZEND_ATOL(param->paramno, ZSTR_VAL(namevar) + 1);
+							param->paramno = ZEND_ATOL(ZSTR_VAL(namevar) + 1);
 							param->paramno--;
 						} else {
 							pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", ZSTR_VAL(param->name));
@@ -505,12 +505,8 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 #if SIZEOF_ZEND_LONG >= 8
 			case INT8OID:
 #endif
-			{
-				zend_long intval;
-				ZEND_ATOL(intval, ptr);
-				ZVAL_LONG(result, intval);
+				ZVAL_LONG(result, ZEND_ATOL(ptr));
 				break;
-			}
 
 			case OIDOID: {
 				char *end_ptr;
