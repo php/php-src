@@ -31,19 +31,20 @@ foreach($f as $k => $v)
 
 class MyCSVFile extends SplFileObject
 {
-    function current(): string|array|false
+    function current(): string
     {
-        return parent::fgetcsv(',', '"');
+        return implode('|', parent::fgetcsv(',', '"'));
     }
 }
 
 $phar->setInfoClass('MyCSVFile');
+/** @var MyCSVFile $v */
 $v = $phar['a.csv'];
 
 echo "===3===\n";
 while(!$v->eof())
 {
-    echo $v->key() . "=>" . join('|',$v->fgetcsv()) . "\n";
+    echo $v->key() . "=>" . join('|', $v->fgetcsv()) . "\n";
 }
 
 echo "===4===\n";
@@ -51,13 +52,13 @@ $v->rewind();
 while(!$v->eof())
 {
     $l = $v->fgetcsv();
-    echo $v->key() . "=>" . join('|',$l) . "\n";
+    echo $v->key() . "=>" . join('|', $l) . "\n";
 }
 
 echo "===5===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . $d . "\n";
 }
 
 class MyCSVFile2 extends SplFileObject
@@ -70,6 +71,7 @@ class MyCSVFile2 extends SplFileObject
 }
 
 $phar->setInfoClass('MyCSVFile2');
+/** @var MyCSVFile2 $v */
 $v = $phar['a.csv'];
 
 echo "===6===\n";

@@ -148,8 +148,8 @@ class FilesystemIterator extends DirectoryIterator
     /** @tentative-return-type */
     public function key(): string {}
 
-    /** @return string|SplFileInfo|FilesystemIterator */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): string|SplFileInfo|FilesystemIterator {}
 
     /** @tentative-return-type */
     public function getFlags(): int {}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d14bdc42fcf352bcfaadab01c44856d72ec4ee26 */
+ * Stub hash: 982c23b21224351dfdb7be670eb78d1559b9ffbd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -124,7 +124,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
-#define arginfo_class_FilesystemIterator_current arginfo_class_DirectoryIterator_key
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_FilesystemIterator_current, 0, 0, SplFileInfo|FilesystemIterator, MAY_BE_STRING)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_FilesystemIterator_getFlags, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

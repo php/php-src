@@ -4,6 +4,7 @@ Invalid SplFileObject::getCurrentLine() return type
 <?php
 
 class MySplFileObject extends SplFileObject {
+    #[ReturnTypeWillChange]
     public function getCurrentLine(): string {
         return [1, 2, 3];
     }
