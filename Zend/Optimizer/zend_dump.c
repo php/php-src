@@ -720,7 +720,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 }
 
-static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
@@ -741,7 +741,9 @@ static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_bl
 	}
 
 	zend_dump_op(op_array, b, opline, dump_flags &~ ZEND_DUMP_LINE_NUMBERS, ssa, ssa_op);
-	fprintf(stderr, "\n");
+	if (!(dump_flags & ZEND_DUMP_NO_LINE_END)) {
+		fprintf(stderr, "\n");
+	}
 }
 
 static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)

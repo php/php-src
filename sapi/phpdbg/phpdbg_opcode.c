@@ -29,7 +29,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, bool ignore_flags) 
 {
 	if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) && (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 		fprintf(stderr, "[");
-		zend_dump_op(&EX(func)->op_array, NULL, EX(opline), ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
+		zend_dump_op_line(&EX(func)->op_array, NULL, EX(opline), ZEND_DUMP_LINE_NUMBERS | ZEND_DUMP_NO_LINE_END, NULL);
 		fprintf(stderr, "]\n");
 	}
 

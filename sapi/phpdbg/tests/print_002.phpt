@@ -29,7 +29,7 @@ L0015 0004 V1 = DO_ICALL
 L0015 0005 SEND_VAR V1 1
 L0015 0006 DO_ICALL
 L0016 0007 RETURN null
-prompt> [L0015 INIT_FCALL %d %d string("var_dump")]
+prompt> [L0015 0001 INIT_FCALL %d %d string("var_dump")]
 prompt> 
 --FILE--
 <?php
