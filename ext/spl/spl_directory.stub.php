@@ -123,10 +123,10 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     public function valid(): bool {}
 
     /** @return int */
-    public function key() {}
+    public function key() {} // TODO change return type to string
 
     /** @return DirectoryIterator */
-    public function current() {}
+    public function current() {} // TODO fix return type so that FilesystemIterator::current() remains compatible
 
     /** @tentative-return-type */
     public function next(): void {}
@@ -145,8 +145,8 @@ class FilesystemIterator extends DirectoryIterator
     /** @tentative-return-type */
     public function rewind(): void {}
 
-    /** @return string */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): string {}
 
     /** @return string|SplFileInfo|FilesystemIterator */
     public function current() {}
@@ -206,7 +206,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fread(int $length): string|false {}
 
     /** @tentative-return-type */
-    public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false|null {}
+    public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
 
     /** @tentative-return-type */
     public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
@@ -251,7 +251,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function ftruncate(int $size): bool {}
 
     /** @tentative-return-type */
-    public function current(): string|array|false {}
+    public function current(): string|false {}
 
     /** @tentative-return-type */
     public function key(): int {}

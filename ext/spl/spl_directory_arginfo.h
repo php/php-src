@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 075912b601422bba070eab7618a915a01327eb5d */
+ * Stub hash: d14bdc42fcf352bcfaadab01c44856d72ec4ee26 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -122,7 +122,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FilesystemIterator_rewind arginfo_class_SplFileInfo__bad_state_ex
 
-#define arginfo_class_FilesystemIterator_key arginfo_class_DirectoryIterator_key
+#define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
 #define arginfo_class_FilesystemIterator_current arginfo_class_DirectoryIterator_key
 
@@ -180,7 +180,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fr
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fgetcsv, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fgetcsv, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escape, IS_STRING, 0, "\"\\\\\"")
@@ -236,8 +236,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_ft
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_current, 0, 0, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_SplFileObject_current arginfo_class_SplFileInfo_getType
 
 #define arginfo_class_SplFileObject_key arginfo_class_FilesystemIterator_getFlags
 

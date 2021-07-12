@@ -4,7 +4,7 @@ Invalid SplFileObject::getCurrentLine() return type
 <?php
 
 class MySplFileObject extends SplFileObject {
-    public function getCurrentLine(): array {
+    public function getCurrentLine(): string {
         return [1, 2, 3];
     }
 }
@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-getCurrentLine(): Return value must be of type string, array returned
+MySplFileObject::getCurrentLine(): Return value must be of type string, array returned

@@ -40,7 +40,7 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
     /** @return RecursiveDualIterator (late binding) for the two inner
      * iterators current children.
      */
-    function getChildren(): object
+    function getChildren(): RecursiveDualIterator
     {
         if (empty($this->ref))
         {
