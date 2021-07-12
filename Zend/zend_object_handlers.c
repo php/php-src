@@ -138,11 +138,6 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* 
 		if (zobj->properties) {
 			*table = NULL;
 			*n = 0;
-			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)
-			 && EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_DELREF(zobj->properties);
-				zobj->properties = zend_array_dup(zobj->properties);
-			}
 			return zobj->properties;
 		} else {
 			*table = zobj->properties_table;
