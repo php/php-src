@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #81101 (PCRE2 10.37 shows unexpected result). (Anatol)
+  . Fixed bug #81243 (Too much memory is allocated for preg_replace()). (cmb)
 
 - Standard:
   . Fixed bug #81223 (flock() only locks first byte of file). (cmb)
