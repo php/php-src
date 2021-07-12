@@ -420,9 +420,13 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
-	*table = NULL;
-	*n = 0;
-	return &wm->ht;
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	zval *val;
+	ZEND_HASH_FOREACH_VAL(&wm->ht, val) {
+		zend_get_gc_buffer_add_zval(gc_buffer, val);
+	} ZEND_HASH_FOREACH_END();
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
 }
 
 static zend_object *zend_weakmap_clone_obj(zend_object *old_object)
