@@ -6,29 +6,17 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 {
     public function __construct(array|object $array = [], int $flags = 0, string $iteratorClass = ArrayIterator::class) {}
 
-    /**
-     * @param string|int $key
-     * @return bool
-     */
-    public function offsetExists($key) {}
+    /** @return bool */
+    public function offsetExists(mixed $key) {}
 
-    /**
-     * @param string|int $key
-     * @return mixed
-     */
-    public function offsetGet($key) {}
+    /** @return mixed */
+    public function offsetGet(mixed $key) {}
 
-    /**
-     * @param string|int $key
-     * @return void
-     */
-    public function offsetSet($key, mixed $value) {}
+    /** @return void */
+    public function offsetSet(mixed $key, mixed $value) {}
 
-    /**
-     * @param string|int $key
-     * @return void
-     */
-    public function offsetUnset($key) {}
+    /** @return void */
+    public function offsetUnset(mixed $key) {}
 
     /** @return void */
     public function append(mixed $value) {}
@@ -96,32 +84,28 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     public function __construct(array|object $array = [], int $flags = 0) {}
 
     /**
-     * @param string|int $key
      * @return bool
      * @implementation-alias ArrayObject::offsetExists
      */
-    public function offsetExists($key) {}
+    public function offsetExists(mixed $key) {}
 
     /**
-     * @param string|int $key
      * @return mixed
      * @implementation-alias ArrayObject::offsetGet
      */
-    public function offsetGet($key) {}
+    public function offsetGet(mixed $key) {}
 
     /**
-     * @param string|int $key
      * @return void
      * @implementation-alias ArrayObject::offsetSet
      */
-    public function offsetSet($key, mixed $value) {}
+    public function offsetSet(mixed $key, mixed $value) {}
 
     /**
-     * @param string|int $key
      * @return void
      * @implementation-alias ArrayObject::offsetUnset
      */
-    public function offsetUnset($key) {}
+    public function offsetUnset(mixed $key) {}
 
     /**
      * @return void

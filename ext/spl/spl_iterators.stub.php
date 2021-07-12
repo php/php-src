@@ -47,13 +47,13 @@ interface RecursiveIterator extends Iterator
     /** @return bool */
     public function hasChildren();
 
-    /** @return RecursiveIterator */
+    /** @return RecursiveIterator|null */
     public function getChildren();
 }
 
 class RecursiveIteratorIterator implements OuterIterator
 {
-    public function __construct(Traversable $iterator, int $mode = self::LEAVES_ONLY, int $flags = 0) {}
+    public function __construct(Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
 
     /** @return void */
     public function rewind() {}
@@ -200,7 +200,7 @@ class LimitIterator extends IteratorIterator
 
 class CachingIterator extends IteratorIterator implements ArrayAccess, Countable, Stringable
 {
-    public function __construct(Iterator $iterator, int $flags = self::CALL_TOSTRING) {}
+    public function __construct(Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
 
     /** @return void */
     public function rewind() {}
@@ -255,7 +255,7 @@ class CachingIterator extends IteratorIterator implements ArrayAccess, Countable
 
 class RecursiveCachingIterator extends CachingIterator implements RecursiveIterator
 {
-    public function __construct(Iterator $iterator, int $flags = self::CALL_TOSTRING) {}
+    public function __construct(Iterator $iterator, int $flags = RecursiveCachingIterator::CALL_TOSTRING) {}
 
     /** @return bool */
     public function hasChildren() {}
@@ -322,7 +322,7 @@ class RegexIterator extends FilterIterator
 {
     public ?string $replacement = null;
 
-    public function __construct(Iterator $iterator, string $pattern, int $mode = self::MATCH, int $flags = 0, int $pregFlags = 0) {}
+    public function __construct(Iterator $iterator, string $pattern, int $mode = RegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
 
     /** @return bool */
     public function accept() {}
@@ -351,7 +351,7 @@ class RegexIterator extends FilterIterator
 
 class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 {
-    public function __construct(RecursiveIterator $iterator, string $pattern, int $mode = self::MATCH, int $flags = 0, int $pregFlags = 0) {}
+    public function __construct(RecursiveIterator $iterator, string $pattern, int $mode = RecursiveRegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
 
     /** @return bool */
     public function accept() {}
@@ -371,9 +371,9 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
     /** @param RecursiveIterator|IteratorAggregate $iterator */
     public function __construct(
         $iterator,
-        int $flags = self::BYPASS_KEY,
+        int $flags = RecursiveTreeIterator::BYPASS_KEY,
         int $cachingIteratorFlags = CachingIterator::CATCH_GET_CHILD,
-        int $mode = self::SELF_FIRST
+        int $mode = RecursiveTreeIterator::SELF_FIRST
     ) {}
 
     /** @return mixed */
