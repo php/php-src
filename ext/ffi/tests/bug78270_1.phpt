@@ -16,7 +16,7 @@ if (preg_match('/Compiler => .*clang.*/', $info)) die("skip not for clang");
 try {
     FFI::cdef(<<<EOC
         __vectorcall int bug78270(const char *str, size_t str_len);
-        EOC, ffi_get_php_dll_name());
+        EOC, "php_zend_test.dll");
 } catch (FFI\ParserException $ex) {
     die('skip __vectorcall not supported');
 }
