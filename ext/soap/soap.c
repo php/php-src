@@ -2127,6 +2127,9 @@ PHP_METHOD(SoapClient, __construct)
 		if ((tmp = zend_hash_str_find(ht, "ssl_method", sizeof("ssl_method")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_LONG) {
 			add_property_long(this_ptr, "_ssl_method", Z_LVAL_P(tmp));
+			php_error_docref(NULL, E_DEPRECATED,
+				"The \"ssl_method\" option is deprecated. "
+				"Use \"ssl\" stream context options instead");
 		}
 	} else if (!wsdl) {
 		php_error_docref(NULL, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");

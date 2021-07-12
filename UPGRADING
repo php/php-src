@@ -406,6 +406,13 @@ PHP 8.1 UPGRADE NOTES
   . The PDO::FETCH_SERIALIZE mode has been deprecated.
     RFC: https://wiki.php.net/rfc/phase_out_serializable
 
+- SOAP:
+  . The ssl_method option for the SoapClient constructor has been deprecated in
+    favor of ssl stream context options. The direct equivalent would be
+    crypto_method, but min_proto_version/max_proto_version are recommended
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
+
 - Standard:
   . Calling key(), current(), next(), prev(), reset(), or end() on objects
     is deprecated. Instead cast the object to array first, or make use of
