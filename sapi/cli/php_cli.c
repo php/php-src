@@ -1085,6 +1085,7 @@ do_repeat:
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zend_object_release(EG(exception));
 						EG(exception) = NULL;
+						exit_status = 1;
 					} else {
 						zend_print_zval(&ref, 0);
 						zend_write("\n", 1);
