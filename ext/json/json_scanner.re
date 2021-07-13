@@ -170,8 +170,9 @@ std:
 		return PHP_JSON_T_FALSE;
 	}
 	<JS>INT                  {
-		zend_bool bigint = 0, negative = s->token[0] == '-';
+		zend_bool bigint = 0, negative = s->token[0] == '-', neg_zero;
 		size_t digits = (size_t) (s->cursor - s->token - negative);
+		neg_zero = negative && digits == 1 && s->token[1] == '0';
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {
 				int cmp = strncmp((char *) (s->token + negative), LONG_MIN_DIGITS, PHP_JSON_INT_MAX_LENGTH);
@@ -182,10 +183,10 @@ std:
 				bigint = 1;
 			}
 		}
-		if (!bigint) {
+		if (EXPECTED(!neg_zero) && !bigint) {
 			ZVAL_LONG(&s->value, ZEND_STRTOL((char *) s->token, NULL, 10));
 			return PHP_JSON_T_INT;
-		} else if (s->options & PHP_JSON_BIGINT_AS_STRING) {
+		} else if (EXPECTED(!neg_zero) && s->options & PHP_JSON_BIGINT_AS_STRING) {
 			ZVAL_STRINGL(&s->value, (char *) s->token, s->cursor - s->token);
 			return PHP_JSON_T_STRING;
 		} else {
