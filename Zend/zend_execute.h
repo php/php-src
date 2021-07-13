@@ -79,6 +79,11 @@ ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_check_user_type_slow(
 		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type);
 
+#if ZEND_DEBUG
+ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call);
+ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc);
+ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret);
+#endif
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources

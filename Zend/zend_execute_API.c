@@ -887,6 +887,9 @@ cleanup_args:
 		EG(jit_trace_num) = orig_jit_trace_num;
 	} else {
 		ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
+#if ZEND_DEBUG
+		bool should_throw = zend_internal_call_should_throw(func, call);
+#endif
 		ZVAL_NULL(fci->retval);
 		call->prev_execute_data = EG(current_execute_data);
 		EG(current_execute_data) = call;
@@ -901,6 +904,18 @@ cleanup_args:
 		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
 			zend_array_release(call->extra_named_params);
 		}
+
+#if ZEND_DEBUG
+		if (!EG(exception) && call->func) {
+			if (should_throw) {
+				zend_internal_call_arginfo_violation(call->func);
+			}
+			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+				zend_verify_internal_return_type(call->func, fci->retval));
+			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+				? Z_ISREF_P(fci->retval) : !Z_ISREF_P(fci->retval));
+		}
+#endif
 
 		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
