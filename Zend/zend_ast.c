@@ -1963,6 +1963,9 @@ simple_list:
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, ')');
 			break;
+		case ZEND_AST_CALLABLE_CONVERT:
+			smart_str_appends(str, "...");
+			break;
 		case ZEND_AST_CLASS_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
