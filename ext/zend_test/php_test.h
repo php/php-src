@@ -67,6 +67,8 @@ struct bug79096 {
 #	define PHP_ZEND_TEST_API
 #endif
 
+PHP_ZEND_TEST_API int ZEND_FASTCALL bug78270(const char *str, size_t str_len);
+
 PHP_ZEND_TEST_API struct bug79096 bug79096(void);
 PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems);
 

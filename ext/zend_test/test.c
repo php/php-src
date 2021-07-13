@@ -469,6 +469,12 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(zend_test)
 #endif
 
+/* The important part here is the ZEND_FASTCALL. */
+PHP_ZEND_TEST_API int ZEND_FASTCALL bug78270(const char *str, size_t str_len)
+{
+	return (int) zend_atol(str, str_len);
+}
+
 PHP_ZEND_TEST_API struct bug79096 bug79096(void)
 {
 	struct bug79096 b;
