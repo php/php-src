@@ -506,10 +506,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 
 zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 {
-	zend_string *class_name = zend_ast_get_str(ast);
-	switch (ast->attr) {
-	}
-	return zend_fetch_class_by_name(class_name, NULL, ZEND_FETCH_CLASS_EXCEPTION);
+	return zend_fetch_class(zend_ast_get_str(ast), ast->attr | ZEND_FETCH_CLASS_EXCEPTION);
 }
 
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
