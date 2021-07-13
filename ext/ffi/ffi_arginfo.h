@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e1141661e96f6fcf67b7dc79b345cfb50c246ac2 */
+ * Stub hash: 2675462a253edd2a0ea6106b9640f0d1a5a09489 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -118,7 +118,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_FFI_CType_getFuncParameterCount arginfo_class_FFI_CType_getKind
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncParameterType, 0, 1, FFI\\CType, 0)
-	ZEND_ARG_TYPE_INFO(0, arg_index, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 

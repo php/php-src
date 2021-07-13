@@ -93,7 +93,7 @@ final class CType {
     public function getFuncABI(): int {}
     public function getFuncReturnType(): CType {}
     public function getFuncParameterCount(): int {}
-    public function getFuncParameterType(int $arg_index): CType {}
+    public function getFuncParameterType(int $index): CType {}
 }
 
 class Exception extends \Error {
