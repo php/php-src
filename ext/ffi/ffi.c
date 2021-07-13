@@ -4653,7 +4653,7 @@ ZEND_METHOD(FFI_CType, getStructFieldOffset) /* {{{ */
 
 	ptr = zend_hash_find_ptr(&type->record.fields, name);
 	if (!ptr) {
-		zend_throw_error(zend_ffi_exception_ce, "Wrong fileld name");
+		zend_throw_error(zend_ffi_exception_ce, "Wrong field name");
 		RETURN_THROWS();
 	}
 	RETURN_LONG(ptr->offset);
@@ -4680,7 +4680,7 @@ ZEND_METHOD(FFI_CType, getStructFieldType) /* {{{ */
 
 	ptr = zend_hash_find_ptr(&type->record.fields, name);
 	if (!ptr) {
-		zend_throw_error(zend_ffi_exception_ce, "Wrong fileld name");
+		zend_throw_error(zend_ffi_exception_ce, "Wrong field name");
 		RETURN_THROWS();
 	}
 
