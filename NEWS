@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #68471 (IntlDateFormatter fails for "GMT+00:00" timezone). (cmb)
   . Fixed bug #74264 (grapheme_strrpos() broken for negative offsets). (cmb)
 
+- JSON:
+  . Fixed bug #79908 (json_encode encodes negative zero as int). (cmb)
+
 - OpenSSL:
   . Fixed bug #52093 (openssl_csr_sign truncates $serial). (cmb)
 
