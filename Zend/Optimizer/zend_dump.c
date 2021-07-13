@@ -410,10 +410,6 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	uint32_t n = 0;
 
-	if (dump_flags & ZEND_DUMP_LINE_NUMBERS) {
-		fprintf(stderr, "L%04u ", opline->lineno);
-	}
-
 	if (!ssa_op || ssa_op->result_use < 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa_op && ssa_op->result_def >= 0) {
@@ -720,7 +716,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 }
 
-void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
@@ -740,7 +736,7 @@ void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b,
 		}
 	}
 
-	zend_dump_op(op_array, b, opline, dump_flags &~ ZEND_DUMP_LINE_NUMBERS, ssa, ssa_op);
+	zend_dump_op(op_array, b, opline, dump_flags, ssa, ssa_op);
 	fprintf(stderr, "\n");
 }
 
