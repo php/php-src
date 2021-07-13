@@ -93,12 +93,16 @@ static const unsigned char tolower_map[256] = {
 
 ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {{{ */
 {
-	zend_long retval;
-
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOL(str, NULL, 0);
+
+	/* Perform following multiplications on unsigned to avoid overflow UB.
+	 * For now overflow is silently ignored -- not clear what else can be
+	 * done here, especially as the final result of this function may be
+	 * used in an unsigned context (e.g. "memory_limit=3G", which overflows
+	 * zend_long on 32-bit, but not size_t). */
+	zend_ulong retval = (zend_ulong) ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
@@ -115,7 +119,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 				break;
 		}
 	}
-	return retval;
+	return (zend_long) retval;
 }
 /* }}} */
 
