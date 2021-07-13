@@ -5,13 +5,13 @@ SPL: RecursiveIteratorIterator and catch getChildren
 
 class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-    function getChildren()
+    function getChildren(): ?RecursiveArrayIterator
     {
         echo __METHOD__ . "\n";
         return $this->current();
     }
 
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid())
         {

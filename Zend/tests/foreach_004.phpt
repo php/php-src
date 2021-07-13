@@ -16,10 +16,10 @@ class IT extends ArrayIterator {
         }
     }
 
-    function rewind()  {$this->trap(__FUNCTION__); return parent::rewind();}
-    function valid()   {$this->trap(__FUNCTION__); return parent::valid();}
-    function key()     {$this->trap(__FUNCTION__); return parent::key();}
-    function next()    {$this->trap(__FUNCTION__); return parent::next();}
+    function rewind(): void  {$this->trap(__FUNCTION__); parent::rewind();}
+    function valid(): bool   {$this->trap(__FUNCTION__); return parent::valid();}
+    function key(): mixed    {$this->trap(__FUNCTION__); return parent::key();}
+    function next(): void    {$this->trap(__FUNCTION__); parent::next();}
 }
 
 foreach(['rewind', 'valid', 'key', 'next'] as $trap) {

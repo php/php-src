@@ -5,13 +5,13 @@ SPL: RecursiveIteratorIterator and callHasChildren/callGetChildren
 
 class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-    function getChildren()
+    function getChildren(): ?RecursiveArrayIterator
     {
         echo __METHOD__ . "\n";
         return $this->current();
     }
 
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid())
         {
@@ -44,7 +44,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
         parent::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         if ($this->skip)

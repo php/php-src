@@ -37,7 +37,7 @@ class Collection implements Iterator
         return $this->valid;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         echo __METHOD__ . "\n";
         $this->valid = (false !== reset($this->array));

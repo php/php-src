@@ -1957,8 +1957,8 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		}
 
 		if (Z_TYPE(retval) != IS_STRING) {
-			zend_type_error("getCurrentLine(): Return value must be of type string, %s returned",
-				zend_zval_type_name(&retval));
+			zend_type_error("%s::getCurrentLine(): Return value must be of type string, %s returned",
+				ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name), zend_zval_type_name(&retval));
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		}

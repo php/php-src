@@ -75,7 +75,7 @@ class DualIterator implements Iterator
 
     /** rewind both inner iterators
      */
-    function rewind()
+    function rewind(): void
     {
         $this->lhs->rewind();
         $this->rhs->rewind();

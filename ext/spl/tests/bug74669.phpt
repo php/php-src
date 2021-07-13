@@ -39,7 +39,7 @@ class Container implements Iterator
         return $this->iterator->valid();
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->iterator->rewind();
     }

@@ -4,7 +4,7 @@ Bug #42703 (Exception raised in an iterator::current() causes segfault in Filter
 <?php
 class BlaIterator implements Iterator
 {
-    public function rewind() { }
+    public function rewind(): void { }
 
     public function next() { }
 

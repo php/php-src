@@ -13,14 +13,14 @@ touch($td . '/testsubdir/file3.csv');
 
 class Bug66405 extends RecursiveDirectoryIterator
 {
-    public function current()
+    public function current(): string|SplFileInfo|FilesystemIterator
     {
         $current = parent::current();
         echo gettype($current) . " $current\n";
         return $current;
     }
 
-    public function getChildren()
+    public function getChildren(): RecursiveDirectoryIterator
     {
         $children = parent::getChildren();
         if (is_object($children)) {
