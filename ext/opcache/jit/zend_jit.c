@@ -4080,7 +4080,6 @@ done:
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		zend_arena_release(&CG(arena), checkpoint);
 	}
-	ZEND_ASSERT(call_level == 0);
 	return SUCCESS;
 
 jit_failure:
