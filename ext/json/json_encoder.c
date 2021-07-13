@@ -84,7 +84,8 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 
 	php_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
 	len = strlen(num);
-	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2) {
+	if ((options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2)
+	 || (UNEXPECTED(len == 2 && num[0] == '-' && num[1] == '0'))) {
 		num[len++] = '.';
 		num[len++] = '0';
 		num[len] = '\0';
