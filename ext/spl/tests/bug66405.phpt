@@ -13,7 +13,7 @@ touch($td . '/testsubdir/file3.csv');
 
 class Bug66405 extends RecursiveDirectoryIterator
 {
-    public function current()
+    public function current(): string|SplFileInfo|FilesystemIterator
     {
         $current = parent::current();
         echo gettype($current) . " $current\n";
@@ -53,8 +53,6 @@ rmdir($td . '/testsubdir');
 rmdir($td);
 ?>
 --EXPECTF--
-Deprecated: Return type of Bug66405::current() should either be compatible with FilesystemIterator::current(): SplFileInfo|FilesystemIterator|string, or the #[ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s on line %d
-
 Bug66405 file3.csv
 string %sbug66405%efile1.txt
 string %sbug66405%efile2.md

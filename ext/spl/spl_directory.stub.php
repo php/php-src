@@ -251,7 +251,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function ftruncate(int $size): bool {}
 
     /** @tentative-return-type */
-    public function current(): string|false {}
+    public function current(): string|array|false {}
 
     /** @tentative-return-type */
     public function key(): int {}

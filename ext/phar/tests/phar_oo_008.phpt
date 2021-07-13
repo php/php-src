@@ -31,9 +31,9 @@ foreach($f as $k => $v)
 
 class MyCSVFile extends SplFileObject
 {
-    function current(): string
+    function current(): array|false
     {
-        return implode('|', parent::fgetcsv(',', '"'));
+        return parent::fgetcsv(',', '"');
     }
 }
 
@@ -58,7 +58,7 @@ while(!$v->eof())
 echo "===5===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . $d . "\n";
+    echo "$k=>" . join('|', $d) . "\n";
 }
 
 class MyCSVFile2 extends SplFileObject
