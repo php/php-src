@@ -101,13 +101,6 @@
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
-/* Hey, apple. One shouldn't define *functions* from the standard C library as macros. */
-#ifdef memcpy
-#define memcpy_tmp(...) memcpy(__VA_ARGS__)
-#undef memcpy
-#define memcpy(...) memcpy_tmp(__VA_ARGS__)
-#endif
-
 #ifdef ZTS
 # define PHPDBG_G(v) ZEND_TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
