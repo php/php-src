@@ -42,6 +42,11 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   c. Added the zend_get_opcode_id() function, which is intended to get opcode id from name.
   d. Removed support for "p" modifier (%pd, %pu, etc) in PHP's printf
      implementations. Use ZEND_LONG_FMT and ZEND_ULONG_FMT instead.
+  e. ZEND_ATOL() now returns the integer instead of assigning it as part of the
+     macro. Replace ZEND_ATOL(i, s) with i = ZEND_ATOL(s).
+  f. zend_atoi() has been removed. It is identical to (int) zend_atol(). Please
+     note that zend_atol() parses an integer with size suffix. If you just want
+     to parse a simple integer use ZEND_ATOL() or ZEND_STRTOL().
 
 ========================
 2. Build system changes
