@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.9
+?? ??? 2021, PHP 8.0.10
+
+
+29 Jul 2021, PHP 8.0.9
 
 - Core:
   . Fixed bug #81145 (copy() and stream_copy_to_stream() fail for +4GB files).
