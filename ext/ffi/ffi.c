@@ -4469,6 +4469,318 @@ ZEND_METHOD(FFI_CType, getName) /* {{{ */
 		RETURN_STR(res);
 	}
 }
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getKind) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	RETURN_LONG(type->kind);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getSize) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	RETURN_LONG(type->size);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getAlignment) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	RETURN_LONG(type->align);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getAttributes) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	RETURN_LONG(type->attr);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getEnumKind) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_ENUM) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not an enumeration");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(type->enumeration.kind);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getArrayElementType) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+	zend_ffi_ctype *ret;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not an array");
+		RETURN_THROWS();
+	}
+
+	ret = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+	ret->type = ZEND_FFI_TYPE(type->array.type);
+	RETURN_OBJ(&ret->std);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getArrayLength) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not an array");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(type->array.length);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getPointerType) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_ctype *ret;
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_POINTER) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a pointer");
+		RETURN_THROWS();
+	}
+
+	ret = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+	ret->type = ZEND_FFI_TYPE(type->pointer.type);
+	RETURN_OBJ(&ret->std);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getStructFieldNames) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+	HashTable *ht;
+	zend_string* name;
+	zval zv;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_STRUCT) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a structure");
+		RETURN_THROWS();
+	}
+
+	ht = zend_new_array(zend_hash_num_elements(&type->record.fields));
+	RETVAL_ARR(ht);
+	ZEND_HASH_FOREACH_STR_KEY(&type->record.fields, name) {
+		ZVAL_STR_COPY(&zv, name);
+		zend_hash_next_index_insert_new(ht, &zv);
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getStructFieldOffset) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+	zend_string *name;
+	zend_ffi_field *ptr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_STRUCT) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a structure");
+		RETURN_THROWS();
+	}
+
+	ptr = zend_hash_find_ptr(&type->record.fields, name);
+	if (!ptr) {
+		zend_throw_error(zend_ffi_exception_ce, "Wrong fileld name");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(ptr->offset);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getStructFieldType) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+	zend_string *name;
+	zend_ffi_field *ptr;
+	zend_ffi_ctype *ret;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_STRUCT) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a structure");
+		RETURN_THROWS();
+	}
+
+	ptr = zend_hash_find_ptr(&type->record.fields, name);
+	if (!ptr) {
+		zend_throw_error(zend_ffi_exception_ce, "Wrong fileld name");
+		RETURN_THROWS();
+	}
+
+	ret = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+	ret->type = ZEND_FFI_TYPE(ptr->type);
+	RETURN_OBJ(&ret->std);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getFuncABI) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_FUNC) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a function");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(type->func.abi);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getFuncReturnType) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_ctype *ret;
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_FUNC) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a function");
+		RETURN_THROWS();
+	}
+
+	ret = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+	ret->type = ZEND_FFI_TYPE(type->func.ret_type);
+	RETURN_OBJ(&ret->std);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getFuncArgCount) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_FUNC) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a function");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(type->func.args ? zend_hash_num_elements(type->func.args) : 0);
+}
+/* }}} */
+
+ZEND_METHOD(FFI_CType, getFuncArgType) /* {{{ */
+{
+	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
+	zend_ffi_type *type, *ptr;
+	zend_long n;
+	zend_ffi_ctype *ret;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(n)
+	ZEND_PARSE_PARAMETERS_END();
+
+	type = ZEND_FFI_TYPE(ctype->type);
+	if (type->kind != ZEND_FFI_TYPE_FUNC) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\CType is not a function");
+		RETURN_THROWS();
+	}
+
+	if (!type->func.args) {
+		zend_throw_error(zend_ffi_exception_ce, "Wrong argument number");
+		RETURN_THROWS();
+	}
+
+	ptr = zend_hash_index_find_ptr(type->func.args, n);
+	if (!ptr) {
+		zend_throw_error(zend_ffi_exception_ce, "Wrong argument number");
+		RETURN_THROWS();
+	}
+
+	ret = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+	ret->type = ZEND_FFI_TYPE(ptr);
+	RETURN_OBJ(&ret->std);
+}
+/* }}} */
 
 static char *zend_ffi_parse_directives(const char *filename, char *code_pos, char **scope_name, char **lib, bool preload) /* {{{ */
 {
@@ -4896,6 +5208,9 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 }
 /* }}} */
 
+#define REGISTER_FFI_TYPE_CONSTANT(name) \
+	zend_declare_class_constant_long(zend_ffi_ctype_ce, #name, sizeof(#name) - 1, ZEND_FFI_ ## name)
+
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(ffi)
 {
@@ -5045,6 +5360,49 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_closure          = NULL;
 	zend_ffi_ctype_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_ctype_handlers.get_gc               = zend_fake_get_gc;
+
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_VOID);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_FLOAT);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_DOUBLE);
+#ifdef HAVE_LONG_DOUBLE
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_LONGDOUBLE);
+#endif
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_UINT8);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_SINT8);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_UINT16);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_SINT16);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_UINT32);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_SINT32);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_UINT64);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_SINT64);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_ENUM);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_BOOL);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_CHAR);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_POINTER);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_FUNC);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_ARRAY);
+	REGISTER_FFI_TYPE_CONSTANT(TYPE_STRUCT);
+
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_CONST);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_INCOMPLETE_TAG);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_VARIADIC);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_INCOMPLETE_ARRAY);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_VLA);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_UNION);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_PACKED);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_MS_STRUCT);
+	REGISTER_FFI_TYPE_CONSTANT(ATTR_GCC_STRUCT);
+
+	REGISTER_FFI_TYPE_CONSTANT(ABI_DEFAULT);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_CDECL);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_FASTCALL);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_THISCALL);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_STDCALL);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_PASCAL);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_REGISTER);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_MS);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_SYSV);
+	REGISTER_FFI_TYPE_CONSTANT(ABI_VECTORCALL);
 
 	if (FFI_G(preload)) {
 		if (zend_ffi_preload(FFI_G(preload)) != SUCCESS) {
