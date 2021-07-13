@@ -32,7 +32,6 @@
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
 #include "phpdbg_break.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
@@ -1107,7 +1106,6 @@ PHPDBG_COMMAND(info) /* {{{ */
 	phpdbg_writeln("Compiled   %s", PHPDBG_G(ops) ? "yes" : "no");
 	phpdbg_writeln("Stepping   %s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 	phpdbg_writeln("Quietness  %s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-	phpdbg_writeln("Oplog      %s", PHPDBG_G(oplog) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
 		phpdbg_writeln("Opcodes    %d", PHPDBG_G(ops)->last);
@@ -1676,7 +1674,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
-			phpdbg_print_opline_ex(execute_data, 0);
+			phpdbg_print_opline(execute_data, 0);
 			goto next;
 		}
 
@@ -1720,7 +1718,7 @@ ex_is_caught:
 		}
 
 		/* not while in conditionals */
-		phpdbg_print_opline_ex(execute_data, 0);
+		phpdbg_print_opline(execute_data, 0);
 
 		/* perform seek operation */
 		if ((PHPDBG_G(flags) & PHPDBG_SEEK_MASK) && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {

@@ -100,15 +100,6 @@
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
-/* Hey, apple. One shouldn't define *functions* from the standard C library as macros. */
-#ifdef memcpy
-#define memcpy_tmp(...) memcpy(__VA_ARGS__)
-#undef memcpy
-#define memcpy(...) memcpy_tmp(__VA_ARGS__)
-#endif
-
-#if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
-
 #ifdef ZTS
 # define PHPDBG_G(v) ZEND_TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
@@ -123,7 +114,6 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
-#include "phpdbg_opcode.h"
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
@@ -223,6 +213,23 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 void phpdbg_register_file_handles(void);
 
+typedef struct _phpdbg_oplog_entry phpdbg_oplog_entry;
+struct _phpdbg_oplog_entry {
+	phpdbg_oplog_entry *next;
+	zend_string *function_name;
+	zend_class_entry *scope;
+	zend_string *filename;
+	zend_op *opcodes;
+	zend_op *op;
+};
+
+typedef struct _phpdbg_oplog_list phpdbg_oplog_list;
+struct _phpdbg_oplog_list {
+	phpdbg_oplog_list *prev;
+	phpdbg_oplog_entry start; /* Only "next" member used. */
+};
+
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
@@ -266,7 +273,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename);
 	HashTable file_sources;
 
-	FILE *oplog;                                 /* opline log */
 	zend_arena *oplog_arena;                     /* arena for storing oplog */
 	phpdbg_oplog_list *oplog_list;               /* list of oplog starts */
 	phpdbg_oplog_entry *oplog_cur;               /* current oplog entry */
@@ -303,7 +309,5 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
 	zend_ulong lines;                                  /* max number of lines to display */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
-
-#endif
 
 #endif /* PHPDBG_H */

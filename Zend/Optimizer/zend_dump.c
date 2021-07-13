@@ -716,11 +716,15 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 }
 
-static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
 	zend_ssa_op *ssa_op = NULL;
+	
+	if (dump_flags & ZEND_DUMP_LINE_NUMBERS) {
+		fprintf(stderr, "L%04u ", opline->lineno);
+	}
 
 	len = fprintf(stderr, "%04u", (uint32_t)(opline - op_array->opcodes));
 	fprintf(stderr, "%*c", 5-len, ' ');

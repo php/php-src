@@ -33,8 +33,9 @@ PHPDBG_PRINT(method);
 PHPDBG_PRINT(func);
 PHPDBG_PRINT(stack);
 
-PHPDBG_API void phpdbg_print_opcodes(const char *function);
-
 extern const phpdbg_command_t phpdbg_print_commands[];
 
+void phpdbg_print_opcodes(const char *function);
+
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags);
 #endif /* PHPDBG_PRINT_H */

@@ -391,7 +391,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-b**                          Disable colour" CR
 "  **-i**      **-i**my.init           Set .phpdbginit file" CR
 "  **-I**                          Ignore default .phpdbginit" CR
-"  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
 "  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
 "  **-e**                          Generate extended information for debugger/profiler" CR
@@ -872,7 +871,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "   **prompt**     **p**     set the prompt" CR
 "   **color**      **c**     set color  <element> <color>" CR
 "   **colors**     **C**     set colors [<on|off>]" CR
-"   **oplog**      **O**     set oplog [output]" CR
 "   **break**      **b**     set break **id** <on|off>" CR
 "   **breaks**     **B**     set breaks [<on|off>]" CR
 "   **quiet**      **q**     set quiet [<on|off>]" CR

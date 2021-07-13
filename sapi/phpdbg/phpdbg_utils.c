@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "phpdbg.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 

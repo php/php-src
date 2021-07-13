@@ -21,7 +21,6 @@
 #include "phpdbg.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_utils.h"
-#include "phpdbg_opcode.h"
 #include "zend_globals.h"
 #include "ext/standard/php_string.h"
 
