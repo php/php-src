@@ -4730,7 +4730,7 @@ ZEND_METHOD(FFI_CType, getFuncReturnType) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getFuncArgCount) /* {{{ */
+ZEND_METHOD(FFI_CType, getFuncParameterCount) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_type *type;
@@ -4748,7 +4748,7 @@ ZEND_METHOD(FFI_CType, getFuncArgCount) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI_CType, getFuncArgType) /* {{{ */
+ZEND_METHOD(FFI_CType, getFuncParameterType) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	zend_ffi_type *type, *ptr;
