@@ -46,6 +46,8 @@ PHP_METHOD(php_user_filter, filter)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrzb", &in, &out, &consumed, &closing) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	RETURN_LONG(PSFS_ERR_FATAL);
 }
 
 PHP_METHOD(php_user_filter, onCreate)
