@@ -4,155 +4,155 @@
 
 interface SplObserver
 {
-    /** @return void */
-    public function update(SplSubject $subject);
+    /** @tentative-return-type */
+    public function update(SplSubject $subject): void;
 }
 
 interface SplSubject
 {
-    /** @return void */
-    public function attach(SplObserver $observer);
+    /** @tentative-return-type */
+    public function attach(SplObserver $observer): void;
 
-    /** @return void */
-    public function detach(SplObserver $observer);
+    /** @tentative-return-type */
+    public function detach(SplObserver $observer): void;
 
-    /** @return void */
-    public function notify();
+    /** @tentative-return-type */
+    public function notify(): void;
 }
 
 class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 {
-    /** @return void */
-    public function attach(object $object, mixed $info = null) {}
+    /** @tentative-return-type */
+    public function attach(object $object, mixed $info = null): void {}
 
-    /** @return void */
-    public function detach(object $object) {}
+    /** @tentative-return-type */
+    public function detach(object $object): void {}
 
-    /** @return bool */
-    public function contains(object $object) {}
+    /** @tentative-return-type */
+    public function contains(object $object): bool {}
 
-    /** @return int */
-    public function addAll(SplObjectStorage $storage) {}
+    /** @tentative-return-type */
+    public function addAll(SplObjectStorage $storage): int {}
 
-    /** @return int */
-    public function removeAll(SplObjectStorage $storage) {}
+    /** @tentative-return-type */
+    public function removeAll(SplObjectStorage $storage): int {}
 
-    /** @return int */
-    public function removeAllExcept(SplObjectStorage $storage) {}
+    /** @tentative-return-type */
+    public function removeAllExcept(SplObjectStorage $storage): int {}
 
-    /** @return mixed */
-    public function getInfo() {}
+    /** @tentative-return-type */
+    public function getInfo(): mixed {}
 
-    /** @return void */
-    public function setInfo(mixed $info) {}
+    /** @tentative-return-type */
+    public function setInfo(mixed $info): void {}
 
-    /** @return int */
-    public function count(int $mode = COUNT_NORMAL) {}
+    /** @tentative-return-type */
+    public function count(int $mode = COUNT_NORMAL): int {}
 
-    /** @return void */
-    public function rewind() {}
+    /** @tentative-return-type */
+    public function rewind(): void {}
 
-    /** @return bool */
-    public function valid() {}
+    /** @tentative-return-type */
+    public function valid(): bool {}
 
-    /** @return int */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): int {}
 
-    /** @return object */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): object {}
 
-    /** @return void */
-    public function next() {}
+    /** @tentative-return-type */
+    public function next(): void {}
 
-    /** @return void */
-    public function unserialize(string $data) {}
+    /** @tentative-return-type */
+    public function unserialize(string $data): void {}
 
-    /** @return string */
-    public function serialize() {}
+    /** @tentative-return-type */
+    public function serialize(): string {}
 
     /**
      * @param object $object
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias SplObjectStorage::contains
      * @no-verify Cannot specify arg type because ArrayAccess does not
      */
-    public function offsetExists($object) {}
+    public function offsetExists($object): bool {}
 
     /**
      * @param object $object
-     * @return mixed
+     * @tentative-return-type
      */
-    public function offsetGet($object) {}
+    public function offsetGet($object): mixed {}
 
     /**
      * @param object $object
-     * @return void
+     * @tentative-return-type
      * @implementation-alias SplObjectStorage::attach
      * @no-verify Cannot specify arg type because ArrayAccess does not
      */
-    public function offsetSet($object, mixed $info = null) {}
+    public function offsetSet(mixed $object, mixed $info = null): void {}
 
     /**
      * @param object $object
-     * @return void
+     * @tentative-return-type
      * @implementation-alias SplObjectStorage::detach
      * @no-verify Cannot specify arg type because ArrayAccess does not
      */
-    public function offsetUnset($object) {}
+    public function offsetUnset($object): void {}
 
-    /** @return string */
-    public function getHash(object $object) {}
+    /** @tentative-return-type */
+    public function getHash(object $object): string {}
 
-    /** @return array */
-    public function __serialize() {}
+    /** @tentative-return-type */
+    public function __serialize(): array {}
 
-    /** @return void */
-    public function __unserialize(array $data) {}
+    /** @tentative-return-type */
+    public function __unserialize(array $data): void {}
 
-    /** @return array */
-    public function __debugInfo() {}
+    /** @tentative-return-type */
+    public function __debugInfo(): array {}
 }
 
 class MultipleIterator implements Iterator
 {
     public function __construct(int $flags = MultipleIterator::MIT_NEED_ALL|MultipleIterator::MIT_KEYS_NUMERIC) {}
 
-    /** @return int */
-    public function getFlags() {}
+    /** @tentative-return-type */
+    public function getFlags(): int {}
 
-    /** @return void */
-    public function setFlags(int $flags) {}
+    /** @tentative-return-type */
+    public function setFlags(int $flags): void {}
 
-    /** @return void */
-    public function attachIterator(Iterator $iterator, string|int|null $info = null) {}
+    /** @tentative-return-type */
+    public function attachIterator(Iterator $iterator, string|int|null $info = null): void {}
 
-    /** @return void */
-    public function detachIterator(Iterator $iterator) {}
+    /** @tentative-return-type */
+    public function detachIterator(Iterator $iterator): void {}
 
-    /** @return bool */
-    public function containsIterator(Iterator $iterator) {}
+    /** @tentative-return-type */
+    public function containsIterator(Iterator $iterator): bool {}
 
-    /** @return int */
-    public function countIterators() {}
+    /** @tentative-return-type */
+    public function countIterators(): int {}
 
-    /** @return void */
-    public function rewind() {}
+    /** @tentative-return-type */
+    public function rewind(): void {}
 
-    /** @return bool */
-    public function valid() {}
+    /** @tentative-return-type */
+    public function valid(): bool {}
 
-    /** @return array */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): array {}
 
-    /** @return array */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): array {}
 
-    /** @return void */
-    public function next() {}
+    /** @tentative-return-type */
+    public function next(): void {}
 
     /**
-     * @return array
+     * @tentative-return-type
      * @implementation-alias SplObjectStorage::__debugInfo
      */
-    public function __debugInfo() {}
+    public function __debugInfo(): array {}
 }

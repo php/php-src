@@ -1,40 +1,46 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 115b2d974b18287654be925c4fdc2236674423eb */
+ * Stub hash: 79a13a549d91f0e79c78a125de65fbac4795339f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___wakeup, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray___wakeup, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_count arginfo_class_SplFixedArray___wakeup
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_toArray arginfo_class_SplFixedArray___wakeup
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_toArray, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_fromArray, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SplFixedArray_fromArray, 0, 1, SplFixedArray, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preserveKeys, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_getSize arginfo_class_SplFixedArray___wakeup
+#define arginfo_class_SplFixedArray_getSize arginfo_class_SplFixedArray_count
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_setSize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetExists, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetExists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_offsetGet arginfo_class_SplFixedArray_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_offsetSet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetSet, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFixedArray_offsetUnset arginfo_class_SplFixedArray_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_SplFixedArray_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()

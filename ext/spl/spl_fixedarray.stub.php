@@ -6,47 +6,47 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
 {
     public function __construct(int $size = 0) {}
 
-    /** @return void */
-    public function __wakeup() {}
+    /** @tentative-return-type */
+    public function __wakeup(): void {}
 
-    /** @return int */
-    public function count() {}
+    /** @tentative-return-type */
+    public function count(): int {}
 
-    /** @return array */
-    public function toArray() {}
+    /** @tentative-return-type */
+    public function toArray(): array {}
 
-    /** @return SplFixedArray */
-    public static function fromArray(array $array, bool $preserveKeys = true) {}
+    /** @tentative-return-type */
+    public static function fromArray(array $array, bool $preserveKeys = true): SplFixedArray {}
 
-    /** @return int */
-    public function getSize() {}
+    /** @tentative-return-type */
+    public function getSize(): int {}
 
     /** @return bool */
-    public function setSize(int $size) {}
+    public function setSize(int $size) {} // TODO make return type void
 
     /**
      * @param int $index
-     * @return bool
+     * @tentative-return-type
      */
-    public function offsetExists($index) {}
+    public function offsetExists($index): bool {}
 
     /**
      * @param int $index
-     * @return mixed
+     * @tentative-return-type
      */
-    public function offsetGet($index) {}
+    public function offsetGet($index): mixed {}
 
     /**
      * @param int $index
-     * @return void
+     * @tentative-return-type
      */
-    public function offsetSet($index, mixed $value) {}
+    public function offsetSet($index, mixed $value): void {}
 
     /**
      * @param int $index
-     * @return void
+     * @tentative-return-type
      */
-    public function offsetUnset($index) {}
+    public function offsetUnset($index): void {}
 
     public function getIterator(): Iterator {}
 

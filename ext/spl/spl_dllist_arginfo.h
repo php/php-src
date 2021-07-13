@@ -1,17 +1,17 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d0c98e1628895a81ac0b4abe62dede9ed2c7f55e */
+ * Stub hash: 4631669bb268bb2c9e005fa7ee385245604c1d71 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_pop, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_pop, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_shift arginfo_class_SplDoublyLinkedList_pop
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_push, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_push, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -21,52 +21,61 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_bottom arginfo_class_SplDoublyLinkedList_pop
 
-#define arginfo_class_SplDoublyLinkedList___debugInfo arginfo_class_SplDoublyLinkedList_pop
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList___debugInfo, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_count arginfo_class_SplDoublyLinkedList_pop
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_isEmpty arginfo_class_SplDoublyLinkedList_pop
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_isEmpty, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_setIteratorMode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_setIteratorMode, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_getIteratorMode arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList_getIteratorMode arginfo_class_SplDoublyLinkedList_count
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetExists, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetExists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_offsetGet arginfo_class_SplDoublyLinkedList_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetSet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetSet, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_offsetUnset arginfo_class_SplDoublyLinkedList_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_rewind arginfo_class_SplDoublyLinkedList_pop
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_rewind, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_current arginfo_class_SplDoublyLinkedList_pop
 
-#define arginfo_class_SplDoublyLinkedList_key arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList_key arginfo_class_SplDoublyLinkedList_count
 
-#define arginfo_class_SplDoublyLinkedList_prev arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList_prev arginfo_class_SplDoublyLinkedList_rewind
 
-#define arginfo_class_SplDoublyLinkedList_next arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList_next arginfo_class_SplDoublyLinkedList_rewind
 
-#define arginfo_class_SplDoublyLinkedList_valid arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList_valid arginfo_class_SplDoublyLinkedList_isEmpty
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList_unserialize, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList_serialize arginfo_class_SplDoublyLinkedList_pop
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_serialize, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplDoublyLinkedList___serialize arginfo_class_SplDoublyLinkedList_pop
+#define arginfo_class_SplDoublyLinkedList___serialize arginfo_class_SplDoublyLinkedList___debugInfo
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplDoublyLinkedList___unserialize, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
