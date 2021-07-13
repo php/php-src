@@ -3691,7 +3691,7 @@ bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
-		zend_emit_op(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
 		return true;
 	}
 
