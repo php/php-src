@@ -5,7 +5,7 @@ Invalid SplFileObject::getCurrentLine() return type
 
 class MySplFileObject extends SplFileObject {
     #[ReturnTypeWillChange]
-    public function getCurrentLine(): string {
+    public function getCurrentLine(): array {
         return [1, 2, 3];
     }
 }
