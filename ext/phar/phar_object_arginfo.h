@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fa11774e0b29ff4f711f1677b395545334e1aee9 */
+ * Stub hash: ac04a4161a11d054922cb04787f81f5661203e3e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -119,7 +119,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetExist
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_offsetGet, 0, 1, PharFileInfo, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_offsetGet, 0, 1, SplFileInfo, 0)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 

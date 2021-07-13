@@ -106,7 +106,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param string $localName
      * @tentative-return-type
      */
-    public function offsetGet($localName): PharFileInfo {}
+    public function offsetGet($localName): SplFileInfo {}
 
     /**
      * @param string $localName
@@ -371,7 +371,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::offsetGet
      */
-    public function offsetGet($localName): PharFileInfo {}
+    public function offsetGet($localName): SplFileInfo {}
 
     /**
      * @param string $localName
