@@ -115,7 +115,6 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
-#include "phpdbg_opcode.h"
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
@@ -214,6 +213,23 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 
 void phpdbg_register_file_handles(void);
+
+typedef struct _phpdbg_oplog_entry phpdbg_oplog_entry;
+struct _phpdbg_oplog_entry {
+	phpdbg_oplog_entry *next;
+	zend_string *function_name;
+	zend_class_entry *scope;
+	zend_string *filename;
+	zend_op *opcodes;
+	zend_op *op;
+};
+
+typedef struct _phpdbg_oplog_list phpdbg_oplog_list;
+struct _phpdbg_oplog_list {
+	phpdbg_oplog_list *prev;
+	phpdbg_oplog_entry start; /* Only "next" member used. */
+};
+
 
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)

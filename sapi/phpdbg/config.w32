@@ -2,7 +2,7 @@ ARG_ENABLE('phpdbg', 'Build phpdbg', 'no');
 ARG_ENABLE('phpdbgs', 'Build phpdbg shared', 'no');
 
 PHPDBG_SOURCES='phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c ' +
-		'phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c ' +
+		'phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c ' +
 		'phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_win.c phpdbg_btree.c '+
 		'phpdbg_parser.c phpdbg_lexer.c phpdbg_sigsafe.c phpdbg_io.c phpdbg_out.c';
 PHPDBG_DLL='php' + PHP_VERSION + 'phpdbg.dll';

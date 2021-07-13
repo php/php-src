@@ -19,8 +19,9 @@
 #include "phpdbg.h"
 #include "phpdbg_print.h"
 #include "phpdbg_utils.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_prompt.h"
+
+#include "Optimizer/zend_dump.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -319,7 +320,7 @@ void phpdbg_print_opcodes_class(const char *class) {
 	phpdbg_print_opcodes_ce(ce);
 }
 
-PHPDBG_API void phpdbg_print_opcodes(const char *function)
+void phpdbg_print_opcodes(const char *function)
 {
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
@@ -360,3 +361,23 @@ PHPDBG_API void phpdbg_print_opcodes(const char *function)
 		efree(function_lowercase);
 	}
 }
+
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
+{
+	if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) && (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+		zend_dump_op_line(&EX(func)->op_array, NULL, EX(opline), ZEND_DUMP_LINE_NUMBERS, NULL);
+	}
+
+	if (PHPDBG_G(oplog_list)) {
+		phpdbg_oplog_entry *cur = zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry));
+		zend_op_array *op_array = &EX(func)->op_array;
+		cur->op = (zend_op *) EX(opline);
+		cur->opcodes = op_array->opcodes;
+		cur->filename = op_array->filename;
+		cur->scope = op_array->scope;
+		cur->function_name = op_array->function_name;
+		cur->next = NULL;
+		PHPDBG_G(oplog_cur)->next = cur;
+		PHPDBG_G(oplog_cur) = cur;
+	}
+} /* }}} */
