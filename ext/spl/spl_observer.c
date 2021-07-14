@@ -566,7 +566,8 @@ PHP_METHOD(SplObjectStorage, current)
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
-		return;
+		zend_throw_exception(spl_ce_RuntimeException, "Called current() on invalid iterator", 0);
+		RETURN_THROWS();
 	}
 	ZVAL_OBJ_COPY(return_value, element->obj);
 } /* }}} */
