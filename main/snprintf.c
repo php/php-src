@@ -568,11 +568,11 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
+static size_t format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
 {
 	char *sp;
 	char *bep;
-	int cc = 0;
+	size_t cc = 0;
 	size_t i;
 
 	char *s = NULL;
@@ -1172,10 +1172,10 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_list ap) /* {{{ */
+static size_t strx_printv(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
 	buffy od;
-	int cc;
+	size_t cc;
 
 	/*
 	 * First initialize the descriptor
@@ -1197,59 +1197,53 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 	if (len != 0 && od.nextb <= od.buf_end) {
 		*(od.nextb) = '\0';
 	}
-	if (ccp) {
-		*ccp = cc;
-	}
+	return cc;
 }
 /* }}} */
 
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	int cc;
+	size_t cc;
 	va_list ap;
 
 	va_start(ap, format);
-	strx_printv(&cc, buf, len, format, ap);
+	cc = strx_printv(buf, len, format, ap);
 	va_end(ap);
-	if ((size_t)cc >= len) {
-		cc = (int)len -1;
+	if (cc >= len) {
+		cc = len -1;
 		buf[cc] = '\0';
 	}
-	return cc;
+	return (int) cc;
 }
 /* }}} */
 
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	int cc;
-
-	strx_printv(&cc, buf, len, format, ap);
-	if ((size_t)cc >= len) {
-		cc = (int)len -1;
+	size_t cc = strx_printv(buf, len, format, ap);
+	if (cc >= len) {
+		cc = len -1;
 		buf[cc] = '\0';
 	}
-	return cc;
+	return (int) cc;
 }
 /* }}} */
 
 PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	int cc;
+	size_t cc;
 	va_list ap;
 
 	va_start(ap, format);
-	strx_printv(&cc, buf, len, format, ap);
+	cc = strx_printv(buf, len, format, ap);
 	va_end(ap);
-	return (cc);
+	return (int) cc;
 }
 /* }}} */
 
 PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	int cc;
-
-	strx_printv(&cc, buf, len, format, ap);
-	return (cc);
+	size_t cc = strx_printv(buf, len, format, ap);
+	return (int) cc;
 }
 /* }}} */
 
