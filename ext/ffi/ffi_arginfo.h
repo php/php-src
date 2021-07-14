@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bdfc4211d30630290aaf5046dd4ae72936982703 */
+ * Stub hash: 2675462a253edd2a0ea6106b9640f0d1a5a09489 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -115,10 +115,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FFI_CType_getFuncReturnType arginfo_class_FFI_CType_getArrayElementType
 
-#define arginfo_class_FFI_CType_getFuncArgCount arginfo_class_FFI_CType_getKind
+#define arginfo_class_FFI_CType_getFuncParameterCount arginfo_class_FFI_CType_getKind
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncArgType, 0, 1, FFI\\CType, 0)
-	ZEND_ARG_TYPE_INFO(0, arg_index, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncParameterType, 0, 1, FFI\\CType, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -153,8 +153,8 @@ ZEND_METHOD(FFI_CType, getStructFieldOffset);
 ZEND_METHOD(FFI_CType, getStructFieldType);
 ZEND_METHOD(FFI_CType, getFuncABI);
 ZEND_METHOD(FFI_CType, getFuncReturnType);
-ZEND_METHOD(FFI_CType, getFuncArgCount);
-ZEND_METHOD(FFI_CType, getFuncArgType);
+ZEND_METHOD(FFI_CType, getFuncParameterCount);
+ZEND_METHOD(FFI_CType, getFuncParameterType);
 
 
 static const zend_function_entry class_FFI_methods[] = {
@@ -199,8 +199,8 @@ static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_ME(FFI_CType, getStructFieldType, arginfo_class_FFI_CType_getStructFieldType, ZEND_ACC_PUBLIC)
 	ZEND_ME(FFI_CType, getFuncABI, arginfo_class_FFI_CType_getFuncABI, ZEND_ACC_PUBLIC)
 	ZEND_ME(FFI_CType, getFuncReturnType, arginfo_class_FFI_CType_getFuncReturnType, ZEND_ACC_PUBLIC)
-	ZEND_ME(FFI_CType, getFuncArgCount, arginfo_class_FFI_CType_getFuncArgCount, ZEND_ACC_PUBLIC)
-	ZEND_ME(FFI_CType, getFuncArgType, arginfo_class_FFI_CType_getFuncArgType, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncParameterCount, arginfo_class_FFI_CType_getFuncParameterCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncParameterType, arginfo_class_FFI_CType_getFuncParameterType, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

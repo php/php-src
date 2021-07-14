@@ -47,9 +47,9 @@ $x = FFI::type("void (*)(double,int32_t)");
 var_dump($x->getKind() === $x::TYPE_POINTER);
 var_dump($x->getPointerType()->getKind() === $x::TYPE_FUNC);
 var_dump($x->getPointerType()->getFuncReturnType()->getKind() === $x::TYPE_VOID);
-var_dump($x->getPointerType()->getFuncArgCount());
-var_dump($x->getPointerType()->getFuncArgType(0)->getKind() === $x::TYPE_DOUBLE);
-var_dump($x->getPointerType()->getFuncArgType(1)->getKind() === $x::TYPE_SINT32);
+var_dump($x->getPointerType()->getFuncParameterCount());
+var_dump($x->getPointerType()->getFuncParameterType(0)->getKind() === $x::TYPE_DOUBLE);
+var_dump($x->getPointerType()->getFuncParameterType(1)->getKind() === $x::TYPE_SINT32);
 ?>
 --EXPECT--
 bool(true)
