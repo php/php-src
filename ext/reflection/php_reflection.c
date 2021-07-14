@@ -6430,6 +6430,7 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
 			zval tmp;
 			if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
+				smart_str_free(&str);
 				RETURN_THROWS();
 			}
 
@@ -6440,7 +6441,9 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 			}
 
 			if (format_default_value(&str, &tmp, NULL) == FAILURE) {
-				return;
+				zval_ptr_dtor(&tmp);
+				smart_str_free(&str);
+				RETURN_THROWS();
 			}
 
 			smart_str_appends(&str, " ]\n");
