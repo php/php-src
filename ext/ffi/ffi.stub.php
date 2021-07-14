@@ -87,8 +87,8 @@ final class CType {
     public function getPointerType(): CType {}
 
     public function getStructFieldNames(): array {}
-    public function getStructFieldOffset(string $field_name): int {}
-    public function getStructFieldType(string $field_name): CType {}
+    public function getStructFieldOffset(string $name): int {}
+    public function getStructFieldType(string $name): CType {}
 
     public function getFuncABI(): int {}
     public function getFuncReturnType(): CType {}
