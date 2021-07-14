@@ -6,18 +6,18 @@ class BlaIterator implements Iterator
 {
     public function rewind(): void { }
 
-    public function next() { }
+    public function next(): void { }
 
-    public function valid() {
+    public function valid(): bool {
         return true;
     }
 
-    public function current()
+    public function current(): mixed
     {
       throw new Exception('boo');
     }
 
-    public function key() { }
+    public function key(): mixed { return null; }
 }
 
 $it = new BlaIterator();
