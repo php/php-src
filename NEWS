@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.23
 
+- Core:
+  . Fixed bug #72595 (php_output_handler_append illegal write access). (cmb)
+
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
 
