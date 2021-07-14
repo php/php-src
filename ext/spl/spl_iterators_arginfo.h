@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d69310bd3c6a7f8a0df41c2285af88711b1032f2 */
+ * Stub hash: 889a6eed2d62fbb6af168146840189d37765dbaa */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_EmptyIterator_current, 0, 0, never, 0)
 ZEND_END_ARG_INFO()
@@ -230,7 +230,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_AppendIterator_next arginfo_class_EmptyIterator_next
 
-#define arginfo_class_AppendIterator_getIteratorIndex arginfo_class_RecursiveIteratorIterator_getDepth
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_AppendIterator_getIteratorIndex, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_AppendIterator_getArrayIterator, 0, 0, ArrayIterator, 0)
 ZEND_END_ARG_INFO()

@@ -304,7 +304,7 @@ class AppendIterator extends IteratorIterator
     public function next(): void {}
 
     /** @tentative-return-type */
-    public function getIteratorIndex(): int {}
+    public function getIteratorIndex(): ?int {}
 
     /** @tentative-return-type */
     public function getArrayIterator(): ArrayIterator {}
