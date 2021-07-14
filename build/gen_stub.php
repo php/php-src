@@ -154,6 +154,7 @@ class SimpleType {
             case "resource":
             case "mixed":
             case "static":
+            case "never":
                 return new SimpleType(strtolower($type), true);
             case "self":
                 throw new Exception('The exact class name must be used instead of "self"');
@@ -205,6 +206,8 @@ class SimpleType {
             return "IS_MIXED";
         case "static":
             return "IS_STATIC";
+        case "never":
+            return "IS_NEVER";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -235,6 +238,8 @@ class SimpleType {
             return "MAY_BE_ANY";
         case "static":
             return "MAY_BE_STATIC";
+        case "never":
+            return "MAY_BE_NEVER";
         default:
             throw new Exception("Not implemented: $this->name");
         }
