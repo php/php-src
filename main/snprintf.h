@@ -126,16 +126,7 @@ typedef enum {
 	LM_LONG_DOUBLE,
 } length_modifier_e;
 
-#ifdef PHP_WIN32
-# define WIDE_INT		__int64
-#elif SIZEOF_LONG_LONG
-# define WIDE_INT		long long
-#else
-# define WIDE_INT		long
-#endif
-typedef WIDE_INT wide_int;
-
-PHPAPI char * ap_php_conv_10(wide_int num, bool is_unsigned,
+PHPAPI char * ap_php_conv_10(int64_t num, bool is_unsigned,
 	   bool * is_negative, char *buf_end, size_t *len);
 
 PHPAPI char * ap_php_conv_p2(uint64_t num, int nbits,
