@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.23
 
+- Standard:
+  . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
 
 29 Jul 2021, PHP 7.4.22
 
