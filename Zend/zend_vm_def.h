@@ -2379,18 +2379,7 @@ ZEND_VM_C_LABEL(assign_object):
 					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 					if (UNEXPECTED(prop_info != NULL)) {
-						zend_uchar orig_type = IS_UNDEF;
-
-						if (OP_DATA_TYPE == IS_CONST) {
-							orig_type = Z_TYPE_P(value);
-						}
-
 						value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
-
-						/* will remain valid, thus no need to check prop_info in future here */
-						if (OP_DATA_TYPE == IS_CONST && Z_TYPE_P(value) == orig_type) {
-							CACHE_PTR_EX(cache_slot + 2, NULL);
-						}
 						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 					} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
