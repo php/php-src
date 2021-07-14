@@ -432,10 +432,6 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 						break;
 					}
 				}
-			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
-				zend_argument_type_error(argument_number, "cannot be an object, %s given", zend_zval_type_name(val));
-				ret = 0;
-				break;
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -443,6 +439,13 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 	return ret;
 }
 /* }}} */
+
+static bool validate_constant_obj_argument(zend_object *obj)
+{
+	bool ret = 1;
+
+	return ret;
+}
 
 static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 {
@@ -520,11 +523,10 @@ ZEND_FUNCTION(define)
 				val = &val_free;
 				break;
 			}
-			ZEND_FALLTHROUGH;
-		default:
-			zval_ptr_dtor(&val_free);
-			zend_argument_type_error(2, "cannot be an object, %s given", zend_zval_type_name(val));
-			RETURN_THROWS();
+
+			if (!validate_constant_obj_argument(Z_OBJ_P(val))) {
+				RETURN_THROWS();
+			}
 	}
 
 	ZVAL_COPY(&c.value, val);
