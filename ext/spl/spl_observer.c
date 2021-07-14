@@ -1097,7 +1097,9 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 
 	num_elements = zend_hash_num_elements(&intern->storage);
 	if (num_elements < 1) {
-		RETURN_FALSE;
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Called %s() on an invalid iterator",
+			get_type == SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT ? "current" : "key");
+		RETURN_THROWS();
 	}
 
 	array_init_size(return_value, num_elements);

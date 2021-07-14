@@ -58,7 +58,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /** @return int */
     public function key() {}
 
-    /** @return object|null */
+    /** @return object */
     public function current() {}
 
     /** @return void */
@@ -141,10 +141,10 @@ class MultipleIterator implements Iterator
     /** @return bool */
     public function valid() {}
 
-    /** @return array|false */
+    /** @return array */
     public function key() {}
 
-    /** @return array|false */
+    /** @return array */
     public function current() {}
 
     /** @return void */
