@@ -20,7 +20,7 @@ class IntlCalendar
     public function equals(IntlCalendar $other) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_field_difference
      */
     public function fieldDifference(float $timestamp, int $field) {}
@@ -56,19 +56,19 @@ class IntlCalendar
     public static function fromDateTime(DateTime|string $datetime, ?string $locale = null) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get
      */
     public function get(int $field) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_actual_maximum
      */
     public function getActualMaximum(int $field) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_actual_minimum
      */
     public function getActualMinimum(int $field) {}
@@ -80,7 +80,7 @@ class IntlCalendar
     public static function getAvailableLocales() {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_day_of_week_type
      */
     public function getDayOfWeekType(int $dayOfWeek) {}
@@ -98,13 +98,13 @@ class IntlCalendar
     public function getErrorMessage() {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_first_day_of_week
      */
     public function getFirstDayOfWeek() {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_greatest_minimum
      */
     public function getGreatestMinimum(int $field) {}
@@ -116,25 +116,25 @@ class IntlCalendar
     public static function getKeywordValuesForLocale(string $keyword, string $locale, bool $onlyCommon) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_least_maximum
      */
     public function getLeastMaximum(int $field) {}
 
     /**
-     * @return string
+     * @return string|false
      * @alias intlcal_get_locale
      */
     public function getLocale(int $type) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_maximum
      */
     public function getMaximum(int $field) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_minimal_days_in_first_week
      */
     public function getMinimalDaysInFirstWeek() {}
@@ -146,7 +146,7 @@ class IntlCalendar
     public function setMinimalDaysInFirstWeek(int $days) {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_minimum
      */
     public function getMinimum(int $field) {}
@@ -170,7 +170,7 @@ class IntlCalendar
     public function getSkippedWallTimeOption() {}
 
     /**
-     * @return float
+     * @return float|false
      * @alias intlcal_get_time
      */
     public function getTime() {}
@@ -188,7 +188,7 @@ class IntlCalendar
     public function getType() {}
 
     /**
-     * @return int
+     * @return int|false
      * @alias intlcal_get_weekend_transition
      */
     public function getWeekendTransition(int $dayOfWeek) {}
