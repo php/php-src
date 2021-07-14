@@ -367,7 +367,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
  */
 /* PHPAPI char * php_conv_fp() {{{ */
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len)
+		 bool add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len)
 {
 	register char *s = buf;
 	register char *p, *p_orig;
@@ -570,7 +570,7 @@ typedef struct buf_area buffy;
  * Increase length
  * Set the has_prefix flag
  */
-#define PREFIX( str, length, ch )	 *--str = ch ; length++ ; has_prefix = YES
+#define PREFIX( str, length, ch )	 *--str = ch ; length++ ; has_prefix = true
 
 
 /*
@@ -611,11 +611,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	 * Flag variables
 	 */
 	length_modifier_e modifier;
-	boolean_e alternate_form;
-	boolean_e print_sign;
-	boolean_e print_blank;
-	boolean_e adjust_precision;
-	boolean_e adjust_width;
+	bool alternate_form;
+	bool print_sign;
+	bool print_blank;
+	bool adjust_precision;
+	bool adjust_width;
 	bool is_negative;
 
 	sp = odp->nextb;
@@ -630,7 +630,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 */
 			zend_string *tmp_str = NULL;
 			adjust = RIGHT;
-			alternate_form = print_sign = print_blank = NO;
+			alternate_form = print_sign = print_blank = false;
 			pad_char = ' ';
 			prefix_char = NUL;
 
@@ -647,11 +647,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					if (*fmt == '-')
 						adjust = LEFT;
 					else if (*fmt == '+')
-						print_sign = YES;
+						print_sign = true;
 					else if (*fmt == '#')
-						alternate_form = YES;
+						alternate_form = true;
 					else if (*fmt == ' ')
-						print_blank = YES;
+						print_blank = true;
 					else if (*fmt == '0')
 						pad_char = '0';
 					else
@@ -663,23 +663,23 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 				 */
 				if (isdigit((int)*fmt)) {
 					STR_TO_DEC(fmt, min_width);
-					adjust_width = YES;
+					adjust_width = true;
 				} else if (*fmt == '*') {
 					min_width = va_arg(ap, int);
 					fmt++;
-					adjust_width = YES;
+					adjust_width = true;
 					if (min_width < 0) {
 						adjust = LEFT;
 						min_width = -min_width;
 					}
 				} else
-					adjust_width = NO;
+					adjust_width = false;
 
 				/*
 				 * Check if a precision was specified
 				 */
 				if (*fmt == '.') {
-					adjust_precision = YES;
+					adjust_precision = true;
 					fmt++;
 					if (isdigit((int)*fmt)) {
 						STR_TO_DEC(fmt, precision);
@@ -695,9 +695,9 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
 				} else
-					adjust_precision = NO;
+					adjust_precision = false;
 			} else
-				adjust_precision = adjust_width = NO;
+				adjust_precision = adjust_width = false;
 
 			/*
 			 * Modifier check
@@ -993,7 +993,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						}
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
-						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (adjust_precision == false) ? FLOAT_DIGITS : precision,
 						 (*fmt == 'f')?LCONV_DECIMAL_POINT:'.',
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
@@ -1036,7 +1036,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						break;
 					}
 
-					if (adjust_precision == NO) {
+					if (adjust_precision == false) {
 						precision = FLOAT_DIGITS;
 					} else if (precision == 0) {
 						precision = 1;
