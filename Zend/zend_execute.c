@@ -823,7 +823,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	zend_string_release(type_str);
 }
 
-ZEND_COLD zend_never_inline void zend_readonly_property_modification_error(
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		zend_property_info *info) {
 	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
