@@ -344,7 +344,7 @@ function msgfmt_get_error_message(MessageFormatter $formatter): string {}
 
 /* normalizer */
 
-function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false|null {}
+function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 

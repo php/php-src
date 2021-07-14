@@ -162,9 +162,10 @@ PHP_FUNCTION( normalizer_normalize )
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */
 	if( U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR && status != U_STRING_NOT_TERMINATED_WARNING ) {
+		intl_error_set_custom_msg( NULL, "Error normalizing string", 0 );
 		efree( uret_buf );
 		efree( uinput );
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	if ( size_needed > uret_len ) {
