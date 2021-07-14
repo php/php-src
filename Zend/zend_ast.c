@@ -2125,9 +2125,14 @@ simple_list:
 			zend_ast_export_stmt(str, ast->child[1], indent + 1);
 			break;
 		case ZEND_AST_MATCH:
-			smart_str_appends(str, "match (");
-			zend_ast_export_ex(str, ast->child[0], 0, indent);
-			smart_str_appends(str, ") {\n");
+			if (ast->attr & ZEND_MATCH_SHORT) {
+				smart_str_appends(str, "match {\n");
+			}
+			else {
+				smart_str_appends(str, "match (");
+				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				smart_str_appends(str, ") {\n");
+			}
 			zend_ast_export_ex(str, ast->child[1], 0, indent + 1);
 			zend_ast_export_indent(str, indent);
 			smart_str_appendc(str, '}');
