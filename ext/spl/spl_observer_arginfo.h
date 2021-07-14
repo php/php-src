@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 743017a29d50b11d3e18476664ad4c5f648d2571 */
+ * Stub hash: 7afd0fa1170cb9c21bef514336e6cfb38dccdacd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -31,11 +31,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage
 	ZEND_ARG_OBJ_INFO(0, storage, SplObjectStorage, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_removeAll, 0, 1, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, storage, SplObjectStorage, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_SplObjectStorage_removeAll arginfo_class_SplObjectStorage_addAll
 
-#define arginfo_class_SplObjectStorage_removeAllExcept arginfo_class_SplObjectStorage_removeAll
+#define arginfo_class_SplObjectStorage_removeAllExcept arginfo_class_SplObjectStorage_addAll
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_getInfo, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
