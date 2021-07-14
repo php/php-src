@@ -1568,6 +1568,10 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_w_slow(zend_object *zobj)
 			}
 			return;
 		}
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_ERROR(result);
+			return;
+		}
 	} else if (UNEXPECTED(Z_ISERROR_P(retval))) {
 		ZVAL_ERROR(result);
 		return;
