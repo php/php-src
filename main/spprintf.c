@@ -95,8 +95,6 @@
 
 #include "snprintf.h"
 
-#define FALSE           0
-#define TRUE            1
 #define NUL             '\0'
 #define INT_NULL        ((int *)0)
 
@@ -220,7 +218,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 	boolean_e print_blank;
 	boolean_e adjust_precision;
 	boolean_e adjust_width;
-	bool_int is_negative;
+	bool is_negative;
 
 	while (*fmt) {
 		if (*fmt != '%') {

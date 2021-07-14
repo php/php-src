@@ -83,7 +83,7 @@ php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len
 inline static void
 php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 						   size_t min_width, size_t max_width, char padding,
-						   size_t alignment, size_t len, int neg, int expprec, int always_sign)
+						   size_t alignment, size_t len, bool neg, int expprec, int always_sign)
 {
 	size_t npad;
 	size_t req_size;
@@ -208,7 +208,7 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 
 	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n", number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
-							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0, 0);
+							 padding, alignment, (NUM_BUF_SIZE - 1) - i, /* neg */ false, 0, 0);
 }
 /* }}} */
 
@@ -225,7 +225,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	char num_buf[NUM_BUF_SIZE];
 	char *s = NULL;
 	size_t s_len = 0;
-	int is_negative = 0;
+	bool is_negative = false;
 #ifdef ZTS
 	struct lconv lconv;
 #else
@@ -346,7 +346,7 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 
 	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 0, expprec, 0);
+							 /* neg */ false, expprec, 0);
 }
 /* }}} */
 
@@ -627,7 +627,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 											 width, precision, padding,
 											 alignment,
 											 ZSTR_LEN(str),
-											 0, expprec, 0);
+											 /* neg */ false, expprec, 0);
 					zend_tmp_string_release(t);
 					break;
 				}

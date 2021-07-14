@@ -57,7 +57,7 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, int pad) /* {{{ */
+static char * __cvt(double value, int ndigit, int *decpt, bool *sign, int fmode, int pad) /* {{{ */
 {
 	register char *s = NULL;
 	char *p, *rve, c;
@@ -116,13 +116,13 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 }
 /* }}} */
 
-static inline char *php_ecvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
+static inline char *php_ecvt(double value, int ndigit, int *decpt, bool *sign) /* {{{ */
 {
 	return(__cvt(value, ndigit, decpt, sign, 0, 1));
 }
 /* }}} */
 
-static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /* {{{ */
+static inline char *php_fcvt(double value, int ndigit, int *decpt, bool *sign) /* {{{ */
 {
 	return(__cvt(value, ndigit, decpt, sign, 1, 1));
 }
@@ -131,7 +131,8 @@ static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /*
 PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
 {
 	char *digits, *dst, *src;
-	int i, decpt, sign;
+	int i, decpt;
+	bool sign;
 	int mode = ndigit >= 0 ? 2 : 0;
 
 	if (mode == 0) {
@@ -182,7 +183,8 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 			*dst = '\0';
 		} else {
 			/* XXX - optimize */
-			for (sign = decpt, i = 0; (sign /= 10) != 0; i++);
+			int n;
+			for (n = decpt, i = 0; (n /= 10) != 0; i++);
 			dst[i + 1] = '\0';
 			while (decpt != 0) {
 				dst[i--] = '0' + decpt % 10;
@@ -283,8 +285,6 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  */
 /* }}} */
 
-#define FALSE			0
-#define TRUE			1
 #define NUL			'\0'
 #define INT_NULL		((int *)0)
 
@@ -300,23 +300,23 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * Return value:
  *   - a pointer to a string containing the number (no sign)
  *   - len contains the length of the string
- *   - is_negative is set to TRUE or FALSE depending on the sign
- *     of the number (always set to FALSE if is_unsigned is TRUE)
+ *   - is_negative is set to true or false depending on the sign
+ *     of the number (always set to false if is_unsigned is true)
  *
  * The caller provides a buffer for the string: that is the buf_end argument
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 /* char * ap_php_conv_10() {{{ */
-PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register size_t *len)
+PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
+	   register bool * is_negative, char *buf_end, register size_t *len)
 {
 	register char *p = buf_end;
 	register u_wide_int magnitude;
 
 	if (is_unsigned) {
 		magnitude = (u_wide_int) num;
-		*is_negative = FALSE;
+		*is_negative = false;
 	} else {
 		*is_negative = (num < 0);
 
@@ -367,7 +367,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigne
  */
 /* PHPAPI char * php_conv_fp() {{{ */
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len)
+		 boolean_e add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len)
 {
 	register char *s = buf;
 	register char *p, *p_orig;
@@ -389,7 +389,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 	if (isalpha((int)*p)) {
 		*len = strlen(p);
 		memcpy(buf, p, *len + 1);
-		*is_negative = FALSE;
+		*is_negative = false;
 		free(p_orig);
 		return (buf);
 	}
@@ -436,12 +436,12 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 	if (format != 'F') {
 		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
 		size_t t_len;
-		bool_int exponent_is_negative;
+		bool exponent_is_negative;
 
 		*s++ = format;			/* either e or E */
 		decimal_point--;
 		if (decimal_point != 0) {
-			p = ap_php_conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative, &temp[EXPONENT_LENGTH], &t_len);
+			p = ap_php_conv_10((wide_int) decimal_point, false, &exponent_is_negative, &temp[EXPONENT_LENGTH], &t_len);
 			*s++ = exponent_is_negative ? '-' : '+';
 
 			/*
@@ -616,7 +616,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	boolean_e print_blank;
 	boolean_e adjust_precision;
 	boolean_e adjust_width;
-	bool_int is_negative;
+	bool is_negative;
 
 	sp = odp->nextb;
 	bep = odp->buf_end;
