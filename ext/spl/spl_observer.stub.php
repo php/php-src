@@ -4,6 +4,7 @@
 
 interface SplObserver
 {
+    /** @tentative-return-type */
     public function update(SplSubject $subject): void;
 }
 
@@ -58,7 +59,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     public function key(): int {}
 
     /** @tentative-return-type */
-    public function current(): ?object {}
+    public function current(): object {}
 
     /** @tentative-return-type */
     public function next(): void {}
@@ -141,10 +142,10 @@ class MultipleIterator implements Iterator
     public function valid(): bool {}
 
     /** @tentative-return-type */
-    public function key(): array|false {}
+    public function key(): array {}
 
     /** @tentative-return-type */
-    public function current(): array|false {}
+    public function current(): array {}
 
     /** @tentative-return-type */
     public function next(): void {}

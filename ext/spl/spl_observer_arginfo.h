@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7afd0fa1170cb9c21bef514336e6cfb38dccdacd */
+ * Stub hash: a3c87f5b7edd257e25d6651628dd9896e14f5715 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
 ZEND_END_ARG_INFO()
 
@@ -54,7 +54,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_key, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_current, 0, 0, IS_OBJECT, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_current, 0, 0, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_next arginfo_class_SplSubject_notify
@@ -125,10 +125,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_MultipleIterator_valid arginfo_class_SplObjectStorage_valid
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_MultipleIterator_key, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_MultipleIterator_key arginfo_class_SplObjectStorage___serialize
 
-#define arginfo_class_MultipleIterator_current arginfo_class_MultipleIterator_key
+#define arginfo_class_MultipleIterator_current arginfo_class_SplObjectStorage___serialize
 
 #define arginfo_class_MultipleIterator_next arginfo_class_SplSubject_notify
 
