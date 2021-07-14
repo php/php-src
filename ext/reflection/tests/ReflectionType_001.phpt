@@ -180,10 +180,7 @@ string(4) "Test"
 
 *** return types
 ** Function/method return type 0
-bool(true)
 bool(false)
-bool(true)
-string(4) "void"
 ** Function/method return type 1
 bool(true)
 bool(false)
