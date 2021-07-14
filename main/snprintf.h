@@ -134,12 +134,11 @@ typedef enum {
 # define WIDE_INT		long
 #endif
 typedef WIDE_INT wide_int;
-typedef unsigned WIDE_INT u_wide_int;
 
 PHPAPI char * ap_php_conv_10(wide_int num, bool is_unsigned,
 	   bool * is_negative, char *buf_end, size_t *len);
 
-PHPAPI char * ap_php_conv_p2(u_wide_int num, int nbits,
+PHPAPI char * ap_php_conv_p2(uint64_t num, int nbits,
 		 char format, char *buf_end, size_t *len);
 
 /* The maximum precision that's allowed for float conversion. Does not include

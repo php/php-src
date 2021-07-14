@@ -198,7 +198,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 
 	double fp_num;
 	wide_int i_num = (wide_int) 0;
-	u_wide_int ui_num = (u_wide_int) 0;
+	uint64_t ui_num = (uint64_t) 0;
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
@@ -395,7 +395,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							i_num = (wide_int) va_arg(ap, u_wide_int);
+							i_num = (wide_int) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
@@ -471,29 +471,29 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 				case 'o':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -511,29 +511,29 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 				case 'X':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -695,8 +695,8 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					if (sizeof(char *) <= sizeof(u_wide_int)) {
-						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
+					if (sizeof(char *) <= sizeof(uint64_t)) {
+						ui_num = (uint64_t)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x',
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (ui_num != 0) {

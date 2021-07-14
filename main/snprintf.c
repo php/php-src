@@ -312,10 +312,10 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
 	   register bool * is_negative, char *buf_end, register size_t *len)
 {
 	register char *p = buf_end;
-	register u_wide_int magnitude;
+	register uint64_t magnitude;
 
 	if (is_unsigned) {
-		magnitude = (u_wide_int) num;
+		magnitude = (uint64_t) num;
 		*is_negative = false;
 	} else {
 		*is_negative = (num < 0);
@@ -331,9 +331,9 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
 		 */
 		if (*is_negative) {
 			wide_int t = num + 1;
-			magnitude = ((u_wide_int) - t) + 1;
+			magnitude = ((uint64_t) - t) + 1;
 		} else {
-			magnitude = (u_wide_int) num;
+			magnitude = (uint64_t) num;
 		}
 	}
 
@@ -341,7 +341,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
 	 * We use a do-while loop so that we write at least 1 digit
 	 */
 	do {
-		register u_wide_int new_magnitude = magnitude / 10;
+		register uint64_t new_magnitude = magnitude / 10;
 
 		*--p = (char)(magnitude - new_magnitude * 10 + '0');
 		magnitude = new_magnitude;
@@ -471,7 +471,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(register uint64_t num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -588,7 +588,7 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 
 	double fp_num;
 	wide_int i_num = (wide_int) 0;
-	u_wide_int ui_num;
+	uint64_t ui_num;
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
@@ -788,7 +788,7 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							i_num = (wide_int) va_arg(ap, u_wide_int);
+							i_num = (wide_int) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
@@ -865,29 +865,29 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 				case 'o':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -904,29 +904,29 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 				case 'X':
 					switch(modifier) {
 						default:
-							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							ui_num = (uint64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							ui_num = (u_wide_int) va_arg(ap, size_t);
+							ui_num = (uint64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -1089,8 +1089,8 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					if (sizeof(char *) <= sizeof(u_wide_int)) {
-						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
+					if (sizeof(char *) <= sizeof(uint64_t)) {
+						ui_num = (uint64_t)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x',
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (ui_num != 0) {
