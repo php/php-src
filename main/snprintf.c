@@ -566,14 +566,6 @@ typedef struct buf_area buffy;
 	while ( (size_t)width > len )
 
 /*
- * Prefix the character ch to the string str
- * Increase length
- * Set the has_prefix flag
- */
-#define PREFIX( str, length, ch )	 *--str = ch ; length++ ; has_prefix = true
-
-
-/*
  * Do format conversion placing the output in buffer
  */
 static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
