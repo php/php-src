@@ -34,7 +34,7 @@ class MessageFormatter
      * @tentative-return-type
      * @alias msgfmt_parse_message
      */
-    public static function parseMessage(string $locale, string $pattern, string $message): array|false|null {}
+    public static function parseMessage(string $locale, string $pattern, string $message): array|false {}
 
     /**
      * @tentative-return-type
