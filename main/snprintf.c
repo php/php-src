@@ -59,7 +59,7 @@
 
 static char * __cvt(double value, int ndigit, int *decpt, bool *sign, int fmode, int pad) /* {{{ */
 {
-	register char *s = NULL;
+	char *s = NULL;
 	char *p, *rve, c;
 	size_t siz;
 
@@ -308,11 +308,11 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 /* char * ap_php_conv_10() {{{ */
-PHPAPI char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
-	   register bool * is_negative, char *buf_end, register size_t *len)
+PHPAPI char * ap_php_conv_10(int64_t num, bool is_unsigned,
+	   bool * is_negative, char *buf_end, size_t *len)
 {
-	register char *p = buf_end;
-	register uint64_t magnitude;
+	char *p = buf_end;
+	uint64_t magnitude;
 
 	if (is_unsigned) {
 		magnitude = (uint64_t) num;
@@ -341,7 +341,7 @@ PHPAPI char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
 	 * We use a do-while loop so that we write at least 1 digit
 	 */
 	do {
-		register uint64_t new_magnitude = magnitude / 10;
+		uint64_t new_magnitude = magnitude / 10;
 
 		*--p = (char)(magnitude - new_magnitude * 10 + '0');
 		magnitude = new_magnitude;
@@ -366,11 +366,11 @@ PHPAPI char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
  * in buf).
  */
 /* PHPAPI char * php_conv_fp() {{{ */
-PHPAPI char * php_conv_fp(register char format, register double num,
+PHPAPI char * php_conv_fp(char format, double num,
 		 bool add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len)
 {
-	register char *s = buf;
-	register char *p, *p_orig;
+	char *s = buf;
+	char *p, *p_orig;
 	int decimal_point;
 
 	if (precision >= NDIG - 1) {
@@ -471,13 +471,13 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-PHPAPI char * ap_php_conv_p2(register uint64_t num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(uint64_t num, int nbits, char format, char *buf_end, size_t *len) /* {{{ */
 {
-	register int mask = (1 << nbits) - 1;
-	register char *p = buf_end;
+	int mask = (1 << nbits) - 1;
+	char *p = buf_end;
 	static const char low_digits[] = "0123456789abcdef";
 	static const char upper_digits[] = "0123456789ABCDEF";
-	register const char *digits = (format == 'X') ? upper_digits : low_digits;
+	const char *digits = (format == 'X') ? upper_digits : low_digits;
 
 	do {
 		*--p = digits[num & mask];
@@ -568,7 +568,7 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static size_t format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
+static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ */
 {
 	char *sp;
 	char *bep;
