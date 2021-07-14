@@ -3701,14 +3701,7 @@ zend_freedtoa(char *s)
  *	   calculation.
  */
 
-ZEND_API char *
-zend_dtoa
-#ifdef KR_headers
-	(dd, mode, ndigits, decpt, sign, rve)
-	double dd; int mode, ndigits, *decpt, *sign; char **rve;
-#else
-	(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
-#endif
+ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sign, char **rve)
 {
  /*	Arguments ndigits, decpt, sign are similar to those
 	of ecvt and fcvt; trailing zeros are suppressed from
