@@ -69,7 +69,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval);
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset);
 
-ZEND_COLD zend_never_inline void zend_readonly_property_modification_error(zend_property_info *info);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(zend_property_info *info);
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(

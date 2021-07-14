@@ -2006,6 +2006,14 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
+	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
+		zend_readonly_property_modification_error(info);
+		if (result) {
+			ZVAL_UNDEF(result);
+		}
+		return;
+	}
+
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
 
