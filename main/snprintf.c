@@ -308,7 +308,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 /* char * ap_php_conv_10() {{{ */
-PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
+PHPAPI char * ap_php_conv_10(register int64_t num, register bool is_unsigned,
 	   register bool * is_negative, char *buf_end, register size_t *len)
 {
 	register char *p = buf_end;
@@ -330,7 +330,7 @@ PHPAPI char * ap_php_conv_10(register wide_int num, register bool is_unsigned,
 		 *      d. add 1
 		 */
 		if (*is_negative) {
-			wide_int t = num + 1;
+			int64_t t = num + 1;
 			magnitude = ((uint64_t) - t) + 1;
 		} else {
 			magnitude = (uint64_t) num;
@@ -441,7 +441,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 		*s++ = format;			/* either e or E */
 		decimal_point--;
 		if (decimal_point != 0) {
-			p = ap_php_conv_10((wide_int) decimal_point, false, &exponent_is_negative, &temp[EXPONENT_LENGTH], &t_len);
+			p = ap_php_conv_10((int64_t) decimal_point, false, &exponent_is_negative, &temp[EXPONENT_LENGTH], &t_len);
 			*s++ = exponent_is_negative ? '-' : '+';
 
 			/*
@@ -587,7 +587,7 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 	char prefix_char;
 
 	double fp_num;
-	wide_int i_num = (wide_int) 0;
+	int64_t i_num = (int64_t) 0;
 	uint64_t ui_num;
 
 	char num_buf[NUM_BUF_SIZE];
@@ -776,29 +776,29 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 				case 'u':
 					switch(modifier) {
 						default:
-							i_num = (wide_int) va_arg(ap, unsigned int);
+							i_num = (int64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							i_num = (wide_int) va_arg(ap, unsigned long int);
+							i_num = (int64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							i_num = (wide_int) va_arg(ap, size_t);
+							i_num = (int64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							i_num = (wide_int) va_arg(ap, unsigned long long int);
+							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							i_num = (wide_int) va_arg(ap, uintmax_t);
+							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							i_num = (wide_int) va_arg(ap, ptrdiff_t);
+							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -815,33 +815,33 @@ static size_t format_converter(register buffy * odp, const char *fmt, va_list ap
 					if ((*fmt) != 'u') {
 						switch(modifier) {
 							default:
-								i_num = (wide_int) va_arg(ap, int);
+								i_num = (int64_t) va_arg(ap, int);
 								break;
 							case LM_LONG_DOUBLE:
 								goto fmt_error;
 							case LM_LONG:
-								i_num = (wide_int) va_arg(ap, long int);
+								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
 #if SIZEOF_SSIZE_T
-								i_num = (wide_int) va_arg(ap, ssize_t);
+								i_num = (int64_t) va_arg(ap, ssize_t);
 #else
-								i_num = (wide_int) va_arg(ap, size_t);
+								i_num = (int64_t) va_arg(ap, size_t);
 #endif
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:
-								i_num = (wide_int) va_arg(ap, wide_int);
+								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
 #if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
-								i_num = (wide_int) va_arg(ap, intmax_t);
+								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
 #endif
 #if SIZEOF_PTRDIFF_T
 							case LM_PTRDIFF_T:
-								i_num = (wide_int) va_arg(ap, ptrdiff_t);
+								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
 #endif
 						}

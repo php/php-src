@@ -197,7 +197,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 	char prefix_char;
 
 	double fp_num;
-	wide_int i_num = (wide_int) 0;
+	int64_t i_num = (int64_t) 0;
 	uint64_t ui_num = (uint64_t) 0;
 
 	char num_buf[NUM_BUF_SIZE];
@@ -383,29 +383,29 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 				case 'u':
 					switch(modifier) {
 						default:
-							i_num = (wide_int) va_arg(ap, unsigned int);
+							i_num = (int64_t) va_arg(ap, unsigned int);
 							break;
 						case LM_LONG_DOUBLE:
 							goto fmt_error;
 						case LM_LONG:
-							i_num = (wide_int) va_arg(ap, unsigned long int);
+							i_num = (int64_t) va_arg(ap, unsigned long int);
 							break;
 						case LM_SIZE_T:
-							i_num = (wide_int) va_arg(ap, size_t);
+							i_num = (int64_t) va_arg(ap, size_t);
 							break;
 #if SIZEOF_LONG_LONG
 						case LM_LONG_LONG:
-							i_num = (wide_int) va_arg(ap, unsigned long long int);
+							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
 #if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
-							i_num = (wide_int) va_arg(ap, uintmax_t);
+							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
 #endif
 #if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
-							i_num = (wide_int) va_arg(ap, ptrdiff_t);
+							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
 #endif
 					}
@@ -422,33 +422,33 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					if ((*fmt) != 'u') {
 						switch(modifier) {
 							default:
-								i_num = (wide_int) va_arg(ap, int);
+								i_num = (int64_t) va_arg(ap, int);
 								break;
 							case LM_LONG_DOUBLE:
 								goto fmt_error;
 							case LM_LONG:
-								i_num = (wide_int) va_arg(ap, long int);
+								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
 #if SIZEOF_SSIZE_T
-								i_num = (wide_int) va_arg(ap, ssize_t);
+								i_num = (int64_t) va_arg(ap, ssize_t);
 #else
-								i_num = (wide_int) va_arg(ap, size_t);
+								i_num = (int64_t) va_arg(ap, size_t);
 #endif
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:
-								i_num = (wide_int) va_arg(ap, wide_int);
+								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
 #if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
-								i_num = (wide_int) va_arg(ap, intmax_t);
+								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
 #endif
 #if SIZEOF_PTRDIFF_T
 							case LM_PTRDIFF_T:
-								i_num = (wide_int) va_arg(ap, ptrdiff_t);
+								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
 #endif
 						}
