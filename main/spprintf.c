@@ -213,11 +213,11 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 	 * Flag variables
 	 */
 	length_modifier_e modifier;
-	boolean_e alternate_form;
-	boolean_e print_sign;
-	boolean_e print_blank;
-	boolean_e adjust_precision;
-	boolean_e adjust_width;
+	bool alternate_form;
+	bool print_sign;
+	bool print_blank;
+	bool adjust_precision;
+	bool adjust_width;
 	bool is_negative;
 
 	while (*fmt) {
@@ -229,7 +229,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 			 */
 			zend_string *tmp_str = NULL;
 			adjust = RIGHT;
-			alternate_form = print_sign = print_blank = NO;
+			alternate_form = print_sign = print_blank = false;
 			pad_char = ' ';
 			prefix_char = NUL;
 
@@ -246,11 +246,11 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					if (*fmt == '-')
 						adjust = LEFT;
 					else if (*fmt == '+')
-						print_sign = YES;
+						print_sign = true;
 					else if (*fmt == '#')
-						alternate_form = YES;
+						alternate_form = true;
 					else if (*fmt == ' ')
-						print_blank = YES;
+						print_blank = true;
 					else if (*fmt == '0')
 						pad_char = '0';
 					else
@@ -262,23 +262,23 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 				 */
 				if (isdigit((int)*fmt)) {
 					STR_TO_DEC(fmt, min_width);
-					adjust_width = YES;
+					adjust_width = true;
 				} else if (*fmt == '*') {
 					min_width = va_arg(ap, int);
 					fmt++;
-					adjust_width = YES;
+					adjust_width = true;
 					if (min_width < 0) {
 						adjust = LEFT;
 						min_width = -min_width;
 					}
 				} else
-					adjust_width = NO;
+					adjust_width = false;
 
 				/*
 				 * Check if a precision was specified
 				 */
 				if (*fmt == '.') {
-					adjust_precision = YES;
+					adjust_precision = true;
 					fmt++;
 					if (isdigit((int)*fmt)) {
 						STR_TO_DEC(fmt, precision);
@@ -294,9 +294,9 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
 				} else
-					adjust_precision = NO;
+					adjust_precision = false;
 			} else
-				adjust_precision = adjust_width = NO;
+				adjust_precision = adjust_width = false;
 
 			/*
 			 * Modifier check
@@ -594,7 +594,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						}
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
-						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
+						 (adjust_precision == false) ? FLOAT_DIGITS : precision,
 						 (*fmt == 'f')?LCONV_DECIMAL_POINT:'.',
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
@@ -637,7 +637,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
  						break;
  					}
 
-					if (adjust_precision == NO)
+					if (adjust_precision == false)
 						precision = FLOAT_DIGITS;
 					else if (precision == 0)
 						precision = 1;
