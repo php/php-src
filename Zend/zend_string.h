@@ -53,6 +53,9 @@ ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
 ZEND_API extern zend_string **zend_known_strings;
 
+ZEND_API extern zend_string  *zend_one_char_literal[256];
+ZEND_API extern zend_string  *zend_empty_literal;
+
 END_EXTERN_C()
 
 /* Shortcuts */
@@ -76,7 +79,9 @@ END_EXTERN_C()
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
 #define ZSTR_EMPTY_ALLOC() zend_empty_string
+#define ZSTR_EMPTY_LITERAL_ALLOC() zend_empty_literal
 #define ZSTR_CHAR(c) zend_one_char_string[c]
+#define ZSTR_LITERAL_CHAR(c) zend_one_char_literal[c]
 #define ZSTR_KNOWN(idx) zend_known_strings[idx]
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
@@ -329,6 +334,53 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 		}
 	}
 }
+
+#define ZSTR_IS_LITERAL(s)	 (GC_TYPE_INFO(s) & IS_STR_LITERAL)
+#define ZSTR_IS_LITERAL_CHAR(s) (ZSTR_IS_LITERAL(s) && (ZSTR_LEN(s) <= 1))
+
+static zend_always_inline zend_string* zend_string_set_literal(zend_string *s) {
+	if (UNEXPECTED(ZSTR_IS_LITERAL(s))) {
+		return s;
+	}
+
+	if (EXPECTED(GC_REFCOUNT(s) == 1 && !ZSTR_IS_INTERNED(s))) {
+		GC_TYPE_INFO(s) |= IS_STR_LITERAL;
+		return s;
+	}
+
+	zend_string *literal = zend_string_separate(s, 0);
+
+	GC_TYPE_INFO(literal) |= IS_STR_LITERAL;
+
+	return literal;
+}
+
+static zend_always_inline zend_string* zend_string_unset_literal(zend_string *s) {
+	if (UNEXPECTED(!ZSTR_IS_LITERAL(s))) {
+		return s;
+	}
+
+	if (EXPECTED(GC_REFCOUNT(s) == 1 && !ZSTR_IS_INTERNED(s))) {
+		GC_TYPE_INFO(s) &= ~IS_STR_LITERAL;
+		return s;
+	}
+
+	zend_string *literal = zend_string_separate(s, 0);
+
+	GC_TYPE_INFO(literal) &= ~IS_STR_LITERAL;
+
+	return literal;
+}
+
+static zend_always_inline void zend_string_set_literal_fast(zend_string *s) {
+	ZEND_ASSERT(GC_REFCOUNT(s) == 1 && !ZSTR_IS_INTERNED(s));
+
+	GC_TYPE_INFO(s) |= IS_STR_LITERAL;
+}
+
+#define ZSTR_SET_LITERAL(s)    *(s) = zend_string_set_literal(*(s))
+#define ZSTR_SET_LITERAL_FAST  zend_string_set_literal_fast
+#define ZSTR_UNSET_LITERAL(s)  *(s) = zend_string_unset_literal(*(s))
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()

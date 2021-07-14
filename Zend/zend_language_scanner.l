@@ -760,6 +760,15 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename)
 	RESET_DOC_COMMENT();
 }
 
+zend_ast* zend_get_scanned_string_ast(zval *zendlval, uint32_t start_line) {
+    if (Z_TYPE_P(zendlval) == IS_STRING && Z_STRLEN_P(zendlval) > 1) {
+        zend_string *string = 
+            Z_STR_P(zendlval);
+
+        GC_TYPE_INFO(string) |= IS_STR_LITERAL;
+    }
+    return zend_ast_create_zval_with_lineno(zendlval, start_line);
+}
 
 ZEND_API size_t zend_get_scanned_file_offset(void)
 {
@@ -895,7 +904,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		ZVAL_STRINGL(zendlval, s, sz); \
 		efree(s); \
 	} else if (yyleng == 1) { \
-		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext))); \
+		ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR((zend_uchar)*(yytext))); \
 	} else { \
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
@@ -907,13 +916,13 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 
 	if (len <= 1) {
 		if (len < 1) {
-			ZVAL_EMPTY_STRING(zendlval);
+			ZVAL_INTERNED_STR(zendlval, ZSTR_EMPTY_LITERAL_ALLOC());
 		} else {
 			zend_uchar c = (zend_uchar)*str;
 			if (c == '\n' || c == '\r') {
 				CG(zend_lineno)++;
 			}
-			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+			ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR(c));
 		}
 		goto skip_escape_conversion;
 	}
@@ -1120,6 +1129,14 @@ skip_escape_conversion:
 		zval_ptr_dtor(zendlval);
 		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
+	}
+
+	if (UNEXPECTED(Z_STRLEN_P(zendlval) == 1)) {
+		zend_uchar c = (zend_uchar)*Z_STRVAL_P(zendlval);
+
+		zend_string_release(Z_STR_P(zendlval));
+
+		ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR(c));
 	}
 	return SUCCESS;
 }
@@ -2130,7 +2147,7 @@ string:
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM}|{ONUM} { /* Offset must be treated as a string */
 	if (yyleng == 1) {
-		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext)));
+		ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR((zend_uchar)*(yytext)));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
@@ -2285,7 +2302,7 @@ inline_char_handler:
 			yyless(readsize);
 		}
 	} else if (yyleng == 1) {
-		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*yytext));
+		ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR((zend_uchar)*yytext));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
@@ -2460,13 +2477,13 @@ inline_char_handler:
 
 	if (yyleng-bprefix-2 <= 1) {
 		if (yyleng-bprefix-2 < 1) {
-			ZVAL_EMPTY_STRING(zendlval);
+			ZVAL_INTERNED_STR(zendlval, ZSTR_EMPTY_LITERAL_ALLOC());
 		} else {
 			zend_uchar c = (zend_uchar)*(yytext+bprefix+1);
 			if (c == '\n' || c == '\r') {
 				CG(zend_lineno)++;
 			}
-			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+			ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR(c));
 		}
 		goto skip_escape_conversion;
 	}
@@ -2524,6 +2541,15 @@ skip_escape_conversion:
 		zend_string_release_ex(Z_STR_P(zendlval), 0);
 		ZVAL_STR(zendlval, new_str);
 	}
+
+	if (UNEXPECTED(Z_STRLEN_P(zendlval) == 1)) {
+		zend_uchar c = (zend_uchar)*Z_STRVAL_P(zendlval);
+
+		zend_string_release(Z_STR_P(zendlval));
+
+		ZVAL_INTERNED_STR(zendlval, ZSTR_LITERAL_CHAR(c));
+	}
+
 	RETURN_TOKEN_WITH_VAL(T_CONSTANT_ENCAPSED_STRING);
 }
 
@@ -3090,7 +3116,7 @@ emit_token_with_str:
 emit_token_with_val:
 	if (PARSER_MODE()) {
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
-		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
+		elem->ast = zend_get_scanned_string_ast(zendlval, start_line);
 	}
 
 emit_token:

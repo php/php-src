@@ -833,10 +833,12 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 /* }}} */
 
 ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name) {
-	return zend_string_concat3(
+	zend_string* string = zend_string_concat3(
 		ZSTR_VAL(class_name), ZSTR_LEN(class_name),
 		"::", sizeof("::") - 1,
 		ZSTR_VAL(member_name), ZSTR_LEN(member_name));
+	ZSTR_SET_LITERAL_FAST(string);
+	return string;
 }
 
 zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_t name2_len) {
@@ -846,7 +848,11 @@ zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_
 zend_string *zend_prefix_with_ns(zend_string *name) {
 	if (FC(current_namespace)) {
 		zend_string *ns = FC(current_namespace);
-		return zend_concat_names(ZSTR_VAL(ns), ZSTR_LEN(ns), ZSTR_VAL(name), ZSTR_LEN(name));
+		zend_string *prefixed =
+			zend_concat_names(ZSTR_VAL(ns), ZSTR_LEN(ns), ZSTR_VAL(name), ZSTR_LEN(name));
+
+		ZSTR_SET_LITERAL_FAST(prefixed);
+		return prefixed;
 	} else {
 		return zend_string_copy(name);
 	}
@@ -3826,7 +3832,21 @@ static zend_result zend_compile_func_is_scalar(znode *result, zend_ast_list *arg
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
 	opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
 	return SUCCESS;
-}
+} /* }}} */
+
+static zend_result zend_compile_func_is_literal(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+
+	if (args->children != 1) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op(result, ZEND_LITERAL_CHECK, &arg_node, NULL);
+
+	return SUCCESS;
+} /* }}} */
 
 zend_result zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
 {
@@ -4357,6 +4377,8 @@ zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, ze
 		return zend_compile_func_typecheck(result, args, IS_RESOURCE);
 	} else if (zend_string_equals_literal(lcname, "is_scalar")) {
 		return zend_compile_func_is_scalar(result, args);
+	} else if (zend_string_equals_literal(lcname, "is_literal")) {
+		return zend_compile_func_is_literal(result, args);
 	} else if (zend_string_equals_literal(lcname, "boolval")) {
 		return zend_compile_func_cast(result, args, _IS_BOOL);
 	} else if (zend_string_equals_literal(lcname, "intval")) {

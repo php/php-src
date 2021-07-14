@@ -1182,10 +1182,15 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 	size_t op2_len = Z_STRLEN_P(op2);
 	size_t result_len = op1_len + op2_len;
 	zend_string *result_str;
+	bool literal = false;
 
 	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
+	}
+
+	if (UNEXPECTED(ZSTR_IS_LITERAL(Z_STR_P(op1)) && ZSTR_IS_LITERAL(Z_STR_P(op2)))) {
+		literal = true;
 	}
 
 	do {
@@ -1194,12 +1199,18 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 				result_str = perealloc(Z_STR_P(op1), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(result_len)), 0);
 				ZSTR_LEN(result_str) = result_len;
 				zend_string_forget_hash_val(result_str);
+				if (EXPECTED(!literal && ZSTR_IS_LITERAL(result_str))) {
+				    ZSTR_UNSET_LITERAL(&result_str);
+				}
 				break;
 			}
 			GC_DELREF(Z_STR_P(op1));
 		}
 		result_str = zend_string_alloc(result_len, 0);
 		memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
+		if (UNEXPECTED(literal)) {
+		    ZSTR_SET_LITERAL_FAST(result_str);
+		}
 	} while(0);
 
 	ZVAL_NEW_STR(op1, result_str);
@@ -1221,6 +1232,9 @@ static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, z
 
 	result_str = zend_string_alloc(result_len, 0);
 	memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
+	if (UNEXPECTED(ZSTR_IS_LITERAL(Z_STR_P(op1)) && ZSTR_IS_LITERAL(Z_STR_P(op2)))) {
+		ZSTR_SET_LITERAL_FAST(result_str);
+	}
 
 	ZVAL_NEW_STR(result, result_str);
 

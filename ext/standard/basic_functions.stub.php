@@ -1425,6 +1425,8 @@ function is_object(mixed $value): bool {}
 
 function is_scalar(mixed $value): bool {}
 
+function is_literal(mixed $value): bool {}
+
 /** @param string $callable_name */
 function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
