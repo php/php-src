@@ -20,7 +20,7 @@ class ArrayIteratorEx extends ArrayIterator
         echo __METHOD__ . "\n";
         return parent::current();
     }
-    function key(): mixed
+    function key(): string|int|null
     {
         echo __METHOD__ . "\n";
         return parent::key();

@@ -17,7 +17,7 @@ class ArrayIteratorEx extends ArrayIterator
         return ArrayIterator::valid();
     }
 
-    function key(): mixed
+    function key(): string|int|null
     {
         echo __METHOD__ . "\n";
         return ArrayIterator::key();

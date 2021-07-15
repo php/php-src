@@ -226,7 +226,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
     /**
      * @return scalar
      */
-    public function key(): mixed
+    public function key(): string|int|null
     {
         return $this->index;
     }

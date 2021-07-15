@@ -33,7 +33,7 @@ class MyIterator extends ArrayIterator {
         parent::next();
     }
 
-    function key(): mixed {
+    function key(): string|int|null {
         $args = func_get_args();
         echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
         return parent::key();

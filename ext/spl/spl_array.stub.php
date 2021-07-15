@@ -204,7 +204,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     public function current(): mixed {}
 
     /** @tentative-return-type */
-    public function key(): mixed {}
+    public function key(): string|int|null {}
 
     /** @tentative-return-type */
     public function next(): void {}

@@ -42,7 +42,7 @@ class MyArrayIterator extends ArrayIterator
         return parent::current();
     }
 
-    function key(): mixed
+    function key(): string|int|null
     {
         self::fail(5, __FUNCTION__);
         return parent::key();

@@ -18,7 +18,7 @@ class IT extends ArrayIterator {
 
     function rewind(): void  {$this->trap(__FUNCTION__); parent::rewind();}
     function valid(): bool   {$this->trap(__FUNCTION__); return parent::valid();}
-    function key(): mixed    {$this->trap(__FUNCTION__); return parent::key();}
+    function key(): string|int|null { $this->trap(__FUNCTION__); return parent::key(); }
     function next(): void    {$this->trap(__FUNCTION__); parent::next();}
 }
 

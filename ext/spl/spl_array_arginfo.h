@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d58390328052e8db45a6e388ab1b3fdf882be635 */
+ * Stub hash: e8e9909c2548a2259ba58ecf9f2ad6fe5add70f4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -134,7 +134,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayIterator_current, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ArrayIterator_key arginfo_class_ArrayIterator_current
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ArrayIterator_key, 0, 0, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator_next arginfo_class_ArrayIterator_rewind
 
