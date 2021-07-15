@@ -3004,6 +3004,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 	zend_string *key;
 	zend_function *parent_func;
 	zend_property_info *parent_info;
+	inheritance_status overall_status = INHERITANCE_SUCCESS;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent_func) {
 		zval *zv = zend_hash_find_ex(&ce->function_table, key, 1);
@@ -3014,8 +3015,9 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 					child_func, child_func->common.scope,
 					parent_func, parent_func->common.scope,
 					ce, NULL, /* check_visibility */ 1, 1, 0);
-
-			if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
+			if (UNEXPECTED(status == INHERITANCE_WARNING)) {
+				overall_status = INHERITANCE_WARNING;
+			} else if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 				return status;
 			}
 		}
@@ -3032,6 +3034,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 			zend_property_info *child_info = Z_PTR_P(zv);
 			if (ZEND_TYPE_IS_SET(child_info->type)) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
+				ZEND_ASSERT(status != INHERITANCE_WARNING);
 				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 					return status;
 				}
@@ -3039,7 +3042,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return INHERITANCE_SUCCESS;
+	return overall_status;
 }
 /* }}} */
 
