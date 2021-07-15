@@ -1447,13 +1447,9 @@ PHP_METHOD(IteratorIterator, getInnerIterator)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (!Z_ISUNDEF(intern->inner.zobject)) {
-		zval *value = &intern->inner.zobject;
-
-		ZVAL_COPY_DEREF(return_value, value);
-	} else {
-		RETURN_NULL();
-	}
+	zval *value = &intern->inner.zobject;
+	ZEND_ASSERT(!Z_ISUNDEF_P(value));
+	ZVAL_COPY_DEREF(return_value, value);
 } /* }}} */
 
 static inline void spl_dual_it_free(spl_dual_it_object *intern)
