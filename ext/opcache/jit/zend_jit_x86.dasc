@@ -12531,6 +12531,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|2:
 			|	mov FCARG1a, FCARG2a
 			|	EXT_CALL zend_readonly_property_modification_error, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR
 			|	jmp >9
 			|3:
 			if (flags == ZEND_FETCH_DIM_WRITE) {
@@ -12582,6 +12583,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|4:
 			|	LOAD_ADDR FCARG1a, prop_info
 			|	EXT_CALL zend_readonly_property_modification_error, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR
 			|	jmp >9
 			|.code
 		}

@@ -11842,7 +11842,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	tst TMP1w, #ZEND_ACC_READONLY
 			|	bne >3
 			|	IF_NOT_TYPE REG2w, IS_OBJECT, >2
-			|	GET_Z_PTR REG2, FCARG1x, TMP1
+			|	GET_Z_PTR REG2, FCARG1x
 			|	GC_ADDREF REG2, TMP1w
 			|	SET_ZVAL_PTR res_addr, REG2, TMP1
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX, TMP1w, TMP2
@@ -11850,6 +11850,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|2:
 			|	mov FCARG1x, FCARG2x
 			|	EXT_CALL zend_readonly_property_modification_error, REG0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR, TMP1w, TMP2
 			|	b >9
 			|3:
 			if (flags == ZEND_FETCH_DIM_WRITE) {
@@ -11893,6 +11894,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|4:
 			|	LOAD_ADDR FCARG1x, prop_info
 			|	EXT_CALL zend_readonly_property_modification_error, REG0
+			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR, TMP1w, TMP2
 			|	b >9
 			|.code
 		}
