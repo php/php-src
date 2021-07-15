@@ -897,7 +897,7 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used - (handler->buffer.size - handler->buffer.used));
 			size_t grow_max = MAX(grow_int, grow_buf);
 
-			handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size + grow_max);
+			handler->buffer.data = safe_erealloc(handler->buffer.data, 1, handler->buffer.size, grow_max);
 			handler->buffer.size += grow_max;
 		}
 		memcpy(handler->buffer.data + handler->buffer.used, buf->data, buf->used);
