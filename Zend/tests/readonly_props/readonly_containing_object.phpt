@@ -51,9 +51,11 @@ object(stdClass)#2 (1) {
   ["foo"]=>
   int(3)
 }
-object(stdClass)#5 (0) {
+object(stdClass)#2 (1) {
+  ["foo"]=>
+  int(3)
 }
-object(ArrayObject)#4 (1) {
+object(ArrayObject)#7 (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     [0]=>

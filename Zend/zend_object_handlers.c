@@ -588,7 +588,13 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
 					&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
-				if (Z_TYPE_P(retval) != IS_OBJECT) {
+				if (Z_TYPE_P(retval) == IS_OBJECT) {
+					/* For objects, R/RW/UNSET fetch modes might not actually modify object.
+					 * Similar as with magic __get() allow them, but return the value as a copy
+					 * to make sure no actual modification is possible. */
+					ZVAL_COPY(rv, retval);
+					retval = rv;
+				} else {
 					zend_readonly_property_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
 				}
