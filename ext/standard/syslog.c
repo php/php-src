@@ -174,15 +174,14 @@ PHP_FUNCTION(closelog)
 PHP_FUNCTION(syslog)
 {
 	zend_long priority;
-	char *message;
-	size_t message_len;
+	zend_string *message;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(priority)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_STR(message)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_syslog(priority, "%s", message);
+	php_syslog_str(priority, message);
 	RETURN_TRUE;
 }
 /* }}} */

@@ -471,6 +471,9 @@ PHP 8.1 UPGRADE NOTES
     accessible through reflection.
     RFC: https://wiki.php.net/rfc/make-reflection-setaccessible-no-op
 
+- Standard:
+  . syslog() is now binary safe.
+
 ========================================
 6. New Functions
 ========================================
