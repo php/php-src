@@ -1,5 +1,10 @@
 --TEST--
 Test syslog() function : new line in message
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Won't run on Windows");
+?>
 --FILE--
 <?php
 $priority = LOG_WARNING;
@@ -9,6 +14,6 @@ openlog('PHPT', LOG_PERROR, LOG_USER);
 syslog($priority, $message);
 
 ?>
---EXPECT--
-PHPT: First line
-PHPT: Second line
+--EXPECTF--
+%SPHPT%S%r(:|-)%r First line
+%SPHPT%S%r(:|-)%r Second line
