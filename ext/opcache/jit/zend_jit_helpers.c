@@ -1926,6 +1926,9 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 				&& !zend_verify_ref_array_assignable(Z_REF_P(ref))) {
 			return NULL;
 		}
+		if (Z_TYPE_P(val) == IS_FALSE) {
+			zend_false_to_array_deprecated();
+		}
 		ZVAL_ARR(val, zend_new_array(8));
 	}
 	return val;
