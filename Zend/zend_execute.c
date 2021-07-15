@@ -2840,11 +2840,14 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				ZVAL_INDIRECT(result, ptr);
 				zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
 				if (prop_info) {
-					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
-							&& Z_TYPE_P(ptr) != IS_OBJECT) {
+					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
-						zend_readonly_property_modification_error(prop_info);
-						ZVAL_ERROR(result);
+						if (Z_TYPE_P(ptr) == IS_OBJECT) {
+							ZVAL_COPY(result, ptr);
+						} else {
+							zend_readonly_property_modification_error(prop_info);
+							ZVAL_ERROR(result);
+						}
 						return;
 					}
 					if (flags) {

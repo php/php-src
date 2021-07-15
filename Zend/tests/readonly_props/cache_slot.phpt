@@ -6,12 +6,21 @@ Test interaction with cache slots
 class Test {
     public readonly string $prop;
     public readonly array $prop2;
+    public readonly object $prop3;
     public function setProp(string $prop) {
         $this->prop = $prop;
     }
     public function initAndAppendProp2() {
         $this->prop2 = [];
         $this->prop2[] = 1;
+    }
+    public function initProp3() {
+        $this->prop3 = new stdClass;
+        $this->prop3->foo = 1;
+    }
+    public function replaceProp3() {
+        $ref =& $this->prop3;
+        $ref = new stdClass;
     }
 }
 
@@ -38,6 +47,22 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump($test->prop2);
+echo "\n";
+
+$test = new Test;
+$test->initProp3();
+try {
+    $test->replaceProp3();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($test->prop3);
+try {
+    $test->replaceProp3();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump($test->prop3);
 
 ?>
 --EXPECT--
@@ -48,4 +73,13 @@ string(1) "a"
 Cannot modify readonly property Test::$prop2
 Cannot modify readonly property Test::$prop2
 array(0) {
+}
+
+object(stdClass)#3 (1) {
+  ["foo"]=>
+  int(1)
+}
+object(stdClass)#3 (1) {
+  ["foo"]=>
+  int(1)
 }
