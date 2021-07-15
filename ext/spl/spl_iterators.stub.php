@@ -117,7 +117,7 @@ class IteratorIterator implements OuterIterator
 {
     public function __construct(Traversable $iterator, ?string $class = null) {}
 
-    /** @return Iterator */
+    /** @return Iterator|null */
     public function getInnerIterator() {}
 
     /** @return void */
