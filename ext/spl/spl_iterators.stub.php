@@ -4,13 +4,13 @@
 
 class EmptyIterator implements Iterator
 {
-    /** @return void */
+    /** @return mixed */
     public function current() {}
 
     /** @return void */
     public function next() {}
 
-    /** @return void */
+    /** @return mixed */
     public function key() {}
 
     /** @return bool */
@@ -109,7 +109,7 @@ class RecursiveIteratorIterator implements OuterIterator
 
 interface OuterIterator extends Iterator
 {
-    /** @return Iterator */
+    /** @return Iterator|null */
     public function getInnerIterator();
 }
 
@@ -303,7 +303,7 @@ class AppendIterator extends IteratorIterator
     /** @return void */
     public function next() {}
 
-    /** @return int */
+    /** @return int|null */
     public function getIteratorIndex() {}
 
     /** @return ArrayIterator */
