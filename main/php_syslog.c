@@ -61,9 +61,8 @@ PHPAPI void php_syslog_str(int priority, const zend_string* message)
 			const char xdigits[] = "0123456789abcdef";
 
 			smart_string_appendl(&sbuf, "\\x", 2);
-			smart_string_appendc(&sbuf, xdigits[(c / 0x10)]);
-			c &= 0x0f;
-			smart_string_appendc(&sbuf, xdigits[c]);
+			smart_string_appendc(&sbuf, xdigits[c >> 4]);
+			smart_string_appendc(&sbuf, xdigits[c & 0xf]);
 		}
 	}
 
