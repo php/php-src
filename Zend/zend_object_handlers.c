@@ -1137,8 +1137,10 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
 				}
 			}
-			zval_ptr_dtor(slot);
+			zval tmp;
+			ZVAL_COPY_VALUE(&tmp, slot);
 			ZVAL_UNDEF(slot);
+			zval_ptr_dtor(&tmp);
 			if (zobj->properties) {
 				HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 			}
