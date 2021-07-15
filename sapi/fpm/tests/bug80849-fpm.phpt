@@ -20,7 +20,7 @@ EOT;
 
 $code = <<<EOT
 <?php
-header('HTTP/1.1 201 ' . str_repeat('A', 1011), true);
+header('HTTP/1.1 201 ' . str_repeat('A', 1014), true);
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
