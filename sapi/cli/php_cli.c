@@ -1197,7 +1197,7 @@ int main(int argc, char *argv[])
 #if defined(PHP_WIN32) && defined(_DEBUG)
 	{
 		char *tmp = getenv("PHP_WIN32_DEBUG_HEAP");
-		if (tmp && ZEND_ATOL(tmp, 0)) {
+		if (tmp && ZEND_ATOL(tmp)) {
 			int tmp_flag;
 			_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 			_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
