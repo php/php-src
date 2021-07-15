@@ -2461,7 +2461,9 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if ((f + l) > (zend_long)ZSTR_LEN(orig_str)) {
+			ZEND_ASSERT(0 <= f && f <= ZEND_LONG_MAX);
+			ZEND_ASSERT(0 <= l && l <= ZEND_LONG_MAX);
+			if (((size_t) f + l) > ZSTR_LEN(orig_str)) {
 				l = ZSTR_LEN(orig_str) - f;
 			}
 
