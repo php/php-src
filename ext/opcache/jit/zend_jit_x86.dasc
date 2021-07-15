@@ -12521,12 +12521,18 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|.cold_code
 			|1:
 			|	test dword [FCARG2a + offsetof(zend_property_info, flags)], ZEND_ACC_READONLY
-			|	jz >2
-			|	IF_Z_TYPE FCARG1a, IS_OBJECT, >2
+			|	jz >3
+			|	IF_NOT_Z_TYPE FCARG1a, IS_OBJECT, >2
+			|	GET_Z_PTR r0, FCARG1a
+			|	GC_ADDREF r0
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
+			|	jmp >9
+			|2:
 			|	mov FCARG1a, FCARG2a
 			|	EXT_CALL zend_readonly_property_modification_error, r0
 			|	jmp >9
-			|2:
+			|3:
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				|	SET_EX_OPLINE opline, r0
 				|	EXT_CALL zend_jit_check_array_promotion, r0
@@ -12567,6 +12573,11 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
 			|	IF_NOT_TYPE dl, IS_OBJECT, >4
+			|	GET_ZVAL_PTR r0, prop_addr
+			|	GC_ADDREF r0
+			|	SET_ZVAL_PTR res_addr, r0
+			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
+			|	jmp >9
 			|.cold_code
 			|4:
 			|	LOAD_ADDR FCARG1a, prop_info
