@@ -277,6 +277,19 @@ static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
+static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
+		zend_class_entry *ce, zend_string *member, zend_class_entry *scope, const char *operation) {
+	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
+		operation, ZSTR_VAL(ce->name), ZSTR_VAL(member),
+		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
+}
+
+static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
+		zend_class_entry *ce, zend_string *member) {
+	zend_throw_error(NULL, "Cannot unset readonly property %s::$%s",
+		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+}
+
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
@@ -573,6 +586,19 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		retval = OBJ_PROP(zobj, property_offset);
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
+					&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
+				if (Z_TYPE_P(retval) == IS_OBJECT) {
+					/* For objects, R/RW/UNSET fetch modes might not actually modify object.
+					 * Similar as with magic __get() allow them, but return the value as a copy
+					 * to make sure no actual modification is possible. */
+					ZVAL_COPY(rv, retval);
+					retval = rv;
+				} else {
+					zend_readonly_property_modification_error(prop_info);
+					retval = &EG(uninitialized_zval);
+				}
+			}
 			goto exit;
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
@@ -708,6 +734,36 @@ static zend_always_inline bool property_uses_strict_types() {
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
 }
 
+static bool verify_readonly_initialization_access(
+		zend_property_info *prop_info, zend_class_entry *ce,
+		zend_string *name, const char *operation) {
+	zend_class_entry *scope;
+	if (UNEXPECTED(EG(fake_scope))) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+	if (prop_info->ce == scope) {
+		return true;
+	}
+
+	/* We may have redeclared a parent property. In that case the parent should still be
+	 * allowed to initialize it. */
+	if (scope && is_derived_class(ce, scope)) {
+		zend_property_info *prop_info = zend_hash_find_ptr(&scope->properties_info, name);
+		if (prop_info) {
+			/* This should be ensured by inheritance. */
+			ZEND_ASSERT(prop_info->flags & ZEND_ACC_READONLY);
+			if (prop_info->ce == scope) {
+				return true;
+			}
+		}
+	}
+
+	zend_readonly_property_modification_scope_error(prop_info->ce, name, scope, operation);
+	return false;
+}
+
 ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zval *value, void **cache_slot) /* {{{ */
 {
 	zval *variable_ptr, tmp;
@@ -723,6 +779,13 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
+				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					Z_TRY_DELREF_P(value);
+					zend_readonly_property_modification_error(prop_info);
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
 					Z_TRY_DELREF_P(value);
@@ -787,6 +850,13 @@ write_std_property:
 
 			Z_TRY_ADDREF_P(value);
 			if (UNEXPECTED(prop_info)) {
+				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY)
+						&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
+					Z_TRY_DELREF_P(value);
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
 					zval_ptr_dtor(value);
@@ -955,6 +1025,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				/* we do have getter - fail and let it try again with usual get/set */
 				retval = NULL;
 			}
+		} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+			/* Readonly property, delegate to read_property + write_property. */
+			retval = NULL;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties)) {
@@ -1003,6 +1076,10 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
+			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
+				zend_readonly_property_unset_error(prop_info->ce, name);
+				return;
+			}
 			if (UNEXPECTED(Z_ISREF_P(slot)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
 				if (prop_info) {
@@ -1019,6 +1096,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			return;
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
+					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
+				return;
+			}
+
 			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
 			Z_PROP_FLAG_P(slot) = 0;
 			return;
