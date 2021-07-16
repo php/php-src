@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70374ed7b55604eb98e85148d7ff19e79258ce92 */
+ * Stub hash: 7a76a82242a168597397e7ae7f3533d648a6fefc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -71,6 +71,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_ZendSubNS_namespaced_func
 
+#define arginfo_class_ZendTestUnbacked_showName arginfo_class__ZendTestClass___toString
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestStringBacked_getFirst, 0, 0, ZendTestStringBacked, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
@@ -98,6 +103,8 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
+static ZEND_METHOD(ZendTestUnbacked, showName);
+static ZEND_METHOD(ZendTestStringBacked, getFirst);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
@@ -149,6 +156,23 @@ static const zend_function_entry class__ZendTestTrait_methods[] = {
 
 
 static const zend_function_entry class_ZendTestAttribute_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestUnbacked_methods[] = {
+	ZEND_ME(ZendTestUnbacked, showName, arginfo_class_ZendTestUnbacked_showName, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestStringBacked_methods[] = {
+	ZEND_ME(ZendTestStringBacked, getFirst, arginfo_class_ZendTestStringBacked_getFirst, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestIntBacked_methods[] = {
 	ZEND_FE_END
 };
 
@@ -264,6 +288,42 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	INIT_CLASS_ENTRY(ce, "ZendTestAttribute", class_ZendTestAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_object *enum_ZendTestUnbacked_FIRST;
+static zend_object *enum_ZendTestUnbacked_SECOND;
+
+static zend_class_entry *register_class_ZendTestUnbacked(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum_ex("ZendTestUnbacked", class_ZendTestUnbacked_methods);
+	enum_ZendTestUnbacked_FIRST = zend_add_enum_case(class_entry, "FIRST");
+	enum_ZendTestUnbacked_SECOND = zend_add_enum_case(class_entry, "SECOND");
+
+	return class_entry;
+}
+
+static zend_object *enum_ZendTestStringBacked_FIRST;
+static zend_object *enum_ZendTestStringBacked_SECOND;
+
+static zend_class_entry *register_class_ZendTestStringBacked(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_backed_enum_ex("ZendTestStringBacked", IS_STRING, class_ZendTestStringBacked_methods);
+	enum_ZendTestStringBacked_FIRST = zend_add_enum_case_string(class_entry, "FIRST", "a");
+	enum_ZendTestStringBacked_SECOND = zend_add_enum_case_string(class_entry, "SECOND", "bc");
+
+	return class_entry;
+}
+
+static zend_object *enum_ZendTestIntBacked_FIRST;
+static zend_object *enum_ZendTestIntBacked_SECOND;
+
+static zend_class_entry *register_class_ZendTestIntBacked(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_backed_enum_ex("ZendTestIntBacked", IS_LONG, class_ZendTestIntBacked_methods);
+	enum_ZendTestIntBacked_FIRST = zend_add_enum_case_long(class_entry, "FIRST", 42);
+	enum_ZendTestIntBacked_SECOND = zend_add_enum_case_long(class_entry, "SECOND", -42);
 
 	return class_entry;
 }

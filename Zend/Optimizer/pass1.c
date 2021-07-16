@@ -210,7 +210,7 @@ constant_binary_op:
 						break;
 					}
 				}
-				if (Z_TYPE(c) == IS_CONSTANT_AST) {
+				if (Z_TYPE(c) == IS_CONSTANT_AST || Z_TYPE(c) == IS_OBJECT) {
 					break;
 				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
@@ -274,6 +274,8 @@ constant_binary_op:
 							 || Z_TYPE(t) == IS_CONSTANT_AST) {
 								break;
 							}
+						} else if (Z_TYPE_P(c) == IS_OBJECT) {
+							break;
 						} else {
 							ZVAL_COPY_OR_DUP(&t, c);
 						}

@@ -26,12 +26,19 @@
 #include "zend_exceptions.h"
 #include "zend_weakrefs.h"
 
-static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
+ZEND_API uint32_t zend_objects_persistent_handle_counter = 0;
+
+static zend_always_inline void _zend_object_minimal_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT;
 	object->ce = ce;
 	object->properties = NULL;
+}
+
+static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
+{
+	_zend_object_minimal_init(object, ce);
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
@@ -281,4 +288,28 @@ ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 	zend_objects_clone_members(new_object, old_object);
 
 	return new_object;
+}
+
+ZEND_API zend_object *zend_objects_new_persistent(zend_class_entry *ce)
+{
+	size_t alloc_size = sizeof(zend_object) + zend_object_properties_size(ce);
+	zend_object *obj = malloc(alloc_size);
+	_zend_object_minimal_init(obj, ce);
+	GC_TYPE_INFO(obj) |= IS_OBJ_PERSISTENT << GC_FLAGS_SHIFT;
+	obj->handle = zend_objects_persistent_handle_counter;
+	zend_objects_persistent_handle_counter += (alloc_size - 1) / sizeof(zend_object) + 1;
+	return obj;
+}
+
+ZEND_API zend_object* ZEND_FASTCALL zend_objects_persistent_copy(zend_object *object)
+{
+	ZEND_ASSERT(GC_FLAGS(object) & IS_OBJ_PERSISTENT);
+
+	zend_object *target = EG(persistent_objects) + object->handle;
+	if (UNEXPECTED(GC_REFCOUNT(target) == 0)) { // non-initialized
+		memcpy(target, object, sizeof(zend_object) + zend_object_properties_size(object->ce));
+	}
+	GC_TYPE_INFO(target) &= ~(IS_OBJ_PERSISTENT << GC_FLAGS_SHIFT);
+	GC_ADDREF(target);
+	return target;
 }

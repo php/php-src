@@ -19,8 +19,10 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_compile.h"
-#include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
+#include "zend_inheritance.h"
+#include "zend_constants.h"
+#include "zend_enum_arginfo.h"
 
 #define ZEND_ENUM_PROPERTY_ERROR() \
 	zend_throw_error(NULL, "Enum properties are immutable")
@@ -37,19 +39,22 @@ ZEND_API zend_class_entry *zend_ce_backed_enum;
 
 static zend_object_handlers enum_handlers;
 
-zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
+static void enum_obj_init(zend_object *obj, zend_string *case_name, zval *backing_value_zv)
 {
-	zend_object *zobj = zend_objects_new(ce);
-	ZVAL_OBJ(result, zobj);
-
-	ZVAL_STR_COPY(OBJ_PROP_NUM(zobj, 0), case_name);
+	ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 0), case_name);
 	if (backing_value_zv != NULL) {
-		ZVAL_COPY(OBJ_PROP_NUM(zobj, 1), backing_value_zv);
+		ZVAL_COPY(OBJ_PROP_NUM(obj, 1), backing_value_zv);
 	}
 
-	zobj->handlers = &enum_handlers;
+	obj->handlers = &enum_handlers;
+}
 
-	return zobj;
+zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
+{
+	zend_object *obj = zend_objects_new(ce);
+	ZVAL_OBJ(result, obj);
+	enum_obj_init(obj, case_name, backing_value_zv);
+	return obj;
 }
 
 static void zend_verify_enum_properties(zend_class_entry *ce)
@@ -370,4 +375,129 @@ void zend_enum_register_props(zend_class_entry *ce)
 		zend_type value_type = ZEND_TYPE_INIT_CODE(ce->enum_backing_type, 0, 0);
 		zend_declare_typed_property(ce, ZSTR_KNOWN(ZEND_STR_VALUE), &value_default_value, ZEND_ACC_PUBLIC, NULL, value_type);
 	}
+}
+
+static const zend_function_entry simple_internal_methods[] = {
+	ZEND_NAMED_ME(cases, zend_enum_cases_func, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry backed_internal_methods[] = {
+	ZEND_NAMED_ME(from, zend_enum_from_func, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_NAMED_ME(tryFrom, zend_enum_try_from_func, arginfo_class_BackedEnum_tryFrom, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+ZEND_API zend_class_entry *zend_register_internal_enum(const char *name)
+{
+	return zend_register_internal_backed_enum_ex(name, IS_UNDEF, NULL);
+}
+
+ZEND_API zend_class_entry *zend_register_internal_enum_ex(const char *name, const zend_function_entry *functions)
+{
+	return zend_register_internal_backed_enum_ex(name, IS_UNDEF, functions);
+}
+
+ZEND_API zend_class_entry *zend_register_internal_backed_enum(const char *name, uint32_t backing_type)
+{
+	return zend_register_internal_backed_enum_ex(name, backing_type, NULL);
+}
+
+ZEND_API zend_class_entry *zend_register_internal_backed_enum_ex(const char *name, uint32_t backing_type, const zend_function_entry *functions)
+{
+	ZEND_ASSERT(backing_type == IS_UNDEF || backing_type == IS_STRING || backing_type == IS_LONG);
+
+	zend_class_entry ce_val, *ce;
+	INIT_CLASS_ENTRY_EX(ce_val, name, strlen(name), functions);
+	ce = zend_register_internal_class(&ce_val);
+
+	ce->ce_flags |= ZEND_ACC_ENUM;
+	ce->enum_backing_type = backing_type;
+	ce->backed_enum_table = malloc(sizeof(HashTable));
+	zend_hash_init(ce->backed_enum_table, 0, NULL, ZVAL_PTR_DTOR, 1);
+	zend_enum_register_props(ce);
+
+	zend_register_functions(ce, simple_internal_methods, &ce->function_table, EG(current_module)->type);
+	zend_do_implement_interface(ce, zend_ce_unit_enum);
+	if (backing_type != IS_UNDEF) {
+		zend_register_functions(ce, backed_internal_methods, &ce->function_table, EG(current_module)->type);
+		zend_do_implement_interface(ce, zend_ce_backed_enum);
+	}
+
+	return ce;
+}
+
+static zend_object *add_internal_enum_case(zend_class_entry *ce, zend_string *name, zval *value)
+{
+	zend_object *case_obj = zend_objects_new_persistent(ce);
+	enum_obj_init(case_obj, name, value);
+
+	zval casezv;
+	ZVAL_OBJ(&casezv, case_obj);
+	zend_class_constant *c = zend_declare_class_constant_ex(ce, name, &casezv, ZEND_ACC_PUBLIC, NULL);
+	ZEND_CLASS_CONST_FLAGS(c) |= ZEND_CLASS_CONST_IS_CASE;
+
+	zend_string_release(name);
+	if (value) {
+		zval_internal_ptr_dtor(value);
+	}
+
+	return case_obj;
+}
+
+ZEND_API zend_object *zend_add_enum_case_ex(zend_class_entry *ce, zend_string *name)
+{
+	ZEND_ASSERT(ce->enum_backing_type == IS_UNDEF);
+
+	name = zend_new_interned_string(name);
+
+	zend_object *case_obj = add_internal_enum_case(ce, name, NULL);
+
+	zend_string_release(name);
+
+	return case_obj;
+}
+
+ZEND_API zend_object *zend_add_enum_case_long_ex(zend_class_entry *ce, zend_string *name, zend_long value)
+{
+	ZEND_ASSERT(ce->enum_backing_type == IS_LONG);
+
+	name = zend_new_interned_string(name);
+
+	zval namezv;
+	ZVAL_STR_COPY(&namezv, name);
+	if (!zend_hash_index_add(ce->backed_enum_table, value, &namezv)) {
+		ZEND_ASSERT(0 && "Cannot add two enum values with the same backing value");
+	}
+
+	zval zv;
+	ZVAL_LONG(&zv, value);
+	zend_object *case_obj = add_internal_enum_case(ce, name, &zv);
+
+	zend_string_release(name);
+
+	return case_obj;
+}
+
+ZEND_API zend_object *zend_add_enum_case_str_ex(zend_class_entry *ce, zend_string *name, zend_string *str)
+{
+	ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+
+	name = zend_new_interned_string(name);
+	str = zend_new_interned_string(str);
+
+	zval namezv;
+	ZVAL_STR_COPY(&namezv, name);
+	if (!zend_hash_add(ce->backed_enum_table, str, &namezv)) {
+		ZEND_ASSERT(0 && "Cannot add two enum values with the same backing value");
+	}
+
+	zval zv;
+	ZVAL_STR(&zv, str);
+	zend_object *case_obj = add_internal_enum_case(ce, name, &zv);
+
+	zend_string_release(name);
+	zend_string_release(str);
+
+	return case_obj;
 }

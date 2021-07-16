@@ -40,6 +40,8 @@ typedef struct _zend_function_entry {
 	uint32_t flags;
 } zend_function_entry;
 
+#include "zend_enum.h"
+
 typedef struct _zend_fcall_info {
 	size_t size;
 	zval function_name;

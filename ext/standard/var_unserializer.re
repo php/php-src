@@ -1388,7 +1388,7 @@ object ":" uiv ":" ["]	{
 		}
 	}
 	ZEND_ASSERT(Z_TYPE_P(value) == IS_OBJECT);
-	ZVAL_COPY(rval, value);
+	ZVAL_COPY_OR_DUP(rval, value);
 
 	return 1;
 

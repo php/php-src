@@ -79,13 +79,13 @@
 #endif
 
 /* GC_INFO layout */
-#define GC_ADDRESS  0x0fffffu
-#define GC_COLOR    0x300000u
+#define GC_ADDRESS  0x07ffffu
+#define GC_COLOR    0x180000u
 
 #define GC_BLACK    0x000000u /* must be zero */
-#define GC_WHITE    0x100000u
-#define GC_GREY     0x200000u
-#define GC_PURPLE   0x300000u
+#define GC_WHITE    0x080000u
+#define GC_GREY     0x100000u
+#define GC_PURPLE   0x180000u
 
 /* Debug tracing */
 #if ZEND_GC_DEBUG > 1

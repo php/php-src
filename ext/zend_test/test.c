@@ -294,6 +294,18 @@ void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t ta
 	}
 }
 
+static ZEND_METHOD(ZendTestUnbacked, showName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_COPY(zend_enum_fetch_case_name(Z_OBJ_P(getThis())));
+}
+
+static ZEND_METHOD(ZendTestStringBacked, getFirst)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_OBJ_COPY(zend_objects_persistent_copy(enum_ZendTestStringBacked_FIRST));
+}
+
 static ZEND_METHOD(_ZendTestClass, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -383,6 +395,10 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
+
+	register_class_ZendTestIntBacked();
+	register_class_ZendTestStringBacked();
+	register_class_ZendTestUnbacked();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

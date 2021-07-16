@@ -98,8 +98,12 @@ ZEND_API void zval_internal_ptr_dtor(zval *zval_ptr) /* {{{ */
 				ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
 				ZEND_ASSERT((GC_FLAGS(str) & IS_STR_PERSISTENT));
 				free(str);
+			} else if (Z_TYPE_P(zval_ptr) == IS_OBJECT) {
+				zend_object *obj = (zend_object *) ref;
+				ZEND_ASSERT((GC_FLAGS(ref) & IS_OBJ_PERSISTENT));
+				free(obj);
 			} else {
-				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects, resources or reference");
+				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, resources or reference");
 			}
 		}
 	}
@@ -129,5 +133,7 @@ ZEND_API void ZEND_FASTCALL zval_copy_ctor_func(zval *zvalue)
 		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zvalue)));
 		CHECK_ZVAL_STRING(Z_STR_P(zvalue));
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_OBJECT)) {
+		ZVAL_OBJ(zvalue, zend_objects_persistent_copy(Z_OBJ_P(zvalue)));
 	}
 }

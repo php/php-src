@@ -44,6 +44,25 @@ final class ZendTestAttribute {
 
 }
 
+enum ZendTestUnbacked {
+    case FIRST;
+    case SECOND;
+
+    public function showName(): string {}
+}
+
+enum ZendTestStringBacked: string {
+    case FIRST = "a";
+    case SECOND = "bc";
+
+    public static function getFirst(): ZendTestStringBacked {}
+}
+
+enum ZendTestIntBacked: int {
+    case FIRST = 42;
+    case SECOND = -42;
+}
+
 function zend_test_array_return(): array {}
 
 function zend_test_nullable_array_return(): ?array {}
