@@ -1195,6 +1195,8 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
+    /** @var bool */
+    public $isNotSerializable;
     /** @var Name[] */
     public $extends;
     /** @var Name[] */
@@ -1217,6 +1219,7 @@ class ClassInfo {
         ?string $alias,
         bool $isDeprecated,
         bool $isStrictProperties,
+        bool $isNotSerializable,
         array $extends,
         array $implements,
         array $propertyInfos,
@@ -1228,6 +1231,7 @@ class ClassInfo {
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
+        $this->isNotSerializable = $isNotSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->propertyInfos = $propertyInfos;
@@ -1316,6 +1320,10 @@ class ClassInfo {
 
         if ($this->isStrictProperties) {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
+        }
+
+        if ($this->isNotSerializable) {
+            $flags[] = "ZEND_ACC_NOT_SERIALIZABLE";
         }
 
         return implode("|", $flags);
@@ -1625,6 +1633,7 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
     $alias = null;
     $isDeprecated = false;
     $isStrictProperties = false;
+    $isNotSerializable = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -1635,6 +1644,8 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
                 $isDeprecated = true;
             } else if ($tag->name === 'strict-properties') {
                 $isStrictProperties = true;
+            } else if ($tag->name === 'not-serializable') {
+                $isNotSerializable = true;
             }
         }
     }
@@ -1658,6 +1669,7 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
         $alias,
         $isDeprecated,
         $isStrictProperties,
+        $isNotSerializable,
         $extends,
         $implements,
         $properties,

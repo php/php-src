@@ -640,8 +640,6 @@ void zend_register_closure_ce(void) /* {{{ */
 {
 	zend_ce_closure = register_class_Closure();
 	zend_ce_closure->create_object = zend_closure_new;
-	zend_ce_closure->serialize = zend_class_serialize_deny;
-	zend_ce_closure->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&closure_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;

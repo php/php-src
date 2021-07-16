@@ -7671,8 +7671,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{
 
 	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {
 		/* Serialization is not supported for anonymous classes */
-		ce->serialize = zend_class_serialize_deny;
-		ce->unserialize = zend_class_unserialize_deny;
+		ce->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	}
 
 	if (extends_ast) {

@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - Reflection:
  . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)
 
+- Standard:
+ . Fixed bug #81111 (Serialization is unexpectedly allowed on anonymous classes
+   with __serialize()). (Nikita)
+
 08 Jul 2021, PHP 8.1.0alpha3
 
 - Core:

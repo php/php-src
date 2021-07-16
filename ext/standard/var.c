@@ -27,6 +27,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 #include "zend_enum.h"
+#include "zend_exceptions.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -1057,6 +1058,12 @@ again:
 				zend_class_entry *ce = Z_OBJCE_P(struc);
 				bool incomplete_class;
 				uint32_t count;
+
+				if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+					zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed",
+						ZSTR_VAL(ce->name));
+					return;
+				}
 
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
 					PHP_CLASS_ATTRIBUTES;

@@ -238,7 +238,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 29...)                            |     |     |     */
+/* Class Flags (unused: 30...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -300,6 +300,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* loaded from file cache to process memory               |     |     |     */
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class cannot be serialized or unserialized             |     |     |     */
+#define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */

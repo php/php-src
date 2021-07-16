@@ -47,6 +47,10 @@ PHP 8.1 INTERNALS UPGRADE NOTES
      implementations. Use ZEND_LONG_FMT and ZEND_ULONG_FMT instead.
   e. ZEND_ATOL() now returns the integer instead of assigning it as part of the
      macro. Replace ZEND_ATOL(i, s) with i = ZEND_ATOL(s).
+  f. Non-serializable classes should be indicated using the
+     ZEND_ACC_NOT_SERIALIZABLE (@not-serializable in stubs) rather than the
+     zend_class_(un)serialize_deny handlers. Support for the serialization
+     handlers will be dropped in the future.
 
 ========================
 2. Build system changes

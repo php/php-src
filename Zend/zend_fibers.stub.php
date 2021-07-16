@@ -2,7 +2,10 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Fiber
 {
     public function __construct(callable $callback) {}
