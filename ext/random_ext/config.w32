@@ -1,0 +1,4 @@
+// vim:ft=javascript
+
+EXTENSION("random_ext", "random_ext.c", false /* never shared */, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+PHP_INSTALL_HEADERS("", "ext/random_ext");
