@@ -8632,6 +8632,27 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
+ * evaluation order. */
+void zend_compile_pipe(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *func_ast = ast->child[1];
+
+	znode expr_node;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	zend_ast *call =  zend_ast_create(ZEND_AST_CALL,
+		func_ast,
+		zend_ast_create_list(1,
+		ZEND_AST_ARG_LIST,
+			zend_ast_create_znode(&expr_node)));
+
+	zend_compile_expr(result, call);
+}
+/* }}} */
+
 void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -10050,6 +10071,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
 			zend_compile_greater(result, ast);
+			return;
+		case ZEND_AST_PIPE:
+			zend_compile_pipe(result, ast);
 			return;
 		case ZEND_AST_UNARY_OP:
 			zend_compile_unary_op(result, ast);
