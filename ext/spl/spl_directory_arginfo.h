@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fcfc6e8120dff87ab81d9b5491f27e695b3790f4 */
+ * Stub hash: f4bfc0a1b26c2c3d8a6bf8ac6369a10c5e015c61 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -496,6 +496,7 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 
 	INIT_CLASS_ENTRY(ce, "SplFileInfo", class_SplFileInfo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;

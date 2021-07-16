@@ -18,6 +18,7 @@
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
+#include "zend_exceptions.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
@@ -1266,6 +1267,13 @@ object ":" uiv ":" ["]	{
 	} while (0);
 
 	*p = YYCURSOR;
+
+	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
+			ZSTR_VAL(ce->name));
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
 
 	if (custom_object) {
 		int ret;

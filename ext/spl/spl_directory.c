@@ -2744,8 +2744,6 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
-	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;
-	spl_ce_SplFileInfo->unserialize = zend_class_unserialize_deny;
 
 	spl_ce_DirectoryIterator = register_class_DirectoryIterator(spl_ce_SplFileInfo, spl_ce_SeekableIterator);
 	spl_ce_DirectoryIterator->create_object = spl_filesystem_object_new;
