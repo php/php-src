@@ -141,13 +141,14 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
+PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth, zend_string *indent_str) /* {{{ */
 {
 	php_json_encoder encoder;
 	int return_code;
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = depth;
+	encoder.indent_str = indent_str;
 
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
@@ -158,7 +159,13 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth));
+	zend_string *indent_str = zend_string_init("    ", strlen("    "), 0);
+
+	int result = php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), indent_str);
+
+	zend_string_release(indent_str);
+
+	return result;
 }
 /* }}} */
 
@@ -222,19 +229,43 @@ PHP_FUNCTION(json_encode)
 	zval *parameter;
 	php_json_encoder encoder;
 	smart_str buf = {0};
+	zend_string *indent_str = NULL;
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
+	zend_long indent = PHP_JSON_ENCODER_DEFAULT_INDENT;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(parameter)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(options)
 		Z_PARAM_LONG(depth)
+		Z_PARAM_STR_OR_LONG(indent_str, indent)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (indent_str == NULL) {
+		if (indent < 0) {
+			zend_argument_value_error(4, "must be either a string or a number greater than or equal to 0");
+			RETURN_THROWS();
+		}
+
+		if (indent > 0) {
+			// Generate indent_str
+			indent_str = zend_string_alloc(indent, 0);
+			for (zend_long i = 0; i < indent; i++)
+				ZSTR_VAL(indent_str)[i] = ' ';
+		}
+	}
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
+	encoder.indent_str = indent_str;
+
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+
+	if (indent > 0 && indent_str) {
+		// If the indent_str was generated locally, we need to release it.
+		zend_string_release(indent_str);
+	}
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		JSON_G(error_code) = encoder.error_code;
