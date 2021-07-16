@@ -64,10 +64,6 @@ static inline int get_options(zend_array *options, size_t *memlimit, size_t *ops
 			return FAILURE;
 		}
 	}
-	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-		php_error_docref(NULL, E_WARNING, "A thread value other than 1 is not supported by this implementation");
-		return FAILURE;
-	}
 	return SUCCESS;
 }
 
