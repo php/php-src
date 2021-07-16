@@ -225,7 +225,7 @@ class DOMNodeList implements IteratorAggregate, Countable
     /** @readonly */
     public int $length;
 
-    /** @return int|false */
+    /** @return int */
     public function count() {}
 
     public function getIterator(): Iterator {}
