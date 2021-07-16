@@ -1099,6 +1099,12 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 		num_icons--;
 	}
 
+	if (0 == result->width)
+		result->width = 256;
+
+	if (0 == result->height)
+		result->height = 256;
+
 	return result;
 }
 /* }}} */
