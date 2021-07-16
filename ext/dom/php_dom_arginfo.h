@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 98af31a563c0e793308c583a80a1be77c4965e82 */
+ * Stub hash: 8fe764fbc22387ea36d36d3e5bec3c003d742c8c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -119,7 +119,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocumentFragment_prepend arginfo_class_DOMParentNode_append
 
-#define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNodeList_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMNodeList_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
@@ -400,7 +401,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMNamedNodeMap_item arginfo_class_DOMNodeList_item
 
-#define arginfo_class_DOMNamedNodeMap_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOMNamedNodeMap_count arginfo_class_DOMNodeList_count
 
 #define arginfo_class_DOMNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 

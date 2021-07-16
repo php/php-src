@@ -225,8 +225,7 @@ class DOMNodeList implements IteratorAggregate, Countable
     /** @readonly */
     public int $length;
 
-    /** @return int */
-    public function count() {}
+    public function count(): int {}
 
     public function getIterator(): Iterator {}
 
@@ -602,8 +601,7 @@ class DOMNamedNodeMap implements IteratorAggregate, Countable
     /** @return DOMNode|null */
     public function item(int $index) {}
 
-    /** @return int */
-    public function count() {}
+    public function count(): int {}
 
     public function getIterator(): Iterator {}
 }
