@@ -18,7 +18,7 @@ class test implements IteratorAggregate
         $this->imp = "implicit";
     }
 
-    function getIterator()
+    function getIterator(): Traversable
     {
         $it = new ArrayObject($this);
         return $it->getIterator();

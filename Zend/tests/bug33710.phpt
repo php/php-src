@@ -5,10 +5,10 @@ Bug #33710 (ArrayAccess objects doesn't initialize $this)
 
 class Foo implements ArrayAccess
 {
-    function offsetExists($offset) {/*...*/}
-    function offsetGet($offset) {/*...*/}
-    function offsetSet($offset, $value) {/*...*/}
-    function offsetUnset($offset) {/*...*/}
+    function offsetExists($offset): bool { return true;}
+    function offsetGet($offset): mixed { return null; }
+    function offsetSet($offset, $value): void {/*...*/}
+    function offsetUnset($offset): void {/*...*/}
 
     function fail()
     {

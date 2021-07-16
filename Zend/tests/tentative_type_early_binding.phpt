@@ -3,7 +3,7 @@ Check that both warning and unresolved during early binding is handled
 --FILE--
 <?php
 class Test extends SplObjectStorage {
-    function valid() {}
+    function valid(): bool {}
     function current(): Unknown {}
 }
 ?>

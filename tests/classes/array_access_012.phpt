@@ -6,17 +6,17 @@ ZE2 ArrayAccess cannot assign by reference
 class ArrayAccessImpl implements ArrayAccess {
     private $data = array();
 
-    public function offsetUnset($index) {}
+    public function offsetUnset($index): void {}
 
-    public function offsetSet($index, $value) {
+    public function offsetSet($index, $value): void {
         $this->data[$index] = $value;
     }
 
-    public function offsetGet($index) {
+    public function offsetGet($index): mixed {
         return $this->data[$index];
     }
 
-    public function offsetExists($index) {
+    public function offsetExists($index): bool {
         return isset($this->data[$index]);
     }
 }

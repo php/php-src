@@ -24,15 +24,15 @@ class c2 {
         echo __METHOD__ . "\n";
         return $this->num;
     }
-    function next() {
+    function next(): void {
         echo __METHOD__ . "\n";
         $this->num++;
     }
-    function valid() {
+    function valid(): bool {
         echo __METHOD__ . "\n";
         return $this->num < $this->max;
     }
-    function key() {
+    function key(): mixed {
         echo __METHOD__ . "\n";
         switch($this->num) {
             case 0: return "1st";

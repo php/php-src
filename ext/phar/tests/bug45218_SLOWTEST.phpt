@@ -19,22 +19,22 @@ class myIterator implements Iterator
     var $a;
     var $count = 1;
 
-    function next() {
+    function next(): void {
         return (++$this->count < 3000) ? 'f' . $this->count : false;
     }
-    function current() {
+    function current(): mixed {
         if (($this->count % 100) === 0) {
             echo $this->count, "\n";
         }
         return $GLOBALS['fname2'];
     }
-    function key() {
+    function key(): mixed {
         return 'f' . $this->count;
     }
-    function valid() {
+    function valid(): bool {
         return $this->count < 3000;
     }
-    function rewind() {
+    function rewind(): void {
         $this->count = 1;
         return $GLOBALS['fname2'];
     }

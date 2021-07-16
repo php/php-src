@@ -7,21 +7,23 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 class Test implements ArrayAccess {
-    public function offsetExists($offset) {
+    public function offsetExists($offset): bool {
         echo "offsetExists given ";
         var_dump($offset);
+        return true;
     }
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset): void {
         echo "offsetUnset given ";
         var_dump($offset);
     }
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value): void {
         echo "offsetSet given ";
         var_dump($offset);
     }
-    public function offsetGet($offset) {
+    public function offsetGet($offset): mixed {
         echo "offsetGet given ";
         var_dump($offset);
+        return null;
     }
 }
 

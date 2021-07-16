@@ -52,10 +52,10 @@ try {
 
 try {
     $foo = new class implements ArrayAccess {
-        function offsetGet($x) { return [0]; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed { return [0]; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
     };
     var_dump($foo[0] += [new class {
         function __destruct() { throw new Exception; }
@@ -65,10 +65,10 @@ try {
 try {
     $foo = new class implements ArrayAccess {
         public $foo = [0];
-        function &offsetGet($x) { return $this->foo; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function &offsetGet($x): bool { return $this->foo; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
     };
     var_dump($foo[0] += [new class {
         function __destruct() { throw new Exception; }
@@ -123,20 +123,20 @@ try {
 
 try {
     var_dump((function() { return new class implements ArrayAccess {
-        function offsetGet($x) { return [new stdClass]; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed { return [new stdClass]; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
         function __destruct() { throw new Exception; }
     }; })()[0]++);
 } catch (Exception $e) { print "caught Exception 15\n"; }
 
 try {
     var_dump(++(function() { return new class implements ArrayAccess {
-        function offsetGet($x) { return [new stdClass]; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed { return [new stdClass]; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
         function __destruct() { throw new Exception; }
     }; })()[0]);
 } catch (Exception $e) { print "caught Exception 16\n"; }
@@ -158,10 +158,10 @@ try {
 
 try {
     var_dump((new class implements ArrayAccess {
-        function offsetGet($x) { return [new stdClass]; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed { return [new stdClass]; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
         function __destruct() { throw new Exception; }
     })[0]);
 } catch (Exception $e) { print "caught Exception 19\n"; }
@@ -183,10 +183,10 @@ try {
 
 try {
     var_dump(isset((new class implements ArrayAccess {
-        function offsetGet($x) { return [new stdClass]; }
-        function offsetSet($x, $y) {}
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed { return [new stdClass]; }
+        function offsetSet($x, $y): void {}
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
         function __destruct() { throw new Exception; }
     })[0]->bar));
 } catch (Exception $e) { print "caught Exception 22\n"; }
@@ -222,10 +222,10 @@ try {
 
 try {
     $foo = new class implements ArrayAccess {
-        function offsetGet($x) {}
-        function offsetSet($x, $y) { throw new Exception; }
-        function offsetExists($x) { return true; }
-        function offsetUnset($x) {}
+        function offsetGet($x): mixed {}
+        function offsetSet($x, $y): void { throw new Exception; }
+        function offsetExists($x): bool { return true; }
+        function offsetUnset($x): void {}
     };
     var_dump($foo[0] = new stdClass);
 } catch (Exception $e) { print "caught Exception 27\n"; }

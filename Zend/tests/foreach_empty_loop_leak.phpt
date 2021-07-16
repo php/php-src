@@ -4,7 +4,7 @@ Empty foreach loops with exception must not leak
 <?php
 
 class Foo implements IteratorAggregate {
-    public function getIterator() {
+    public function getIterator(): Traversable {
         return new ArrayIterator([]);
     }
     public function __destruct() {

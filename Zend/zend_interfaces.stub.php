@@ -6,44 +6,44 @@ interface Traversable {}
 
 interface IteratorAggregate extends Traversable
 {
-    /** @return Traversable */
-    public function getIterator();
+    /** @tentative-return-type */
+    public function getIterator(): Traversable;
 }
 
 interface Iterator extends Traversable
 {
     /** @return mixed */
-    public function current();
+    public function current(); // TODO Can't add tentative return tyoe due to DirectoryIterator::current()
 
-    /** @return void */
-    public function next();
+    /** @tentative-return-type */
+    public function next(): void;
 
     /** @return mixed */
-    public function key();
+    public function key(); // TODO Can't add tentative return tyoe due to DirectoryIterator::key()
 
-    /** @return bool */
-    public function valid();
+    /** @tentative-return-type */
+    public function valid(): bool;
 
-    /** @return void */
-    public function rewind();
+    /** @tentative-return-type */
+    public function rewind(): void;
 }
 
 interface ArrayAccess
 {
-    /** @return bool */
-    public function offsetExists(mixed $offset);
+    /** @tentative-return-type */
+    public function offsetExists(mixed $offset): bool;
 
     /**
      * Actually this should be return by ref but atm cannot be.
-     * @return mixed
+     * @tentative-return-type
      */
-    public function offsetGet(mixed $offset);
+    public function offsetGet(mixed $offset): mixed;
+
+    /** @tentative-return-type */
+    public function offsetSet(mixed $offset, mixed $value): void;
 
     /** @return void */
-    public function offsetSet(mixed $offset, mixed $value);
-
-    /** @return void */
-    public function offsetUnset(mixed $offset);
+    public function offsetUnset(mixed $offset); // TODO Can't add tentative return type due to Phar::offsetUnset
 }
 
 interface Serializable
@@ -58,7 +58,7 @@ interface Serializable
 interface Countable
 {
     /** @return int */
-    public function count();
+    public function count(); // TODO Can't add tentatie return type due to DOMNodeList::count() and DOMNamedNodeMap::count()
 }
 
 interface Stringable
@@ -68,17 +68,15 @@ interface Stringable
 
 final class InternalIterator implements Iterator
 {
-    private function __construct();
+    private function __construct() {}
 
-    /** @return mixed */
-    public function current();
+    public function current(): mixed {}
 
-    /** @return mixed */
-    public function key();
+    public function key(): mixed {}
 
-    public function next(): void;
+    public function next(): void {}
 
-    public function valid(): bool;
+    public function valid(): bool {}
 
-    public function rewind(): void;
+    public function rewind(): void {}
 }

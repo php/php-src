@@ -5,18 +5,18 @@ Using indirect append on ArrayAccess object
 
 class AA implements ArrayAccess {
     private $data = [];
-    public function &offsetGet($name) {
+    public function &offsetGet($name): mixed {
         if (null === $name) {
             return $this->data[];
         } else {
             return $this->data[$name];
         }
     }
-    public function offsetSet($name, $value) {
+    public function offsetSet($name, $value): void {
         $this->data[$name] = $value;
     }
-    public function offsetUnset($name) {}
-    public function offsetExists($name) {}
+    public function offsetUnset($name): void {}
+    public function offsetExists($name): bool {}
 }
 
 $aa = new AA;

@@ -22,25 +22,26 @@ class Foo implements ArrayAccess {
     $test = 'bug';
   }
 
-  function offsetget($test) {
+  function offsetget($test): mixed {
     var_dump($test);
     $test = 'bug';
     return 123;
   }
 
-  function offsetset($test, $val) {
+  function offsetset($test, $val): void {
     var_dump($test);
     var_dump($val);
     $test = 'bug';
     $val  = 'bug';
   }
 
-  function offsetexists($test) {
+  function offsetexists($test): bool {
     var_dump($test);
     $test = 'bug';
+    return true;
   }
 
-  function offsetunset($test) {
+  function offsetunset($test): void {
     var_dump($test);
     $test = 'bug';
   }
