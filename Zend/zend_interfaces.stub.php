@@ -12,13 +12,13 @@ interface IteratorAggregate extends Traversable
 
 interface Iterator extends Traversable
 {
-    /** @return mixed */
+    /** @tentative-return-type */
     public function current(): mixed;
 
     /** @tentative-return-type */
     public function next(): void;
 
-    /** @return mixed */
+    /** @tentative-return-type */
     public function key(): mixed;
 
     /** @tentative-return-type */
@@ -57,6 +57,7 @@ interface Serializable
 
 interface Countable
 {
+    /** @tentative-return-type */
     public function count(): int;
 }
 
