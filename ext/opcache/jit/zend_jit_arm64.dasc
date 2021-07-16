@@ -11841,7 +11841,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	ldr TMP1w, [FCARG2x, #offsetof(zend_property_info, flags)]
 			|	tst TMP1w, #ZEND_ACC_READONLY
 			|	bne >3
-			|	IF_NOT_TYPE REG2w, IS_OBJECT, >2
+			|	IF_NOT_TYPE REG2w, IS_OBJECT_EX, >2
 			|	GET_Z_PTR REG2, FCARG1x
 			|	GC_ADDREF REG2, TMP1w
 			|	SET_ZVAL_PTR res_addr, REG2, TMP1
@@ -11884,7 +11884,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	IF_UNDEF REG2w, >5
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
-			|	IF_NOT_TYPE REG2w, IS_OBJECT, >4
+			|	IF_NOT_TYPE REG2w, IS_OBJECT_EX, >4
 			|	GET_ZVAL_PTR REG2, prop_addr, TMP1
 			|	GC_ADDREF REG2, TMP1w
 			|	SET_ZVAL_PTR res_addr, REG2, TMP1
