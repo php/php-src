@@ -35,9 +35,11 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, stdClass given

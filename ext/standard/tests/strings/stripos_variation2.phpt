@@ -76,7 +76,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -112,10 +112,18 @@ bool(false)
 int(10)
 int(10)
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(11)
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(12)
 -- Iteration 14 --
 int(0)

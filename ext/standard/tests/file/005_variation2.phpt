@@ -55,6 +55,8 @@ echo "Done";
 
 *** testing touch ***
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: Undefined variable $a in %s on line %d
 NULL
 bool(false)
@@ -65,8 +67,14 @@ bool(true)
 *** testing file info ***
 -- File '' --
 -- File access time is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 -- File modification time is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 -- inode change time is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 
 -- File '' --
 -- File access time is => 

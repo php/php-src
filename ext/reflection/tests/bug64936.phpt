@@ -28,6 +28,9 @@ $rb = new ReflectionClass('B');
 var_dump(strip_doc_comment($rb->getDocComment()));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)

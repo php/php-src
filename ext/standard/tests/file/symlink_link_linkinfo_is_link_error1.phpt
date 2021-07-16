@@ -43,11 +43,15 @@ unlink(__DIR__."/symlink_link_linkinfo_is_link_error1.tmp");
 Warning: symlink(): %s in %s on line %d
 bool(false)
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: symlink(): %s in %s on line %d
 bool(false)
 
 Warning: symlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: symlink(): %s in %s on line %d
 bool(false)
@@ -56,6 +60,8 @@ bool(false)
 
 Warning: linkinfo(): %s in %s on line %d
 int(-1)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: linkinfo(): %s in %s on line %d
 int(-1)

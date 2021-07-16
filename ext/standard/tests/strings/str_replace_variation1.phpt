@@ -23,6 +23,8 @@ foreach( $search_arr as $value ) {
 *** Testing str_replace() with various search values ***
 -- Iteration 0 --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: Array to string conversion in %s on line %d
 array(12) {
   [0]=>
@@ -53,6 +55,8 @@ array(12) {
 int(5)
 
 -- Iteration 1 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 array(12) {

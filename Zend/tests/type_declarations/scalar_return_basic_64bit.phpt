@@ -158,8 +158,10 @@ string(19) "9223372036854775807"
 *** Trying float(NAN)
 string(3) "NAN"
 *** Trying bool(true)
+E_DEPRECATED: Implicit bool to string coercion is deprecated on line 16
 string(1) "1"
 *** Trying bool(false)
+E_DEPRECATED: Implicit bool to string coercion is deprecated on line 16
 string(0) ""
 *** Trying NULL
 *** Caught {closure}(): Return value must be of type string, null returned in %s on line %d

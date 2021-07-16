@@ -227,4 +227,6 @@ if (!$IS_MYSQLND)
 ?>
 --EXPECTF--
 [083][control string 'n:O,%smysqli_debug_phpt.trace'] Trace file has not been written.
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 done%s

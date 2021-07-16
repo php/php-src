@@ -66,7 +66,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with single quoted strings ***
 -- Iteration 1 --
 int(32)
@@ -102,10 +102,18 @@ bool(false)
 int(10)
 int(10)
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
 -- Iteration 14 --
 int(54)

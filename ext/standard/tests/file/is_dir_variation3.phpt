@@ -24,10 +24,14 @@ foreach($dirnames as $dirname) {
   var_dump( is_dir($dirname) );
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

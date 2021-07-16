@@ -52,9 +52,15 @@ foreach($names_arr as $key =>$value) {
 9 bytes written to: '-1'
 
 -- Filename: TRUE --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 9 bytes written to: '1'
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 -- Filename: FALSE --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ValueError: Path cannot be empty
 
 -- Filename: "" --

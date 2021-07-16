@@ -147,11 +147,15 @@ string(6) "-3.344"
 string(4) "nULL"
 string(1) "0"
 string(1) "0"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
 string(4) "tRUE"
 string(1) "1"
 string(1) "1"
 string(8) "1.234444"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 string(5) "fALSE"
 string(1) " "

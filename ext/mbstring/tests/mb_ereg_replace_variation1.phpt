@@ -77,7 +77,7 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg_replace() : usage variations ***
 
 -- Iteration 1 --
@@ -108,15 +108,23 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 10 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "string_val"
 
 -- Iteration 11 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "string_val"
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 14 --

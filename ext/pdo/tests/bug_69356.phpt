@@ -6,7 +6,8 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip query not supported');
+$dsn = (string) getenv('PDOTEST_DSN');
+if (!strncasecmp($dsn, 'oci', strlen('oci'))) die('skip query not supported');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

@@ -51,10 +51,14 @@ bool(false)
 
 -- Filename: TRUE --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Filename: FALSE --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ValueError: Path cannot be empty
 
 -- Filename: "" --

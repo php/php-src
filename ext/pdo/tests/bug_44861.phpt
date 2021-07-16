@@ -9,7 +9,8 @@ if (false == $dir) die('skip no driver');
 $allowed = array('oci', 'pgsql');
 $ok = false;
 foreach ($allowed as $driver) {
-    if (!strncasecmp(getenv('PDOTEST_DSN'), $driver, strlen($driver))) {
+    $dsn = (string) getenv('PDOTEST_DSN');
+    if (!strncasecmp($dsn, $driver, strlen($driver))) {
         $ok = true;
     }
 }

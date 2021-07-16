@@ -72,11 +72,15 @@ File permissions are => 100666
 File created in => temp dir
 -- Iteration 1 --
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 2 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir

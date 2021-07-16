@@ -687,7 +687,7 @@ class Tester
             if (is_null($line)) {
                 break;
             }
-            if ((empty($ignore) || !strpos($line, $ignore)) && (!$skipBlank || strlen(trim($line)) > 0)) {
+            if ((empty($ignore) || $line !== false && !strpos($line, $ignore)) && (!$skipBlank || strlen(trim($line)) > 0)) {
                 $lines[] = $line;
                 $number--;
             }

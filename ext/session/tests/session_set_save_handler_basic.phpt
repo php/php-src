@@ -64,6 +64,8 @@ rmdir($path);
 *** Testing session_set_save_handler() : basic functionality ***
 string(%d) "%s"
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 Warning: session_module_name(): Session handler module "" cannot be found in %s on line %d
 bool(false)
 

@@ -652,6 +652,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **des
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string", arg_num)) {
 			return 0;
 		}
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_TRUE || Z_TYPE_P(arg) == IS_FALSE)) {
+			zend_error(E_DEPRECATED, "Implicit bool to string coercion is deprecated");
+		}
 		convert_to_string(arg);
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {

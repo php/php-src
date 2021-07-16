@@ -54,7 +54,7 @@ foreach($inputs as $input) {
     $iterator++;
 };
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing escapeshellarg() : usage variations ***
 
 -- Iteration 1 --
@@ -88,15 +88,23 @@ string(12) "'0.01234567'"
 string(5) "'0.5'"
 
 -- Iteration 11 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(3) "'1'"
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(2) "''"
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(3) "'1'"
 
 -- Iteration 14 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(2) "''"
 
 -- Iteration 15 --

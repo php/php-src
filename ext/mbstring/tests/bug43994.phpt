@@ -40,18 +40,26 @@ foreach($inputs as $input) {
     $iterator++;
 };
 ?>
---EXPECT--
+--EXPECTF--
 -- Iteration 1 --
 Without $regs arg:
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 
 -- Iteration 2 --
 Without $regs arg:
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 

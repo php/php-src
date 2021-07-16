@@ -6,9 +6,10 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for OCI driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'odbc', strlen('odbc'))) die('skip inconsistent error message with odbc');
+$dsn = (string) getenv('PDOTEST_DSN');
+if (!strncasecmp($dsn, 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
+if (!strncasecmp($dsn, 'oci', strlen('oci'))) die('skip not relevant for OCI driver');
+if (!strncasecmp($dsn, 'odbc', strlen('odbc'))) die('skip inconsistent error message with odbc');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

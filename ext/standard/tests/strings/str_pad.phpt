@@ -79,7 +79,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 #### Basic operations ####
 string(20) "str_pad()           "
 string(20) "str_pad()-+-+-+-+-+-"
@@ -148,35 +148,95 @@ string(16) "================"
 string(16) "================"
 string(16) "================"
 string(16) "================"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(9) "1        "
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(9) "1========"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(9) "========1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(9) "1========"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(9) "====1===="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "1         "
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "1========="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "=========1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "1========="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(10) "====1====="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "1               "
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "1==============="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "===============1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "1==============="
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "=======1========"
 string(2) "15"
 string(2) "15"
@@ -278,9 +338,17 @@ string(16) "variation1111111"
 string(16) "1111111variation"
 string(16) "variation1111111"
 string(16) "111variation1111"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "variation1111111"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "1111111variation"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "variation1111111"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(16) "111variation1111"
 string(16) "variationstring_"
 string(16) "string_variation"

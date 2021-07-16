@@ -23,8 +23,9 @@ foreach($arrays as $str1_arr){
   for ($i=0; $i<count($str1_arr); $i++){
     echo "\nIteration $i\n";
     for($j=0; $j<count($str1_arr); $j++){
+      $result = strcmp($str1_arr[$i], $str1_arr[$j]);
       echo "- strcmp of '$str1_arr[$i]' and '$str1_arr[$j]' is => ";
-      var_dump(strcmp($str1_arr[$i], $str1_arr[$j]));
+      var_dump($result);
     }
   }
 }
@@ -121,8 +122,8 @@ Array
     [1] => A
     [2] => a
     [3] => A
-    [4] => €
-    [5] => ÿ
+    [4] => %s
+    [5] => %s
     [6] => %0
 )
 
@@ -131,8 +132,8 @@ Iteration 0
 - strcmp of 'a' and 'A' is => int(%d)
 - strcmp of 'a' and 'a' is => int(0)
 - strcmp of 'a' and 'A' is => int(%d)
-- strcmp of 'a' and '€' is => int(-%d)
-- strcmp of 'a' and 'ÿ' is => int(-%d)
+- strcmp of 'a' and '%s' is => int(-%d)
+- strcmp of 'a' and '%s' is => int(-%d)
 - strcmp of 'a' and '%0' is => int(%d)
 
 Iteration 1
@@ -140,8 +141,8 @@ Iteration 1
 - strcmp of 'A' and 'A' is => int(0)
 - strcmp of 'A' and 'a' is => int(-%d)
 - strcmp of 'A' and 'A' is => int(0)
-- strcmp of 'A' and '€' is => int(-%d)
-- strcmp of 'A' and 'ÿ' is => int(-%d)
+- strcmp of 'A' and '%s' is => int(-%d)
+- strcmp of 'A' and '%s' is => int(-%d)
 - strcmp of 'A' and '%0' is => int(%d)
 
 Iteration 2
@@ -149,8 +150,8 @@ Iteration 2
 - strcmp of 'a' and 'A' is => int(%d)
 - strcmp of 'a' and 'a' is => int(0)
 - strcmp of 'a' and 'A' is => int(%d)
-- strcmp of 'a' and '€' is => int(-%d)
-- strcmp of 'a' and 'ÿ' is => int(-%d)
+- strcmp of 'a' and '%s' is => int(-%d)
+- strcmp of 'a' and '%s' is => int(-%d)
 - strcmp of 'a' and '%0' is => int(%d)
 
 Iteration 3
@@ -158,35 +159,35 @@ Iteration 3
 - strcmp of 'A' and 'A' is => int(0)
 - strcmp of 'A' and 'a' is => int(-%d)
 - strcmp of 'A' and 'A' is => int(0)
-- strcmp of 'A' and '€' is => int(-%d)
-- strcmp of 'A' and 'ÿ' is => int(-%d)
+- strcmp of 'A' and '%s' is => int(-%d)
+- strcmp of 'A' and '%s' is => int(-%d)
 - strcmp of 'A' and '%0' is => int(%d)
 
 Iteration 4
-- strcmp of '€' and 'a' is => int(%d)
-- strcmp of '€' and 'A' is => int(%d)
-- strcmp of '€' and 'a' is => int(%d)
-- strcmp of '€' and 'A' is => int(%d)
-- strcmp of '€' and '€' is => int(0)
-- strcmp of '€' and 'ÿ' is => int(-%d)
-- strcmp of '€' and '%0' is => int(%d)
+- strcmp of '%s' and 'a' is => int(%d)
+- strcmp of '%s' and 'A' is => int(%d)
+- strcmp of '%s' and 'a' is => int(%d)
+- strcmp of '%s' and 'A' is => int(%d)
+- strcmp of '%s' and '%s' is => int(0)
+- strcmp of '%s' and '%s' is => int(-%d)
+- strcmp of '%s' and '%0' is => int(%d)
 
 Iteration 5
-- strcmp of 'ÿ' and 'a' is => int(%d)
-- strcmp of 'ÿ' and 'A' is => int(%d)
-- strcmp of 'ÿ' and 'a' is => int(%d)
-- strcmp of 'ÿ' and 'A' is => int(%d)
-- strcmp of 'ÿ' and '€' is => int(%d)
-- strcmp of 'ÿ' and 'ÿ' is => int(0)
-- strcmp of 'ÿ' and '%0' is => int(%d)
+- strcmp of '%s' and 'a' is => int(%d)
+- strcmp of '%s' and 'A' is => int(%d)
+- strcmp of '%s' and 'a' is => int(%d)
+- strcmp of '%s' and 'A' is => int(%d)
+- strcmp of '%s' and '%s' is => int(%d)
+- strcmp of '%s' and '%s' is => int(0)
+- strcmp of '%s' and '%0' is => int(%d)
 
 Iteration 6
 - strcmp of '%0' and 'a' is => int(-%d)
 - strcmp of '%0' and 'A' is => int(-%d)
 - strcmp of '%0' and 'a' is => int(-%d)
 - strcmp of '%0' and 'A' is => int(-%d)
-- strcmp of '%0' and '€' is => int(-%d)
-- strcmp of '%0' and 'ÿ' is => int(-%d)
+- strcmp of '%0' and '%s' is => int(-%d)
+- strcmp of '%0' and '%s' is => int(-%d)
 - strcmp of '%0' and '%0' is => int(0)
 
 *** comparing the strings in an 
@@ -323,7 +324,11 @@ Iteration 0
 - strcmp of '1' and '-1' is => int(%d)
 - strcmp of '1' and '-1' is => int(%d)
 - strcmp of '1' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '1' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '' is => int(%d)
 - strcmp of '1' and 'string' is => int(-%d)
 
@@ -334,7 +339,11 @@ Iteration 1
 - strcmp of '0' and '-1' is => int(%d)
 - strcmp of '0' and '-1' is => int(%d)
 - strcmp of '0' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '0' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '0' and '' is => int(%d)
 - strcmp of '0' and 'string' is => int(-%d)
 
@@ -345,7 +354,11 @@ Iteration 2
 - strcmp of '0' and '-1' is => int(%d)
 - strcmp of '0' and '-1' is => int(%d)
 - strcmp of '0' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '0' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '0' and '' is => int(%d)
 - strcmp of '0' and 'string' is => int(-%d)
 
@@ -356,7 +369,11 @@ Iteration 3
 - strcmp of '-1' and '-1' is => int(0)
 - strcmp of '-1' and '-1' is => int(0)
 - strcmp of '-1' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '-1' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '-1' and '' is => int(%d)
 - strcmp of '-1' and 'string' is => int(-%d)
 
@@ -367,7 +384,11 @@ Iteration 4
 - strcmp of '-1' and '-1' is => int(0)
 - strcmp of '-1' and '-1' is => int(0)
 - strcmp of '-1' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '-1' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '-1' and '' is => int(%d)
 - strcmp of '-1' and 'string' is => int(-%d)
 
@@ -378,30 +399,78 @@ Iteration 5
 - strcmp of '' and '-1' is => int(-%d)
 - strcmp of '' and '-1' is => int(-%d)
 - strcmp of '' and '' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '' is => int(0)
 - strcmp of '' and 'string' is => int(-%d)
 
 Iteration 6
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '1' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '0' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '0' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '-1' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '-1' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '1' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '1' and 'string' is => int(-%d)
 
 Iteration 7
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '0' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '0' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '-1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '-1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '1' is => int(-%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and '' is => int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of '' and 'string' is => int(-%d)
 
 Iteration 8
@@ -411,7 +480,11 @@ Iteration 8
 - strcmp of 'string' and '-1' is => int(%d)
 - strcmp of 'string' and '-1' is => int(%d)
 - strcmp of 'string' and '' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of 'string' and '1' is => int(%d)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 - strcmp of 'string' and '' is => int(%d)
 - strcmp of 'string' and 'string' is => int(0)
 

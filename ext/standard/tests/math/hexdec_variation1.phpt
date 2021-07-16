@@ -115,15 +115,23 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(5)
 
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
 
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
 
 -- Iteration 14 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
 
 -- Iteration 15 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
 
 -- Iteration 16 --

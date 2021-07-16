@@ -34,14 +34,18 @@ foreach( $invalid_files as $invalid_file ) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on invalid files ***
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 Done

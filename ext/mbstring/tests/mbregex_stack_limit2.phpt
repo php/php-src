@@ -29,5 +29,7 @@ echo 'OK';
 ?>
 --EXPECTF--
 Warning: mb_ereg_replace(): mbregex search failure in php_mbereg_replace_exec(): match-stack limit over in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 OK

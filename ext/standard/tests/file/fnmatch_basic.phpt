@@ -26,7 +26,7 @@ var_dump( fnmatch(FALSE, FALSE) );
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fnmatch() with file ***
 bool(true)
 bool(true)
@@ -37,7 +37,15 @@ bool(false)
 *** Testing fnmatch() with other than file ***
 bool(true)
 bool(true)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(true)
 
 *** Done ***

@@ -69,21 +69,29 @@ test(4);
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 
 Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 read: string(32) "The quick brown fox jumps over t"
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
 
 Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 
 
 Notice: fread(): zlib: data error in %s on line %d

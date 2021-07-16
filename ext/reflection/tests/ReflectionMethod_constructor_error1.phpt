@@ -65,6 +65,8 @@ try {
 ?>
 --EXPECTF--
 Wrong type of argument (bool):
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('1')
@@ -75,11 +77,15 @@ Stack trace:
 #0 %s ReflectionMethod->__construct('3')
 #1 {main}
 Wrong type of argument (bool, string):
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ReflectionException: Class "1" does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('1', 'foo')
 #1 {main}
 Wrong type of argument (string, bool):
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 ReflectionException: Method TestClass::1() does not exist in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass', '1')

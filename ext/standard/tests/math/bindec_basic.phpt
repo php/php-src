@@ -72,5 +72,9 @@ int(6)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)

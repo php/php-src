@@ -212,6 +212,8 @@ string(198) "Hello, world,0120333FOUND445-1.234567          NULL TRUE FALSE%0
 
 --- Iteration 21 ---
 -- String after replacing the search value is => --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(207) "Hello, world,0FOUND20333.3445-FOUND.234567          NULL TRUE FALSE%0
         %00ZCD%0abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World
         ?Hello, World chr(0).chr(FOUND28).chr(234).chr(65).chr(255).chr(256)"
@@ -240,6 +242,8 @@ string(207) "Hello, world,0FOUND20333.3445-FOUND.234567          NULL TRUE FALSE
 
 --- Iteration 25 ---
 -- String after replacing the search value is => --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(195) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE%0
         %00ZCD%0abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World
         ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"

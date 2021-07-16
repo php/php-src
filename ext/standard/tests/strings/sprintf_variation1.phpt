@@ -98,7 +98,7 @@ fclose($file_handle);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : with unexpected values for format argument ***
 
 -- Iteration 1 --
@@ -172,23 +172,47 @@ sprintf(): Argument #1 ($format) must be of type string, array given
 sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
 
 -- Iteration 16 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 
 -- Iteration 17 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(1) "1"
 
 -- Iteration 18 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(0) ""
 
 -- Iteration 19 --

@@ -61,6 +61,8 @@ Deprecated: ReflectionClass::getProperty(): Passing null to parameter #1 ($name)
 Property C::$ does not exist
 Property C::$1 does not exist
 Property C::$1.5 does not exist
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 Property C::$1 does not exist
 ReflectionClass::getProperty(): Argument #1 ($name) must be of type string, array given
 ReflectionClass::getProperty(): Argument #1 ($name) must be of type string, C given

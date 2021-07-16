@@ -70,9 +70,17 @@ try {
 
 --- str_repeat() of '1' ---
 -- after repeating 0 times is => 
--- after repeating 1 times is => 1
--- after repeating 2 times is => 11
--- after repeating 3 times is => 111
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+
+-- after repeating 1 times is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+1
+-- after repeating 2 times is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+11
+-- after repeating 3 times is => 
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
+111
 
 --- str_repeat() of '4' ---
 -- after repeating 0 times is => 

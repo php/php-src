@@ -13,14 +13,17 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 function stat_fn( $filename ) {
   echo "\n-- File '$filename' --\n";
+  $result = fileatime($filename);
   echo "-- File access time is => ";
-  echo fileatime($filename)."\n";
+  echo $result."\n";
   clearstatcache();
+  $result = filemtime($filename);
   echo "-- File modification time is => ";
-  echo filemtime($filename)."\n";
+  echo $result."\n";
   clearstatcache();
+  $result = filectime($filename);
   echo "-- inode change time is => ";
-  echo filectime($filename)."\n";
+  echo $result."\n";
   clearstatcache();
 
 
@@ -48,8 +51,14 @@ echo "Done";
 
 *** testing file info ***
 -- File '' --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 -- File access time is => 
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 -- File modification time is => 
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 -- inode change time is => 
 
 -- File '' --
@@ -58,28 +67,30 @@ echo "Done";
 -- inode change time is => 
 
 -- File ' ' --
--- File access time is => 
+
 Warning: fileatime(): stat failed for   in %s on line %d
+-- File access time is => 
 
--- File modification time is => 
 Warning: filemtime(): stat failed for   in %s on line %d
+-- File modification time is => 
 
--- inode change time is => 
 Warning: filectime(): stat failed for   in %s on line %d
-
+-- inode change time is => 
 
 -- File '|' --
--- File access time is => 
+
 Warning: fileatime(): stat failed for | in %s on line %d
+-- File access time is => 
 
--- File modification time is => 
 Warning: filemtime(): stat failed for | in %s on line %d
+-- File modification time is => 
 
--- inode change time is => 
 Warning: filectime(): stat failed for | in %s on line %d
-
+-- inode change time is => 
 
 *** testing touch ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 

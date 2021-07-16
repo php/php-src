@@ -12,8 +12,10 @@ var_dump(file_exists(' '));
 var_dump(file_exists('|'));
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing file_exists() : usage variations ***
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

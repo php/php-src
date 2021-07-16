@@ -95,12 +95,20 @@ strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 9 --
 strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 10 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(6) "0a2atm"
 -- Iteration 11 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(6) "012atm"
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(6) "0a2atm"
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(6) "012atm"
 -- Iteration 14 --
 

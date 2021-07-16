@@ -46,6 +46,8 @@ string(0) ""
 string(1) "0"
 string(1) "0"
 string(13) "	testing trim"
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 string(15) "	testing trim  "
 
 *** Testing with OBJECTS ***

@@ -67,7 +67,7 @@ foreach ($needles as $needle) {
   $count++;
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(32)
@@ -125,14 +125,30 @@ int(10)
 bool(false)
 int(10)
 -- Iteration 12 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(53)
 -- Iteration 13 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(54)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(53)
 -- Iteration 14 --
 int(54)

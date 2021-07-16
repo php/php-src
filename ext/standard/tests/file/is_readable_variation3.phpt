@@ -28,14 +28,18 @@ foreach( $misc_files as $misc_file ) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on miscellaneous filenames ***
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 bool(false)
 bool(false)
 Done

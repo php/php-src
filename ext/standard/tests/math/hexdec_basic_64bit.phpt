@@ -86,7 +86,11 @@ int(18279)
 int(70199)
 
 -- hexdec 1 --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(1)
 
 -- hexdec  --
+
+Deprecated: Implicit bool to string coercion is deprecated in %s on line %d
 int(0)
