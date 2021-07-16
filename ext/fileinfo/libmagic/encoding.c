@@ -88,6 +88,9 @@ file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
 	*code = "unknown";
 	*code_mime = "binary";
 
+	if (nbytes > ms->encoding_max)
+		nbytes = ms->encoding_max;
+
 	mlen = (nbytes + 1) * sizeof((*ubuf)[0]);
 	if ((*ubuf = CAST(unichar *, ecalloc(CAST(size_t, 1), mlen))) == NULL) {
 		file_oomem(ms, mlen);

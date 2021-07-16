@@ -438,12 +438,14 @@ struct magic_set {
 	uint16_t elf_notes_max;
 	uint16_t regex_max;
 	size_t bytes_max;		/* number of bytes to read from file */
+    size_t encoding_max;		/* bytes to look for encoding */
 #define	FILE_INDIR_MAX			50
 #define	FILE_NAME_MAX			30
 #define	FILE_ELF_SHNUM_MAX		32768
 #define	FILE_ELF_PHNUM_MAX		2048
 #define	FILE_ELF_NOTES_MAX		256
 #define	FILE_REGEX_MAX			8192
+#define	FILE_ENCODING_MAX		(64 * 1024)
 };
 
 /* Type for Unicode characters */

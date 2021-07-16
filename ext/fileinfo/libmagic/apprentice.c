@@ -518,6 +518,7 @@ file_ms_alloc(int flags)
 	ms->elf_notes_max = FILE_ELF_NOTES_MAX;
 	ms->regex_max = FILE_REGEX_MAX;
 	ms->bytes_max = FILE_BYTES_MAX;
+	ms->encoding_max = FILE_ENCODING_MAX;
 	return ms;
 free:
 	efree(ms);
