@@ -123,6 +123,11 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len)
+{
+	return (int) zend_atol(str, str_len);
+}
+
 /* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
 #define convert_object_to_type(op, dst, ctype)									\
 	ZVAL_UNDEF(dst);																		\
