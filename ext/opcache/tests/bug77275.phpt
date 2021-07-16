@@ -11,7 +11,7 @@ namespace Foo;
 class Bar { public function get() {} }
 class Record implements \ArrayAccess {
     public function offsetSet($offset, $value): void { throw new \Exception; }
-    public function offsetGet($offset): mixed { var_dump($offset); }
+    public function offsetGet($offset): mixed { var_dump($offset); return null; }
     public function offsetExists($offset): bool { throw new \Exception; }
     public function offsetUnset($offset): void { throw new \Exception; }
 }
