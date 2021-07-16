@@ -108,6 +108,9 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	const char *iv, size_t iv_len,
 	const char *tag, zend_long tag_len,
 	const char *aad, size_t aad_len);
+PHP_OPENSSL_API EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key,
+	char *passphrase, size_t passphrase_len);
+PHP_OPENSSL_API X509 *php_openssl_x509_from_str(zend_string *cert_str);
 
 /* OpenSSLCertificate class */
 
