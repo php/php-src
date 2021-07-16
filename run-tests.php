@@ -131,6 +131,7 @@ Options:
                 Run the tests multiple times in the same process and check the
                 output of the last execution (CLI SAPI only).
 
+    --bless     Bless failed tests using scripts/dev/bless_tests.php.
 
 HELP;
 }
@@ -157,7 +158,8 @@ function main(): void
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
+           $bless;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -357,6 +359,7 @@ function main(): void
     $preload = false;
     $file_cache = null;
     $shuffle = false;
+    $bless = false;
     $workers = null;
     $context_line_count = 3;
     $num_repeats = 1;
@@ -582,6 +585,9 @@ function main(): void
                     $num_repeats = (int) $argv[++$i];
                     $environment['SKIP_REPEAT'] = 1;
                     break;
+                case '--bless':
+                    $bless = true;
+                    break;
                 //case 'w'
                 case '-':
                     // repeat check with full switch
@@ -782,6 +788,9 @@ function main(): void
     }
 
     $junit->saveXML();
+    if ($bless) {
+        bless_failed_tests($PHP_FAILED_TESTS['FAILED']);
+    }
     if (getenv('REPORT_EXIT_STATUS') !== '0' && getenv('REPORT_EXIT_STATUS') !== 'no' &&
             ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
         exit(1);
@@ -3994,6 +4003,21 @@ function check_proc_open_function_exists(): void
 NO_PROC_OPEN_ERROR;
         exit(1);
     }
+}
+
+function bless_failed_tests(array $failedTests): void
+{
+    if (empty($failedTests)) {
+        return;
+    }
+    $args = [
+        PHP_BINARY,
+        __DIR__ . '/scripts/dev/bless_tests.php',
+    ];
+    foreach ($failedTests as $test) {
+        $args[] = $test['name'];
+    }
+    proc_open($args, [], $pipes);
 }
 
 main();
