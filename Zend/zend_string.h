@@ -23,6 +23,8 @@
 
 BEGIN_EXTERN_C()
 
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+
 typedef void (*zend_string_copy_storage_func_t)(void);
 typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
 typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
@@ -130,8 +132,13 @@ static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 
 static zend_always_inline zend_string *zend_string_alloc(size_t len, int persistent)
 {
-	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
+	size_t size = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len));
+	zend_string *ret;
 
+	if (UNEXPECTED(size < len)) {
+		zend_error_noreturn(E_ERROR, "Integer overflow in string allocation");
+	}
+	ret = (zend_string *)pemalloc(size, persistent);
 	GC_SET_REFCOUNT(ret, 1);
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
 	ZSTR_H(ret) = 0;
