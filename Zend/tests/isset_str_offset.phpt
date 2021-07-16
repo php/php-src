@@ -22,21 +22,46 @@ var_dump(isset($str['-10']));
 var_dump(isset($str['0']));
 var_dump(isset($str['1']));
 var_dump(isset($str['4'])); // 0
-var_dump(isset($str['1.5']));
-var_dump(isset($str['good']));
-var_dump(isset($str['3 and a half']));
+try {
+    var_dump(isset($str['1.5']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    var_dump(isset($str['good']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    var_dump(isset($str['3 and a half']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 print "- string variable ---\n";
 var_dump(isset($str[$key = '-1'])); // 3
 var_dump(isset($str[$key = '-10']));
 var_dump(isset($str[$key = '0']));
 var_dump(isset($str[$key = '1']));
 var_dump(isset($str[$key = '4'])); // 0
-var_dump(isset($str[$key = '1.5']));
-var_dump(isset($str[$key = 'good']));
-var_dump(isset($str[$key = '3 and a half']));
+try {
+    var_dump(isset($str[$key = '1.5']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    var_dump(isset($str[$key = 'good']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    var_dump(isset($str[$key = '3 and a half']));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 print "- bool ---\n";
 var_dump(isset($str[true]));
 var_dump(isset($str[false]));
+echo "Sub-keys:\n";
 var_dump(isset($str[false][true]));
 print "- null ---\n";
 var_dump(isset($str[null]));
@@ -50,13 +75,29 @@ var_dump(isset($str[0.9]));
 var_dump(isset($str[M_PI]));
 var_dump(isset($str[100.5001]));
 print "- array ---\n";
-var_dump(isset($str[array()]));
-var_dump(isset($str[array(1,2,3)]));
+try {
+    var_dump(isset($str[array()]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+try {
+    var_dump(isset($str[array(1,2,3)]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 print "- object ---\n";
-var_dump(isset($str[new stdClass()]));
+try {
+    var_dump(isset($str[new stdClass()]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 print "- resource ---\n";
 $f = fopen(__FILE__, 'r');
-var_dump(isset($str[$f]));
+try {
+    var_dump(isset($str[$f]));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 print "done\n";
 
 ?>
@@ -76,54 +117,69 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
-bool(false)
-bool(false)
+Cannot access offset of type string on string
+Cannot access offset of type string on string
+
+Warning: Illegal string offset "3 and a half" in %s on line %d
+bool(true)
 - string variable ---
 bool(true)
 bool(false)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
-bool(false)
-bool(false)
+Cannot access offset of type string on string
+Cannot access offset of type string on string
+
+Warning: Illegal string offset "3 and a half" in %s on line %d
+bool(true)
 - bool ---
+
+Warning: String offset cast occurred in %s on line %d
 bool(true)
+
+Warning: String offset cast occurred in %s on line %d
 bool(true)
+Sub-keys:
+
+Warning: String offset cast occurred in %s on line %d
+
+Warning: String offset cast occurred in %s on line %d
 bool(false)
 - null ---
+
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 - double ---
 
-Deprecated: Implicit conversion from float -1.1 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float -10.5 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(false)
 
-Deprecated: Implicit conversion from float -0.8 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float -0.1 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float 0.2 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float 0.9 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float 3.141592653589793 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(true)
 
-Deprecated: Implicit conversion from float 100.5001 to int loses precision in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 bool(false)
 - array ---
-bool(false)
-bool(false)
+Cannot access offset of type array on string
+Cannot access offset of type array on string
 - object ---
-bool(false)
+Cannot access offset of type stdClass on string
 - resource ---
-bool(false)
+Cannot access offset of type resource on string
 done

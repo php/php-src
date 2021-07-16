@@ -14,7 +14,11 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-var_dump(isset($string["foo"]["bar"]));
+try {
+    var_dump(isset($string["foo"]["bar"]));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECT--
@@ -24,4 +28,4 @@ string(1) "o"
 bool(true)
 bool(true)
 Cannot access offset of type string on string
-bool(false)
+Cannot access offset of type string on string
