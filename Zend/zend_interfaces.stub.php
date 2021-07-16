@@ -13,13 +13,13 @@ interface IteratorAggregate extends Traversable
 interface Iterator extends Traversable
 {
     /** @return mixed */
-    public function current(); // TODO Can't add tentative return tyoe due to DirectoryIterator::current()
+    public function current(): mixed;
 
     /** @tentative-return-type */
     public function next(): void;
 
     /** @return mixed */
-    public function key(); // TODO Can't add tentative return tyoe due to DirectoryIterator::key()
+    public function key(): mixed;
 
     /** @tentative-return-type */
     public function valid(): bool;
@@ -42,8 +42,8 @@ interface ArrayAccess
     /** @tentative-return-type */
     public function offsetSet(mixed $offset, mixed $value): void;
 
-    /** @return void */
-    public function offsetUnset(mixed $offset); // TODO Can't add tentative return type due to Phar::offsetUnset
+    /** @tentative-return-type */
+    public function offsetUnset(mixed $offset): void;
 }
 
 interface Serializable
@@ -57,8 +57,7 @@ interface Serializable
 
 interface Countable
 {
-    /** @return int */
-    public function count(); // TODO Can't add tentatie return type due to DOMNodeList::count() and DOMNamedNodeMap::count()
+    public function count(): int;
 }
 
 interface Stringable

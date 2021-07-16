@@ -8,7 +8,7 @@ class Test implements Iterator {
 
     public function rewind(): void    { reset($this->arr); }
     public function current(): mixed   { throw new Exception(); }
-    public function key()       { return key($this->arr); }
+    public function key(): mixed       { return key($this->arr); }
     public function next(): void      { next($this->arr); }
     public function valid(): bool     { return (current($this->arr) !== false); }
 }

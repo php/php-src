@@ -16,7 +16,7 @@ class myIterator implements Iterator
     }
     function next(): void {
         echo "next\n";
-        return next($this->a);
+        next($this->a);
     }
     function current(): mixed {
         echo "current\n";
@@ -32,7 +32,7 @@ class myIterator implements Iterator
     }
     function rewind(): void {
         echo "rewind\n";
-        return reset($this->a);
+        reset($this->a);
     }
 }
 try {

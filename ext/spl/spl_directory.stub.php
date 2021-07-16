@@ -123,10 +123,10 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     public function valid(): bool {}
 
     /** @return int */
-    public function key() {} // TODO change return type to string
+    public function key(): mixed {} // TODO change return type to string
 
     /** @return DirectoryIterator */
-    public function current() {} // TODO fix return type so that FilesystemIterator::current() remains compatible
+    public function current(): mixed {} // TODO narrow return type
 
     /** @tentative-return-type */
     public function next(): void {}
