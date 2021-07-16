@@ -3759,11 +3759,7 @@ PHP_METHOD(Phar, offsetUnset)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
 			}
-
-			RETURN_TRUE;
 		}
-	} else {
-		RETURN_FALSE;
 	}
 }
 /* }}} */

@@ -119,7 +119,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param string $localName
      * @tentative-return-type
      */
-    public function offsetUnset($localName): bool {}
+    public function offsetUnset($localName): void {}
 
     /** @tentative-return-type */
     public function setAlias(string $alias): bool {}
@@ -386,7 +386,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::offsetUnset
      */
-    public function offsetUnset($localName): bool {}
+    public function offsetUnset($localName): void {}
 
     /**
      * @tentative-return-type

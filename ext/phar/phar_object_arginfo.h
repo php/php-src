@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ac04a4161a11d054922cb04787f81f5661203e3e */
+ * Stub hash: ddb04eb0a40f19ad06cb351e545895a8dd58fece */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -128,7 +128,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetSet, 
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_offsetUnset arginfo_class_Phar_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
@@ -297,7 +299,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_offsetSet arginfo_class_Phar_offsetSet
 
-#define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetExists
+#define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetUnset
 
 #define arginfo_class_PharData_setAlias arginfo_class_Phar_setAlias
 

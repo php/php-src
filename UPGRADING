@@ -147,6 +147,10 @@ PHP 8.1 UPGRADE NOTES
     default connection is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- Phar:
+  . To comply with the ArrayAccess interface, Phar::offsetUnset() and
+    PharData::offsetUnset() no longer return a boolean.
+
 - PSpell:
   . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
     instead of "pspell" resources. Return value checks using is_resource()
