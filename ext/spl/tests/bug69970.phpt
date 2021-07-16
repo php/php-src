@@ -9,7 +9,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator {
   function rewind(): void {
     echo "dummy\n";
   }
-  function endChildren() {
+  function endChildren(): void {
       global $count;
       echo $this->getDepth();
       if (--$count > 0) {

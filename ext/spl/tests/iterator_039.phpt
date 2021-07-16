@@ -14,31 +14,31 @@ class NumericArrayIterator implements Iterator
         $this->a = $a;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         echo __METHOD__ . "\n";
         return $this->i < count($this->a);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         echo __METHOD__ . "\n";
         $this->i = 0;
     }
 
-    public function key()
+    public function key(): mixed
     {
         echo __METHOD__ . "\n";
         return $this->i;
     }
 
-    public function current()
+    public function current(): mixed
     {
         echo __METHOD__ . "\n";
         return $this->a[$this->i];
     }
 
-    public function next()
+    public function next(): void
     {
         echo __METHOD__ . "\n";
         $this->i++;

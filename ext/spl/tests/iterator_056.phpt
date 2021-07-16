@@ -6,7 +6,7 @@ Sebastian Schürmann
 <?php
 
 class myFilterIterator extends FilterIterator {
-    function accept() { }
+    function accept(): bool { }
 }
 
 class myCachingIterator extends CachingIterator { }

@@ -18,21 +18,21 @@ class MenuOutput extends RecursiveIteratorIterator
     {
         parent::__construct($it);
     }
-    function rewind()
+    function rewind(): void
     {
         echo "<ul>\n";
         parent::rewind();
     }
-    function beginChildren()
+    function beginChildren(): void
     {
         echo str_repeat('  ',$this->getDepth())."<ul>\n";
     }
 
-    function endChildren()
+    function endChildren(): void
     {
         echo str_repeat('  ',$this->getDepth())."</ul>\n";
     }
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid()) {
             echo "<ul>\n";
