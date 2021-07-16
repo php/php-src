@@ -110,6 +110,8 @@ int bc_compare(bc_num n1, bc_num n2);
 
 char bc_is_zero(bc_num num);
 
+char bc_is_zero_for_scale(bc_num num, int scale);
+
 char bc_is_near_zero(bc_num num, int scale);
 
 char bc_is_neg(bc_num num);
