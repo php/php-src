@@ -36,8 +36,8 @@ class Exception implements Throwable
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
-    /** @return void */
-    public function __wakeup() {}
+    /** @tentative-return-type */
+    public function __wakeup(): void {}
 
     final public function getMessage(): string {}
 

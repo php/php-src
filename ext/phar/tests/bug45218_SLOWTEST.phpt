@@ -19,7 +19,8 @@ class myIterator implements Iterator
     var $a;
     var $count = 1;
 
-    function next(): void {
+    #[ReturnTypeWillChange]
+    function next() {
         return (++$this->count < 3000) ? 'f' . $this->count : false;
     }
     function current(): mixed {
@@ -34,7 +35,8 @@ class myIterator implements Iterator
     function valid(): bool {
         return $this->count < 3000;
     }
-    function rewind(): void {
+    #[ReturnTypeWillChange]
+    function rewind() {
         $this->count = 1;
         return $GLOBALS['fname2'];
     }
