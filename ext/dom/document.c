@@ -533,7 +533,7 @@ PHP_METHOD(DOMDocument, createElement)
 
 	node = xmlNewDocNode(docp, NULL, (xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -561,7 +561,7 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 
 	node = xmlNewDocFragment(docp);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -591,7 +591,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 
 	node = xmlNewDocText(docp, (xmlChar *) value);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -621,7 +621,7 @@ PHP_METHOD(DOMDocument, createComment)
 
 	node = xmlNewDocComment(docp, (xmlChar *) value);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -651,7 +651,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 
 	node = xmlNewCDataBlock(docp, (xmlChar *) value, value_len);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -686,7 +686,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 
 	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -723,7 +723,7 @@ PHP_METHOD(DOMDocument, createAttribute)
 
 	node = xmlNewDocProp(docp, (xmlChar *) name, NULL);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 
@@ -759,7 +759,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 
 	node = xmlNewReference(docp, (xmlChar *) name);
 	if (!node) {
-		php_dom_throw_error(LIBXML_ERR, /* strict */ true);
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 

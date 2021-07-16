@@ -97,9 +97,6 @@ void php_dom_throw_error(int error_code, int strict_error)
 		case VALIDATION_ERR:
 			error_message = "Validation Error";
 			break;
-		case LIBXML_ERR:
-			error_message = "Unknown LibXML error, likely out of memory";
-			break;
 		default:
 			error_message = "Unhandled Error";
 	}
