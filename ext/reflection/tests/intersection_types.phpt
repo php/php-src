@@ -29,7 +29,7 @@ dumpType($rp->getType());
 
 interface y {}
 class x implements Y, Countable {
-    public function count() {}
+    public function count(): int { return 0; }
 }
 $test = new Test;
 $test->prop = new x;
