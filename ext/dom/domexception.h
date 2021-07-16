@@ -43,7 +43,9 @@ typedef enum {
 /* Introduced in DOM Level 2: */
 	INVALID_ACCESS_ERR             = 15,
 /* Introduced in DOM Level 3: */
-	VALIDATION_ERR                 = 16
+	VALIDATION_ERR                 = 16,
+	/* Unknown libxml error, likely out of memory. */
+	LIBXML_ERR                     = 128,
 } dom_exception_code;
 
 #endif /* DOM_EXCEPTION_H */
