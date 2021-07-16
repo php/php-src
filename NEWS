@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
+  . Fixed bug #81265 (getimagesize returns 0 for 256px ICO images).
+    (George Dietrich)
 
 29 Jul 2021, PHP 7.4.22
 
