@@ -1125,6 +1125,9 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 	zval *tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1);
 	if (tmpval != NULL) {
 		*pretval = zend_is_true(tmpval);
+		if (EG(exception)) {
+			return PHP_CONV_ERR_NOT_FOUND;
+		}
 		return PHP_CONV_ERR_SUCCESS;
 	} else {
 		*pretval = 0;

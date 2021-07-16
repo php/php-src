@@ -305,6 +305,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 		GET_VER_OPT("allow_self_signed") &&
 		zend_is_true(val)
 	) {
+		/* TODO Check if stream context value can be an object */
 		ret = 1;
 	}
 
@@ -510,6 +511,7 @@ static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_
 
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
+	/* TODO Check if stream context value can be an object */
 	must_verify_peer = GET_VER_OPT("verify_peer")
 		? zend_is_true(val)
 		: sslsock->is_client;

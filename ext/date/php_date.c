@@ -1588,6 +1588,7 @@ static int date_interval_has_property(zend_object *object, zend_string *name, in
 		if (type == 2) {
 			retval = 1;
 		} else if (type == 1) {
+			/* TODO: Check if special handling needs to be done when prop is an object which cannot be converted to bool */
 			retval = zend_is_true(prop);
 		} else if (type == 0) {
 			retval = (Z_TYPE_P(prop) != IS_NULL);

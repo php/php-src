@@ -397,6 +397,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 					send_array = call_info->caller_call_opline - 1;
 					send_needly = call_info->caller_call_opline - 2;
 				} else {
+					/* zend_is_true() cannot fail here as op1 is not an object */
 					if (zend_is_true(CT_CONSTANT_EX(op_array, (call_info->caller_call_opline - 1)->op1.constant))) {
 						strict = 1;
 					}

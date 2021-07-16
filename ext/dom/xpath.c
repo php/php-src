@@ -280,6 +280,9 @@ int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
 int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 {
 	php_xpath_obj_from_dom_obj(obj)->register_node_ns = zend_is_true(newval);
+	if (EG(exception)) {
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }

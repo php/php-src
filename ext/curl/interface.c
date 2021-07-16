@@ -2451,6 +2451,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			break;
 		case CURLOPT_SAFE_UPLOAD:
 			if (!zend_is_true(zvalue)) {
+				/* Handles case where zvalue is an object which cannot be cast to bool at the same time */
 				zend_value_error("%s(): Disabling safe uploads is no longer supported", get_active_function_name());
 				return FAILURE;
 			}
@@ -2784,6 +2785,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 
 		case CURLOPT_FOLLOWLOCATION:
 			lval = zend_is_true(zvalue);
+			/* If zvalue is an object which cannot be cast to bool */
+			if (EG(exception)) {
+				error = CURLE_UNKNOWN_OPTION;
+				break;
+			}
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
@@ -2841,6 +2847,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			if (zend_is_true(zvalue)) {
 				ch->handlers.write->method = PHP_CURL_RETURN;
 			} else {
+				/* If zvalue is an object which cannot be cast to bool */
+				if (EG(exception)) {
+					error = CURLE_UNKNOWN_OPTION;
+					break;
+				}
 				ch->handlers.write->method = PHP_CURL_STDOUT;
 			}
 			break;
@@ -2903,6 +2914,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 1);
 			} else {
+				/* If zvalue is an object which cannot be cast to bool */
+				if (EG(exception)) {
+					error = CURLE_UNKNOWN_OPTION;
+					break;
+				}
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, NULL);
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, NULL);
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 0);

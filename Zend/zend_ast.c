@@ -609,8 +609,18 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 					break;
 				}
 				ZVAL_BOOL(result, zend_is_true(&op2));
+				/* op2 is an object which cannot be converted to bool */
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_UNDEF(result);
+					return FAILURE;
+				}
 				zval_ptr_dtor_nogc(&op2);
 			} else {
+				/* op1 is an object which cannot be converted to bool */
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_UNDEF(result);
+					return FAILURE;
+				}
 				ZVAL_FALSE(result);
 			}
 			zval_ptr_dtor_nogc(&op1);
@@ -623,12 +633,22 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			if (zend_is_true(&op1)) {
 				ZVAL_TRUE(result);
 			} else {
+				/* op1 is an object which cannot be converted to bool */
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_UNDEF(result);
+					return FAILURE;
+				}
 				if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
 					zval_ptr_dtor_nogc(&op1);
 					ret = FAILURE;
 					break;
 				}
 				ZVAL_BOOL(result, zend_is_true(&op2));
+				/* op2 is an object which cannot be converted to bool */
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_UNDEF(result);
+					return FAILURE;
+				}
 				zval_ptr_dtor_nogc(&op2);
 			}
 			zval_ptr_dtor_nogc(&op1);
@@ -650,6 +670,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 					zval_ptr_dtor_nogc(&op1);
 				}
 			} else {
+				/* op1 is an object which cannot be converted to bool */
+				if (UNEXPECTED(EG(exception))) {
+					return FAILURE;
+				}
 				if (UNEXPECTED(zend_ast_evaluate(result, ast->child[2], scope) != SUCCESS)) {
 					zval_ptr_dtor_nogc(&op1);
 					ret = FAILURE;

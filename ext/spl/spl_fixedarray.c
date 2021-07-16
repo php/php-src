@@ -486,6 +486,7 @@ static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *in
 	}
 
 	if (check_empty) {
+		/* Do not check that a TypeError is emitted by zend_is_true() as we're already returning */
 		return zend_is_true(&intern->array.elements[index]);
 	}
 
@@ -505,6 +506,7 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_has, "offsetExists", &rv, offset);
 		result = zend_is_true(&rv);
 		zval_ptr_dtor(&rv);
+		/* Need to do something if rv is an object which can't be converted to bool? */
 		return result;
 	}
 

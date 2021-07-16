@@ -474,6 +474,10 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest, uint
 			return 0;
 		}
 		*dest = zend_is_true(arg);
+		/* arg is an object which cannot be converted to bool */
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 	} else {
 		return 0;
 	}

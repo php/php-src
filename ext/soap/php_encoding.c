@@ -1130,6 +1130,7 @@ static xmlNodePtr to_xml_bool(encodeTypePtr type, zval *data, int style, xmlNode
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
+	/* TODO: Check if when data is an object which cannnot be converted to bool special handling is needed? */
 	if (zend_is_true(data)) {
 		xmlNodeSetContent(ret, BAD_CAST("true"));
 	} else {

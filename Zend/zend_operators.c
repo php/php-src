@@ -1404,7 +1404,7 @@ ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *o
 
 ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	int op1_val, op2_val;
+	bool op1_val, op2_val;
 
 	do {
 		if (Z_TYPE_P(op1) == IS_FALSE) {
@@ -1424,6 +1424,10 @@ ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1,
 			}
 			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BOOL_XOR);
 			op1_val = zval_is_true(op1);
+			if (UNEXPECTED(EG(exception))) {
+				ZVAL_UNDEF(result);
+				return FAILURE;
+			}
 		}
 	} while (0);
 	do {
@@ -1444,6 +1448,10 @@ ZEND_API zend_result ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1,
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BOOL_XOR);
 			op2_val = zval_is_true(op2);
+			if (UNEXPECTED(EG(exception))) {
+				ZVAL_UNDEF(result);
+				return FAILURE;
+			}
 		}
 	} while (0);
 
@@ -1459,6 +1467,7 @@ ZEND_API zend_result ZEND_FASTCALL boolean_not_function(zval *result, zval *op1)
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_TRUE)) {
 		ZVAL_FALSE(result);
 	} else {
+		bool not;
 		if (Z_ISREF_P(op1)) {
 			op1 = Z_REFVAL_P(op1);
 			if (Z_TYPE_P(op1) < IS_TRUE) {
@@ -1471,7 +1480,12 @@ ZEND_API zend_result ZEND_FASTCALL boolean_not_function(zval *result, zval *op1)
 		}
 		ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BOOL_NOT);
 
-		ZVAL_BOOL(result, !zval_is_true(op1));
+		not = !zval_is_true(op1);
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_UNDEF(result);
+			return FAILURE;
+		}
+		ZVAL_BOOL(result, not);
 	}
 	return SUCCESS;
 }
@@ -2195,13 +2209,29 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 
 				if (!converted) {
 					if (Z_TYPE_P(op1) < IS_TRUE) {
-						return zval_is_true(op2) ? -1 : 0;
+						bool is_true = zval_is_true(op2);
+						if (UNEXPECTED(EG(exception))) {
+							return 1;
+						}
+						return is_true ? -1 : 0;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
-						return zval_is_true(op2) ? 0 : 1;
+						bool is_true = zval_is_true(op2);
+						if (UNEXPECTED(EG(exception))) {
+							return 1;
+						}
+						return is_true ? 0 : 1;
 					} else if (Z_TYPE_P(op2) < IS_TRUE) {
-						return zval_is_true(op1) ? 1 : 0;
+						bool is_true = zval_is_true(op1);
+						if (UNEXPECTED(EG(exception))) {
+							return 1;
+						}
+						return is_true ? 1 : 0;
 					} else if (Z_TYPE_P(op2) == IS_TRUE) {
-						return zval_is_true(op1) ? 0 : -1;
+						bool is_true = zval_is_true(op1);
+						if (UNEXPECTED(EG(exception))) {
+							return 1;
+						}
+						return is_true ? 0 : -1;
 					} else {
 						op1 = _zendi_convert_scalar_to_number_silent(op1, &op1_copy);
 						op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);
@@ -2575,6 +2605,7 @@ try_again:
 }
 /* }}} */
 
+/* TODO make JIT compatible with a bool return */
 ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 {
 	return (int) i_zend_is_true(op);
@@ -2588,7 +2619,7 @@ ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 	if (zobj->handlers->cast_object(zobj, &tmp, _IS_BOOL) == SUCCESS) {
 		return Z_TYPE(tmp) == IS_TRUE;
 	}
-	zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
+	zend_type_error("Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
 	return false;
 }
 /* }}} */

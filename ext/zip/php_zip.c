@@ -955,6 +955,7 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 		} else if ((prop = php_zip_property_reader(obj, hnd, &tmp)) != NULL) {
 			if (type == 1) {
 				retval = zend_is_true(&tmp);
+				/* TODO Check if need to do special handling in case tmp is an object which cannot be converted to bool? */
 			} else if (type == 0) {
 				retval = (Z_TYPE(tmp) != IS_NULL);
 			}

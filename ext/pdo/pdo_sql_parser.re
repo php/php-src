@@ -259,6 +259,10 @@ safe:
 					switch (param_type) {
 						case PDO_PARAM_BOOL:
 							plc->quoted = zend_is_true(parameter) ? ZSTR_CHAR('1') : ZSTR_CHAR('0');
+							// TODO Can an exception occur here?
+							if (EG(exception)) {
+								goto clean_up;
+							}
 							break;
 
 						case PDO_PARAM_INT:

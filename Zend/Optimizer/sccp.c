@@ -391,6 +391,7 @@ static inline int ct_eval_bool_cast(zval *result, zval *op) {
 		return SUCCESS;
 	}
 
+	/* op cannot be an object so zend_is_true() cannot fail */
 	ZVAL_BOOL(result, zend_is_true(op));
 	return SUCCESS;
 }

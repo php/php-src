@@ -148,6 +148,9 @@ PHP_FUNCTION(assert)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		RETURN_TRUE;
 	}
 

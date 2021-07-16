@@ -8354,7 +8354,8 @@ ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 
-	return 0;
+	/* Objects might throw a type error if they cannot be converted to bool */
+	return Z_TYPE_P(op) == IS_OBJECT;
 }
 
 static inline bool zend_try_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op) /* {{{ */
@@ -10266,6 +10267,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child0_is_true = zend_is_true(zend_ast_get_zval(ast->child[0]));
+			/* TODO Check if need to handle potential TypeError if child[0] is an object which cannot be converted to bool */
 			if (child0_is_true == (ast->kind == ZEND_AST_OR)) {
 				ZVAL_BOOL(&result, ast->kind == ZEND_AST_OR);
 				break;
@@ -10276,6 +10278,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child1_is_true = zend_is_true(zend_ast_get_zval(ast->child[1]));
+			/* TODO Check if need to handle potential TypeError if child[1] is an object which cannot be converted to bool */
 			if (ast->kind == ZEND_AST_OR) {
 				ZVAL_BOOL(&result, child0_is_true || child1_is_true);
 			} else {
@@ -10342,6 +10345,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			child = &ast->child[2 - zend_is_true(zend_ast_get_zval(ast->child[0]))];
+			/* TODO Check if need to handle potential TypeError if child[0] is an object which cannot be converted to bool */
 			if (*child == NULL) {
 				child--;
 			}

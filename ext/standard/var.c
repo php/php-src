@@ -1352,6 +1352,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			goto cleanup;
 		}
 
+		/* zend_is_true() cannot fail as it is or a boolean or an array */
 		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes))) {
 			ALLOC_HASHTABLE(class_hash);
 			zend_hash_init(class_hash, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);

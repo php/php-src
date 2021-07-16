@@ -339,6 +339,10 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated")-1))) {
 					data->expect_concatenated = zend_is_true(tmpzval);
+					if (EG(exception)) {
+						status = BZ_DATA_ERROR;
+						// TODO Goto cleanup?
+					}
 					tmpzval = NULL;
 				}
 
@@ -349,6 +353,10 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 
 			if (tmpzval) {
 				data->small_footprint = zend_is_true(tmpzval);
+				if (EG(exception)) {
+					status = BZ_DATA_ERROR;
+					// TODO Goto cleanup?
+				}
 			}
 		}
 
