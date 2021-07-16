@@ -602,7 +602,7 @@ class DOMNamedNodeMap implements IteratorAggregate, Countable
     /** @return DOMNode|null */
     public function item(int $index) {}
 
-    /** @return int|false */
+    /** @return int */
     public function count() {}
 
     public function getIterator(): Iterator {}
