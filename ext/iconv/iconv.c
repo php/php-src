@@ -1764,10 +1764,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					str_left = 1; /* quit_loop */
 					break;
 				}
-				if (encoded_word == NULL) {
-					_php_iconv_appendc(pretval, ' ', cd_pl);
-				}
-				spaces = NULL;
+				spaces = p1;
 				scan_stat = 11;
 				break;
 
