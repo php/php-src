@@ -4690,6 +4690,16 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, 
 }
 /* }}} */
 
+ZEND_API zval *zend_read_property_deref(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv)
+{
+	zval *value;
+
+	value = zend_read_property(scope, object, name, name_length, silent, rv);
+	ZVAL_DEREF(value);
+
+	return value;
+}
+
 ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent) /* {{{ */
 {
 	zval *property;

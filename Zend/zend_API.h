@@ -463,6 +463,7 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 
 ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv);
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv);
+ZEND_API zval *zend_read_property_deref(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv);
 
 ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent);
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, bool silent);
