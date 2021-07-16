@@ -13,11 +13,11 @@ class ItemArray implements Iterator {
         $this->a = $a;
     }
 
-    public function rewind()    { return reset($this->a); }
-    public function current()   { return current($this->a); }
-    public function key()       { return key($this->a); }
-    public function next()      { return next($this->a); }
-    public function valid()     { return (current($this->a) !== false); }
+    public function rewind(): void    { reset($this->a); }
+    public function current(): mixed   { return current($this->a); }
+    public function key(): mixed       { return key($this->a); }
+    public function next(): void      { next($this->a); }
+    public function valid(): bool     { return (current($this->a) !== false); }
 }
 
 class Item {

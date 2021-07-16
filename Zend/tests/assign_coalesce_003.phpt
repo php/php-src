@@ -13,19 +13,19 @@ class AA implements ArrayAccess {
     public function __construct($data = []) {
         $this->data = $data;
     }
-    public function &offsetGet($k) {
+    public function &offsetGet($k): mixed {
         echo "offsetGet($k)\n";
         return $this->data[$k];
     }
-    public function offsetExists($k) {
+    public function offsetExists($k): bool {
         echo "offsetExists($k)\n";
         return array_key_exists($k, $this->data);
     }
-    public function offsetSet($k,$v) {
+    public function offsetSet($k,$v): void {
         echo "offsetSet($k,$v)\n";
         $this->data[$k] = $v;
     }
-    public function offsetUnset($k) { }
+    public function offsetUnset($k): void { }
 }
 
 $ary = new AA(["foo" => new AA, "null" => null]);

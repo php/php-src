@@ -65,7 +65,7 @@ class Tree
     /**
      * @return \RecursiveIteratorIterator
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new \RecursiveIteratorIterator(
             $this->head->getChildren(),

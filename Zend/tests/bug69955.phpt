@@ -4,19 +4,19 @@ Bug #69955 (Segfault when trying to combine [] and assign-op on ArrayAccess obje
 <?php
 class C10 implements ArrayAccess
 {
-        function offsetExists($offset)
+        function offsetExists($offset): bool
         {
                 echo "\nInside " . __METHOD__ . "\n"; var_dump($offset);
         }
-        function offsetGet($offset)
+        function offsetGet($offset): mixed
         {
                 echo "\nInside " . __METHOD__ . "\n"; var_dump($offset); return 100;
         }
-        function offsetSet($offset, $value)
+        function offsetSet($offset, $value): void
         {
                 echo "\nInside " . __METHOD__ . "\n"; var_dump($offset); var_dump($value);
         }
-        function offsetUnset($offset)
+        function offsetUnset($offset): void
         {
                 echo "\nInside " . __METHOD__ . "\n"; var_dump($offset);
         }

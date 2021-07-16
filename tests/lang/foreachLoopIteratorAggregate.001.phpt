@@ -6,31 +6,31 @@ class EnglishMealIterator implements Iterator {
     private $pos=0;
     private $myContent=array("breakfast", "dinner", "tea");
 
-    public function valid() {
+    public function valid(): bool {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos < count($this->myContent);
     }
 
-    public function next() {
+    public function next(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos++;
     }
 
-    public function rewind() {
+    public function rewind(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;
@@ -42,31 +42,31 @@ class FrenchMealIterator implements Iterator {
     private $pos=0;
     private $myContent=array("petit dejeuner", "dejeuner", "gouter", "dinner");
 
-    public function valid() {
+    public function valid(): bool {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos < count($this->myContent);
     }
 
-    public function next() {
+    public function next(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos++;
     }
 
-    public function rewind() {
+    public function rewind(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;
@@ -85,7 +85,7 @@ Class EuropeanMeals implements IteratorAggregate {
         $this->storedFrenchMealIterator = new FrenchMealIterator;
     }
 
-    public function getIterator() {
+    public function getIterator(): Traversable {
         global $indent;
         echo "$indent--> " . __METHOD__  . "\n";
 
