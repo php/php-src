@@ -6,13 +6,13 @@ Enum offsetGet in constant expression
 enum Foo implements ArrayAccess {
     case Bar;
 
-    public function offsetGet($key) {
+    public function offsetGet($key): mixed {
         return 42;
     }
 
-    public function offsetExists($key) {}
-    public function offsetSet($key, $value) {}
-    public function offsetUnset($key) {}
+    public function offsetExists($key): bool {}
+    public function offsetSet($key, $value): void {}
+    public function offsetUnset($key): void {}
 }
 
 class X {
