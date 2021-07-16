@@ -1117,8 +1117,6 @@ void zend_register_generator_ce(void) /* {{{ */
 {
 	zend_ce_generator = register_class_Generator(zend_ce_iterator);
 	zend_ce_generator->create_object = zend_generator_create;
-	zend_ce_generator->serialize = zend_class_serialize_deny;
-	zend_ce_generator->unserialize = zend_class_unserialize_deny;
 	/* get_iterator has to be assigned *after* implementing the interface */
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 
