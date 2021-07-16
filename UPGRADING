@@ -361,7 +361,10 @@ PHP 8.1 UPGRADE NOTES
 
 - Date:
   . The date_sunrise() and date_sunset() functions have been deprecated in
-    favor of date_sun_info().
+    favor of date_sun_info(). Their related ini settings
+    date.default_latitude, date.default_longitude and date.sunset_zenith,
+    along with constants SUNFUNCS_RET_STRING, SUNFUNCS_RET_DOUBLE, and
+    SUNFUNCS_RET_TIMESTAMP are also deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
   . The strftime() and gmstrftime() functions have been deprecated in favor of
     date()/DateTime::format() (for locale-independent formatting) or
