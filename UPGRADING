@@ -544,9 +544,6 @@ PHP 8.1 UPGRADE NOTES
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
 
-- Sockets:
-  . FreeBSD defines SO_ACCEPTFILTER
-
 - Standard:
   . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
     an alternative libargon2 location should now be specified using
@@ -563,7 +560,12 @@ PHP 8.1 UPGRADE NOTES
     be deprecated/removed in the future.
 
 - Sockets:
-  . TCP_DEFER_ACCEPT socket option added where available.
+  . The following socket options are now defined if they are supported:
+     * SO_ACCEPTFILTER
+     * SO_DONTTRUNC
+     * SO_WANTMORE
+     * SO_MARK
+     * TCP_DEFER_ACCEPT
 
 ========================================
 11. Changes to INI File Handling
