@@ -25,6 +25,7 @@
 
 ZEND_API zend_class_entry *zend_ce_attribute;
 ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
+ZEND_API zend_class_entry *zend_ce_namedparameteralias_attribute;
 
 static HashTable internal_attributes;
 
@@ -56,6 +57,28 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	}
 }
 
+void validate_namedparameteralias_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	zval alias;
+
+	if (attr->argc != 1) {
+		zend_error_noreturn(E_ERROR, "NamedParameterAlias::__construct(): Argument #1 ($alias) is required");
+	}
+
+	if (FAILURE == zend_get_attribute_value(&alias, attr, 0, NULL)) {
+		return;
+	}
+
+	if (Z_TYPE(alias) != IS_STRING) {
+		zend_error_noreturn(E_ERROR,
+			"NamedParameterAlias::__construct(): Argument #1 ($alias) must be of type string, %s given",
+			zend_zval_type_name(&alias)
+		);
+	}
+
+	zval_ptr_dtor(&alias);
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -66,6 +89,17 @@ ZEND_METHOD(Attribute, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), flags);
+}
+
+ZEND_METHOD(NamedParameterAlias, __construct)
+{
+	zend_string *alias = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_STR(alias)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_STR(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), alias);
 }
 
 ZEND_METHOD(ReturnTypeWillChange, __construct)
@@ -285,6 +319,10 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
+
+	zend_ce_namedparameteralias_attribute = register_class_NamedParameterAlias();
+	attr = zend_internal_attribute_register(zend_ce_namedparameteralias_attribute, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	attr->validator = validate_namedparameteralias_attribute;
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
 	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
