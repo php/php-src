@@ -3008,7 +3008,7 @@ static zend_result accel_post_startup(void)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
-#if defined(HAVE_JIT) && !defined(ZEND_WIN32)
+#ifdef HAVE_JIT
 				reattached = 1;
 #endif
 				zend_shared_alloc_lock();

@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #81249 (Intermittent property assignment failure with JIT
     enabled). (Dmitry)
+  . Fixed bug #81206 (Multiple PHP processes crash with JIT enabled). (cmb,
+    Nikita)
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
