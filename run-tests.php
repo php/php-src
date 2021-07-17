@@ -159,7 +159,7 @@ function main(): void
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
-           $bless;
+           $bless, $asan;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -363,6 +363,7 @@ function main(): void
     $workers = null;
     $context_line_count = 3;
     $num_repeats = 1;
+    $asan = false;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -567,6 +568,7 @@ function main(): void
                     break;
                 case '--asan':
                 case '--msan':
+                    $asan = true;
                     $environment['USE_ZEND_ALLOC'] = 0;
                     $environment['USE_TRACKED_ALLOC'] = 1;
                     $environment['SKIP_ASAN'] = 1;
@@ -1312,7 +1314,10 @@ function system_with_timeout(
         $data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
     } else if (defined('PHP_WINDOWS_VERSION_MAJOR') && (($stat["exitcode"] >> 28) & 0b1111) === 0b1100) {
         // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/87fba13e-bf06-450e-83b1-9241dc81e781
-        $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
+        // ignore STATUS_BAD_STACK exit codes under ASan for now
+        if (!$asan || $stat["exitcode"] !== -1073741784) {
+            $data .= "\nTermsig=" . $stat["exitcode"] . "\n";
+        }
     }
 
     proc_close($proc);
