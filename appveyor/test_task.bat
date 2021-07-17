@@ -119,7 +119,6 @@ set EXIT_CODE=%errorlevel%
 appveyor PushArtifact %TEST_PHP_JUNIT%
 
 if %EXIT_CODE% GEQ 1 (
-	git checkout .
 	git diff > bless_tests.patch
 	appveyor PushArtifact bless_tests.patch
 )
