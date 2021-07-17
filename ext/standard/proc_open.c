@@ -288,7 +288,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 
 	_php_free_envp(proc->env);
 	efree(proc->pipes);
-	efree(proc->command);
+	zend_string_release_ex(proc->command, false);
 	efree(proc);
 }
 /* }}} */
@@ -374,7 +374,7 @@ PHP_FUNCTION(proc_get_status)
 	}
 
 	array_init(return_value);
-	add_assoc_string(return_value, "command", proc->command);
+	add_assoc_str(return_value, "command", zend_string_copy(proc->command));
 	add_assoc_long(return_value, "pid", (zend_long)proc->child);
 
 #ifdef PHP_WIN32
@@ -1233,7 +1233,7 @@ PHP_FUNCTION(proc_open)
 	}
 
 	proc = (php_process_handle*) emalloc(sizeof(php_process_handle));
-	proc->command = estrdup(ZSTR_VAL(command_str));
+	proc->command = zend_string_copy(command_str);
 	proc->pipes = emalloc(sizeof(zend_resource *) * ndesc);
 	proc->npipes = ndesc;
 	proc->child = child;
