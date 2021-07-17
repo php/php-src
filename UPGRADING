@@ -64,23 +64,21 @@ PHP 8.1 UPGRADE NOTES
     PHP cross-version compatibility concerns, a `#[ReturnTypeWillChange]`
     attribute can be added to silence the deprecation notice.
     RFC: https://wiki.php.net/rfc/internal_method_return_types
-  . Added support for intersection types.
-    They cannot be combined with union types.
-    RFC: https://wiki.php.net/rfc/pure-intersection-types
-  . Added support for the final modifier for class constants.
-    RFC: https://wiki.php.net/rfc/final_class_const
 
 - Fileinfo:
   . The fileinfo functions now accept and return, respectively, finfo objects
-    instead of resources.
+    instead of resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
 
 - FTP:
   . The FTP functions now accept and return, respectively, FTP\Connection objects
-    instead of resources.
+    instead of resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
 
 - IMAP:
   . The IMAP functions now accept and return, respectively, IMAP\Connection objects
-    instead of resources.
+    instead of resources. Return value checks using is_resource()
+    should be replaced with checks for `false`.
 
 - LDAP:
   . The LDAP functions now accept and return, respectively, LDAP\Connection objects
@@ -143,9 +141,6 @@ PHP 8.1 UPGRADE NOTES
   . The PgSQL functions now accept and return, respectively, \PgSql\Lob
     objects instead of "pgsql large object" resources. Return value checks
     using is_resource() should be replaced with checks for `false`.
-  . Not passing the connection argument to PgSQL functions and using the
-    default connection is deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - Phar:
   . To comply with the ArrayAccess interface, Phar::offsetUnset() and
@@ -172,12 +167,8 @@ PHP 8.1 UPGRADE NOTES
     reference representation since PHP 7.0.
   . debug_zval_dump() will not print "interned" instead of a dummy refcount of
     one for interned strings and immutable arrays.
-  . fputcsv() now accepts a new "eol" argument which allow to define a custom
-    eol sequence, the default remains the same and is "\n".
 
 - SPL:
-  . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
-    define a custom eol sequence, the default remains the same and is "\n".
   . SplFixedArray will now be JSON encoded like an array.
 
 ========================================
@@ -210,6 +201,11 @@ PHP 8.1 UPGRADE NOTES
     intended for use in conjunction with "upload webkitdirectory".
   . It is now allowed to specify named arguments after an argument unpack, e.g.
     foo(...$args, named: $arg).
+  . Added support for intersection types.
+    They cannot be combined with union types.
+    RFC: https://wiki.php.net/rfc/pure-intersection-types
+  . Added support for the final modifier for class constants.
+    RFC: https://wiki.php.net/rfc/final_class_const
 
 - Curl:
   . Added CURLOPT_DOH_URL option.
@@ -242,7 +238,7 @@ PHP 8.1 UPGRADE NOTES
     imageavif() functions, if libgd has been built with avif support.
 
 - hash:
-  . The following functions have changed signatures:
+  . The following functions have changed signatures, to support an optional `$options` argument:
 
     - function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
     - function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
@@ -297,7 +293,7 @@ PHP 8.1 UPGRADE NOTES
   . Binding in execute has been added to mysqli prepared statements.
     Parameters can now be passed to mysqli_stmt::execute as an array.
     RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
-  . A new function has been added to mysqli_result called mysqli_fetch_column().
+  . A new method has been added to mysqli_result called mysqli_fetch_column().
     It allows for fetching single scalar values from the result set.
     RFC: https://wiki.php.net/rfc/mysqli_fetch_column
 
@@ -317,6 +313,14 @@ PHP 8.1 UPGRADE NOTES
 - Posix:
   . Added POSIX_RLIMIT_KQUEUES and POSIX_RLIMIT_NPTS. These rlimits are only
     available on FreeBSD.
+
+- Standard:
+  . fputcsv() now accepts a new "eol" argument which allow to define a custom
+    eol sequence, the default remains the same and is "\n".
+
+- SPL:
+  . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
+    define a custom eol sequence, the default remains the same and is "\n".
 
 ========================================
 3. Changes in SAPI modules
@@ -419,6 +423,11 @@ PHP 8.1 UPGRADE NOTES
 - PDO:
   . The PDO::FETCH_SERIALIZE mode has been deprecated.
     RFC: https://wiki.php.net/rfc/phase_out_serializable
+
+- PgSQL:
+  . Not passing the connection argument to PgSQL functions and using the
+    default connection is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
 - SOAP:
   . The ssl_method option for the SoapClient constructor has been deprecated in
@@ -581,8 +590,6 @@ PHP 8.1 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
-
-. The macro IGNORE_URL_WIN has been removed; it had no effect as of PHP 5.0.0.
 
 ========================================
 13. Other Changes

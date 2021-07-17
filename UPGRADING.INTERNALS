@@ -4,6 +4,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   a. Removed Zend APIs
   b. Zend Stream API
   c. zend_get_opcode_id()
+  d. Removed support for "p" printf format specifier
+  e. ZEND_ATOL() changes
 
 2. Build system changes
   a. New compiler flags
@@ -25,6 +27,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
        zend_ce_traversable.
      - The ZVAL_NEW_ARR() macro has been removed. Use array_init() or ZVAL_ARR
        with zend_new_array() instead.
+     - The IGNORE_URL_WIN macro has been removed; it had no effect as of PHP 5.0.0.
   b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
       - zend_file_handle.filename now is zend_string*
       - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
