@@ -361,7 +361,7 @@ PHP_FUNCTION(proc_get_status)
 	int wstatus;
 	pid_t wait_pid;
 #endif
-	int running = 1, signaled = 0, stopped = 0;
+	bool running = 1, signaled = 0, stopped = 0;
 	int exitcode = -1, termsig = 0, stopsig = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -546,7 +546,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 
 /* Get a boolean option from the `other_options` array which can be passed to `proc_open`.
  * (Currently, all options apply on Windows only.) */
-static int get_option(zval *other_options, char *opt_name)
+static bool get_option(zval *other_options, char *opt_name)
 {
 	HashTable *opt_ary = Z_ARRVAL_P(other_options);
 	zval *item = zend_hash_str_find_deref(opt_ary, opt_name, strlen(opt_name));
@@ -1020,11 +1020,11 @@ PHP_FUNCTION(proc_open)
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
 	size_t cmdw_len;
-	int suppress_errors = 0;
-	int bypass_shell = 0;
-	int blocking_pipes = 0;
-	int create_process_group = 0;
-	int create_new_console = 0;
+	bool suppress_errors = 0;
+	bool bypass_shell = 0;
+	bool blocking_pipes = 0;
+	bool create_process_group = 0;
+	bool create_new_console = 0;
 #else
 	char **argv = NULL;
 #endif
