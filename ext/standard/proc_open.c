@@ -26,7 +26,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
-#include "zend_smart_string.h"
+#include "zend_smart_str.h"
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -485,40 +485,41 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 }
 
 #ifdef PHP_WIN32
-static void append_backslashes(smart_string *str, size_t num_bs)
+static void append_backslashes(smart_str *str, size_t num_bs)
 {
 	for (size_t i = 0; i < num_bs; i++) {
-		smart_string_appendc(str, '\\');
+		smart_str_appendc(str, '\\');
 	}
 }
 
 /* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments */
-static void append_win_escaped_arg(smart_string *str, char *arg)
+static void append_win_escaped_arg(smart_str *str, zend_string *arg)
 {
-	char c;
 	size_t num_bs = 0;
-	smart_string_appendc(str, '"');
-	while ((c = *arg)) {
+
+	smart_str_appendc(str, '"');
+	for (size_t i = 0; i < ZSTR_LEN(arg); ++i) {
+		char c = ZSTR_VAL(arg)[i];
 		if (c == '\\') {
 			num_bs++;
-		} else {
-			if (c == '"') {
-				/* Backslashes before " need to be doubled. */
-				num_bs = num_bs * 2 + 1;
-			}
-			append_backslashes(str, num_bs);
-			smart_string_appendc(str, c);
-			num_bs = 0;
+			continue;
 		}
-		arg++;
+
+		if (c == '"') {
+			/* Backslashes before " need to be doubled. */
+			num_bs = num_bs * 2 + 1;
+		}
+		append_backslashes(str, num_bs);
+		smart_str_appendc(str, c);
+		num_bs = 0;
 	}
 	append_backslashes(str, num_bs * 2);
-	smart_string_appendc(str, '"');
+	smart_str_appendc(str, '"');
 }
 
-static char *create_win_command_from_args(HashTable *args)
+static zend_string *create_win_command_from_args(HashTable *args)
 {
-	smart_string str = {0};
+	smart_str str = {0};
 	zval *arg_zv;
 	bool is_prog_name = 1;
 	int elem_num = 0;
@@ -526,21 +527,21 @@ static char *create_win_command_from_args(HashTable *args)
 	ZEND_HASH_FOREACH_VAL(args, arg_zv) {
 		zend_string *arg_str = get_valid_arg_string(arg_zv, ++elem_num);
 		if (!arg_str) {
-			smart_string_free(&str);
+			smart_str_free(&str);
 			return NULL;
 		}
 
 		if (!is_prog_name) {
-			smart_string_appendc(&str, ' ');
+			smart_str_appendc(&str, ' ');
 		}
 
-		append_win_escaped_arg(&str, ZSTR_VAL(arg_str));
+		append_win_escaped_arg(&str, arg_str);
 
 		is_prog_name = 0;
 		zend_string_release(arg_str);
 	} ZEND_HASH_FOREACH_END();
-	smart_string_0(&str);
-	return str.c;
+	smart_str_0(&str);
+	return str.s;
 }
 
 /* Get a boolean option from the `other_options` array which can be passed to `proc_open`.
@@ -611,10 +612,10 @@ static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 #endif
 
 /* Convert command parameter array passed as first argument to `proc_open` into command string */
-static char* get_command_from_array(HashTable *array, char ***argv, int num_elems)
+static zend_string* get_command_from_array(HashTable *array, char ***argv, int num_elems)
 {
 	zval *arg_zv;
-	char *command = NULL;
+	zend_string *command = NULL;
 	int i = 0;
 
 	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
@@ -625,13 +626,13 @@ static char* get_command_from_array(HashTable *array, char ***argv, int num_elem
 			/* Terminate with NULL so exit_fail code knows how many entries to free */
 			(*argv)[i] = NULL;
 			if (command != NULL) {
-				efree(command);
+				zend_string_release_ex(command, false);
 			}
 			return NULL;
 		}
 
 		if (i == 0) {
-			command = estrdup(ZSTR_VAL(arg_str));
+			command = zend_string_copy(arg_str);
 		}
 
 		(*argv)[i++] = estrdup(ZSTR_VAL(arg_str));
@@ -1005,7 +1006,6 @@ PHP_FUNCTION(proc_open)
 	size_t cwd_len = 0;                              /* Optional argument */
 	zval *environment = NULL, *other_options = NULL; /* Optional arguments */
 
-	char *command = NULL;
 	php_process_env env;
 	int ndesc = 0;
 	int i;
@@ -1057,18 +1057,16 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 		/* Automatically bypass shell if command is given as an array */
 		bypass_shell = 1;
-		command = create_win_command_from_args(command_ht);
-		if (!command) {
+		command_str = create_win_command_from_args(command_ht);
+		if (!command_str) {
 			RETURN_FALSE;
 		}
 #else
-		command = get_command_from_array(command_ht, &argv, num_elems);
-		if (command == NULL) {
+		command_str = get_command_from_array(command_ht, &argv, num_elems);
+		if (!command_str) {
 			goto exit_fail;
 		}
 #endif
-	} else {
-		command = estrdup(ZSTR_VAL(command_str));
 	}
 
 #ifdef PHP_WIN32
@@ -1155,7 +1153,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &cmdw_len);
+	cmdw = php_win32_cp_conv_any_to_w(ZSTR_VAL(command_str), ZSTR_LEN(command_str), &cmdw_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
@@ -1206,12 +1204,12 @@ PHP_FUNCTION(proc_open)
 			if (env.envarray) {
 				environ = env.envarray;
 			}
-			execvp(command, argv);
+			execvp(ZSTR_VAL(command_str), argv);
 		} else {
 			if (env.envarray) {
-				execle("/bin/sh", "sh", "-c", command, NULL, env.envarray);
+				execle("/bin/sh", "sh", "-c", ZSTR_VAL(command_str), NULL, env.envarray);
 			} else {
-				execl("/bin/sh", "sh", "-c", command, NULL);
+				execl("/bin/sh", "sh", "-c", ZSTR_VAL(command_str), NULL);
 			}
 		}
 
@@ -1237,7 +1235,7 @@ PHP_FUNCTION(proc_open)
 	}
 
 	proc = (php_process_handle*) emalloc(sizeof(php_process_handle));
-	proc->command = command;
+	proc->command = estrdup(ZSTR_VAL(command_str));
 	proc->pipes = emalloc(sizeof(zend_resource *) * ndesc);
 	proc->npipes = ndesc;
 	proc->child = child;
@@ -1308,10 +1306,12 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
-		if (command) {
-			efree(command);
-		}
 		RETVAL_FALSE;
+	}
+
+	/* the command_str needs to be freed if it was created by parsing an array */
+	if (command_ht && command_str) {
+		zend_string_release_ex(command_str, false);
 	}
 
 #ifdef PHP_WIN32
