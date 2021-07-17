@@ -643,9 +643,9 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 	return command;
 }
 
-static descriptorspec_item* alloc_descriptor_array(zval *descriptorspec)
+static descriptorspec_item* alloc_descriptor_array(HashTable *descriptorspec)
 {
-	int ndescriptors = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
+	uint32_t ndescriptors = zend_hash_num_elements(descriptorspec);
 	return ecalloc(sizeof(descriptorspec_item), ndescriptors);
 }
 
@@ -998,7 +998,8 @@ PHP_FUNCTION(proc_open)
 {
 	zend_string *command_str;
 	HashTable *command_ht;
-	zval *descriptorspec, *pipes;       /* Mandatory arguments */
+	HashTable *descriptorspec; /* Mandatory argument */
+	zval *pipes;               /* Mandatory argument */
 	char *cwd = NULL;                                /* Optional argument */
 	size_t cwd_len = 0;                              /* Optional argument */
 	zval *environment = NULL, *other_options = NULL; /* Optional arguments */
@@ -1034,7 +1035,7 @@ PHP_FUNCTION(proc_open)
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ARRAY_HT_OR_STR(command_ht, command_str)
-		Z_PARAM_ARRAY(descriptorspec)
+		Z_PARAM_ARRAY_HT(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(cwd, cwd_len)
@@ -1084,7 +1085,7 @@ PHP_FUNCTION(proc_open)
 	descriptors = alloc_descriptor_array(descriptorspec);
 
 	/* Walk the descriptor spec and set up files/pipes */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
+	ZEND_HASH_FOREACH_KEY_VAL(descriptorspec, nindex, str_index, descitem) {
 		if (str_index) {
 			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
