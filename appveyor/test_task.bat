@@ -112,7 +112,7 @@ mkdir c:\tests_tmp
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
 cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 
@@ -120,7 +120,6 @@ appveyor PushArtifact %TEST_PHP_JUNIT%
 
 if %EXIT_CODE% GEQ 1 (
 	git checkout .
-	nmake run ARGS="scripts\dev\bless_tests.php ."
 	git diff > bless_tests.patch
 	appveyor PushArtifact bless_tests.patch
 )
