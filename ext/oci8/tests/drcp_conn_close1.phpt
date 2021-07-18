@@ -38,6 +38,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Directive oci8.old_oci_close_semantics is deprecated
 This is with a OCI_CONNECT
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
