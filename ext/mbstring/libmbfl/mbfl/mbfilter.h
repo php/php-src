@@ -289,7 +289,7 @@ MBFLAPI extern mbfl_string *
 mbfl_html_numeric_entity(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, int type);
 
 /*
- * convert of harfwidth and fullwidth for japanese
+ * convert of halfwidth and fullwidth for japanese
  */
 MBFLAPI extern mbfl_string *
 mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
