@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #80849 (HTTP Status header truncation). (cmb)
 
+- Opcache:
+  . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
+    (Dmitry)
+
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
   . Fixed bug #81265 (getimagesize returns 0 for 256px ICO images).
