@@ -797,8 +797,9 @@ static inline int ct_eval_array_key_exists(zval *result, zval *op1, zval *op2) {
 }
 
 static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
-	/* Functions that can be evaluated independently of what the arguments are.
-	 * It's okay if these functions throw on invalid arguments, but they should not warn. */
+	/* Functions in this list must always produce the same result for the same arguments,
+	 * and have no dependence on global state (such as locales). It is okay if they throw
+	 * or warn on invalid arguments, as we detect this and will discard the evaluation result. */
 	if (false
 		|| zend_string_equals_literal(name, "array_diff")
 		|| zend_string_equals_literal(name, "array_diff_assoc")
@@ -811,6 +812,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "array_merge_recursive")
 		|| zend_string_equals_literal(name, "array_replace")
 		|| zend_string_equals_literal(name, "array_replace_recursive")
+		|| zend_string_equals_literal(name, "array_unique")
 		|| zend_string_equals_literal(name, "array_values")
 		|| zend_string_equals_literal(name, "base64_decode")
 		|| zend_string_equals_literal(name, "base64_encode")
@@ -834,6 +836,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "serialize")
 		|| zend_string_equals_literal(name, "str_contains")
 		|| zend_string_equals_literal(name, "str_ends_with")
+		|| zend_string_equals_literal(name, "str_replace")
 		|| zend_string_equals_literal(name, "str_split")
 		|| zend_string_equals_literal(name, "str_starts_with")
 		|| zend_string_equals_literal(name, "strpos")
