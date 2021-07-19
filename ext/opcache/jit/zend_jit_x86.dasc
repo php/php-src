@@ -4309,7 +4309,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			!may_overflow &&
 			Z_MODE(op1_addr) == IS_REG &&
 			Z_MODE(op2_addr) == IS_CONST_ZVAL &&
-			IS_SIGNED_32BIT(Z_LVAL_P(Z_ZV(op2_addr)))) {
+			IS_SIGNED_32BIT(-Z_LVAL_P(Z_ZV(op2_addr)))) {
 		|	lea Ra(result_reg), [Ra(Z_REG(op1_addr))-Z_LVAL_P(Z_ZV(op2_addr))]
 	} else {
 		|	GET_ZVAL_LVAL result_reg, op1_addr
