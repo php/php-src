@@ -416,7 +416,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  if (*p != DASM_IMM_DB && *p != DASM_IMM_WB) mark = NULL;
 	  if (n == 0) { int mrm = mm[-1]&7; if (mrm == 4) mrm = mm[0]&7;
 	    if (mrm != 5) { mm[-1] -= 0x80; break; } }
-	  if (((n+128) & -256) != 0) goto wd; else mm[-1] -= 0x40;
+	  if ((((unsigned)n+128) & -256) != 0) goto wd; else mm[-1] -= 0x40;
 	}
 	  /* fallthrough */
 	case DASM_IMM_S: case DASM_IMM_B: wb: dasmb(n); break;
@@ -425,7 +425,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  } else mark = NULL;
 	  /* fallthrough */
 	case DASM_IMM_D: wd: dasmd(n); break;
-	case DASM_IMM_WB: if (((n+128)&-256) == 0) goto db; else mark = NULL;
+	case DASM_IMM_WB: if ((((unsigned)n+128)&-256) == 0) goto db; else mark = NULL;
 	  /* fallthrough */
 	case DASM_IMM_W: dasmw(n); break;
 	case DASM_VREG: {
