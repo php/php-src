@@ -6,6 +6,10 @@ PHP                                                                        NEWS
  . Fixed bug #81238 (Fiber support missing for Solaris Sparc). (trowski)
  . Fixed bug #81237 (Comparison of fake closures doesn't work). (krakjoe)
 
+- Opcache:
+  . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
+    (Dmitry)
+
 - Reflection:
  . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)
 
