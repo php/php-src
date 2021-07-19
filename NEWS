@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
     (Dmitry)
+  . Fixed bug #81249 (Intermittent property assignment failure with JIT
+    enabled). (Dmitry)
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
