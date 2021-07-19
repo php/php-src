@@ -19,9 +19,8 @@ class myIterator implements Iterator
     var $a;
     var $count = 1;
 
-    #[ReturnTypeWillChange]
-    function next() {
-        return (++$this->count < 3000) ? 'f' . $this->count : false;
+    function next(): void {
+        ++$this->count;
     }
     function current(): mixed {
         if (($this->count % 100) === 0) {
