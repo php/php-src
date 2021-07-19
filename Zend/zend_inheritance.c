@@ -376,13 +376,17 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 		return;
 	}
 
+#ifndef ZEND_WIN32
+	/* On non-Windows systems, internal classes are always the same,
+	 * so there is no need to explicitly track them. */
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		return;
+	}
+#endif
+
 	ht = (HashTable*)CG(current_linking_class)->inheritance_cache;
 
-#ifndef ZEND_WIN32
-	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-#else
 	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-#endif
 		// TODO: dependency on not-immutable class ???
 		if (ht) {
 			zend_hash_destroy(ht);
