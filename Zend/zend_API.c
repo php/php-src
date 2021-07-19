@@ -2806,6 +2806,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
 						list->num_types = num_types;
 						ZEND_TYPE_SET_LIST(new_arg_info[i].type, list);
+						ZEND_TYPE_FULL_MASK(new_arg_info[i].type) |= _ZEND_TYPE_UNION_BIT;
 
 						const char *start = class_name;
 						uint32_t j = 0;
