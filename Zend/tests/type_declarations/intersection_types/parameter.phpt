@@ -9,10 +9,11 @@ interface B {}
 class Foo implements A, B {}
 class Bar implements A {}
 
-function foo(A&B $bar) {
+function foo(?A&B $bar) {
     var_dump($bar);
 }
 
+foo(null);
 foo(new Foo());
 
 try {
@@ -23,6 +24,7 @@ try {
 
 ?>
 --EXPECTF--
+NULL
 object(Foo)#1 (0) {
 }
-foo(): Argument #1 ($bar) must be of type A&B, Bar given, called in %s on line %d
+foo(): Argument #1 ($bar) must be of type ?A&B, Bar given, called in %s on line %d

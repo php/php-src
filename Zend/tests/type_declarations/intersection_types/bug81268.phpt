@@ -1,5 +1,5 @@
 --TEST--
-Bug #81268 Wrong message when using null as a default value for intersection types
+Bug #81268 Message when using null as a default value for intersection types
 --FILE--
 <?php
 
@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use null as default value for property Test::$y of type X&Y in %s on line %d
+Fatal error: Default value for property of type X&Y may not be null. Use the nullable type ?X&Y to allow null default value in %s on line %d

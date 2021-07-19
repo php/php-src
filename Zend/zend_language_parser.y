@@ -798,6 +798,7 @@ type_expr:
 	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type			{ $$ = $1; }
 	|	intersection_type	{ $$ = $1; }
+	|	'?' intersection_type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type:
@@ -823,6 +824,7 @@ type_expr_without_static:
 	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type_without_static	{ $$ = $1; }
 	|	intersection_type_without_static	{ $$ = $1; }
+	|	'?' intersection_type_without_static	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type_without_static:

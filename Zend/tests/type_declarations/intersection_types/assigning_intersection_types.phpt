@@ -20,6 +20,9 @@ class A {
     public function method2(X $a): X&Y {
         return new TestParent();
     }
+    public function method3(?X&Y $a): ?X&Y {
+        return $a;
+    }
 }
 
 $tp = new TestParent();
@@ -42,7 +45,10 @@ $r = $o->method1($tc);
 var_dump($r);
 $r = $o->method2($tc);
 var_dump($r);
-
+$r = $o->method3($tc);
+var_dump($r);
+$r = $o->method3(null);
+var_dump($r);
 
 ?>
 --EXPECTF--
@@ -55,3 +61,6 @@ object(TestChild)#%d (0) {
 }
 object(TestParent)#%d (0) {
 }
+object(TestChild)#%d (0) {
+}
+NULL
