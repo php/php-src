@@ -17,6 +17,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Directive oci8.old_oci_close_semantics is deprecated
 resource(%d) of type (oci8 connection)
 NULL
 resource(%d) of type (oci8 statement)

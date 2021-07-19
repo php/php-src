@@ -76,6 +76,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Directive oci8.old_oci_close_semantics is deprecated
 Test 1
 Caught Exception: oci_execute(): ORA-%r(00984|57000: TT2957)%r: %s
 resource(%d) of type (oci8 connection)
