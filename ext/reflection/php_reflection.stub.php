@@ -714,7 +714,7 @@ final class ReflectionEnum extends ReflectionClass
 
     public function isBacked(): bool {}
 
-    public function getBackingType(): ReflectionType|null {}
+    public function getBackingType(): ?ReflectionType {}
 }
 
 class ReflectionEnumUnitCase extends ReflectionClassConstant

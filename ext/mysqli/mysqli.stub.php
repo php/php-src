@@ -515,7 +515,7 @@ class mysqli_stmt
      * @tentative-return-type
      * @alias mysqli_stmt_fetch
      */
-    public function fetch(): bool|null {}
+    public function fetch(): ?bool {}
 
     /**
      * @tentative-return-type
