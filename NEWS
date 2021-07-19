@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
     (Dmitry)
+  . Fixed bug #81249 (Intermittent property assignment failure with JIT
+    enabled). (Dmitry)
 
 - Reflection:
  . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)

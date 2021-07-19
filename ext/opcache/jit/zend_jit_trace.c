@@ -3556,12 +3556,12 @@ static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_o
 			 || prev_opcode == ZEND_IS_NOT_IDENTICAL
 			 || prev_opcode == ZEND_CASE_STRICT) {
 				if (ssa_op->op1_use < 0) {
-					if (opline->op1.constant != ssa_opcodes[prev_ssa_op - ssa->ops]->op1.constant) {
+					if (RT_CONSTANT(opline, opline->op1) != RT_CONSTANT(&ssa_opcodes[prev_ssa_op - ssa->ops], ssa_opcodes[prev_ssa_op - ssa->ops]->op1)) {
 						return 0;
 					}
 				}
 				if (ssa_op->op2_use < 0) {
-					if (opline->op2.constant != ssa_opcodes[prev_ssa_op - ssa->ops]->op2.constant) {
+					if (RT_CONSTANT(opline, opline->op2) != RT_CONSTANT(&ssa_opcodes[prev_ssa_op - ssa->ops], ssa_opcodes[prev_ssa_op - ssa->ops]->op2)) {
 						return 0;
 					}
 				}
