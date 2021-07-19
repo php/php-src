@@ -36,8 +36,8 @@ class Exception implements Throwable
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
-    /** @return void */
-    public function __wakeup() {}
+    /** @tentative-return-type */
+    public function __wakeup(): void {}
 
     final public function getMessage(): string {}
 
@@ -92,10 +92,10 @@ class Error implements Throwable
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @implementation-alias Exception::__wakeup
      */
-    public function __wakeup() {}
+    public function __wakeup(): void {}
 
     /** @implementation-alias Exception::getMessage */
     final public function getMessage(): string {}

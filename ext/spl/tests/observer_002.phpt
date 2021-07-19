@@ -79,7 +79,7 @@ class SubjectImpl implements SplSubject
         $this->observers->detach($observer);
     }
 
-    function count()
+    function count(): int
     {
         return $this->observers->count();
     }

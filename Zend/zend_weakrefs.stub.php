@@ -15,9 +15,7 @@ final class WeakReference
 /** @strict-properties */
 final class WeakMap implements ArrayAccess, Countable, IteratorAggregate
 {
-    /**
-     * @param object $object
-     */
+    /** @param object $object */
     public function offsetGet($object): mixed {}
 
     /** @param object $object */
