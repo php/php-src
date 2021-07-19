@@ -90,7 +90,8 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-THREAD_LS sysvshm_module php_sysvshm;
+/* TODO: Make this thread-safe. */
+sysvshm_module php_sysvshm;
 
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);

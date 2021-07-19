@@ -153,8 +153,6 @@ struct objid_query {
 ZEND_GET_MODULE(snmp)
 #endif
 
-/* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
-
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(snmp)
 {
