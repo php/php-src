@@ -1056,15 +1056,18 @@ PHP_FUNCTION(proc_open)
 		/* Automatically bypass shell if command is given as an array */
 		bypass_shell = 1;
 		command_str = create_win_command_from_args(command_ht);
-		if (!command_str) {
-			RETURN_FALSE;
-		}
 #else
 		command_str = get_command_from_array(command_ht, &argv, num_elems);
-		if (!command_str) {
-			goto exit_fail;
-		}
 #endif
+
+		if (!command_str) {
+#ifndef PHP_WIN32
+			efree_argv(argv);
+#endif
+			RETURN_FALSE;
+		}
+	} else {
+		zend_string_addref(command_str);
 	}
 
 #ifdef PHP_WIN32
@@ -1307,11 +1310,7 @@ exit_fail:
 		RETVAL_FALSE;
 	}
 
-	/* the command_str needs to be freed if it was created by parsing an array */
-	if (command_ht && command_str) {
-		zend_string_release_ex(command_str, false);
-	}
-
+	zend_string_release_ex(command_str, false);
 #ifdef PHP_WIN32
 	free(cwdw);
 	free(cmdw);
