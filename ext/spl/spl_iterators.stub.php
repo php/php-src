@@ -139,7 +139,7 @@ class IteratorIterator implements OuterIterator
 abstract class FilterIterator extends IteratorIterator
 {
     /** @tentative-return-type */
-    abstract public function accept(): bool {}
+    abstract public function accept(): bool;
 
     public function __construct(Iterator $iterator) {}
 
