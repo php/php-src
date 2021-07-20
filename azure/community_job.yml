@@ -47,7 +47,130 @@ jobs:
         sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
         export USE_ZEND_ALLOC=0
         export ASAN_OPTIONS=exitcode=139
-        php vendor/bin/phpunit
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/Config/Repository.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/Config/Repository.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/Config/Repository.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/Config/Repository.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Database/Eloquent/Model.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Database/Eloquent/Model.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Database/Eloquent/Model.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Database/Eloquent/Model.php
+
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/View/View.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/View/View.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/View/View.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/View/View.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Http/Client/Response.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Http/Client/Response.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Http/Client/Response.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Http/Client/Response.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Http/Client/Request.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Http/Client/Request.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Http/Client/Request.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Http/Client/Request.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Http/Request.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Http/Request.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Http/Request.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Http/Request.php
+
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/Collections/Collection.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/Collections/Collection.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/Collections/Collection.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/Collections/Collection.php
+        sed -i 's/public function count()/public function count(): int/g' ./src/Illuminate/Collections/Collection.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./src/Illuminate/Collections/Collection.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./tests/Support/SupportFacadeTest.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./tests/Support/SupportFacadeTest.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./tests/Support/SupportFacadeTest.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./tests/Support/SupportFacadeTest.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Support/Fluent.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Support/Fluent.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Support/Fluent.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Support/Fluent.php
+
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/Container/Container.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/Container/Container.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/Container/Container.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/Container/Container.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./vendor/ramsey/collection/src/AbstractArray.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./vendor/ramsey/collection/src/AbstractArray.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./vendor/ramsey/collection/src/AbstractArray.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./vendor/ramsey/collection/src/AbstractArray.php
+
+        sed -i 's/public function count()/public function count(): int/g' ./src/Illuminate/Support/ViewErrorBag.php
+        sed -i 's/public function count()/public function count(): int/g' ./src/Illuminate/Http/Resources/Json/ResourceCollection.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./src/Illuminate/Http/Resources/CollectsResources.php
+        sed -i 's/public function getSize()/public function getSize(): int/g' ./src/Illuminate/Http/Testing/File.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Http/Resources/DelegatesToResource.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Http/Resources/DelegatesToResource.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Http/Resources/DelegatesToResource.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Http/Resources/DelegatesToResource.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./vendor/aws/aws-sdk-php/src/Api/AbstractModel.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./vendor/aws/aws-sdk-php/src/Api/AbstractModel.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./vendor/aws/aws-sdk-php/src/Api/AbstractModel.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./vendor/aws/aws-sdk-php/src/Api/AbstractModel.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./tests/Support/SupportCollectionTest.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./tests/Support/SupportCollectionTest.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./tests/Support/SupportCollectionTest.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./tests/Support/SupportCollectionTest.php
+
+        sed -i".original" 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./src/Illuminate/Testing/TestResponse.php
+        sed -i".original" 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./src/Illuminate/Testing/TestResponse.php
+        sed -i".original" 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./src/Illuminate/Testing/TestResponse.php
+        sed -i".original" 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./src/Illuminate/Testing/TestResponse.php
+
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/Support/Optional.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/Support/Optional.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/Support/Optional.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/Support/Optional.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./tests/Support/SupportHelpersTest.php
+        sed -i 's/public function offsetGet($offset)/public function offsetGet($offset): mixed/g' ./tests/Support/SupportHelpersTest.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./tests/Support/SupportHelpersTest.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./tests/Support/SupportHelpersTest.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./tests/Support/SupportHelpersTest.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./tests/Support/SupportFluentTest.php
+
+        sed -i 's/public function offsetExists($key)/public function offsetExists($key): bool/g' ./src/Illuminate/Cache/Repository.php
+        sed -i 's/public function offsetGet($key)/public function offsetGet($key): mixed/g' ./src/Illuminate/Cache/Repository.php
+        sed -i 's/public function offsetSet($key, $value)/public function offsetSet($key, $value): void/g' ./src/Illuminate/Cache/Repository.php
+        sed -i 's/public function offsetUnset($key)/public function offsetUnset($key): void/g' ./src/Illuminate/Cache/Repository.php
+
+        sed -i 's/public function offsetExists($offset)/public function offsetExists($offset): bool/g' ./vendor/aws/aws-sdk-php/src/HasDataTrait.php
+        sed -i 's/public function & offsetGet($offset)/public function & offsetGet($offset): mixed/g' ./vendor/aws/aws-sdk-php/src/HasDataTrait.php
+        sed -i 's/public function offsetSet($offset, $value)/public function offsetSet($offset, $value): void/g' ./vendor/aws/aws-sdk-php/src/HasDataTrait.php
+        sed -i 's/public function offsetUnset($offset)/public function offsetUnset($offset): void/g' ./vendor/aws/aws-sdk-php/src/HasDataTrait.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/aws/aws-sdk-php/src/HasDataTrait.php
+
+        sed -i 's/public function isStatic()/public function isStatic(): bool/g' ./vendor/opis/closure/src/ReflectionClosure.php
+        sed -i 's/public function count()/public function count(): int/g' ./vendor/aws/aws-sdk-php/src/HandlerList.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/symfony/routing/RouteCollection.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/symfony/http-foundation/HeaderBag.php
+        sed -i 's/public function count()/public function count(): int/g' ./vendor/symfony/http-foundation/HeaderBag.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/symfony/http-foundation/ParameterBag.php
+        sed -i 's/public function count()/public function count(): int/g' ./vendor/symfony/http-foundation/ParameterBag.php
+        sed -i 's/public function count()/public function count(): int/g' ./vendor/symfony/routing/RouteCollection.php
+        sed -i 's/public function count()/public function count(): int/g' ./src/Illuminate/Routing/AbstractRouteCollection.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./src/Illuminate/Routing/AbstractRouteCollection.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/phpoption/phpoption/src/PhpOption/Some.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\EmptyIterator/g' ./vendor/phpoption/phpoption/src/PhpOption/None.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\ArrayIterator/g' ./vendor/symfony/console/Helper/HelperSet.php
+        sed -i 's/public function jsonSerialize()/public function jsonSerialize(): mixed/g' ./vendor/nesbot/carbon/src/Carbon/Traits/Serialization.php
+        sed -i 's/public function jsonSerialize()/public function jsonSerialize(): mixed/g' ./vendor/nesbot/carbon/src/Carbon/CarbonInterface.php
+        sed -i 's/public function count()/public function count(): int/g' ./src/Illuminate/Container/RewindableGenerator.php
+        sed -i 's/public function getIterator()/public function getIterator(): \\Traversable/g' ./src/Illuminate/Container/RewindableGenerator.php
+
+        php vendor/bin/phpunit -d error_reporting="E_ALL^E_DEPRECATED"
         if [ $? -gt 128 ]; then
           exit 1
         fi
