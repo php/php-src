@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0beta1
+22 Jul 2021, PHP 8.1.0beta1
 
 - Core:
  . Fixed bug #81238 (Fiber support missing for Solaris Sparc). (trowski)
