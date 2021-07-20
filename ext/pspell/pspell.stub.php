@@ -3,10 +3,16 @@
 /** @generate-class-entries */
 
 namespace PSpell {
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Dictionary {}
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Config {}
 }
 
