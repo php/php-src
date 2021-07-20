@@ -3,6 +3,7 @@
 /** @generate-class-entries */
 
 namespace PgSql {
+
     /** @strict-properties */
     final class Connection
     {
@@ -17,9 +18,11 @@ namespace PgSql {
     final class Lob
     {
     }
+
 }
 
 namespace {
+
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
     function pg_pconnect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
@@ -409,4 +412,5 @@ namespace {
     function pg_delete(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+
 }
