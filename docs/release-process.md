@@ -397,8 +397,6 @@ explained at the end of this document in
 
     https://github.com/php/web-php/commit/74bcad4c770d95f21b7fbeeedbd76d943bb83f23
 
- 5. Notify nlopess@ to add PHP_X_Y tag to gcov.php.net.
-
 ## Preparing for the initial stable version (PHP X.Y.0)
 
  1. About the time you release the first RC, remind the documentation team
