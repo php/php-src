@@ -2,6 +2,9 @@
 
 /** @generate-class-entries */
 
+/**
+ * @not-serializable
+ */
 class finfo
 {
     /** @alias finfo_open */
