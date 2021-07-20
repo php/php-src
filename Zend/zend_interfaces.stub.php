@@ -66,6 +66,9 @@ interface Stringable
     public function __toString(): string;
 }
 
+/**
+ * @not-serializable
+ */
 final class InternalIterator implements Iterator
 {
     private function __construct() {}

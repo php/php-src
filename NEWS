@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0beta1
+?? ??? ????, PHP 8.1.0beta2
+
+- Opcache:
+  . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT)
+
+22 Jul 2021, PHP 8.1.0beta1
 
 - Core:
  . Fixed bug #81238 (Fiber support missing for Solaris Sparc). (trowski)
@@ -11,6 +16,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #81249 (Intermittent property assignment failure with JIT
     enabled). (Dmitry)
+  . Fixed bug #81256 (Assertion `zv != ((void *)0)' failed for "preload" with
+    JIT). (Dmitry)
 
 - Reflection:
  . Fixed bug #80097 (ReflectionAttribute is not a Reflector). (beberlei)

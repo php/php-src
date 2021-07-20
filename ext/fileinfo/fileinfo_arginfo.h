@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 933465e008723d0991761b5779a80e5c72248a9c */
+ * Stub hash: edb72bf1a82a6b2e027caa91c6668c27e36b9c34 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_finfo_open, 0, 0, finfo, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FILEINFO_NONE")
@@ -88,6 +88,7 @@ static zend_class_entry *register_class_finfo(void)
 
 	INIT_CLASS_ENTRY(ce, "finfo", class_finfo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

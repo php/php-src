@@ -21,7 +21,6 @@
 #include "zend_API.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
-#include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"

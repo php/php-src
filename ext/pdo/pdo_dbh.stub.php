@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class PDO
 {
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, ?array $options = null) {}

@@ -29,7 +29,6 @@
 #include <sqlite3.h>
 
 #include "zend_exceptions.h"
-#include "zend_interfaces.h"
 #include "SAPI.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
@@ -2350,8 +2349,6 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_object_handlers.free_obj = php_sqlite3_object_free_storage;
 	php_sqlite3_sc_entry = register_class_SQLite3();
 	php_sqlite3_sc_entry->create_object = php_sqlite3_object_new;
-	php_sqlite3_sc_entry->serialize = zend_class_serialize_deny;
-	php_sqlite3_sc_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Prepared Statement Class */
 	sqlite3_stmt_object_handlers.offset = XtOffsetOf(php_sqlite3_stmt, zo);
@@ -2359,8 +2356,6 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_stmt_object_handlers.free_obj = php_sqlite3_stmt_object_free_storage;
 	php_sqlite3_stmt_entry = register_class_SQLite3Stmt();
 	php_sqlite3_stmt_entry->create_object = php_sqlite3_stmt_object_new;
-	php_sqlite3_stmt_entry->serialize = zend_class_serialize_deny;
-	php_sqlite3_stmt_entry->unserialize = zend_class_unserialize_deny;
 
 	/* Register SQLite 3 Result Class */
 	sqlite3_result_object_handlers.offset = XtOffsetOf(php_sqlite3_result, zo);
@@ -2368,8 +2363,6 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_result_object_handlers.free_obj = php_sqlite3_result_object_free_storage;
 	php_sqlite3_result_entry = register_class_SQLite3Result();
 	php_sqlite3_result_entry->create_object = php_sqlite3_result_object_new;
-	php_sqlite3_result_entry->serialize = zend_class_serialize_deny;
-	php_sqlite3_result_entry->unserialize = zend_class_unserialize_deny;
 
 	REGISTER_INI_ENTRIES();
 

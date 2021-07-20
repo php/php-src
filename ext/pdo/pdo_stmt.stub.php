@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class PDOStatement implements IteratorAggregate
 {
     public string $queryString;
@@ -66,6 +67,7 @@ class PDOStatement implements IteratorAggregate
     public function getIterator(): Iterator {}
 }
 
+/** @not-serializable */
 final class PDORow
 {
     public string $queryString;

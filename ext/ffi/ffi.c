@@ -23,7 +23,6 @@
 #include "ext/standard/info.h"
 #include "php_scandir.h"
 #include "zend_exceptions.h"
-#include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "main/SAPI.h"
 #include "ffi_arginfo.h"
@@ -5224,8 +5223,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
-	zend_ffi_ce->serialize = zend_class_serialize_deny;
-	zend_ffi_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
 	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
@@ -5260,8 +5257,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
-	zend_ffi_cdata_ce->serialize = zend_class_serialize_deny;
-	zend_ffi_cdata_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_ffi_cdata_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_cdata_handlers.get_constructor      = zend_fake_get_constructor;
@@ -5335,8 +5330,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ctype_ce = register_class_FFI_CType();
 	zend_ffi_ctype_ce->create_object = zend_ffi_ctype_new;
-	zend_ffi_ctype_ce->serialize = zend_class_serialize_deny;
-	zend_ffi_ctype_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_ffi_ctype_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_ctype_handlers.get_constructor      = zend_fake_get_constructor;

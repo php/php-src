@@ -3199,7 +3199,7 @@ static zend_result accel_post_startup(void)
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
-#if defined(HAVE_JIT) && !defined(ZEND_WIN32)
+#ifdef HAVE_JIT
 				reattached = 1;
 #endif
 				zend_shared_alloc_lock();
@@ -4086,6 +4086,7 @@ static void preload_link(void)
 		zend_op_array *op_array = &script->script.main_op_array;
 		zend_op *opline = op_array->opcodes;
 		zend_op *end = opline + op_array->last;
+		uint32_t skip_dynamic_func_count = 0;
 
 		while (opline != end) {
 			switch (opline->opcode) {
@@ -4095,6 +4096,40 @@ static void preload_link(void)
 					if (!zend_hash_exists(&script->script.class_table, key)) {
 						MAKE_NOP(opline);
 					}
+					break;
+				case ZEND_DECLARE_FUNCTION:
+					opline->op2.num -= skip_dynamic_func_count;
+					key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+					zv = zend_hash_find(EG(function_table), key);
+					if (zv && Z_PTR_P(zv) == op_array->dynamic_func_defs[opline->op2.num]) {
+						zend_op_array **dynamic_func_defs;
+
+						op_array->num_dynamic_func_defs--;
+						if (op_array->num_dynamic_func_defs == 0) {
+							dynamic_func_defs = NULL;
+						} else {
+							dynamic_func_defs = emalloc(sizeof(zend_op_array*) * op_array->num_dynamic_func_defs);
+							if (opline->op2.num > 0) {
+								memcpy(
+									dynamic_func_defs,
+									op_array->dynamic_func_defs,
+									sizeof(zend_op_array*) * opline->op2.num);
+							}
+							if (op_array->num_dynamic_func_defs - opline->op2.num > 0) {
+								memcpy(
+									dynamic_func_defs + opline->op2.num,
+									op_array->dynamic_func_defs + (opline->op2.num + 1),
+									sizeof(zend_op_array*) * (op_array->num_dynamic_func_defs - opline->op2.num));
+							}
+						}
+						efree(op_array->dynamic_func_defs);
+						op_array->dynamic_func_defs = dynamic_func_defs;
+						skip_dynamic_func_count++;
+						MAKE_NOP(opline);
+					}
+					break;
+				case ZEND_DECLARE_LAMBDA_FUNCTION:
+					opline->op2.num -= skip_dynamic_func_count;
 					break;
 			}
 			opline++;

@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "Zend/zend_interfaces.h"
 
 #include "curl_private.h"
 
@@ -164,8 +163,6 @@ void curl_share_free_obj(zend_object *object)
 
 void curl_share_register_handlers(void) {
 	curl_share_ce->create_object = curl_share_create_object;
-	curl_share_ce->serialize = &zend_class_serialize_deny;
-	curl_share_ce->unserialize = &zend_class_unserialize_deny;
 
 	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_handlers.offset = XtOffsetOf(php_curlsh, std);

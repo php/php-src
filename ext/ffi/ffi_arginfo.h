@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 82f586480d2b29e6aa359f7080cdc7ea092a1ecc */
+ * Stub hash: d9dd3b93c0d1623fe61ea0bd8ee9d4c3a359bf78 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -220,7 +220,7 @@ static zend_class_entry *register_class_FFI(void)
 
 	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -231,7 +231,7 @@ static zend_class_entry *register_class_FFI_CData(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "CData", class_FFI_CData_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -242,7 +242,7 @@ static zend_class_entry *register_class_FFI_CType(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", class_FFI_CType_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

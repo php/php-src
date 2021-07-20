@@ -3,23 +3,35 @@
 /** @generate-class-entries */
 
 namespace PgSql {
-    /** @strict-properties */
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Connection
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Result
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Lob
     {
     }
+
 }
 
 namespace {
+
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
     function pg_pconnect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
@@ -173,9 +185,7 @@ namespace {
      */
     function pg_fieldprtlen(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
-    /**
-     * @param string|int $row
-     */
+    /** @param string|int $row */
     function pg_field_is_null(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     /**
@@ -409,4 +419,5 @@ namespace {
     function pg_delete(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+
 }

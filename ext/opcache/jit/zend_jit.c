@@ -4618,6 +4618,27 @@ ZEND_EXT_API void zend_jit_protect(void)
 #endif
 }
 
+static void zend_jit_init_handlers(void)
+{
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		zend_jit_runtime_jit_handler = dasm_labels[zend_lbhybrid_runtime_jit];
+		zend_jit_profile_jit_handler = dasm_labels[zend_lbhybrid_profile_jit];
+		zend_jit_func_hot_counter_handler = dasm_labels[zend_lbhybrid_func_hot_counter];
+		zend_jit_loop_hot_counter_handler = dasm_labels[zend_lbhybrid_loop_hot_counter];
+		zend_jit_func_trace_counter_handler = dasm_labels[zend_lbhybrid_func_trace_counter];
+		zend_jit_ret_trace_counter_handler = dasm_labels[zend_lbhybrid_ret_trace_counter];
+		zend_jit_loop_trace_counter_handler = dasm_labels[zend_lbhybrid_loop_trace_counter];
+	} else {
+		zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
+		zend_jit_profile_jit_handler = (const void*)zend_jit_profile_helper;
+		zend_jit_func_hot_counter_handler = (const void*)zend_jit_func_counter_helper;
+		zend_jit_loop_hot_counter_handler = (const void*)zend_jit_loop_counter_helper;
+		zend_jit_func_trace_counter_handler = (const void*)zend_jit_func_trace_helper;
+		zend_jit_ret_trace_counter_handler = (const void*)zend_jit_ret_trace_helper;
+		zend_jit_loop_trace_counter_handler = (const void*)zend_jit_loop_trace_helper;
+	}
+}
+
 static int zend_jit_make_stubs(void)
 {
 	dasm_State* dasm_state = NULL;
@@ -4637,23 +4658,7 @@ static int zend_jit_make_stubs(void)
 		}
 	}
 
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		zend_jit_runtime_jit_handler = dasm_labels[zend_lbhybrid_runtime_jit];
-		zend_jit_profile_jit_handler = dasm_labels[zend_lbhybrid_profile_jit];
-		zend_jit_func_hot_counter_handler = dasm_labels[zend_lbhybrid_func_hot_counter];
-		zend_jit_loop_hot_counter_handler = dasm_labels[zend_lbhybrid_loop_hot_counter];
-		zend_jit_func_trace_counter_handler = dasm_labels[zend_lbhybrid_func_trace_counter];
-		zend_jit_ret_trace_counter_handler = dasm_labels[zend_lbhybrid_ret_trace_counter];
-		zend_jit_loop_trace_counter_handler = dasm_labels[zend_lbhybrid_loop_trace_counter];
-	} else {
-		zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
-		zend_jit_profile_jit_handler = (const void*)zend_jit_profile_helper;
-		zend_jit_func_hot_counter_handler = (const void*)zend_jit_func_counter_helper;
-		zend_jit_loop_hot_counter_handler = (const void*)zend_jit_loop_counter_helper;
-		zend_jit_func_trace_counter_handler = (const void*)zend_jit_func_trace_helper;
-		zend_jit_ret_trace_counter_handler = (const void*)zend_jit_ret_trace_helper;
-		zend_jit_loop_trace_counter_handler = (const void*)zend_jit_loop_trace_helper;
-	}
+	zend_jit_init_handlers();
 
 	dasm_free(&dasm_state);
 	return 1;
@@ -4928,6 +4933,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 #if _WIN32
 		/* restore global labels */
 		memcpy(dasm_labels, dasm_buf, sizeof(void*) * zend_lb_MAX);
+		zend_jit_init_handlers();
 #endif
 	}
 

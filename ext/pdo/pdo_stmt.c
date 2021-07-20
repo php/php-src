@@ -2496,8 +2496,6 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
-	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
@@ -2510,8 +2508,6 @@ void pdo_stmt_init(void)
 
 	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
-	pdo_row_ce->serialize = zend_class_serialize_deny;
-	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;

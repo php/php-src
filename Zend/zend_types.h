@@ -1143,10 +1143,15 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #if ZEND_RC_DEBUG
 extern ZEND_API bool zend_rc_debug;
+/* The GC_PERSISTENT flag is reused for IS_OBJ_WEAKLY_REFERENCED on objects.
+ * Skip checks for OBJECT/NULL type to avoid interpreting the flag incorrectly. */
 # define ZEND_RC_MOD_CHECK(p) do { \
-		if (zend_rc_debug && zval_gc_type((p)->u.type_info) != IS_OBJECT) { \
-			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
-			ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+		if (zend_rc_debug) { \
+			zend_uchar type = zval_gc_type((p)->u.type_info); \
+			if (type != IS_OBJECT && type != IS_NULL) { \
+				ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
+				ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+			} \
 		} \
 	} while (0)
 # define GC_MAKE_PERSISTENT_LOCAL(p) do { \

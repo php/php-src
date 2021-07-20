@@ -6598,8 +6598,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t visibility =
-			param_ast->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
 
 		znode var_node, default_node;
 		zend_uchar opcode;
@@ -6681,7 +6680,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 
 		if (type_ast) {
 			uint32_t default_type = *default_ast_ptr ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
-			bool force_nullable = default_type == IS_NULL && !visibility;
+			bool force_nullable = default_type == IS_NULL && !property_flags;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename(type_ast, force_nullable);
@@ -6724,14 +6723,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		}
 
 		uint32_t arg_info_flags = _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic, /* is_tentative */ 0)
-			| (visibility ? _ZEND_IS_PROMOTED_BIT : 0);
+			| (property_flags ? _ZEND_IS_PROMOTED_BIT : 0);
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
 				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
 		}
 
-		if (visibility) {
+		if (property_flags) {
 			zend_op_array *op_array = CG(active_op_array);
 			zend_class_entry *scope = op_array->scope;
 			bool is_ctor =
@@ -6778,7 +6777,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_string *doc_comment =
 				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_property_info *prop = zend_declare_typed_property(
-				scope, name, &default_value, visibility | ZEND_ACC_PROMOTED, doc_comment, type);
+				scope, name, &default_value, property_flags | ZEND_ACC_PROMOTED, doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
 					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
@@ -6799,9 +6798,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 	for (i = 0; i < list->children; i++) {
 		zend_ast *param_ast = list->child[i];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
-		uint32_t visibility =
-			param_ast->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
-		if (!visibility) {
+		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		if (!flags) {
 			continue;
 		}
 
@@ -7036,6 +7034,10 @@ zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, 
 	uint32_t fn_flags = op_array->fn_flags;
 
 	zend_string *lcname;
+
+	if (fn_flags & ZEND_ACC_READONLY) {
+		zend_error(E_COMPILE_ERROR, "Cannot use 'readonly' as method modifier");
+	}
 
 	if ((fn_flags & ZEND_ACC_PRIVATE) && (fn_flags & ZEND_ACC_FINAL) && !zend_is_constructor(name)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
@@ -7354,6 +7356,23 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, z
 			ZVAL_UNDEF(&value_zv);
 		}
 
+		if (flags & ZEND_ACC_READONLY) {
+			if (!ZEND_TYPE_IS_SET(type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Readonly property %s::$%s must have type",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			}
+			if (!Z_ISUNDEF(value_zv)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Readonly property %s::$%s cannot have default value",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			}
+			if (flags & ZEND_ACC_STATIC) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Static property %s::$%s cannot be readonly",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			}
+		}
+
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
@@ -7381,6 +7400,8 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as %s modifier", entity);
 	} else if (attr & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as %s modifier", entity);
+	} else if (attr & ZEND_ACC_READONLY) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'readonly' as %s modifier", entity);
 	}
 }
 /* }}} */
@@ -7406,7 +7427,7 @@ void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
 
-		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT))) {
+		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_READONLY))) {
 			zend_check_const_and_trait_alias_attr(flags, "constant");
 		}
 

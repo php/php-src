@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aedd25078f730be3892804dbe0c722fec2fbcf7e */
+ * Stub hash: 04660f3f9559eed67a224d219d38ff80d131b118 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pspell_new, 0, 1, PSpell\\Dictionary, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
@@ -150,7 +150,7 @@ static zend_class_entry *register_class_PSpell_Dictionary(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PSpell", "Dictionary", class_PSpell_Dictionary_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -161,7 +161,7 @@ static zend_class_entry *register_class_PSpell_Config(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PSpell", "Config", class_PSpell_Config_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -2,17 +2,26 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLCertificate
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLCertificateSigningRequest
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLAsymmetricKey
 {
 }
@@ -128,7 +137,7 @@ function openssl_pkcs7_read(string $data, &$certificates): bool {}
 function openssl_cms_verify(string $input_filename, int $flags = 0, ?string $certificates = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
 /** @param OpenSSLCertificate|array|string $certificate */
-function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME,  int $cipher_algo = OPENSSL_CIPHER_RC2_40): bool {}
+function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, int $cipher_algo = OPENSSL_CIPHER_RC2_40): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key */
 function openssl_cms_sign(string $input_filename, string $output_filename, OpenSSLCertificate|string $certificate, $private_key, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, ?string $untrusted_certificates_filename = null): bool {}
