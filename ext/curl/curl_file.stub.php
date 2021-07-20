@@ -2,9 +2,7 @@
 
 /** @generate-class-entries */
 
-/**
- * @not-serializable
- */
+/** @not-serializable */
 class CURLFile
 {
     public string $name = "";

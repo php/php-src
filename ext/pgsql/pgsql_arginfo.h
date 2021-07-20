@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39b3a34ba955184bbfcc7a792fa0ecc2877ac064 */
+ * Stub hash: 37814767f8290b717a4facbdf55ef3bfc1fc24c8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)

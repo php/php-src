@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 706de8c7fbb821b71ad8cfdbbab38fe30fa6590a */
+ * Stub hash: 5f8aa79b08eeca70b934040b8ed3809f249cbef7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)

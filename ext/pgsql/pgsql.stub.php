@@ -185,9 +185,7 @@ namespace {
      */
     function pg_fieldprtlen(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
-    /**
-     * @param string|int $row
-     */
+    /** @param string|int $row */
     function pg_field_is_null(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     /**

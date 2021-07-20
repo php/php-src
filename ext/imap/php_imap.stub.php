@@ -37,9 +37,7 @@ namespace {
 
     function imap_body(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
-    /**
-     * @alias imap_body
-     */
+    /** @alias imap_body */
     function imap_fetchtext(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
     function imap_bodystruct(IMAP\Connection $imap, int $message_num, string $section): \stdClass|false {}
@@ -48,43 +46,29 @@ namespace {
 
     function imap_fetchmime(IMAP\Connection $imap, int $message_num, string $section, int $flags = 0): string|false {}
 
-    /**
-     * @param resource|string|int $file
-     */
+    /** @param resource|string|int $file */
     function imap_savebody(IMAP\Connection $imap, $file, int $message_num, string $section = "", int $flags = 0): bool {}
 
     function imap_fetchheader(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
     function imap_fetchstructure(IMAP\Connection $imap, int $message_num, int $flags = 0): \stdClass|false {}
 
-    /**
-     */
     function imap_gc(IMAP\Connection $imap, int $flags): bool {}
 
-    /**
-     */
     function imap_expunge(IMAP\Connection $imap): bool {}
 
-    /**
-     */
     function imap_delete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
 
-    /**
-     */
     function imap_undelete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
 
     function imap_check(IMAP\Connection $imap): \stdClass|false {}
 
     function imap_listscan(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
-    /**
-     * @alias imap_listscan
-     */
+    /** @alias imap_listscan */
     function imap_scan(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
-    /**
-     * @alias imap_listscan
-     */
+    /** @alias imap_listscan */
     function imap_scanmailbox(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
     function imap_mail_copy(IMAP\Connection $imap, string $message_nums, string $mailbox, int $flags = 0): bool {}
@@ -95,16 +79,12 @@ namespace {
 
     function imap_createmailbox(IMAP\Connection $imap, string $mailbox): bool {}
 
-    /**
-     * @alias imap_createmailbox
-     */
+    /** @alias imap_createmailbox */
     function imap_create(IMAP\Connection $imap, string $mailbox): bool {}
 
     function imap_renamemailbox(IMAP\Connection $imap, string $from, string $to): bool {}
 
-    /**
-     * @alias imap_renamemailbox
-     */
+    /** @alias imap_renamemailbox */
     function imap_rename(IMAP\Connection $imap, string $from, string $to): bool {}
 
     function imap_deletemailbox(IMAP\Connection $imap, string $mailbox): bool {}
@@ -143,16 +123,12 @@ namespace {
 
     function imap_list(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-    /**
-     * @alias imap_list
-     */
+    /** @alias imap_list */
     function imap_listmailbox(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
     function imap_lsub(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-    /**
-     * @alias imap_lsub
-     */
+    /** @alias imap_lsub */
     function imap_listsubscribed(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
     function imap_getsubscribed(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
