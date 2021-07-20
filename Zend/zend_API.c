@@ -2495,8 +2495,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						uint32_t j = 0;
 						while (true) {
 							const char *end = strchr(start, '|');
-							zend_string *str =
-								zend_string_init(start, end ? end - start : strlen(start), 1);
+							zend_string *str = zend_string_init_interned(
+								start, end ? end - start : strlen(start), 1);
 							list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
 							if (!end) {
 								break;
