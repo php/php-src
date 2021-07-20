@@ -2270,12 +2270,6 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 	return p ? &p->val : NULL;
 }
 
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED
-zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
-{
-	return zend_hash_find_known_hash(ht, key);
-}
-
 ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
 {
 	Bucket *p;

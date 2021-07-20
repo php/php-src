@@ -177,13 +177,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char 
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
 
-/**
- * The same as zend_hash_find(), but hash value of the key must be already calculated.
- * Use zend_hash_find_known_hash() when targeting PHP 8.1+; old name kept for bc only.
- */
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED
-zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
-
+/* The same as zend_hash_find(), but hash value of the key must be already calculated. */
 ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
 
 static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
