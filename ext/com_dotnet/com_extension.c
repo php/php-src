@@ -174,21 +174,15 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_variant_class_entry = register_class_variant();
 	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
-	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
-	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
 	tmp = register_class_com(php_com_variant_class_entry);
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 
 #if HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 #endif
 
 	REGISTER_INI_ENTRIES();
