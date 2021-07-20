@@ -1,12 +1,12 @@
 --TEST--
 Bug #81255: Memory leak in PHPUnit with functional JIT
+--EXTENSIONS--
+opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.jit_buffer_size=1M
 opcache.jit=function
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 eval('class B {}');
