@@ -2,17 +2,26 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class CurlHandle
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class CurlMultiHandle
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class CurlShareHandle
 {
 }
