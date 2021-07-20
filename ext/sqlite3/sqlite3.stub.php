@@ -2,6 +2,9 @@
 
 /** @generate-class-entries */
 
+/**
+ * @not-serializable
+ */
 class SQLite3
 {
     /**
@@ -84,6 +87,9 @@ class SQLite3
     public function setAuthorizer(?callable $callback): bool {}
 }
 
+/**
+ * @not-serializable
+ */
 class SQLite3Stmt
 {
     private function __construct(SQLite3 $sqlite3, string $query) {}
@@ -116,6 +122,9 @@ class SQLite3Stmt
     public function reset(): bool {}
 }
 
+/**
+ * @not-serializable
+ */
 class SQLite3Result
 {
     private function __construct() {}
