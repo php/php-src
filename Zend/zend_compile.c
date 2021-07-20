@@ -1284,7 +1284,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 	if (type_mask & MAY_BE_NULL) {
 		bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
-		if (!is_union) {
+		if (!is_union && !ZEND_TYPE_IS_INTERSECTION(type)) {
 			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_string_release(str);
 			return nullable_str;

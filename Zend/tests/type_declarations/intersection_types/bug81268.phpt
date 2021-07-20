@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Default value for property of type X&Y may not be null. Use the nullable type ?X&Y to allow null default value in %s on line %d
+Fatal error: Default value for property of type X&Y may not be null. Use the nullable type X&Y|null to allow null default value in %s on line %d

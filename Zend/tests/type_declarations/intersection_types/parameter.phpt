@@ -9,7 +9,7 @@ interface B {}
 class Foo implements A, B {}
 class Bar implements A {}
 
-function foo(?A&B $bar) {
+function foo(A&B|null $bar) {
     var_dump($bar);
 }
 
@@ -27,4 +27,4 @@ try {
 NULL
 object(Foo)#1 (0) {
 }
-foo(): Argument #1 ($bar) must be of type ?A&B, Bar given, called in %s on line %d
+foo(): Argument #1 ($bar) must be of type A&B|null, Bar given, called in %s on line %d

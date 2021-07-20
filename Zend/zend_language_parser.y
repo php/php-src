@@ -287,6 +287,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <ident> reserved_non_modifiers semi_reserved
 
+%type <void> null_type
+
 %% /* Rules */
 
 start:
@@ -793,12 +795,22 @@ optional_type_without_static:
 	|	type_expr_without_static	{ $$ = $1; }
 ;
 
+null_type:
+		T_STRING {
+			zend_string *str = Z_STR(((zend_ast_zval*)$1)->val);
+			if (!zend_string_equals_literal_ci(str, "null")) {
+				zend_error(E_PARSE, "Invalid compound type expression");
+			}
+			zend_string_free(str);
+		}
+;
+
 type_expr:
 		type				{ $$ = $1; }
 	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type			{ $$ = $1; }
+	|	intersection_type '|' null_type	{ $$ = $1; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	intersection_type	{ $$ = $1; }
-	|	'?' intersection_type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type:
@@ -823,8 +835,8 @@ type_expr_without_static:
 		type_without_static			{ $$ = $1; }
 	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type_without_static	{ $$ = $1; }
+	|	intersection_type_without_static '|' null_type	{ $$ = $1; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	intersection_type_without_static	{ $$ = $1; }
-	|	'?' intersection_type_without_static	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type_without_static:

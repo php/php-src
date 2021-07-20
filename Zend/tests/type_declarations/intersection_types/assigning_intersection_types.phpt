@@ -20,7 +20,7 @@ class A {
     public function method2(X $a): X&Y {
         return new TestParent();
     }
-    public function method3(?X&Y $a): ?X&Y {
+    public function method3(X&Y|null $a): X&Y|null {
         return $a;
     }
 }

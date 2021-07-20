@@ -10,7 +10,7 @@ interface C {}
 class Test implements A, B, C {}
 
 class Foo {
-    public function foo(): ?A&B {
+    public function foo(): A&B|null {
         return null;
     }
 }

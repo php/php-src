@@ -11,7 +11,7 @@ class A implements X, Y, Z {}
 class B implements X, Y {}
 
 class Test {
-    public ?X&Y $y;
+    public X&Y|null $y;
     public X&Z $z;
 }
 $test = new Test;

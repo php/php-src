@@ -22,11 +22,11 @@ class FooChild extends Foo {
 }
 
 class FooSecondChild extends FooChild {
-    public function foo(): ?A&B {
+    public function foo(): A&B|null {
         return new Test();
     }
 }
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of FooSecondChild::foo(): ?A&B must be compatible with FooChild::foo(): A&B in %s on line %d
+Fatal error: Declaration of FooSecondChild::foo(): A&B|null must be compatible with FooChild::foo(): A&B in %s on line %d

@@ -7,7 +7,7 @@ interface A {}
 interface B {}
 
 class Foo {
-    public function foo(?A&B $foo) {
+    public function foo(A&B|null $foo) {
     }
 }
 
@@ -18,4 +18,4 @@ class FooChild extends Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of FooChild::foo(A&B $foo) must be compatible with Foo::foo(?A&B $foo) in %s on line %d
+Fatal error: Declaration of FooChild::foo(A&B $foo) must be compatible with Foo::foo(A&B|null $foo) in %s on line %d
