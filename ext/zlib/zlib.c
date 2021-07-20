@@ -29,7 +29,6 @@
 #include "ext/standard/php_string.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
-#include "Zend/zend_interfaces.h"
 
 /*
  * zlib include files can define the following preprocessor defines which rename
@@ -1341,8 +1340,6 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
-	inflate_context_ce->serialize = zend_class_serialize_deny;
-	inflate_context_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1353,8 +1350,6 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
-	deflate_context_ce->serialize = zend_class_serialize_deny;
-	deflate_context_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);

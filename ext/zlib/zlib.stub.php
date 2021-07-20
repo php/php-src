@@ -2,12 +2,18 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class InflateContext
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class DeflateContext
 {
 }
