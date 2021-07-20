@@ -7036,12 +7036,6 @@ static zval *_reflection_write_property(zend_object *object, zend_string *name, 
 }
 /* }}} */
 
-static void reflection_init_class_handlers(zend_class_entry *ce) {
-	ce->create_object = reflection_objects_new;
-	ce->serialize = zend_class_serialize_deny;
-	ce->unserialize = zend_class_unserialize_deny;
-}
-
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -7058,33 +7052,33 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflector_ptr = register_class_Reflector(zend_ce_stringable);
 
 	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr);
-	reflection_init_class_handlers(reflection_function_abstract_ptr);
+	reflection_function_abstract_ptr->create_object = reflection_objects_new;
 
 	reflection_function_ptr = register_class_ReflectionFunction(reflection_function_abstract_ptr);
-	reflection_init_class_handlers(reflection_function_ptr);
+	reflection_function_ptr->create_object = reflection_objects_new;
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
 
 	reflection_generator_ptr = register_class_ReflectionGenerator();
-	reflection_init_class_handlers(reflection_generator_ptr);
+	reflection_generator_ptr->create_object = reflection_objects_new;
 
 	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr);
-	reflection_init_class_handlers(reflection_parameter_ptr);
+	reflection_parameter_ptr->create_object = reflection_objects_new;
 
 	reflection_type_ptr = register_class_ReflectionType(zend_ce_stringable);
-	reflection_init_class_handlers(reflection_type_ptr);
+	reflection_type_ptr->create_object = reflection_objects_new;
 
 	reflection_named_type_ptr = register_class_ReflectionNamedType(reflection_type_ptr);
-	reflection_init_class_handlers(reflection_named_type_ptr);
+	reflection_named_type_ptr->create_object = reflection_objects_new;
 
 	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
-	reflection_init_class_handlers(reflection_union_type_ptr);
+	reflection_union_type_ptr->create_object = reflection_objects_new;
 
 	reflection_intersection_type_ptr = register_class_ReflectionIntersectionType(reflection_type_ptr);
-	reflection_init_class_handlers(reflection_intersection_type_ptr);
+	reflection_intersection_type_ptr->create_object = reflection_objects_new;
 
 	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
-	reflection_init_class_handlers(reflection_method_ptr);
+	reflection_method_ptr->create_object = reflection_objects_new;
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PUBLIC", ZEND_ACC_PUBLIC);
@@ -7094,7 +7088,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_FINAL", ZEND_ACC_FINAL);
 
 	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr);
-	reflection_init_class_handlers(reflection_class_ptr);
+	reflection_class_ptr->create_object = reflection_objects_new;
 
 	/* IS_IMPLICIT_ABSTRACT is not longer used */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
@@ -7102,10 +7096,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
 
 	reflection_object_ptr = register_class_ReflectionObject(reflection_class_ptr);
-	reflection_init_class_handlers(reflection_object_ptr);
+	reflection_object_ptr->create_object = reflection_objects_new;
 
 	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr);
-	reflection_init_class_handlers(reflection_property_ptr);
+	reflection_property_ptr->create_object = reflection_objects_new;
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
@@ -7113,7 +7107,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
 	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr);
-	reflection_init_class_handlers(reflection_class_constant_ptr);
+	reflection_class_constant_ptr->create_object = reflection_objects_new;
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_PROTECTED", ZEND_ACC_PROTECTED);
@@ -7121,28 +7115,28 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class_constant, "IS_FINAL", ZEND_ACC_FINAL);
 
 	reflection_extension_ptr = register_class_ReflectionExtension(reflector_ptr);
-	reflection_init_class_handlers(reflection_extension_ptr);
+	reflection_extension_ptr->create_object = reflection_objects_new;
 
 	reflection_zend_extension_ptr = register_class_ReflectionZendExtension(reflector_ptr);
-	reflection_init_class_handlers(reflection_zend_extension_ptr);
+	reflection_zend_extension_ptr->create_object = reflection_objects_new;
 
 	reflection_reference_ptr = register_class_ReflectionReference();
-	reflection_init_class_handlers(reflection_reference_ptr);
+	reflection_reference_ptr->create_object = reflection_objects_new;
 
 	reflection_attribute_ptr = register_class_ReflectionAttribute(reflector_ptr);
-	reflection_init_class_handlers(reflection_attribute_ptr);
+	reflection_attribute_ptr->create_object = reflection_objects_new;
 
 	reflection_enum_ptr = register_class_ReflectionEnum(reflection_class_ptr);
-	reflection_init_class_handlers(reflection_enum_ptr);
+	reflection_enum_ptr->create_object = reflection_objects_new;
 
 	reflection_enum_unit_case_ptr = register_class_ReflectionEnumUnitCase(reflection_class_constant_ptr);
-	reflection_init_class_handlers(reflection_enum_unit_case_ptr);
+	reflection_enum_unit_case_ptr->create_object = reflection_objects_new;
 
 	reflection_enum_backed_case_ptr = register_class_ReflectionEnumBackedCase(reflection_enum_unit_case_ptr);
-	reflection_init_class_handlers(reflection_enum_backed_case_ptr);
+	reflection_enum_backed_case_ptr->create_object = reflection_objects_new;
 
 	reflection_fiber_ptr = register_class_ReflectionFiber();
-	reflection_init_class_handlers(reflection_fiber_ptr);
+	reflection_fiber_ptr->create_object = reflection_objects_new;
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(attribute, "IS_INSTANCEOF", REFLECTION_ATTRIBUTE_IS_INSTANCEOF);
 
