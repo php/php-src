@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 339e326a82a7fd1e2ae419c8c86095e29028fbd6 */
+ * Stub hash: a9c915c11e5989d8c7cf2d704ada09ca765670c3 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, Traversable, 0)
 ZEND_END_ARG_INFO()
@@ -208,7 +208,7 @@ static zend_class_entry *register_class_InternalIterator(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;
