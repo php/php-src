@@ -206,6 +206,8 @@ PHP 8.1 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/pure-intersection-types
   . Added support for the final modifier for class constants.
     RFC: https://wiki.php.net/rfc/final_class_const
+  . Added support for readonly properties.
+    RFC: https://wiki.php.net/rfc/readonly_properties_v2
 
 - Curl:
   . Added CURLOPT_DOH_URL option.

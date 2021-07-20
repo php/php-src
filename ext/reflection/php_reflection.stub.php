@@ -428,6 +428,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isStatic(): bool {}
 
+    public function isReadOnly(): bool {}
+
     /** @tentative-return-type */
     public function isDefault(): bool {}
 
