@@ -2,6 +2,9 @@
 
 /** @generate-class-entries */
 
+/**
+ * @not-serializable
+ */
 class NumberFormatter
 {
     public function __construct(string $locale, int $style, ?string $pattern = null) {}

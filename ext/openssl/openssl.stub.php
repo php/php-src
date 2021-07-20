@@ -2,17 +2,26 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLCertificate
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLCertificateSigningRequest
 {
 }
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class OpenSSLAsymmetricKey
 {
 }

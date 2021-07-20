@@ -19,7 +19,6 @@
 #endif
 
 #include "php.h"
-#include "zend_interfaces.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -152,8 +151,6 @@ static PHP_MINIT_FUNCTION(pspell)
 {
 	php_pspell_ce = register_class_PSpell_Dictionary();
 	php_pspell_ce->create_object = php_pspell_object_create;
-	php_pspell_ce->serialize = zend_class_serialize_deny;
-	php_pspell_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_pspell_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_pspell_handlers.clone_obj = NULL;
@@ -163,8 +160,6 @@ static PHP_MINIT_FUNCTION(pspell)
 
 	php_pspell_config_ce = register_class_PSpell_Config();
 	php_pspell_config_ce->create_object = php_pspell_config_object_create;
-	php_pspell_config_ce->serialize = zend_class_serialize_deny;
-	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_pspell_config_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_pspell_config_handlers.clone_obj = NULL;

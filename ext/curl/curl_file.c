@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 #include "curl_private.h"
 #include "curl_file_arginfo.h"
 
@@ -147,8 +146,6 @@ ZEND_METHOD(CURLStringFile, __construct)
 void curlfile_register_class(void)
 {
 	curl_CURLFile_class = register_class_CURLFile();
-	curl_CURLFile_class->serialize = zend_class_serialize_deny;
-	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;
 
 	curl_CURLStringFile_class = register_class_CURLStringFile();
 }

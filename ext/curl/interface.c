@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 
 #include <stdio.h>
@@ -1189,8 +1188,6 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;
-	curl_ce->serialize = zend_class_serialize_deny;
-	curl_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&curl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_object_handlers.offset = XtOffsetOf(php_curl, std);

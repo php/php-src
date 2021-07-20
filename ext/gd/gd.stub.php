@@ -2,9 +2,16 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class GdImage {}
-/** @strict-properties */
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class GdFont {}
 
 function gd_info(): array {}

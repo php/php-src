@@ -4,17 +4,26 @@
 
 namespace PgSql {
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Connection
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Result
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Lob
     {
     }

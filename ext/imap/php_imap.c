@@ -35,7 +35,6 @@
 #include "php_ini.h"
 #include "php_streams.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -481,8 +480,6 @@ PHP_MINIT_FUNCTION(imap)
 
 	php_imap_ce = register_class_IMAP_Connection();
 	php_imap_ce->create_object = imap_object_create;
-	php_imap_ce->serialize = zend_class_serialize_deny;
-	php_imap_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&imap_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	imap_object_handlers.offset = XtOffsetOf(php_imap_object, std);

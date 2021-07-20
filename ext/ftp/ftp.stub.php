@@ -4,7 +4,10 @@
 
 namespace FTP {
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Connection
     {
     }

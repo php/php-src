@@ -604,8 +604,6 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakref = register_class_WeakReference();
 
 	zend_ce_weakref->create_object = zend_weakref_new;
-	zend_ce_weakref->serialize = zend_class_serialize_deny;
-	zend_ce_weakref->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
@@ -617,8 +615,6 @@ void zend_register_weakref_ce(void) /* {{{ */
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
-	zend_ce_weakmap->serialize = zend_class_serialize_deny;
-	zend_ce_weakmap->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);

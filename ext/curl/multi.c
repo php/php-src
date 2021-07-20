@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_smart_str.h"
 
 #include "curl_private.h"
@@ -582,8 +581,6 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 
 void curl_multi_register_handlers(void) {
 	curl_multi_ce->create_object = curl_multi_create_object;
-	curl_multi_ce->serialize = zend_class_serialize_deny;
-	curl_multi_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);

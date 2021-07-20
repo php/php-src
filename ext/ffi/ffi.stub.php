@@ -4,6 +4,9 @@
 
 namespace {
 
+	/**
+	 * @not-serializable
+	 */
     final class FFI
     {
         public static function cdef(string $code = "", ?string $lib = null): FFI {}
@@ -67,10 +70,15 @@ namespace {
 }
 
 namespace FFI {
-
+	/**
+	 * @not-serializable
+	 */
     final class CData {
     }
 
+	/**
+	 * @not-serializable
+	 */
     final class CType {
         public function getName(): string {}
 

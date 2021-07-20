@@ -1640,11 +1640,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__callstatic);
 	UNSERIALIZE_PTR(ce->__debugInfo);
 
-	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_ANON_CLASS))) {
-		ce->serialize = zend_class_serialize_deny;
-		ce->unserialize = zend_class_unserialize_deny;
-	}
-
 	if (ce->iterator_funcs_ptr) {
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr);
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_new_iterator);

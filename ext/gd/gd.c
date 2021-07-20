@@ -36,7 +36,6 @@
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
 #include "zend_object_handlers.h"
-#include "zend_interfaces.h"
 
 #ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -230,8 +229,6 @@ static void php_gd_object_minit_helper(void)
 {
 	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
-	gd_image_ce->serialize = zend_class_serialize_deny;
-	gd_image_ce->unserialize = zend_class_unserialize_deny;
 
 	/* setting up the object handlers for the GdImage class */
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -298,8 +295,6 @@ static void php_gd_font_minit_helper()
 {
 	gd_font_ce = register_class_GdFont();
 	gd_font_ce->create_object = php_gd_font_object_create;
-	gd_font_ce->serialize = zend_class_serialize_deny;
-	gd_font_ce->unserialize = zend_class_unserialize_deny;
 
 	/* setting up the object handlers for the GdFont class */
 	memcpy(&php_gd_font_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
