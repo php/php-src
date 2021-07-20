@@ -677,13 +677,14 @@ void phar_metadata_tracker_copy(phar_metadata_tracker *dest, const phar_metadata
 /* }}} */
 
 /**
- * Increment reference counts after a metadata entry was copied
+ * Copy constructor for a non-persistent clone.
  */
 void phar_metadata_tracker_clone(phar_metadata_tracker *tracker) /* {{{ */
 {
 	Z_TRY_ADDREF_P(&tracker->val);
 	if (tracker->str) {
-		tracker->str = zend_string_copy(tracker->str);
+		/* Duplicate the string, as the original may have been persistent. */
+		tracker->str = zend_string_dup(tracker->str, false);
 	}
 }
 /* }}} */
