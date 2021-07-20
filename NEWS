@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta2
 
-
+- Opcache:
+  . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT)
 
 22 Jul 2021, PHP 8.1.0beta1
 

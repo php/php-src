@@ -13280,7 +13280,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				}
 				if (((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))
 				 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-					|	jmp >8
+					|	jmp >7
 				} else {
 					|	jmp ->exception_handler
 				}
@@ -13699,7 +13699,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 
 			if (((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				|	jmp >8
+				|	jmp >7
 			} else {
 				|	jmp >9
 			}
@@ -13829,7 +13829,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 			val_info |= MAY_BE_RC1|MAY_BE_RCN;
 		}
 
-		|8:
+		|7:
 		|	// FREE_OP_DATA();
 		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline
 		|	jmp >9
