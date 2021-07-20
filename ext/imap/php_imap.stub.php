@@ -3,7 +3,10 @@
 /** @generate-class-entries */
 
 namespace IMAP {
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Connection {
     }
 }
