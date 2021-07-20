@@ -382,7 +382,7 @@ ZEND_FUNCTION(error_reporting)
 		zend_ini_entry *p = EG(error_reporting_ini_entry);
 
 		if (!p) {
-			zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
+			zval *zv = zend_hash_find_known_hash(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING));
 			if (!zv) {
 				/* Ini setting does not exist -- can this happen? */
 				RETURN_LONG(old_error_reporting);

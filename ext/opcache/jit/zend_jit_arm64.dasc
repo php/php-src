@@ -13300,13 +13300,13 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
 			if (Z_TYPE_P(zv) == IS_STRING) {
-				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+				jump_zv = zend_hash_find_known_hash(jumptable, Z_STR_P(zv));
 			}
 		} else if (opline->opcode == ZEND_MATCH) {
 			if (Z_TYPE_P(zv) == IS_LONG) {
 				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
 			} else if (Z_TYPE_P(zv) == IS_STRING) {
-				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+				jump_zv = zend_hash_find_known_hash(jumptable, Z_STR_P(zv));
 			}
 		} else {
 			ZEND_UNREACHABLE();

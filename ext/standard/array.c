@@ -1671,7 +1671,7 @@ static zend_long php_extract_ref_if_exists(zend_array *arr, zend_array *symbol_t
 		if (!var_name) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1714,7 +1714,7 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 		if (!var_name) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1762,7 +1762,7 @@ static zend_long php_extract_ref_overwrite(zend_array *arr, zend_array *symbol_t
 			zend_throw_error(NULL, "Cannot re-assign $this");
 			return -1;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1809,7 +1809,7 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 			zend_throw_error(NULL, "Cannot re-assign $this");
 			return -1;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1844,7 +1844,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 		if (!var_name) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1900,7 +1900,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 		if (!var_name) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -1954,7 +1954,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 		if (ZSTR_LEN(var_name) == 0) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -2028,7 +2028,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 		if (ZSTR_LEN(var_name) == 0) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -2301,7 +2301,7 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 		if (zend_string_equals_literal(var_name, "this")) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -2346,7 +2346,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 		if (zend_string_equals_literal(var_name, "this")) {
 			continue;
 		}
-		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
+		orig_var = zend_hash_find_known_hash(symbol_table, var_name);
 		if (orig_var) {
 			if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 				orig_var = Z_INDIRECT_P(orig_var);
@@ -3509,7 +3509,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 		if (string_key) {
-			if ((dest_entry = zend_hash_find_ex(dest, string_key, 1)) != NULL) {
+			if ((dest_entry = zend_hash_find_known_hash(dest, string_key)) != NULL) {
 				zval *src_zval = src_entry;
 				zval *dest_zval = dest_entry;
 				HashTable *thash;
@@ -3616,7 +3616,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 		ZVAL_DEREF(src_zval);
 		if (string_key) {
 			if (Z_TYPE_P(src_zval) != IS_ARRAY ||
-				(dest_entry = zend_hash_find_ex(dest, string_key, 1)) == NULL ||
+				(dest_entry = zend_hash_find_known_hash(dest, string_key)) == NULL ||
 				(Z_TYPE_P(dest_entry) != IS_ARRAY &&
 				 (!Z_ISREF_P(dest_entry) || Z_TYPE_P(Z_REFVAL_P(dest_entry)) != IS_ARRAY))) {
 
@@ -4564,7 +4564,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_find_ex(Z_ARRVAL(args[i]), key, 1)) == NULL ||
+				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) == NULL ||
 					(intersect_data_compare_func &&
 					intersect_data_compare_func(val, data) != 0)
 				) {
@@ -4938,7 +4938,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_find_ex(Z_ARRVAL(args[i]), key, 1)) != NULL &&
+				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) != NULL &&
 					(!diff_data_compare_func ||
 					diff_data_compare_func(val, data) == 0)
 				) {

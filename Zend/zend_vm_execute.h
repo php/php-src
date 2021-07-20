@@ -2860,7 +2860,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEN
 			/* Do not silence fatal errors */
 			EG(error_reporting) &= E_FATAL_ERRORS;
 			if (!EG(error_reporting_ini_entry)) {
-				zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
+				zval *zv = zend_hash_find_known_hash(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING));
 				if (zv) {
 					EG(error_reporting_ini_entry) = (zend_ini_entry *)Z_PTR_P(zv);
 				} else {
@@ -2928,14 +2928,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 	ce = CACHED_PTR(opline->extended_value);
 	if (UNEXPECTED(ce == NULL)) {
 		zend_string *rtd_key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
-		zv = zend_hash_find_ex(EG(class_table), rtd_key, 1);
+		zv = zend_hash_find_known_hash(EG(class_table), rtd_key);
 		if (UNEXPECTED(zv == NULL)) {
 			SAVE_OPLINE();
 			do {
 				ZEND_ASSERT(EX(func)->op_array.fn_flags & ZEND_ACC_PRELOADED);
 				if (zend_preload_autoload
 				  && zend_preload_autoload(EX(func)->op_array.filename) == SUCCESS) {
-					zv = zend_hash_find_ex(EG(class_table), rtd_key, 1);
+					zv = zend_hash_find_known_hash(EG(class_table), rtd_key);
 					if (EXPECTED(zv != NULL)) {
 						break;
 					}
@@ -3537,7 +3537,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(function_name+1), 1);
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
 			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
@@ -3619,9 +3619,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
 		if (func == NULL) {
-			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
+			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 			if (UNEXPECTED(func == NULL)) {
 				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			}
@@ -3652,7 +3652,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		fname = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(fname), 1);
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
 		if (UNEXPECTED(func == NULL)) {
 			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
@@ -6271,7 +6271,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -6389,7 +6389,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -7032,7 +7032,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 			}
 		}
 
-		zv = zend_hash_find_ex(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1);
+		zv = zend_hash_find_known_hash(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 		if (EXPECTED(zv != NULL)) {
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
@@ -7351,7 +7351,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_DELAYED_SPEC_CON
 	ce = CACHED_PTR(opline->extended_value);
 	if (ce == NULL) {
 		lcname = RT_CONSTANT(opline, opline->op1);
-		zv = zend_hash_find_ex(EG(class_table), Z_STR_P(lcname + 1), 1);
+		zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
 		if (zv) {
 			SAVE_OPLINE();
 			ce = Z_CE_P(zv);
@@ -7654,7 +7654,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CON
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 
 				ZEND_VM_SMART_BRANCH(result, 0);
 			} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
@@ -7673,7 +7673,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CON
 				HANDLE_EXCEPTION();
 			}
 		}
-		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+		result = zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
@@ -7682,7 +7682,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CON
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 
 				ZEND_VM_SMART_BRANCH(result, 0);
 			}
@@ -8599,7 +8599,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -8717,7 +8717,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -10951,7 +10951,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -11069,7 +11069,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -15371,7 +15371,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -15489,7 +15489,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -16791,7 +16791,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -16909,7 +16909,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -18103,7 +18103,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -18221,7 +18221,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -19823,7 +19823,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 				ZEND_VM_SMART_BRANCH(result, 0);
 			} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
@@ -19842,7 +19842,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 				HANDLE_EXCEPTION();
 			}
 		}
-		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+		result = zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
@@ -19851,7 +19851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_TMP_CONST_HANDLE
 		if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 				ZEND_VM_SMART_BRANCH(result, 0);
 			}
@@ -22816,7 +22816,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -22947,7 +22947,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -23078,7 +23078,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -23209,7 +23209,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -24329,7 +24329,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 			}
 		}
 
-		zv = zend_hash_find_ex(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1);
+		zv = zend_hash_find_known_hash(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 		if (EXPECTED(zv != NULL)) {
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
@@ -24761,7 +24761,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		if ((IS_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 				ZEND_VM_SMART_BRANCH(result, 0);
 			} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
@@ -24780,7 +24780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 				HANDLE_EXCEPTION();
 			}
 		}
-		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+		result = zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
@@ -24789,7 +24789,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_VAR_CONST_HANDLE
 		if ((IS_VAR & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 				ZEND_VM_SMART_BRANCH(result, 0);
 			}
@@ -25374,7 +25374,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -25505,7 +25505,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -25636,7 +25636,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -25767,7 +25767,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -29299,7 +29299,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -29430,7 +29430,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -29561,7 +29561,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -29692,7 +29692,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -31407,7 +31407,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -31568,7 +31568,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -31699,7 +31699,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -31830,7 +31830,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -31961,7 +31961,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -32092,7 +32092,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -32691,7 +32691,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 			}
 		}
 
-		zv = zend_hash_find_ex(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1);
+		zv = zend_hash_find_known_hash(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 		if (EXPECTED(zv != NULL)) {
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
@@ -33265,7 +33265,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -33421,7 +33421,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -33552,7 +33552,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -33683,7 +33683,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -33814,7 +33814,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -33945,7 +33945,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -35735,7 +35735,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -35891,7 +35891,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -36022,7 +36022,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -36153,7 +36153,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -36284,7 +36284,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -36415,7 +36415,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -39871,7 +39871,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -40032,7 +40032,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -40163,7 +40163,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -40294,7 +40294,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -40425,7 +40425,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -40556,7 +40556,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -42236,7 +42236,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_C
 		}
 	}
 
-	value = zend_hash_find_ex(&EG(symbol_table), varname, 1);
+	value = zend_hash_find_known_hash(&EG(symbol_table), varname);
 	if (UNEXPECTED(value == NULL)) {
 		value = zend_hash_add_new(&EG(symbol_table), varname, &EG(uninitialized_zval));
 		idx = (char*)value - (char*)EG(symbol_table).arData;
@@ -42313,7 +42313,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 
 				ZEND_VM_SMART_BRANCH(result, 0);
 			} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
@@ -42332,7 +42332,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 				HANDLE_EXCEPTION();
 			}
 		}
-		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+		result = zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 		ZEND_VM_SMART_BRANCH(result, 0);
 	} else {
 		zend_string *key;
@@ -42341,7 +42341,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(op1) == IS_REFERENCE) {
 			op1 = Z_REFVAL_P(op1);
 			if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-				result = zend_hash_find_ex(ht, Z_STR_P(op1), 0);
+				result = zend_hash_find(ht, Z_STR_P(op1));
 
 				ZEND_VM_SMART_BRANCH(result, 0);
 			}
@@ -43504,7 +43504,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -43660,7 +43660,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -43791,7 +43791,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -43922,7 +43922,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -44053,7 +44053,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -44184,7 +44184,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -48532,7 +48532,7 @@ fetch_obj_r_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -48688,7 +48688,7 @@ fetch_obj_is_fast_copy:
 						}
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 					}
-					retval = zend_hash_find_ex(zobj->properties, name, 1);
+					retval = zend_hash_find_known_hash(zobj->properties, name);
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
@@ -48819,7 +48819,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -48950,7 +48950,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -49081,7 +49081,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}
@@ -49212,7 +49212,7 @@ fast_assign_obj:
 						}
 						zobj->properties = zend_array_dup(zobj->properties);
 					}
-					property_val = zend_hash_find_ex(zobj->properties, name, 1);
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
 					if (property_val) {
 						goto fast_assign_obj;
 					}

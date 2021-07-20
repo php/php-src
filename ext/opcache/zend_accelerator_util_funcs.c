@@ -136,7 +136,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find_ex(target, p->key, 1);
+		t = zend_hash_find_known_hash(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
 			goto failure;
 		}
@@ -173,7 +173,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find_ex(target, p->key, 1);
+		t = zend_hash_find_known_hash(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Runtime definition key. There are two circumstances under which the key can

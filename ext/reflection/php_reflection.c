@@ -5134,7 +5134,7 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
 
 					for (j = 0; j < ce->num_traits; j++) {
-						zv = zend_hash_find_ex(CG(class_table), ce->trait_names[j].lc_name, 1);
+						zv = zend_hash_find_known_hash(CG(class_table), ce->trait_names[j].lc_name);
 						if (zv) {
 							trait = Z_CE_P(zv);
 							if (zend_hash_exists(&trait->function_table, lcname)) {

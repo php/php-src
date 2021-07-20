@@ -1160,7 +1160,7 @@ static zend_never_inline void do_inheritance_check_on_method(
 
 static zend_always_inline void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, bool checked) /* {{{ */
 {
-	zval *child = zend_hash_find_ex(&ce->function_table, key, 1);
+	zval *child = zend_hash_find_known_hash(&ce->function_table, key);
 
 	if (child) {
 		zend_function *func = (zend_function*)Z_PTR_P(child);
@@ -1235,7 +1235,7 @@ static void emit_incompatible_property_error(
 
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-	zval *child = zend_hash_find_ex(&ce->properties_info, key, 1);
+	zval *child = zend_hash_find_known_hash(&ce->properties_info, key);
 	zend_property_info *child_info;
 
 	if (UNEXPECTED(child)) {
@@ -1340,7 +1340,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
-	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
+	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
 	zend_class_constant *c;
 
 	if (zv != NULL) {
@@ -1644,7 +1644,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 static bool do_inherit_constant_check(
 	zend_class_entry *ce, zend_class_constant *parent_constant, zend_string *name
 ) {
-	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
+	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
 	if (zv == NULL) {
 		return true;
 	}
@@ -2870,7 +2870,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					if (traits_and_interfaces) {
 						free_alloca(traits_and_interfaces, use_heap);
 					}
-					zv = zend_hash_find_ex(CG(class_table), key, 1);
+					zv = zend_hash_find_known_hash(CG(class_table), key);
 					Z_CE_P(zv) = ret;
 					if (ZSTR_HAS_CE_CACHE(ret->name)) {
 						ZSTR_SET_CE_CACHE(ret->name, ret);
@@ -2888,7 +2888,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 		/* Lazy class loading */
 		ce = zend_lazy_class_load(ce);
-		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		zv = zend_hash_find_known_hash(CG(class_table), key);
 		Z_CE_P(zv) = ce;
 		if (CG(unlinked_uses)
 		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
@@ -2898,7 +2898,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		/* Lazy class loading */
 		ce = zend_lazy_class_load(ce);
 		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
-		zv = zend_hash_find_ex(CG(class_table), key, 1);
+		zv = zend_hash_find_known_hash(CG(class_table), key);
 		Z_CE_P(zv) = ce;
 		if (CG(unlinked_uses)
 		 && zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)proto) == SUCCESS) {
@@ -2987,7 +2987,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		ce->inheritance_cache = NULL;
 		new_ce = zend_inheritance_cache_add(ce, proto, parent, traits_and_interfaces, ht);
 		if (new_ce) {
-			zv = zend_hash_find_ex(CG(class_table), key, 1);
+			zv = zend_hash_find_known_hash(CG(class_table), key);
 			ce = new_ce;
 			Z_CE_P(zv) = ce;
 		}
@@ -3019,7 +3019,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 	inheritance_status overall_status = INHERITANCE_SUCCESS;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent_func) {
-		zval *zv = zend_hash_find_ex(&ce->function_table, key, 1);
+		zval *zv = zend_hash_find_known_hash(&ce->function_table, key);
 		if (zv) {
 			zend_function *child_func = Z_FUNC_P(zv);
 			inheritance_status status =
@@ -3041,7 +3041,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 			continue;
 		}
 
-		zv = zend_hash_find_ex(&ce->properties_info, key, 1);
+		zv = zend_hash_find_known_hash(&ce->properties_info, key);
 		if (zv) {
 			zend_property_info *child_info = Z_PTR_P(zv);
 			if (ZEND_TYPE_IS_SET(child_info->type)) {
@@ -3146,7 +3146,7 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 			ce->inheritance_cache = NULL;
 			new_ce = zend_inheritance_cache_add(ce, proto, parent_ce, NULL, ht);
 			if (new_ce) {
-				zval *zv = zend_hash_find_ex(CG(class_table), lcname, 1);
+				zval *zv = zend_hash_find_known_hash(CG(class_table), lcname);
 				ce = new_ce;
 				Z_CE_P(zv) = ce;
 			}
