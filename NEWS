@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     enabled). (Dmitry)
   . Fixed bug #81206 (Multiple PHP processes crash with JIT enabled). (cmb,
     Nikita)
+  . Fixed bug #81272 (Segfault in var[] after array_slice with JIT). (Nikita)
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
