@@ -28,7 +28,6 @@
 #include "php_ini.h"
 #include "php_openssl.h"
 #include "zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 
 /* PHP Includes */
 #include "ext/standard/file.h"
@@ -1105,8 +1104,6 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
-	php_openssl_certificate_ce->serialize = zend_class_serialize_deny;
-	php_openssl_certificate_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_openssl_certificate_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_certificate_object_handlers.offset = XtOffsetOf(php_openssl_certificate_object, std);
@@ -1117,8 +1114,6 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_request_ce = register_class_OpenSSLCertificateSigningRequest();
 	php_openssl_request_ce->create_object = php_openssl_request_create_object;
-	php_openssl_request_ce->serialize = zend_class_serialize_deny;
-	php_openssl_request_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_openssl_request_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_request_object_handlers.offset = XtOffsetOf(php_openssl_request_object, std);
@@ -1129,8 +1124,6 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_pkey_ce = register_class_OpenSSLAsymmetricKey();
 	php_openssl_pkey_ce->create_object = php_openssl_pkey_create_object;
-	php_openssl_pkey_ce->serialize = zend_class_serialize_deny;
-	php_openssl_pkey_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_openssl_pkey_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_pkey_object_handlers.offset = XtOffsetOf(php_openssl_pkey_object, std);
