@@ -2700,9 +2700,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
 
-	sxe_class_entry->serialize = zend_class_serialize_deny;
-	sxe_class_entry->unserialize = zend_class_unserialize_deny;
-
 	/* TODO: Why do we have two variables for this? */
 	ce_SimpleXMLElement = sxe_class_entry;
 
