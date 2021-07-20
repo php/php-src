@@ -31,7 +31,6 @@
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
-#include "zend_interfaces.h"
 #include "pdo_dbh_arginfo.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
@@ -1326,8 +1325,6 @@ void pdo_dbh_init(void)
 {
 	pdo_dbh_ce = register_class_PDO();
 	pdo_dbh_ce->create_object = pdo_dbh_new;
-	pdo_dbh_ce->serialize = zend_class_serialize_deny;
-	pdo_dbh_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
