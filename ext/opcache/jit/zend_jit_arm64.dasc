@@ -5144,7 +5144,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	EXT_CALL zend_hash_find, REG0
 					|1:
 				} else {
-					|	EXT_CALL _zend_hash_find_known_hash, REG0
+					|	EXT_CALL zend_hash_find_known_hash, REG0
 				}
 				|	mov REG0, RETVALx
 				if (not_found_exit_addr) {
@@ -5168,7 +5168,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	EXT_CALL zend_hash_find, REG0
 					|1:
 				} else {
-					|	EXT_CALL _zend_hash_find_known_hash, REG0
+					|	EXT_CALL zend_hash_find_known_hash, REG0
 				}
 				|	mov REG0, RETVALx
 				if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
@@ -13300,13 +13300,13 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
 			if (Z_TYPE_P(zv) == IS_STRING) {
-				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+				jump_zv = zend_hash_find_known_hash(jumptable, Z_STR_P(zv));
 			}
 		} else if (opline->opcode == ZEND_MATCH) {
 			if (Z_TYPE_P(zv) == IS_LONG) {
 				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
 			} else if (Z_TYPE_P(zv) == IS_STRING) {
-				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+				jump_zv = zend_hash_find_known_hash(jumptable, Z_STR_P(zv));
 			}
 		} else {
 			ZEND_UNREACHABLE();
@@ -13932,7 +13932,7 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 	} else {
 		zend_string *str = Z_STR_P(RT_CONSTANT(opline, opline->op1));
 		|	LOAD_ADDR FCARG2x, str
-		|	EXT_CALL _zend_hash_find_known_hash, REG0
+		|	EXT_CALL zend_hash_find_known_hash, REG0
 	}
 	if (exit_addr) {
 		if (smart_branch_opcode == ZEND_JMPZ) {

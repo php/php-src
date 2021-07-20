@@ -6,6 +6,8 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   c. zend_get_opcode_id()
   d. Removed support for "p" printf format specifier
   e. ZEND_ATOL() changes
+  f. Non-serializable classes should use ZEND_ACC_NOT_SERIALIZABLE
+  g. _zend_hash_find_known_hash renamed to zend_hash_find_known_hash
 
 2. Build system changes
   a. New compiler flags
@@ -50,6 +52,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   f. Non-serializable classes should be indicated using the
      ZEND_ACC_NOT_SERIALIZABLE (@not-serializable in stubs) rather than the
      zend_class_(un)serialize_deny handlers which are removed.
+  g. _zend_hash_find_known_hash has been renamed to zend_hash_find_known_hash.
 
 ========================
 2. Build system changes

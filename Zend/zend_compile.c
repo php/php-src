@@ -1059,7 +1059,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 
 static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zend_string *lcname, zend_op_array *op_array, bool compile_time) /* {{{ */
 {
-	zval *zv = zend_hash_find_ex(compile_time ? CG(function_table) : EG(function_table), lcname, 1);
+	zval *zv = zend_hash_find_known_hash(compile_time ? CG(function_table) : EG(function_table), lcname);
 	int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 	zend_function *old_function;
 
@@ -1102,7 +1102,7 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 
 	rtd_key = lcname + 1;
 
-	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
+	zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(rtd_key));
 
 	if (UNEXPECTED(!zv)) {
 		ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
@@ -1114,7 +1114,7 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 				ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
 				if (zend_preload_autoload
 				  && zend_preload_autoload(EG(current_execute_data)->func->op_array.filename) == SUCCESS) {
-					zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
+					zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(rtd_key));
 					if (EXPECTED(zv != NULL)) {
 						break;
 					}
@@ -1383,7 +1383,7 @@ ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t fi
 		while (opline_num != (uint32_t)-1) {
 			const zend_op *opline = &op_array->opcodes[opline_num];
 			zval *lcname = RT_CONSTANT(opline, opline->op1);
-			zval *zv = zend_hash_find_ex(EG(class_table), Z_STR_P(lcname + 1), 1);
+			zval *zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
 
 			if (zv) {
 				zend_class_entry *ce = Z_CE_P(zv);

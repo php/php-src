@@ -811,7 +811,7 @@ static uint32_t get_internal_func_info(
 		return 0;
 	}
 
-	zval *zv = zend_hash_find_ex(&func_info, callee_func->common.function_name, 1);
+	zval *zv = zend_hash_find_known_hash(&func_info, callee_func->common.function_name);
 	if (!zv) {
 		return 0;
 	}

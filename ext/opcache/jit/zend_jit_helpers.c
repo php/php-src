@@ -63,7 +63,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 
 static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 {
-	zval *func = zend_hash_find_ex(EG(function_table), name, 1);
+	zval *func = zend_hash_find_known_hash(EG(function_table), name);
 	zend_function *fbc;
 
 	if (UNEXPECTED(func == NULL)) {
@@ -78,11 +78,11 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 
 static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name)
 {
-	zval *func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
+	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
 	zend_function *fbc;
 
 	if (func == NULL) {
-		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 		if (UNEXPECTED(func == NULL)) {
 			return NULL;
 		}
@@ -262,7 +262,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 
 static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *str)
 {
-	zval *retval = zend_hash_find_ex(ht, str, 1);
+	zval *retval = zend_hash_find_known_hash(ht, str);
 	if (!retval) {
 		/* Key may be released while throwing the undefined index warning. */
 		retval = zend_undefined_index_write(ht, str);
@@ -1324,7 +1324,7 @@ static zend_reference* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_string *v
 		}
 	}
 
-	value = zend_hash_find_ex(&EG(symbol_table), varname, 1);
+	value = zend_hash_find_known_hash(&EG(symbol_table), varname);
 	if (UNEXPECTED(value == NULL)) {
 		value = zend_hash_add_new(&EG(symbol_table), varname, &EG(uninitialized_zval));
 		idx = (char*)value - (char*)EG(symbol_table).arData;
@@ -1423,7 +1423,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr
 			CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
 
-		retval = zend_hash_find_ex(zobj->properties, name, 1);
+		retval = zend_hash_find_known_hash(zobj->properties, name);
 
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
@@ -1481,7 +1481,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 			CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
 
-		retval = zend_hash_find_ex(zobj->properties, name, 1);
+		retval = zend_hash_find_known_hash(zobj->properties, name);
 
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
