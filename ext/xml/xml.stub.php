@@ -63,7 +63,10 @@ function xml_parser_set_option(XMLParser $parser, int $option, $value): bool {}
 
 function xml_parser_get_option(XMLParser $parser, int $option): string|int {}
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class XMLParser
 {
 }
