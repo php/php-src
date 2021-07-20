@@ -25,7 +25,6 @@
 #include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "Zend/zend_interfaces.h"
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -110,8 +109,6 @@ PHP_MINIT_FUNCTION(sysvmsg)
 {
 	sysvmsg_queue_ce = register_class_SysvMessageQueue();
 	sysvmsg_queue_ce->create_object = sysvmsg_queue_create_object;
-	sysvmsg_queue_ce->serialize = zend_class_serialize_deny;
-	sysvmsg_queue_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);
