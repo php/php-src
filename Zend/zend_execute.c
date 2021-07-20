@@ -2841,7 +2841,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
 				if (prop_info) {
 					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-						/* For objects, R/RW/UNSET fetch modes might not actually modify object.
+						/* For objects, W/RW/UNSET fetch modes might not actually modify object.
 						 * Similar as with magic __get() allow them, but return the value as a copy
 						 * to make sure no actual modification is possible. */
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
