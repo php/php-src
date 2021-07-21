@@ -87,6 +87,9 @@ struct _zend_fiber_context {
 
 	/* Fiber status. */
 	zend_fiber_status status;
+
+	/* Reserved for extensions */
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
 struct _zend_fiber {
