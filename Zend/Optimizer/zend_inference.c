@@ -3474,6 +3474,9 @@ static zend_always_inline int _zend_update_type_info(
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 			} else {
 				tmp &= ~MAY_BE_RC1;
+				if (opline->opcode == ZEND_FETCH_STATIC_PROP_IS) {
+					tmp |= MAY_BE_UNDEF;
+				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			if (ce) {
