@@ -2349,7 +2349,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_interned_strings_switch_storage(1);
 
 #if ZEND_RC_DEBUG
-	zend_rc_debug = 1;
+	if (retval == SUCCESS) {
+		zend_rc_debug = 1;
+	}
 #endif
 
 	/* we're done */
