@@ -689,7 +689,7 @@ try_again:
 				return offset;
 			}
 			zend_jit_illegal_string_offset(dim);
-			break;
+			return 0;
 		}
 		case IS_UNDEF:
 			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
@@ -705,7 +705,7 @@ try_again:
 			goto try_again;
 		default:
 			zend_jit_illegal_string_offset(dim);
-			break;
+			return 0;
 	}
 
 	return zval_get_long_func(dim, /* is_strict */ false);
