@@ -501,26 +501,23 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					zval_ptr_dtor(parameter);
 					ZVAL_NULL(parameter);
 
-					switch (P->len) {
-						case SQL_NULL_DATA:
-							break;
-						default:
-							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, P->outbuf, P->len, &ulen)) {
-								case PDO_ODBC_CONV_FAIL:
-									/* something fishy, but allow it to come back as binary */
-								case PDO_ODBC_CONV_NOT_REQUIRED:
-									srcbuf = P->outbuf;
-									srclen = P->len;
-									break;
-								case PDO_ODBC_CONV_OK:
-									srcbuf = S->convbuf;
-									srclen = ulen;
-									break;
-							}
+					if (P->len >= 0) {
+						switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, P->outbuf, P->len, &ulen)) {
+							case PDO_ODBC_CONV_FAIL:
+								/* something fishy, but allow it to come back as binary */
+							case PDO_ODBC_CONV_NOT_REQUIRED:
+								srcbuf = P->outbuf;
+								srclen = P->len;
+								break;
+							case PDO_ODBC_CONV_OK:
+								srcbuf = S->convbuf;
+								srclen = ulen;
+								break;
+						}
 
-							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
-							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
-							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
+						ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
+						memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
+						Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
 				}
 				return 1;

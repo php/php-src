@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #80849 (HTTP Status header truncation). (cmb)
 
+- PDO_ODBC:
+  . Fixed bug #81252 (PDO_ODBC doesn't account for SQL_NO_TOTAL). (cmb)
+
 - Shmop:
   . Fixed bug #81283 (shmop can't read beyond 2147483647 bytes). (cmb, Nikita)
 
