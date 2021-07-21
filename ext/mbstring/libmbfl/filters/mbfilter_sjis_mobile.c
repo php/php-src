@@ -52,7 +52,9 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
  	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_docomo_wchar,
-	&vtbl_wchar_sjis_docomo
+	&vtbl_wchar_sjis_docomo,
+	NULL,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_sjis_kddi = {
@@ -63,7 +65,9 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
  	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_kddi_wchar,
-	&vtbl_wchar_sjis_kddi
+	&vtbl_wchar_sjis_kddi,
+	NULL,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_sjis_sb = {
@@ -74,7 +78,9 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
  	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_sb_wchar,
-	&vtbl_wchar_sjis_sb
+	&vtbl_wchar_sjis_sb,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {

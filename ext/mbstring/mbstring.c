@@ -2569,7 +2569,16 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (input_str) {
-		/* new encoding */
+		if (num_from_encodings == 1) {
+			const mbfl_encoding *from_encoding = from_encodings[0];
+			if (from_encoding->to_wchar && to_encoding->from_wchar) {
+				unsigned int num_errors = 0;
+				RETVAL_STR(mb_fast_convert(input_str, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors));
+				MBSTRG(illegalchars) += num_errors;
+				goto out;
+			}
+		}
+
 		size_t size;
 		char *ret = php_mb_convert_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str),
 			to_encoding, from_encodings, num_from_encodings, &size);
@@ -2587,6 +2596,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		RETVAL_ARR(tmp);
 	}
 
+out:
 	if (free_from_encodings) {
 		efree(ZEND_VOIDP(from_encodings));
 	}

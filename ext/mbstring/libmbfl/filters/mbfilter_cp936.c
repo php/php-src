@@ -63,7 +63,9 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	mblen_table_cp936,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp936_wchar,
-	&vtbl_wchar_cp936
+	&vtbl_wchar_cp936,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp936_wchar = {

@@ -50,7 +50,9 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,
-	&vtbl_wchar_sjis_mac
+	&vtbl_wchar_sjis_mac,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
