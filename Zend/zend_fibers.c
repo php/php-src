@@ -345,11 +345,15 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 	// Set status in case memory has not been zeroed.
 	context->status = ZEND_FIBER_STATUS_INIT;
 
+	zend_observer_fiber_init_notify(context);
+
 	return true;
 }
 
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
+	zend_observer_fiber_destroy_notify(context);
+
 	zend_fiber_stack_free(context->stack);
 }
 
