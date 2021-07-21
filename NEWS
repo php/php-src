@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT). (Dmitry)
   . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation)
     (Nikita, Dmitry)
+  . Fixed bug #81226 (Integer overflow behavior is different with JIT
+    enabled). (Dmitry)
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
