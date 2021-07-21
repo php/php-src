@@ -1,12 +1,12 @@
 --TEST--
 Bug #80959: infinite loop in building cfg during JIT compilation
+--EXTENSIONS--
+opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.jit_buffer_size=1M
 opcache.jit=tracing
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function test($a, $b) {
