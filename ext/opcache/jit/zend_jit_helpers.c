@@ -2051,7 +2051,9 @@ static zend_never_inline void _zend_jit_assign_op_overloaded_property(zend_objec
 //???	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 //???		ZVAL_COPY(EX_VAR(opline->result.var), &res);
 //???	}
-	zval_ptr_dtor(z);
+	if (z == &rv) {
+		zval_ptr_dtor(z);
+	}
 	zval_ptr_dtor(&res);
 	OBJ_RELEASE(object);
 }
@@ -2361,7 +2363,9 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
 		OBJ_RELEASE(zobj);
 		zval_ptr_dtor(&z_copy);
-		zval_ptr_dtor(z);
+		if (z == &rv) {
+			zval_ptr_dtor(z);
+		}
 	}
 }
 
@@ -2430,7 +2434,9 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
 		OBJ_RELEASE(zobj);
 		zval_ptr_dtor(&z_copy);
-		zval_ptr_dtor(z);
+		if (z == &rv) {
+			zval_ptr_dtor(z);
+		}
 	}
 }
 
@@ -2489,7 +2495,9 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
 		OBJ_RELEASE(zobj);
 		zval_ptr_dtor(&z_copy);
-		zval_ptr_dtor(z);
+		if (z == &rv) {
+			zval_ptr_dtor(z);
+		}
 	}
 }
 
@@ -2548,7 +2556,9 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 		zobj->handlers->write_property(zobj, name, &z_copy, cache_slot);
 		OBJ_RELEASE(zobj);
 		zval_ptr_dtor(&z_copy);
-		zval_ptr_dtor(z);
+		if (z == &rv) {
+			zval_ptr_dtor(z);
+		}
 	}
 }
 
