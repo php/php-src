@@ -230,8 +230,8 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @tentative-return-type */
-    public function item(int $index): ?DOMNode {}
+    /** @return DOMNode|DOMNamespaceNode|null */
+    public function item(int $index) {}
 }
 
 class DOMCharacterData extends DOMNode implements DOMChildNode
