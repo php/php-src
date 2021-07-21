@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     Nikita)
   . Fixed bug #81272 (Segfault in var[] after array_slice with JIT). (Nikita)
   . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT). (Dmitry)
+  . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation)
+    (Nikita, Dmitry)
 
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
