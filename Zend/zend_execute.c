@@ -1202,7 +1202,7 @@ static void zend_verify_internal_read_property_type(zend_object *obj, zend_strin
 }
 
 #ifndef ZEND_VERIFY_FUNC_INFO
-# define ZEND_VERIFY_FUNC_INFO 0
+# define ZEND_VERIFY_FUNC_INFO 1
 #endif
 
 static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
