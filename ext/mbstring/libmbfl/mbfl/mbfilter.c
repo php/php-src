@@ -454,49 +454,39 @@ filter_count_output(int c, void *data)
 	return 0;
 }
 
-size_t
-mbfl_strlen(const mbfl_string *string)
+size_t mbfl_strlen(const mbfl_string *string)
 {
-	size_t len, n, k;
-	unsigned char *p;
+	size_t len = 0;
 	const mbfl_encoding *encoding = string->encoding;
 
-	len = 0;
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 		len = string->len;
 	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		len = string->len/2;
 	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		len = string->len/4;
-	} else if (encoding->mblen_table != NULL) {
+	} else if (encoding->mblen_table) {
 		const unsigned char *mbtab = encoding->mblen_table;
-		n = 0;
-		p = string->val;
-		k = string->len;
-		/* count */
-		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
-				n += m;
-				p += m;
-				len++;
-			}
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
+			p += mbtab[*p];
+			len++;
+		}
+	} else if (encoding->to_wchar) {
+		uint32_t wchar_buf[128];
+		unsigned char *in = string->val;
+		size_t in_len = string->len;
+		unsigned int state = 0;
+
+		while (in_len) {
+			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
 		}
 	} else {
-		/* wchar filter */
-		mbfl_convert_filter *filter = mbfl_convert_filter_new(
-		  string->encoding,
-		  &mbfl_encoding_wchar,
-		  filter_count_output, 0, &len);
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_output, 0, &len);
 		ZEND_ASSERT(filter);
-		/* count */
-		n = string->len;
-		p = string->val;
-		if (p != NULL) {
-			while (n > 0) {
-				(*filter->filter_function)(*p++, filter);
-				n--;
-			}
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
+			(*filter->filter_function)(*p++, filter);
 		}
 		mbfl_convert_filter_delete(filter);
 	}
@@ -1232,7 +1222,7 @@ mbfl_strcut(
 
 /* Some East Asian characters, when printed at a terminal (or the like), require double
  * the usual amount of horizontal space. We call these "fullwidth" characters. */
-static size_t character_width(int c)
+static size_t character_width(unsigned int c)
 {
 	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
 		return 1;
@@ -1260,35 +1250,44 @@ static int filter_count_width(int c, void* data)
 	return 0;
 }
 
-size_t
-mbfl_strwidth(mbfl_string *string)
+size_t mbfl_strwidth(mbfl_string *string)
 {
-	size_t len, n;
-	unsigned char *p;
-	mbfl_convert_filter *filter;
+	if (!string->len) {
+		return 0;
+	}
 
-	len = 0;
-	if (string->len > 0 && string->val != NULL) {
-		/* wchar filter */
-		filter = mbfl_convert_filter_new(
-		    string->encoding,
-		    &mbfl_encoding_wchar,
-		    filter_count_width, 0, &len);
+	size_t width = 0;
+
+	if (string->encoding->to_wchar) {
+		uint32_t wchar_buf[128];
+		unsigned char *in = string->val;
+		size_t in_len = string->len;
+		unsigned int state = 0;
+
+		while (in_len) {
+			size_t out_len = string->encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+			while (out_len) {
+				/* NOTE: 'bad input' marker will be counted as 1 unit of width
+				 * If text conversion is performed with an ordinary ASCII character as
+				 * the 'replacement character', this will give us the correct display width. */
+				width += character_width(wchar_buf[--out_len]);
+			}
+		}
+	} else {
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_width, 0, &width);
 		ZEND_ASSERT(filter);
 
 		/* feed data */
-		p = string->val;
-		n = string->len;
-		while (n > 0) {
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
 			(*filter->filter_function)(*p++, filter);
-			n--;
 		}
 
 		mbfl_convert_filter_flush(filter);
 		mbfl_convert_filter_delete(filter);
 	}
 
-	return len;
+	return width;
 }
 
 

@@ -33,6 +33,10 @@ mb_substitute_character("long");
 convertInvalidString("\xA1", "%", "ARMSCII-8", "UTF-8");
 convertInvalidString("\xFF", "%", "ARMSCII-8", "UTF-8");
 
+// Test replacement character which cannot be encoded in ARMSCII-8
+mb_substitute_character(0x1234);
+convertInvalidString("\x23\x45", '?', 'UTF-16BE', 'ARMSCII-8');
+
 echo "Done!\n";
 ?>
 --EXPECT--

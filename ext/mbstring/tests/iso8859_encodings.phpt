@@ -21,6 +21,10 @@ mb_substitute_character("long");
 convertInvalidString("\xAE", "%", "ISO8859-7", "UTF-8");
 convertInvalidString("\xFF", "%", "ISO8859-8", "UTF-8");
 
+// Test illegal character marker which can't be represented in target encoding
+mb_substitute_character(0x1234);
+convertInvalidString("\x23\x45", '?', 'UTF-16BE', 'ISO8859-7');
+
 echo "Done!\n";
 ?>
 --EXPECT--

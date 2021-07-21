@@ -204,6 +204,7 @@ foreach (['JIS', 'ISO-2022-JP'] as $encoding) {
 
 	testValidString("\x00\xA5", "\x1B(J\x5C\x1B(B", 'UTF-16BE', $encoding, false);
 }
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", 'UTF-16BE', 'ISO-2022-JP', false);
 
 echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
 
