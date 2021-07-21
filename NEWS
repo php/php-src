@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
   . Fixed bug #81265 (getimagesize returns 0 for 256px ICO images).
     (George Dietrich)
+  . Fixed bug #74960 (Heap buffer overflow via str_repeat). (cmb, Dmitry)
 
 29 Jul 2021, PHP 8.0.9
 
