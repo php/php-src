@@ -1882,7 +1882,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
 
-		if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 			zend_throw_error(NULL, "String size overflow");
 			zval_ptr_dtor_str(&op1_copy);
 			zval_ptr_dtor_str(&op2_copy);
