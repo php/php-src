@@ -804,95 +804,27 @@ static const func_info_t func_infos[] = {
 static HashTable func_info;
 ZEND_API int zend_func_info_rid = -1;
 
-void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
-	if (fn->common.scope) {
-		/* This is a method, not a function. */
-		return;
-	}
-
-	zend_string *name = fn->common.function_name;
-	if (!name) {
-		/* zend_pass_function has no name. */
-		return;
-	}
-
-	zval *zv = zend_hash_find_ex(&func_info, name, 1);
-	if (!zv) {
-		return;
-	}
-
-	func_info_t *info = Z_PTR_P(zv);
-	if (info->info_func) {
-		return;
-	}
-
-	uint32_t type_mask = info->info;
-
-	/* Always check refcount of arrays, as immutable arrays are RCN. */
-	if (Z_REFCOUNTED_P(retval) || Z_TYPE_P(retval) == IS_ARRAY) {
-		if (!(type_mask & MAY_BE_RC1)) {
-			zend_error_noreturn(E_CORE_ERROR, "%s() missing rc1", ZSTR_VAL(name));
-		}
-		if (Z_REFCOUNT_P(retval) > 1 && !(type_mask & MAY_BE_RCN)) {
-			zend_error_noreturn(E_CORE_ERROR, "%s() missing rcn", ZSTR_VAL(name));
-		}
-	}
-
-	uint32_t type = 1u << Z_TYPE_P(retval);
-	if (!(type_mask & type)) {
-		zend_error_noreturn(E_CORE_ERROR, "%s() missing type %s",
-			ZSTR_VAL(name), zend_get_type_by_const(Z_TYPE_P(retval)));
-	}
-
-	if (Z_TYPE_P(retval) == IS_ARRAY) {
-		HashTable *ht = Z_ARRVAL_P(retval);
-		uint32_t num_checked = 0;
-		zend_string *str;
-		zval *val;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
-			if (str) {
-				if (!(type_mask & MAY_BE_ARRAY_KEY_STRING)) {
-					zend_error_noreturn(E_CORE_ERROR,
-						"%s() missing array_key_string", ZSTR_VAL(name));
-				}
-			} else {
-				if (!(type_mask & MAY_BE_ARRAY_KEY_LONG)) {
-					zend_error_noreturn(E_CORE_ERROR,
-						"%s() missing array_key_long", ZSTR_VAL(name));
-				}
-			}
-
-			uint32_t array_type = 1u << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
-			if (!(type_mask & array_type)) {
-				zend_error_noreturn(E_CORE_ERROR,
-					"%s() missing array element type %s",
-					ZSTR_VAL(name), zend_get_type_by_const(Z_TYPE_P(retval)));
-			}
-
-			/* Don't check all elements of large arrays. */
-			if (++num_checked > 16) {
-				break;
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-}
-
-static uint32_t get_internal_func_info(
-		const zend_call_info *call_info, const zend_ssa *ssa) {
-	zend_function *callee_func = call_info->callee_func;
+uint32_t zend_get_internal_func_info(
+		const zend_function *callee_func, const zend_call_info *call_info, const zend_ssa *ssa) {
 	if (callee_func->common.scope) {
 		/* This is a method, not a function. */
 		return 0;
 	}
 
-	zval *zv = zend_hash_find_known_hash(&func_info, callee_func->common.function_name);
+	zend_string *name = callee_func->common.function_name;
+	if (!name) {
+		/* zend_pass_function has no name. */
+		return 0;
+	}
+
+	zval *zv = zend_hash_find_known_hash(&func_info, name);
 	if (!zv) {
 		return 0;
 	}
 
 	func_info_t *info = Z_PTR_P(zv);
 	if (info->info_func) {
-		return info->info_func(call_info, ssa);
+		return call_info ? info->info_func(call_info, ssa) : 0;
 	} else {
 		return info->info;
 	}
@@ -908,7 +840,7 @@ ZEND_API uint32_t zend_get_func_info(
 	*ce_is_instanceof = 0;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-		uint32_t internal_ret = get_internal_func_info(call_info, ssa);
+		uint32_t internal_ret = zend_get_internal_func_info(callee_func, call_info, ssa);
 #if !ZEND_DEBUG
 		if (internal_ret) {
 			return internal_ret;

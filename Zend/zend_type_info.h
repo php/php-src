@@ -67,6 +67,9 @@
 #define MAY_BE_CLASS                (1<<24)
 #define MAY_BE_INDIRECT             (1<<25)
 
+#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
+
 
 #define MAY_BE_ANY_ARRAY \
 	(MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)

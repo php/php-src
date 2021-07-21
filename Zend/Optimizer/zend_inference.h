@@ -31,10 +31,6 @@
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
 //#define MAY_BE_IN_REG               (1<<29) /* deprecated and not used */
 
-//TODO: remome MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
-
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
 	|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE)
