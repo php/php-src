@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT)
+  . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation)
+    (Nikita, Dmitry)
 
 22 Jul 2021, PHP 8.1.0beta1
 

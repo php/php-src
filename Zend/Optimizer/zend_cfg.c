@@ -893,6 +893,10 @@ ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cf
 				j = blocks[j].loop_header;
 			}
 			if (j != i) {
+				if (blocks[j].idom < 0 && j != 0) {
+					/* Ignore blocks that are unreachable or only abnormally reachable. */
+					continue;
+				}
 				blocks[j].loop_header = i;
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					zend_worklist_push(&work, cfg->predecessors[blocks[j].predecessor_offset + k]);
