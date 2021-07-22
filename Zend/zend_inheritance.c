@@ -1517,63 +1517,29 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
-		if (UNEXPECTED(parent_ce->type != ce->type)) {
-			/* User class extends internal */
-			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
-				zend_class_init_statics(parent_ce);
+		src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
+		do {
+			dst--;
+			src--;
+			if (Z_TYPE_P(src) == IS_INDIRECT) {
+				ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
+			} else {
+				ZVAL_INDIRECT(dst, src);
 			}
-			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
-				ZEND_UNREACHABLE();
+			if (Z_TYPE_P(Z_INDIRECT_P(dst)) == IS_CONSTANT_AST) {
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
 			}
-			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
-			do {
-				dst--;
-				src--;
-				if (Z_TYPE_P(src) == IS_INDIRECT) {
-					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
-				} else {
-					ZVAL_INDIRECT(dst, src);
-				}
-			} while (dst != end);
-		} else if (ce->type == ZEND_USER_CLASS) {
-			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
-				ZEND_ASSERT(parent_ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED));
-				zend_class_init_statics(parent_ce);
-			}
-			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
-			do {
-				dst--;
-				src--;
-				if (Z_TYPE_P(src) == IS_INDIRECT) {
-					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
-				} else {
-					ZVAL_INDIRECT(dst, src);
-				}
-				if (Z_TYPE_P(Z_INDIRECT_P(dst)) == IS_CONSTANT_AST) {
-					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-					ce->ce_flags |= ZEND_ACC_HAS_AST_STATICS;
-				}
-			} while (dst != end);
-		} else {
-			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
-			do {
-				dst--;
-				src--;
-				if (Z_TYPE_P(src) == IS_INDIRECT) {
-					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
-				} else {
-					ZVAL_INDIRECT(dst, src);
-				}
-			} while (dst != end);
-		}
+		} while (dst != end);
 		ce->default_static_members_count += parent_ce->default_static_members_count;
 		if (!ZEND_MAP_PTR(ce->static_members_table)) {
-			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
-			if (!EG(current_execute_data)) {
+			if (ce->type == ZEND_INTERNAL_CLASS &&
+					ce->info.internal.module->type == MODULE_PERSISTENT) {
 				ZEND_MAP_PTR_NEW(ce->static_members_table);
 			} else {
-				/* internal class loaded by dl() */
-				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+				ZEND_MAP_PTR_INIT(ce->static_members_table,
+					zend_arena_alloc(&CG(arena), sizeof(zval *)));
+				ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 			}
 		}
 	}
@@ -2715,7 +2681,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZVAL_COPY_VALUE(dst, src);
 		}
 	}
-	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+	ZEND_MAP_PTR_INIT(ce->static_members_table, zend_arena_alloc(&CG(arena), sizeof(zval *)));
+	ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 
 	/* properties_info */
 	if (!(HT_FLAGS(&ce->properties_info) & HASH_FLAG_UNINITIALIZED)) {

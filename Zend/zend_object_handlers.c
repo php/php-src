@@ -1480,7 +1480,11 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	}
 
 	if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
-		goto undeclared_property;
+undeclared_property:
+		if (type != BP_VAR_IS) {
+			zend_throw_error(NULL, "Access to undeclared static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+		}
+		return NULL;
 	}
 
 	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
@@ -1489,17 +1493,9 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 		}
 	}
 
-	/* check if static properties were destroyed */
+	/* Ensure static properties are initialized. */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED))) {
-			zend_class_init_statics(ce);
-		} else {
-undeclared_property:
-			if (type != BP_VAR_IS) {
-				zend_throw_error(NULL, "Access to undeclared static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-			}
-			return NULL;
-		}
+		zend_class_init_statics(ce);
 	}
 
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;

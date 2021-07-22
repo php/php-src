@@ -1653,17 +1653,19 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	if (!(script->corrupted)) {
 		ce->ce_flags |= ZEND_ACC_IMMUTABLE;
 		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
-			ZEND_MAP_PTR_NEW(ce->static_members_table);
-		} else {
-			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-		}
 		ZEND_MAP_PTR_NEW(ce->mutable_data);
+		if (ce->default_static_members_count) {
+			ZEND_MAP_PTR_NEW(ce->static_members_table);
+		}
 	} else {
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
-		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+		if (ce->default_static_members_count) {
+			ZEND_MAP_PTR_INIT(ce->static_members_table,
+				zend_arena_alloc(&CG(arena), sizeof(zval *)));
+			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+		}
 	}
 }
 
