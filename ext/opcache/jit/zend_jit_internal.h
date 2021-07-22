@@ -639,7 +639,7 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_THIS_CHECKED)
 #define TRACE_FRAME_IS_UNKNOWN_RETURN(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_UNKNOWN_RETURN)
-#define TRACE_FRAME_NO_NEED_REKEASE_THIS(frame) \
+#define TRACE_FRAME_NO_NEED_RELEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS)
 
 #define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
