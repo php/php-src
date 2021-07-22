@@ -40,7 +40,7 @@ static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_object_handlers zend_test_class_handlers;
 
-zval zend_test_persistent_object;
+ZEND_TLS zval zend_test_persistent_object;
 
 static ZEND_FUNCTION(zend_test_func)
 {
