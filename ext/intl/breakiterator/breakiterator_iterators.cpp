@@ -281,7 +281,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
-	RETURN_COPY_DEREF(return_value, &it->iterator->data);
+	RETURN_COPY_DEREF(&ii->iterator->data);
 }
 
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
