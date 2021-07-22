@@ -366,9 +366,7 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 
 static void zend_test_persistent_object_construct(zend_object *object, void *data)
 {
-	zval *zv = (zval*) data;
-
-	ZVAL_OBJ(zv, object);
+	ZVAL_OBJ(&zend_test_persistent_object, object);
 }
 
 static void zend_test_persistent_object_set_long(zend_object *object, void *data)
@@ -437,7 +435,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_objects_store_persist(zend_test_class);
 	
 	zend_object_persistent_construct(persistent,
-		zend_test_persistent_object_construct, &zend_test_persistent_object, ZEND_OBJECT_PERSISTENT_PTR);
+		zend_test_persistent_object_construct, NULL, 0);
 
 	zval l;
 	ZVAL_LONG(&l, 42);
