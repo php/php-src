@@ -832,7 +832,7 @@ ZEND_METHOD(Fiber, getReturn)
 		} else if (fiber->flags & ZEND_FIBER_FLAG_BAILOUT) {
 			message = "The fiber exited with a fatal error";
 		} else {
-			RETURN_COPY(&fiber->result);
+			RETURN_COPY_DEREF(&fiber->result);
 		}
 	} else if (fiber->context.status == ZEND_FIBER_STATUS_INIT) {
 		message = "The fiber has not been started";
