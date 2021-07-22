@@ -132,7 +132,7 @@ static PHP_INI_MH(OnUpdateOldCloseSemantics)
 	bool *p = (bool *) ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 
-	if (p) {
+	if (*p) {
 		zend_error(E_DEPRECATED, "Directive oci8.old_oci_close_semantics is deprecated");
 	}
 
