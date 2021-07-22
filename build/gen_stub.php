@@ -1178,6 +1178,10 @@ class PropertyInfo
             $flags .= "|ZEND_ACC_STATIC";
         }
 
+        if ($this->flags & Class_::MODIFIER_READONLY) {
+            $flags .= "|ZEND_ACC_READONLY";
+        }
+
         return $flags;
     }
 }
@@ -1806,7 +1810,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 }
 
 function parseStubFile(string $code): FileInfo {
-    $lexer = new PhpParser\Lexer();
+    $lexer = new PhpParser\Lexer\Emulative();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
