@@ -397,6 +397,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
+			if (ce->backed_enum_table) {
+				zend_hash_release(ce->backed_enum_table);
+			}
 			if (ce->default_properties_table) {
 				zval *p = ce->default_properties_table;
 				zval *end = p + ce->default_properties_count;
@@ -442,7 +445,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
-						zval_internal_ptr_dtor(&c->value);
+						if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+							/* We marked this as IMMUTABLE, but do need to free it when the
+							 * class is destroyed. */
+							ZEND_ASSERT(Z_ASTVAL(c->value)->kind == ZEND_AST_CONST_ENUM_INIT);
+							free(Z_AST(c->value));
+						} else {
+							zval_internal_ptr_dtor(&c->value);
+						}
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 1);
 						}

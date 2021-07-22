@@ -38,10 +38,6 @@ static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size
 	return new;
 }
 
-static inline size_t zend_ast_size(uint32_t children) {
-	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
-}
-
 static inline size_t zend_ast_list_size(uint32_t children) {
 	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }

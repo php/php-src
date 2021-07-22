@@ -26,6 +26,7 @@
 #include "observer.h"
 #include "fiber.h"
 #include "zend_attributes.h"
+#include "zend_enum.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -38,6 +39,8 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
+static zend_class_entry *zend_test_unit_enum;
+static zend_class_entry *zend_test_string_enum;
 static zend_object_handlers zend_test_class_handlers;
 
 static ZEND_FUNCTION(zend_test_func)
@@ -227,6 +230,13 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(zend_get_unit_enum)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
+}
+
 static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -383,6 +393,17 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
+
+	zend_test_unit_enum = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, NULL);
+	zend_enum_add_case_cstr(zend_test_unit_enum, "Foo", NULL);
+	zend_enum_add_case_cstr(zend_test_unit_enum, "Bar", NULL);
+
+	zval val;
+	zend_test_string_enum = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, NULL);
+	ZVAL_PSTRINGL(&val, "Test1", sizeof("Test1")-1);
+	zend_enum_add_case_cstr(zend_test_string_enum, "Foo", &val);
+	ZVAL_PSTRINGL(&val, "Test2", sizeof("Test2")-1);
+	zend_enum_add_case_cstr(zend_test_string_enum, "Bar", &val);
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

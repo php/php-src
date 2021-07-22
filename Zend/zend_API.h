@@ -416,8 +416,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
 ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type);
 
 static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry *ce) {
-	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
 		zend_class_mutable_data *mutable_data =
 			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		if (mutable_data && mutable_data->constants_table) {
@@ -431,8 +430,7 @@ static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry
 }
 
 static zend_always_inline zval *zend_class_default_properties_table(zend_class_entry *ce) {
-	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES) && ZEND_MAP_PTR(ce->mutable_data)) {
 		zend_class_mutable_data *mutable_data =
 			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		return mutable_data->default_properties_table;

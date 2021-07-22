@@ -1298,7 +1298,6 @@ static zend_class_mutable_data *zend_allocate_mutable_data(zend_class_entry *cla
 {
 	zend_class_mutable_data *mutable_data;
 
-	ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_IMMUTABLE);
 	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
 	ZEND_ASSERT(ZEND_MAP_PTR_GET_IMM(class_type->mutable_data) == NULL);
 
@@ -1331,7 +1330,6 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 		_zend_hash_append_ptr(constants_table, key, c);
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_IMMUTABLE);
 	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
 
 	mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
@@ -4365,6 +4363,9 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+		if (ce->type == ZEND_INTERNAL_CLASS && !ZEND_MAP_PTR(ce->mutable_data)) {
+			ZEND_MAP_PTR_NEW(ce->mutable_data);
+		}
 	}
 
 	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
