@@ -28,6 +28,7 @@ extern "C" {
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
+#include <zend_interfaces.h>
 }
 
 static zend_class_entry *IntlPartsIterator_ce_ptr;
@@ -229,48 +230,6 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	((zoi_break_iter_parts*)ii->iterator)->key_type = key_type;
 }
 
-U_CFUNC zend_object *IntlPartsIterator_object_create(zend_class_entry *ce)
-{
-	zend_object *retval = IntlIterator_ce_ptr->create_object(ce);
-	retval->handlers = &IntlPartsIterator_handlers;
-
-	return retval;
-}
-
-U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, zend_string *method, const zval *key)
-{
-	zend_function *ret;
-	zend_string *lc_method_name;
-	ALLOCA_FLAG(use_heap);
-
-	if (key == NULL) {
-		ZSTR_ALLOCA_ALLOC(lc_method_name, ZSTR_LEN(method), use_heap);
-		zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method), ZSTR_LEN(method));
-	} else {
-		lc_method_name = Z_STR_P(key);
-	}
-
-	if (ZSTR_LEN(method) == sizeof("getrulestatus") - 1
-			&& memcmp("getrulestatus", ZSTR_VAL(lc_method_name), ZSTR_LEN(lc_method_name)) == 0) {
-		IntlIterator_object *obj = php_intl_iterator_fetch_object(*object_ptr);
-		if (obj->iterator && !Z_ISUNDEF(obj->iterator->data)) {
-			zval *break_iter_zv = &obj->iterator->data;
-			*object_ptr = Z_OBJ_P(break_iter_zv);
-			ret = Z_OBJ_HANDLER_P(break_iter_zv, get_method)(object_ptr, method, key);
-			goto end;
-		}
-	}
-
-	ret = zend_std_get_method(object_ptr, method, key);
-
-end:
-	if (key == NULL) {
-	 	ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
-	}
-
-	return ret;
-}
-
 U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
@@ -284,15 +243,26 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	RETURN_COPY_DEREF(&ii->iterator->data);
 }
 
+U_CFUNC PHP_METHOD(IntlPartsIterator, getRuleStatus)
+{
+	INTLITERATOR_METHOD_INIT_VARS;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	INTLITERATOR_METHOD_FETCH_OBJECT;
+
+	zval *iter = &ii->iterator->data;
+	ZEND_ASSERT(Z_TYPE_P(iter) == IS_OBJECT);
+	zend_call_method_with_0_params(
+			Z_OBJ_P(iter), Z_OBJCE_P(iter), NULL, "getrulestatus", return_value);
+}
+
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	/* Create and register 'BreakIterator' class. */
 	IntlPartsIterator_ce_ptr = register_class_IntlPartsIterator(IntlIterator_ce_ptr);
-	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;
-
-	memcpy(&IntlPartsIterator_handlers, &IntlIterator_handlers,
-			sizeof IntlPartsIterator_handlers);
-	IntlPartsIterator_handlers.get_method = IntlPartsIterator_get_method;
 
 #define PARTSITER_DECL_LONG_CONST(name) \
 	zend_declare_class_constant_long(IntlPartsIterator_ce_ptr, #name, \
