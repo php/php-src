@@ -2443,34 +2443,10 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	return props;
 }
 
-static zend_function *row_method_get(
-	zend_object **object_pp,
-	zend_string *method_name, const zval *key)
-{
-	zend_function *fbc;
-	zend_string *lc_method_name;
-
-	lc_method_name = zend_string_tolower(method_name);
-
-	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
-		zend_string_release_ex(lc_method_name, 0);
-		return NULL;
-	}
-
-	zend_string_release_ex(lc_method_name, 0);
-
-	return fbc;
-}
-
 static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
 	return NULL;
-}
-
-static zend_string *row_get_classname(const zend_object *object)
-{
-	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
 }
 
 void pdo_row_free_storage(zend_object *std)
@@ -2522,8 +2498,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.has_dimension = row_dim_exists;
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
-	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
-	pdo_row_object_handlers.get_class_name = row_get_classname;
 	pdo_row_object_handlers.compare = zend_objects_not_comparable;
 }
