@@ -70,6 +70,8 @@ object(_ZendTestClass)#1 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["readonlyProp"]=>
+  uninitialized(int)
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$intProp of type int
@@ -82,6 +84,8 @@ object(Test)#4 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["readonlyProp"]=>
+  uninitialized(int)
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$staticIntProp of type int
