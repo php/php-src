@@ -860,7 +860,7 @@ PHP_METHOD(SplHeap, top)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 }
 /* }}} */
 
@@ -1034,7 +1034,7 @@ PHP_METHOD(SplHeap, current)
 		RETURN_NULL();
 	} else {
 		zval *element = spl_heap_elem(intern->heap, 0);
-		ZVAL_COPY_DEREF(return_value, element);
+		RETURN_COPY_DEREF(element);
 	}
 }
 /* }}} */

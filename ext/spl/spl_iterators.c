@@ -687,7 +687,7 @@ PHP_METHOD(RecursiveIteratorIterator, current)
 
 	data = iterator->funcs->get_current_data(iterator);
 	if (data) {
-		ZVAL_COPY_DEREF(return_value, data);
+		RETURN_COPY_DEREF(data);
 	}
 } /* }}} */
 
@@ -739,7 +739,7 @@ PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 	}
 
 	value = &object->iterators[level].zobject;
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 } /* }}} */
 
 /* {{{ The current active sub iterator */
@@ -754,7 +754,7 @@ PHP_METHOD(RecursiveIteratorIterator, getInnerIterator)
 
 	SPL_FETCH_SUB_ELEMENT_ADDR(zobject, object, zobject);
 
-	ZVAL_COPY_DEREF(return_value, zobject);
+	RETURN_COPY_DEREF(zobject);
 } /* }}} */
 
 /* {{{ Called when iteration begins (after first rewind() call) */
@@ -1172,8 +1172,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 		SPL_FETCH_SUB_ITERATOR(iterator, object);
 		data = iterator->funcs->get_current_data(iterator);
 		if (data) {
-			ZVAL_COPY_DEREF(return_value, data);
-			return;
+			RETURN_COPY_DEREF(data);
 		} else {
 			RETURN_NULL();
 		}
@@ -1461,8 +1460,7 @@ PHP_METHOD(IteratorIterator, getInnerIterator)
 
 	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		zval *value = &intern->inner.zobject;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(value);
 	} else {
 		RETURN_NULL();
 	}
@@ -1589,9 +1587,7 @@ PHP_METHOD(IteratorIterator, key)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	if (Z_TYPE(intern->current.key) != IS_UNDEF) {
-		zval *value = &intern->current.key;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&intern->current.key);
 	} else {
 		RETURN_NULL();
 	}
@@ -1609,9 +1605,7 @@ PHP_METHOD(IteratorIterator, current)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
-		zval *value = &intern->current.data;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&intern->current.data);
 	} else {
 		RETURN_NULL();
 	}
@@ -2526,7 +2520,7 @@ PHP_METHOD(CachingIterator, offsetGet)
 		return;
 	}
 
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 }
 /* }}} */
 
@@ -2695,7 +2689,7 @@ PHP_METHOD(RecursiveCachingIterator, getChildren)
 	if (Z_TYPE(intern->u.caching.zchildren) != IS_UNDEF) {
 		zval *value = &intern->u.caching.zchildren;
 
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(value);
 	} else {
 		RETURN_NULL();
 	}
@@ -2766,7 +2760,7 @@ PHP_METHOD(NoRewindIterator, current)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
 	if (data) {
-		ZVAL_COPY_DEREF(return_value, data);
+		RETURN_COPY_DEREF(data);
 	}
 } /* }}} */
 
@@ -2952,9 +2946,7 @@ PHP_METHOD(AppendIterator, current)
 
 	spl_dual_it_fetch(intern, 1);
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
-		zval *value = &intern->current.data;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&intern->current.data);
 	} else {
 		RETURN_NULL();
 	}
@@ -3033,7 +3025,7 @@ PHP_METHOD(AppendIterator, getArrayIterator)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	value = &intern->u.append.zarrayit;
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 } /* }}} */
 
 PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser)

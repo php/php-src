@@ -281,8 +281,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
-	zval *biter_zval = &ii->iterator->data;
-	ZVAL_COPY_DEREF(return_value, biter_zval);
+	RETURN_COPY_DEREF(return_value, &it->iterator->data);
 }
 
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)

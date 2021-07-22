@@ -665,7 +665,7 @@ PHP_METHOD(ArrayObject, offsetGet)
 	}
 	value = spl_array_read_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, BP_VAR_R, return_value);
 	if (value != return_value) {
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(value);
 	}
 } /* }}} */
 
@@ -1465,7 +1465,7 @@ PHP_METHOD(ArrayIterator, current)
 			return;
 		}
 	}
-	ZVAL_COPY_DEREF(return_value, entry);
+	RETURN_COPY_DEREF(entry);
 }
 /* }}} */
 

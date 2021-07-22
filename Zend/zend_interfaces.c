@@ -507,7 +507,7 @@ ZEND_METHOD(InternalIterator, current) {
 
 	zval *data = intern->iter->funcs->get_current_data(intern->iter);
 	if (data) {
-		ZVAL_COPY_DEREF(return_value, data);
+		RETURN_COPY_DEREF(data);
 	}
 }
 

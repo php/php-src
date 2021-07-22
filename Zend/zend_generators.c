@@ -860,9 +860,7 @@ ZEND_METHOD(Generator, current)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -880,9 +878,7 @@ ZEND_METHOD(Generator, key)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
-		zval *key = &root->key;
-
-		ZVAL_COPY_DEREF(return_value, key);
+		RETURN_COPY_DEREF(&root->key);
 	}
 }
 /* }}} */
@@ -931,9 +927,7 @@ ZEND_METHOD(Generator, send)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -963,9 +957,7 @@ ZEND_METHOD(Generator, throw)
 
 		root = zend_generator_get_current(generator);
 		if (generator->execute_data) {
-			zval *value = &root->value;
-
-			ZVAL_COPY_DEREF(return_value, value);
+			RETURN_COPY_DEREF(&root->value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the

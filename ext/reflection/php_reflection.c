@@ -3775,7 +3775,7 @@ ZEND_METHOD(ReflectionClassConstant, getName)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_DEREF(return_value, name);
+	RETURN_COPY_DEREF(name);
 }
 /* }}} */
 
@@ -4072,17 +4072,16 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 	prop = zend_std_get_static_property(ce, name, BP_VAR_IS);
 	EG(fake_scope) = old_scope;
 
-	if (!prop) {
-		if (def_value) {
-			ZVAL_COPY(return_value, def_value);
-		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		}
-		return;
-	} else {
-		ZVAL_COPY_DEREF(return_value, prop);
+	if (prop) {
+		RETURN_COPY_DEREF(prop);
 	}
+
+	if (def_value) {
+		RETURN_COPY(def_value);
+	}
+
+	zend_throw_exception_ex(reflection_exception_ptr, 0,
+		"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 }
 /* }}} */
 
@@ -5568,7 +5567,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 0);
 		if (member_p) {
-			ZVAL_COPY_DEREF(return_value, member_p);
+			RETURN_COPY_DEREF(member_p);
 		}
 	} else {
 		zval rv;
@@ -5586,12 +5585,12 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 		member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
 		if (member_p != &rv) {
-			ZVAL_COPY_DEREF(return_value, member_p);
+			RETURN_COPY_DEREF(member_p);
 		} else {
 			if (Z_ISREF_P(member_p)) {
 				zend_unwrap_reference(member_p);
 			}
-			ZVAL_COPY_VALUE(return_value, member_p);
+			RETURN_COPY_VALUE(member_p);
 		}
 	}
 }

@@ -206,7 +206,7 @@ ZEND_FUNCTION(func_get_arg)
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
 	if (EXPECTED(!Z_ISUNDEF_P(arg))) {
-		ZVAL_COPY_DEREF(return_value, arg);
+		RETURN_COPY_DEREF(arg);
 	}
 }
 /* }}} */

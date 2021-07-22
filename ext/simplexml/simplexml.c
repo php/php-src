@@ -1998,7 +1998,6 @@ PHP_METHOD(SimpleXMLElement, valid)
 PHP_METHOD(SimpleXMLElement, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2009,8 +2008,7 @@ PHP_METHOD(SimpleXMLElement, current)
 		RETURN_THROWS();
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 /* }}} */
 
@@ -2083,7 +2081,6 @@ PHP_METHOD(SimpleXMLElement, hasChildren)
 PHP_METHOD(SimpleXMLElement, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2093,8 +2090,7 @@ PHP_METHOD(SimpleXMLElement, getChildren)
 		return; /* return NULL */
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 
 static zend_object_handlers sxe_object_handlers;

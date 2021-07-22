@@ -1082,7 +1082,7 @@ PHP_FUNCTION(end)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_COPY_DEREF(return_value, entry);
+		RETURN_COPY_DEREF(entry);
 	}
 }
 /* }}} */
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(prev)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_COPY_DEREF(return_value, entry);
+		RETURN_COPY_DEREF(entry);
 	}
 }
 /* }}} */
@@ -1136,7 +1136,7 @@ PHP_FUNCTION(next)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_COPY_DEREF(return_value, entry);
+		RETURN_COPY_DEREF(entry);
 	}
 }
 /* }}} */
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(reset)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		ZVAL_COPY_DEREF(return_value, entry);
+		RETURN_COPY_DEREF(entry);
 	}
 }
 /* }}} */
@@ -1187,7 +1187,7 @@ PHP_FUNCTION(current)
 		entry = Z_INDIRECT_P(entry);
 	}
 
-	ZVAL_COPY_DEREF(return_value, entry);
+	RETURN_COPY_DEREF(entry);
 }
 /* }}} */
 
@@ -1226,7 +1226,7 @@ PHP_FUNCTION(min)
 		} else {
 			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare_unstable, 0);
 			if (result) {
-				ZVAL_COPY_DEREF(return_value, result);
+				RETURN_COPY_DEREF(result);
 			} else {
 				zend_argument_value_error(1, "must contain at least one element");
 				RETURN_THROWS();
@@ -1246,7 +1246,7 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		ZVAL_COPY(return_value, min);
+		RETURN_COPY(min);
 	}
 }
 /* }}} */
@@ -1272,7 +1272,7 @@ PHP_FUNCTION(max)
 		} else {
 			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare_unstable, 1);
 			if (result) {
-				ZVAL_COPY_DEREF(return_value, result);
+				RETURN_COPY_DEREF(result);
 			} else {
 				zend_argument_value_error(1, "must contain at least one element");
 				RETURN_THROWS();
@@ -1292,7 +1292,7 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		ZVAL_COPY(return_value, max);
+		RETURN_COPY(max);
 	}
 }
 /* }}} */
@@ -3137,7 +3137,7 @@ PHP_FUNCTION(array_pop)
 			break;
 		}
 	}
-	ZVAL_COPY_DEREF(return_value, val);
+	RETVAL_COPY_DEREF(val);
 
 	if (!p->key && (zend_long)p->h == (Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
@@ -3178,7 +3178,7 @@ PHP_FUNCTION(array_shift)
 		}
 		idx++;
 	}
-	ZVAL_COPY_DEREF(return_value, val);
+	RETVAL_COPY_DEREF(val);
 
 	/* Delete the first value */
 	zend_hash_del_bucket(Z_ARRVAL_P(stack), p);

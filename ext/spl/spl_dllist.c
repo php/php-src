@@ -575,7 +575,7 @@ PHP_METHOD(SplDoublyLinkedList, top)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 }
 /* }}} */
 
@@ -597,7 +597,7 @@ PHP_METHOD(SplDoublyLinkedList, bottom)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_DEREF(return_value, value);
+	RETURN_COPY_DEREF(value);
 }
 /* }}} */
 
@@ -708,7 +708,7 @@ PHP_METHOD(SplDoublyLinkedList, offsetGet)
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_DEREF(return_value, &element->data);
+	RETURN_COPY_DEREF(&element->data);
 } /* }}} */
 
 /* {{{ Sets the value at the specified $index to $newval. */
@@ -1001,7 +1001,7 @@ PHP_METHOD(SplDoublyLinkedList, current)
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
-		ZVAL_COPY_DEREF(return_value, &element->data);
+		RETURN_COPY_DEREF(&element->data);
 	}
 }
 /* }}} */

@@ -1738,13 +1738,13 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
-		ZVAL_COPY_VALUE(return_value, &tmp);
+		RETURN_COPY_VALUE(&tmp);
 	} else {
 		zval *element;
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
-			ZVAL_COPY_DEREF(return_value, element);
+			RETVAL_COPY_DEREF(element);
 		} else {
-			ZVAL_EMPTY_STRING(return_value);
+			RETVAL_EMPTY_STRING();
 		}
 		zval_ptr_dtor(&tmp);
 	}
