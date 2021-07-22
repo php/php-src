@@ -2303,7 +2303,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.9.0";
+    $version = "4.12.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);

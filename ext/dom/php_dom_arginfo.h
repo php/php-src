@@ -100,7 +100,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_replaceChild, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, child, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, never, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, IS_NEVER, 0)
 	ZEND_ARG_TYPE_INFO(0, feature, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 0)
 ZEND_END_ARG_INFO()
