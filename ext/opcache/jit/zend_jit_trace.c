@@ -6010,6 +6010,15 @@ done:
 				p++;
 				break;
 			}
+			if (p->op_array->fn_flags & ZEND_ACC_CLOSURE && !(p->op_array->fn_flags & ZEND_ACC_STATIC)) {
+				if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+					if (TRACE_FRAME_IS_THIS_CHECKED(frame)) {
+						TRACE_FRAME_SET_THIS_CHECKED(call);
+					}
+				} else if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) {
+					TRACE_FRAME_SET_THIS_CHECKED(call);
+				}
+			}
 			op_array = (zend_op_array*)p->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
