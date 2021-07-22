@@ -1422,10 +1422,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	if (class_type->default_static_members_count) {
 		static_members_table = CE_STATIC_MEMBERS(class_type);
 		if (!static_members_table) {
-			if (class_type->type == ZEND_INTERNAL_CLASS || (ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED))) {
-				zend_class_init_statics(class_type);
-				static_members_table = CE_STATIC_MEMBERS(class_type);
-			}
+			zend_class_init_statics(class_type);
+			static_members_table = CE_STATIC_MEMBERS(class_type);
 		}
 	}
 
@@ -4087,12 +4085,13 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		}
 		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
 		if (!ZEND_MAP_PTR(ce->static_members_table)) {
-			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
-			if (!EG(current_execute_data)) {
+			if (ce->type == ZEND_INTERNAL_CLASS &&
+					ce->info.internal.module->type == MODULE_PERSISTENT) {
 				ZEND_MAP_PTR_NEW(ce->static_members_table);
 			} else {
-				/* internal class loaded by dl() */
-				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+				ZEND_MAP_PTR_INIT(ce->static_members_table,
+					zend_arena_alloc(&CG(arena), sizeof(zval **)));
+				ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 			}
 		}
 	} else {

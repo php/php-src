@@ -926,11 +926,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 				} else {
 					ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 				}
-			} else {
-				ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 			}
-		} else {
-			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		}
 
 		zend_hash_persist(&ce->constants_table);

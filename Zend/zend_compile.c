@@ -1873,12 +1873,10 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	zend_hash_init(&ce->constants_table, 8, NULL, NULL, persistent_hashes);
 	zend_hash_init(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes);
 
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
-	} else {
-		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
+	if (ce->type == ZEND_USER_CLASS) {
 		ce->info.user.doc_comment = NULL;
 	}
+	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
 	ce->default_properties_count = 0;

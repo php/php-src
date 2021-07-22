@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation)
     (Nikita, Dmitry)
 
+- Reflection:
+  . Fixed bug #80821 (ReflectionProperty::getDefaultValue() returns current
+    value for statics). (Nikita)
+
 22 Jul 2021, PHP 8.1.0beta1
 
 - Core:

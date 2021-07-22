@@ -170,42 +170,21 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		zval *static_members = CE_STATIC_MEMBERS(ce);
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
-		if (UNEXPECTED(ZEND_MAP_PTR(ce->static_members_table) == &ce->default_static_members_table)) {
-			/* Special case: If this is a static property on a dl'ed internal class, then the
-			 * static property table and the default property table are the same. In this case we
-			 * destroy the values here, but leave behind valid UNDEF zvals and don't free the
-			 * table itself. */
-			while (p != end) {
-				if (UNEXPECTED(Z_ISREF_P(p))) {
-					zend_property_info *prop_info;
-					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
-							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-							break; /* stop iteration here, the array might be realloc()'ed */
-						}
-					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-				}
-				i_zval_ptr_dtor(p);
-				ZVAL_UNDEF(p);
-				p++;
+		ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+		while (p != end) {
+			if (UNEXPECTED(Z_ISREF_P(p))) {
+				zend_property_info *prop_info;
+				ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+					if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+						break; /* stop iteration here, the array might be realloc()'ed */
+					}
+				} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 			}
-		} else {
-			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-			while (p != end) {
-				if (UNEXPECTED(Z_ISREF_P(p))) {
-					zend_property_info *prop_info;
-					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
-							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-							break; /* stop iteration here, the array might be realloc()'ed */
-						}
-					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-				}
-				i_zval_ptr_dtor(p);
-				p++;
-			}
-			efree(static_members);
+			i_zval_ptr_dtor(p);
+			p++;
 		}
+		efree(static_members);
 	}
 }
 
@@ -298,12 +277,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
+	if (ce->default_static_members_count) {
+		zend_cleanup_internal_class_data(ce);
+	}
+
 	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED|ZEND_ACC_FILE_CACHED)) {
 		zend_op_array *op_array;
-
-		if (ce->default_static_members_count) {
-			zend_cleanup_internal_class_data(ce);
-		}
 
 		if (!(ce->ce_flags & ZEND_ACC_FILE_CACHED)) {
 			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
@@ -390,15 +369,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zval *end = p + ce->default_static_members_count;
 
 				while (p != end) {
-					if (UNEXPECTED(Z_ISREF_P(p))) {
-						zend_property_info *prop_info;
-						ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-							if (prop_info->ce == ce && p - ce->default_static_members_table == prop_info->offset) {
-								ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-								break; /* stop iteration here, the array might be realloc()'ed */
-							}
-						} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-					}
+					ZEND_ASSERT(!Z_ISREF_P(p));
 					i_zval_ptr_dtor(p);
 					p++;
 				}
@@ -458,9 +429,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 					p++;
 				}
 				free(ce->default_static_members_table);
-				if (ZEND_MAP_PTR(ce->static_members_table) != &ce->default_static_members_table) {
-					zend_cleanup_internal_class_data(ce);
-				}
 			}
 
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
