@@ -1178,6 +1178,10 @@ class PropertyInfo
             $flags .= "|ZEND_ACC_STATIC";
         }
 
+        if ($this->flags & Class_::MODIFIER_READONLY) {
+            $flags .= "|ZEND_ACC_READONLY";
+        }
+
         return $flags;
     }
 }
@@ -2303,7 +2307,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.9.0";
+    $version = "4.12.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
