@@ -1810,9 +1810,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 }
 
 function parseStubFile(string $code): FileInfo {
-    $minCompatiblePhpVersionId = 80100; // PHP 8.1
-
-    $lexer = PHP_VERSION_ID >= $minCompatiblePhpVersionId ? new PhpParser\Lexer() : new PhpParser\Lexer\Emulative();
+    $lexer = new PhpParser\Lexer\Emulative();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
