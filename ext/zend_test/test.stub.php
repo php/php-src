@@ -24,6 +24,8 @@ namespace {
         public function __toString(): string {}
 
         public function returnsStatic(): static {}
+        
+        public static function returnsPersistent(): _ZendTestClass {}
 
         public function returnsThrowable(): Throwable {}
     }

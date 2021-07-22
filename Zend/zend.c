@@ -1120,6 +1120,8 @@ void zend_shutdown(void) /* {{{ */
 {
 	zend_vm_dtor();
 
+	zend_objects_store_persistent_shutdown();
+
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	zend_destroy_modules();
 

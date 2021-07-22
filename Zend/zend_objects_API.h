@@ -42,12 +42,23 @@
 
 #define OBJ_RELEASE(obj) zend_object_release(obj)
 
+/**
+ * If used as size argument for zend_object_persistent_construct
+ * zend_object_persistent_constructor will recv data as passed,
+ * otherwise data is duplicated
+ */
+#define ZEND_OBJECT_PERSISTENT_PTR ((uint32_t)-1)
+
 typedef struct _zend_objects_store {
 	zend_object **object_buckets;
 	uint32_t top;
 	uint32_t size;
 	int free_list_head;
 } zend_objects_store;
+
+typedef struct _zend_object_persistent zend_object_persistent;
+
+typedef void (*zend_object_persistent_constructor)(zend_object *, void*);
 
 /* Global store handling functions */
 BEGIN_EXTERN_C()
@@ -60,6 +71,18 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objec
 /* Store API functions */
 ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object);
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object);
+
+/* Persistent Store API functions */
+ZEND_API zend_object_persistent* ZEND_FASTCALL zend_objects_store_persist(zend_class_entry *ce);
+ZEND_API void zend_objects_store_persistent_shutdown(void);
+
+/* Persistent Object API functions */
+ZEND_API void zend_object_persistent_construct(zend_object_persistent *object, zend_object_persistent_constructor constructor, void *data, size_t size);
+
+/**
+ * The handle of a persistent object shall match the handle in the normal object store
+ */
+ZEND_API uint32_t zend_object_persistent_handle(zend_object_persistent *persistent);
 
 /* Called when the ctor was terminated by an exception */
 static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)

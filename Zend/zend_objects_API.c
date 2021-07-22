@@ -25,13 +25,57 @@
 #include "zend_objects_API.h"
 #include "zend_fibers.h"
 
+static HashTable zend_objects_store_persistent = {
+	.nTableSize = 0,
+	.nNumUsed   = 0
+};
+
+ZEND_TLS HashTable zend_objects_store_unpersist;
+
+struct _zend_object_persistent {
+	zend_class_entry *class;
+	HashTable         constructors;
+	uint32_t          handle;
+};
+
+typedef struct {
+	zend_object_persistent_constructor function;
+	void *data;
+	size_t size;
+} zend_object_persistent_constructor_call;
+
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
-	objects->object_buckets = (zend_object **) emalloc(init_size * sizeof(zend_object*));
+	uint32_t min_init_size = MAX(init_size, zend_objects_store_persistent.nNumUsed);
+
+	objects->object_buckets = (zend_object **) emalloc(min_init_size * sizeof(zend_object*));
 	objects->top = 1; /* Skip 0 so that handles are true */
-	objects->size = init_size;
+	objects->size = min_init_size;
 	objects->free_list_head = -1;
 	memset(&objects->object_buckets[0], 0, sizeof(zend_object*));
+
+	if (UNEXPECTED(zend_objects_store_persistent.nNumUsed)) {
+		zend_object_persistent *persistent;
+
+		zend_hash_init(&zend_objects_store_unpersist,
+			zend_objects_store_persistent.nNumUsed, NULL, zval_ptr_dtor, 0);
+
+		ZEND_HASH_FOREACH_PTR(&zend_objects_store_persistent, persistent) {
+			zval zv;
+
+			object_init_ex(&zv, persistent->class);
+
+			if (persistent->constructors.nNumUsed) {
+				zend_object_persistent_constructor_call *call;
+
+				ZEND_HASH_FOREACH_PTR(&persistent->constructors, call) {
+					call->function(Z_OBJ(zv), call->data);
+				} ZEND_HASH_FOREACH_END();
+			}
+
+			zend_hash_next_index_insert(&zend_objects_store_unpersist, &zv);
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objects)
@@ -90,6 +134,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 
 	if (objects->top <= 1) {
 		return;
+	}
+
+	if (UNEXPECTED(zend_objects_store_unpersist.nNumUsed)) {
+		zend_hash_destroy(&zend_objects_store_unpersist);
 	}
 
 	/* Free object contents, but don't free objects themselves, so they show up as leaks.
@@ -161,6 +209,76 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 	EG(objects_store).object_buckets[handle] = object;
 }
 
+static void zend_object_persistent_dtor(zval *zv)
+{
+	zend_object_persistent *persistent = Z_PTR_P(zv);
+
+	if (persistent->constructors.nNumUsed) {
+		zend_hash_destroy(&persistent->constructors);
+	}
+
+	pefree(persistent, 1);
+}
+
+ZEND_API zend_object_persistent* ZEND_FASTCALL zend_objects_store_persist(zend_class_entry *ce)
+{
+	ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+
+	if (UNEXPECTED(zend_objects_store_persistent.nTableSize == 0)) {
+		zend_hash_init(&zend_objects_store_persistent, 8, NULL, zend_object_persistent_dtor, 1);
+	}
+
+	zend_object_persistent persistent = {
+		.class = ce,
+		.constructors = {
+			.nTableSize = 0,
+			.nNumUsed   = 0
+		},
+		.handle = zend_hash_num_elements(&zend_objects_store_persistent)
+	};
+
+	return zend_hash_next_index_insert_mem(&zend_objects_store_persistent, &persistent, sizeof(persistent));
+}
+
+static void zend_object_persistent_constructor_dtor(zval *zv)
+{
+	zend_object_persistent_constructor_call *call = Z_PTR_P(zv);
+
+	if (EXPECTED(call->size && call->size != ZEND_OBJECT_PERSISTENT_PTR)) {
+		pefree(call->data, 1);
+	}
+
+	pefree(call, 1);
+}
+
+ZEND_API void zend_object_persistent_construct(zend_object_persistent *object, zend_object_persistent_constructor constructor, void *data, size_t size)
+{
+	if (UNEXPECTED(object->constructors.nTableSize == 0)) {
+		zend_hash_init(&object->constructors, 2, NULL, zend_object_persistent_constructor_dtor, 1);
+	}
+
+	zend_object_persistent_constructor_call construct = {
+		.function = constructor,
+		.size     = size,
+		.data     = NULL
+	};
+
+	if (size == ZEND_OBJECT_PERSISTENT_PTR) {
+		construct.data = data;
+	} else if (size) {
+		construct.data = pemalloc(size, 1);
+
+		memcpy(construct.data, data, size);
+	}
+
+	zend_hash_next_index_insert_mem(&object->constructors, &construct, sizeof(construct));
+}
+
+ZEND_API uint32_t zend_object_persistent_handle(zend_object_persistent *persistent)
+{
+	return persistent->handle;
+}
+
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
@@ -204,5 +322,12 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		efree(ptr);
 		ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 	}
+}
+
+ZEND_API void zend_objects_store_persistent_shutdown(void)
+{
+	zend_hash_destroy(&zend_objects_store_persistent);
+
+	memset(&zend_objects_store_persistent, 0, sizeof(zend_objects_store_persistent));
 }
 /* }}} */

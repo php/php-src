@@ -40,6 +40,8 @@ static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_object_handlers zend_test_class_handlers;
 
+zval zend_test_persistent_object;
+
 static ZEND_FUNCTION(zend_test_func)
 {
 	RETVAL_STR_COPY(EX(func)->common.function_name);
@@ -312,6 +314,12 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic) {
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
 
+static ZEND_METHOD(_ZendTestClass, returnsPersistent) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, &zend_test_persistent_object);
+}
+
 static ZEND_METHOD(_ZendTestClass, returnsThrowable)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -354,6 +362,27 @@ void (*old_zend_execute_ex)(zend_execute_data *execute_data);
 static void custom_zend_execute_ex(zend_execute_data *execute_data)
 {
 	old_zend_execute_ex(execute_data);
+}
+
+static void zend_test_persistent_object_construct(zend_object *object, void *data)
+{
+	zval *zv = (zval*) data;
+
+	ZVAL_OBJ(zv, object);
+}
+
+static void zend_test_persistent_object_set_long(zend_object *object, void *data)
+{
+	zval *zv = (zval*) data;
+
+	zend_update_property(object->ce, object, "long", sizeof("long")-1, zv);
+}
+
+static void zend_test_persistent_object_set_string(zend_object *object, void *data)
+{
+	zval *zv = (zval*) data;
+
+	zend_update_property(object->ce, object, "string", sizeof("string")-1, zv);
 }
 
 PHP_MINIT_FUNCTION(zend_test)
@@ -403,6 +432,22 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
+
+	zend_object_persistent* persistent =
+		zend_objects_store_persist(zend_test_class);
+	
+	zend_object_persistent_construct(persistent,
+		zend_test_persistent_object_construct, &zend_test_persistent_object, ZEND_OBJECT_PERSISTENT_PTR);
+
+	zval l;
+	ZVAL_LONG(&l, 42);
+	zend_object_persistent_construct(persistent,
+		zend_test_persistent_object_set_long, &l, sizeof(zval));
+
+	zval s;
+	ZVAL_INTERNED_STR(&s, zend_string_init_interned("42", sizeof("42")-1, 1));
+	zend_object_persistent_construct(persistent,
+		zend_test_persistent_object_set_string, &s, sizeof(zval));
 
 	return SUCCESS;
 }
