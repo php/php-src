@@ -235,7 +235,7 @@ PHP_FUNCTION(shmop_read)
 		RETURN_THROWS();
 	}
 
-	if (count < 0 || start > (INT_MAX - count) || start + count > shmop->size) {
+	if (count < 0 || start > (ZEND_LONG_MAX - count) || start + count > shmop->size) {
 		zend_argument_value_error(3, "is out of range");
 		RETURN_THROWS();
 	}
