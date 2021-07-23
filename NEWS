@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta2
 
+- MySQLnd:
+  . Fixed bug #63327 (Crash (Bus Error) in mysqlnd due to wrong alignment).
+    (Nikita)
+
 - Opcache:
   . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT)
   . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation)

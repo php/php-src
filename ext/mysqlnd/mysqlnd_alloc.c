@@ -61,9 +61,10 @@ PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 #define __zend_orig_lineno   0
 #endif
 
-#define REAL_SIZE(s) (collect_memory_statistics? (s) + sizeof(size_t) : (s))
-#define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - sizeof(size_t)) : (p))
-#define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + sizeof(size_t)) : (p))
+#define EXTRA_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(size_t))
+#define REAL_SIZE(s) (collect_memory_statistics? (s) + EXTRA_SIZE : (s))
+#define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - EXTRA_SIZE) : (p))
+#define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + EXTRA_SIZE) : (p))
 
 /* {{{ _mysqlnd_emalloc */
 static void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
