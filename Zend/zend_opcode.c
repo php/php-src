@@ -277,47 +277,34 @@ ZEND_API void destroy_zend_class(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
-	if (ce->default_static_members_count) {
-		zend_cleanup_internal_class_data(ce);
-	}
-
-	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED|ZEND_ACC_FILE_CACHED)) {
-		zend_op_array *op_array;
-
-		if (!(ce->ce_flags & ZEND_ACC_FILE_CACHED)) {
-			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
-				zend_cleanup_mutable_class_data(ce);
-			}
-		} else {
-			zend_class_constant *c;
-			zval *p, *end;
-
-			ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-				if (c->ce == ce) {
-					zval_ptr_dtor_nogc(&c->value);
-				}
-			} ZEND_HASH_FOREACH_END();
-
-			p = ce->default_properties_table;
-			end = p + ce->default_properties_count;
-
-			while (p < end) {
-				zval_ptr_dtor_nogc(p);
-				p++;
-			}
-		}
-
-		if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-				if (op_array->type == ZEND_USER_FUNCTION) {
-					destroy_op_array(op_array);
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-		return;
-	} else if (--ce->refcount > 0) {
+	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED)) {
 		return;
 	}
+
+	if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+		zend_class_constant *c;
+		zval *p, *end;
+
+		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+			if (c->ce == ce) {
+				zval_ptr_dtor_nogc(&c->value);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		p = ce->default_properties_table;
+		end = p + ce->default_properties_count;
+
+		while (p < end) {
+			zval_ptr_dtor_nogc(p);
+			p++;
+		}
+		return;
+	}
+
+	if (--ce->refcount > 0) {
+		return;
+	}
+
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
 			if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
