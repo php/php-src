@@ -835,7 +835,6 @@ ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
-ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_type_release(zend_type type, bool persistent);
 ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name);
 

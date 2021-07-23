@@ -394,7 +394,6 @@ void shutdown_executor(void) /* {{{ */
 		 */
 		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
-		zend_cleanup_internal_classes();
 	} else {
 		zend_vm_stack_destroy();
 

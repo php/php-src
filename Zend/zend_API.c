@@ -3010,17 +3010,6 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_cleanup_internal_classes(void) /* {{{ */
-{
-	zend_class_entry **p = class_cleanup_handlers;
-
-	while (*p) {
-		zend_cleanup_internal_class_data(*p);
-		p++;
-	}
-}
-/* }}} */
-
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
