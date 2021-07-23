@@ -8,19 +8,25 @@ class Foo {
     }
 
     public static function __callStatic($method, $args) {
-        return $method;
+        return static::class . "::" . $method;
     }
 }
+
+class Bar extends Foo {}
 
 $foo = new Foo;
 $bar = $foo->anythingInstance(...);
 
-echo $bar() . PHP_EOL;
+echo $bar(), "\n";
 
 $qux = Foo::anythingStatic(...);
+echo $qux(), "\n";
 
-echo $qux();
+$qux2 = Bar::anythingStatic(...);
+echo $qux2(), "\n";
+
 ?>
 --EXPECT--
 anythingInstance
-anythingStatic
+Foo::anythingStatic
+Bar::anythingStatic

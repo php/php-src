@@ -282,6 +282,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	}
 
 	fcc.object = fci.object = Z_OBJ_P(ZEND_THIS);
+	fcc.called_scope = zend_get_called_scope(EG(current_execute_data));
 
 	zend_call_function(&fci, &fcc);
 
