@@ -917,6 +917,10 @@ ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
+	if (accel_is_script_preloaded(script_name)) {
+		RETURN_TRUE;
+	}
+
 	if (!ZCG(accelerator_enabled)) {
 		RETURN_FALSE;
 	}

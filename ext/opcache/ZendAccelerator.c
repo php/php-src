@@ -4580,6 +4580,24 @@ finish:
 	return ret;
 }
 
+bool accel_is_script_preloaded(zend_string *script_name)
+{
+	if (preload_scripts) {
+		if (zend_hash_exists(preload_scripts, script_name)) {
+			return true;
+		}
+	}
+	if (ZCSG(saved_scripts)) {
+		zend_persistent_script **p;
+		for (p = ZCSG(saved_scripts); *p; ++p) {
+			if (zend_string_equals((*p)->script.filename, script_name)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 static size_t preload_ub_write(const char *str, size_t str_length)
 {
 	return fwrite(str, 1, str_length, stdout);
