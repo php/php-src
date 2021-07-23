@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #80821 (ReflectionProperty::getDefaultValue() returns current
     value for statics). (Nikita)
+  . Fixed bug #80564 (ReflectionProperty::__toString() renders current value,
+    not default value). (Nikita)
 
 22 Jul 2021, PHP 8.1.0beta1
 
