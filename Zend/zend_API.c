@@ -2999,6 +2999,9 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
 			fcc->called_scope = zend_get_called_scope(frame);
+			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope)) {
+				fcc->called_scope = scope;
+			}
 			fcc->calling_scope = scope;
 			if (!fcc->object) {
 				fcc->object = zend_get_this_object(frame);
@@ -3012,6 +3015,9 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
 		} else {
 			fcc->called_scope = zend_get_called_scope(frame);
+			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope->parent)) {
+				fcc->called_scope = scope->parent;
+			}
 			fcc->calling_scope = scope->parent;
 			if (!fcc->object) {
 				fcc->object = zend_get_this_object(frame);
