@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #81226 (Integer overflow behavior is different with JIT
     enabled). (Dmitry)
 
+- Shmop:
+  . Fixed bug #81283 (shmop can't read beyond 2147483647 bytes). (cmb, Nikita)
+
 - Standard:
   . Fixed bug #72146 (Integer overflow on substr_replace). (cmb)
   . Fixed bug #81265 (getimagesize returns 0 for 256px ICO images).
