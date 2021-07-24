@@ -545,7 +545,7 @@ static const unsigned char ucs_armscii8_table[] = {
 };
 DEF_SB(armscii8, "ArmSCII-8", "ArmSCII-8", armscii8_aliases);
 
-int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
+static int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
@@ -562,7 +562,7 @@ int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
+static int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0x28 && c <= 0x2F) {
 		CK((*filter->output_function)(ucs_armscii8_table[c - 0x28], filter->data));
