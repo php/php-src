@@ -6774,6 +6774,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			if (ZEND_TYPE_IS_SET(type)) {
 				ZVAL_UNDEF(&default_value);
 			} else {
+				if (property_flags & ZEND_ACC_READONLY) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Readonly property %s::$%s must have type",
+						ZSTR_VAL(scope->name), ZSTR_VAL(name));
+				}
+
 				ZVAL_NULL(&default_value);
 			}
 
