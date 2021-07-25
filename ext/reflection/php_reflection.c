@@ -891,6 +891,9 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		if (prop->flags & ZEND_ACC_STATIC) {
 			smart_str_appends(str, "static ");
 		}
+		if (prop->flags & ZEND_ACC_READONLY) {
+			smart_str_appends(str, "readonly ");
+		}
 		if (ZEND_TYPE_IS_SET(prop->type)) {
 			zend_string *type_str = zend_type_to_string(prop->type);
 			smart_str_append(str, type_str);
