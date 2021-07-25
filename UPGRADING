@@ -421,6 +421,9 @@ PHP 8.1 UPGRADE NOTES
     parent::init() with parent::__construct().
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
 
+- OCI8:
+  . The INI directive oci8.old_oci_close_semantics has been deprecated.
+
 - ODBC:
   . odbc_result_all() has been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_1
