@@ -17,7 +17,7 @@ $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 try {
     $mysqli->query("Syntax Error");
-} catch (mysqli_sql_exception) {
+} catch (mysqli_sql_exception $e) {
 }
 $mysqli->next_result();
 
