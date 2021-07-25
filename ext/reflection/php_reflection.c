@@ -348,6 +348,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		if (ce->ce_flags & ZEND_ACC_FINAL) {
 			smart_str_append_printf(str, "final ");
 		}
+		if (ce->ce_flags & ZEND_ACC_READONLY_CLASS) {
+			smart_str_append_printf(str, "readonly ");
+		}
 		smart_str_append_printf(str, "class ");
 	}
 	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
@@ -4863,6 +4866,12 @@ ZEND_METHOD(ReflectionClass, isFinal)
 }
 /* }}} */
 
+/* Returns whether this class is readonly */
+ZEND_METHOD(ReflectionClass, isReadonly)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY_CLASS);
+}
+
 /* {{{ Returns whether this class is abstract */
 ZEND_METHOD(ReflectionClass, isAbstract)
 {
@@ -4875,8 +4884,7 @@ ZEND_METHOD(ReflectionClass, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	uint32_t keep_flags = ZEND_ACC_FINAL
-		| ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_READONLY_CLASS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -7123,6 +7131,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_READONLY", ZEND_ACC_READONLY_CLASS);
 
 	reflection_object_ptr = register_class_ReflectionObject(reflection_class_ptr);
 	reflection_object_ptr->create_object = reflection_objects_new;
