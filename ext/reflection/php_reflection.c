@@ -3103,9 +3103,6 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (type_mask & MAY_BE_CALLABLE) {
 		append_type_mask(return_value, MAY_BE_CALLABLE);
 	}
-	if (type_mask & MAY_BE_ITERABLE) {
-		append_type_mask(return_value, MAY_BE_ITERABLE);
-	}
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);
 	}

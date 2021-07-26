@@ -1227,9 +1227,6 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	if (type_mask & MAY_BE_CALLABLE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_CALLABLE), /* is_intersection */ false);
 	}
-	if (type_mask & MAY_BE_ITERABLE) {
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
-	}
 	if (type_mask & MAY_BE_OBJECT) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_OBJECT), /* is_intersection */ false);
 	}
@@ -1289,7 +1286,7 @@ static void zend_mark_function_as_generator(void) /* {{{ */
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_type return_type = CG(active_op_array)->arg_info[-1].type;
-		bool valid_type = (ZEND_TYPE_FULL_MASK(return_type) & (MAY_BE_ITERABLE | MAY_BE_OBJECT)) != 0;
+		bool valid_type = (ZEND_TYPE_FULL_MASK(return_type) & MAY_BE_OBJECT) != 0;
 		if (!valid_type) {
 			zend_type *single_type;
 			ZEND_TYPE_FOREACH(return_type, single_type) {
@@ -6134,6 +6131,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use \"static\" when no class scope is active");
 		}
+
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
@@ -6145,6 +6143,17 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
+
+			/* Transform iterable into a type union alias */
+			if (type_code == IS_ITERABLE) {
+				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE), 0, 0);
+				ZEND_TYPE_FULL_MASK(iterable) |= MAY_BE_ARRAY;
+				/* Inform that the type list is a union type */
+				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_NAME_BIT;
+				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_UNION_BIT;
+				return iterable;
+			}
+
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
 			const char *correct_name;
@@ -6184,19 +6193,6 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 	}
 }
 
-static bool zend_type_contains_traversable(zend_type type) {
-	zend_type *single_type;
-	ZEND_TYPE_FOREACH(type, single_type) {
-		if (ZEND_TYPE_HAS_NAME(*single_type)
-				&& zend_string_equals_literal_ci(ZEND_TYPE_NAME(*single_type), "Traversable")) {
-			return 1;
-		}
-	} ZEND_TYPE_FOREACH_END();
-	return 0;
-}
-
-// TODO: Ideally we'd canonicalize "iterable" into "array|Traversable" and essentially
-// treat it as a built-in type alias.
 static zend_type zend_compile_typename(
 		zend_ast *ast, bool force_allow_null) /* {{{ */
 {
@@ -6291,7 +6287,7 @@ static zend_type zend_compile_typename(
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
 			/* An intersection of standard types cannot exist so invalidate it */
-			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
+			if (ZEND_TYPE_PURE_MASK(single_type)) {
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
@@ -6329,18 +6325,6 @@ static zend_type zend_compile_typename(
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-	if ((type_mask & (MAY_BE_ARRAY|MAY_BE_ITERABLE)) == (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
-		zend_string *type_str = zend_type_to_string(type);
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Type %s contains both iterable and array, which is redundant", ZSTR_VAL(type_str));
-	}
-
-	if ((type_mask & MAY_BE_ITERABLE) && zend_type_contains_traversable(type)) {
-		zend_string *type_str = zend_type_to_string(type);
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Type %s contains both iterable and Traversable, which is redundant",
-			ZSTR_VAL(type_str));
-	}
 
 	if (type_mask == MAY_BE_ANY && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be marked as nullable since mixed already includes null");
@@ -6385,9 +6369,6 @@ static bool zend_is_valid_default_value(zend_type type, zval *value)
 	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_DOUBLE) && Z_TYPE_P(value) == IS_LONG) {
 		/* Integers are allowed as initializers for floating-point values. */
 		convert_to_double(value);
-		return 1;
-	}
-	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_ITERABLE) && Z_TYPE_P(value) == IS_ARRAY) {
 		return 1;
 	}
 	return 0;
