@@ -742,7 +742,7 @@ function escapeshellcmd(string $command): string {}
 
 function escapeshellarg(string $arg): string {}
 
-function shell_exec(string $command): string|false|null {}
+function shell_exec(string $command): string|null {}
 
 #ifdef HAVE_NICE
 function proc_nice(int $priority): bool {}
