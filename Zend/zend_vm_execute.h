@@ -10512,7 +10512,11 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MATCH_ERROR_SPEC_
 	// in the error message. Otherwise just show its type.
 	switch (Z_TYPE_P(op)) {
 	case IS_FALSE:
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: false");
+		break;
 	case IS_TRUE:
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: true");
+		break;
 	case IS_LONG:
 	case IS_DOUBLE:
 	case IS_STRING: {
@@ -10522,7 +10526,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MATCH_ERROR_SPEC_
 		break;
 	}
 	default:
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));		PUTS("UNKNOWN:0\n");
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
 		break;
 	}
 
@@ -14056,7 +14060,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MATCH_ERROR_SPEC_TMPVARCV_UNUS
 	// in the error message. Otherwise just show its type.
 	switch (Z_TYPE_P(op)) {
 	case IS_FALSE:
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: false");
+		break;
 	case IS_TRUE:
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: true");
+		break;
 	case IS_LONG:
 	case IS_DOUBLE:
 	case IS_STRING: {
@@ -14066,7 +14074,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MATCH_ERROR_SPEC_TMPVARCV_UNUS
 		break;
 	}
 	default:
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));		PUTS("UNKNOWN:0\n");
+		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
 		break;
 	}
 
