@@ -277,7 +277,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
-	if (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED)) {
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		return;
 	}
 

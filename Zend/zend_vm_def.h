@@ -7609,20 +7609,6 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 	if (UNEXPECTED(ce == NULL)) {
 		zend_string *rtd_key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
 		zv = zend_hash_find_known_hash(EG(class_table), rtd_key);
-		if (UNEXPECTED(zv == NULL)) {
-			SAVE_OPLINE();
-			do {
-				ZEND_ASSERT(EX(func)->op_array.fn_flags & ZEND_ACC_PRELOADED);
-				if (zend_preload_autoload
-				  && zend_preload_autoload(EX(func)->op_array.filename) == SUCCESS) {
-					zv = zend_hash_find_known_hash(EG(class_table), rtd_key);
-					if (EXPECTED(zv != NULL)) {
-						break;
-					}
-				}
-				zend_error_noreturn(E_ERROR, "Anonymous class wasn't preloaded");
-			} while (0);
-		}
 		ZEND_ASSERT(zv != NULL);
 		ce = Z_CE_P(zv);
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
