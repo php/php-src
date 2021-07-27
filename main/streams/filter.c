@@ -416,7 +416,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
-		status = filter->fops->filter(stream, current, inp, outp, NULL, flags);
+		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;

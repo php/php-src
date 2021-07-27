@@ -36,6 +36,9 @@ PHP                                                                        NEWS
     (George Dietrich)
   . Fixed bug #74960 (Heap buffer overflow via str_repeat). (cmb, Dmitry)
 
+- Streams:
+  . Fixed bug #81294 (Segfault when removing a filter). (cmb)
+
 29 Jul 2021, PHP 8.0.9
 
 - Core:
