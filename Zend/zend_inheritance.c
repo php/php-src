@@ -2310,7 +2310,6 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 typedef struct _zend_abstract_info {
 	zend_function *afn[MAX_ABSTRACT_INFO_CNT + 1];
 	int cnt;
-	int ctor;
 } zend_abstract_info;
 
 static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai) /* {{{ */
@@ -2318,16 +2317,7 @@ static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract
 	if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 		ai->afn[ai->cnt] = fn;
 	}
-	if (fn->common.fn_flags & ZEND_ACC_CTOR) {
-		if (!ai->ctor) {
-			ai->cnt++;
-			ai->ctor = 1;
-		} else {
-			ai->afn[ai->cnt] = NULL;
-		}
-	} else {
-		ai->cnt++;
-	}
+	ai->cnt++;
 }
 /* }}} */
 
