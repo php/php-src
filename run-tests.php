@@ -2499,8 +2499,6 @@ COMMAND $cmd
         }
     }
 
-    @unlink($preload_filename);
-
     $leaked = false;
     $passed = false;
 
@@ -2647,6 +2645,7 @@ COMMAND $cmd
             $passed = true;
             if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
+                @unlink($preload_filename);
             }
             @unlink($tmp_post);
 
@@ -2675,6 +2674,7 @@ COMMAND $cmd
 
             if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
+                @unlink($preload_filename);
             }
             @unlink($tmp_post);
 
