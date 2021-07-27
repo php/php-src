@@ -8939,24 +8939,24 @@ ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)
 	// For simpler types where there is a convenient stringified version, include that
 	// in the error message. Otherwise just show its type.
 	switch (Z_TYPE_P(op)) {
-	case IS_FALSE:
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: false");
-		break;
-	case IS_TRUE:
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: true");
-		break;
-	case IS_LONG:
-	case IS_DOUBLE:
-	case IS_STRING: {
-		zend_string* stringified = zval_get_string(op);
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: %s", ZSTR_VAL(stringified));
-		zend_string_release_ex(stringified, false);
-		break;
-	}
-	default:
-		zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
-		break;
-	}
+		case IS_FALSE:
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: false");
+			break;
+		case IS_TRUE:
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: true");
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING: {
+			zend_string* stringified = zval_get_string(op);
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: %s", ZSTR_VAL(stringified));
+			zend_string_release_ex(stringified, false);
+			break;
+		}
+		default:
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
+			break;
+		}
 
 	HANDLE_EXCEPTION();
 }
