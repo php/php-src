@@ -195,7 +195,7 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 		n = ((filter->cache & 0xFF) << 8) | (c & 0xFF);
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* Wrong; that's the first half of a surrogate pair, not the second */
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(0xD800 | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
@@ -203,7 +203,7 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(0xD800 | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		}
@@ -269,7 +269,7 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 	case 3:
 		n = (filter->cache & 0xFF) | ((c & 0xFF) << 8);
 		if (n >= 0xD800 && n <= 0xDBFF) {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(0xD800 | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
@@ -277,7 +277,7 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(0xD800 | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		}
@@ -316,7 +316,11 @@ static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 
 	if (status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		if (status == 1) {
+			CK((*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		} else if (status == 2) {
+			CK((*filter->output_function)(0xD800 | cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		}
 	}
 
 	if (filter->flush_function) {

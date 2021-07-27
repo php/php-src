@@ -155,9 +155,7 @@ retry:
 					w = 0;
 				}
 				if (w <= 0) {
-					w = (c1 << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0208;
+					w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0208;
 				}
 			} else {
 				if (s >= 0 && s < jisx0212_ucs_table_size) {
@@ -166,16 +164,12 @@ retry:
 					w = 0;
 				}
 				if (w <= 0) {
-					w = (c1 << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0212;
+					w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0212;
 				}
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
+			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;

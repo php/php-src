@@ -300,8 +300,15 @@ echo "Tested GB18030 4-byte characters <-> UTF-16BE\n";
 testAllValidChars($fromUnicode, 'UTF-16BE', 'GB18030', false);
 echo "Tested UTF-16BE -> GB18030 (1 and 2 byte characters)\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x81\x30\x81\xFF", "BAD+3081FF", "GB18030", "UTF-8");
+convertInvalidString("\xE3\x32\x9A\x36", "BAD+329A36", "GB18030", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested GB18030 (1 and 2 byte characters) -> UTF-16BE
 Tested GB18030 4-byte characters <-> UTF-16BE
 Tested UTF-16BE -> GB18030 (1 and 2 byte characters)
+Done!

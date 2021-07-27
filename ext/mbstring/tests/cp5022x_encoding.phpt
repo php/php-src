@@ -292,6 +292,16 @@ testInvalidString("\xD8\x00", '%', 'UTF-16BE', 'CP50222');
 
 echo "Invalid Unicode is flagged when converting to CP5022x\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "BAD+80", "CP50220", "UTF-8");
+convertInvalidString("\x80", "BAD+80", "CP50221", "UTF-8");
+convertInvalidString("\x80", "BAD+80", "CP50222", "UTF-8");
+convertInvalidString("\x1B\$B1", "BAD+31", "CP50220", "UTF-8");
+convertInvalidString("\x1B\$B1", "BAD+31", "CP50221", "UTF-8");
+convertInvalidString("\x1B\$B1", "BAD+31", "CP50222", "UTF-8");
+
+echo "Long error markers OK\n";
 ?>
 --EXPECT--
 ASCII support OK
@@ -299,3 +309,4 @@ JIS X 0201 support OK
 CP932 support OK
 Folding of fullwidth katakana for CP50220 OK
 Invalid Unicode is flagged when converting to CP5022x
+Long error markers OK

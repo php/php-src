@@ -10,7 +10,16 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 <?php
 include('encoding_tests.inc');
 testEncodingFromUTF16ConversionTable(__DIR__ . '/data/EUC-CN.txt', 'EUC-CN');
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "BAD+80", "EUC-CN", "UTF-8");
+convertInvalidString("\xA1\x50", "BAD+A150", "EUC-CN", "UTF-8");
+convertInvalidString("\xF7\xFF", "BAD+F7FF", "EUC-CN", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested EUC-CN -> UTF-16BE
 Tested UTF-16BE -> EUC-CN
+Done!

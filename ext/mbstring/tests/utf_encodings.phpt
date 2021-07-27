@@ -799,6 +799,44 @@ $invalid = array(
 
 testInvalidCodepoints($invalid, 'UTF-8');
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xF4\x90\x80\x80", "BAD+F490BAD+80BAD+80", "UTF-8", "ASCII");
+convertInvalidString("\xF7\x80\x80\x80", "BAD+F7BAD+80BAD+80BAD+80", "UTF-8", "ASCII");
+convertInvalidString("\xED\xA0\x80", "BAD+EDA0BAD+80", "UTF-8", "ASCII");
+convertInvalidString("\xED\xBF\xBF", "BAD+EDBFBAD+BF", "UTF-8", "ASCII");
+// Truncated:
+convertInvalidString("\xDF", "BAD+DF", "UTF-8", "ASCII");
+convertInvalidString("\xEF", "BAD+EF", "UTF-8", "ASCII");
+convertInvalidString("\xEF\xBF", "BAD+EFBF", "UTF-8", "ASCII");
+convertInvalidString("\xF0", "BAD+F0", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBF", "BAD+F0BF", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBF\xBF", "BAD+F0BFBF", "UTF-8", "ASCII");
+// Multi-byte character ends too early and goes back to ASCII:
+convertInvalidString("\xDFA", "BAD+DFA", "UTF-8", "ASCII");
+convertInvalidString("\xEFA", "BAD+EFA", "UTF-8", "ASCII");
+convertInvalidString("\xEF\xBFA", "BAD+EFBFA", "UTF-8", "ASCII");
+convertInvalidString("\xF0A", "BAD+F0A", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBFA", "BAD+F0BFA", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBF\xBFA", "BAD+F0BFBFA", "UTF-8", "ASCII");
+// Multi-byte character ends too early and goes to a byte which is not ASCII, nor could
+// it possibly start a valid multi-byte character
+convertInvalidString("\xEF\xBF\xC0", "BAD+EFBFC0", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBF\xBF\xC0", "BAD+BFBFC0", "UTF-8", "ASCII");
+
+convertInvalidString("\xDF\xDF\xBF", "BAD+DFU+7FF", "UTF-8", "ASCII");
+convertInvalidString("\xEF\xBF\xDF\xBF", "BAD+EFBFU+7FF", "UTF-8", "ASCII");
+convertInvalidString("\xF0\xBF\xBF\xDF\xBF", "BAD+F0BFBFU+7FF", "UTF-8", "ASCII");
+
+convertInvalidString("\x80", "BAD+80", "UTF-8", "ASCII");
+convertInvalidString(".\x80", ".BAD+80", "UTF-8", "ASCII");
+convertInvalidString("\xDF\xBF\x80", "U+7FFBAD+80", "UTF-8", "ASCII");
+
+convertInvalidString("\xC1\xBF", "BAD+C1BAD+BF", "UTF-8", "ASCII");
+convertInvalidString("\xE0\x9F\xBF", "BAD+E09FBAD+BF", "UTF-8", "ASCII");
+convertInvalidString("\xF0\x8F\xBF\xBF", "BAD+F08FBAD+BFBAD+BF", "UTF-8", "ASCII");
+mb_substitute_character(0x25); // '%'
+
 echo "== UTF-16 ==\n";
 
 testValidCodepoints("UTF-16");
@@ -848,6 +886,29 @@ testInvalidCodepoints($invalid, 'UTF-16LE');
 // Truncated
 testInvalidString("\x00", "\x00\x00\x00%", 'UTF-16LE', 'UTF-32BE');
 testInvalidString("A\x00\x01", "\x00\x00\x00A\x00\x00\x00%", 'UTF-16LE', 'UTF-32BE');
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xDC\x01\xD8\x02", "BAD+DC01BAD+D802", "UTF-16", "ASCII");
+convertInvalidString("\xDC\x01\xD8\x02", "BAD+DC01BAD+D802", "UTF-16BE", "ASCII");
+convertInvalidString("\x01\xDC\x02\xD8", "BAD+DC01BAD+D802", "UTF-16LE", "ASCII");
+convertInvalidString("\xDD\x11\xD9\x13", "BAD+DD11BAD+D913", "UTF-16BE", "ASCII");
+
+convertInvalidString("\xD8\x01\x00A", "BAD+D801A", "UTF-16", "ASCII");
+convertInvalidString("\xD8\x01\x00A", "BAD+D801A", "UTF-16BE", "ASCII");
+convertInvalidString("\x01\xD8A\x00", "BAD+D801A", "UTF-16LE", "ASCII");
+
+convertInvalidString("\xD8\x01", "BAD+D801", "UTF-16", "ASCII");
+convertInvalidString("\xD8\x01", "BAD+D801", "UTF-16BE", "ASCII");
+convertInvalidString("\x01\xD8", "BAD+D801", "UTF-16LE", "ASCII");
+
+convertInvalidString("\x00", "BAD+0", 'UTF-16', 'ASCII');
+convertInvalidString("\x00", "BAD+0", 'UTF-16BE', 'ASCII');
+convertInvalidString("\x00", "BAD+0", 'UTF-16LE', 'ASCII');
+convertInvalidString("\x00A\x01", "ABAD+1", 'UTF-16', 'ASCII');
+convertInvalidString("\x00A\x01", "ABAD+1", 'UTF-16BE', 'ASCII');
+convertInvalidString("A\x00\x01", "ABAD+1", 'UTF-16LE', 'ASCII');
+mb_substitute_character(0x25); // '%'
 
 // TODO: test handling of UTF-16 BOM
 
@@ -904,6 +965,24 @@ testInvalidCodepoints($invalid, 'UTF-32LE');
 testInvalidString("\x00\x01\x01", "\x00\x00\x00%", 'UTF-32LE', 'UTF-32BE');
 testInvalidString("\x00\x01",     "\x00\x00\x00%", 'UTF-32LE', 'UTF-32BE');
 testInvalidString("\x00",         "\x00\x00\x00%", 'UTF-32LE', 'UTF-32BE');
+
+mb_substitute_character("long");
+convertInvalidString("\x00\x01\x01", "BAD+101", "UTF-32", "ASCII");
+convertInvalidString("\x00\x01\x01", "BAD+101", "UTF-32BE", "ASCII");
+convertInvalidString("\x01\x01\x00", "BAD+101", "UTF-32LE", "ASCII");
+
+convertInvalidString("\x01", "BAD+1", "UTF-32", "ASCII");
+convertInvalidString("\x01", "BAD+1", "UTF-32BE", "ASCII");
+convertInvalidString("\x01", "BAD+1", "UTF-32LE", "ASCII");
+
+convertInvalidString("\x00\x11\x00\x00", "BAD+110000", "UTF-32", "ASCII");
+convertInvalidString("\x00\x11\x00\x00", "BAD+110000", "UTF-32BE", "ASCII");
+convertInvalidString("\x00\x00\x11\x00", "BAD+110000", "UTF-32LE", "ASCII");
+
+convertInvalidString("\x00\x00\xd8\x00", "BAD+D800", "UTF-32", "ASCII");
+convertInvalidString("\x00\x00\xd8\x00", "BAD+D800", "UTF-32BE", "ASCII");
+convertInvalidString("\x00\xd8\x00\x00", "BAD+D800", "UTF-32LE", "ASCII");
+mb_substitute_character(0x25); // '%'
 
 // TODO: test handling of UTF-32 BOM
 
@@ -1011,6 +1090,28 @@ testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-
 $encoded = encode("\x12\x34", 'UTF-16BE'); // 3 Base64 bytes, 2 bits of padding...
 $corrupted = substr($encoded, 0, 2) . chr(ord($encoded[2]) + 1);
 testInvalidString('+' . $corrupted . '-', "\x00\x00\x12\x34\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString('+' . rawEncode("\xDC\x01\xD8\x02") . '-', "BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+convertInvalidString('+' . rawEncode("\xDC\x01\xD8\x02"), "BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+convertInvalidString('+' . rawEncode("\x00\x2E\xDC\x01\xD8\x02") . '-', ".BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+convertInvalidString('+' . rawEncode("\x00\x2E\xDC\x01\xD8\x02"), ".BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+convertInvalidString('+' . rawEncode("\x00\x2E\x00\x2E\xDC\x01\xD8\x02") . '-', "..BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+convertInvalidString('+' . rawEncode("\x00\x2E\x00\x2E\xDC\x01\xD8\x02"), "..BAD+DC01BAD+D802", "UTF-7", "UTF-8");
+
+convertInvalidString('+' . rawEncode("\xD8\x01\x00A") . '-', "BAD+D801A", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\xD8\x01\x00A") . '-', ".BAD+D801A", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\x00\x2E\xD8\x01\x00A") . '-', "..BAD+D801A", 'UTF-7', 'UTF-8');
+
+convertInvalidString('+' . rawEncode("\xD8\x01\xD9\x02") . '-', "BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\xD8\x01\xD9\x02"), "BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\xD8\x01\xD9\x02") . '-', ".BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\xD8\x01\xD9\x02"), ".BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\x00\x2E\xD8\x01\xD9\x02") . '-', "..BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+convertInvalidString('+' . rawEncode("\x00\x2E\x00\x2E\xD8\x01\xD9\x02"), "..BAD+D801BAD+D902", 'UTF-7', 'UTF-8');
+
+convertInvalidString('+' . rawEncode("\x01") . '-', "BAD+100", 'UTF-7', 'UTF-8');
 
 echo "Done!\n";
 

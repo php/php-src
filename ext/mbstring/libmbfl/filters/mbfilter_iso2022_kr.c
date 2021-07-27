@@ -174,8 +174,16 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_conv_2022kr_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status & 0xF) {
-		/* 2-byte character or escape sequence was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		if (filter->status == 2) {
+			CK((*filter->output_function)(0x1B | MBFL_WCSGROUP_THROUGH, filter->data));
+		} else if (filter->status == 3) {
+			CK((*filter->output_function)(0x1B24 | MBFL_WCSGROUP_THROUGH, filter->data));
+		} else if (filter->status == 4) {
+			CK((*filter->output_function)(0x1B2429 | MBFL_WCSGROUP_THROUGH, filter->data));
+		} else {
+			/* 2-byte character was truncated */
+			CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		}
 	}
 
 	if (filter->flush_function) {

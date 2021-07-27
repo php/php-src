@@ -199,8 +199,21 @@ foreach (array_keys($truncatedChars) as $truncated)
 
 echo "JIS X 0208 (with MS extensions) and KDDI emoji support OK\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-KDDI", "UTF-8");
+// Invalid escapes:
+convertInvalidString("\x1B", "BAD+1B", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B.", "BAD+1B2E", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$", "BAD+1B24", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$.", "BAD+1B242E", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$(X", "BAD+242858", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$B\x9F", "BAD+9F", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
+
+echo "Done!\n";
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) and KDDI emoji support OK
+Done!

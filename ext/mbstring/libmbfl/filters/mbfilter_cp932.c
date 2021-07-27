@@ -151,9 +151,7 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 		}
 		break;
 
@@ -215,7 +213,7 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
-		(*filter->filter_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter);
+		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
 	}
 
 	if (filter->flush_function) {
