@@ -5,3 +5,8 @@ enum MyEnum {
     case Bar;
 }
 var_dump(MyEnum::Bar);
+
+class Test {
+    public $x = MyEnum::Bar;
+}
+new Test;

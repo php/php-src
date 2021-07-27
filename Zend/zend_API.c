@@ -1327,6 +1327,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 			memcpy(new_c, c, sizeof(zend_class_constant));
 			c = new_c;
 		}
+		Z_TRY_ADDREF(c->value);
 		_zend_hash_append_ptr(constants_table, key, c);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1437,7 +1438,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 			dst = default_properties_table;
 			end = dst + class_type->default_properties_count;
 			do {
-				ZVAL_COPY_VALUE_PROP(dst, src);
+				ZVAL_COPY_PROP(dst, src);
 				src++;
 				dst++;
 			} while (dst != end);
