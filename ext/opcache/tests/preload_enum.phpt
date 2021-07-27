@@ -14,7 +14,10 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 <?php
 
 var_dump(MyEnum::Foo);
+var_dump(MyEnum::Bar);
 
 ?>
 --EXPECT--
+enum(MyEnum::Bar)
 enum(MyEnum::Foo)
+enum(MyEnum::Bar)

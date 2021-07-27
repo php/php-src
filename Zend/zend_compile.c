@@ -7687,6 +7687,7 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 		ce->ce_flags |= ZEND_ACC_PRELOADED;
 		ZEND_MAP_PTR_NEW(ce->static_members_table);
+		ZEND_MAP_PTR_NEW(ce->mutable_data);
 	}
 
 	ce->ce_flags |= decl->flags;
