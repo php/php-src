@@ -418,6 +418,11 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 		S->result = NULL;
 	}
 
+	if (!mysql_more_results(H->server)) {
+		/* No more results */
+		pdo_mysql_error_stmt(stmt);
+		PDO_DBG_RETURN(0);
+	}
 #if PDO_USE_MYSQLND
 	if (mysql_next_result(H->server) == FAIL) {
 		pdo_mysql_error_stmt(stmt);
