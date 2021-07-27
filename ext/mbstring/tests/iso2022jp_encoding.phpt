@@ -187,6 +187,16 @@ for ($i = 0; $i <= 0xFF; $i++) {
 
 echo "All escape sequences work as expected\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "BAD+E0", "JIS", "UTF-8");
+convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B\$(X", "BAD+1B\$(X", "JIS", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$(X", "BAD+1B\$(X", "ISO-2022-JP", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$B!", "BAD+21", "JIS", "UTF-8"); // Truncated character
+convertInvalidString("\x1B\$B!", "BAD+21", "ISO-2022-JP", "UTF-8"); // Truncated character
+
+echo "Done!\n";
 ?>
 --EXPECT--
 ASCII support OK
@@ -194,3 +204,4 @@ JIS X 0201 support OK
 JIS X 0208 support OK
 JIS X 0212 support OK
 All escape sequences work as expected
+Done!

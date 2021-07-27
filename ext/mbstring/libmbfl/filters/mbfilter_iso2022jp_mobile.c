@@ -241,7 +241,13 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_conv_2022jp_mobile_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status & 0xF) {
-		mbfl_filt_conv_illegal_output(filter->cache, filter);
+		if ((filter->status & 0xF) == 2) {
+			(*filter->output_function)(0x1B | MBFL_WCSGROUP_THROUGH, filter->data);
+		} else if ((filter->status & 0xF) == 3) {
+			(*filter->output_function)(0x1B24 | MBFL_WCSGROUP_THROUGH, filter->data);
+		} else {
+			(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+		}
 	}
 
 	if (filter->flush_function) {

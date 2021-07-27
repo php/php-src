@@ -198,9 +198,17 @@ foreach (array_keys($truncatedChars) as $truncated)
 
 echo "UDC support OK\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$(X", "BAD+242858", "ISO-2022-JP-MS", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$B\x9F", "BAD+9F", "ISO-2022-JP-MS", "UTF-8"); // 0x9F does not start any 2-byte character
+
+echo "Done!\n";
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) support OK
 UDC support OK
+Done!

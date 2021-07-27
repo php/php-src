@@ -188,14 +188,14 @@ int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 				s1 = c1 - 0x80;
 				s2 = c - 0x80;
 			} else {
-				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
 				break;
 			}
 		} else if (filter->from->no_encoding == mbfl_no_encoding_sjis2004) {
 			if (c >= 0x40 && c <= 0xfc && c != 0x7f) {
 				SJIS_DECODE(c1, c, s1, s2);
 			} else {
-				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
 				break;
 			}
 		} else { /* ISO-2022-JP-2004 */
@@ -203,7 +203,7 @@ int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 				s1 = c1;
 				s2 = c;
 			} else {
-				CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
 				break;
 			}
 		}

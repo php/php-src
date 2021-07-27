@@ -277,6 +277,13 @@ function testSJISVariant($validChars, $nonInvertible, $encoding) {
 
   convertAllInvalidChars($invalidCodepoints, $fromUnicode, 'UTF-32BE', $encoding, '%');
   echo "Unicode -> $encoding conversion works on all invalid codepoints\n";
+
+  // Test "long" illegal character markers
+  mb_substitute_character("long");
+  convertInvalidString("\x80", "BAD+80", $encoding, "UTF-8");
+  convertInvalidString("\x81\x20", "BAD+8120", $encoding, "UTF-8");
+  convertInvalidString("\xEA\xA9", "W932+742B", $encoding, "UTF-8");
+  mb_substitute_character(0x25); // '%'
 }
 
 testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');

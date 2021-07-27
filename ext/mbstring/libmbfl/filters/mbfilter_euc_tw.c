@@ -148,7 +148,7 @@ int mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = (c1 << 8) + c - 0xA1;
 		} else {
 			filter->status = filter->cache = 0;
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
+			w = 0x8E0000 | ((c1 + 0xA1) << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;
@@ -179,7 +179,7 @@ int mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(w, filter->data));
 		} else {
 			filter->status = filter->cache = 0;
-			w = (c1 << 8) | c | 0x8e0000 | MBFL_WCSGROUP_THROUGH;
+			w = ((c1 + 0xA1A1) << 8) | c | MBFL_WCSGROUP_THROUGH;
 			CK((*filter->output_function)(w, filter->data));
 		}
 		break;

@@ -314,6 +314,12 @@ for ($i = 0; $i < 100; $i++) {
 	testValid($testString, $convertsTo, false);
 }
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-2004", "UTF-8");
+convertInvalidString("\x1B\$(X", "BAD+1B2428", "ISO-2022-JP-2004", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$B!", "BAD+21", "ISO-2022-JP-2004", "UTF-8"); // Truncated character
+
 echo "All done!\n";
 
 ?>

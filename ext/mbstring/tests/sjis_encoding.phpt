@@ -59,9 +59,18 @@ echo "Unicode -> SJIS conversion works on all valid characters\n";
 findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'Shift-JIS', '%');
 echo "Unicode -> SJIS conversion works on all invalid characters\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "BAD+80", "Shift-JIS", "UTF-8");
+convertInvalidString("\x81\x20", "BAD+8120", "Shift-JIS", "UTF-8");
+convertInvalidString("\xEA\xA9", "JIS+742B", "Shift-JIS", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 SJIS verification and conversion works on all valid characters
 SJIS verification and conversion works on all invalid characters
 Unicode -> SJIS conversion works on all valid characters
 Unicode -> SJIS conversion works on all invalid characters
+Done!
