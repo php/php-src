@@ -266,6 +266,12 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 		return attributes;
 	}
 
+	/* Attributes for trait properties may be shared if preloading is used. */
+	HashTable *xlat = zend_shared_alloc_get_xlat_entry(attributes);
+	if (xlat) {
+		return xlat;
+	}
+
 	zend_hash_persist(attributes);
 
 	ZEND_HASH_FOREACH_VAL(attributes, v) {
