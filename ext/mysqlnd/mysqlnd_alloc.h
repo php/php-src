@@ -36,9 +36,6 @@ struct st_mysqlnd_allocator_methods
 	char *	(*m_pememdup)(const char * const ptr, size_t size, bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrndup)(const char * const ptr, size_t size, bool persistent MYSQLND_MEM_D);
 	char *	(*m_pestrdup)(const char * const ptr, bool persistent MYSQLND_MEM_D);
-	int		(*m_sprintf)(char **pbuf, size_t max_len, const char *format, ...);
-	int		(*m_vsprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
-	void	(*m_sprintf_free)(char * p);
 };
 
 PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
@@ -54,9 +51,9 @@ PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 #define mnd_pememdup(ptr, size, pers)	mysqlnd_allocator.m_pememdup((ptr), (size), (pers) MYSQLND_MEM_C)
 #define mnd_pestrndup(ptr, size, pers)	mysqlnd_allocator.m_pestrndup((ptr), (size), (pers) MYSQLND_MEM_C)
 #define mnd_pestrdup(ptr, pers)			mysqlnd_allocator.m_pestrdup((ptr), (pers) MYSQLND_MEM_C)
-#define mnd_sprintf(p, mx_len, fmt,...) mysqlnd_allocator.m_sprintf((p), (mx_len), (fmt), __VA_ARGS__)
-#define mnd_vsprintf(p, mx_len, fmt,ap) mysqlnd_allocator.m_vsprintf((p), (mx_len), (fmt), (ap))
-#define mnd_sprintf_free(p)				mysqlnd_allocator.m_sprintf_free((p))
+#define mnd_sprintf(p, mx_len, fmt,...) spprintf((p), (mx_len), (fmt), __VA_ARGS__)
+#define mnd_vsprintf(p, mx_len, fmt,ap) vspprintf((p), (mx_len), (fmt), (ap))
+#define mnd_sprintf_free(p)				efree((p))
 
 static inline MYSQLND_STRING mnd_dup_cstring(const MYSQLND_CSTRING str, const bool persistent)
 {
