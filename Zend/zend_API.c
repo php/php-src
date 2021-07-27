@@ -1378,7 +1378,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		return SUCCESS;
 	}
 
-	if (ce_flags & ZEND_ACC_IMMUTABLE) {
+	bool uses_mutable_data = ZEND_MAP_PTR(class_type->mutable_data) != NULL;
+	if (uses_mutable_data) {
 		mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
 		if (mutable_data) {
 			ce_flags = mutable_data->ce_flags;
@@ -1399,7 +1400,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	if (ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) {
 		HashTable *constants_table;
 
-		if (ce_flags & ZEND_ACC_IMMUTABLE) {
+		if (uses_mutable_data) {
 			constants_table = mutable_data->constants_table;
 			if (!constants_table) {
 				constants_table = zend_separate_class_constants_table(class_type);
@@ -1426,8 +1427,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	}
 
 	default_properties_table = class_type->default_properties_table;
-	if ((ce_flags & ZEND_ACC_IMMUTABLE)
-	 && (ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)) {
+	if (uses_mutable_data && (ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)) {
 		zval *src, *dst, *end;
 
 		default_properties_table = mutable_data->default_properties_table;
@@ -1475,15 +1475,10 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	ce_flags &= ~ZEND_ACC_HAS_AST_CONSTANTS;
 	ce_flags &= ~ZEND_ACC_HAS_AST_PROPERTIES;
-	if (class_type->ce_flags & ZEND_ACC_IMMUTABLE) {
-		ce_flags &= ~ZEND_ACC_HAS_AST_STATICS;
-		if (mutable_data) {
-			mutable_data->ce_flags = ce_flags;
-		}
+	ce_flags &= ~ZEND_ACC_HAS_AST_STATICS;
+	if (uses_mutable_data) {
+		mutable_data->ce_flags = ce_flags;
 	} else {
-		if (!(ce_flags & ZEND_ACC_PRELOADED)) {
-			ce_flags &= ~ZEND_ACC_HAS_AST_STATICS;
-		}
 		class_type->ce_flags = ce_flags;
 	}
 

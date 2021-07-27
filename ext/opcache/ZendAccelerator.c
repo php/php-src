@@ -4664,9 +4664,6 @@ static int accel_preload(const char *config, bool in_child)
 			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_PRELOADED);
 			if (ce->default_static_members_count) {
 				zend_cleanup_internal_class_data(ce);
-				if (ce->ce_flags & ZEND_ACC_HAS_AST_STATICS) {
-					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-				}
 			}
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 				zend_op_array *op_array;
