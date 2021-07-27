@@ -425,7 +425,7 @@ static zend_ast_ref *create_enum_case_ast(
 	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = GC_CONSTANT_AST | GC_PERSISTENT | GC_IMMUTABLE;
 
-	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(3);
+	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(num_children);
 	ast->kind = ZEND_AST_CONST_ENUM_INIT;
 	ast->attr = 0;
 	ast->lineno = 0;
