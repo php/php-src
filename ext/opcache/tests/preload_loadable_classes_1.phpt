@@ -20,4 +20,4 @@ var_dump(class_exists('Foo'));
 --EXPECT--
 bool(true)
 bool(true)
-bool(true)
+bool(false)

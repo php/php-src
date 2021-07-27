@@ -3787,9 +3787,8 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name) {
 	return ce;
 }
 
-static bool preload_try_resolve_property_types(zend_class_entry *ce)
+static void preload_try_resolve_property_types(zend_class_entry *ce)
 {
-	bool ok = 1;
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		zend_property_info *prop;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
@@ -3798,20 +3797,13 @@ static bool preload_try_resolve_property_types(zend_class_entry *ce)
 				if (ZEND_TYPE_HAS_NAME(*single_type)) {
 					zend_class_entry *p =
 						preload_fetch_resolved_ce(ZEND_TYPE_NAME(*single_type));
-					if (!p) {
-						ok = 0;
-						continue;
+					if (p) {
+						ZEND_TYPE_SET_CE(*single_type, p);
 					}
-					ZEND_TYPE_SET_CE(*single_type, p);
 				}
 			} ZEND_TYPE_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
-		if (ok) {
-			ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
-		}
 	}
-
-	return ok;
 }
 
 static bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
@@ -4009,10 +4001,8 @@ static void preload_link(void)
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			break;
 		}
-		if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
-				preload_try_resolve_property_types(ce);
-			}
+		if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
+			preload_try_resolve_property_types(ce);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -4156,18 +4146,6 @@ static inline int preload_update_class_constants(zend_class_entry *ce) {
 	return result;
 }
 
-static zend_class_entry *preload_load_prop_type(zend_property_info *prop, zend_string *name) {
-	zend_class_entry *ce;
-	if (zend_string_equals_literal_ci(name, "self")) {
-		ce = prop->ce;
-	} else if (zend_string_equals_literal_ci(name, "parent")) {
-		ce = prop->ce->parent;
-	} else {
-		ce = zend_lookup_class(name);
-	}
-	return ce;
-}
-
 static void preload_ensure_classes_loadable(void) {
 	/* Run this in a loop, because additional classes may be loaded while updating constants etc. */
 	uint32_t checked_classes_idx = 0;
@@ -4191,25 +4169,6 @@ static void preload_ensure_classes_loadable(void) {
 
 			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				preload_update_class_constants(ce);
-			}
-
-			if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-				if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-					zend_property_info *prop;
-					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-						zend_type *single_type;
-						ZEND_TYPE_FOREACH(prop->type, single_type) {
-							if (ZEND_TYPE_HAS_NAME(*single_type)) {
-								zend_class_entry *ce = preload_load_prop_type(
-									prop, ZEND_TYPE_NAME(*single_type));
-								if (ce) {
-									ZEND_TYPE_SET_CE(*single_type, ce);
-								}
-							}
-						} ZEND_TYPE_FOREACH_END();
-					} ZEND_HASH_FOREACH_END();
-				}
-				ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 			}
 		} ZEND_HASH_FOREACH_END();
 		checked_classes_idx = num_classes;

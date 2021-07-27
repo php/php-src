@@ -1050,7 +1050,6 @@ static void zend_resolve_property_types(void) /* {{{ */
 				} ZEND_TYPE_FOREACH_END();
 			} ZEND_HASH_FOREACH_END();
 		}
-		ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */

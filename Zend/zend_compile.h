@@ -241,7 +241,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30...)                            |     |     |     */
+/* Class Flags (unused: 15,30,31)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -269,9 +269,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Whether all property types are resolved to CEs         |     |     |     */
-#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Children must reuse parent get_iterator()              |     |     |     */
 #define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 16) /*  X  |     |     |     */
