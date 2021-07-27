@@ -1465,13 +1465,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 	DBG_ENTER("mysqlnd_conn_data::next_result");
 	DBG_INF_FMT("conn=%" PRIu64 "", conn->thread_id);
 
+	SET_EMPTY_ERROR(conn->error_info);
+
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
 			if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING) {
 				break;
 			}
 
-			SET_EMPTY_ERROR(conn->error_info);
 			UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 			/*
 			  We are sure that there is a result set, since conn->state is set accordingly
