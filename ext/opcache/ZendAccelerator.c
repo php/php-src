@@ -4134,47 +4134,6 @@ static void preload_link(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static inline int preload_update_class_constants(zend_class_entry *ce) {
-	/* This is a separate function to work around what appears to be a bug in GCC
-	 * maybe-uninitialized analysis. */
-	int result;
-	zend_try {
-		result = preload_try_resolve_constants(ce) ? SUCCESS : FAILURE;
-	} zend_catch {
-		result = FAILURE;
-	} zend_end_try();
-	return result;
-}
-
-static void preload_ensure_classes_loadable(void) {
-	/* Run this in a loop, because additional classes may be loaded while updating constants etc. */
-	uint32_t checked_classes_idx = 0;
-	while (1) {
-		zend_class_entry *ce;
-		uint32_t num_classes = zend_hash_num_elements(EG(class_table));
-		if (num_classes == checked_classes_idx) {
-			return;
-		}
-
-		ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
-			if (ce->type == ZEND_INTERNAL_CLASS || _idx == checked_classes_idx) {
-				break;
-			}
-
-			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-				/* Only require that already linked classes are loadable, we'll properly check
-				 * things when linking additional classes. */
-				continue;
-			}
-
-			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-				preload_update_class_constants(ce);
-			}
-		} ZEND_HASH_FOREACH_END();
-		checked_classes_idx = num_classes;
-	}
-}
-
 static zend_string *preload_resolve_path(zend_string *filename)
 {
 	if (is_stream_path(ZSTR_VAL(filename))) {
@@ -4626,10 +4585,6 @@ static int accel_preload(const char *config, bool in_child)
 
 			CG(unclean_shutdown) = 1;
 			ret = FAILURE;
-		}
-
-		if (ret == SUCCESS) {
-			preload_ensure_classes_loadable();
 		}
 	} zend_catch {
 		ret = FAILURE;
