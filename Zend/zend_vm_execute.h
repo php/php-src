@@ -7355,27 +7355,16 @@ array_key_exists_array:
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *lcname, *zv;
-	zend_class_entry *ce;
 
-	ce = CACHED_PTR(opline->extended_value);
+	zend_class_entry *ce = CACHED_PTR(opline->extended_value);
 	if (ce == NULL) {
-		lcname = RT_CONSTANT(opline, opline->op1);
-		zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
+		zval *lcname = RT_CONSTANT(opline, opline->op1);
+		zval *zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
 		if (zv) {
 			SAVE_OPLINE();
-			ce = Z_CE_P(zv);
-			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
-			if (UNEXPECTED(!zv)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-			} else {
-				ce = zend_do_link_class(ce, Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(lcname));
-				if (!ce) {
-					/* Reload bucket pointer, the hash table may have been reallocated */
-					zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
-					zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(lcname + 1));
-					HANDLE_EXCEPTION();
-				}
+			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			if (!ce) {
+				HANDLE_EXCEPTION();
 			}
 		}
 		CACHE_PTR(opline->extended_value, ce);

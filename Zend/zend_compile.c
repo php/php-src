@@ -1100,6 +1100,32 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 }
 /* }}} */
 
+ZEND_API zend_class_entry *zend_bind_class_in_slot(
+		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name)
+{
+	zend_class_entry *ce = Z_PTR_P(class_table_slot);
+	zval *zv = zend_hash_set_bucket_key(
+		EG(class_table), (Bucket *) class_table_slot, Z_STR_P(lcname));
+	if (UNEXPECTED(!zv)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		return NULL;
+	}
+
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		return ce;
+	}
+
+	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
+	if (ce) {
+		return ce;
+	}
+
+	/* Reload bucket pointer, the hash table may have been reallocated */
+	zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
+	zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(lcname + 1));
+	return NULL;
+}
+
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 {
 	zend_class_entry *ce;
@@ -1131,26 +1157,7 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 	}
 
 	/* Register the derived class */
-	ce = (zend_class_entry*)Z_PTR_P(zv);
-	zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
-	if (UNEXPECTED(!zv)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-		return FAILURE;
-	}
-
-	if (ce->ce_flags & ZEND_ACC_LINKED) {
-		return SUCCESS;
-	}
-
-	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
-	if (!ce) {
-		/* Reload bucket pointer, the hash table may have been reallocated */
-		zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
-		zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(rtd_key));
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return zend_bind_class_in_slot(zv, lcname, lc_parent_name) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
