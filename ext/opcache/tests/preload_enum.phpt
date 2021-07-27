@@ -17,7 +17,9 @@ var_dump(MyEnum::Foo);
 var_dump(MyEnum::Bar);
 
 ?>
---EXPECT--
+--EXPECTF--
 enum(MyEnum::Bar)
+
+Warning: Can't preload unlinked class MyEnum2: Unknown reason in %s on line %d
 enum(MyEnum::Foo)
 enum(MyEnum::Bar)

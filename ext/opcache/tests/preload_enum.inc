@@ -10,3 +10,9 @@ class Test {
     public $x = MyEnum::Bar;
 }
 new Test;
+
+if (false) {
+    enum MyEnum2 {
+        case Foo;
+    }
+}

@@ -782,6 +782,13 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 				: NULL;
 
 			zend_class_entry *ce = zend_lookup_class(class_name);
+			if (!ce) {
+				/* Class may not be available when resolving constants on a dynamically
+				 * declared enum during preloading. */
+				ZEND_ASSERT(CG(compiler_options) & ZEND_COMPILE_PRELOAD);
+				return FAILURE;
+			}
+
 			zend_enum_new(result, ce, case_name, case_value_zv);
 			break;
 		}
