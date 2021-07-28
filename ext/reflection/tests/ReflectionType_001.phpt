@@ -95,7 +95,7 @@ foreach ($reflector->getProperties() as $name => $property) {
             printf("public %s $%s;\n", $type->getName(), $property->getName());
         } else {
             echo 'public ', implode('|', $type->getTypes()),
-                ' $', $property->getName(), "\n";
+                ' $', $property->getName(), ";\n";
         }
     } else printf("public $%s;\n", $property->getName());
 }
@@ -221,7 +221,7 @@ string(4) "Test"
 public int $int;
 public string $string;
 public array $arr;
-public Traversable|array $iterable
+public iterable $iterable;
 public stdClass $std;
 public OtherThing $other;
 public $mixed;

@@ -21,7 +21,7 @@ Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(true)
 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
-bool(true)
+bool(false)
 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(false)

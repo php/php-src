@@ -7,4 +7,4 @@ function test(iterable $arg) { }
 var_dump((string)(new ReflectionParameter("test", 0))->getType());
 ?>
 --EXPECT--
-string(17) "Traversable|array"
+string(8) "iterable"

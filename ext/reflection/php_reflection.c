@@ -1330,6 +1330,7 @@ typedef enum {
 } reflection_type_kind;
 
 /* For backwards compatibility reasons, we need to return T|null style unions
+ * and transformation from iterable to Traversable|array
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
 static reflection_type_kind get_type_kind(zend_type type) {
@@ -1344,6 +1345,10 @@ static reflection_type_kind get_type_kind(zend_type type) {
 	}
 
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
+		/* BC support for 'iterable' type */
+		if (type_mask_without_null == (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
+			return NAMED_TYPE;
+		}
 		if (type_mask_without_null != 0) {
 			return UNION_TYPE;
 		}
@@ -1373,6 +1378,10 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 			reflection_instantiate(reflection_intersection_type_ptr, object);
 			break;
 		case UNION_TYPE:
+			/* Clear fake iterable type */
+			if ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_ITERABLE) != 0) {
+				ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_ITERABLE;
+			}
 			reflection_instantiate(reflection_union_type_ptr, object);
 			break;
 		case NAMED_TYPE:
@@ -3006,9 +3015,17 @@ ZEND_METHOD(ReflectionType, allowsNull)
 }
 /* }}} */
 
+/* BC for iterable */
+static zend_string *zend_type_to_string_ex(zend_type type) {
+	if (UNEXPECTED((ZEND_TYPE_PURE_MASK(type) & MAY_BE_ITERABLE) != 0)) {
+		return ZSTR_KNOWN(ZEND_STR_ITERABLE);
+	}
+	return zend_type_to_string(type);
+}
+
 static zend_string *zend_type_to_string_without_null(zend_type type) {
 	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-	return zend_type_to_string(type);
+	return zend_type_to_string_ex(type);
 }
 
 /* {{{ Return the text of the type hint */
@@ -3022,7 +3039,7 @@ ZEND_METHOD(ReflectionType, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string(param->type));
+	RETURN_STR(zend_type_to_string_ex(param->type));
 }
 /* }}} */
 
@@ -3040,7 +3057,7 @@ ZEND_METHOD(ReflectionNamedType, getName)
 	if (param->legacy_behavior) {
 		RETURN_STR(zend_type_to_string_without_null(param->type));
 	}
-	RETURN_STR(zend_type_to_string(param->type));
+	RETURN_STR(zend_type_to_string_ex(param->type));
 }
 /* }}} */
 
@@ -3102,6 +3119,9 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		append_type_mask(return_value, MAY_BE_CALLABLE);
+	}
+	if (type_mask & MAY_BE_ITERABLE) {
+		append_type_mask(return_value, MAY_BE_ITERABLE);
 	}
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);
