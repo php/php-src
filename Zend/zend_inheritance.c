@@ -541,7 +541,8 @@ static inheritance_status zend_perform_covariant_type_check(
 	/* Builtin types may be removed, but not added */
 	uint32_t fe_type_mask = ZEND_TYPE_PURE_MASK(fe_type);
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
-	uint32_t added_types = fe_type_mask & ~proto_type_mask;
+	/* MAY_BE_ITERABLE is only used for BC with Reflection so remove it */
+	uint32_t added_types = fe_type_mask & ~proto_type_mask & ~MAY_BE_ITERABLE;
 	if (added_types) {
 		if ((added_types & MAY_BE_STATIC)
 				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
