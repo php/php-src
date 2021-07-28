@@ -110,9 +110,11 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  *
  * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
  * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
- * ZEND_TYPE_HAS_CLASS()     - checks if type-hint contains some class
+ * ZEND_TYPE_IS_COMPLEX()    - checks if type is a type_list, or contains a class either as a CE or as a name
  * ZEND_TYPE_HAS_CE()        - checks if type-hint contains some class as zend_class_entry *
  * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
+ * ZEND_TYPE_IS_INTERSECTION() - checks if the type_list represents an intersection type list
+ * ZEND_TYPE_IS_UNION()      - checks if the type_list represents a union type list
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry

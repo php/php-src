@@ -8,6 +8,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   e. ZEND_ATOL() changes
   f. Non-serializable classes should use ZEND_ACC_NOT_SERIALIZABLE
   g. _zend_hash_find_known_hash renamed to zend_hash_find_known_hash
+  h. Renaming of ZEND_TYPE_HAS_CLASS() into ZEND_TYPE_IS_COMPLEX()
 
 2. Build system changes
   a. New compiler flags
@@ -53,6 +54,9 @@ PHP 8.1 INTERNALS UPGRADE NOTES
      ZEND_ACC_NOT_SERIALIZABLE (@not-serializable in stubs) rather than the
      zend_class_(un)serialize_deny handlers which are removed.
   g. _zend_hash_find_known_hash has been renamed to zend_hash_find_known_hash.
+  h. ZEND_TYPE_HAS_CLASS() has been renamed to ZEND_TYPE_IS_COMPLEX() for clarity.
+     A zend_type element can contain a zend_type_list which might be either a union or an intersection,
+     or a single class stored as either a zend_string* or a zend_class_entry*.
 
 ========================
 2. Build system changes
