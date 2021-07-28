@@ -230,7 +230,6 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 #define mysqlnd_stmt_free_result_bind(stmt,bind)	(stmt)->m->free_result_bind((stmt), (bind))
 #define mysqlnd_stmt_bind_result(stmt,bind)			(stmt)->m->bind_result((stmt), (bind))
 #define mysqlnd_stmt_bind_one_result(s,no)			(s)->m->bind_one_result((s), (no))
-#define mysqlnd_stmt_param_metadata(stmt)			(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)			(stmt)->m->get_result_metadata((stmt))
 
 #define	mysqlnd_stmt_free_result(stmt)				(stmt)->m->free_result((stmt))

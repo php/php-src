@@ -813,7 +813,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt)
 	func_mysqlnd_stmt__bind_result bind_result;
 	func_mysqlnd_stmt__bind_one_result bind_one_result;
 	func_mysqlnd_stmt__send_long_data send_long_data;
-	func_mysqlnd_stmt__get_parameter_metadata get_parameter_metadata;
 	func_mysqlnd_stmt__get_result_metadata get_result_metadata;
 
 	func_mysqlnd_stmt__get_last_insert_id get_last_insert_id;

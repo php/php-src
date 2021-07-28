@@ -95,7 +95,6 @@
 #define mysql_stmt_send_long_data(s,p,d,l) mysqlnd_stmt_send_long_data((s), (p), (d), (l))
 #define mysql_stmt_attr_get(s,a,v)		mysqlnd_stmt_attr_get((s), (a), (v))
 #define mysql_stmt_attr_set(s,a,v)		mysqlnd_stmt_attr_set((s), (a), (v))
-#define mysql_stmt_param_metadata(s)	mysqlnd_stmt_param_metadata((s))
 #define mysql_stmt_result_metadata(s)	mysqlnd_stmt_result_metadata((s))
 #define mysql_stmt_next_result(s)		mysqlnd_stmt_next_result((s))
 #define mysql_stmt_more_results(s)		mysqlnd_stmt_more_results((s))

@@ -1481,19 +1481,6 @@ MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const s, uint64_t r
 /* }}} */
 
 
-/* {{{ mysqlnd_stmt::param_metadata */
-static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_stmt, param_metadata)(MYSQLND_STMT * const s)
-{
-	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
-	if (!stmt || !stmt->param_count) {
-		return NULL;
-	}
-	return NULL;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_stmt::result_metadata */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
@@ -1977,7 +1964,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, bind_result),
 	MYSQLND_METHOD(mysqlnd_stmt, bind_one_result),
 	MYSQLND_METHOD(mysqlnd_stmt, send_long_data),
-	MYSQLND_METHOD(mysqlnd_stmt, param_metadata),
+
 	MYSQLND_METHOD(mysqlnd_stmt, result_metadata),
 
 	MYSQLND_METHOD(mysqlnd_stmt, insert_id),
