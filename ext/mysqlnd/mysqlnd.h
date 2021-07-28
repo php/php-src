@@ -177,8 +177,6 @@ PHPAPI void mysqlnd_free_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
 PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
-PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
-
 /* LOAD DATA LOCAL */
 PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 

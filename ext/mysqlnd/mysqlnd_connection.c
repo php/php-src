@@ -1505,59 +1505,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 /* }}} */
 
 
-/* {{{ mysqlnd_field_type_name */
-PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type)
-{
-	switch(field_type) {
-		case FIELD_TYPE_JSON:
-			return "json";
-		case FIELD_TYPE_STRING:
-		case FIELD_TYPE_VAR_STRING:
-			return "string";
-		case FIELD_TYPE_TINY:
-		case FIELD_TYPE_SHORT:
-		case FIELD_TYPE_LONG:
-		case FIELD_TYPE_LONGLONG:
-		case FIELD_TYPE_INT24:
-			return "int";
-		case FIELD_TYPE_FLOAT:
-		case FIELD_TYPE_DOUBLE:
-		case FIELD_TYPE_DECIMAL:
-		case FIELD_TYPE_NEWDECIMAL:
-			return "real";
-		case FIELD_TYPE_TIMESTAMP:
-			return "timestamp";
-		case FIELD_TYPE_YEAR:
-			return "year";
-		case FIELD_TYPE_DATE:
-		case FIELD_TYPE_NEWDATE:
-			return "date";
-		case FIELD_TYPE_TIME:
-			return "time";
-		case FIELD_TYPE_SET:
-			return "set";
-		case FIELD_TYPE_ENUM:
-			return "enum";
-		case FIELD_TYPE_GEOMETRY:
-			return "geometry";
-		case FIELD_TYPE_DATETIME:
-			return "datetime";
-		case FIELD_TYPE_TINY_BLOB:
-		case FIELD_TYPE_MEDIUM_BLOB:
-		case FIELD_TYPE_LONG_BLOB:
-		case FIELD_TYPE_BLOB:
-			return "blob";
-		case FIELD_TYPE_NULL:
-			return "null";
-		case FIELD_TYPE_BIT:
-			return "bit";
-		default:
-			return "unknown";
-	}
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::change_user */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
