@@ -3983,16 +3983,7 @@ static void preload_link(void)
 					/* Set filename & lineno information for inheritance errors */
 					CG(in_compilation) = 1;
 					CG(compiled_filename) = ce->info.user.filename;
-					if (ce->parent_name
-					 && !ce->num_interfaces
-					 && !ce->num_traits
-					 && (parent->type == ZEND_INTERNAL_CLASS
-					  || parent->info.user.filename == ce->info.user.filename)) {
-						/* simulate early binding */
-						CG(zend_lineno) = ce->info.user.line_end;
-					} else {
-						CG(zend_lineno) = ce->info.user.line_start;
-					}
+					CG(zend_lineno) = ce->info.user.line_start;
 					ce = zend_do_link_class(ce, NULL, key);
 					if (!ce) {
 						ZEND_ASSERT(0 && "Class linking failed?");

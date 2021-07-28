@@ -7761,13 +7761,10 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{
 				 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
 				 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))) {
 
-					CG(zend_lineno) = decl->end_lineno;
 					if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
-						CG(zend_lineno) = ast->lineno;
 						zend_string_release(lcname);
 						return;
 					}
-					CG(zend_lineno) = ast->lineno;
 				}
 			} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 				zend_string_release(lcname);

@@ -11,4 +11,4 @@ class Baz extends Foo{
 }
 ?>
 --EXPECTF--
-Fatal error: Type of Baz::$bar must not be defined (as in class Foo) in %s on line 8
+Fatal error: Type of Baz::$bar must not be defined (as in class Foo) in %s on line 6
