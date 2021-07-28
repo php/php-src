@@ -1,7 +1,6 @@
 <?php
 
-// Requires X, delay to runtime.
-// TODO: It is not actually required, because we don't need X to check inheritance in this case.
+// Works, because X does not need to be known to check inheritance in this case.
 class A extends Z {
     public function method(X $a) {}
 }

@@ -39,6 +39,11 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 
+/* Returns NULL on success, or an unresolved class name on failure. */
+ZEND_API zend_string *zend_can_preload(
+	zend_class_entry *ce, zend_class_entry *parent,
+	zend_class_entry **interfaces, zend_class_entry **traits);
+
 END_EXTERN_C()
 
 #endif

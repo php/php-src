@@ -25,8 +25,4 @@ $g = new G;
 
 ?>
 --EXPECTF--
-Warning: Can't preload unlinked class H: Unknown type dependencies in %s on line %d
-
-Warning: Can't preload unlinked class B: Unknown type dependencies in %s on line %d
-
-Warning: Can't preload unlinked class A: Unknown type dependencies in %s on line %d
+Warning: Can't preload unlinked class H: Unknown type dependency L in %s on line %d
