@@ -315,12 +315,17 @@ mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, 
 
 	mbfl_encoding_detector *identd = emalloc(sizeof(mbfl_encoding_detector));
 	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_convert_filter*));
+
+	int filter_list_size = 0;
 	for (int i = 0; i < elistsz; i++) {
-		identd->filter_list[i] = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
 			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_list[i]);
-		identd->filter_list[i]->opaque = (void*)0;
+		if (filter) {
+			identd->filter_list[filter_list_size++] = filter;
+			filter->opaque = (void*)0;
+		}
 	}
-	identd->filter_list_size = elistsz;
+	identd->filter_list_size = filter_list_size;
 	identd->strict = strict;
 	return identd;
 }

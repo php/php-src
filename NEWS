@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta2
 
+- Mbstring:
+  . Fixed bug #81298 (mb_detect_encoding() segfaults when 7bit encoding is
+    specified). (Nikita)
+
 - MySQLnd:
   . Fixed bug #63327 (Crash (Bus Error) in mysqlnd due to wrong alignment).
     (Nikita)
