@@ -3015,6 +3015,18 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 }
 /* }}} */
 
+static zend_always_inline bool register_early_bound_ce(zval *delayed_early_binding, zend_string *lcname, zend_class_entry *ce) {
+	if (delayed_early_binding) {
+		if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket *)delayed_early_binding, lcname) == NULL)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+			return false;
+		}
+		Z_CE_P(delayed_early_binding) = ce;
+		return true;
+	}
+	return zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL;
+}
+
 zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
 	inheritance_status status;
@@ -3027,16 +3039,8 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
 			if (ret) {
-				if (delayed_early_binding) {
-					if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-						return NULL;
-					}
-					Z_CE_P(delayed_early_binding) = ret;
-				} else {
-					if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ret) == NULL)) {
-						return NULL;
-					}
+				if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ret))) {
+					return NULL;
 				}
 				if (ZSTR_HAS_CE_CACHE(ret->name)) {
 					ZSTR_SET_CE_CACHE(ret->name, ret);
@@ -3063,16 +3067,8 @@ zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *pa
 			ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
 		}
 
-		if (delayed_early_binding) {
-			if (UNEXPECTED(zend_hash_set_bucket_key(EG(class_table), (Bucket*)delayed_early_binding, lcname) == NULL)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-				return NULL;
-			}
-			Z_CE_P(delayed_early_binding) = ce;
-		} else {
-			if (UNEXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) == NULL)) {
-				return NULL;
-			}
+		if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ce))) {
+			return NULL;
 		}
 
 		orig_linking_class = CG(current_linking_class);
