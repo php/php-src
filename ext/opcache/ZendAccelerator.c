@@ -3664,51 +3664,95 @@ try_again:
 	}
 }
 
-static bool preload_needed_types_known(zend_class_entry *ce);
-static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
-	zend_class_entry *p;
-	*kind = "Unknown reason";
-	*name = "";
+typedef struct {
+	zend_class_entry *parent;
+	zend_class_entry **interfaces;
+	zend_class_entry **traits;
+	const char *error_kind;
+	const char *error_name;
+	void *checkpoint;
+} preload_deps;
+
+static bool preload_needed_types_known(const preload_deps *deps, zend_class_entry *ce);
+static zend_result preload_resolve_deps(preload_deps *deps, zend_class_entry *ce)
+{
+	memset(deps, 0, sizeof(preload_deps));
+	deps->checkpoint = zend_arena_checkpoint(CG(arena));
 
 	if (ce->parent_name) {
 		zend_string *key = zend_string_tolower(ce->parent_name);
-		p = zend_hash_find_ptr(EG(class_table), key);
+		deps->parent = zend_hash_find_ptr(EG(class_table), key);
 		zend_string_release(key);
-		if (!p) {
-			*kind = "Unknown parent ";
-			*name = ZSTR_VAL(ce->parent_name);
-			return;
+		if (!deps->parent) {
+			deps->error_kind = "Unknown parent ";
+			deps->error_name = ZSTR_VAL(ce->parent_name);
+			return FAILURE;
 		}
 	}
 
 	if (ce->num_interfaces) {
-		uint32_t i;
-		for (i = 0; i < ce->num_interfaces; i++) {
-			p = zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
-			if (!p) {
-				*kind = "Unknown interface ";
-				*name = ZSTR_VAL(ce->interface_names[i].name);
-				return;
+		deps->interfaces =
+			zend_arena_alloc(&CG(arena), ce->num_interfaces * sizeof(zend_class_entry));
+		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+			deps->interfaces[i] =
+				zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
+			if (!deps->interfaces[i]) {
+				deps->error_kind = "Unknown interface ";
+				deps->error_name = ZSTR_VAL(ce->interface_names[i].name);
+				return FAILURE;
 			}
 		}
 	}
 
 	if (ce->num_traits) {
-		uint32_t i;
-		for (i = 0; i < ce->num_traits; i++) {
-			p = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
-			if (!p) {
-				*kind = "Unknown trait ";
-				*name = ZSTR_VAL(ce->trait_names[i].name);
-				return;
+		deps->traits =
+			zend_arena_alloc(&CG(arena), ce->num_traits * sizeof(zend_class_entry));
+		for (uint32_t i = 0; i < ce->num_traits; i++) {
+			deps->traits[i] = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
+			if (!deps->traits[i]) {
+				deps->error_kind = "Unknown trait ";
+				deps->error_name = ZSTR_VAL(ce->trait_names[i].name);
+				return FAILURE;
 			}
 		}
 	}
 
-	if (!preload_needed_types_known(ce)) {
-		*kind = "Unknown type dependencies";
-		return;
+	/* TODO: This is much more restrictive than necessary. We only need to actually
+	 * know the types for covariant checks, but don't need them if we can ensure
+	 * compatibility through a simple string comparison. We could improve this using
+	 * a more general version of zend_can_early_bind(). */
+	if (!preload_needed_types_known(deps, ce)) {
+		deps->error_kind = "Unknown type dependencies";
+		deps->error_name = "";
+		return FAILURE;
 	}
+
+	return SUCCESS;
+}
+
+static void preload_release_deps(preload_deps *deps)
+{
+	zend_arena_release(&CG(arena), deps->checkpoint);
+}
+
+static bool preload_can_resolve_deps(zend_class_entry *ce)
+{
+	preload_deps deps;
+	zend_result result = preload_resolve_deps(&deps, ce);
+	preload_release_deps(&deps);
+	return result == SUCCESS;
+}
+
+static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
+	preload_deps deps;
+	if (preload_resolve_deps(&deps, ce) == FAILURE) {
+		*kind = deps.error_kind;
+		*name = deps.error_name;
+	} else {
+		*kind = "Unknown reason";
+		*name = "";
+	}
+	preload_release_deps(&deps);
 }
 
 static zend_result preload_update_constant(zval *val, zend_class_entry *scope)
@@ -3844,58 +3888,51 @@ static bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
 	return 1;
 }
 
-static bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {
-	zend_class_entry *p;
+static bool preload_is_method_maybe_override(
+		const preload_deps *deps, zend_class_entry *ce, zend_string *lcname) {
 	if (ce->trait_aliases || ce->trait_precedences) {
-		return 1;
+		return true;
 	}
 
 	if (ce->parent_name) {
-		zend_string *key = zend_string_tolower(ce->parent_name);
-		p = zend_hash_find_ptr(EG(class_table), key);
-		zend_string_release(key);
-		if (zend_hash_exists(&p->function_table, lcname)) {
-			return 1;
+		if (zend_hash_exists(&deps->parent->function_table, lcname)) {
+			return true;
 		}
 	}
 
 	if (ce->num_interfaces) {
-		uint32_t i;
-		for (i = 0; i < ce->num_interfaces; i++) {
-			zend_class_entry *p = zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
-			if (zend_hash_exists(&p->function_table, lcname)) {
-				return 1;
+		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+			if (zend_hash_exists(&deps->interfaces[i]->function_table, lcname)) {
+				return true;
 			}
 		}
 	}
 
 	if (ce->num_traits) {
-		uint32_t i;
-		for (i = 0; i < ce->num_traits; i++) {
-			zend_class_entry *p = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
-			if (zend_hash_exists(&p->function_table, lcname)) {
-				return 1;
+		for (uint32_t i = 0; i < ce->num_traits; i++) {
+			if (zend_hash_exists(&deps->traits[i]->function_table, lcname)) {
+				return true;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
-static bool preload_needed_types_known(zend_class_entry *ce) {
+static bool preload_needed_types_known(const preload_deps *deps, zend_class_entry *ce) {
 	zend_function *fptr;
 	zend_string *lcname;
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
 		uint32_t i;
 		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			if (!preload_is_type_known(ce, &fptr->common.arg_info[-1].type) &&
-				preload_is_method_maybe_override(ce, lcname)) {
+				preload_is_method_maybe_override(deps, ce, lcname)) {
 				return 0;
 			}
 		}
 		for (i = 0; i < fptr->common.num_args; i++) {
 			if (!preload_is_type_known(ce, &fptr->common.arg_info[i].type) &&
-				preload_is_method_maybe_override(ce, lcname)) {
+				preload_is_method_maybe_override(deps, ce, lcname)) {
 				return 0;
 			}
 		}
@@ -3907,10 +3944,9 @@ static void preload_link(void)
 {
 	zval *zv;
 	zend_persistent_script *script;
-	zend_class_entry *ce, *parent, *p;
+	zend_class_entry *ce;
 	zend_string *key;
-	bool found, changed;
-	uint32_t i;
+	bool changed;
 
 	/* Resolve class dependencies */
 	do {
@@ -3933,44 +3969,7 @@ static void preload_link(void)
 					zend_string_release(key);
 				}
 
-				parent = NULL;
-
-				if (ce->parent_name) {
-					key = zend_string_tolower(ce->parent_name);
-					parent = zend_hash_find_ptr(EG(class_table), key);
-					zend_string_release(key);
-					if (!parent) continue;
-				}
-
-				if (ce->num_interfaces) {
-					found = 1;
-					for (i = 0; i < ce->num_interfaces; i++) {
-						p = zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
-						if (!p) {
-							found = 0;
-							break;
-						}
-					}
-					if (!found) continue;
-				}
-
-				if (ce->num_traits) {
-					found = 1;
-					for (i = 0; i < ce->num_traits; i++) {
-						p = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
-						if (!p) {
-							found = 0;
-							break;
-						}
-					}
-					if (!found) continue;
-				}
-
-				/* TODO: This is much more restrictive than necessary. We only need to actually
-				 * know the types for covariant checks, but don't need them if we can ensure
-				 * compatibility through a simple string comparison. We could improve this using
-				 * a more general version of zend_can_early_bind(). */
-				if (!preload_needed_types_known(ce)) {
+				if (!preload_can_resolve_deps(ce)) {
 					continue;
 				}
 
