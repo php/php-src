@@ -3911,8 +3911,6 @@ static void preload_link(void)
 	zend_string *key;
 	bool found, changed;
 	uint32_t i;
-	dtor_func_t orig_dtor;
-	zend_function *function;
 
 	/* Resolve class dependencies */
 	do {
@@ -4031,9 +4029,7 @@ static void preload_link(void)
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
 
-	/* Move unlinked clases (and with unresolved constants) back to scripts */
-	orig_dtor = EG(class_table)->pDestructor;
-	EG(class_table)->pDestructor = NULL;
+	/* Warn for classes that could not be linked. */
 	ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 		ce = Z_PTR_P(zv);
 		if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -4055,25 +4051,8 @@ static void preload_link(void)
 					ZSTR_VAL(ce->name), kind, name);
 			}
 			zend_string_release(key);
-		} else {
-			continue;
 		}
-		ce->ce_flags &= ~ZEND_ACC_PRELOADED;
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
-			if (EXPECTED(function->type == ZEND_USER_FUNCTION)
-			 && function->common.scope == ce) {
-				function->common.fn_flags &= ~ZEND_ACC_PRELOADED;
-			}
-		} ZEND_HASH_FOREACH_END();
-		script = zend_hash_find_ptr(preload_scripts, ce->info.user.filename);
-		ZEND_ASSERT(script);
-		zend_hash_add(&script->script.class_table, key, zv);
-		ZVAL_UNDEF(zv);
-		zend_string_release(key);
-		EG(class_table)->nNumOfElements--;
 	} ZEND_HASH_FOREACH_END();
-	EG(class_table)->pDestructor = orig_dtor;
-	zend_hash_rehash(EG(class_table));
 
 	/* Remove DECLARE opcodes */
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
@@ -4087,7 +4066,7 @@ static void preload_link(void)
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
 					key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
-					if (!zend_hash_exists(&script->script.class_table, key)) {
+					if (!zend_hash_exists(CG(class_table), key)) {
 						MAKE_NOP(opline);
 					}
 					break;
@@ -4405,8 +4384,6 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	return new_persistent_script;
 }
 
-static zend_result preload_autoload(zend_string *filename);
-
 static void preload_load(void)
 {
 	/* Load into process tables */
@@ -4450,77 +4427,6 @@ static void preload_load(void)
 		memset((void **) ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + old_map_ptr_last, 0,
 			(CG(map_ptr_last) - old_map_ptr_last) * sizeof(void *));
 	}
-
-	zend_preload_autoload = preload_autoload;
-}
-
-static zend_result preload_autoload(zend_string *filename)
-{
-	zend_persistent_script *persistent_script;
-	zend_op_array *op_array;
-	zend_execute_data *old_execute_data;
-	zend_class_entry *old_fake_scope;
-	bool do_bailout = 0;
-	int ret = SUCCESS;
-
-	if (zend_hash_exists(&EG(included_files), filename)) {
-		return FAILURE;
-	}
-
-	persistent_script = zend_accel_hash_find(&ZCSG(hash), filename);
-	if (!persistent_script) {
-		return FAILURE;
-	}
-
-	zend_hash_add_empty_element(&EG(included_files), filename);
-
-	if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
-		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
-	}
-
-	op_array = zend_accel_load_script(persistent_script, 1);
-	if (!op_array) {
-		return FAILURE;
-	}
-
-	/* Execute in global context */
-	old_execute_data = EG(current_execute_data);
-	EG(current_execute_data) = NULL;
-	old_fake_scope = EG(fake_scope);
-	EG(fake_scope) = NULL;
-	zend_exception_save();
-
-	zend_try {
-		zend_execute(op_array, NULL);
-	} zend_catch {
-		do_bailout = 1;
-	} zend_end_try();
-
-	if (EG(exception)) {
-		ret = FAILURE;
-	}
-
-	zend_exception_restore();
-	EG(fake_scope) = old_fake_scope;
-	EG(current_execute_data) = old_execute_data;
-	while (old_execute_data) {
-		if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-			if (old_execute_data->symbol_table == &EG(symbol_table)) {
-				zend_attach_symbol_table(old_execute_data);
-			}
-			break;
-		}
-		old_execute_data = old_execute_data->prev_execute_data;
-	}
-
-	destroy_op_array(op_array);
-	efree_size(op_array, sizeof(zend_op_array));
-
-	if (do_bailout) {
-		zend_bailout();
-	}
-
-	return ret;
 }
 
 static int accel_preload(const char *config, bool in_child)

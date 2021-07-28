@@ -1104,9 +1104,16 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name)
 {
 	zend_class_entry *ce = Z_PTR_P(class_table_slot);
-	zval *zv = zend_hash_set_bucket_key(
-		EG(class_table), (Bucket *) class_table_slot, Z_STR_P(lcname));
-	if (UNEXPECTED(!zv)) {
+	bool is_preloaded =
+		(ce->ce_flags & ZEND_ACC_PRELOADED) && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD);
+	bool success;
+	if (EXPECTED(!is_preloaded)) {
+		success = zend_hash_set_bucket_key(EG(class_table), (Bucket*) class_table_slot, Z_STR_P(lcname)) != NULL;
+	} else {
+		/* If preloading is used, don't replace the existing bucket, add a new one. */
+		success = zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) != NULL;
+	}
+	if (UNEXPECTED(!success)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 		return NULL;
 	}
@@ -1120,9 +1127,13 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		return ce;
 	}
 
-	/* Reload bucket pointer, the hash table may have been reallocated */
-	zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
-	zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(lcname + 1));
+	if (!is_preloaded) {
+		/* Reload bucket pointer, the hash table may have been reallocated */
+		zval *zv = zend_hash_find(EG(class_table), Z_STR_P(lcname));
+		zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(lcname + 1));
+	} else {
+		zend_hash_del(EG(class_table), Z_STR_P(lcname));
+	}
 	return NULL;
 }
 
@@ -1137,23 +1148,9 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 
 	if (UNEXPECTED(!zv)) {
 		ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
-		if (ce) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-			return FAILURE;
-		} else {
-			do {
-				ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
-				if (zend_preload_autoload
-				  && zend_preload_autoload(EG(current_execute_data)->func->op_array.filename) == SUCCESS) {
-					zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(rtd_key));
-					if (EXPECTED(zv != NULL)) {
-						break;
-					}
-				}
-				zend_error_noreturn(E_ERROR, "Class %s wasn't preloaded", Z_STRVAL_P(lcname));
-				return FAILURE;
-			} while (0);
-		}
+		ZEND_ASSERT(ce);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		return FAILURE;
 	}
 
 	/* Register the derived class */
