@@ -154,8 +154,14 @@ MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
  */
 typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
 
+typedef struct {
+	size_t num_illegalchars;
+	size_t score;
+} mbfl_encoding_detector_data;
+
 struct _mbfl_encoding_detector {
 	mbfl_convert_filter **filter_list;
+	mbfl_encoding_detector_data *filter_data;
 	int filter_list_size;
 	int strict;
 };
