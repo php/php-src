@@ -1,5 +1,7 @@
 --TEST--
 Bug #81298: mb_detect_encoding() segfaults when 7bit encoding is specified
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
