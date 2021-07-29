@@ -47,4 +47,4 @@ $c->func('This should work!');
 --EXPECT--
 string(27) "B::func2: This should work!"
 string(27) "B::func3: This should work!"
-call_user_func_array(): Argument #1 ($function) must be a valid callback, class C does not have a method "inexistent"
+call_user_func_array(): Argument #1 ($callback) must be a valid callback, class C does not have a method "inexistent"

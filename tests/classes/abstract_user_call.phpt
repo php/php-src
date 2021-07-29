@@ -29,4 +29,4 @@ try {
 ?>
 --EXPECT--
 test::func()
-call_user_func(): Argument #1 ($function) must be a valid callback, cannot call abstract method test_base::func()
+call_user_func(): Argument #1 ($callback) must be a valid callback, cannot call abstract method test_base::func()
