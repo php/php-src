@@ -294,14 +294,10 @@ typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 
 typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
-typedef void (*mysqlnd_stat_trigger)(MYSQLND_STATS * stats, enum_mysqlnd_collected_stats stat, int64_t change);
-
 struct st_mysqlnd_stats
 {
 	uint64_t				*values;
-	mysqlnd_stat_trigger	*triggers;
 	size_t					count;
-	bool				in_trigger;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
