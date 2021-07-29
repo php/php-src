@@ -17,4 +17,5 @@ if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
 echo "Foobar\n";
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 8
+Warning: Can't preload unlinked class B: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 8
+Foobar

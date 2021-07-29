@@ -3665,94 +3665,50 @@ try_again:
 }
 
 typedef struct {
-	zend_class_entry *parent;
-	zend_class_entry **interfaces;
-	zend_class_entry **traits;
-	const char *error_kind;
-	const char *error_name;
-	void *checkpoint;
-} preload_deps;
+	const char *kind;
+	const char *name;
+} preload_error;
 
-static bool preload_needed_types_known(const preload_deps *deps, zend_class_entry *ce);
-static zend_result preload_resolve_deps(preload_deps *deps, zend_class_entry *ce)
+static zend_result preload_resolve_deps(preload_error *error, const zend_class_entry *ce)
 {
-	memset(deps, 0, sizeof(preload_deps));
-	deps->checkpoint = zend_arena_checkpoint(CG(arena));
+	memset(error, 0, sizeof(preload_error));
 
 	if (ce->parent_name) {
 		zend_string *key = zend_string_tolower(ce->parent_name);
-		deps->parent = zend_hash_find_ptr(EG(class_table), key);
+		zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
 		zend_string_release(key);
-		if (!deps->parent) {
-			deps->error_kind = "Unknown parent ";
-			deps->error_name = ZSTR_VAL(ce->parent_name);
+		if (!parent) {
+			error->kind = "Unknown parent ";
+			error->name = ZSTR_VAL(ce->parent_name);
 			return FAILURE;
 		}
 	}
 
 	if (ce->num_interfaces) {
-		deps->interfaces =
-			zend_arena_alloc(&CG(arena), ce->num_interfaces * sizeof(zend_class_entry));
 		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
-			deps->interfaces[i] =
+			zend_class_entry *interface =
 				zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
-			if (!deps->interfaces[i]) {
-				deps->error_kind = "Unknown interface ";
-				deps->error_name = ZSTR_VAL(ce->interface_names[i].name);
+			if (!interface) {
+				error->kind = "Unknown interface ";
+				error->name = ZSTR_VAL(ce->interface_names[i].name);
 				return FAILURE;
 			}
 		}
 	}
 
 	if (ce->num_traits) {
-		deps->traits =
-			zend_arena_alloc(&CG(arena), ce->num_traits * sizeof(zend_class_entry));
 		for (uint32_t i = 0; i < ce->num_traits; i++) {
-			deps->traits[i] = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
-			if (!deps->traits[i]) {
-				deps->error_kind = "Unknown trait ";
-				deps->error_name = ZSTR_VAL(ce->trait_names[i].name);
+			zend_class_entry *trait =
+				zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
+			if (!trait) {
+				error->kind = "Unknown trait ";
+				error->name = ZSTR_VAL(ce->trait_names[i].name);
 				return FAILURE;
 			}
 		}
 	}
 
-	/* TODO: This is much more restrictive than necessary. We only need to actually
-	 * know the types for covariant checks, but don't need them if we can ensure
-	 * compatibility through a simple string comparison. We could improve this using
-	 * a more general version of zend_can_early_bind(). */
-	if (!preload_needed_types_known(deps, ce)) {
-		deps->error_kind = "Unknown type dependencies";
-		deps->error_name = "";
-		return FAILURE;
-	}
-
 	return SUCCESS;
-}
-
-static void preload_release_deps(preload_deps *deps)
-{
-	zend_arena_release(&CG(arena), deps->checkpoint);
-}
-
-static bool preload_can_resolve_deps(zend_class_entry *ce)
-{
-	preload_deps deps;
-	zend_result result = preload_resolve_deps(&deps, ce);
-	preload_release_deps(&deps);
-	return result == SUCCESS;
-}
-
-static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
-	preload_deps deps;
-	if (preload_resolve_deps(&deps, ce) == FAILURE) {
-		*kind = deps.error_kind;
-		*name = deps.error_name;
-	} else {
-		*kind = "Unknown reason";
-		*name = "";
-	}
-	preload_release_deps(&deps);
 }
 
 static zend_result preload_update_constant(zval *val, zend_class_entry *scope)
@@ -3863,81 +3819,14 @@ static void preload_try_resolve_property_types(zend_class_entry *ce)
 	}
 }
 
-static bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
-	if (zend_string_equals_literal_ci(name, "self") ||
-		zend_string_equals_literal_ci(name, "parent") ||
-		zend_string_equals_ci(name, ce->name)) {
-		return 1;
+static void (*orig_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+
+static void preload_error_cb(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message)
+{
+	/* Suppress printing of the error, only bail out for fatal errors. */
+	if (type & E_FATAL_ERRORS) {
+		zend_bailout();
 	}
-
-	zend_string *lcname = zend_string_tolower(name);
-	bool known = zend_hash_exists(EG(class_table), lcname);
-	zend_string_release(lcname);
-	return known;
-}
-
-static bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
-	zend_type *single_type;
-	ZEND_TYPE_FOREACH(*type, single_type) {
-		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			if (!preload_is_class_type_known(ce, ZEND_TYPE_NAME(*single_type))) {
-				return 0;
-			}
-		}
-	} ZEND_TYPE_FOREACH_END();
-	return 1;
-}
-
-static bool preload_is_method_maybe_override(
-		const preload_deps *deps, zend_class_entry *ce, zend_string *lcname) {
-	if (ce->trait_aliases || ce->trait_precedences) {
-		return true;
-	}
-
-	if (ce->parent_name) {
-		if (zend_hash_exists(&deps->parent->function_table, lcname)) {
-			return true;
-		}
-	}
-
-	if (ce->num_interfaces) {
-		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
-			if (zend_hash_exists(&deps->interfaces[i]->function_table, lcname)) {
-				return true;
-			}
-		}
-	}
-
-	if (ce->num_traits) {
-		for (uint32_t i = 0; i < ce->num_traits; i++) {
-			if (zend_hash_exists(&deps->traits[i]->function_table, lcname)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-static bool preload_needed_types_known(const preload_deps *deps, zend_class_entry *ce) {
-	zend_function *fptr;
-	zend_string *lcname;
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
-		uint32_t i;
-		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			if (!preload_is_type_known(ce, &fptr->common.arg_info[-1].type) &&
-				preload_is_method_maybe_override(deps, ce, lcname)) {
-				return 0;
-			}
-		}
-		for (i = 0; i < fptr->common.num_args; i++) {
-			if (!preload_is_type_known(ce, &fptr->common.arg_info[i].type) &&
-				preload_is_method_maybe_override(deps, ce, lcname)) {
-				return 0;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-	return 1;
 }
 
 static void preload_link(void)
@@ -3948,50 +3837,99 @@ static void preload_link(void)
 	zend_string *key;
 	bool changed;
 
+	HashTable errors;
+	zend_hash_init(&errors, 0, NULL, NULL, 0);
+
 	/* Resolve class dependencies */
 	do {
 		changed = 0;
 
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+		ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 			ce = Z_PTR_P(zv);
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
 			if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 			 && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+				zend_string *lcname = zend_string_tolower(ce->name);
 
 				if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-					key = zend_string_tolower(ce->name);
-					if (zend_hash_exists(EG(class_table), key)) {
-						zend_string_release(key);
+					if (zend_hash_exists(EG(class_table), lcname)) {
+						zend_string_release(lcname);
 						continue;
 					}
-					zend_string_release(key);
 				}
 
-				if (!preload_can_resolve_deps(ce)) {
+				preload_error error_info;
+				if (preload_resolve_deps(&error_info, ce) == FAILURE) {
+					zend_string_release(lcname);
 					continue;
 				}
 
-				key = zend_string_tolower(ce->name);
-				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
+				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
 
 				if (EXPECTED(zv)) {
+					/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
+					 * prevent freeing of interface names. */
+					void *checkpoint = zend_arena_checkpoint(CG(arena));
+					zend_class_entry *orig_ce = ce;
+					uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
+					ce->ce_flags |= temporary_flags;
+					if (ce->parent_name) {
+						zend_string_addref(ce->parent_name);
+					}
+
+					/* Record and suppress errors during inheritance. */
+					orig_error_cb = zend_error_cb;
+					zend_error_cb = preload_error_cb;
+					zend_begin_record_errors();
+
 					/* Set filename & lineno information for inheritance errors */
 					CG(in_compilation) = 1;
 					CG(compiled_filename) = ce->info.user.filename;
 					CG(zend_lineno) = ce->info.user.line_start;
-					ce = zend_do_link_class(ce, NULL, key);
-					if (!ce) {
-						ZEND_ASSERT(0 && "Class linking failed?");
-					}
+					zend_try {
+						ce = zend_do_link_class(ce, NULL, lcname);
+						if (!ce) {
+							ZEND_ASSERT(0 && "Class linking failed?");
+						}
+						ce->ce_flags &= ~temporary_flags;
+						changed = true;
+
+						/* Inheritance successful, print out any warnings. */
+						zend_error_cb = orig_error_cb;
+						EG(record_errors) = false;
+						for (uint32_t i = 0; i < EG(num_errors); i++) {
+							zend_error_info *error = EG(errors)[i];
+							zend_error_zstr_at(
+								error->type, error->filename, error->lineno, error->message);
+						}
+					} zend_catch {
+						/* Clear variance obligations that were left behind on bailout. */
+						if (CG(delayed_variance_obligations)) {
+							zend_hash_index_del(
+								CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
+						}
+
+						/* Restore the original class. */
+						zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
+						Z_CE_P(zv) = orig_ce;
+						orig_ce->ce_flags &= ~temporary_flags;
+						zend_arena_release(&CG(arena), checkpoint);
+
+						/* Remember the last error. */
+						zend_error_cb = orig_error_cb;
+						EG(record_errors) = false;
+						ZEND_ASSERT(EG(num_errors) > 0);
+						zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
+						EG(num_errors)--;
+					} zend_end_try();
 					CG(in_compilation) = 0;
 					CG(compiled_filename) = NULL;
-
-					changed = 1;
+					zend_free_recorded_errors();
 				}
 
-				zend_string_release(key);
+				zend_string_release(lcname);
 			}
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
@@ -4036,23 +3974,30 @@ static void preload_link(void)
 		}
 		if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 				&& !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			zend_string *key = zend_string_tolower(ce->name);
+			zend_string *lcname = zend_string_tolower(ce->name);
+			preload_error error;
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
-			 && zend_hash_exists(EG(class_table), key)) {
+			 && zend_hash_exists(EG(class_table), lcname)) {
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
-			} else {
-				const char *kind, *name;
-				get_unlinked_dependency(ce, &kind, &name);
+			} else if (preload_resolve_deps(&error, ce)) {
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload unlinked class %s: %s%s",
-					ZSTR_VAL(ce->name), kind, name);
+					ZSTR_VAL(ce->name), error.kind, error.name);
+			} else {
+				zend_error_info *error = zend_hash_find_ptr(&errors, key);
+				zend_error_at(
+					E_WARNING, error->filename, error->lineno,
+					"Can't preload unlinked class %s: %s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(error->message));
 			}
-			zend_string_release(key);
+			zend_string_release(lcname);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(&errors);
 
 	/* Remove DECLARE opcodes */
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
