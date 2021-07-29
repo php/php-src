@@ -617,19 +617,8 @@ static int format_default_value(smart_str *str, zval *value, zend_class_entry *s
 		return FAILURE;
 	}
 
-	if (Z_TYPE(zv) == IS_TRUE) {
-		smart_str_appends(str, "true");
-	} else if (Z_TYPE(zv) == IS_FALSE) {
-		smart_str_appends(str, "false");
-	} else if (Z_TYPE(zv) == IS_NULL) {
-		smart_str_appends(str, "NULL");
-	} else if (Z_TYPE(zv) == IS_STRING) {
-		smart_str_appendc(str, '\'');
-		smart_str_appendl(str, Z_STRVAL(zv), MIN(Z_STRLEN(zv), 15));
-		if (Z_STRLEN(zv) > 15) {
-			smart_str_appends(str, "...");
-		}
-		smart_str_appendc(str, '\'');
+	if (Z_TYPE(zv) <= IS_STRING) {
+		smart_str_append_scalar(str, &zv, 15);
 	} else if (Z_TYPE(zv) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else {

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta2
 
+- Core:
+  . Fixed bug #81303 (match error message improvements). (krakjoe)
+
 - Mbstring:
   . Fixed bug #81298 (mb_detect_encoding() segfaults when 7bit encoding is
     specified). (Nikita)

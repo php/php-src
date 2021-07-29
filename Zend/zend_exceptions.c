@@ -491,49 +491,28 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 	 */
 
 	ZVAL_DEREF(arg);
-	switch (Z_TYPE_P(arg)) {
-		case IS_NULL:
-			smart_str_appends(str, "NULL, ");
-			break;
-		case IS_STRING:
-			smart_str_appendc(str, '\'');
-			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), EG(exception_string_param_max_len)));
-			if (Z_STRLEN_P(arg) > EG(exception_string_param_max_len)) {
-				smart_str_appends(str, "...', ");
-			} else {
-				smart_str_appends(str, "', ");
+
+	if (Z_TYPE_P(arg) <= IS_STRING) {
+		smart_str_append_scalar(str, arg, EG(exception_string_param_max_len));
+		smart_str_appends(str, ", ");
+	} else {
+		switch (Z_TYPE_P(arg)) {
+			case IS_RESOURCE:
+				smart_str_appends(str, "Resource id #");
+				smart_str_append_long(str, Z_RES_HANDLE_P(arg));
+				smart_str_appends(str, ", ");
+				break;
+			case IS_ARRAY:
+				smart_str_appends(str, "Array, ");
+				break;
+			case IS_OBJECT: {
+				zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
+				smart_str_appends(str, "Object(");
+				smart_str_appends(str, ZSTR_VAL(class_name));
+				smart_str_appends(str, "), ");
+				zend_string_release_ex(class_name, 0);
+				break;
 			}
-			break;
-		case IS_FALSE:
-			smart_str_appends(str, "false, ");
-			break;
-		case IS_TRUE:
-			smart_str_appends(str, "true, ");
-			break;
-		case IS_RESOURCE:
-			smart_str_appends(str, "Resource id #");
-			smart_str_append_long(str, Z_RES_HANDLE_P(arg));
-			smart_str_appends(str, ", ");
-			break;
-		case IS_LONG:
-			smart_str_append_long(str, Z_LVAL_P(arg));
-			smart_str_appends(str, ", ");
-			break;
-		case IS_DOUBLE:
-			smart_str_append_double(
-				str, Z_DVAL_P(arg), (int) EG(precision), /* zero_fraction */ false);
-			smart_str_appends(str, ", ");
-			break;
-		case IS_ARRAY:
-			smart_str_appends(str, "Array, ");
-			break;
-		case IS_OBJECT: {
-			zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
-			smart_str_appends(str, "Object(");
-			smart_str_appends(str, ZSTR_VAL(class_name));
-			smart_str_appends(str, "), ");
-			zend_string_release_ex(class_name, 0);
-			break;
 		}
 	}
 }

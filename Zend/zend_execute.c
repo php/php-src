@@ -824,6 +824,25 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	zend_string_release(type_str);
 }
 
+ZEND_COLD void zend_match_unhandled_error(zval *value)
+{
+	smart_str msg = {0};
+
+	if (Z_TYPE_P(value) <= IS_STRING) {
+		smart_str_append_scalar(&msg, value, EG(exception_string_param_max_len));
+	} else {
+		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
+		smart_str_appends(&msg, zend_zval_type_name(value));
+	}
+
+	smart_str_0(&msg);
+
+	zend_throw_exception_ex(
+		zend_ce_unhandled_match_error, 0, "Unhandled match case %s", ZSTR_VAL(msg.s));
+
+	smart_str_free(&msg);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		zend_property_info *info) {
 	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",
