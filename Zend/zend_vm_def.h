@@ -8946,10 +8946,23 @@ ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)
 			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: true");
 			break;
 		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_STRING: {
+		case IS_DOUBLE: {
 			zend_string* stringified = zval_get_string(op);
 			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: %s", ZSTR_VAL(stringified));
+			zend_string_release_ex(stringified, false);
+			break;
+		}
+		case IS_STRING: {
+			zend_string* stringified = zval_get_string(op);
+			// This number was chosen mostly arbitrarily. But in context,
+			// a match() on a string should only be using short strings so something
+			// longer is unlikely to happen to begin with.
+			const int max_strlen = 10;
+            if (ZSTR_LEN(stringified) > max_strlen) {
+				stringified = zend_string_realloc(stringified, max_strlen + 3, 0);
+				memcpy(&ZSTR_VAL(stringified)[max_strlen], "...", sizeof("..."));
+            }
+			zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value: \"%s\"", ZSTR_VAL(stringified));
 			zend_string_release_ex(stringified, false);
 			break;
 		}

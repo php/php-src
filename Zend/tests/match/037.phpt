@@ -59,7 +59,7 @@ Stack trace:
 string(%d) "UnhandledMatchError: Unhandled match value: 6 in %s:%d
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError: Unhandled match value: 3 in %s:%d
+string(%d) "UnhandledMatchError: Unhandled match value: "3" in %s:%d
 Stack trace:
 #0 {main}"
 string(3) "foo"
