@@ -34,7 +34,7 @@ static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NU
 
 /* This library historically had encodings called 'byte4be' and 'byte4le'
  * which were almost identical to UCS-4
- * Maintain minimal support by aliasing to UCS-2 */
+ * Maintain minimal support by aliasing to UCS-4 */
 static const char *mbfl_encoding_ucs4be_aliases[] = {"byte4be", NULL};
 static const char *mbfl_encoding_ucs4le_aliases[] = {"byte4le", NULL};
 
