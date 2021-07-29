@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #72595 (php_output_handler_append illegal write access). (cmb)
   . Fixed bug #66719 (Weird behaviour when using get_called_class() with
     call_user_func()). (Nikita)
+  . Fixed bug #81305 (Built-in Webserver Drops Requests With "Upgrade" Header).
+    (cmb)
 
 - BCMath:
   . Fixed bug #78238 (BCMath returns "-0"). (cmb)
