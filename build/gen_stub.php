@@ -1184,44 +1184,44 @@ class PropertyInfo
     public function getFieldSynopsisElement(DOMDocument $doc): DOMElement
     {
         $fieldsynopsisElement = $doc->createElement("fieldsynopsis");
-        $fieldsynopsisElement->appendChild(new DOMText("\n    "));
 
         if ($this->flags & Class_::MODIFIER_PUBLIC) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public"));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         } elseif ($this->flags & Class_::MODIFIER_PROTECTED) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected"));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         }
 
         if ($this->flags & Class_::MODIFIER_STATIC) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         } elseif ($this->flags & Class_::MODIFIER_READONLY || $this->isReadonly) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         }
 
         if ($this->type) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($this->type->getTypeForDoc($doc));
-            $fieldsynopsisElement->appendChild(new DOMText("\n    "));
         }
 
         $className = str_replace("\\", "-", $this->name->class->toLowerString());
         $varnameElement = $doc->createElement("varname", $this->name->property);
         $varnameElement->setAttribute("linkend", "$className.props." . strtolower($this->name->property));
+        $fieldsynopsisElement->appendChild(new DOMText("\n     "));
         $fieldsynopsisElement->appendChild($varnameElement);
-        $fieldsynopsisElement->appendChild(new DOMText("\n   "));
 
         if ($this->defaultValueString) {
-            $fieldsynopsisElement->appendChild(new DOMText(" "));
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $initializerElement = $doc->createElement("initializer",  $this->defaultValueString);
             $fieldsynopsisElement->appendChild($initializerElement);
-            $fieldsynopsisElement->appendChild(new DOMText("\n   "));
         }
+
+        $fieldsynopsisElement->appendChild(new DOMText("\n    "));
 
         return $fieldsynopsisElement;
     }
@@ -1414,26 +1414,24 @@ class ClassInfo {
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap): ?DOMElement {
 
         $classSynopsis = $doc->createElement("classsynopsis");
-        $classSynopsis->appendChild(new DOMText("\n   "));
+        $classSynopsis->appendChild(new DOMText("\n    "));
 
-        $ooElement = self::createOoElement($doc, $this, false, false);
+        $ooElement = self::createOoElement($doc, $this, false, false, 4);
         if (!$ooElement) {
             return null;
         }
         $classSynopsis->appendChild($ooElement);
-        $classSynopsis->appendChild(new DOMText("\n\n   "));
+        $classSynopsis->appendChild(new DOMText("\n\n    "));
 
         $classSynopsisInfo = $doc->createElement("classsynopsisinfo");
-        $classSynopsisInfo->appendChild(new DOMText("\n    "));
-        $ooElement = self::createOoElement($doc, $this, true, false);
+        $classSynopsisInfo->appendChild(new DOMText("\n     "));
+        $ooElement = self::createOoElement($doc, $this, true, false, 5);
         if (!$ooElement) {
             return null;
         }
         $classSynopsisInfo->appendChild($ooElement);
-        $classSynopsisInfo->appendChild(new DOMText("\n   "));
 
         $classSynopsis->appendChild($classSynopsisInfo);
-        $classSynopsis->appendChild(new DOMText("\n   "));
 
         foreach ($this->extends as $k => $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
@@ -1441,14 +1439,13 @@ class ClassInfo {
                 throw new Exception("Missing parent class " . $parent->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $parentInfo, false, $k === 0 && $parentInfo->type === "class");
+            $ooElement = self::createOoElement($doc, $parentInfo, false, $k === 0 && $parentInfo->type === "class", 5);
             if (!$ooElement) {
                 return null;
             }
 
-            $classSynopsisInfo->appendChild(new DOMText("\n   "));
+            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
             $classSynopsisInfo->appendChild($ooElement);
-            $classSynopsisInfo->appendChild(new DOMText("\n   "));
         }
 
         foreach ($this->implements as $interface) {
@@ -1457,14 +1454,14 @@ class ClassInfo {
                 throw new Exception("Missing implemented interface " . $interface->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false);
+            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false, 5);
             if (!$ooElement) {
                 return null;
             }
-            $classSynopsisInfo->appendChild(new DOMText("\n   "));
+            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
             $classSynopsisInfo->appendChild($ooElement);
-            $classSynopsisInfo->appendChild(new DOMText("\n   "));
         }
+        $classSynopsisInfo->appendChild(new DOMText("\n    "));
 
         /** @var Name[] $parentsWithInheritedProperties */
         $parentsWithInheritedProperties = [];
@@ -1474,120 +1471,126 @@ class ClassInfo {
         $this->collectInheritedMembers($parentsWithInheritedProperties, $parentsWithInheritedMethods, $classMap);
 
         if (!empty($this->propertyInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n   "));
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-            $classSynopsis->appendChild(new DOMText("\n   "));
 
             foreach ($this->propertyInfos as $propertyInfo) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc);
                 $classSynopsis->appendChild($fieldSynopsisElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
         }
 
         if (!empty($parentsWithInheritedProperties)) {
-            $classSynopsis->appendChild(new DOMText("\n   "));
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedProperties;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-            $classSynopsis->appendChild(new DOMText("\n   "));
 
             foreach ($parentsWithInheritedProperties as $parent) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $parentClassName = self::getClassSynopsisFilename($parent);
                 $includeElement = $this->createIncludeElement(
                     $doc,
                     "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
                 );
                 $classSynopsis->appendChild($includeElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
         }
 
         if (!empty($this->funcInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n   "));
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-            $classSynopsis->appendChild(new DOMText("\n   "));
 
             $className = self::getClassSynopsisFilename($this->name);
 
             if ($this->hasConstructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
                     "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')]"
                 );
                 $classSynopsis->appendChild($includeElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
 
             if ($this->hasMethods()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
                     "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
                 );
                 $classSynopsis->appendChild($includeElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
 
             if ($this->hasDestructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
                     "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')]"
                 );
                 $classSynopsis->appendChild($includeElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
         }
 
         if (!empty($parentsWithInheritedMethods)) {
-            $classSynopsis->appendChild(new DOMText("\n   "));
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedMethods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-            $classSynopsis->appendChild(new DOMText("\n   "));
 
             foreach ($parentsWithInheritedMethods as $parent) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
                 $parentClassName = self::getClassSynopsisFilename($parent);
                 $includeElement = $this->createIncludeElement(
                     $doc,
                     "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
                 );
                 $classSynopsis->appendChild($includeElement);
-                $classSynopsis->appendChild(new DOMText("\n   "));
             }
         }
+
+        $classSynopsis->appendChild(new DOMText("\n   "));
 
         return $classSynopsis;
     }
 
-    private static function createOoElement(DOMDocument $doc, ClassInfo $classInfo, bool $withModifiers, bool $isExtends): ?DOMElement {
+    private static function createOoElement(
+        DOMDocument $doc,
+        ClassInfo $classInfo,
+        bool $withModifiers,
+        bool $isExtends,
+        int $indentationLevel
+    ): ?DOMElement {
+        $indentation = str_repeat(" ", $indentationLevel);
+
         if ($classInfo->type !== "class" && $classInfo->type !== "interface") {
             echo "Class synopsis generation is not implemented for " . $classInfo->type . "\n";
             return null;
         }
 
         $ooElement = $doc->createElement('oo' . $classInfo->type);
-        $ooElement->appendChild(new DOMText("\n    "));
+        $ooElement->appendChild(new DOMText("\n$indentation "));
         if ($isExtends) {
             $ooElement->appendChild($doc->createElement('modifier', 'extends'));
-            $ooElement->appendChild(new DOMText("\n    "));
+            $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
             if ($classInfo->flags & Class_::MODIFIER_FINAL) {
                 $ooElement->appendChild($doc->createElement('modifier', 'final'));
-                $ooElement->appendChild(new DOMText("\n    "));
+                $ooElement->appendChild(new DOMText("\n$indentation "));
             }
             if ($classInfo->flags & Class_::MODIFIER_ABSTRACT) {
                 $ooElement->appendChild($doc->createElement('modifier', 'abstract'));
-                $ooElement->appendChild(new DOMText("\n    "));
+                $ooElement->appendChild(new DOMText("\n$indentation "));
             }
         }
 
         $nameElement = $doc->createElement($classInfo->type . 'name', $classInfo->name->toString());
         $ooElement->appendChild($nameElement);
-        $ooElement->appendChild(new DOMText("\n    "));
+        $ooElement->appendChild(new DOMText("\n$indentation"));
 
         return $ooElement;
     }
@@ -1663,9 +1666,9 @@ class ClassInfo {
         $includeElement = $doc->createElement("xi:include");
         $includeElement->setAttribute("xpointer", $query);
         $fallbackElement = $doc->createElement("xi:fallback");
-        $includeElement->appendChild(new DOMText("\n    "));
+        $includeElement->appendChild(new DOMText("\n     "));
         $includeElement->appendChild($fallbackElement);
-        $includeElement->appendChild(new DOMText("\n   "));
+        $includeElement->appendChild(new DOMText("\n    "));
 
         return $includeElement;
     }
