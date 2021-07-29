@@ -94,8 +94,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 
 int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 {
-	int w = 0, flag = 0;
-
 	switch (filter->status) {
 	case 0:
 		if (c >= 0 && c < 0x80) { /* latin */
@@ -110,35 +108,26 @@ int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 
 	case 1: /* dbcs second byte */
 		filter->status = 0;
-		int c1 = filter->cache;
+		int c1 = filter->cache, w = 0;
 
 		if (c1 >= 0x81 && c1 <= 0xa0 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0x81)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc1_ucs_table_size) {
-				flag = 1;
 				w = uhc1_ucs_table[w];
-			} else {
-				w = 0;
 			}
 		} else if (c1 >= 0xa1 && c1 <= 0xc6 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0xa1)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc2_ucs_table_size) {
-				flag = 2;
 				w = uhc2_ucs_table[w];
-			} else {
-				w = 0;
 			}
 		} else if (c1 >= 0xc7 && c1 < 0xfe && c >= 0xa1 && c <= 0xfe) {
 			w = (c1 - 0xc7)*94 + (c - 0xa1);
 			if (w >= 0 && w < uhc3_ucs_table_size) {
-				flag = 3;
 				w = uhc3_ucs_table[w];
-			} else {
-				w = 0;
 			}
 		}
 
-		if (flag <= 0 || w <= 0) {
+		if (w == 0) {
 			w = (c1 << 8) | c | MBFL_WCSPLANE_UHC;
 		}
 		CK((*filter->output_function)(w, filter->data));
