@@ -469,6 +469,8 @@ ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *p
 		} \
 	} while (0)
 
+ZEND_COLD void zend_match_unhandled_error(zval *value);
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */

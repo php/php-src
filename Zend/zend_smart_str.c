@@ -180,3 +180,30 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 		str->c = erealloc2(str->c, str->a + 1, str->len);
 	}
 }
+
+ZEND_API void ZEND_FASTCALL smart_str_append_truncated(smart_str *str, zend_string *value, size_t length)
+{
+	smart_str_append_escaped(str, ZSTR_VAL(value), MIN(length, ZSTR_LEN(value)));
+
+	if (ZSTR_LEN(value) > length) {
+		smart_str_appendl(str, "...", sizeof("...")-1);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value) {
+	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
+
+	if (Z_TYPE_P(value) == IS_UNDEF || Z_TYPE_P(value) == IS_NULL) {
+		smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
+	} else if (Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE) {
+		smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
+		smart_str_append_printf(dest, "%.*G", (int) EG(precision), Z_DVAL_P(value));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		smart_str_append_long(dest, Z_LVAL_P(value));
+	} else {
+		smart_str_appendc(dest, '\'');
+		smart_str_append_truncated(dest, Z_STR_P(value), EG(exception_string_param_max_len));
+		smart_str_appendc(dest, '\'');
+	}
+}
