@@ -8941,7 +8941,7 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 			ZVAL_UNDEFINED_OP1();
 		}
 		count = 0;
-		zend_type_error("%s(): Argument #1 ($var) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
+		zend_type_error("%s(): Argument #1 ($value) must be of type Countable|array, %s given", opline->extended_value ? "sizeof" : "count", zend_zval_type_name(op1));
 		break;
 	}
 
