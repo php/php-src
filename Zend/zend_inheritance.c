@@ -248,7 +248,7 @@ static zend_class_entry *lookup_class_ex(
 	ce = zend_lookup_class_ex(
 	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
-	if (!CG(in_compilation)) {
+	if (!CG(in_compilation) || (CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
 		if (ce) {
 			return ce;
 		}
@@ -2593,7 +2593,6 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
 	ce->inheritance_cache = NULL;
-	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
 	/* properties */
 	if (ce->default_properties_table) {
@@ -2817,6 +2816,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 #endif
 
+	bool orig_record_errors = EG(record_errors);
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		if (is_cacheable) {
 			if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
@@ -2902,7 +2902,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	zend_build_properties_info_table(ce);
-	EG(record_errors) = false;
+	EG(record_errors) = orig_record_errors;
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
@@ -2948,7 +2948,9 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
-	zend_free_recorded_errors();
+	if (!orig_record_errors) {
+		zend_free_recorded_errors();
+	}
 	if (traits_and_interfaces) {
 		free_alloca(traits_and_interfaces, use_heap);
 	}
