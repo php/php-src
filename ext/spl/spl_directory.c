@@ -2304,7 +2304,7 @@ PHP_METHOD(SplFileObject, getChildren)
 	/* return NULL */
 } /* }}} */
 
-/* {{{ Return current line as csv */
+/* {{{ Return current line as CSV */
 PHP_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
@@ -2546,7 +2546,7 @@ PHP_METHOD(SplFileObject, fseek)
 	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, (int)whence));
 } /* }}} */
 
-/* {{{ Get a character form the file */
+/* {{{ Get a character from the file */
 PHP_METHOD(SplFileObject, fgetc)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
