@@ -1,5 +1,9 @@
 --TEST--
 Deprecation promoted to exception should result in fatal error during inheritance
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Error handler not active during preloading');
+?>
 --FILE--
 <?php
 

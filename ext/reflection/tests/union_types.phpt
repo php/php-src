@@ -1,7 +1,9 @@
 --TEST--
 Union types in reflection
---INI--
-error_reporting=E_ALL&~E_DEPRECATED
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('xfail Difference in class name casing');
+?>
 --FILE--
 <?php
 
