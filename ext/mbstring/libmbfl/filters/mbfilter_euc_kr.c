@@ -114,19 +114,13 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
 			if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
-				w = (c1 - 0xa1)*190 + (c - 0x41);
-				if (w >= 0 && w < uhc2_ucs_table_size) {
-					w = uhc2_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0xa1)*190 + c - 0x41;
+				ZEND_ASSERT(w < uhc2_ucs_table_size);
+				w = uhc2_ucs_table[w];
 			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
-				w = (c1 - 0xc7)*94 + (c - 0xa1);
-				if (w >= 0 && w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0xc7)*94 + c - 0xa1;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
 			}
 
 			if (w <= 0) {
@@ -138,9 +132,7 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

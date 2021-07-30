@@ -785,16 +785,6 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 			}
 		}
 
-		if (s1 <= 0) {
-			/* CP932 vendor ext3 (115ku - 119ku) */
-			for (c1 = 0; c1 < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; c1++) {
-				if (c == cp932ext3_ucs_table[c1]) {
-					s1 = (((c1 / 94) + 0x93) << 8) + (c1 % 94) + 0x21;
-					break;
-				}
-			}
-		}
-
 		if (c == 0) {
 			s1 = 0;
 		}

@@ -142,24 +142,16 @@ int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter)
 
 		if (w <= 0) {
 			if (c1 < 0xff && c1 > 0x80 && c >= 0x40 && c < 0xff && c != 0x7f) {
-				w = (c1 - 0x81)*192 + (c - 0x40);
-				if (w >= 0 && w < cp936_ucs_table_size) {
-					w = cp936_ucs_table[w];
-					if (!w)
-						w = MBFL_BAD_INPUT;
-				} else {
-					w = MBFL_BAD_INPUT;
-				}
-				CK((*filter->output_function)(w, filter->data));
+				w = (c1 - 0x81)*192 + c - 0x40;
+				ZEND_ASSERT(w < cp936_ucs_table_size);
+				CK((*filter->output_function)(cp936_ucs_table[w], filter->data));
 			} else {
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			}
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

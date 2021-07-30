@@ -298,9 +298,7 @@ retry:
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -322,16 +320,13 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 {
-	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE, second = 0;
+	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 	bool consumed = false;
 
 	if (filter->cache) {
-		int s = mbfl_convert_kana(filter->cache, c, &consumed, &second, mode);
+		int s = mbfl_convert_kana(filter->cache, c, &consumed, NULL, mode);
 		filter->cache = consumed ? 0 : c;
 		mbfl_filt_conv_wchar_cp50221(s, filter);
-		if (second) {
-			mbfl_filt_conv_wchar_cp50221(second, filter);
-		}
 	} else if (c == 0) {
 		/* This case has to be handled separately, since `filter->cache == 0` means
 		 * no codepoint is cached */
@@ -345,14 +340,11 @@ static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_cp50220_flush(mbfl_convert_filter *filter)
 {
-	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE, second = 0;
+	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
 
 	if (filter->cache) {
-		int s = mbfl_convert_kana(filter->cache, 0, NULL, &second, mode);
+		int s = mbfl_convert_kana(filter->cache, 0, NULL, NULL, mode);
 		mbfl_filt_conv_wchar_cp50221(s, filter);
-		if (second) {
-			mbfl_filt_conv_wchar_cp50221(s, filter);
-		}
 		filter->cache = 0;
 	}
 
@@ -427,21 +419,6 @@ int mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			for (i = 0; i < cp932ext2_ucs_table_size; i++) {
 				if (c == cp932ext2_ucs_table[i]) {
 					s = ((i / 94 + oh + 0x21) << 8) + (i % 94 + 0x21);
-					break;
-				}
-			}
-		}
-
-		if (s < 0) {
-			const int cp932ext3_ucs_table_size =
-					cp932ext3_ucs_table_max - cp932ext3_ucs_table_min;
-			const int limit = cp932ext3_ucs_table_size >
-					cp932ext3_eucjp_table_size ?
-						cp932ext3_eucjp_table_size:
-						cp932ext3_ucs_table_size;
-			for (i = 0; i < limit; i++) {
-				if (c == cp932ext3_ucs_table[i]) {
-					s = cp932ext3_eucjp_table[i];
 					break;
 				}
 			}
@@ -559,21 +536,6 @@ int mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			for (i = 0; i < cp932ext2_ucs_table_size; i++) {
 				if (c == cp932ext2_ucs_table[i]) {
 					s = ((i / 94 + oh + 0x21) << 8) + (i % 94 + 0x21);
-					break;
-				}
-			}
-		}
-
-		if (s <= 0) {
-			const int cp932ext3_ucs_table_size =
-					cp932ext3_ucs_table_max - cp932ext3_ucs_table_min;
-			const int limit = cp932ext3_ucs_table_size >
-					cp932ext3_eucjp_table_size ?
-						cp932ext3_eucjp_table_size:
-						cp932ext3_ucs_table_size;
-			for (i = 0; i < limit; i++) {
-				if (c == cp932ext3_ucs_table[i]) {
-					s = cp932ext3_eucjp_table[i];
 					break;
 				}
 			}

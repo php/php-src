@@ -133,9 +133,7 @@ int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(w, filter->data));
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

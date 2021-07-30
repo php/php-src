@@ -113,19 +113,13 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 			if (flag == 1) {
 				if (c1 != 0x22 || c <= 0x65) {
 					w = (c1 - 0x21)*190 + (c - 0x41) + 0x80;
-					if (w >= 0 && w < uhc2_ucs_table_size) {
-						w = uhc2_ucs_table[w];
-					} else {
-						w = 0;
-					}
+					ZEND_ASSERT(w < uhc2_ucs_table_size);
+					w = uhc2_ucs_table[w];
 				}
 			} else {
-				w = (c1 - 0x47)*94 + (c - 0x21);
-				if (w >= 0 && w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0x47)*94 + c - 0x21;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
 			}
 
 			if (w <= 0) {
@@ -162,9 +156,7 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

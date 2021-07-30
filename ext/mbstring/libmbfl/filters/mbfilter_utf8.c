@@ -172,9 +172,8 @@ retry:
 			}
 		}
 		break;
-	default:
-		filter->status = 0;
-		break;
+
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

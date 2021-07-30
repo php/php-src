@@ -95,20 +95,17 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		c1 = filter->cache;
 		if (c1 > 0x20 && c1 < 0x7F && c > 0x20 && c < 0x7F) {
 			s = (c1 - 1)*192 + c + 0x40; /* GB2312 */
-			if (s >= 0 && s < cp936_ucs_table_size) {
-				if (s == 0x1864) {
-					w = 0x30FB;
-				} else if (s == 0x186A) {
-					w = 0x2015;
-				} else if (s == 0x186C) {
-					w = 0x2225;
-				} else if ((s >= 0x1920 && s <= 0x192A) || s == 0x1963 || (s >= 0x1C60 && s <= 0x1C7F) || (s >= 0x1DBB && s <= 0x1DC4)) {
-					w = 0;
-				} else {
-					w = cp936_ucs_table[s];
-				}
-			} else {
+			ZEND_ASSERT(s < cp936_ucs_table_size);
+			if (s == 0x1864) {
+				w = 0x30FB;
+			} else if (s == 0x186A) {
+				w = 0x2015;
+			} else if (s == 0x186C) {
+				w = 0x2225;
+			} else if ((s >= 0x1920 && s <= 0x192A) || s == 0x1963 || (s >= 0x1C60 && s <= 0x1C7F) || (s >= 0x1DBB && s <= 0x1DC4)) {
 				w = 0;
+			} else {
+				w = cp936_ucs_table[s];
 			}
 
 			if (w <= 0) {
@@ -139,9 +136,7 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
