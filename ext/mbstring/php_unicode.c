@@ -363,7 +363,7 @@ MBSTRING_API char *php_unicode_convert_case(
 {
 	struct convert_case_data data;
 	mbfl_convert_filter *from_wchar, *to_wchar;
-	mbfl_string result, *result_ptr;
+	mbfl_string result;
 
 	mbfl_memory_device device;
 	mbfl_memory_device_init(&device, srclen + 1, 0);
@@ -410,13 +410,9 @@ MBSTRING_API char *php_unicode_convert_case(
 
 	mbfl_convert_filter_flush(to_wchar);
 	mbfl_convert_filter_flush(from_wchar);
-	result_ptr = mbfl_memory_device_result(&device, &result);
+	mbfl_memory_device_result(&device, &result);
 	mbfl_convert_filter_delete(to_wchar);
 	mbfl_convert_filter_delete(from_wchar);
-
-	if (!result_ptr) {
-		return NULL;
-	}
 
 	*ret_len = result.len;
 	return (char *) result.val;
