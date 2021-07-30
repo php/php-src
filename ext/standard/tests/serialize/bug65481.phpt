@@ -2,7 +2,6 @@
 Bug #65481 (shutdown segfault due to serialize)
 --FILE--
 <?php
-echo "Test\n";
 
 class A {
     public $e = array();
@@ -36,7 +35,5 @@ $token = serialize($token);
 ?>
 Done
 --EXPECTF--
-Test
-
 Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Done
