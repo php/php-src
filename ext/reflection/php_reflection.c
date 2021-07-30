@@ -618,7 +618,7 @@ static int format_default_value(smart_str *str, zval *value, zend_class_entry *s
 	}
 
 	if (Z_TYPE(zv) <= IS_STRING) {
-		smart_str_append_scalar(str, &zv);
+		smart_str_append_scalar(str, &zv, 15);
 	} else if (Z_TYPE(zv) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else {

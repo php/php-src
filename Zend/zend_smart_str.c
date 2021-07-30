@@ -190,7 +190,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_truncated(smart_str *str, zend_stri
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value) {
+ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value, size_t truncate) {
 	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
 
 	if (Z_TYPE_P(value) == IS_UNDEF || Z_TYPE_P(value) == IS_NULL) {
@@ -203,7 +203,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value
 		smart_str_append_long(dest, Z_LVAL_P(value));
 	} else {
 		smart_str_appendc(dest, '\'');
-		smart_str_append_truncated(dest, Z_STR_P(value), EG(exception_string_param_max_len));
+		smart_str_append_truncated(dest, Z_STR_P(value), truncate);
 		smart_str_appendc(dest, '\'');
 	}
 }
