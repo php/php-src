@@ -196,6 +196,19 @@ foreach (array_keys($truncatedChars) as $truncated)
 
 echo "UDC support OK\n";
 
+testValidString("\x00\xA5", "\x1B\$B!o\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+testValidString("\xFF\x5E", "\x1B\$B!A\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+
+echo "Other mappings from Unicode -> ISO-2022-JP-MS OK\n";
+
+// Alternative escape sequences for 2-byte characters
+testValidString("\x1B\$(B\x21\x21", "\x30\x00", "ISO-2022-JP-MS", "UTF-16BE", false);
+testValidString("\x1B\$(@\x21\x21", "\x30\x00", "ISO-2022-JP-MS", "UTF-16BE", false);
+
+// Switching between different character types
+testValidString("\x00a\x00b\x00c\xFF\x61\x00a\x00b\x00c", "abc\x1B(I\x21\x1B(Babc", "UTF-16BE", "ISO-2022-JP-MS", false);
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-MS", "UTF-8");
@@ -217,4 +230,5 @@ ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) support OK
 UDC support OK
+Other mappings from Unicode -> ISO-2022-JP-MS OK
 Done!
