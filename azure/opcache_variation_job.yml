@@ -61,3 +61,11 @@ jobs:
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so
           -d opcache.interned_strings_buffer=0
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'Preload'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --preload
