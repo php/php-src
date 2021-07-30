@@ -22,48 +22,6 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache (prime)'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          --file-cache-prime
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache (use)'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          --file-cache-use
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache Only (prime)'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          --file-cache-prime
-          -d opcache.file_cache_only=1
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache Only (use)'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          --file-cache-use
-          -d opcache.file_cache_only=1
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'Without interned strings'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          -d opcache.interned_strings_buffer=0
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
         runTestsName: 'Preload'
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
