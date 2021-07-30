@@ -2530,7 +2530,7 @@ PHP_METHOD(SplFileObject, ftell)
 	}
 } /* }}} */
 
-/* {{{ Return current file position */
+/* {{{ Seek to a position */
 PHP_METHOD(SplFileObject, fseek)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
