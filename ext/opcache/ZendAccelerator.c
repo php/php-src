@@ -4034,7 +4034,8 @@ static void preload_link(void)
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			break;
 		}
-		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+		if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
+				&& !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_string *key = zend_string_tolower(ce->name);
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
 			 && zend_hash_exists(EG(class_table), key)) {
