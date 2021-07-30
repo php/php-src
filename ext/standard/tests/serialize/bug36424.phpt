@@ -3,8 +3,6 @@ Bug #36424 - Serializable interface breaks object references
 --FILE--
 <?php
 
-echo "-TEST\n";
-
 class a implements Serializable {
     function serialize() {
         return serialize(get_object_vars($this));
@@ -44,8 +42,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
--TEST
-
 Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
 Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
