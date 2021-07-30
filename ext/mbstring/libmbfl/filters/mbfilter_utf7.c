@@ -163,11 +163,7 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				s &= 0x3ff;
 				s |= (filter->cache & 0xfff0000) >> 6;
 				filter->cache = n;
-				if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-					CK((*filter->output_function)(s, filter->data));
-				} else { /* illegal character */
-					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-				}
+				CK((*filter->output_function)(s, filter->data));
 			} else {
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				filter->cache = n;
@@ -207,11 +203,7 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				s &= 0x3ff;
 				s |= (filter->cache & 0xfff0000) >> 6;
 				filter->cache = n;
-				if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-					CK((*filter->output_function)(s, filter->data));
-				} else { /* illegal character */
-					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-				}
+				CK((*filter->output_function)(s, filter->data));
 			} else {
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				filter->cache = n;
@@ -245,11 +237,7 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 				s &= 0x3ff;
 				s |= (filter->cache & 0xfff0000) >> 6;
 				filter->cache = 0;
-				if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
-					CK((*filter->output_function)(s, filter->data));
-				} else { /* illegal character */
-					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-				}
+				CK((*filter->output_function)(s, filter->data));
 			} else {
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				filter->cache = 0;
@@ -264,9 +252,7 @@ int mbfl_filt_conv_utf7_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -373,9 +359,7 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;

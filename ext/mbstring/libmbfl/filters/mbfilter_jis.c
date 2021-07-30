@@ -251,9 +251,7 @@ retry:
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -318,14 +316,6 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			}
 			filter->status = 0;
 			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x100) { /* kana */
-			if ((filter->status & 0xff00) != 0x100) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x49, filter->data));		/* 'I' */
-			}
-			filter->status = 0x100;
-			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x8080) { /* X 0208 */
 			if ((filter->status & 0xff00) != 0x200) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -380,11 +370,10 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
 	}
+
 	if (s <= 0) {
 		if (c == 0xa5) {			/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */

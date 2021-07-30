@@ -167,6 +167,7 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 		filter->status++;
 		filter->cache = c;
 		break;
+
 	case 4:	/* got 0x8f,  X 0212 second char */
 		filter->status = 0;
 		c1 = filter->cache;
@@ -211,9 +212,7 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -271,8 +270,6 @@ int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			s1 = 0x213D;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
 			s1 = 0x2142;
 		} else if (c == 0xff0d) {	/* FULLWIDTH HYPHEN-MINUS */

@@ -221,8 +221,6 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 			s1 = 0x5C;
 		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xFF5E) { /* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else if (c == 0x2225) { /* PARALLEL TO */
 			s1 = 0x2142;
 		} else if (c == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */

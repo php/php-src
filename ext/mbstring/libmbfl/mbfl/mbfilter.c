@@ -2480,8 +2480,6 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 				(*pc->decoder->filter_function)(mbfl_hexchar_table[d], pc->decoder);
 			}
 			break;
-		default:
-			break;
 		}
 	}
 

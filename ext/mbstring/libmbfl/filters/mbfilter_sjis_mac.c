@@ -253,9 +253,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -287,7 +285,6 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 	//  r: U+FF00 -> U+FFFF
 
 	switch (filter->status) {
-
 	case 1:
 		c1 = filter->cache;
 		filter->cache = 0;
@@ -368,7 +365,6 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		ZEND_FALLTHROUGH;
 
 	case 0:
-
 		if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 			s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 			if (c == 0x5c) {
@@ -480,7 +476,6 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-
 	case 2:
 		c1 = filter->cache;
 		filter->cache = 0;
@@ -516,7 +511,6 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			CK(mbfl_filt_conv_illegal_output(c1, filter));
 			return mbfl_filt_conv_wchar_sjis_mac(c, filter);
 		}
-
 		break;
 
 	case 3:
@@ -653,10 +647,9 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
 	return 0;
 }
 

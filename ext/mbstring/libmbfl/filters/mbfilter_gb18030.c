@@ -168,15 +168,9 @@ int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 				(c1 >= 0x81 && c1 <= 0xa0 && c >= 0x40 && c <= 0xfe && c != 0x7f) ||
 				(c1 >= 0xaa && c1 <= 0xfe && c >= 0x40 && c <= 0xa0 && c != 0x7f) ||
 				(c1 >= 0xa8 && c1 <= 0xa9 && c >= 0x40 && c <= 0xa0 && c != 0x7f)) {
-				w = (c1 - 0x81)*192 + (c - 0x40);
-				if (w >= 0 && w < cp936_ucs_table_size) {
-					w = cp936_ucs_table[w];
-					if (!w)
-						w = MBFL_BAD_INPUT;
-				} else {
-					w = MBFL_BAD_INPUT;
-				}
-				CK((*filter->output_function)(w, filter->data));
+				w = (c1 - 0x81)*192 + c - 0x40;
+				ZEND_ASSERT(w < cp936_ucs_table_size);
+				CK((*filter->output_function)(cp936_ucs_table[w], filter->data));
 			} else {
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			}
@@ -211,10 +205,6 @@ int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 				w = (((c1 - 0x81)*10 + (c2 - 0x30))*126 + (c3 - 0x81))*10 + (c - 0x30);
 				if (w >= 0 && w <= 39419) {
 					k = mbfl_bisec_srch(w, mbfl_gb2uni_tbl, mbfl_gb_uni_max);
-					if (k < 0) {
-						CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-						return 0;
-					}
 					w += mbfl_gb_uni_ofst[k];
 				} else {
 					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
@@ -227,9 +217,7 @@ int mbfl_filt_conv_gb18030_wchar(int c, mbfl_convert_filter *filter)
 		}
  		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -370,12 +358,8 @@ int mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 		s1 = c1 + 0x90;
 	}
 
-	if (s <= 0) {
-		if (c == 0) {
-			s = 0;
-		} else {
-			s = -1;
-		}
+	if (c == 0) {
+		s = 0;
 	}
 
 	if (s >= 0) {

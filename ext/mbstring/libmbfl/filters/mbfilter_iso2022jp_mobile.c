@@ -268,12 +268,8 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 	if (s1 <= 0) {
 		if (c == 0xA5) { /* YEN SIGN */
 			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0x203E) { /* OVER LINE */
-			s1 = 0x2131; /* FULLWIDTH MACRON */
 		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xFF5E) { /* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else if (c == 0x2225) { /* PARALLEL TO */
 			s1 = 0x2142;
 		} else if (c == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
