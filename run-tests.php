@@ -493,6 +493,7 @@ function main(): void
                     break;
                 case '--preload':
                     $preload = true;
+                    $environment['SKIP_PRELOAD'] = 1;
                     break;
                 case '--file-cache-prime':
                     $file_cache = 'prime';

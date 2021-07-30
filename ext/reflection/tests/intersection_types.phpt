@@ -1,5 +1,9 @@
 --TEST--
 Intersection types in reflection
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('xfail Difference in class name casing');
+?>
 --FILE--
 <?php
 

@@ -1,7 +1,9 @@
 --TEST--
 method overloading with different method signature
---INI--
-error_reporting=8191
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('xfail Difference in class name casing');
+?>
 --FILE--
 <?php
 

@@ -1,5 +1,9 @@
 --TEST--
 Bug #78549: Stack overflow due to nested serialized input
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Different order of deprecation messages');
+?>
 --FILE--
 <?php
 
