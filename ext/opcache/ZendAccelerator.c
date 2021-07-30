@@ -4403,6 +4403,7 @@ static int accel_preload(const char *config, bool in_child)
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+	CG(skip_shebang) = 1;
 
 	zend_try {
 		zend_op_array *op_array;
