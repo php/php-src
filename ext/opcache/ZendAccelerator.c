@@ -3564,32 +3564,28 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 
 	src->pDestructor = NULL;
 	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
-	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
+	ZEND_HASH_FOREACH_BUCKET_FROM(src, p, EG(persistent_classes_count)) {
 		zend_class_entry *ce = Z_PTR(p->val);
-
-		if (EXPECTED(ce->type == ZEND_USER_CLASS)) {
-			if (ce->info.user.filename != filename) {
-				filename = ce->info.user.filename;
-				if (filename) {
-					if (!(copy = zend_hash_exists(preload_scripts, filename))) {
-						size_t eval_len = preload_try_strip_filename(filename);
-						if (eval_len) {
-							copy = zend_hash_str_exists(preload_scripts, ZSTR_VAL(filename), eval_len);
-						}
+		ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
+		if (ce->info.user.filename != filename) {
+			filename = ce->info.user.filename;
+			if (filename) {
+				if (!(copy = zend_hash_exists(preload_scripts, filename))) {
+					size_t eval_len = preload_try_strip_filename(filename);
+					if (eval_len) {
+						copy = zend_hash_str_exists(preload_scripts, ZSTR_VAL(filename), eval_len);
 					}
-				} else {
-					copy = 0;
 				}
-			}
-			if (copy) {
-				_zend_hash_append(dst, p->key, &p->val);
 			} else {
-				orig_dtor(&p->val);
+				copy = 0;
 			}
-			zend_hash_del_bucket(src, p);
-		} else {
-			break;
 		}
+		if (copy) {
+			_zend_hash_append(dst, p->key, &p->val);
+		} else {
+			orig_dtor(&p->val);
+		}
+		zend_hash_del_bucket(src, p);
 	} ZEND_HASH_FOREACH_END();
 	src->pDestructor = orig_dtor;
 }
@@ -3844,11 +3840,10 @@ static void preload_link(void)
 	do {
 		changed = 0;
 
-		ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(EG(class_table), key, zv, EG(persistent_classes_count)) {
 			ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
+			ZEND_ASSERT(ce->type != ZEND_INTERNAL_CLASS);
+
 			if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 			 && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 				zend_string *lcname = zend_string_tolower(ce->name);
@@ -3967,7 +3962,8 @@ static void preload_link(void)
 	} while (changed);
 
 	/* Warn for classes that could not be linked. */
-	ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(
+			EG(class_table), key, zv, EG(persistent_classes_count)) {
 		ce = Z_PTR_P(zv);
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			break;

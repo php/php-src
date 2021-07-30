@@ -958,16 +958,18 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define zend_hash_get_current_data_ptr(ht) \
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
-#define ZEND_HASH_FOREACH(_ht, indirect) do { \
+#define ZEND_HASH_FOREACH_FROM(_ht, indirect, _from) do { \
 		HashTable *__ht = (_ht); \
-		Bucket *_p = __ht->arData; \
-		Bucket *_end = _p + __ht->nNumUsed; \
+		Bucket *_p = __ht->arData + (_from); \
+		Bucket *_end = __ht->arData + __ht->nNumUsed; \
 		for (; _p != _end; _p++) { \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
 			} \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_HASH_FOREACH(_ht, indirect) ZEND_HASH_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
@@ -1009,6 +1011,10 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_BUCKET(ht, _bucket) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_bucket = _p;
+
+#define ZEND_HASH_FOREACH_BUCKET_FROM(ht, _bucket, _from) \
+	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
 	_bucket = _p;
 
 #define ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
@@ -1077,6 +1083,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(ht, _key, _val, _from) \
+	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
 	_key = _p->key; \
 	_val = _z;
 
