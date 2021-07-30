@@ -199,6 +199,12 @@ foreach (array_keys($truncatedChars) as $truncated)
 
 echo "JIS X 0208 (with MS extensions) and KDDI emoji support OK\n";
 
+testValidString("\x00\xA5", "\x1B\$B!o\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+testValidString("\xFF\x5E", "\x1B\$B!A\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+
+echo "Other mappings from Unicode -> ISO-2022-JP-KDDI OK\n";
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-KDDI", "UTF-8");
@@ -217,4 +223,5 @@ echo "Done!\n";
 ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) and KDDI emoji support OK
+Other mappings from Unicode -> ISO-2022-JP-KDDI OK
 Done!
