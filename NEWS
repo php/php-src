@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #81192 ("Declaration should be compatible with" gives incorrect
     line number with traits). (Nikita)
+  . Fixed bug #78919 (CLI server: insufficient cleanup if request startup
+    fails). (cataphract, cmb)
 
 - Date:
   . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)

@@ -2126,8 +2126,6 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup()) {
-		/* should never be happen */
-		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
 	PG(during_request_startup) = 0;
@@ -2198,9 +2196,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 
 	if (server->router || !is_static_file) {
 		if (FAILURE == php_cli_server_request_startup(server, client)) {
-			SG(server_context) = NULL;
-			php_cli_server_close_connection(server, client);
-			destroy_request_info(&SG(request_info));
+			php_cli_server_request_shutdown(server, client);
 			return SUCCESS;
 		}
 	}
