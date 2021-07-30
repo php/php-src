@@ -187,6 +187,18 @@ for ($i = 0; $i <= 0xFF; $i++) {
 
 echo "All escape sequences work as expected\n";
 
+foreach (['JIS', 'ISO-2022-JP'] as $encoding) {
+	testValidString("\x22\x25", "\x1B\$B!B\x1B(B", 'UTF-16BE', $encoding, false);
+	testValidString("\xFF\x0D", "\x1B\$B!]\x1B(B", 'UTF-16BE', $encoding, false);
+	testValidString("\xFF\xE0", "\x1B\$B!q\x1B(B", 'UTF-16BE', $encoding, false);
+	testValidString("\xFF\xE1", "\x1B\$B!r\x1B(B", 'UTF-16BE', $encoding, false);
+	testValidString("\xFF\xE2", "\x1B\$B\"L\x1B(B", 'UTF-16BE', $encoding, false);
+
+	testValidString("\x00\xA5", "\x1B(J\x5C\x1B(B", 'UTF-16BE', $encoding, false);
+}
+
+echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\xE0", "BAD+E0", "JIS", "UTF-8");
@@ -204,4 +216,5 @@ JIS X 0201 support OK
 JIS X 0208 support OK
 JIS X 0212 support OK
 All escape sequences work as expected
+Other mappings from Unicode -> ISO-2022-JP are OK
 Done!
