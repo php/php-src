@@ -1053,7 +1053,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 				/* even though lval is declared as unsigned, the value
-				 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+				 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
 				 * use MYSQLI_LL_SPEC.
 				 */
 				snprintf(tmp, sizeof(tmp), (mysql_fetch_field_direct(result, i)->flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
