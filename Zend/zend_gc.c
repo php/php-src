@@ -33,7 +33,7 @@
  * ------------------------------------------
  *
  * GREEN - Acyclic
- * RED   - Candidate cycle underogin
+ * RED   - Candidate cycle undergoing
  * ORANGE - Candidate cycle awaiting epoch boundary.
  *
  *
