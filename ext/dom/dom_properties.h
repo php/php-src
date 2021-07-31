@@ -139,4 +139,4 @@ int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval);
 int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval);
 #endif
 
-#endif /* DOM_PROPERTIERS_H */
+#endif /* DOM_PROPERTIES_H */
