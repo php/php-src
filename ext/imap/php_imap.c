@@ -3991,7 +3991,7 @@ static int _php_rfc822_len(char *str)
 	 */
 	len = strlen(str) + 2;
 	p = str;
-	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
+	/* rfc822_cat() will escape all " and \ characters, therefore we need to increase
 	 * our buffer length to account for these characters.
 	 */
 	while ((p = strpbrk(p, "\\\""))) {

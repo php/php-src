@@ -1045,7 +1045,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 								char tmp[22];
 								/* even though lval is declared as unsigned, the value
-								 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+								 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
 								 * use MYSQLI_LL_SPEC.
 								 */
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
