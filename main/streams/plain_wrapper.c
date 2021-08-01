@@ -1410,7 +1410,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 
 		if (p == buf) {
 			ret = php_mkdir(dir, mode);
-		} else if (!(ret = php_mkdir(buf, mode)) || (EEXIST == errno && (size_t) strlen(buf) < dir_len)) {
+		} else if (!(ret = php_mkdir(buf, mode)) || EEXIST == errno) {
 			if (!p) {
 				p = buf;
 			}
