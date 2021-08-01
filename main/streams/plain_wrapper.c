@@ -1418,8 +1418,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 			while (++p != e) {
 				if (*p == '\0') {
 					*p = DEFAULT_SLASH;
-					if ((*(p+1) != '\0') &&
-						(ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
+					if ((*(p+1) != '\0') && (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
                         // parent directory already exists and try to create child directories.
                         if (EEXIST == errno && (size_t) strlen(buf) < dir_len) {
                             continue;
