@@ -4062,9 +4062,13 @@ static void preload_link(void)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	/* Dynamic defs inside methods need to be removed as well. */
+	/* Dynamic defs inside functions and methods need to be removed as well. */
+	zend_op_array *op_array;
+	ZEND_HASH_FOREACH_PTR_FROM(EG(function_table), op_array, EG(persistent_functions_count)) {
+		ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+		preload_remove_declares(op_array);
+	} ZEND_HASH_FOREACH_END();
 	ZEND_HASH_FOREACH_PTR_FROM(EG(class_table), ce, EG(persistent_classes_count)) {
-		zend_op_array *op_array;
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->type == ZEND_USER_FUNCTION) {
 				preload_remove_declares(op_array);
