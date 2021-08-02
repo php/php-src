@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81342 (New ampersand token parsing depends on new line after it).
     (Nikita)
+  . Fixed bug #81280 (Unicode characters in cli.prompt causes segfault).
+    (krakjoe)
 
 - Date:
   . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)
