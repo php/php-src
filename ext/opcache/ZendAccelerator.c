@@ -3825,6 +3825,63 @@ static void preload_error_cb(int type, zend_string *error_filename, const uint32
 	}
 }
 
+/* Remove DECLARE opcodes and dynamic defs. */
+static void preload_remove_declares(zend_op_array *op_array)
+{
+	zend_op *opline = op_array->opcodes;
+	zend_op *end = opline + op_array->last;
+	uint32_t skip_dynamic_func_count = 0;
+	zend_string *key;
+	zend_op_array *func;
+
+	while (opline != end) {
+		switch (opline->opcode) {
+			case ZEND_DECLARE_CLASS:
+			case ZEND_DECLARE_CLASS_DELAYED:
+				key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
+				if (!zend_hash_exists(CG(class_table), key)) {
+					MAKE_NOP(opline);
+				}
+				break;
+			case ZEND_DECLARE_FUNCTION:
+				opline->op2.num -= skip_dynamic_func_count;
+				key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+				func = zend_hash_find_ptr(EG(function_table), key);
+				if (func && func == op_array->dynamic_func_defs[opline->op2.num]) {
+					zend_op_array **dynamic_func_defs;
+
+					op_array->num_dynamic_func_defs--;
+					if (op_array->num_dynamic_func_defs == 0) {
+						dynamic_func_defs = NULL;
+					} else {
+						dynamic_func_defs = emalloc(sizeof(zend_op_array*) * op_array->num_dynamic_func_defs);
+						if (opline->op2.num > 0) {
+							memcpy(
+								dynamic_func_defs,
+								op_array->dynamic_func_defs,
+								sizeof(zend_op_array*) * opline->op2.num);
+						}
+						if (op_array->num_dynamic_func_defs - opline->op2.num > 0) {
+							memcpy(
+								dynamic_func_defs + opline->op2.num,
+								op_array->dynamic_func_defs + (opline->op2.num + 1),
+								sizeof(zend_op_array*) * (op_array->num_dynamic_func_defs - opline->op2.num));
+						}
+					}
+					efree(op_array->dynamic_func_defs);
+					op_array->dynamic_func_defs = dynamic_func_defs;
+					skip_dynamic_func_count++;
+					MAKE_NOP(opline);
+				}
+				break;
+			case ZEND_DECLARE_LAMBDA_FUNCTION:
+				opline->op2.num -= skip_dynamic_func_count;
+				break;
+		}
+		opline++;
+	}
+}
+
 static void preload_link(void)
 {
 	zval *zv;
@@ -3965,9 +4022,7 @@ static void preload_link(void)
 	ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(
 			EG(class_table), key, zv, EG(persistent_classes_count)) {
 		ce = Z_PTR_P(zv);
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			break;
-		}
+		ZEND_ASSERT(ce->type != ZEND_INTERNAL_CLASS);
 		if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 				&& !(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_string *lcname = zend_string_tolower(ce->name);
@@ -3995,59 +4050,9 @@ static void preload_link(void)
 
 	zend_hash_destroy(&errors);
 
-	/* Remove DECLARE opcodes */
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 		zend_op_array *op_array = &script->script.main_op_array;
-		zend_op *opline = op_array->opcodes;
-		zend_op *end = opline + op_array->last;
-		uint32_t skip_dynamic_func_count = 0;
-
-		while (opline != end) {
-			switch (opline->opcode) {
-				case ZEND_DECLARE_CLASS:
-				case ZEND_DECLARE_CLASS_DELAYED:
-					key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
-					if (!zend_hash_exists(CG(class_table), key)) {
-						MAKE_NOP(opline);
-					}
-					break;
-				case ZEND_DECLARE_FUNCTION:
-					opline->op2.num -= skip_dynamic_func_count;
-					key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
-					zv = zend_hash_find(EG(function_table), key);
-					if (zv && Z_PTR_P(zv) == op_array->dynamic_func_defs[opline->op2.num]) {
-						zend_op_array **dynamic_func_defs;
-
-						op_array->num_dynamic_func_defs--;
-						if (op_array->num_dynamic_func_defs == 0) {
-							dynamic_func_defs = NULL;
-						} else {
-							dynamic_func_defs = emalloc(sizeof(zend_op_array*) * op_array->num_dynamic_func_defs);
-							if (opline->op2.num > 0) {
-								memcpy(
-									dynamic_func_defs,
-									op_array->dynamic_func_defs,
-									sizeof(zend_op_array*) * opline->op2.num);
-							}
-							if (op_array->num_dynamic_func_defs - opline->op2.num > 0) {
-								memcpy(
-									dynamic_func_defs + opline->op2.num,
-									op_array->dynamic_func_defs + (opline->op2.num + 1),
-									sizeof(zend_op_array*) * (op_array->num_dynamic_func_defs - opline->op2.num));
-							}
-						}
-						efree(op_array->dynamic_func_defs);
-						op_array->dynamic_func_defs = dynamic_func_defs;
-						skip_dynamic_func_count++;
-						MAKE_NOP(opline);
-					}
-					break;
-				case ZEND_DECLARE_LAMBDA_FUNCTION:
-					opline->op2.num -= skip_dynamic_func_count;
-					break;
-			}
-			opline++;
-		}
+		preload_remove_declares(op_array);
 
 		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
 			script->script.first_early_binding_opline = zend_build_delayed_early_binding_list(op_array);
@@ -4055,6 +4060,16 @@ static void preload_link(void)
 				op_array->fn_flags &= ~ZEND_ACC_EARLY_BINDING;
 			}
 		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* Dynamic defs inside methods need to be removed as well. */
+	ZEND_HASH_FOREACH_PTR_FROM(EG(class_table), ce, EG(persistent_classes_count)) {
+		zend_op_array *op_array;
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+			if (op_array->type == ZEND_USER_FUNCTION) {
+				preload_remove_declares(op_array);
+			}
+		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 }
 
