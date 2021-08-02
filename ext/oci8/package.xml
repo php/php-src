@@ -53,12 +53,12 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2020-12-21</date>
+ <date>2021-08-02</date>
  <time>12:00:00</time>
 
   <version>
-   <release>3.0.1</release>
-   <api>3.0.1</api>
+   <release>3.1.0</release>
+   <api>3.1.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -68,7 +68,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <notes>
     This version is for PHP 8 only.
 
-    Updated Windows build environment to build with newer Oracle Client libraries. (cmb)
+    Deprecated directive oci8.old_oci_close_semantics
   </notes>
  <contents>
   <dir name="/">
@@ -456,6 +456,23 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
  </extsrcrelease>
  <changelog>
 
+<release>
+  <version>
+   <release>3.0.1</release>
+   <api>3.0.1</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8 only.
+
+    Updated Windows build environment to build with newer Oracle Client libraries. (cmb)
+  </notes>
+</release>
+   
 <release>
   <version>
    <release>2.2.0</release>
