@@ -1355,7 +1355,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, int mode, int options, php_stream_context *context)
 {
-	int ret, len, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
+	int ret, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char *p;
 
 	if (strncasecmp(dir, "file://", sizeof("file://") - 1) == 0) {
@@ -1376,7 +1376,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 			return 0;
 		}
 
-		len = strlen(buf);
+		size_t len = strlen(buf);
 		e = buf + len;
 
 		if ((p = memchr(buf, DEFAULT_SLASH, dir_len))) {
