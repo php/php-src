@@ -38,6 +38,8 @@ static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NU
 static const char *mbfl_encoding_ucs4be_aliases[] = {"byte4be", NULL};
 static const char *mbfl_encoding_ucs4le_aliases[] = {"byte4le", NULL};
 
+static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter);
+
 const mbfl_encoding mbfl_encoding_ucs4 = {
 	mbfl_no_encoding_ucs4,
 	"UCS-4",
@@ -77,7 +79,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -97,7 +99,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4be_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -117,7 +119,7 @@ const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_ucs4le_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_ucs4_wchar_flush,
 	NULL,
 };
 
@@ -280,4 +282,18 @@ int mbfl_filt_conv_wchar_ucs4le(int c, mbfl_convert_filter *filter)
 	}
 
 	return c;
+}
+
+static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status & 0xF) {
+		/* Input string was truncated */
+		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
 }
