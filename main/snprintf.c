@@ -582,10 +582,6 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							precision = 0;
 					} else
 						precision = 0;
-
-					if (precision > FORMAT_CONV_MAX_PRECISION) {
-						precision = FORMAT_CONV_MAX_PRECISION;
-					}
 				} else
 					adjust_precision = false;
 			} else

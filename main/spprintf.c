@@ -289,10 +289,6 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							precision = -1;
 					} else
 						precision = 0;
-
-					if (precision > FORMAT_CONV_MAX_PRECISION) {
-						precision = FORMAT_CONV_MAX_PRECISION;
-					}
 				} else
 					adjust_precision = false;
 			} else
