@@ -199,7 +199,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value
 		smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
 	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
 		smart_str dval = {0};
-		smart_str_append_printf(&dval, "%.*G", (int) EG(precision), Z_DVAL_P(value));
+		smart_str_append_printf(&dval, "%.*H", (int) EG(precision), Z_DVAL_P(value));
 		smart_str_0(&dval);
 		if (zend_finite(Z_DVAL_P(value)) && NULL == strchr(ZSTR_VAL(dval.s), '.')) {
 			smart_str_appendl(&dval, ".0", 2);
