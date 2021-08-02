@@ -53,13 +53,13 @@ var_dump(match(3) {
 
 ?>
 --EXPECTF--
-string(%d) "UnhandledMatchError: Unhandled match true in %s:%d
+string(%d) "UnhandledMatchError: Unhandled match case true in %s:%d
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError: Unhandled match 6 in %s:%d
+string(%d) "UnhandledMatchError: Unhandled match case 6 in %s:%d
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError: Unhandled match '3' in %s:%d
+string(%d) "UnhandledMatchError: Unhandled match case '3' in %s:%d
 Stack trace:
 #0 {main}"
 string(3) "foo"

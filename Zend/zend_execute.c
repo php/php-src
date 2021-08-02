@@ -838,7 +838,7 @@ ZEND_COLD void zend_match_unhandled_error(zval *value)
 	smart_str_0(&msg);
 
 	zend_throw_exception_ex(
-		zend_ce_unhandled_match_error, 0, "Unhandled match %s", ZSTR_VAL(msg.s));
+		zend_ce_unhandled_match_error, 0, "Unhandled match case %s", ZSTR_VAL(msg.s));
 
 	smart_str_free(&msg);
 }

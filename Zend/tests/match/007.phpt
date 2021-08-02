@@ -19,7 +19,7 @@ echo get_value(3) . "\n";
 1
 2
 
-Fatal error: Uncaught UnhandledMatchError: Unhandled match 3 in %s:%d
+Fatal error: Uncaught UnhandledMatchError: Unhandled match case 3 in %s:%d
 Stack trace:
 #0 %s: get_value(3)
 #1 {main}

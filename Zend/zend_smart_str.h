@@ -55,7 +55,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_double(
 		smart_str *str, double num, int precision, bool zero_fraction);
 ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...)
 	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API void ZEND_FASTCALL smart_str_append_truncated(smart_str *str, zend_string *value, size_t length);
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, zend_string *value, size_t length);
 ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *str, zval *value, size_t truncate);
 END_EXTERN_C()
 
