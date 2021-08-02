@@ -480,7 +480,6 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -508,17 +507,8 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			smart_str_appends(buf, tmp_str);
-			/* Without a decimal point, PHP treats a number literal as an int.
-			 * This check even works for scientific notation, because the
-			 * mantissa always contains a decimal point.
-			 * We need to check for finiteness, because INF, -INF and NAN
-			 * must not have a decimal point added.
-			 */
-			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
-				smart_str_appendl(buf, ".0", 2);
-			}
+			smart_str_append_double(
+				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);

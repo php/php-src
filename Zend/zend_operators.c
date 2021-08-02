@@ -637,19 +637,12 @@ try_again:
 			ZVAL_NEW_STR(op, str);
 			break;
 		}
-		case IS_LONG: {
+		case IS_LONG:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
-		}
-		case IS_DOUBLE: {
-			zend_string *str;
-			double dval = Z_DVAL_P(op);
-
-			str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), dval);
-
-			ZVAL_NEW_STR(op, str);
+		case IS_DOUBLE:
+			ZVAL_NEW_STR(op, zend_double_to_str(Z_DVAL_P(op)));
 			break;
-		}
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
 			zval_ptr_dtor(op);
@@ -917,15 +910,12 @@ try_again:
 			return ZSTR_EMPTY_ALLOC();
 		case IS_TRUE:
 			return ZSTR_CHAR('1');
-		case IS_RESOURCE: {
+		case IS_RESOURCE:
 			return zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
-		}
-		case IS_LONG: {
+		case IS_LONG:
 			return zend_long_to_str(Z_LVAL_P(op));
-		}
-		case IS_DOUBLE: {
-			return zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(op));
-		}
+		case IS_DOUBLE:
+			return zend_double_to_str(Z_DVAL_P(op));
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
 			return (try && UNEXPECTED(EG(exception))) ?
@@ -2089,7 +2079,7 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 		return ZEND_NORMALIZE_BOOL(dval - str_dval);
 	}
 
-	zend_string *dval_as_str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
+	zend_string *dval_as_str = zend_double_to_str(dval);
 	int cmp_result = zend_binary_strcmp(
 		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
 	zend_string_release(dval_as_str);
@@ -3146,6 +3136,15 @@ ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num)
 		char *res = zend_print_i64_to_buf(buf + sizeof(buf) - 1, num);
 		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
 	}
+}
+
+ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num)
+{
+	char buf[ZEND_DOUBLE_MAX_LENGTH];
+	/* Model snprintf precision behavior. */
+	int precision = (int) EG(precision);
+	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
+	return zend_string_init(buf, strlen(buf), 0);
 }
 
 ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */

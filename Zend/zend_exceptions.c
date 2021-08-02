@@ -519,11 +519,11 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_append_long(str, Z_LVAL_P(arg));
 			smart_str_appends(str, ", ");
 			break;
-		case IS_DOUBLE: {
-			smart_str_append_printf(str, "%.*G", (int) EG(precision), Z_DVAL_P(arg));
+		case IS_DOUBLE:
+			smart_str_append_double(
+				str, Z_DVAL_P(arg), (int) EG(precision), /* zero_fraction */ false);
 			smart_str_appends(str, ", ");
 			break;
-		}
 		case IS_ARRAY:
 			smart_str_appends(str, "Array, ");
 			break;

@@ -1409,11 +1409,6 @@ tail_call:
 
 static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
 {
-	zend_long idx;
-	zend_string *key;
-	zval *val;
-	int first;
-
 	ZVAL_DEREF(zv);
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -1429,21 +1424,23 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 			smart_str_append_long(str, Z_LVAL_P(zv));
 			break;
 		case IS_DOUBLE:
-			key = zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
-			smart_str_appendl(str, ZSTR_VAL(key), ZSTR_LEN(key));
-			zend_string_release_ex(key, 0);
+			smart_str_append_double(
+				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ false);
 			break;
 		case IS_STRING:
 			smart_str_appendc(str, '\'');
 			zend_ast_export_str(str, Z_STR_P(zv));
 			smart_str_appendc(str, '\'');
 			break;
-		case IS_ARRAY:
+		case IS_ARRAY: {
+			zend_long idx;
+			zend_string *key;
+			zval *val;
+			bool first = true;
 			smart_str_appendc(str, '[');
-			first = 1;
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(zv), idx, key, val) {
 				if (first) {
-					first = 0;
+					first = false;
 				} else {
 					smart_str_appends(str, ", ");
 				}
@@ -1459,6 +1456,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 			} ZEND_HASH_FOREACH_END();
 			smart_str_appendc(str, ']');
 			break;
+		}
 		case IS_CONSTANT_AST:
 			zend_ast_export_ex(str, Z_ASTVAL_P(zv), priority, indent);
 			break;
