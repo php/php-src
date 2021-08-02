@@ -1411,6 +1411,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		if (p == buf) {
 			ret = php_mkdir(dir, mode);
 		} else {
+		    /* split php_mkdir() into php_check_open_basedir() and VCWD_MKDIR() */
 		    if ((ret = php_check_open_basedir(dir)) < 0 || (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
 		        if (EEXIST != errno) {
 		            php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -1423,7 +1424,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
                 while (++p != e) {
                     if (*p == '\0') {
                         *p = DEFAULT_SLASH;
-                        if ((*(p+1) != '\0') && (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {+
+                        if ((*(p+1) != '\0') && (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
                             /* parent directory already exists, try to create child directory */
                             if (EEXIST == errno && (size_t) strlen(buf) < dir_len) {
                                 continue;
