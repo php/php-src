@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #80849 (HTTP Status header truncation). (cmb)
 
+- GD:
+  . Fixed bug #51498 (imagefilledellipse does not work for large circles). (cmb)
+
 - PDO_ODBC:
   . Fixed bug #81252 (PDO_ODBC doesn't account for SQL_NO_TOTAL). (cmb)
 
