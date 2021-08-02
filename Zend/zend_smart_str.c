@@ -204,7 +204,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value
 		if (zend_finite(Z_DVAL_P(value)) && NULL == strchr(ZSTR_VAL(dval.s), '.')) {
 			smart_str_appendl(&dval, ".0", 2);
 		}
-		smart_str_append(dest, dval.s);
+		smart_str_append_smart_str(dest, &dval);
 		smart_str_free(&dval);
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		smart_str_append_long(dest, Z_LVAL_P(value));
