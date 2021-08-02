@@ -1355,7 +1355,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, int mode, int options, php_stream_context *context)
 {
-	int ret, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
+	int ret, len, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char *p;
 
 	if (strncasecmp(dir, "file://", sizeof("file://") - 1) == 0) {
@@ -1376,7 +1376,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 			return 0;
 		}
 
-		e = buf +  strlen(buf);
+		len = strlen(buf);
+		e = buf + len;
 
 		if ((p = memchr(buf, DEFAULT_SLASH, dir_len))) {
 			offset = p - buf + 1;
@@ -1413,8 +1414,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		} else {
 		    /* split php_mkdir() into php_check_open_basedir() and VCWD_MKDIR() */
             if ((ret = php_check_open_basedir(dir)) < 0
-                || ((ret = VCWD_MKDIR(buf, (mode_t) mode)) < 0 && EEXIST != errno)) {
-		        php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+                || ((ret = VCWD_MKDIR(buf, (mode_t) mode)) < 0 && EEXIST != errno) && (size_t) strlen(buf) < len) {
+                php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		    } else {
                 if (!p) {
                     p = buf;
@@ -1425,7 +1426,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
                         *p = DEFAULT_SLASH;
                         if ((*(p+1) != '\0') && (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
                             /* parent directory already exists, try to create child directory */
-                            if (EEXIST == errno && (size_t) strlen(buf) < dir_len) {
+                            if (EEXIST == errno && (size_t) strlen(buf) < len) {
                                 continue;
                             }
                             if (options & REPORT_ERRORS) {
