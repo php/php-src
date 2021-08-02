@@ -128,106 +128,6 @@ static inline char *php_fcvt(double value, int ndigit, int *decpt, bool *sign) /
 }
 /* }}} */
 
-PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
-{
-	char *digits, *dst, *src;
-	int i, decpt;
-	bool sign;
-	int mode = ndigit >= 0 ? 2 : 0;
-
-	if (mode == 0) {
-		ndigit = 17;
-	}
-	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
-	if (decpt == 9999) {
-		/*
-		 * Infinity or NaN, convert to inf or nan with sign.
-		 * We assume the buffer is at least ndigit long.
-		 */
-		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
-		zend_freedtoa(digits);
-		return (buf);
-	}
-
-	dst = buf;
-	if (sign) {
-		*dst++ = '-';
-	}
-
-	if ((decpt >= 0 && decpt > ndigit) || decpt < -3) { /* use E-style */
-		/* exponential format (e.g. 1.2345e+13) */
-		if (--decpt < 0) {
-			sign = 1;
-			decpt = -decpt;
-		} else {
-			sign = 0;
-		}
-		src = digits;
-		*dst++ = *src++;
-		*dst++ = dec_point;
-		if (*src == '\0') {
-			*dst++ = '0';
-		} else {
-			do {
-				*dst++ = *src++;
-			} while (*src != '\0');
-		}
-		*dst++ = exponent;
-		if (sign) {
-			*dst++ = '-';
-		} else {
-			*dst++ = '+';
-		}
-		if (decpt < 10) {
-			*dst++ = '0' + decpt;
-			*dst = '\0';
-		} else {
-			/* XXX - optimize */
-			int n;
-			for (n = decpt, i = 0; (n /= 10) != 0; i++);
-			dst[i + 1] = '\0';
-			while (decpt != 0) {
-				dst[i--] = '0' + decpt % 10;
-				decpt /= 10;
-			}
-		}
-	} else if (decpt < 0) {
-		/* standard format 0. */
-		*dst++ = '0';   /* zero before decimal point */
-		*dst++ = dec_point;
-		do {
-			*dst++ = '0';
-		} while (++decpt < 0);
-		src = digits;
-		while (*src != '\0') {
-			*dst++ = *src++;
-		}
-		*dst = '\0';
-	} else {
-		/* standard format */
-		for (i = 0, src = digits; i < decpt; i++) {
-			if (*src != '\0') {
-				*dst++ = *src++;
-			} else {
-				*dst++ = '0';
-			}
-		}
-		if (*src != '\0') {
-			if (src == digits) {
-				*dst++ = '0';   /* zero before decimal point */
-			}
-			*dst++ = dec_point;
-			for (i = decpt; digits[i] != '\0'; i++) {
-				*dst++ = digits[i];
-			}
-		}
-		*dst = '\0';
-	}
-	zend_freedtoa(digits);
-	return (buf);
-}
-/* }}} */
-
 /* {{{ Apache license */
 /* ====================================================================
  * Copyright (c) 1995-1998 The Apache Group.  All rights reserved.
@@ -1043,7 +943,7 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 						lconv = localeconv();
 					}
 #endif
-					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
+					s = zend_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-') {
 						prefix_char = *s++;
 					} else if (print_sign) {

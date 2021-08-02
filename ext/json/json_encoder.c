@@ -80,11 +80,11 @@ static inline int php_json_is_valid_double(double d) /* {{{ */
 static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	size_t len;
-	char num[PHP_DOUBLE_MAX_LENGTH];
+	char num[ZEND_DOUBLE_MAX_LENGTH];
 
-	php_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
+	zend_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
 	len = strlen(num);
-	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2) {
+	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < ZEND_DOUBLE_MAX_LENGTH - 2) {
 		num[len++] = '.';
 		num[len++] = '0';
 		num[len] = '\0';

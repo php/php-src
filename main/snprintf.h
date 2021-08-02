@@ -75,12 +75,13 @@ PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) ZEND_ATTRIBUTE_FOR
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
 PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(char format, double num,
 		 bool add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len);
 
 END_EXTERN_C()
+
+#define php_gcvt zend_gcvt
 
 #ifdef slprintf
 #undef slprintf
@@ -138,7 +139,7 @@ PHPAPI char * ap_php_conv_p2(uint64_t num, int nbits,
  * another level (see NDIG in php_conv_fp()).
  * Applies to the formatting functions of both spprintf.c and snprintf.c, which
  * use equally sized buffers of MAX_BUF_SIZE = 512 to hold the result of the
- * call to php_gcvt().
+ * call to zend_gcvt().
  * This should be reasonably smaller than MAX_BUF_SIZE (I think MAX_BUF_SIZE - 9
  * should be enough, but let's give some more space) */
 #define FORMAT_CONV_MAX_PRECISION 500

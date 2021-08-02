@@ -480,7 +480,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
+	char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -508,7 +508,7 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 			smart_str_appends(buf, tmp_str);
 			/* Without a decimal point, PHP treats a number literal as an int.
 			 * This check even works for scientific notation, because the
@@ -1038,8 +1038,8 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
+			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 
 			size_t len = strlen(tmp_str);
 			char *res = smart_str_extend(buf, 2 + len + 1);

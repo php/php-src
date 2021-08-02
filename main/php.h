@@ -245,13 +245,7 @@ typedef unsigned int socklen_t;
 #define INT_MIN (- INT_MAX - 1)
 #endif
 
-/* double limits */
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define PHP_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define PHP_DOUBLE_MAX_LENGTH 1080
-#endif
+#define PHP_DOUBLE_MAX_LENGTH ZEND_DOUBLE_MAX_LENGTH
 
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
