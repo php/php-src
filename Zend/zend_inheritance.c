@@ -2593,6 +2593,11 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
 	ce->inheritance_cache = NULL;
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		ZEND_MAP_PTR_NEW(ce->mutable_data);
+	} else {
+		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+	}
 
 	/* properties */
 	if (ce->default_properties_table) {
