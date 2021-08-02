@@ -193,24 +193,31 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, z
 ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value, size_t truncate) {
 	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
 
-	if (Z_TYPE_P(value) == IS_UNDEF || Z_TYPE_P(value) == IS_NULL) {
-		smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
-	} else if (Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE) {
-		smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
-	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
-		smart_str dval = {0};
-		smart_str_append_printf(&dval, "%.*G", (int) EG(precision), Z_DVAL_P(value));
-		smart_str_0(&dval);
-		if (zend_finite(Z_DVAL_P(value)) && NULL == strchr(ZSTR_VAL(dval.s), '.')) {
-			smart_str_appendl(&dval, ".0", 2);
-		}
-		smart_str_append_smart_str(dest, &dval);
-		smart_str_free(&dval);
-	} else if (Z_TYPE_P(value) == IS_LONG) {
-		smart_str_append_long(dest, Z_LVAL_P(value));
-	} else {
-		smart_str_appendc(dest, '\'');
-		smart_str_append_escaped_truncated(dest, Z_STR_P(value), truncate);
-		smart_str_appendc(dest, '\'');
+	switch (Z_TYPE_P(value)) {
+		case IS_UNDEF:
+		case IS_NULL:
+			smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
+		break;
+
+		case IS_TRUE:
+		case IS_FALSE:
+			smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+		break;
+
+		case IS_DOUBLE:
+			smart_str_append_double(dest, Z_DVAL_P(value), (int) EG(precision), true);
+		break;
+
+		case IS_LONG:
+			smart_str_append_long(dest, Z_LVAL_P(value));
+		break;
+
+		case IS_STRING:
+			smart_str_appendc(dest, '\'');
+			smart_str_append_escaped_truncated(dest, Z_STR_P(value), truncate);
+			smart_str_appendc(dest, '\'');
+		break;
+
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
