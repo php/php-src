@@ -30,7 +30,7 @@ test(str_repeat("e\n", 100));
 Unhandled match case NULL
 Unhandled match case 1
 Unhandled match case 5.5
-Unhandled match case 5
+Unhandled match case 5.0
 Unhandled match case 'foo'
 Unhandled match case true
 Unhandled match case false
