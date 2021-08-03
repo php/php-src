@@ -54,8 +54,8 @@ var_dump(ini_set('oci8.old_oci_close_semantics', 'Off'));
 echo 'oci8.old_oci_close_semantics = ' . ini_get('oci8.old_oci_close_semantics') . "\n";
 
 ?>
---EXPECT--
-Directive oci8.old_oci_close_semantics is deprecated
+--EXPECTF--
+Deprecated: Directive oci8.old_oci_close_semantics is deprecated%s
 Test 1 - check initialization
 oci8.privileged_connect = 1
 oci8.max_persistent = 111

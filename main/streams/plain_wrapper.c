@@ -1411,7 +1411,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 
 		if (p == buf) {
 			ret = php_mkdir(dir, mode);
-			/* split php_mkdir into php_check_open_basedir() and VCWD_MKDIR() */
+			/* split php_mkdir into php_check_open_basedir and VCWD_MKDIR */
 		} else if ((ret = php_check_open_basedir(dir)) < 0) {
 		    /* if ret = -1, php_check_open_basedir will issue a warning */
 		} else {
