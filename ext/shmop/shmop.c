@@ -251,7 +251,7 @@ PHP_FUNCTION(shmop_read)
 		RETURN_FALSE;
 	}
 
-	if (count < 0 || start > (INT_MAX - count) || start + count > shmop->size) {
+	if (count < 0 || start > (ZEND_LONG_MAX - count) || start + count > shmop->size) {
 		php_error_docref(NULL, E_WARNING, "count is out of range");
 		RETURN_FALSE;
 	}

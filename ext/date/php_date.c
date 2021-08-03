@@ -698,7 +698,7 @@ zend_module_entry date_module_entry = {
 	PHP_MODULE_GLOBALS(date),   /* globals descriptor */
 	PHP_GINIT(date),            /* globals ctor */
 	NULL,                       /* globals dtor */
-	NULL,                       /* post deactivate */
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(date), /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -743,11 +743,19 @@ PHP_RSHUTDOWN_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
-	if(DATEG(tzcache)) {
+
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
+{
+	if (DATEG(tzcache)) {
 		zend_hash_destroy(DATEG(tzcache));
 		FREE_HASHTABLE(DATEG(tzcache));
 		DATEG(tzcache) = NULL;
 	}
+
 	if (DATEG(last_errors)) {
 		timelib_error_container_dtor(DATEG(last_errors));
 		DATEG(last_errors) = NULL;
@@ -755,7 +763,6 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 	return SUCCESS;
 }
-/* }}} */
 
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 

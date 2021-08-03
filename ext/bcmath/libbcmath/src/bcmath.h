@@ -120,6 +120,8 @@ _PROTOTYPE(int bc_compare, (bc_num n1, bc_num n2));
 
 _PROTOTYPE(char bc_is_zero, (bc_num num));
 
+_PROTOTYPE(char bc_is_zero_for_scale, (bc_num num, int scale));
+
 _PROTOTYPE(char bc_is_near_zero, (bc_num num, int scale));
 
 _PROTOTYPE(char bc_is_neg, (bc_num num));
