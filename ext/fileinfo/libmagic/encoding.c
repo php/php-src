@@ -46,7 +46,7 @@ FILE_RCSID("@(#)$File: encoding.c,v 1.20 2019/04/15 16:48:41 christos Exp $")
 
 private int looks_ascii(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_utf8_with_BOM(const unsigned char *, size_t, unichar *,
-    size_t *);
+	size_t *);
 private int looks_utf7(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_ucs16(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_ucs32(const unsigned char *, size_t, unichar *, size_t *);
@@ -68,7 +68,7 @@ private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
  */
 protected int
 file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
-    size_t *ulen, const char **code, const char **code_mime, const char **type)
+	size_t *ulen, const char **code, const char **code_mime, const char **type)
 {
 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
 	size_t nbytes = b->flen;
@@ -98,7 +98,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
 	}
 	mlen = (nbytes + 1) * sizeof(nbuf[0]);
 	if ((nbuf = CAST(unsigned char *,
-	    ecalloc(CAST(size_t, 1), mlen))) == NULL) {
+		ecalloc(CAST(size_t, 1), mlen))) == NULL) {
 		file_oomem(ms, mlen);
 		goto done;
 	}
@@ -156,7 +156,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
 			*code_mime = "ebcdic";
 		} else if (looks_latin1(nbuf, nbytes, *ubuf, ulen)) {
 			DPRINTF(("ebcdic/international %" SIZE_T_FORMAT "u\n",
-			    *ulen));
+				*ulen));
 			*code = "International EBCDIC";
 			*code_mime = "ebcdic";
 		} else { /* Doesn't look like text at all */
@@ -255,7 +255,7 @@ private char text_chars[256] = {
 
 private int
 looks_ascii(const unsigned char *buf, size_t nbytes, unichar *ubuf,
-    size_t *ulen)
+	size_t *ulen)
 {
 	size_t i;
 
@@ -294,7 +294,7 @@ looks_latin1(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ule
 
 private int
 looks_extended(const unsigned char *buf, size_t nbytes, unichar *ubuf,
-    size_t *ulen)
+	size_t *ulen)
 {
 	size_t i;
 
@@ -396,7 +396,7 @@ done:
  */
 private int
 looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes, unichar *ubuf,
-    size_t *ulen)
+	size_t *ulen)
 {
 	if (nbytes > 3 && buf[0] == 0xef && buf[1] == 0xbb && buf[2] == 0xbf)
 		return file_looks_utf8(buf + 3, nbytes - 3, ubuf, ulen);
@@ -425,7 +425,7 @@ looks_utf7(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ulen)
 
 private int
 looks_ucs16(const unsigned char *bf, size_t nbytes, unichar *ubf,
-    size_t *ulen)
+	size_t *ulen)
 {
 	int bigend;
 	size_t i;
@@ -447,15 +447,15 @@ looks_ucs16(const unsigned char *bf, size_t nbytes, unichar *ubf,
 
 		if (bigend)
 			ubf[(*ulen)++] = bf[i + 1]
-			    | (CAST(unichar, bf[i]) << 8);
+				| (CAST(unichar, bf[i]) << 8);
 		else
 			ubf[(*ulen)++] = bf[i]
-			    | (CAST(unichar, bf[i + 1]) << 8);
+				| (CAST(unichar, bf[i + 1]) << 8);
 
 		if (ubf[*ulen - 1] == 0xfffe)
 			return 0;
 		if (ubf[*ulen - 1] < 128 &&
-		    text_chars[CAST(size_t, ubf[*ulen - 1])] != T)
+			text_chars[CAST(size_t, ubf[*ulen - 1])] != T)
 			return 0;
 	}
 
@@ -464,7 +464,7 @@ looks_ucs16(const unsigned char *bf, size_t nbytes, unichar *ubf,
 
 private int
 looks_ucs32(const unsigned char *bf, size_t nbytes, unichar *ubf,
-    size_t *ulen)
+	size_t *ulen)
 {
 	int bigend;
 	size_t i;
@@ -486,19 +486,19 @@ looks_ucs32(const unsigned char *bf, size_t nbytes, unichar *ubf,
 
 		if (bigend)
 			ubf[(*ulen)++] = CAST(unichar, bf[i + 3])
-			    | (CAST(unichar, bf[i + 2]) << 8)
-			    | (CAST(unichar, bf[i + 1]) << 16)
-			    | (CAST(unichar, bf[i]) << 24);
+				| (CAST(unichar, bf[i + 2]) << 8)
+				| (CAST(unichar, bf[i + 1]) << 16)
+				| (CAST(unichar, bf[i]) << 24);
 		else
 			ubf[(*ulen)++] = CAST(unichar, bf[i + 0])
-			    | (CAST(unichar, bf[i + 1]) << 8) 
-			    | (CAST(unichar, bf[i + 2]) << 16)
-			    | (CAST(unichar, bf[i + 3]) << 24);
+				| (CAST(unichar, bf[i + 1]) << 8)
+				| (CAST(unichar, bf[i + 2]) << 16)
+				| (CAST(unichar, bf[i + 3]) << 24);
 
 		if (ubf[*ulen - 1] == 0xfffe)
 			return 0;
 		if (ubf[*ulen - 1] < 128 &&
-		    text_chars[CAST(size_t, ubf[*ulen - 1])] != T)
+			text_chars[CAST(size_t, ubf[*ulen - 1])] != T)
 			return 0;
 	}
 

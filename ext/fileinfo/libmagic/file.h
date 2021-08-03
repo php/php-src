@@ -37,9 +37,9 @@
 
 #ifdef PHP_WIN32
   #ifdef _WIN64
-    #define SIZE_T_FORMAT "I64"
+	#define SIZE_T_FORMAT "I64"
   #else
-    #define SIZE_T_FORMAT ""
+	#define SIZE_T_FORMAT ""
   #endif
   #define INT64_T_FORMAT "I64"
   #define INTMAX_T_FORMAT "I64"
@@ -346,7 +346,7 @@ struct magic {
 #define PSTRING_4_LE				BIT(11)
 #define REGEX_LINE_COUNT			BIT(11)
 #define PSTRING_LEN	\
-    (PSTRING_1_BE|PSTRING_2_LE|PSTRING_2_BE|PSTRING_4_LE|PSTRING_4_BE)
+	(PSTRING_1_BE|PSTRING_2_LE|PSTRING_2_BE|PSTRING_4_LE|PSTRING_4_BE)
 #define PSTRING_LENGTH_INCLUDES_ITSELF		BIT(12)
 #define	STRING_TRIM				BIT(13)
 #define CHAR_COMPACT_WHITESPACE			'W'
@@ -438,7 +438,7 @@ struct magic_set {
 	uint16_t elf_notes_max;
 	uint16_t regex_max;
 	size_t bytes_max;		/* number of bytes to read from file */
-    size_t encoding_max;		/* bytes to look for encoding */
+	size_t encoding_max;		/* bytes to look for encoding */
 #define	FILE_INDIR_MAX			50
 #define	FILE_NAME_MAX			30
 #define	FILE_ELF_SHNUM_MAX		32768
@@ -457,7 +457,7 @@ protected const char *file_fmttime(uint64_t, int, char *);
 protected struct magic_set *file_ms_alloc(int);
 protected void file_ms_free(struct magic_set *);
 protected int file_buffer(struct magic_set *, php_stream *, zend_stat_t *, const char *, const void *,
-    size_t);
+	size_t);
 protected int file_fsmagic(struct magic_set *, const char *, zend_stat_t *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_separator(struct magic_set *);
@@ -469,24 +469,24 @@ protected int file_tryelf(struct magic_set *, const struct buffer *);
 protected int file_trycdf(struct magic_set *, const struct buffer *);
 #ifdef PHP_FILEINFO_UNCOMPRESS
 protected int file_zmagic(struct magic_set *, const struct buffer *,
-    const char *);
+	const char *);
 #endif
 protected int file_ascmagic(struct magic_set *, const struct buffer *,
-    int);
+	int);
 protected int file_ascmagic_with_encoding(struct magic_set *,
-    const struct buffer *, unichar *, size_t, const char *, const char *, int);
+	const struct buffer *, unichar *, size_t, const char *, const char *, int);
 protected int file_encoding(struct magic_set *, const struct buffer *,
-    unichar **, size_t *, const char **, const char **, const char **);
+	unichar **, size_t *, const char **, const char **, const char **);
 protected int file_is_json(struct magic_set *, const struct buffer *);
 protected int file_is_tar(struct magic_set *, const struct buffer *);
 protected int file_softmagic(struct magic_set *, const struct buffer *,
-    uint16_t *, uint16_t *, int, int);
+	uint16_t *, uint16_t *, int, int);
 protected int file_apprentice(struct magic_set *, const char *, int);
 protected int buffer_apprentice(struct magic_set *, struct magic **,
-    size_t *, size_t);
+	size_t *, size_t);
 protected int file_magicfind(struct magic_set *, const char *, struct mlist *);
 protected uint64_t file_signextend(struct magic_set *, struct magic *,
-    uint64_t);
+	uint64_t);
 protected void file_badread(struct magic_set *);
 protected void file_badseek(struct magic_set *);
 protected void file_oomem(struct magic_set *, size_t);
@@ -499,17 +499,17 @@ protected const char *file_getbuffer(struct magic_set *);
 protected ssize_t sread(int, void *, size_t, int);
 protected int file_check_mem(struct magic_set *, unsigned int);
 protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
-    size_t *);
+	size_t *);
 protected size_t file_pstring_length_size(const struct magic *);
 protected size_t file_pstring_get_length(const struct magic *, const char *);
 protected char * file_printable(char *, size_t, const char *, size_t);
 #ifdef __EMX__
 protected int file_os2_apptype(struct magic_set *, const char *, const void *,
-    size_t);
+	size_t);
 #endif /* __EMX__ */
 
 protected void buffer_init(struct buffer *, int, const zend_stat_t *,
-    const void *, size_t);
+	const void *, size_t);
 protected void buffer_fini(struct buffer *);
 protected int buffer_fill(const struct buffer *);
 
