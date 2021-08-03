@@ -23288,8 +23288,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -23298,7 +23298,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -23404,8 +23404,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -23414,7 +23414,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -23521,8 +23521,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -23531,7 +23531,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -23638,8 +23638,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -23648,7 +23648,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -25846,8 +25846,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -25856,7 +25856,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -25962,8 +25962,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -25972,7 +25972,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -26079,8 +26079,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -26089,7 +26089,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -26196,8 +26196,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -26206,7 +26206,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -27236,8 +27236,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -27246,7 +27246,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -27352,8 +27352,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -27362,7 +27362,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -27469,8 +27469,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -27479,7 +27479,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -27586,8 +27586,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -27596,7 +27596,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -29771,8 +29771,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -29781,7 +29781,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -29887,8 +29887,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -29897,7 +29897,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -30004,8 +30004,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -30014,7 +30014,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -30121,8 +30121,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -30131,7 +30131,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -40635,8 +40635,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -40645,7 +40645,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -40751,8 +40751,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -40761,7 +40761,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -40868,8 +40868,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -40878,7 +40878,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -40985,8 +40985,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -40995,7 +40995,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -44263,8 +44263,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -44273,7 +44273,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -44379,8 +44379,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -44389,7 +44389,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -44496,8 +44496,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -44506,7 +44506,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -44613,8 +44613,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -44623,7 +44623,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -46098,8 +46098,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -46108,7 +46108,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -46214,8 +46214,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -46224,7 +46224,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -46331,8 +46331,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -46341,7 +46341,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -46448,8 +46448,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -46458,7 +46458,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -49291,8 +49291,8 @@ try_assign_dim_array:
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CONST == IS_CV) {
@@ -49301,7 +49301,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CONST == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -49407,8 +49407,8 @@ try_assign_dim_array:
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_TMP_VAR == IS_CV) {
@@ -49417,7 +49417,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_TMP_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -49524,8 +49524,8 @@ try_assign_dim_array:
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_VAR == IS_CV) {
@@ -49534,7 +49534,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_VAR == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
@@ -49641,8 +49641,8 @@ try_assign_dim_array:
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
-			if (UNEXPECTED(variable_ptr == NULL)) {
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				goto assign_dim_error;
 			} else if (IS_CV == IS_CV) {
@@ -49651,7 +49651,7 @@ try_assign_dim_array:
 				}
 			} else if (IS_CV == IS_VAR) {
 				zval *free_op_data = EX_VAR((opline+1)->op1.var);
-				if (value != free_op_data) {
+				if (Z_ISREF_P(free_op_data)) {
 					if (Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
