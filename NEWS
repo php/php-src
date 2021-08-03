@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0beta2
+?? ??? ????, PHP 8.1.0beta3
+
+
+
+05 Aug 2021, PHP 8.1.0beta2
 
 - Core:
   . Fixed bug #81303 (match error message improvements). (krakjoe)
