@@ -1715,7 +1715,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
-	long aq,bq,dx,dy,r,rx,ry,a,b;
+	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 
 	a=w>>1;
 	b=h>>1;
@@ -1754,7 +1754,7 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
-	long aq,bq,dx,dy,r,rx,ry,a,b;
+	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 	int i;
 	int old_y2;
 
