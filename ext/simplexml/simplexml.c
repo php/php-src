@@ -2619,7 +2619,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 	}
 
-	if (nodep->type == XML_ELEMENT_NODE) {
+	if (nodep && nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
 			ce = sxe_class_entry;
 			fptr_count = NULL;
