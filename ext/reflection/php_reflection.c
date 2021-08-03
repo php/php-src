@@ -3061,17 +3061,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
 		zend_string *name = ZEND_TYPE_NAME(param->type);
-
-		if (ZSTR_HAS_CE_CACHE(name) && ZSTR_GET_CE_CACHE(name)) {
-			append_type(return_value,
-				(zend_type) ZEND_TYPE_INIT_CE(ZSTR_GET_CE_CACHE(name), 0, 0));
-		} else {
-			append_type(return_value,
-				(zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
-		}
-	} else if (ZEND_TYPE_HAS_CE(param->type)) {
-		append_type(return_value,
-			(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_CE(param->type), 0, 0));
+		append_type(return_value, (zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
 	}
 
 	type_mask = ZEND_TYPE_PURE_MASK(param->type);

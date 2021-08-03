@@ -851,11 +851,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 
 static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
-		/* We need to explicitly check for this here, to avoid updating the type in the trait and
-		 * later using the wrong "self" when the trait is used in a class. */
-		if (UNEXPECTED((self_ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
-			return NULL;
-		}
 		return self_ce;
 	} else if (zend_string_equals_literal_ci(name, "parent")) {
 		return self_ce->parent;
@@ -866,26 +861,16 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 
 static zend_always_inline zend_class_entry *zend_ce_from_type(
 		zend_property_info *info, zend_type *type) {
-	if (UNEXPECTED(!ZEND_TYPE_HAS_NAME(*type))) {
-		ZEND_ASSERT(ZEND_TYPE_HAS_CE(*type));
-		return ZEND_TYPE_CE(*type);
-	}
-
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*type));
 	zend_string *name = ZEND_TYPE_NAME(*type);
-	zend_class_entry *ce;
 	if (ZSTR_HAS_CE_CACHE(name)) {
-		ce = ZSTR_GET_CE_CACHE(name);
+		zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 		if (!ce) {
 			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		}
-	} else {
-		ce = resolve_single_class_type(name, info->ce);
-		if (ce && !(info->ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-			zend_string_release(name);
-			ZEND_TYPE_SET_CE(*type, ce);
-		}
+		return ce;
 	}
-	return ce;
+	return resolve_single_class_type(name, info->ce);
 }
 
 static bool zend_check_and_resolve_property_class_type(

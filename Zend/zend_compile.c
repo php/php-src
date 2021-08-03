@@ -1202,43 +1202,13 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 		zend_type *list_type;
 		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-			if (ZEND_TYPE_HAS_CE(*list_type)) {
-				str = add_type_string(str, ZEND_TYPE_CE(*list_type)->name, is_intersection);
-			} else {
-				zend_string *name = ZEND_TYPE_NAME(*list_type);
-
-				if (ZSTR_HAS_CE_CACHE(name)
-				 && ZSTR_GET_CE_CACHE(name)) {
-					zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
-					if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
-						zend_string *tmp = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
-						str = add_type_string(str, tmp, is_intersection);
-					} else {
-						str = add_type_string(str, ce->name, is_intersection);
-					}
-				} else {
-					zend_string *resolved = resolve_class_name(name, scope);
-					str = add_type_string(str, resolved, is_intersection);
-					zend_string_release(resolved);
-				}
-			}
+			zend_string *name = ZEND_TYPE_NAME(*list_type);
+			zend_string *resolved = resolve_class_name(name, scope);
+			str = add_type_string(str, resolved, is_intersection);
+			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		zend_string *name = ZEND_TYPE_NAME(type);
-
-		if (ZSTR_HAS_CE_CACHE(name)
-		 && ZSTR_GET_CE_CACHE(name)) {
-			zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
-			if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
-				str = zend_string_init(ZSTR_VAL(ce->name), strlen(ZSTR_VAL(ce->name)), 0);
-			} else {
-				str = zend_string_copy(ce->name);
-			}
-		} else {
-			str = resolve_class_name(name, scope);
-		}
-	} else if (ZEND_TYPE_HAS_CE(type)) {
-		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
+		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
@@ -6232,6 +6202,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				}
 			}
 
+			class_name = zend_new_interned_string(class_name);
+			zend_alloc_ce_cache(class_name);
 			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, 0, 0);
 		}
 	}
@@ -7687,6 +7659,9 @@ void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
 	zend_initialize_class_data(ce, 1);
+	if (!(decl->flags & ZEND_ACC_ANON_CLASS)) {
+		zend_alloc_ce_cache(ce->name);
+	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 		ce->ce_flags |= ZEND_ACC_PRELOADED;

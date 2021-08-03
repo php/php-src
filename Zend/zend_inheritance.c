@@ -430,9 +430,6 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 
 			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
 			fe_ce = lookup_class(fe_scope, fe_class_name);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
-			fe_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type in an intersection type is impossible,
 			 * because it would be a fatal compile error */
@@ -503,9 +500,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 			proto_ce = lookup_class(proto_scope, proto_class_name);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
-			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type */
 			ZEND_ASSERT(!is_intersection);
@@ -540,10 +534,6 @@ static zend_string *get_class_from_type(
 	if (ZEND_TYPE_HAS_NAME(single_type)) {
 		*ce = NULL;
 		return resolve_class_name(scope, ZEND_TYPE_NAME(single_type));
-	}
-	if (ZEND_TYPE_HAS_CE(single_type)) {
-		*ce = ZEND_TYPE_CE(single_type);
-		return (*ce)->name;
 	}
 	return NULL;
 }

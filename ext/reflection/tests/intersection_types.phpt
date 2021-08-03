@@ -1,9 +1,5 @@
 --TEST--
 Intersection types in reflection
---SKIPIF--
-<?php
-if (getenv('SKIP_PRELOAD')) die('xfail Difference in class name casing');
-?>
 --FILE--
 <?php
 
@@ -71,13 +67,13 @@ Allows null: false
   Name: Countable
   String: Countable
   Allows Null: false
-Type x&y&Countable:
+Type X&Y&Countable:
 Allows null: false
-  Name: x
-  String: x
+  Name: X
+  String: X
   Allows Null: false
-  Name: y
-  String: y
+  Name: Y
+  String: Y
   Allows Null: false
   Name: Countable
   String: Countable

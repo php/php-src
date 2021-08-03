@@ -2269,9 +2269,7 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 		if (pce) {
 			/* As we only have space to store one CE,
 			 * we use a plain object type for class unions. */
-			if (ZEND_TYPE_HAS_CE(type)) {
-				*pce = ZEND_TYPE_CE(type);
-			} else if (ZEND_TYPE_HAS_NAME(type)) {
+			if (ZEND_TYPE_HAS_NAME(type)) {
 				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
 				*pce = zend_optimizer_get_class_entry(script, lcname);
 				zend_string_release_ex(lcname, 0);

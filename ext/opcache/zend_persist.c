@@ -1118,24 +1118,6 @@ void zend_update_parent_ce(zend_class_entry *ce)
 		}
 	}
 
-	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-		zend_property_info *prop;
-		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			zend_type *single_type;
-			ZEND_TYPE_FOREACH(prop->type, single_type) {
-				if (ZEND_TYPE_HAS_CE(*single_type)) {
-					zend_class_entry *ce = ZEND_TYPE_CE(*single_type);
-					if (ce->type == ZEND_USER_CLASS) {
-						ce = zend_shared_alloc_get_xlat_entry(ce);
-						if (ce) {
-							ZEND_TYPE_SET_PTR(*single_type, ce);
-						}
-					}
-				}
-			} ZEND_TYPE_FOREACH_END();
-		} ZEND_HASH_FOREACH_END();
-	}
-
 	/* update methods */
 	if (ce->constructor) {
 		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->constructor);

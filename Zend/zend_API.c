@@ -3053,6 +3053,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	zend_initialize_class_data(class_entry, 0);
+	zend_alloc_ce_cache(class_entry->name);
 	class_entry->ce_flags = orig_class_entry->ce_flags | ce_flags | ZEND_ACC_CONSTANTS_UPDATED | ZEND_ACC_LINKED | ZEND_ACC_RESOLVED_PARENT | ZEND_ACC_RESOLVED_INTERFACES;
 	class_entry->info.internal.module = EG(current_module);
 
@@ -4125,6 +4126,17 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->attributes = NULL;
 	property_info->ce = ce;
 	property_info->type = type;
+
+	if (is_persistent_class(ce)) {
+		zend_type *single_type;
+		ZEND_TYPE_FOREACH(property_info->type, single_type) {
+			if (ZEND_TYPE_HAS_NAME(*single_type)) {
+				zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*single_type));
+				ZEND_TYPE_SET_PTR(*single_type, name);
+				zend_alloc_ce_cache(name);
+			}
+		} ZEND_TYPE_FOREACH_END();
+	}
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
 
