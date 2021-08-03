@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #80849 (HTTP Status header truncation). (cmb)
 
+- GD:
+  . Fixed bug #51498 (imagefilledellipse does not work for large circles). (cmb)
+
 - Opcache:
   . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
     (Dmitry)
