@@ -28,8 +28,8 @@ jobs:
     #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
     - template: libmysqlclient_test.yml
       parameters:
-        configurationName: ${{ parameters.configurationName }} - MySQL 5.7.31
-        libmysql: mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+        configurationName: ${{ parameters.configurationName }} - MySQL 5.7.35
+        libmysql: mysql-5.7.35-linux-glibc2.12-x86_64.tar.gz
     - template: libmysqlclient_test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }} - MySQL 8.0.24
