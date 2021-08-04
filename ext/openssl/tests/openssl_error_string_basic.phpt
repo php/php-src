@@ -112,7 +112,7 @@ expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
 expect_openssl_errors('openssl_pkey_get_public', [$err_pem_no_start_line]);
 // private encrypt with unknown padding
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
-expect_openssl_errors('openssl_private_encrypt', ['04066076']);
+expect_openssl_errors('openssl_private_encrypt', ['0408F090']);
 // private decrypt with failed padding check
 @openssl_private_decrypt("data", $crypted, $private_key_file);
 expect_openssl_errors('openssl_private_decrypt', ['04065072']);
