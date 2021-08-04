@@ -6765,6 +6765,31 @@ PHP_FUNCTION(openssl_get_md_methods)
 }
 /* }}} */
 
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+static void php_openssl_add_cipher_name(const char *name, void *arg)
+{
+	size_t len = strlen(name);
+	zend_string *str = zend_string_alloc(len, 0);
+	zend_str_tolower_copy(ZSTR_VAL(str), name, len);
+	add_next_index_str((zval*)arg, str);
+}
+
+static void php_openssl_add_cipher_or_alias(EVP_CIPHER *cipher, void *arg)
+{
+	EVP_CIPHER_names_do_all(cipher, php_openssl_add_cipher_name, arg);
+}
+
+static void php_openssl_add_cipher(EVP_CIPHER *cipher, void *arg)
+{
+	php_openssl_add_cipher_name(EVP_CIPHER_get0_name(cipher), arg);
+}
+
+static int php_openssl_compare_func(Bucket *a, Bucket *b)
+{
+	return string_compare_function(&a->val, &b->val);
+}
+#endif
+
 /* {{{ Return array of available cipher algorithms */
 PHP_FUNCTION(openssl_get_cipher_methods)
 {
@@ -6774,9 +6799,16 @@ PHP_FUNCTION(openssl_get_cipher_methods)
 		RETURN_THROWS();
 	}
 	array_init(return_value);
-	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
-		aliases ? php_openssl_add_method_or_alias: php_openssl_add_method,
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	EVP_CIPHER_do_all_provided(NULL,
+		aliases ? php_openssl_add_cipher_or_alias : php_openssl_add_cipher,
 		return_value);
+	zend_hash_sort(Z_ARRVAL_P(return_value), php_openssl_compare_func, 1);
+#else
+	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
+		aliases ? php_openssl_add_method_or_alias : php_openssl_add_method,
+		return_value);
+#endif
 }
 /* }}} */
 
