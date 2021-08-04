@@ -3213,7 +3213,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
+#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
 	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
 #else
 	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
