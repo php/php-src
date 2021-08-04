@@ -19,8 +19,9 @@ $single_cert = "file://" . __DIR__ . "/cert.crt";
 $headers = array("test@test", "testing openssl_pkcs7_encrypt()");
 $wrong = "wrong";
 $empty = "";
+$cipher = OPENSSL_CIPHER_AES_128_CBC;
 
-openssl_pkcs7_encrypt($infile, $encrypted, $single_cert, $headers);
+openssl_pkcs7_encrypt($infile, $encrypted, $single_cert, $headers, 0, $cipher);
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, openssl_x509_read($single_cert), $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $wrong));
