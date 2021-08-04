@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #81226 (Integer overflow behavior is different with JIT
     enabled). (Dmitry)
 
+- OpenSSL:
+  . Fixed bug #81327 (Error build openssl extension on php 7.4.22). (cmb)
+
 - PDO_ODBC:
   . Fixed bug #81252 (PDO_ODBC doesn't account for SQL_NO_TOTAL). (cmb)
 
