@@ -37,7 +37,6 @@ extern int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter);
 extern const unsigned char mblen_table_utf8[];
 
 static const char *mbfl_encoding_utf8_docomo_aliases[] = {"UTF-8-DOCOMO", "UTF8-DOCOMO", NULL};
-static const char *mbfl_encoding_utf8_kddi_a_aliases[] = {NULL};
 static const char *mbfl_encoding_utf8_kddi_b_aliases[] = {"UTF-8-Mobile#KDDI", "UTF-8-KDDI", "UTF8-KDDI", NULL};
 static const char *mbfl_encoding_utf8_sb_aliases[] = {"UTF-8-SOFTBANK", "UTF8-SOFTBANK", NULL};
 
@@ -56,7 +55,7 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	mbfl_no_encoding_utf8_kddi_a,
 	"UTF-8-Mobile#KDDI-A",
 	"UTF-8",
-	mbfl_encoding_utf8_kddi_a_aliases,
+	NULL,
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_kddi_a_wchar,
