@@ -23,7 +23,6 @@ $algo = array(
     OPENSSL_ALGO_SHA256,
     OPENSSL_ALGO_SHA384,
     OPENSSL_ALGO_SHA512,
-    OPENSSL_ALGO_RMD160
 );
 
 /* loop over key sizes for test */
@@ -48,12 +47,6 @@ function _uuid() {
 
 ?>
 --EXPECT--
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
 bool(true)
 bool(false)
 bool(true)
