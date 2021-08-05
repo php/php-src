@@ -69,6 +69,7 @@
 
 #define MIN_KEY_LENGTH		384
 
+/* constants used in ext/phar/util.c, keep in sync */
 #define OPENSSL_ALGO_SHA1 	1
 #define OPENSSL_ALGO_MD5	2
 #define OPENSSL_ALGO_MD4	3
