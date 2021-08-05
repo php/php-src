@@ -4563,16 +4563,48 @@ static zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, s
 	return result;
 }
 
+static zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pub_len) {
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	EVP_PKEY *peer_key = EVP_PKEY_new();
+	if (!peer_key || EVP_PKEY_copy_parameters(peer_key, pkey) <= 0 ||
+			EVP_PKEY_set1_encoded_public_key(peer_key, (unsigned char *) pub_str, pub_len) <= 0) {
+		php_openssl_store_errors();
+		EVP_PKEY_free(peer_key);
+		return NULL;
+	}
+
+	zend_string *result = php_openssl_pkey_derive(pkey, peer_key, 0);
+	EVP_PKEY_free(peer_key);
+	return result;
+#else
+	DH *dh = EVP_PKEY_get0_DH(pkey);
+	if (dh == NULL) {
+		return NULL;
+	}
+
+	BIGNUM *pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
+	zend_string *data = zend_string_alloc(DH_size(dh), 0);
+	int len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
+	BN_free(pub);
+
+	if (len < 0) {
+		php_openssl_store_errors();
+		zend_string_release_ex(data, 0);
+		return NULL;
+	}
+
+	ZSTR_LEN(data) = len;
+	ZSTR_VAL(data)[len] = 0;
+	return data;
+#endif
+}
+
 /* {{{ Computes shared secret for public value of remote DH key and local DH key */
 PHP_FUNCTION(openssl_dh_compute_key)
 {
 	zval *key;
 	char *pub_str;
 	size_t pub_len;
-	DH *dh;
-	BIGNUM *pub;
-	zend_string *data;
-	int len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sO", &pub_str, &pub_len, &key, php_openssl_pkey_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -4581,32 +4613,16 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key, 1);
 
 	EVP_PKEY *pkey = Z_OPENSSL_PKEY_P(key)->pkey;
-
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
 		RETURN_FALSE;
 	}
 
-	dh = EVP_PKEY_get0_DH(pkey);
-	if (dh == NULL) {
+	zend_string *result = php_openssl_dh_compute_key(pkey, pub_str, pub_len);
+	if (result) {
+		RETURN_NEW_STR(result);
+	} else {
 		RETURN_FALSE;
 	}
-
-	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
-
-	data = zend_string_alloc(DH_size(dh), 0);
-	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
-
-	if (len >= 0) {
-		ZSTR_LEN(data) = len;
-		ZSTR_VAL(data)[len] = 0;
-		RETVAL_NEW_STR(data);
-	} else {
-		php_openssl_store_errors();
-		zend_string_release_ex(data, 0);
-		RETVAL_FALSE;
-	}
-
-	BN_free(pub);
 }
 /* }}} */
 
