@@ -3631,132 +3631,130 @@ static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *pas
 	return key;
 }
 
+static int php_openssl_get_evp_pkey_type(int key_type) {
+	switch (key_type) {
+	case OPENSSL_KEYTYPE_RSA:
+		return EVP_PKEY_RSA;
+#if !defined(NO_DSA)
+	case OPENSSL_KEYTYPE_DSA:
+		return EVP_PKEY_DSA;
+#endif
+#if !defined(NO_DH)
+	case OPENSSL_KEYTYPE_DH:
+		return EVP_PKEY_DH;
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+	case OPENSSL_KEYTYPE_EC:
+		return EVP_PKEY_EC;
+#endif
+	default:
+		return -1;
+	}
+}
+
 /* {{{ php_openssl_generate_private_key */
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req)
 {
-	char * randfile = NULL;
-	int egdsocket, seeded;
-	EVP_PKEY * return_val = NULL;
-
 	if (req->priv_key_bits < MIN_KEY_LENGTH) {
 		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
 			MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
 	}
 
-	randfile = php_openssl_conf_get_string(req->req_config, req->section_name, "RANDFILE");
-	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
-
-	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
-		switch(req->priv_key_type) {
-			case OPENSSL_KEYTYPE_RSA:
-				{
-					RSA* rsaparam;
-					BIGNUM *bne = (BIGNUM *)BN_new();
-					if (BN_set_word(bne, RSA_F4) != 1) {
-						BN_free(bne);
-						php_error_docref(NULL, E_WARNING, "Failed setting exponent");
-						return NULL;
-					}
-					rsaparam = RSA_new();
-					PHP_OPENSSL_RAND_ADD_TIME();
-					if (rsaparam == NULL || !RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL)) {
-						php_openssl_store_errors();
-						RSA_free(rsaparam);
-						rsaparam = NULL;
-					}
-					BN_free(bne);
-					if (rsaparam && EVP_PKEY_assign_RSA(req->priv_key, rsaparam)) {
-						return_val = req->priv_key;
-					} else {
-						php_openssl_store_errors();
-					}
-				}
-				break;
-#if !defined(NO_DSA)
-			case OPENSSL_KEYTYPE_DSA:
-				PHP_OPENSSL_RAND_ADD_TIME();
-				{
-					DSA *dsaparam = DSA_new();
-					if (dsaparam && DSA_generate_parameters_ex(dsaparam, req->priv_key_bits, NULL, 0, NULL, NULL, NULL)) {
-						DSA_set_method(dsaparam, DSA_get_default_method());
-						if (DSA_generate_key(dsaparam)) {
-							if (EVP_PKEY_assign_DSA(req->priv_key, dsaparam)) {
-								return_val = req->priv_key;
-							} else {
-								php_openssl_store_errors();
-							}
-						} else {
-							php_openssl_store_errors();
-							DSA_free(dsaparam);
-						}
-					} else {
-						php_openssl_store_errors();
-					}
-				}
-				break;
-#endif
-#if !defined(NO_DH)
-			case OPENSSL_KEYTYPE_DH:
-				PHP_OPENSSL_RAND_ADD_TIME();
-				{
-					int codes = 0;
-					DH *dhparam = DH_new();
-					if (dhparam && DH_generate_parameters_ex(dhparam, req->priv_key_bits, 2, NULL)) {
-						DH_set_method(dhparam, DH_get_default_method());
-						if (DH_check(dhparam, &codes) && codes == 0 && DH_generate_key(dhparam)) {
-							if (EVP_PKEY_assign_DH(req->priv_key, dhparam)) {
-								return_val = req->priv_key;
-							} else {
-								php_openssl_store_errors();
-							}
-						} else {
-							php_openssl_store_errors();
-							DH_free(dhparam);
-						}
-					} else {
-						php_openssl_store_errors();
-					}
-				}
-				break;
-#endif
-#ifdef HAVE_EVP_PKEY_EC
-			case OPENSSL_KEYTYPE_EC:
-				{
-					EC_KEY *eckey;
-					if (req->curve_name == NID_undef) {
-						php_error_docref(NULL, E_WARNING, "Missing configuration value: \"curve_name\" not set");
-						return NULL;
-					}
-					eckey = EC_KEY_new_by_curve_name(req->curve_name);
-					if (eckey) {
-						EC_KEY_set_asn1_flag(eckey, OPENSSL_EC_NAMED_CURVE);
-						if (EC_KEY_generate_key(eckey) &&
-							EVP_PKEY_assign_EC_KEY(req->priv_key, eckey)) {
-							return_val = req->priv_key;
-						} else {
-							EC_KEY_free(eckey);
-						}
-					}
-				}
-				break;
-#endif
-			default:
-				php_error_docref(NULL, E_WARNING, "Unsupported private key type");
-		}
-	} else {
-		php_openssl_store_errors();
-	}
-
-	php_openssl_write_rand_file(randfile, egdsocket, seeded);
-
-	if (return_val == NULL) {
-		EVP_PKEY_free(req->priv_key);
-		req->priv_key = NULL;
+	int type = php_openssl_get_evp_pkey_type(req->priv_key_type);
+	if (type < 0) {
+		php_error_docref(NULL, E_WARNING, "Unsupported private key type");
 		return NULL;
 	}
 
-	return return_val;
+	int egdsocket, seeded;
+	char *randfile = php_openssl_conf_get_string(req->req_config, req->section_name, "RANDFILE");
+	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
+	PHP_OPENSSL_RAND_ADD_TIME();
+
+	EVP_PKEY *key = NULL;
+	EVP_PKEY *params = NULL;
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(type, NULL);
+	if (!ctx) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
+
+	if (type != EVP_PKEY_RSA) {
+		if (EVP_PKEY_paramgen_init(ctx) <= 0) {
+			php_openssl_store_errors();
+			goto cleanup;
+		}
+
+		switch (type) {
+#if !defined(NO_DSA)
+		case EVP_PKEY_DSA:
+			if (EVP_PKEY_CTX_set_dsa_paramgen_bits(ctx, req->priv_key_bits) <= 0) {
+				php_openssl_store_errors();
+				goto cleanup;
+			}
+			break;
+#endif
+#if !defined(NO_DH)
+		case EVP_PKEY_DH:
+			if (EVP_PKEY_CTX_set_dh_paramgen_prime_len(ctx, req->priv_key_bits) <= 0) {
+				php_openssl_store_errors();
+				goto cleanup;
+			}
+			break;
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+		case EVP_PKEY_EC:
+			if (req->curve_name == NID_undef) {
+				php_error_docref(NULL, E_WARNING, "Missing configuration value: \"curve_name\" not set");
+				goto cleanup;
+			}
+
+			if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, req->curve_name) <= 0 ||
+					EVP_PKEY_CTX_set_ec_param_enc(ctx, OPENSSL_EC_NAMED_CURVE) <= 0) {
+				php_openssl_store_errors();
+				goto cleanup;
+			}
+			break;
+#endif
+		EMPTY_SWITCH_DEFAULT_CASE()
+		}
+
+		if (EVP_PKEY_paramgen(ctx, &params) <= 0) {
+			php_openssl_store_errors();
+			goto cleanup;
+		}
+
+		EVP_PKEY_CTX_free(ctx);
+		ctx = EVP_PKEY_CTX_new(params, NULL);
+		if (!ctx) {
+			php_openssl_store_errors();
+			goto cleanup;
+		}
+	}
+
+	if (EVP_PKEY_keygen_init(ctx) <= 0) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
+
+	if (type == EVP_PKEY_RSA && EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, req->priv_key_bits) <= 0) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
+
+	if (EVP_PKEY_keygen(ctx, &key) <= 0) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
+
+	req->priv_key = key;
+
+cleanup:
+	php_openssl_write_rand_file(randfile, egdsocket, seeded);
+	EVP_PKEY_free(params);
+	EVP_PKEY_CTX_free(ctx);
+	return key;
 }
 /* }}} */
 
