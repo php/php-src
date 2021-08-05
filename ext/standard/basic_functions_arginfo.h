@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aa585d759aa844227ea32a15a7382bb0f9c6b9e3 */
+ * Stub hash: 5cd058e02c0af11d8cb73552c1ba2d04e13f34f5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2109,6 +2109,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_url, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_parse_query_string, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_urlencode arginfo_base64_encode
 
 #define arginfo_urldecode arginfo_base64_encode
@@ -2804,6 +2808,7 @@ ZEND_FUNCTION(is_countable);
 ZEND_FUNCTION(uniqid);
 #endif
 ZEND_FUNCTION(parse_url);
+ZEND_FUNCTION(parse_query_string);
 ZEND_FUNCTION(urlencode);
 ZEND_FUNCTION(urldecode);
 ZEND_FUNCTION(rawurlencode);
@@ -3459,6 +3464,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(uniqid, arginfo_uniqid)
 #endif
 	ZEND_FE(parse_url, arginfo_parse_url)
+	ZEND_FE(parse_query_string, arginfo_parse_query_string)
 	ZEND_FE(urlencode, arginfo_urlencode)
 	ZEND_FE(urldecode, arginfo_urldecode)
 	ZEND_FE(rawurlencode, arginfo_rawurlencode)

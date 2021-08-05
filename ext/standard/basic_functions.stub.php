@@ -1443,6 +1443,8 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 /** @return mixed */
 function parse_url(string $url, int $component = -1) {}
 
+function parse_query_string(string $string): array {}
+
 function urlencode(string $string): string {}
 
 function urldecode(string $string): string {}

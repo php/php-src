@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#include "php_variables.h"
 
 #include "url.h"
 #include "file.h"
@@ -422,6 +423,22 @@ done:
 	php_url_free(resource);
 }
 /* }}} */
+
+PHP_FUNCTION(parse_query_string)
+{
+	char *arg;
+	char *res = NULL;
+	size_t arglen;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(arg, arglen)
+	ZEND_PARSE_PARAMETERS_END();
+
+	array_init(return_value);
+
+	res = estrndup(arg, arglen);
+	sapi_module.treat_data(PARSE_STRING, res, return_value);
+}
 
 /* {{{ php_htoi */
 static int php_htoi(char *s)
