@@ -200,6 +200,7 @@ static void php_openssl_request_free_obj(zend_object *object)
 
 typedef struct _php_openssl_pkey_object {
 	EVP_PKEY *pkey;
+	bool is_private;
 	zend_object std;
 } php_openssl_pkey_object;
 
@@ -221,6 +222,13 @@ static zend_object *php_openssl_pkey_create_object(zend_class_entry *class_type)
 	intern->std.handlers = &php_openssl_pkey_object_handlers;
 
 	return &intern->std;
+}
+
+static void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private) {
+	object_init_ex(zv, php_openssl_pkey_ce);
+	php_openssl_pkey_object *obj = Z_OPENSSL_PKEY_P(zv);
+	obj->pkey = pkey;
+	obj->is_private = is_private;
 }
 
 static zend_function *php_openssl_pkey_get_constructor(zend_object *object) {
@@ -516,7 +524,6 @@ static X509 *php_openssl_x509_from_zval(zval *val, bool *free_cert);
 static X509_REQ *php_openssl_csr_from_param(zend_object *csr_obj, zend_string *csr_str);
 static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *passphrase, size_t passphrase_len);
 
-static int php_openssl_is_private_key(EVP_PKEY* pkey);
 static X509_STORE * php_openssl_setup_verify(zval * calist);
 static STACK_OF(X509) * php_openssl_load_all_certs_from_file(char *certfile);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
@@ -3337,11 +3344,8 @@ PHP_FUNCTION(openssl_csr_new)
 						if (we_made_the_key) {
 							/* and an object for the private key */
 							zval zkey_object;
-							php_openssl_pkey_object *key_object;
-							object_init_ex(&zkey_object, php_openssl_pkey_ce);
-							key_object = Z_OPENSSL_PKEY_P(&zkey_object);
-							key_object->pkey = req.priv_key;
-
+							php_openssl_pkey_object_init(
+								&zkey_object, req.priv_key, /* is_private */ true);
 							ZEND_TRY_ASSIGN_REF_TMP(out_pkey, &zkey_object);
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						}
@@ -3399,7 +3403,6 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	zend_string *csr_str;
 	bool use_shortnames = 1;
 
-	php_openssl_pkey_object *key_object;
 	EVP_PKEY *tpubkey;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -3442,9 +3445,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, php_openssl_pkey_ce);
-	key_object = Z_OPENSSL_PKEY_P(return_value);
-	key_object->pkey = tpubkey;
+	php_openssl_pkey_object_init(return_value, tpubkey, /* is_private */ false);
 }
 /* }}} */
 
@@ -3520,10 +3521,9 @@ static EVP_PKEY *php_openssl_pkey_from_zval(zval *val, int public_key, char *pas
 	}
 
 	if (Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_pkey_ce) {
-		int is_priv;
-
-		key = php_openssl_pkey_from_obj(Z_OBJ_P(val))->pkey;
-		is_priv = php_openssl_is_private_key(key);
+		php_openssl_pkey_object *obj = php_openssl_pkey_from_obj(Z_OBJ_P(val));
+		key = obj->pkey;
+		bool is_priv = obj->is_private;
 
 		/* check whether it is actually a private key if requested */
 		if (!public_key && !is_priv) {
@@ -3758,85 +3758,6 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ php_openssl_is_private_key
-	Check whether the supplied key is a private key by checking if the secret prime factors are set */
-static int php_openssl_is_private_key(EVP_PKEY* pkey)
-{
-	assert(pkey != NULL);
-
-	switch (EVP_PKEY_id(pkey)) {
-		case EVP_PKEY_RSA:
-		case EVP_PKEY_RSA2:
-			{
-				RSA *rsa = EVP_PKEY_get0_RSA(pkey);
-				if (rsa != NULL) {
-					const BIGNUM *p, *q;
-
-					RSA_get0_factors(rsa, &p, &q);
-					 if (p == NULL || q == NULL) {
-						return 0;
-					 }
-				}
-			}
-			break;
-		case EVP_PKEY_DSA:
-		case EVP_PKEY_DSA1:
-		case EVP_PKEY_DSA2:
-		case EVP_PKEY_DSA3:
-		case EVP_PKEY_DSA4:
-			{
-				DSA *dsa = EVP_PKEY_get0_DSA(pkey);
-				if (dsa != NULL) {
-					const BIGNUM *p, *q, *g, *pub_key, *priv_key;
-
-					DSA_get0_pqg(dsa, &p, &q, &g);
-					if (p == NULL || q == NULL) {
-						return 0;
-					}
-
-					DSA_get0_key(dsa, &pub_key, &priv_key);
-					if (priv_key == NULL) {
-						return 0;
-					}
-				}
-			}
-			break;
-		case EVP_PKEY_DH:
-			{
-				DH *dh = EVP_PKEY_get0_DH(pkey);
-				if (dh != NULL) {
-					const BIGNUM *p, *q, *g, *pub_key, *priv_key;
-
-					DH_get0_pqg(dh, &p, &q, &g);
-					if (p == NULL) {
-						return 0;
-					}
-
-					DH_get0_key(dh, &pub_key, &priv_key);
-					if (priv_key == NULL) {
-						return 0;
-					}
-				}
-			}
-			break;
-#ifdef HAVE_EVP_PKEY_EC
-		case EVP_PKEY_EC:
-			{
-				EC_KEY *ec = EVP_PKEY_get0_EC_KEY(pkey);
-				if (ec != NULL && NULL == EC_KEY_get0_private_key(ec)) {
-					return 0;
-				}
-			}
-			break;
-#endif
-		default:
-			php_error_docref(NULL, E_WARNING, "Key type not supported in this PHP build!");
-			break;
-	}
-	return 1;
-}
-/* }}} */
-
 #define OPENSSL_GET_BN(_array, _bn, _name) do { \
 		if (_bn != NULL) { \
 			int len = BN_num_bytes(_bn); \
@@ -3895,7 +3816,7 @@ static bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, zval 
 }
 
 /* {{{ php_openssl_pkey_init_dsa */
-static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
+static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data, bool *is_private)
 {
 	BIGNUM *p, *q, *g, *priv_key, *pub_key;
 	const BIGNUM *priv_key_const, *pub_key_const;
@@ -3909,6 +3830,7 @@ static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 	OPENSSL_PKEY_SET_BN(data, priv_key);
+	*is_private = priv_key != NULL;
 	if (pub_key) {
 		return DSA_set0_key(dsa, pub_key, priv_key);
 	}
@@ -3973,7 +3895,7 @@ static BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM 
 /* }}} */
 
 /* {{{ php_openssl_pkey_init_dh */
-static bool php_openssl_pkey_init_dh(DH *dh, zval *data)
+static bool php_openssl_pkey_init_dh(DH *dh, zval *data, bool *is_private)
 {
 	BIGNUM *p, *q, *g, *priv_key, *pub_key;
 
@@ -3986,6 +3908,7 @@ static bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
+	*is_private = priv_key != NULL;
 	if (pub_key) {
 		return DH_set0_key(dh, pub_key, priv_key);
 	}
@@ -4014,7 +3937,6 @@ PHP_FUNCTION(openssl_pkey_new)
 	struct php_x509_request req;
 	zval * args = NULL;
 	zval *data;
-	php_openssl_pkey_object *key_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &args) == FAILURE) {
 		RETURN_THROWS();
@@ -4031,9 +3953,7 @@ PHP_FUNCTION(openssl_pkey_new)
 				RSA *rsa = RSA_new();
 				if (rsa) {
 					if (php_openssl_pkey_init_and_assign_rsa(pkey, rsa, data)) {
-						object_init_ex(return_value, php_openssl_pkey_ce);
-						key_object = Z_OPENSSL_PKEY_P(return_value);
-						key_object->pkey = pkey;
+						php_openssl_pkey_object_init(return_value, pkey, /* is_private */ true);
 						return;
 					}
 					RSA_free(rsa);
@@ -4051,11 +3971,10 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				DSA *dsa = DSA_new();
 				if (dsa) {
-					if (php_openssl_pkey_init_dsa(dsa, data)) {
+					bool is_private;
+					if (php_openssl_pkey_init_dsa(dsa, data, &is_private)) {
 						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
-							object_init_ex(return_value, php_openssl_pkey_ce);
-							key_object = Z_OPENSSL_PKEY_P(return_value);
-							key_object->pkey = pkey;
+							php_openssl_pkey_object_init(return_value, pkey, is_private);
 							return;
 						} else {
 							php_openssl_store_errors();
@@ -4076,13 +3995,10 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				DH *dh = DH_new();
 				if (dh) {
-					if (php_openssl_pkey_init_dh(dh, data)) {
+					bool is_private;
+					if (php_openssl_pkey_init_dh(dh, data, &is_private)) {
 						if (EVP_PKEY_assign_DH(pkey, dh)) {
-							php_openssl_pkey_object *key_object;
-
-							object_init_ex(return_value, php_openssl_pkey_ce);
-							key_object = Z_OPENSSL_PKEY_P(return_value);
-							key_object->pkey = pkey;
+							php_openssl_pkey_object_init(return_value, pkey, is_private);
 							return;
 						} else {
 							php_openssl_store_errors();
@@ -4108,6 +4024,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			if (pkey) {
 				eckey = EC_KEY_new();
 				if (eckey) {
+					bool is_private = false;
 					EC_GROUP *group = NULL;
 					zval *bn;
 					zval *x;
@@ -4139,6 +4056,7 @@ PHP_FUNCTION(openssl_pkey_new)
 					// The public key 'pnt' can be calculated from 'd' or is defined by 'x' and 'y'
 					if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "d", sizeof("d") - 1)) != NULL &&
 							Z_TYPE_P(bn) == IS_STRING) {
+						is_private = true;
 						d = BN_bin2bn((unsigned char*) Z_STRVAL_P(bn), Z_STRLEN_P(bn), NULL);
 						if (!EC_KEY_set_private_key(eckey, d)) {
 							php_openssl_store_errors();
@@ -4186,10 +4104,7 @@ PHP_FUNCTION(openssl_pkey_new)
 					}
 					if (EC_KEY_check_key(eckey) && EVP_PKEY_assign_EC_KEY(pkey, eckey)) {
 						EC_GROUP_free(group);
-
-						object_init_ex(return_value, php_openssl_pkey_ce);
-						key_object = Z_OPENSSL_PKEY_P(return_value);
-						key_object->pkey = pkey;
+						php_openssl_pkey_object_init(return_value, pkey, is_private);
 						return;
 					} else {
 						php_openssl_store_errors();
@@ -4224,9 +4139,7 @@ clean_exit:
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
 		if (php_openssl_generate_private_key(&req)) {
 			/* pass back a key resource */
-			object_init_ex(return_value, php_openssl_pkey_ce);
-			key_object = Z_OPENSSL_PKEY_P(return_value);
-			key_object->pkey = req.priv_key;
+			php_openssl_pkey_object_init(return_value, req.priv_key, /* is_private */ true);
 			/* make sure the cleanup code doesn't zap it! */
 			req.priv_key = NULL;
 		}
@@ -4399,7 +4312,6 @@ PHP_FUNCTION(openssl_pkey_get_public)
 {
 	zval *cert;
 	EVP_PKEY *pkey;
-	php_openssl_pkey_object *key_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &cert) == FAILURE) {
 		RETURN_THROWS();
@@ -4409,9 +4321,7 @@ PHP_FUNCTION(openssl_pkey_get_public)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, php_openssl_pkey_ce);
-	key_object = Z_OPENSSL_PKEY_P(return_value);
-	key_object->pkey = pkey;
+	php_openssl_pkey_object_init(return_value, pkey, /* is_private */ false);
 }
 /* }}} */
 
@@ -4433,7 +4343,6 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	EVP_PKEY *pkey;
 	char * passphrase = "";
 	size_t passphrase_len = sizeof("")-1;
-	php_openssl_pkey_object *key_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!", &cert, &passphrase, &passphrase_len) == FAILURE) {
 		RETURN_THROWS();
@@ -4448,9 +4357,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, php_openssl_pkey_ce);
-	key_object = Z_OPENSSL_PKEY_P(return_value);
-	key_object->pkey = pkey;
+	php_openssl_pkey_object_init(return_value, pkey, /* is_private */ true);
 }
 
 /* }}} */
