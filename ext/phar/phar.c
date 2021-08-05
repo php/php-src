@@ -858,6 +858,8 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		PHAR_GET_32(sig_ptr, sig_flags);
 
 		switch(sig_flags) {
+			case PHAR_SIG_OPENSSL_SHA512:
+			case PHAR_SIG_OPENSSL_SHA256:
 			case PHAR_SIG_OPENSSL: {
 				uint32_t signature_len;
 				char *sig;
@@ -892,7 +894,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 					return FAILURE;
 				}
 
-				if (FAILURE == phar_verify_signature(fp, end_of_phar, PHAR_SIG_OPENSSL, sig, signature_len, fname, &signature, &sig_len, error)) {
+				if (FAILURE == phar_verify_signature(fp, end_of_phar, sig_flags, sig, signature_len, fname, &signature, &sig_len, error)) {
 					efree(savebuf);
 					efree(sig);
 					php_stream_close(fp);
@@ -3146,7 +3148,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 				php_stream_write(newfile, digest, digest_len);
 				efree(digest);
-				if (phar->sig_flags == PHAR_SIG_OPENSSL) {
+				if (phar->sig_flags == PHAR_SIG_OPENSSL ||
+					phar->sig_flags == PHAR_SIG_OPENSSL_SHA256 ||
+					phar->sig_flags == PHAR_SIG_OPENSSL_SHA512) {
 					phar_set_32(sig_buf, digest_len);
 					php_stream_write(newfile, sig_buf, 4);
 				}
