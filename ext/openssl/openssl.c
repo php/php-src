@@ -4535,6 +4535,34 @@ PHP_FUNCTION(openssl_pkey_get_details)
 }
 /* }}} */
 
+static zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size) {
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(key, NULL);
+	if (!ctx) {
+		return NULL;
+	}
+
+	if (EVP_PKEY_derive_init(ctx) <= 0 ||
+			EVP_PKEY_derive_set_peer(ctx, peer_key) <= 0 ||
+			(key_size == 0 && EVP_PKEY_derive(ctx, NULL, &key_size) <= 0)) {
+		php_openssl_store_errors();
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+
+	zend_string *result = zend_string_alloc(key_size, 0);
+	if (EVP_PKEY_derive(ctx, (unsigned char *)ZSTR_VAL(result), &key_size) <= 0) {
+		php_openssl_store_errors();
+		zend_string_release_ex(result, 0);
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+
+	ZSTR_LEN(result) = key_size;
+	ZSTR_VAL(result)[key_size] = 0;
+	EVP_PKEY_CTX_free(ctx);
+	return result;
+}
+
 /* {{{ Computes shared secret for public value of remote DH key and local DH key */
 PHP_FUNCTION(openssl_dh_compute_key)
 {
@@ -4542,7 +4570,6 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	char *pub_str;
 	size_t pub_len;
 	DH *dh;
-	EVP_PKEY *pkey;
 	BIGNUM *pub;
 	zend_string *data;
 	int len;
@@ -4553,11 +4580,12 @@ PHP_FUNCTION(openssl_dh_compute_key)
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key, 1);
 
-	pkey = Z_OPENSSL_PKEY_P(key)->pkey;
+	EVP_PKEY *pkey = Z_OPENSSL_PKEY_P(key)->pkey;
 
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
 		RETURN_FALSE;
 	}
+
 	dh = EVP_PKEY_get0_DH(pkey);
 	if (dh == NULL) {
 		RETURN_FALSE;
@@ -4587,59 +4615,36 @@ PHP_FUNCTION(openssl_pkey_derive)
 {
 	zval *priv_key;
 	zval *peer_pub_key;
-	EVP_PKEY *pkey = NULL;
-	EVP_PKEY *peer_key = NULL;
-	EVP_PKEY_CTX *ctx = NULL;
-	size_t key_size;
 	zend_long key_len = 0;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &peer_pub_key, &priv_key, &key_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_FALSE;
 	if (key_len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
-	key_size = key_len;
-	pkey = php_openssl_pkey_from_zval(priv_key, 0, "", 0);
+	EVP_PKEY *pkey = php_openssl_pkey_from_zval(priv_key, 0, "", 0);
 	if (!pkey) {
-		goto cleanup;
+		RETURN_FALSE;
 	}
 
-	peer_key = php_openssl_pkey_from_zval(peer_pub_key, 1, NULL, 0);
+	EVP_PKEY *peer_key = php_openssl_pkey_from_zval(peer_pub_key, 1, NULL, 0);
 	if (!peer_key) {
-		goto cleanup;
+		EVP_PKEY_free(pkey);
+		RETURN_FALSE;
 	}
 
-	ctx = EVP_PKEY_CTX_new(pkey, NULL);
-	if (!ctx) {
-		goto cleanup;
-	}
-
-	if (EVP_PKEY_derive_init(ctx) > 0
-		&& EVP_PKEY_derive_set_peer(ctx, peer_key) > 0
-		&& (key_size > 0 || EVP_PKEY_derive(ctx, NULL, &key_size) > 0)
-		&& (result = zend_string_alloc(key_size, 0)) != NULL) {
-		if (EVP_PKEY_derive(ctx, (unsigned char*)ZSTR_VAL(result), &key_size) > 0) {
-			ZSTR_LEN(result) = key_size;
-			ZSTR_VAL(result)[key_size] = 0;
-			RETVAL_NEW_STR(result);
-		} else {
-			php_openssl_store_errors();
-			zend_string_release_ex(result, 0);
-			RETVAL_FALSE;
-		}
-	}
-
-cleanup:
+	zend_string *result = php_openssl_pkey_derive(pkey, peer_key, key_len);
 	EVP_PKEY_free(pkey);
 	EVP_PKEY_free(peer_key);
-	if (ctx) {
-		EVP_PKEY_CTX_free(ctx);
+
+	if (result) {
+		RETURN_NEW_STR(result);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
