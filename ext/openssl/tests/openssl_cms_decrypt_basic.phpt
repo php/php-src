@@ -15,8 +15,9 @@ $single_cert = "file://" . __DIR__ . "/cert.crt";
 $headers = array("test@test", "testing openssl_cms_encrypt()");
 $wrong = "wrong";
 $empty = "";
+$cipher = OPENSSL_CIPHER_AES_128_CBC;
 
-openssl_cms_encrypt($infile, $encrypted, $single_cert, $headers);
+openssl_cms_encrypt($infile, $encrypted, $single_cert, $headers, cipher_algo: $cipher);
 
 var_dump(openssl_cms_decrypt($encrypted, $outfile, $single_cert, $privkey));
 print("\nDecrypted text:\n");
