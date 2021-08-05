@@ -1798,6 +1798,9 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			*signature_length = 64;
 			break;
 		}
+		default:
+			phar->sig_flags = PHAR_SIG_SHA256;
+			ZEND_FALLTHROUGH;
 		case PHAR_SIG_SHA256: {
 			unsigned char digest[32];
 			PHP_SHA256_CTX  context;
@@ -1894,9 +1897,6 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			*signature_length = siglen;
 		}
 		break;
-		default:
-			phar->sig_flags = PHAR_SIG_SHA1;
-			ZEND_FALLTHROUGH;
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;

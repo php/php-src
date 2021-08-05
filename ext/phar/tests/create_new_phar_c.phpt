@@ -20,7 +20,7 @@ var_dump($phar->getSignature());
 --EXPECTF--
 array(2) {
   ["hash"]=>
-  string(40) "%s"
+  string(64) "%s"
   ["hash_type"]=>
-  string(5) "SHA-1"
+  string(7) "SHA-256"
 }

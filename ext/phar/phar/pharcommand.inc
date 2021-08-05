@@ -92,7 +92,7 @@ class PharCommand extends CLICommand
                 'typ' => 'select',
                 'val' => NULL,
                 'inf' => '<method> Selects the hash algorithm.',
-                'select' => array('md5' => 'MD5','sha1' => 'SHA1')
+                'select' => array('md5' => 'MD5','sha1' => 'SHA1', 'sha256' => 'SHA256', 'sha512' => 'SHA512', 'openssl' => 'OPENSSL')
             ),
             'i' => array(
                 'typ' => 'regex',
