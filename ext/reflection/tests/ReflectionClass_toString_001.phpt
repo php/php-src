@@ -285,7 +285,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
       - Tentative return [ bool ]
     }
 
-    Method [ <internal:Reflection> public method isReadonly ] {
+    Method [ <internal:Reflection> public method isReadOnly ] {
 
       - Parameters [0] {
       }

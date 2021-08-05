@@ -4867,7 +4867,7 @@ ZEND_METHOD(ReflectionClass, isFinal)
 /* }}} */
 
 /* Returns whether this class is readonly */
-ZEND_METHOD(ReflectionClass, isReadonly)
+ZEND_METHOD(ReflectionClass, isReadOnly)
 {
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY_CLASS);
 }
