@@ -1,0 +1,68 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PHP aviftest",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sapi/cli/php",
+      "args": ["../play/php/aviftest.php"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "getimagesize",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sapi/cli/php",
+      "args": ["../play/php/getimagesize.php"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "imagecreatefromstring_avif",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sapi/cli/php",
+      "args": ["ext/gd/tests/imagecreatefromstring_avif.phpt"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "Web-Pee",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sapi/cli/php",
+      "args": ["ext/gd/tests/imagecreatefromstring_webp.phpt"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "avif_decode_encode",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sapi/cli/php",
+      "args": ["ext/gd/tests/avif_decode_encode.phpt"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    }
+  ]
+}
