@@ -112,6 +112,10 @@ PHP 8.1 UPGRADE NOTES
   . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
     should not result in user-visible behavior changes.
 
+- OpenSSL:
+  . EC private keys will now be exported in PKCS#8 format rather than
+    traditional format, just like all other keys.
+
 - PDO:
   . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
     "0" or "1". Previously booleans were not stringified.

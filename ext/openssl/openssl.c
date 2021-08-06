@@ -4200,21 +4200,9 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 			cipher = NULL;
 		}
 
-		switch (EVP_PKEY_base_id(key)) {
-#ifdef HAVE_EVP_PKEY_EC
-			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(
-						bio_out, EVP_PKEY_get0_EC_KEY(key), cipher,
-						(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
-				break;
-#endif
-			default:
-				pem_write = PEM_write_bio_PrivateKey(
-						bio_out, key, cipher,
-						(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
-				break;
-		}
-
+		pem_write = PEM_write_bio_PrivateKey(
+				bio_out, key, cipher,
+				(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 		if (pem_write) {
 			/* Success!
 			 * If returning the output as a string, do so now */
@@ -4272,21 +4260,9 @@ PHP_FUNCTION(openssl_pkey_export)
 			cipher = NULL;
 		}
 
-		switch (EVP_PKEY_base_id(key)) {
-#ifdef HAVE_EVP_PKEY_EC
-			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(
-						bio_out, EVP_PKEY_get0_EC_KEY(key), cipher,
-						(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
-				break;
-#endif
-			default:
-				pem_write = PEM_write_bio_PrivateKey(
-						bio_out, key, cipher,
-						(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
-				break;
-		}
-
+		pem_write = PEM_write_bio_PrivateKey(
+				bio_out, key, cipher,
+				(unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 		if (pem_write) {
 			/* Success!
 			 * If returning the output as a string, do so now */
