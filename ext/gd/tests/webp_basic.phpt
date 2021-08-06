@@ -14,6 +14,8 @@ if (!function_exists('imagewebp') || !function_exists('imagecreatefromwebp'))
 <?php
 require_once __DIR__ . '/similarity.inc';
 
+define("WEBP_LOSSLESS", 101);
+
 $filename = __DIR__ . '/webp_basic.webp';
 
 $im1 = imagecreatetruecolor(75, 75);
@@ -29,11 +31,19 @@ imagewebp($im1, $filename);
 
 $im2 = imagecreatefromwebp($filename);
 imagewebp($im2, $filename);
+echo 'Is lossy conversion close enough? ';
 var_dump(calc_image_dissimilarity($im1, $im2) < 10e5);
+
+imagewebp($im1, $filename, WEBP_LOSSLESS);
+$im_lossless = imagecreatefromwebp($filename);
+echo 'Does lossless conversion work? ';
+var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
+
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/webp_basic.webp');
 ?>
 --EXPECT--
-bool(true)
+Is lossy conversion close enough? bool(true)
+Does lossless conversion work? bool(true)
