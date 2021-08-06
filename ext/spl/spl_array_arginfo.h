@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8e9909c2548a2259ba58ecf9f2ad6fe5add70f4 */
+ * Stub hash: aea359465f8fd8c8c5eabc998a36e90628432db9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -228,16 +228,16 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_MALIAS(ArrayObject, append, append, arginfo_class_ArrayIterator_append, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, getArrayCopy, getArrayCopy, arginfo_class_ArrayIterator_getArrayCopy, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, count, count, arginfo_class_ArrayIterator_count, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, getFlags, getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, setFlags, setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, asort, asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, ksort, ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, uasort, uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, uksort, uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, natsort, natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, natcasesort, natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, unserialize, unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ArrayObject, serialize, serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(ArrayObject, getFlags, getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, setFlags, setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, asort, asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, ksort, ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, uasort, uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, uksort, uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, natsort, natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, natcasesort, natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, unserialize, unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_MALIAS(ArrayObject, serialize, serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_MALIAS(ArrayObject, __serialize, __serialize, arginfo_class_ArrayIterator___serialize, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(ArrayObject, __unserialize, __unserialize, arginfo_class_ArrayIterator___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayIterator, rewind, arginfo_class_ArrayIterator_rewind, ZEND_ACC_PUBLIC)

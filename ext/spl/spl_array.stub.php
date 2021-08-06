@@ -126,60 +126,70 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
     public function count(): int {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::getFlags
      */
     public function getFlags(): int {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::setFlags
      */
     public function setFlags(int $flags): void {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::asort
      */
     public function asort(int $flags = SORT_REGULAR): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::ksort
      */
     public function ksort(int $flags = SORT_REGULAR): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::uasort
      */
     public function uasort(callable $callback): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::uksort
      */
     public function uksort(callable $callback): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::natsort
      */
     public function natsort(): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::natcasesort
      */
     public function natcasesort(): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::unserialize
      */
     public function unserialize(string $data): void {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @implementation-alias ArrayObject::serialize
      */
