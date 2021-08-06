@@ -3819,8 +3819,8 @@ static bool php_openssl_pkey_init_and_assign_rsa(EVP_PKEY *pkey, RSA *rsa, zval 
 	return 1;
 }
 
-/* {{{ php_openssl_pkey_init_dsa */
-static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data, bool *is_private)
+#if PHP_OPENSSL_API_VERSION < 0x30000
+static bool php_openssl_pkey_init_legacy_dsa(DSA *dsa, zval *data, bool *is_private)
 {
 	BIGNUM *p, *q, *g, *priv_key, *pub_key;
 	const BIGNUM *priv_key_const, *pub_key_const;
@@ -3853,9 +3853,102 @@ static bool php_openssl_pkey_init_dsa(DSA *dsa, zval *data, bool *is_private)
 		return 0;
 	}
 	/* all good */
+	*is_private = true;
 	return 1;
 }
-/* }}} */
+#endif
+
+static EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
+{
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	BIGNUM *p = NULL, *q = NULL, *g = NULL, *priv_key = NULL, *pub_key = NULL;
+	EVP_PKEY *param_key = NULL, *pkey = NULL;
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DSA, NULL);
+	OSSL_PARAM *params = NULL;
+	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
+
+	OPENSSL_PKEY_SET_BN(data, p);
+	OPENSSL_PKEY_SET_BN(data, q);
+	OPENSSL_PKEY_SET_BN(data, g);
+	OPENSSL_PKEY_SET_BN(data, priv_key);
+	OPENSSL_PKEY_SET_BN(data, pub_key);
+
+	if (!ctx || !bld || !p || !q || !g) {
+		goto cleanup;
+	}
+
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_FFC_P, p);
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_FFC_Q, q);
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_FFC_G, g);
+	// TODO: We silently ignore priv_key if pub_key is not given, unlike in the DH case.
+	if (pub_key) {
+		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_PUB_KEY, pub_key);
+		if (priv_key) {
+			OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_PRIV_KEY, priv_key);
+		}
+	}
+
+	params = OSSL_PARAM_BLD_to_param(bld);
+	if (!params) {
+		goto cleanup;
+	}
+
+	if (EVP_PKEY_fromdata_init(ctx) <= 0 ||
+			EVP_PKEY_fromdata(ctx, &param_key, EVP_PKEY_KEYPAIR, params) <= 0) {
+		goto cleanup;
+	}
+
+	if (pub_key) {
+		*is_private = priv_key != NULL;
+		EVP_PKEY_up_ref(param_key);
+		pkey = param_key;
+	} else {
+		*is_private = true;
+		PHP_OPENSSL_RAND_ADD_TIME();
+		EVP_PKEY_CTX_free(ctx);
+		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
+			goto cleanup;
+		}
+	}
+
+cleanup:
+	php_openssl_store_errors();
+	EVP_PKEY_free(param_key);
+	EVP_PKEY_CTX_free(ctx);
+	OSSL_PARAM_free(params);
+	OSSL_PARAM_BLD_free(bld);
+	BN_free(p);
+	BN_free(q);
+	BN_free(g);
+	BN_free(priv_key);
+	BN_free(pub_key);
+	return pkey;
+#else
+	EVP_PKEY *pkey = EVP_PKEY_new();
+	if (!pkey) {
+		php_openssl_store_errors();
+		return NULL;
+	}
+
+	DSA *dsa = DSA_new();
+	if (!dsa) {
+		php_openssl_store_errors();
+		EVP_PKEY_free(pkey);
+		return NULL;
+	}
+
+	if (!php_openssl_pkey_init_legacy_dsa(dsa, data, is_private)
+			|| !EVP_PKEY_assign_DSA(pkey, dsa)) {
+		php_openssl_store_errors();
+		EVP_PKEY_free(pkey);
+		DSA_free(dsa);
+		return NULL;
+	}
+
+	return pkey;
+#endif
+}
 
 /* {{{ php_openssl_dh_pub_from_priv */
 static BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM *p)
@@ -4070,28 +4163,13 @@ PHP_FUNCTION(openssl_pkey_new)
 			RETURN_FALSE;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dsa", sizeof("dsa") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			pkey = EVP_PKEY_new();
-			if (pkey) {
-				DSA *dsa = DSA_new();
-				if (dsa) {
-					bool is_private;
-					if (php_openssl_pkey_init_dsa(dsa, data, &is_private)) {
-						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
-							php_openssl_pkey_object_init(return_value, pkey, is_private);
-							return;
-						} else {
-							php_openssl_store_errors();
-						}
-					}
-					DSA_free(dsa);
-				} else {
-					php_openssl_store_errors();
-				}
-				EVP_PKEY_free(pkey);
-			} else {
-				php_openssl_store_errors();
+			bool is_private;
+			pkey = php_openssl_pkey_init_dsa(data, &is_private);
+			if (!pkey) {
+				RETURN_FALSE;
 			}
-			RETURN_FALSE;
+			php_openssl_pkey_object_init(return_value, pkey, is_private);
+			return;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dh", sizeof("dh") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			bool is_private;
