@@ -347,6 +347,15 @@ gdImagePtr gdImageCreateFromAvifCtx (gdIOCtx *ctx)
 
 	decoder = avifDecoderCreate();
 
+	// Check if libavif version is >= 0.9.1
+	// If so, allow the PixelInformationProperty ('pixi') to be missing in AV1 image
+	// items. libheif v1.11.0 or older does not add the 'pixi' item property to
+	// AV1 image items. (This issue has been corrected in libheif v1.12.0.)
+
+#if AVIF_VERSION >= 90100
+	decoder->strictFlags &= ~AVIF_STRICT_PIXI_REQUIRED;
+#endif
+
 	io = createAvifIOFromCtx(ctx);
 	if (!io) {
 		gd_error("avif error - Could not allocate memory");

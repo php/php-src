@@ -7,9 +7,6 @@ gd
 if (!(imagetypes() & IMG_AVIF)) {
     die('skip AVIF support required');
 }
-if (str_contains(PHP_OS, "FreeBSD")) {
-    die("xfail Currently failing on FreeBSD CI");
-}
 ?>
 --FILE--
 <?php
