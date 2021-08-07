@@ -246,7 +246,7 @@ cc_basename=`$echo "X$cc_temp" | $Xsed -e 's%.*/%%' -e "s%^$host_alias-%%"`
 # Check for compiler boilerplate output or warnings with
 # the simple compiler test code.
 AC_DEFUN([_LT_COMPILER_BOILERPLATE],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 ac_outfile=conftest.$ac_objext
 echo "$lt_simple_compile_test_code" >conftest.$ac_ext
 eval "$ac_compile" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
@@ -260,7 +260,7 @@ $rm conftest*
 # Check for linker boilerplate output or warnings with
 # the simple link test code.
 AC_DEFUN([_LT_LINKER_BOILERPLATE],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 ac_outfile=conftest.$ac_objext
 echo "$lt_simple_link_test_code" >conftest.$ac_ext
 eval "$ac_link" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
@@ -371,7 +371,7 @@ AC_DEFUN([_LT_REQUIRED_DARWIN_CHECKS],[
 # If we don't find anything, use the default library path according
 # to the aix ld manual.
 AC_DEFUN([_LT_AC_SYS_LIBPATH_AIX],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 _LT_AC_TRY_LINK([
 lt_aix_libpath_sed='
     /Import File Strings/,/^$/ {
@@ -723,7 +723,7 @@ need_locks="$enable_libtool_lock"
 # ----------------------------------------------------------------
 # Check whether the given compiler option works
 AC_DEFUN([AC_LIBTOOL_COMPILER_OPTION],
-[AC_REQUIRE([LT_AC_PROG_SED])
+[AC_REQUIRE([AC_PROG_SED])
 AC_CACHE_CHECK([$1], [$2],
   [$2=no
   ifelse([$4], , [ac_outfile=conftest.$ac_objext], [ac_outfile=$4])
@@ -768,7 +768,7 @@ fi
 # ------------------------------------------------------------
 # Check whether the given compiler option works
 AC_DEFUN([AC_LIBTOOL_LINKER_OPTION],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 AC_CACHE_CHECK([$1], [$2],
   [$2=no
    save_LDFLAGS="$LDFLAGS"
@@ -1131,7 +1131,7 @@ fi
 # ---------------------------------
 # Check to see if options -c and -o are simultaneously supported by compiler
 AC_DEFUN([AC_LIBTOOL_PROG_CC_C_O],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 AC_REQUIRE([_LT_AC_SYS_COMPILER])dnl
 AC_CACHE_CHECK([if $compiler supports -c -o file.$ac_objext],
   [_LT_AC_TAGVAR(lt_cv_prog_compiler_c_o, $1)],
@@ -1298,7 +1298,7 @@ fi
 # -----------------------------
 # PORTME Fill in your ld.so characteristics
 AC_DEFUN([AC_LIBTOOL_SYS_DYNAMIC_LINKER],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 AC_MSG_CHECKING([dynamic linker characteristics])
 library_names_spec=
 libname_spec='lib$name'
@@ -1916,7 +1916,7 @@ fi
 # _LT_AC_TAGCONFIG
 # ----------------
 AC_DEFUN([_LT_AC_TAGCONFIG],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 AC_ARG_WITH([tags],
 [  --with-tags[=TAGS]        Include additional configurations [automatic]
 ],
@@ -2244,7 +2244,7 @@ AC_DEFUN([AC_PROG_LD],
 [  --with-gnu-ld           Assume the C compiler uses GNU ld [default=no]],
     [test "$withval" = no || with_gnu_ld=yes],
     [with_gnu_ld=no])
-AC_REQUIRE([LT_AC_PROG_SED])dnl
+AC_REQUIRE([AC_PROG_SED])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_REQUIRE([AC_CANONICAL_BUILD])dnl
@@ -3815,7 +3815,7 @@ lt_cv_prog_gnu_ld=$lt_save_with_gnu_ld
 # Parse the compiler output and extract the necessary
 # objects, libraries and library flags.
 AC_DEFUN([AC_LIBTOOL_POSTDEP_PREDEP],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 dnl we can't use the lt_simple_compile_test_code here,
 dnl because it contains code intended for an executable,
 dnl not a library.  It's possible we should let each
@@ -4529,7 +4529,7 @@ fi
 # ---------------------------------
 AC_DEFUN([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE],
 [AC_REQUIRE([AC_CANONICAL_HOST])
-AC_REQUIRE([LT_AC_PROG_SED])
+AC_REQUIRE([AC_PROG_SED])
 AC_REQUIRE([AC_PROG_NM])
 AC_REQUIRE([AC_OBJEXT])
 # Check for command to grab the raw symbol name followed by C symbol from nm.
@@ -5304,7 +5304,7 @@ AC_LIBTOOL_LINKER_OPTION([if $compiler static flag $lt_tmp_static_flag works],
 # ------------------------------------
 # See if the linker supports building shared libraries.
 AC_DEFUN([AC_LIBTOOL_PROG_LD_SHLIBS],
-[AC_REQUIRE([LT_AC_PROG_SED])dnl
+[AC_REQUIRE([AC_PROG_SED])dnl
 AC_MSG_CHECKING([whether the $compiler linker ($LD) supports shared libraries])
 ifelse([$1],[CXX],[
   _LT_AC_TAGVAR(export_symbols_cmds, $1)='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
@@ -6297,66 +6297,3 @@ AC_DEFUN([AM_PROG_NM],        [AC_PROG_NM])
 
 # This is just to silence aclocal about the macro not being used
 ifelse([AC_DISABLE_FAST_INSTALL])
-
-############################################################
-# NOTE: This macro has been submitted for inclusion into   #
-#  GNU Autoconf as AC_PROG_SED.  When it is available in   #
-#  a released version of Autoconf we should remove this    #
-#  macro and use it instead.                               #
-############################################################
-# LT_AC_PROG_SED
-# --------------
-# Check for a fully-functional sed program, that truncates
-# as few characters as possible.  Prefer GNU sed if found.
-AC_DEFUN([LT_AC_PROG_SED],
-[AC_MSG_CHECKING([for a sed that does not truncate output])
-AC_CACHE_VAL(lt_cv_path_SED,
-[# Loop through the user's path and test for sed and gsed.
-# Then use that list of sed's as ones to test for truncation.
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for lt_ac_prog in sed gsed; do
-    for ac_exec_ext in '' $ac_executable_extensions; do
-      if test -f "$as_dir/$lt_ac_prog$ac_exec_ext"; then
-        lt_ac_sed_list="$lt_ac_sed_list $as_dir/$lt_ac_prog$ac_exec_ext"
-      fi
-    done
-  done
-done
-lt_ac_max=0
-lt_ac_count=0
-# Add /usr/xpg4/bin/sed as it is typically found on Solaris
-# along with /bin/sed that truncates output.
-for lt_ac_sed in $lt_ac_sed_list /usr/xpg4/bin/sed; do
-  test ! -f $lt_ac_sed && continue
-  cat /dev/null > conftest.in
-  lt_ac_count=0
-  echo $ECHO_N "0123456789$ECHO_C" >conftest.in
-  # Check for GNU sed and select it if it is found.
-  if "$lt_ac_sed" --version 2>&1 < /dev/null | grep 'GNU' > /dev/null; then
-    lt_cv_path_SED=$lt_ac_sed
-    break
-  fi
-  while true; do
-    cat conftest.in conftest.in >conftest.tmp
-    mv conftest.tmp conftest.in
-    cp conftest.in conftest.nl
-    echo >>conftest.nl
-    $lt_ac_sed -e 's/a$//' < conftest.nl >conftest.out || break
-    cmp -s conftest.out conftest.nl || break
-    # 10000 chars as input seems more than enough
-    test $lt_ac_count -gt 10 && break
-    lt_ac_count=`expr $lt_ac_count + 1`
-    if test $lt_ac_count -gt $lt_ac_max; then
-      lt_ac_max=$lt_ac_count
-      lt_cv_path_SED=$lt_ac_sed
-    fi
-  done
-done
-])
-SED=$lt_cv_path_SED
-AC_MSG_RESULT([$SED])
-])
