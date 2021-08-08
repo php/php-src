@@ -174,6 +174,22 @@ static void read_32bit_header(const unsigned char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(buffer);
 }
 
+static int detect_slim_file(timelib_tzinfo *tz)
+{
+	if (
+		(tz->_bit32.ttisgmtcnt == 0) &&
+		(tz->_bit32.ttisstdcnt == 0) &&
+		(tz->_bit32.leapcnt    == 0) &&
+		(tz->_bit32.timecnt    == 0) &&
+		(tz->_bit32.typecnt    == 1) &&
+		(tz->_bit32.charcnt    == 1)
+	) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static int read_64bit_transitions(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	int64_t *buffer = NULL;
@@ -232,7 +248,7 @@ static int read_64bit_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit64.typecnt);
 	*tzf += sizeof(unsigned char) * 6 * tz->bit64.typecnt;
 
-	tz->type = (ttinfo*) timelib_malloc(tz->bit64.typecnt * sizeof(ttinfo));
+	tz->type = (ttinfo*) timelib_calloc(1, tz->bit64.typecnt * sizeof(ttinfo));
 	if (!tz->type) {
 		timelib_free(buffer);
 		return TIMELIB_ERROR_CANNOT_ALLOCATE;
@@ -381,6 +397,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
 	printf("BC:                %s\n",  tz->bc ? "" : "yes");
+	printf("Slim File:         %s\n",  detect_slim_file(tz) ? "yes" : "no");
 
 	printf("\n64-bit:\n");
 	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit64.ttisgmtcnt);
@@ -505,6 +522,8 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 	int transitions_result, types_result;
 	unsigned int type; /* TIMELIB_TZINFO_PHP or TIMELIB_TZINFO_ZONEINFO */
 
+	*error_code = TIMELIB_ERROR_NO_ERROR;
+
 	if (seek_to_tz_position(&tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
@@ -519,6 +538,10 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 		read_32bit_header(&tzf, tmp);
 		skip_32bit_transitions(&tzf, tmp);
 		skip_32bit_types(&tzf, tmp);
+
+		if (detect_slim_file(tmp)) {
+			*error_code = TIMELIB_ERROR_SLIM_FILE;
+		}
 
 		if (!skip_64bit_preamble(&tzf, tmp)) {
 			/* 64 bit preamble is not in place */

@@ -15,6 +15,13 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #80849 (HTTP Status header truncation). (cmb)
 
+- Date:
+  . Fixed bug #64975 (Error parsing when AM/PM not at the end). (Derick)
+  . Fixed bug #78984 (DateTimeZone accepting invalid UTC timezones). (Derick)
+  . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)
+  . Fixed bug #80409 (DateTime::modify() loses time with 'weekday' parameter).
+    (Derick)
+
 - GD:
   . Fixed bug #51498 (imagefilledellipse does not work for large circles). (cmb)
 

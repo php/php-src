@@ -35,7 +35,7 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-const char *timelib_error_messages[8] = {
+const char *timelib_error_messages[9] = {
 	"No error",
 	"Can not allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
@@ -43,6 +43,7 @@ const char *timelib_error_messages[8] = {
 	"Corrupt tzfile: No abbreviation could be found for a transition",
 	"The version used in this timezone identifier is unsupported",
 	"No timezone with this name could be found",
+	"A 'slim' timezone file has been detected",
 };
 
 const char *timelib_get_error_message(int error_code)
