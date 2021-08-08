@@ -499,8 +499,8 @@ int php_openssl_get_ssl_stream_data_index(void)
 static char default_ssl_conf_filename[MAXPATHLEN];
 
 struct php_x509_request { /* {{{ */
-	LHASH_OF(CONF_VALUE) * global_config;	/* Global SSL config */
-	LHASH_OF(CONF_VALUE) * req_config;		/* SSL config for this request */
+	CONF *global_config;	/* Global SSL config */
+	CONF *req_config;		/* SSL config for this request */
 	const EVP_MD * md_alg;
 	const EVP_MD * digest;
 	char	* section_name,
@@ -711,13 +711,13 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 }
 /* }}} */
 
-static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH_OF(CONF_VALUE) * config) /* {{{ */
+static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, CONF *config) /* {{{ */
 {
 	X509V3_CTX ctx;
 
 	X509V3_set_ctx_test(&ctx);
-	X509V3_set_conf_lhash(&ctx, config);
-	if (!X509V3_EXT_add_conf(config, &ctx, (char *)section, NULL)) {
+	X509V3_set_nconf(&ctx, config);
+	if (!X509V3_EXT_add_nconf(config, &ctx, (char *)section, NULL)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error loading %s section %s of %s",
 				section_label,
@@ -729,15 +729,22 @@ static inline int php_openssl_config_check_syntax(const char * section_label, co
 }
 /* }}} */
 
-static char *php_openssl_conf_get_string(
-		LHASH_OF(CONF_VALUE) *conf, const char *group, const char *name) {
-	char *str = CONF_get_string(conf, group, name);
-	if (str == NULL) {
-		/* OpenSSL reports an error if a configuration value is not found.
-		 * However, we don't want to generate errors for optional configuration. */
-		ERR_clear_error();
-	}
+static char *php_openssl_conf_get_string(CONF *conf, const char *group, const char *name) {
+	/* OpenSSL reports an error if a configuration value is not found.
+	 * However, we don't want to generate errors for optional configuration. */
+	ERR_set_mark();
+	char *str = NCONF_get_string(conf, group, name);
+	ERR_pop_to_mark();
 	return str;
+}
+
+static long php_openssl_conf_get_number(CONF *conf, const char *group, const char *name) {
+	/* Same here, ignore errors. */
+	long res = 0;
+	ERR_set_mark();
+	NCONF_get_number(conf, group, name, &res);
+	ERR_pop_to_mark();
+	return res;
 }
 
 static int php_openssl_add_oid_section(struct php_x509_request * req) /* {{{ */
@@ -751,7 +758,7 @@ static int php_openssl_add_oid_section(struct php_x509_request * req) /* {{{ */
 	if (str == NULL) {
 		return SUCCESS;
 	}
-	sktmp = CONF_get_section(req->req_config, str);
+	sktmp = NCONF_get_section(req->req_config, str);
 	if (sktmp == NULL) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Problem loading oid section %s", str);
@@ -822,13 +829,13 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
-	req->global_config = CONF_load(NULL, default_ssl_conf_filename, NULL);
-	if (req->global_config == NULL) {
+	req->global_config = NCONF_new(NULL);
+	if (!NCONF_load(req->global_config, default_ssl_conf_filename, NULL)) {
 		php_openssl_store_errors();
 	}
-	req->req_config = CONF_load(NULL, req->config_filename, NULL);
-	if (req->req_config == NULL) {
-		php_openssl_store_errors();
+
+	req->req_config = NCONF_new(NULL);
+	if (!NCONF_load(req->req_config, req->config_filename, NULL)) {
 		return FAILURE;
 	}
 
@@ -852,8 +859,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	SET_OPTIONAL_STRING_ARG("req_extensions", req->request_extensions_section,
 		php_openssl_conf_get_string(req->req_config, req->section_name, "req_extensions"));
 	SET_OPTIONAL_LONG_ARG("private_key_bits", req->priv_key_bits,
-		CONF_get_number(req->req_config, req->section_name, "default_bits"));
-
+		php_openssl_conf_get_number(req->req_config, req->section_name, "default_bits"));
 	SET_OPTIONAL_LONG_ARG("private_key_type", req->priv_key_type, OPENSSL_KEYTYPE_DEFAULT);
 
 	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), "encrypt_key", sizeof("encrypt_key")-1)) != NULL) {
@@ -933,11 +939,11 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 		req->priv_key = NULL;
 	}
 	if (req->global_config) {
-		CONF_free(req->global_config);
+		NCONF_free(req->global_config);
 		req->global_config = NULL;
 	}
 	if (req->req_config) {
-		CONF_free(req->req_config);
+		NCONF_free(req->req_config);
 		req->req_config = NULL;
 	}
 }
@@ -2821,12 +2827,12 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 	STACK_OF(CONF_VALUE) * dn_sk, *attr_sk = NULL;
 	char * str, *dn_sect, *attr_sect;
 
-	dn_sect = CONF_get_string(req->req_config, req->section_name, "distinguished_name");
+	dn_sect = NCONF_get_string(req->req_config, req->section_name, "distinguished_name");
 	if (dn_sect == NULL) {
 		php_openssl_store_errors();
 		return FAILURE;
 	}
-	dn_sk = CONF_get_section(req->req_config, dn_sect);
+	dn_sk = NCONF_get_section(req->req_config, dn_sect);
 	if (dn_sk == NULL) {
 		php_openssl_store_errors();
 		return FAILURE;
@@ -2835,7 +2841,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 	if (attr_sect == NULL) {
 		attr_sk = NULL;
 	} else {
-		attr_sk = CONF_get_section(req->req_config, attr_sect);
+		attr_sk = NCONF_get_section(req->req_config, attr_sect);
 		if (attr_sk == NULL) {
 			php_openssl_store_errors();
 			return FAILURE;
@@ -3252,8 +3258,8 @@ PHP_FUNCTION(openssl_csr_sign)
 		X509V3_CTX ctx;
 
 		X509V3_set_ctx(&ctx, cert, new_cert, csr, NULL, 0);
-		X509V3_set_conf_lhash(&ctx, req.req_config);
-		if (!X509V3_EXT_add_conf(req.req_config, &ctx, req.extensions_section, new_cert)) {
+		X509V3_set_nconf(&ctx, req.req_config);
+		if (!X509V3_EXT_add_nconf(req.req_config, &ctx, req.extensions_section, new_cert)) {
 			php_openssl_store_errors();
 			goto cleanup;
 		}
@@ -3326,10 +3332,10 @@ PHP_FUNCTION(openssl_csr_new)
 					X509V3_CTX ext_ctx;
 
 					X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
-					X509V3_set_conf_lhash(&ext_ctx, req.req_config);
+					X509V3_set_nconf(&ext_ctx, req.req_config);
 
 					/* Add extensions */
-					if (req.request_extensions_section && !X509V3_EXT_REQ_add_conf(req.req_config,
+					if (req.request_extensions_section && !X509V3_EXT_REQ_add_nconf(req.req_config,
 								&ext_ctx, req.request_extensions_section, csr))
 					{
 						php_openssl_store_errors();
