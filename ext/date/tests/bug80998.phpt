@@ -8,5 +8,7 @@ $interval->f = 0.999999;
 $interval->invert = 1;
 $date->add($interval);
 $string = $date->format('Y-m-d H:i:s.u');
+echo $string, "\n";
 ?>
 --EXPECT--
+2021-04-05 11:00:01.000001
