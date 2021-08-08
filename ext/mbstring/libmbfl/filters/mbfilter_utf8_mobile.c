@@ -33,6 +33,7 @@
 #include "mbfilter_sjis_mobile.h"
 
 extern int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter);
+extern int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter);
 
 extern const unsigned char mblen_table_utf8[];
 
@@ -100,7 +101,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_docomo = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
@@ -120,7 +121,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_a = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
@@ -140,7 +141,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_kddi_b = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
@@ -160,16 +161,13 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8_sb = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_wchar_utf8_mobile,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_sjis_mobile_flush,
 	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter);
 
-/*
- * UTF-8 => wchar
- */
 int mbfl_filt_conv_utf8_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s, s1 = 0, c1 = 0, snd = 0;
@@ -192,25 +190,22 @@ retry:
 			CK(mbfl_filt_put_invalid_char(c, filter));
 		}
 		break;
+
 	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
 	case 0x21: /* 3byte code 3rd char: 0x80-0xbf */
 	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
 		filter->status = 0;
 		if (c >= 0x80 && c <= 0xbf) {
-			s = (filter->cache<<6) | (c & 0x3f);
+			s = (filter->cache << 6) | (c & 0x3f);
 			filter->cache = 0;
 
-			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo &&
-				mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
+			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
 				s = mbfilter_sjis_emoji_docomo2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7) > 0) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8) > 0) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_sb &&
-					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6) > 0) {
 				s = mbfilter_sjis_emoji_sb2unicode(s1, &snd);
 			}
 
@@ -223,12 +218,13 @@ retry:
 			goto retry;
 		}
 		break;
+
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
-		s = (filter->cache<<6) | (c & 0x3f);
+		s = (filter->cache << 6) | (c & 0x3f);
 		c1 = filter->cache & 0xf;
 
 		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0xa0) ||
+			 ((c1 == 0x0 && c >= 0xa0) ||
 			 (c1 == 0xd && c < 0xa0) ||
 			 (c1 > 0x0 && c1 != 0xd))) {
 			filter->cache = s;
@@ -238,12 +234,13 @@ retry:
 			goto retry;
 		}
 		break;
+
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
-		s = (filter->cache<<6) | (c & 0x3f);
+		s = (filter->cache << 6) | (c & 0x3f);
 		c1 = filter->cache & 0x7;
 
 		if ((c >= 0x80 && c <= 0xbf) &&
-			((c1 == 0x0 && c >= 0x90) ||
+			 ((c1 == 0x0 && c >= 0x90) ||
 			 (c1 == 0x4 && c < 0x90) ||
 			 (c1 > 0x0 && c1 != 0x4))) {
 			filter->cache = s;
@@ -253,9 +250,10 @@ retry:
 			goto retry;
 		}
 		break;
+
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
 		if (c >= 0x80 && c <= 0xbf) {
-			filter->cache = (filter->cache<<6) | (c & 0x3f);
+			filter->cache = (filter->cache << 6) | (c & 0x3f);
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
@@ -270,26 +268,15 @@ retry:
 	return c;
 }
 
-/*
- * wchar => UTF-8
- */
 int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x110000) {
 		int s1, c1;
 
-		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo &&
-			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
-			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b &&
-			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
-			(filter->to->no_encoding == mbfl_no_encoding_utf8_sb &&
-			 mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6) > 0)) {
+		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6) > 0)) {
 			c = c1;
 		}
 
