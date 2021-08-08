@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)
+  . Fixed bug #80963 (DateTimeZone::getTransitions() truncated). (Derick)
   . Fixed bug #80974 (Wrong diff between 2 dates in different timezones).
     (Derick)
   . Fixed bug #80998 (Missing second with inverted interval). (Derick)
