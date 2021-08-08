@@ -832,6 +832,10 @@ int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 	int c1 = filter->cache;
 	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
 		CK((*filter->output_function)(c1, filter->data));
+	} else if (filter->status == 2) {
+		/* First of a pair of Regional Indicator codepoints came at the end of a string */
+		filter->cache = filter->status = 0;
+		mbfl_filt_conv_illegal_output(c1, filter);
 	}
 
 	if (filter->flush_function) {
