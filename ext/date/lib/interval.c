@@ -207,6 +207,19 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 	return t;
 }
 
+static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
+{
+	if (*a < start) {
+		*b -= (start - *a - 1) / adj + 1;
+		*a += adj * ((start - *a - 1) / adj + 1);
+	}
+	if (*a >= end) {
+		*b += *a / adj;
+		*a -= adj * (*a / adj);
+	}
+}
+
+
 timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interval)
 {
 	int bias = 1;
@@ -232,6 +245,7 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
+		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse += bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
 		t->us += interval->us * bias;
 		timelib_do_normalize(t);
@@ -271,6 +285,7 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
+		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
 		t->us -= interval->us * bias;
 		timelib_do_normalize(t);
