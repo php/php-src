@@ -31,6 +31,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
      - The ZVAL_NEW_ARR() macro has been removed. Use array_init() or ZVAL_ARR
        with zend_new_array() instead.
      - The IGNORE_URL_WIN macro has been removed; it had no effect as of PHP 5.0.0.
+     - TsHashTable has been removed, it was not used in php-src and was not useful outside of php-src.
   b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
       - zend_file_handle.filename now is zend_string*
       - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
