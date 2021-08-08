@@ -553,11 +553,22 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 		timelib_free(date_str);
 	}
 
+	if (!tz->posix_string) {
+		printf("\n%43sNo POSIX string\n", "");
+		return;
+	}
+
+	if (strcmp("", tz->posix_string) == 0) {
+		printf("\n%43sEmpty POSIX string\n", "");
+		return;
+	}
+
 	printf("\n%43sPOSIX string: %s\n", "", tz->posix_string);
-	if (tz->posix_info->std) {
+	if (tz->posix_info && tz->posix_info->std) {
 		trans_str = format_offset_type(tz, tz->posix_info->type_index_std_type);
 		printf("%43sstd: %s\n", "", trans_str);
 		timelib_free(trans_str);
+
 		if (tz->posix_info->dst) {
 			trans_str = format_offset_type(tz, tz->posix_info->type_index_dst_type);
 			printf("%43sdst: %s\n", "", trans_str);
@@ -654,7 +665,7 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 	timelib_tzinfo *tmp;
 	int version;
 	int transitions_result, types_result;
-	unsigned int type; /* TIMELIB_TZINFO_PHP or TIMELIB_TZINFO_ZONEINFO */
+	unsigned int type = TIMELIB_TZINFO_ZONEINFO; /* TIMELIB_TZINFO_PHP or TIMELIB_TZINFO_ZONEINFO */
 
 	*error_code = TIMELIB_ERROR_NO_ERROR;
 
@@ -693,8 +704,10 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 		}
 
 		read_posix_string(&tzf, tmp);
-		if (!integrate_posix_string(tmp)) {
-			*error_code = TIMELIB_ERROR_POSIX_MISSING_TTINFO;
+		if (strcmp("", tmp->posix_string) == 0) {
+			*error_code = TIMELIB_ERROR_EMPTY_POSIX_STRING;
+		} else if (!integrate_posix_string(tmp)) {
+			*error_code = TIMELIB_ERROR_CORRUPT_POSIX_STRING;
 			timelib_tzinfo_dtor(tmp);
 			return NULL;
 		}

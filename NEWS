@@ -2,6 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta3
 
+- Date:
+  . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)
+  . Fixed bug #80974 (Wrong diff between 2 dates in different timezones).
+    (Derick)
+  . Fixed bug #81097 (DateTimeZone silently falls back to UTC when providing an
+    offset with seconds). (Derick)
+  . Fixed bug #81273 (Date interval calculation not correct). (Derick)
 
 
 05 Aug 2021, PHP 8.1.0beta2

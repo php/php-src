@@ -30,6 +30,10 @@
 # include "timelib_config.h"
 #endif
 
+#define TIMELIB_VERSION 202106
+#define TIMELIB_EXTENDED_VERSION 20210601
+#define TIMELIB_ASCII_VERSION "2021.06"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -355,13 +359,14 @@ typedef struct _timelib_tzdb {
 # define timelib_realloc realloc
 # define timelib_calloc  calloc
 # define timelib_strdup  strdup
-# define timelib_strndup strndup
 # define timelib_free    free
+# if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#  define TIMELIB_USE_BUILTIN_STRNDUP 1
+# else
+#  define TIMELIB_USE_BUILTIN_STRNDUP 0
+#  define timelib_strndup strndup
+# endif
 #endif
-
-#define TIMELIB_VERSION 202103
-#define TIMELIB_EXTENDED_VERSION 20210301
-#define TIMELIB_ASCII_VERSION "2021.03"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -370,7 +375,8 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_UNSET   -99999
 
 /* An entry for each of these error codes is also in the
- * timelib_error_messages array in timelib.c */
+ * timelib_error_messages array in timelib.c.
+ * Codes 0x00, 0x07, and 0x09 are warnings only. */
 #define TIMELIB_ERROR_NO_ERROR                            0x00
 #define TIMELIB_ERROR_CANNOT_ALLOCATE                     0x01
 #define TIMELIB_ERROR_CORRUPT_TRANSITIONS_DONT_INCREASE   0x02
@@ -378,8 +384,9 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_ERROR_CORRUPT_NO_ABBREVIATION             0x04
 #define TIMELIB_ERROR_UNSUPPORTED_VERSION                 0x05
 #define TIMELIB_ERROR_NO_SUCH_TIMEZONE                    0x06
-#define TIMELIB_ERROR_SLIM_FILE                           0x07
-#define TIMELIB_ERROR_POSIX_MISSING_TTINFO                0x08
+#define TIMELIB_ERROR_SLIM_FILE                           0x07 /* Warns if the file is SLIM, but we can't read it */
+#define TIMELIB_ERROR_CORRUPT_POSIX_STRING                0x08
+#define TIMELIB_ERROR_EMPTY_POSIX_STRING                  0x09 /* Warns if the POSIX string is empty, but still produces results */
 
 #ifdef __cplusplus
 extern "C" {

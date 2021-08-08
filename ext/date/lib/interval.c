@@ -90,7 +90,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	/* Do corrections for "Type 3" times */
-	if (one->zone_type == 3 && two->zone_type == 3) {
+	if (one->zone_type == 3 && two->zone_type == 3 && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		if (one->dst == 1 && two->dst == 0) { /* Fall Back */
 			if (two->tz_info) {
 				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
@@ -130,7 +130,11 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		}
 	} else {
 		/* Then for all the others */
-		rt->h -= dst_h_corr + (two->dst - one->dst);
+		if (one->zone_type == 3 && two->zone_type == 3) {
+			rt->h -= dst_h_corr;
+		} else {
+			rt->h -= dst_h_corr + (two->dst - one->dst);
+		}
 		rt->i -= dst_m_corr;
 
 		timelib_do_rel_normalize(rt->invert ? one : two, rt);
