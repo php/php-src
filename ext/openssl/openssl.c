@@ -3407,15 +3407,26 @@ PHP_FUNCTION(openssl_csr_get_subject)
 }
 /* }}} */
 
+static EVP_PKEY *php_openssl_extract_public_key(EVP_PKEY *priv_key)
+{
+	/* Extract public key portion by round-tripping through PEM. */
+	BIO *bio = BIO_new(BIO_s_mem());
+	if (!bio || !PEM_write_bio_PUBKEY(bio, priv_key)) {
+		BIO_free(bio);
+		return NULL;
+	}
+
+	EVP_PKEY *pub_key = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
+	BIO_free(bio);
+	return pub_key;
+}
+
 /* {{{ Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_public_key)
 {
-	X509_REQ *orig_csr, *csr;
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
-
-	EVP_PKEY *tpubkey;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
@@ -3423,33 +3434,17 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 		Z_PARAM_BOOL(use_shortnames)
 	ZEND_PARSE_PARAMETERS_END();
 
-	orig_csr = php_openssl_csr_from_param(csr_obj, csr_str);
-	if (orig_csr == NULL) {
+	X509_REQ *csr = php_openssl_csr_from_param(csr_obj, csr_str);
+	if (csr == NULL) {
 		RETURN_FALSE;
 	}
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
-	/* Due to changes in OpenSSL 1.1 related to locking when decoding CSR,
-	 * the pub key is not changed after assigning. It means if we pass
-	 * a private key, it will be returned including the private part.
-	 * If we duplicate it, then we get just the public part which is
-	 * the same behavior as for OpenSSL 1.0 */
-	csr = X509_REQ_dup(orig_csr);
-#else
-	csr = orig_csr;
-#endif
-
 	/* Retrieve the public key from the CSR */
-	tpubkey = X509_REQ_get_pubkey(csr);
-
-	if (csr != orig_csr) {
-		/* We need to free the duplicated CSR */
-		X509_REQ_free(csr);
-	}
+	EVP_PKEY *tpubkey = php_openssl_extract_public_key(X509_REQ_get_pubkey(csr));
 
 	if (csr_str) {
-		/* We also need to free the original CSR if it was freshly created */
-		X509_REQ_free(orig_csr);
+		/* We need to free the original CSR if it was freshly created */
+		X509_REQ_free(csr);
 	}
 
 	if (tpubkey == NULL) {
