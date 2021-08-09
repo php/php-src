@@ -4233,7 +4233,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 	BIGNUM *d = NULL, *x = NULL, *y = NULL;
 	EC_GROUP *group = NULL;
 	EC_POINT *pnt = NULL;
-	char *pnt_oct = NULL;
+	unsigned char *pnt_oct = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
 	OSSL_PARAM *params = NULL;
