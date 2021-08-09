@@ -875,8 +875,50 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		if (p->pi >= 0 && p->has_range_constraint) {
 			zend_ssa_range_constraint *constraint = &p->constraint.range;
 			if (constraint->negative) {
-				if (ssa->var_info[p->sources[0]].has_range) {
-					*tmp = ssa->var_info[p->sources[0]].range;
+				int src1 = p->sources[0];
+
+				if (ssa->var_info[src1].has_range) {
+					*tmp = ssa->var_info[src1].range;
+					if (constraint->range.min == constraint->range.max
+					 && !constraint->range.underflow
+					 && !constraint->range.overflow
+					 && p->constraint.range.min_ssa_var < 0
+					 && p->constraint.range.max_ssa_var < 0
+					 && ssa->vars[src1].definition >= 0) {
+						/* Check for constrained induction variable */
+						line = ssa->vars[src1].definition;
+						opline = op_array->opcodes + line;
+						switch (opline->opcode) {
+							case ZEND_PRE_DEC:
+							case ZEND_POST_DEC:
+								if (!tmp->underflow) {
+									zend_ssa_phi *p = ssa->vars[ssa->ops[line].op1_use].definition_phi;
+
+									if (p && p->pi < 0
+									 && ssa->cfg.blocks[p->block].predecessors_count == 2
+									 && p->sources[1] == var
+									 && ssa->var_info[p->sources[0]].has_range
+									 && ssa->var_info[p->sources[0]].range.min > constraint->range.max) {
+										tmp->min = constraint->range.max + 1;
+									}
+								}
+								break;
+							case ZEND_PRE_INC:
+							case ZEND_POST_INC:
+								if (!tmp->overflow) {
+									zend_ssa_phi *p = ssa->vars[ssa->ops[line].op1_use].definition_phi;
+
+									if (p && p->pi < 0
+									 && ssa->cfg.blocks[p->block].predecessors_count == 2
+									 && p->sources[1] == var
+									 && ssa->var_info[p->sources[0]].has_range
+									 && ssa->var_info[p->sources[0]].range.max < constraint->range.min) {
+										tmp->max = constraint->range.min - 1;
+									}
+								}
+								break;
+						}
+					}
 				} else if (narrowing) {
 					tmp->underflow = 1;
 					tmp->min = ZEND_LONG_MIN;
