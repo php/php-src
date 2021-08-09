@@ -4,7 +4,7 @@ Check for libsodium scalarmult ristretto255
 sodium
 --SKIPIF--
 <?php
-if (!defined('SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_HASHBYTES')) print "skip libsodium without Ristretto255";
+if (!defined('SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES')) print "skip libsodium without Ristretto255";
 ?>
 --FILE--
 <?php
