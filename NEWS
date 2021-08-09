@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #51498 (imagefilledellipse does not work for large circles). (cmb)
 
+- MySQLi:
+  . Fixed bug #74544 (Integer overflow in mysqli_real_escape_string()). (cmb,
+    johannes)
+
 - Opcache:
   . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
     (Dmitry)
