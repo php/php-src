@@ -84,9 +84,21 @@
     # adjust stack
     addi  1, 1, 184
 
+    # zero in r3 indicates first jump to context-function
+    cmpdi 3, 0
+    beq use_entry_arg
+
     # return transfer_t
     std  6, 0(3)
     std  5, 8(3)
+
+    # jump to context
+    bctr
+
+use_entry_arg:
+    # copy transfer_t into transfer_fn arg registers
+    mr  3, 6
+    mr  4, 5
 
     # jump to context
     bctr
