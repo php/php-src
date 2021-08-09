@@ -1,7 +1,7 @@
 git:
   quiet: true
 
-dist: bionic
+dist: focal
 language: c
 os: linux
 addons:
