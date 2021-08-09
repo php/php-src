@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #51498 (imagefilledellipse does not work for large circles). (cmb)
 
+- MySQLi:
+  . Fixed bug #74544 (Integer overflow in mysqli_real_escape_string()). (cmb,
+    johannes)
+
 - OpenSSL:
   . Fixed bug #81327 (Error build openssl extension on php 7.4.22). (cmb)
 
