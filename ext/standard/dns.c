@@ -47,6 +47,10 @@
 #endif
 #if HAVE_RESOLV_H
 #include <resolv.h>
+#if defined(__HAIKU__)
+extern void __res_ndestroy(res_state statp);
+#define res_ndestroy __res_ndestroy
+#endif
 #endif
 #ifdef HAVE_DNS_H
 #include <dns.h>
