@@ -513,7 +513,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 finish:
 	/* Transfer CE_CACHE map ptr slot to new interned string.
 	 * Should only happen for permanent interned strings with permanent map_ptr slot. */
-	if (ZSTR_HAS_CE_CACHE(str)) {
+	if (ZSTR_HAS_CE_CACHE(str) && !ZSTR_HAS_CE_CACHE(s)) {
 		ZEND_ASSERT(GC_FLAGS(str) & IS_STR_PERMANENT);
 		GC_SET_REFCOUNT(s, GC_REFCOUNT(str));
 		GC_ADD_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
