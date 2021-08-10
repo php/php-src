@@ -674,12 +674,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
-	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-
-	if (S->cols != NULL){
-		efree(S->cols);
-		S->cols = NULL;
-	}
 	return 1;
 }
 
