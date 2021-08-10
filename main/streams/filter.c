@@ -468,7 +468,10 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	} else if (chain == &(stream->writefilters)) {
 		/* Send flushed data to the stream */
 		while ((bucket = inp->head)) {
-			stream->ops->write(stream, bucket->buf, bucket->buflen);
+			ssize_t count = stream->ops->write(stream, bucket->buf, bucket->buflen);
+			if (count > 0) {
+				stream->position += count;
+			}
 			php_stream_bucket_unlink(bucket);
 			php_stream_bucket_delref(bucket);
 		}
