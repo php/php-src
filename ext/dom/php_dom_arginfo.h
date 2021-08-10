@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3db2a5e01c88b189f2d58aa67b598653ebde6a76 */
+ * Stub hash: cff5c4b824da940f151617d08bb6b2419a9d26e9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -989,6 +989,7 @@ static zend_class_entry *register_class_DOMNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMNode", class_DOMNode_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_nodeName_default_value;
 	ZVAL_UNDEF(&property_nodeName_default_value);
@@ -1103,6 +1104,7 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMNameSpaceNode", class_DOMNameSpaceNode_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_nodeName_default_value;
 	ZVAL_UNDEF(&property_nodeName_default_value);
@@ -1654,6 +1656,7 @@ static zend_class_entry *register_class_DOMXPath(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMXPath", class_DOMXPath_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	zend_string *property_document_class_DOMDocument = zend_string_init("DOMDocument", sizeof("DOMDocument")-1, 1);
 	zval property_document_default_value;

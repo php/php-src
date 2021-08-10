@@ -56,6 +56,7 @@ interface DOMChildNode
     public function replaceWith(...$nodes): void;
 }
 
+/** @not-serializable */
 class DOMNode
 {
     /** @readonly */
@@ -155,6 +156,7 @@ class DOMNode
     public function replaceChild(DOMNode $node, DOMNode $child) {}
 }
 
+/** @not-serializable */
 class DOMNameSpaceNode
 {
     /** @readonly */
@@ -654,6 +656,7 @@ class DOMProcessingInstruction extends DOMNode
 }
 
 #ifdef LIBXML_XPATH_ENABLED
+/** @not-serializable */
 class DOMXPath
 {
     /** @readonly */
