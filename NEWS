@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81302 (Stream position after stream filter removed). (cmb)
+  . Fixed bug #81346 (Non-seekable streams don't update position after write).
+    (cmb)
 
 26 Aug 2021, PHP 8.0.10
 
