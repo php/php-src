@@ -33,10 +33,8 @@
     li   0, 0
     std  0, 184(3)
 
-    # compute address of returned transfer_t
-    addi 0, 3, 232
-    mr   4, 0
-    std  4, 152(3)
+    # zero in r3 indicates first jump to context-function
+    std  %r0, 152(%r3)
 
     # load LR
     mflr  0
