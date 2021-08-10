@@ -88,8 +88,8 @@ $s3 = sodium_crypto_core_ristretto255_from_hash($ru);
 var_dump(sodium_crypto_core_ristretto255_is_valid_point($s3));
 
 // Modular inverse should be valid too (???)
-$r_invert = sodium_crypto_core_ristretto255_scalar_invert($r);
-var_dump(sodium_crypto_core_ristretto255_is_valid_point($r_invert));
+//$r_invert = sodium_crypto_core_ristretto255_scalar_invert($r);
+//var_dump(sodium_crypto_core_ristretto255_is_valid_point($r_invert));
 
 $s_plus = sodium_crypto_core_ristretto255_add($s, $s0);
 $s_minus = sodium_crypto_core_ristretto255_sub($s_plus, $s0);
@@ -130,5 +130,4 @@ string(64) "3066f82a1a747d45120d1740f14358531a8f04bbffe6a819f86dfe50f44a0a46"
 bool(true)
 Result is identity element
 bool(true)
-bool(false)
 bool(true)
