@@ -240,8 +240,8 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
-		stmt->column_count = (int) PQnfields(S->result);
+	stmt->column_count = (int) PQnfields(S->result);
+	if (S->cols == NULL) {
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
 
