@@ -1191,11 +1191,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength)
 
 static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 {
-	DH *dh;
-	BIO* bio;
-	zval *zdhpath;
-
-	zdhpath = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "dh_param");
+	zval *zdhpath = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "dh_param");
 	if (zdhpath == NULL) {
 #if 0
 	/* Coming in OpenSSL 1.1 ... eventually we'll want to enable this
@@ -1210,14 +1206,29 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+	BIO *bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 
 	if (bio == NULL) {
 		php_error_docref(NULL, E_WARNING, "Invalid dh_param");
 		return FAILURE;
 	}
 
-	dh = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	EVP_PKEY *pkey = PEM_read_bio_Parameters(bio, NULL);
+	BIO_free(bio);
+
+	if (pkey == NULL) {
+		php_error_docref(NULL, E_WARNING, "Failed reading DH params");
+		return FAILURE;
+	}
+
+	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) < 0) {
+		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
+		EVP_PKEY_free(pkey);
+		return FAILURE;
+	}
+#else
+	DH *dh = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
 	BIO_free(bio);
 
 	if (dh == NULL) {
@@ -1232,6 +1243,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 	}
 
 	DH_free(dh);
+#endif
 
 	return SUCCESS;
 }
