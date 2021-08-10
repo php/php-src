@@ -10,14 +10,22 @@ if (!defined('SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES')) print "skip libsodium
 <?php
 $b = sodium_hex2bin("e2f2ae0a6abc4e71a884a961c500515f58e30b6aa582dd8db6a65945e08d2d76");
 $n = str_repeat("\0", SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES);
-for ($i = 0; $i < 16; $i++, sodium_increment($n)) {
-    try {
-        $p = sodium_crypto_scalarmult_ristretto255_base($n);
-        $p2 = sodium_crypto_scalarmult_ristretto255($n, $b);
-    } catch (SodiumException $ex) {
-        echo $ex->getMessage(), "\n";
-        continue;
-    }
+
+try {
+    $p = sodium_crypto_scalarmult_ristretto255_base($n);
+} catch (SodiumException $ex) {
+    echo $ex->getMessage(), "\n";
+}
+try {
+    $p2 = sodium_crypto_scalarmult_ristretto255($n, $b);
+} catch (SodiumException $ex) {
+    echo $ex->getMessage(), "\n";
+}
+
+for ($i = 1; $i < 16; $i++) {
+    sodium_increment($n);
+    $p = sodium_crypto_scalarmult_ristretto255_base($n);
+    $p2 = sodium_crypto_scalarmult_ristretto255($n, $b);
     var_dump(sodium_bin2hex($p));
     assert($p === $p2);
 }
@@ -30,7 +38,8 @@ try {
 
 ?>
 --EXPECT--
-internal error
+sodium_crypto_scalarmult_ristretto255_base(): Argument #1 ($n) must not be zero
+Result is identity element
 string(64) "e2f2ae0a6abc4e71a884a961c500515f58e30b6aa582dd8db6a65945e08d2d76"
 string(64) "6a493210f7499cd17fecb510ae0cea23a110e8d5b901f8acadd3095c73a3b919"
 string(64) "94741f5d5d52755ece4f23f044ee27d5d1ea1e2bd196b462166b16152a9d0259"

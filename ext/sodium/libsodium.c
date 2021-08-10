@@ -2585,7 +2585,7 @@ PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255)
 	q = zend_string_alloc(crypto_scalarmult_ristretto255_BYTES, 0);
 	if (crypto_scalarmult_ristretto255((unsigned char *) ZSTR_VAL(q), n, p) != 0) {
 		zend_string_efree(q);
-		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		zend_throw_exception(sodium_exception_ce, "Result is identity element", 0);
 		RETURN_THROWS();
 	}
 	ZSTR_VAL(q)[crypto_scalarmult_ristretto255_BYTES] = 0;
@@ -2612,7 +2612,7 @@ PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255_base)
 	q = zend_string_alloc(crypto_scalarmult_ristretto255_BYTES, 0);
 	if (crypto_scalarmult_ristretto255_base((unsigned char *) ZSTR_VAL(q), n) != 0) {
 		zend_string_efree(q);
-		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		zend_argument_error(sodium_exception_ce, 1, "must not be zero", 0);
 		RETURN_THROWS();
 	}
 	ZSTR_VAL(q)[crypto_scalarmult_BYTES] = 0;

@@ -128,7 +128,7 @@ bool(false)
 bool(false)
 string(64) "3066f82a1a747d45120d1740f14358531a8f04bbffe6a819f86dfe50f44a0a46"
 bool(true)
-internal error
+Result is identity element
 bool(true)
 bool(false)
 bool(true)
