@@ -119,7 +119,7 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_AES_192_CBC,
 	PHP_OPENSSL_CIPHER_AES_256_CBC,
 
-	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
+	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_AES_128_CBC
 };
 
 /* Add some encoding rules.  This is normally handled through filters

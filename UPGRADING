@@ -115,6 +115,9 @@ PHP 8.1 UPGRADE NOTES
 - OpenSSL:
   . EC private keys will now be exported in PKCS#8 format rather than
     traditional format, just like all other keys.
+  . openssl_pkcs7_encrypt() and openssl_cms_encrypt() will now default to
+    using AES-128-CBC rather than RC2-40. The RC2-40 cipher is considered
+    insecure and not enabled by default in OpenSSL 3.
 
 - PDO:
   . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
@@ -573,6 +576,9 @@ PHP 8.1 UPGRADE NOTES
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
+  . OpenSSL 3.0 is now supported. Be aware that many ciphers are no longer
+    enabled by default (part of the legacy provider), and that parameter
+    validation (e.g. minimum key sizes) is stricter now.
 
 - Phar:
   . Use SHA256 by default for signature.
