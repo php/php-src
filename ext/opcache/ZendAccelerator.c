@@ -750,7 +750,7 @@ static void accel_allocate_ce_cache_slots(void)
 
 		ce = (zend_class_entry*)Z_PTR(p->val);
 		if (ce->name) {
-			zend_accel_get_class_name_map_ptr(ce->name, ce, /* have_xlat */ false);
+			zend_accel_get_class_name_map_ptr(ce->name);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
