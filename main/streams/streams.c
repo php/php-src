@@ -1144,12 +1144,7 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		buf += justwrote;
 		count -= justwrote;
 		didwrite += justwrote;
-
-		/* Only screw with the buffer if we can seek, otherwise we lose data
-		 * buffered from fifos and sockets */
-		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-			stream->position += justwrote;
-		}
+		stream->position += justwrote;
 	}
 
 	return didwrite;
