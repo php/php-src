@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0beta3
 
+- Core:
+  . Fixed bug #81342 (New ampersand token parsing depends on new line after it).
+    (Nikita)
+
 - Date:
   . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)
   . Fixed bug #80963 (DateTimeZone::getTransitions() truncated). (Derick)

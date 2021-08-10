@@ -1858,7 +1858,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"{TABS_AND_SPACES}("$"|"...") {
+<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
