@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #81349 (mb_detect_encoding misdetcts ASCII in some cases).
     (Nikita)
 
+- PDO PgSQL:
+  . Fixed bug #81343 (pdo_pgsql: Inconsitent boolean conversion after calling
+    closeCursor()). (Philip Hofstetter)
+
 - Phar:
   . Use SHA256 by default for signature. (remi)
   . Add support for OpenSSL_SHA256 and OpenSSL_SHA512 signature. (remi)

@@ -240,8 +240,8 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
-		stmt->column_count = (int) PQnfields(S->result);
+	stmt->column_count = (int) PQnfields(S->result);
+	if (S->cols == NULL) {
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
 
@@ -674,12 +674,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
-	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-
-	if (S->cols != NULL){
-		efree(S->cols);
-		S->cols = NULL;
-	}
 	return 1;
 }
 
