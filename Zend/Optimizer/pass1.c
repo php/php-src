@@ -338,8 +338,7 @@ constant_binary_op:
 			}
 
 			/* define("name", scalar); */
-			if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("define")-1 &&
-			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), Z_STRLEN(ZEND_OP2_LITERAL(init_opline)), "define", sizeof("define")-1) == 0) {
+			if (zend_string_equals_literal_ci(Z_STR(ZEND_OP2_LITERAL(init_opline)), "define")) {
 
 				if (Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING &&
 				    send2_opline &&

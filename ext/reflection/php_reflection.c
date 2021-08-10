@@ -2618,14 +2618,14 @@ ZEND_METHOD(ReflectionParameter, getClass)
 		zend_string *class_name;
 
 		class_name = ZEND_TYPE_NAME(param->arg_info->type);
-		if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "self", sizeof("self")- 1)) {
+		if (zend_string_equals_literal_ci(class_name, "self")) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses \"self\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
-		} else if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "parent", sizeof("parent")- 1)) {
+		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
