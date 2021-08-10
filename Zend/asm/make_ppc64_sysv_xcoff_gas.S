@@ -34,7 +34,7 @@
     std  0, 184(3)
 
     # zero in r3 indicates first jump to context-function
-    std  %r0, 152(%r3)
+    std  0, 152(3)
 
     # load LR
     mflr  0
