@@ -2588,7 +2588,7 @@ PHP_FUNCTION(sodium_crypto_scalarmult_ristretto255)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	ZSTR_VAL(q)[crypto_scalarmult_BYTES] = 0;
+	ZSTR_VAL(q)[crypto_scalarmult_ristretto255_BYTES] = 0;
 
 	RETURN_NEW_STR(q);
 }
