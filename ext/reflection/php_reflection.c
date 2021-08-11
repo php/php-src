@@ -1346,7 +1346,7 @@ static reflection_type_kind get_type_kind(zend_type type) {
 
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
 		/* BC support for 'iterable' type */
-		if (type_mask_without_null == (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
+		if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
 			return NAMED_TYPE;
 		}
 		if (type_mask_without_null != 0) {
@@ -1378,10 +1378,6 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 			reflection_instantiate(reflection_intersection_type_ptr, object);
 			break;
 		case UNION_TYPE:
-			/* Clear fake iterable type */
-			if ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_ITERABLE) != 0) {
-				ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_ITERABLE;
-			}
 			reflection_instantiate(reflection_union_type_ptr, object);
 			break;
 		case NAMED_TYPE:
@@ -2735,6 +2731,11 @@ ZEND_METHOD(ReflectionParameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
+	/* BC For iterable */
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(param->arg_info->type)) {
+		RETURN_FALSE;
+	}
+
 	type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(param->arg_info->type);
 	RETVAL_BOOL(type_mask == MAY_BE_ARRAY);
 }
@@ -3017,7 +3018,7 @@ ZEND_METHOD(ReflectionType, allowsNull)
 
 /* BC for iterable */
 static zend_string *zend_type_to_string_ex(zend_type type) {
-	if (UNEXPECTED((ZEND_TYPE_PURE_MASK(type) & MAY_BE_ITERABLE) != 0)) {
+	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
 		return ZSTR_KNOWN(ZEND_STR_ITERABLE);
 	}
 	return zend_type_to_string(type);
@@ -3119,9 +3120,6 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		append_type_mask(return_value, MAY_BE_CALLABLE);
-	}
-	if (type_mask & MAY_BE_ITERABLE) {
-		append_type_mask(return_value, MAY_BE_ITERABLE);
 	}
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);

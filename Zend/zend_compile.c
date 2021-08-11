@@ -6149,8 +6149,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE), 0, 0);
 				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_NAME_BIT;
 				ZEND_TYPE_FULL_MASK(iterable) |= MAY_BE_ARRAY;
-				/* Set MAY_BE_ITERABLE for BC compat during Reflection */
-				ZEND_TYPE_FULL_MASK(iterable) |= MAY_BE_ITERABLE;
+				/* Set iterable bit for BC compat during Reflection */
+				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_ITERABLE_BIT;
 				/* Inform that the type list is a union type */
 				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_UNION_BIT;
 				return iterable;

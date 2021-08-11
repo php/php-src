@@ -144,7 +144,7 @@ typedef struct {
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
-/* TODO: bit 21 is not used */
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Whether the type list is an intersection type */
@@ -169,6 +169,9 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+
+#define ZEND_TYPE_IS_ITERABLE_FALLBACK(t) \
+	((((t).type_mask) & _ZEND_TYPE_ITERABLE_BIT) != 0)
 
 #define ZEND_TYPE_IS_INTERSECTION(t) \
 	((((t).type_mask) & _ZEND_TYPE_INTERSECTION_BIT) != 0)

@@ -80,8 +80,8 @@ Allows null: false
   Name: X
   String: X
   Allows Null: false
-  Name: Traversable
-  String: Traversable
+  Name: iterable
+  String: iterable
   Allows Null: false
   Name: array
   String: array

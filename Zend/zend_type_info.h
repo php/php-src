@@ -38,8 +38,6 @@
 /* These are used in zend_type, but not for type inference.
  * They are allowed to overlap with types used during inference. */
 #define MAY_BE_CALLABLE             (1 << IS_CALLABLE)
-/* Kept as BC for reflection */
-#define MAY_BE_ITERABLE             (1 << IS_ITERABLE)
 #define MAY_BE_VOID                 (1 << IS_VOID)
 #define MAY_BE_NEVER                (1 << IS_NEVER)
 #define MAY_BE_STATIC               (1 << IS_STATIC)
