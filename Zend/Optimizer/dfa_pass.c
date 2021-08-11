@@ -1207,6 +1207,24 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 								ssa->ops[op_1].op2_use = -1;
 								ssa->ops[op_1].op2_use_chain = -1;
 							}
+						} else if (opline->opcode == ZEND_MUL
+						 && (OP2_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+							zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+
+							if ((Z_TYPE_INFO_P(zv) == IS_LONG
+							  && Z_LVAL_P(zv) == 2)
+							 || (Z_TYPE_INFO_P(zv) == IS_DOUBLE
+							  && Z_DVAL_P(zv) == 2.0
+							  && !(OP2_INFO() & MAY_BE_LONG))) {
+
+// op_1: #v.? = MUL 2, #x.? [double,long] => #v.? = ADD #x.?, #x.?
+
+								opline->opcode = ZEND_ADD;
+								opline->op1_type = opline->op2_type;
+								opline->op1.var = opline->op2.var;
+								ssa->ops[op_1].op1_use = ssa->ops[op_1].op2_use;
+								ssa->ops[op_1].op1_use_chain = ssa->ops[op_1].op2_use_chain;
+							}
 						}
 					} else if (opline->op1_type != IS_CONST && opline->op2_type == IS_CONST) {
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
@@ -1233,6 +1251,24 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 								opline->opcode = ZEND_QM_ASSIGN;
 								opline->op2_type = IS_UNUSED;
 								opline->op2.num = 0;
+							}
+						} else if (opline->opcode == ZEND_MUL
+						 && (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+							zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
+
+							if ((Z_TYPE_INFO_P(zv) == IS_LONG
+							  && Z_LVAL_P(zv) == 2)
+							 || (Z_TYPE_INFO_P(zv) == IS_DOUBLE
+							  && Z_DVAL_P(zv) == 2.0
+							  && !(OP1_INFO() & MAY_BE_LONG))) {
+
+// op_1: #v.? = MUL #x.? [double,long], 2 => #v.? = ADD #x.?, #x.?
+
+								opline->opcode = ZEND_ADD;
+								opline->op2_type = opline->op1_type;
+								opline->op2.var = opline->op1.var;
+								ssa->ops[op_1].op2_use = ssa->ops[op_1].op1_use;
+								ssa->ops[op_1].op2_use_chain = ssa->ops[op_1].op1_use_chain;
 							}
 						}
 					}
