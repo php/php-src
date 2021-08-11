@@ -83,9 +83,6 @@ Allows null: false
   Name: iterable
   String: iterable
   Allows Null: false
-  Name: array
-  String: array
-  Allows Null: false
   Name: bool
   String: bool
   Allows Null: false
