@@ -29,6 +29,7 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
+#include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
 #include "snmp_arginfo.h"
 
@@ -936,7 +937,37 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 		return true;
 	}
 
-	zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
+#ifdef HAVE_SNMP_SHA256
+	if (zend_string_equals_literal_ci(prot, "SHA256")) {
+		s->securityAuthProto = usmHMAC192SHA256AuthProtocol;
+		s->securityAuthProtoLen = sizeof(usmHMAC192SHA256AuthProtocol) / sizeof(oid);
+		return true;
+	}
+#endif
+
+#ifdef HAVE_SNMP_SHA512
+	if (zend_string_equals_literal_ci(prot, "SHA512")) {
+		s->securityAuthProto = usmHMAC384SHA512AuthProtocol;
+		s->securityAuthProtoLen = sizeof(usmHMAC384SHA512AuthProtocol) / sizeof(oid);
+		return true;
+	}
+#endif
+
+	smart_string err = {0};
+
+	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+#ifdef HAVE_SNMP_SHA256
+	smart_string_appends(&err, " or \"SHA256\"");
+#endif
+#ifdef HAVE_SNMP_SHA512
+	smart_string_appends(&err, " or \"SHA512\"");
+#endif
+#ifndef DISABLE_MD5
+	smart_string_appends(&err, " or \"MD5\"");
+#endif
+	smart_string_0(&err);
+	zend_value_error("%s", err.c);
+	smart_string_free(&err);
 	return false;
 }
 /* }}} */
