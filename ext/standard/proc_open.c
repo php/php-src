@@ -588,7 +588,7 @@ static void init_process_info(PROCESS_INFORMATION *pi)
 	memset(&pi, 0, sizeof(pi));
 }
 
-static int convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
+static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
 	size_t len = sizeof(COMSPEC_NT) + sizeof(" /s /c ") + cmdw_len + 3;
 	wchar_t *cmdw_shell = (wchar_t *)malloc(len * sizeof(wchar_t));
@@ -659,7 +659,7 @@ static zend_string* get_string_parameter(zval *array, int index, char *param_nam
 	return zval_try_get_string(array_item);
 }
 
-static int set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
+static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 {
 #ifdef PHP_WIN32
 	desc->childend = CreateFileA("nul", GENERIC_READ | GENERIC_WRITE,
@@ -678,7 +678,7 @@ static int set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 	return SUCCESS;
 }
 
-static int set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd, int *slave_fd)
+static zend_result set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd, int *slave_fd)
 {
 #if HAVE_OPENPTY
 	/* All FDs set to PTY in the child process will go to the slave end of the same PTY.
@@ -717,7 +717,7 @@ static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
 #endif
 }
 
-static int set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *zmode)
+static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *zmode)
 {
 	php_file_descriptor_t newpipe[2];
 
@@ -754,7 +754,7 @@ static int set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *z
 #define create_socketpair(socks) socketpair(AF_UNIX, SOCK_STREAM, 0, (socks))
 #endif
 
-static int set_proc_descriptor_to_socket(descriptorspec_item *desc)
+static zend_result set_proc_descriptor_to_socket(descriptorspec_item *desc)
 {
 	php_socket_t sock[2];
 
@@ -774,7 +774,7 @@ static int set_proc_descriptor_to_socket(descriptorspec_item *desc)
 	return SUCCESS;
 }
 
-static int set_proc_descriptor_to_file(descriptorspec_item *desc, zend_string *file_path,
+static zend_result set_proc_descriptor_to_file(descriptorspec_item *desc, zend_string *file_path,
 	zend_string *file_mode)
 {
 	php_socket_t fd;
@@ -807,7 +807,7 @@ static int set_proc_descriptor_to_file(descriptorspec_item *desc, zend_string *f
 	return SUCCESS;
 }
 
-static int dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t *to,
+static zend_result dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t *to,
 	zend_ulong nindex)
 {
 #ifdef PHP_WIN32
@@ -827,7 +827,7 @@ static int dup_proc_descriptor(php_file_descriptor_t from, php_file_descriptor_t
 	return SUCCESS;
 }
 
-static int redirect_proc_descriptor(descriptorspec_item *desc, int target,
+static zend_result redirect_proc_descriptor(descriptorspec_item *desc, int target,
 	descriptorspec_item *descriptors, int ndesc, int nindex)
 {
 	php_file_descriptor_t redirect_to = PHP_INVALID_FD;
@@ -863,7 +863,7 @@ static int redirect_proc_descriptor(descriptorspec_item *desc, int target,
 }
 
 /* Process one item from `$descriptorspec` argument to `proc_open` */
-static int set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *descriptors,
+static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *descriptors,
 	int ndesc, int nindex, int *pty_master_fd, int *pty_slave_fd) {
 	zend_string *ztype = get_string_parameter(descitem, 0, "handle qualifier");
 	if (!ztype) {
@@ -871,7 +871,8 @@ static int set_proc_descriptor_from_array(zval *descitem, descriptorspec_item *d
 	}
 
 	zend_string *zmode = NULL, *zfile = NULL;
-	int retval = FAILURE;
+	zend_result retval = FAILURE;
+
 	if (zend_string_equals_literal(ztype, "pipe")) {
 		/* Set descriptor to pipe */
 		zmode = get_string_parameter(descitem, 1, "mode parameter for 'pipe'");
@@ -923,7 +924,7 @@ finish:
 	return retval;
 }
 
-static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item *desc, int nindex)
+static zend_result set_proc_descriptor_from_resource(zval *resource, descriptorspec_item *desc, int nindex)
 {
 	/* Should be a stream - try and dup the descriptor */
 	php_stream *stream = (php_stream*)zend_fetch_resource(Z_RES_P(resource), "stream",
@@ -933,7 +934,7 @@ static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item
 	}
 
 	php_socket_t fd;
-	int status = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS);
+	zend_result status = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS);
 	if (status == FAILURE) {
 		return FAILURE;
 	}
@@ -943,15 +944,11 @@ static int set_proc_descriptor_from_resource(zval *resource, descriptorspec_item
 #else
 	php_file_descriptor_t fd_t = fd;
 #endif
-	if (dup_proc_descriptor(fd_t, &desc->childend, nindex) == FAILURE) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return dup_proc_descriptor(fd_t, &desc->childend, nindex);
 }
 
 #ifndef PHP_WIN32
-static int close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc)
+static zend_result close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc)
 {
 	/* We are running in child process
 	 * Close the 'parent end' of pipes which were opened before forking/spawning
