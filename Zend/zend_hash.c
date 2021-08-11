@@ -999,7 +999,8 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	}
 
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
-		if (h < ht->nNumUsed) {
+		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) != (HASH_ADD_NEW|HASH_ADD_NEXT)
+		 && h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				if (flag & HASH_LOOKUP) {
