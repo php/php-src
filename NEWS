@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #81349 (mb_detect_encoding misdetcts ASCII in some cases).
     (Nikita)
 
+- SNMP:
+  . Implement SHA256 and SHA512 for security protocol. (remi)
+
 05 Aug 2021, PHP 8.1.0beta2
 
 - Core:
