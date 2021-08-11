@@ -99,7 +99,7 @@ static int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
 	if (c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
+		CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
 	}
 	return c;
 }

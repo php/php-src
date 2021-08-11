@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #81106 (Regression in 8.1: add() now truncate ->f). (Derick)
   . Fixed bug #81273 (Date interval calculation not correct). (Derick)
 
+- Mbstring:
+  . Fixed bug #81349 (mb_detect_encoding misdetcts ASCII in some cases).
+    (Nikita)
 
 05 Aug 2021, PHP 8.1.0beta2
 
