@@ -12,7 +12,7 @@
     # reserve space on stack
     subi  1, 1, 184
 
-    std  13, 0(1)  # save R13
+    std  2, 0(1)  # save TOC
     std  14, 8(1)  # save R14
     std  15, 16(1)  # save R15
     std  16, 24(1)  # save R16
@@ -48,7 +48,7 @@
     # restore RSP (pointing to context-data) from R4
     mr  1, 4
 
-    ld  13, 0(1)  # restore R13
+    ld  2, 0(1)  # restore TOC
     ld  14, 8(1)  # restore R14
     ld  15, 16(1)  # restore R15
     ld  16, 24(1)  # restore R16
