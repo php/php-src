@@ -858,7 +858,7 @@ static int zend_inference_calc_binary_op_range(
 	return 0;
 }
 
-int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp)
+static int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp)
 {
 	uint32_t line;
 	zend_op *opline;
@@ -1549,7 +1549,7 @@ ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_
 	return 0;
 }
 
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
+static void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow)
 {
 	if (underflow) {
 		min = ZEND_LONG_MIN;
@@ -1565,7 +1565,7 @@ void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int
 	LOG_SSA_RANGE("  change range (init      SCC %2d) %2d [%s%ld..%ld%s]\n", ssa->vars[var].scc, var, (underflow?"-- ":""), min, max, (overflow?" ++":""));
 }
 
-int zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r)
+static int zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r)
 {
 	if (!var_info->has_range) {
 		var_info->has_range = 1;
@@ -1606,7 +1606,7 @@ static int zend_ssa_range_widening(const zend_op_array *op_array, zend_ssa *ssa,
 	return 0;
 }
 
-int zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r)
+static int zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r)
 {
 	if (!var_info->has_range) {
 		var_info->has_range = 1;
@@ -3728,7 +3728,7 @@ static zend_class_entry *join_class_entries(
 	return ce1;
 }
 
-int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
+static int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -4091,11 +4091,11 @@ ZEND_API void zend_init_func_return_info(
 	ret->has_range = 0;
 }
 
-void zend_func_return_info(const zend_op_array   *op_array,
-                           const zend_script     *script,
-                           int                    recursive,
-                           int                    widening,
-                           zend_ssa_var_info     *ret)
+static void zend_func_return_info(const zend_op_array   *op_array,
+                                  const zend_script     *script,
+                                  int                    recursive,
+                                  int                    widening,
+                                  zend_ssa_var_info     *ret)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_ssa *ssa = &info->ssa;
@@ -4506,37 +4506,6 @@ ZEND_API int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_arra
 	return SUCCESS;
 }
 /* }}} */
-
-void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
-{
-	zend_func_info *info = ZEND_FUNC_INFO(op_array);
-	zend_call_info *call_info;
-	zend_bitset worklist;
-	int worklist_len, i;
-	ALLOCA_FLAG(use_heap);
-
-	if (!info->ssa.var_info || !(info->flags & ZEND_FUNC_RECURSIVE)) {
-		return;
-	}
-	worklist_len = zend_bitset_len(info->ssa.vars_count);
-	worklist = do_alloca(sizeof(zend_ulong) * worklist_len, use_heap);
-	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
-	call_info = info->callee_info;
-	while (call_info) {
-		if (call_info->recursive && call_info->caller_call_opline &&
-		    info->ssa.ops[call_info->caller_call_opline - op_array->opcodes].result_def >= 0) {
-			zend_bitset_incl(worklist, info->ssa.ops[call_info->caller_call_opline - op_array->opcodes].result_def);
-		}
-		call_info = call_info->next_callee;
-	}
-	WHILE_WORKLIST(worklist, worklist_len, i) {
-		if (!info->ssa.var_info[i].recursive) {
-			info->ssa.var_info[i].recursive = 1;
-			add_usages(op_array, &info->ssa, worklist, i);
-		}
-	} WHILE_WORKLIST_END();
-	free_alloca(worklist, use_heap);
-}
 
 ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2)
 {
