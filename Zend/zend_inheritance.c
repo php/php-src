@@ -165,43 +165,43 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		ce->__debugInfo = parent->__debugInfo;
 	}
 	if (EXPECTED(!ce->__add)) {
-	    ce->__add = parent->__add;
+		ce->__add = parent->__add;
 	}
 	if (EXPECTED(!ce->__sub)) {
-	    ce->__sub = parent->__sub;
+		ce->__sub = parent->__sub;
 	}
 	if (EXPECTED(!ce->__mul)) {
-	    ce->__mul = parent->__mul;
+		ce->__mul = parent->__mul;
 	}
 	if (EXPECTED(!ce->__div)) {
-	    ce->__div = parent->__div;
+		ce->__div = parent->__div;
 	}
 	if (EXPECTED(!ce->__mod)) {
-	    ce->__mod = parent->__mod;
+		ce->__mod = parent->__mod;
 	}
 	if (EXPECTED(!ce->__pow)) {
-	    ce->__pow = parent->__pow;
+		ce->__pow = parent->__pow;
 	}
 	if (EXPECTED(!ce->__equals)) {
-	    ce->__equals = parent->__equals;
+		ce->__equals = parent->__equals;
 	}
 	if (EXPECTED(!ce->__notequals)) {
-	    ce->__notequals = parent->__notequals;
+		ce->__notequals = parent->__notequals;
 	}
 	if (EXPECTED(!ce->__lessthan)) {
-	    ce->__lessthan = parent->__lessthan;
+		ce->__lessthan = parent->__lessthan;
 	}
 	if (EXPECTED(!ce->__lessthanoreq)) {
-	    ce->__lessthanoreq = parent->__lessthanoreq;
+		ce->__lessthanoreq = parent->__lessthanoreq;
 	}
 	if (EXPECTED(!ce->__greaterthan)) {
-	    ce->__greaterthan = parent->__greaterthan;
+		ce->__greaterthan = parent->__greaterthan;
 	}
 	if (EXPECTED(!ce->__greaterthanoreq)) {
-	    ce->__greaterthanoreq = parent->__greaterthanoreq;
+		ce->__greaterthanoreq = parent->__greaterthanoreq;
 	}
 	if (EXPECTED(!ce->__compareto)) {
-	    ce->__compareto = parent->__compareto;
+		ce->__compareto = parent->__compareto;
 	}
 
 	if (ce->constructor) {

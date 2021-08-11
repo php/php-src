@@ -774,6 +774,9 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_unhandled_match_error = register_class_UnhandledMatchError(zend_ce_error);
 	zend_ce_unhandled_match_error->create_object = zend_default_exception_new;
 
+	zend_ce_operator_error = register_class_InvalidOperator(zend_ce_error);
+	zend_ce_operator_error->create_object = zend_default_exception_new;
+
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 
 	INIT_CLASS_ENTRY(zend_ce_graceful_exit, "GracefulExit", NULL);

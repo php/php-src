@@ -223,6 +223,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	zend_bool is_retry = 0;
 	zend_object *zobj;
 	zend_class_entry *ce;
+	char *operator;
 
 	if(Z_TYPE_P(op1) == IS_OBJECT) {
 		zobj = Z_OBJ_P(op1);
@@ -230,74 +231,97 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	} else if(Z_TYPE_P(op2) == IS_OBJECT) {
 		zobj = Z_OBJ_P(op2);
 		ce = Z_OBJCE_P(op2);
+		is_retry = 1;
 	}
 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
 
-	zval params[1];
-	params[0] = *op2;
+	zval params[2];
+	zval *left;
 
 	fci.param_count = 1;
-	fci.params = params;
 	fci.size = sizeof(fci);
 	fci.retval = result;
 
 	do {
 		fci.object = zobj;
 
+		Z_TYPE_INFO_P(left) = is_retry ? IS_FALSE : IS_TRUE;
+
+		if (zobj == Z_OBJ_P(op1)) {
+			params[0] = *op2;
+			params[1] = *left;
+		} else {
+			params[0] = *op1;
+			params[1] = *left;
+		}
+
+		fci.params = params;
+
 		switch (opcode) {
 			case ZEND_ADD:
 				fcic.function_handler = ce->__add;
+				operator = "+";
 				break;
 
 			case ZEND_SUB:
 				fcic.function_handler = ce->__sub;
+				operator = "-";
 				break;
 
 			case ZEND_MUL:
 				fcic.function_handler = ce->__mul;
+				operator = "*";
 				break;
 
 			case ZEND_DIV:
 				fcic.function_handler = ce->__div;
+				operator = "/";
 				break;
 
 			case ZEND_MOD:
 				fcic.function_handler = ce->__mod;
+				operator = "%";
 				break;
 
 			case ZEND_POW:
 				fcic.function_handler = ce->__pow;
+				operator = "**";
 				break;
 
 			case ZEND_IS_EQUAL:
 				fcic.function_handler = ce->__equals;
+				operator = "==";
 				break;
 
 			case ZEND_IS_NOT_EQUAL:
 				fcic.function_handler = ce->__notequals;
+				operator = "!=";
 				break;
 
 			case ZEND_IS_SMALLER:
 				fcic.function_handler = ce->__lessthan;
+				operator = "<";
 				break;
 
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				fcic.function_handler = ce->__lessthanoreq;
+				operator = "<=";
 				break;
 
 			case ZEND_IS_LARGER:
 				fcic.function_handler = ce->__greaterthan;
+				operator = ">";
 				break;
 
 			case ZEND_IS_LARGER_OR_EQUAL:
 				fcic.function_handler = ce->__greaterthanoreq;
+				operator = ">=";
 				break;
 
 			default:
 				return FAILURE;
-				break;
 		}
 
 		if (fcic.function_handler == NULL)
@@ -309,7 +333,11 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				continue;
 			}
 
-			return zend_std_compare_objects(op1, op2);
+			if (ce->type != ZEND_INTERNAL_CLASS) {
+				zend_throw_exception_ex(zend_ce_operator_error, 0, "Operator '%s' unsupported by class %s", operator, ZSTR_VAL(ce->name));
+			}
+
+			return FAILURE;
 		}
 
 		fcic.called_scope = ce;

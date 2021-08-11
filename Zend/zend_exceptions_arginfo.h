@@ -187,6 +187,10 @@ static const zend_function_entry class_UnhandledMatchError_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_InvalidOperator_methods[] = {
+		ZEND_FE_END
+};
+
 static zend_class_entry *register_class_Throwable(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
@@ -391,6 +395,16 @@ static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", class_UnhandledMatchError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_InvalidOperator(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "InvalidOperator", class_InvalidOperator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
 
 	return class_entry;
