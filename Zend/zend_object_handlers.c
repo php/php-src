@@ -218,6 +218,108 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 }
 /* }}} */
 
+static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_bool is_retry = 0;
+	zend_object *zobj;
+	zend_class_entry *ce;
+
+	if(Z_TYPE_P(op1) == IS_OBJECT) {
+		zobj = Z_OBJ_P(op1);
+		ce = Z_OBJCE_P(op1);
+	} else if(Z_TYPE_P(op2) == IS_OBJECT) {
+		zobj = Z_OBJ_P(op2);
+		ce = Z_OBJCE_P(op2);
+	}
+
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcic;
+
+	zval params[1];
+	params[0] = *op2;
+
+	fci.param_count = 1;
+	fci.params = params;
+	fci.size = sizeof(fci);
+	fci.retval = result;
+
+	do {
+		fci.object = zobj;
+
+		switch (opcode) {
+			case ZEND_ADD:
+				fcic.function_handler = ce->__add;
+				break;
+
+			case ZEND_SUB:
+				fcic.function_handler = ce->__sub;
+				break;
+
+			case ZEND_MUL:
+				fcic.function_handler = ce->__mul;
+				break;
+
+			case ZEND_DIV:
+				fcic.function_handler = ce->__div;
+				break;
+
+			case ZEND_MOD:
+				fcic.function_handler = ce->__mod;
+				break;
+
+			case ZEND_POW:
+				fcic.function_handler = ce->__pow;
+				break;
+
+			case ZEND_IS_EQUAL:
+				fcic.function_handler = ce->__equals;
+				break;
+
+			case ZEND_IS_NOT_EQUAL:
+				fcic.function_handler = ce->__notequals;
+				break;
+
+			case ZEND_IS_SMALLER:
+				fcic.function_handler = ce->__lessthan;
+				break;
+
+			case ZEND_IS_SMALLER_OR_EQUAL:
+				fcic.function_handler = ce->__lessthanoreq;
+				break;
+
+			case ZEND_IS_LARGER:
+				fcic.function_handler = ce->__greaterthan;
+				break;
+
+			case ZEND_IS_LARGER_OR_EQUAL:
+				fcic.function_handler = ce->__greaterthanoreq;
+				break;
+
+			default:
+				return FAILURE;
+				break;
+		}
+
+		if (fcic.function_handler == NULL)
+		{
+			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT && !is_retry) {
+				zobj = Z_OBJ_P(op2);
+				ce = Z_OBJCE_P(op2);
+				is_retry = 1;
+				continue;
+			}
+
+			return zend_std_compare_objects(op1, op2);
+		}
+
+		fcic.called_scope = ce;
+		fcic.object = zobj;
+		fcic.function_handler->type = ZEND_USER_FUNCTION;
+		int tmp = zend_call_function(&fci, &fcic);
+
+		return tmp;
+	} while(1);
+}
 
 static zend_always_inline bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
 {
@@ -1571,6 +1673,62 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
+static int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
+{
+	zend_bool is_retry = 0;
+	zend_object *zobj;
+	zend_class_entry *ce;
+
+	if(Z_TYPE_P(o1) == IS_OBJECT) {
+		zobj = Z_OBJ_P(o1);
+		ce = Z_OBJCE_P(o1);
+	} else if(Z_TYPE_P(o2) == IS_OBJECT) {
+		zobj = Z_OBJ_P(o2);
+		ce = Z_OBJCE_P(o2);
+	}
+
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcic;
+	zval *result;
+
+	zval params[1];
+	params[0] = *o2;
+
+	fci.param_count = 1;
+	fci.params = params;
+	fci.size = sizeof(fci);
+	fci.retval = result;
+
+	do {
+		fci.object = zobj;
+		fcic.function_handler = ce->__compareto;
+
+		if (fcic.function_handler == NULL)
+		{
+			if(zobj == Z_OBJ_P(o1) && Z_TYPE_P(o2) == IS_OBJECT && !is_retry) {
+				zobj = Z_OBJ_P(o2);
+				ce = Z_OBJCE_P(o2);
+				is_retry = 1;
+				continue;
+			}
+
+			return zend_std_compare_objects(o1, o2);
+		}
+
+		fcic.called_scope = ce;
+		fcic.object = zobj;
+		fcic.function_handler->type = ZEND_USER_FUNCTION;
+		int tmp = zend_call_function(&fci, &fcic);
+
+		if (tmp == SUCCESS) {
+			return result->value.lval;
+		} else {
+			return ZEND_UNCOMPARABLE;
+		}
+	} while(1);
+}
+/* }}} */
+
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
@@ -1928,7 +2086,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
-	NULL,									/* do_operation */
-	zend_std_compare_objects,				/* compare */
+	zend_std_call_op_override,									/* do_operation */
+	zend_std_user_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
 };

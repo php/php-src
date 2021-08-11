@@ -286,7 +286,9 @@ END_EXTERN_C()
 #define ZEND_FETCH_GLOBALS              200
 #define ZEND_VERIFY_NEVER_TYPE          201
 #define ZEND_CALLABLE_CONVERT           202
+#define ZEND_IS_LARGER                  203
+#define ZEND_IS_LARGER_OR_EQUAL         204
 
-#define ZEND_VM_LAST_OPCODE             202
+#define ZEND_VM_LAST_OPCODE             204
 
 #endif

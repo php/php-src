@@ -1874,6 +1874,19 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__serialize = NULL;
 		ce->__unserialize = NULL;
 		ce->__debugInfo = NULL;
+		ce->__add = NULL;
+		ce->__sub = NULL;
+		ce->__mul = NULL;
+		ce->__div = NULL;
+		ce->__mod = NULL;
+		ce->__pow = NULL;
+		ce->__equals = NULL;
+		ce->__notequals = NULL;
+		ce->__lessthan = NULL;
+		ce->__lessthanoreq = NULL;
+		ce->__greaterthan = NULL;
+		ce->__greaterthanoreq = NULL;
+		ce->__compareto = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
 		ce->iterator_funcs_ptr = NULL;
@@ -8638,6 +8651,12 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
 		zval_ptr_dtor(&left_node.u.constant);
 		zval_ptr_dtor(&right_node.u.constant);
 		return;
+	}
+
+	if (left_node.op_type == IS_OBJECT || right_node.op_type == IS_OBJECT) {
+		zend_emit_op_tmp(result,
+			ast->kind == ZEND_AST_GREATER ? ZEND_IS_LARGER : ZEND_IS_LARGER_OR_EQUAL,
+			&left_node, &right_node);
 	}
 
 	zend_emit_op_tmp(result,
