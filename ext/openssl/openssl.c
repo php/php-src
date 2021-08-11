@@ -3440,7 +3440,9 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	}
 
 	/* Retrieve the public key from the CSR */
-	EVP_PKEY *tpubkey = php_openssl_extract_public_key(X509_REQ_get_pubkey(csr));
+	EVP_PKEY *orig_key = X509_REQ_get_pubkey(csr);
+	EVP_PKEY *tpubkey = php_openssl_extract_public_key(orig_key);
+	EVP_PKEY_free(orig_key);
 
 	if (csr_str) {
 		/* We need to free the original CSR if it was freshly created */
@@ -4305,6 +4307,7 @@ static bool php_openssl_pkey_init_legacy_ec(EC_KEY *eckey, zval *data, bool *is_
 		php_openssl_store_errors();
 	}
 	if (EC_KEY_check_key(eckey)) {
+		EC_GROUP_free(group);
 		return true;
 	} else {
 		php_openssl_store_errors();
