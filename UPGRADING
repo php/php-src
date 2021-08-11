@@ -569,6 +569,10 @@ PHP 8.1 UPGRADE NOTES
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
 
+- Phar:
+  . Use SHA256 by default for signature.
+  . Add support for OpenSSL_SHA256 and OpenSSL_SHA512 signature.
+
 - SNMP:
   . add SHA256 and SHA512 for security protocol.
 
