@@ -966,7 +966,7 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 	smart_string_appends(&err, " or \"MD5\"");
 #endif
 	smart_string_0(&err);
-	zend_value_error(err.c);
+	zend_value_error("%s", err.c);
 	smart_string_free(&err);
 	return false;
 }
