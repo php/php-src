@@ -1,5 +1,7 @@
 --TEST--
 Bug #81349: mb_detect_encoding misdetcts ASCII in some cases
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
