@@ -814,8 +814,18 @@ type:
 ;
 
 union_type:
-		type '|' type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
-	|	union_type '|' type { $$ = zend_ast_list_add($1, $3); }
+		type '|' type
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	'(' intersection_type ')' '|' type
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $2, $5); }
+	|	type '|' '(' intersection_type ')'
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $4); }
+	|	'(' intersection_type ')' '|' '(' intersection_type ')'
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $2, $6); }
+	|	union_type '|' type
+			{ $$ = zend_ast_list_add($1, $3); }
+	|	union_type '|' '(' intersection_type ')'
+			{ $$ = zend_ast_list_add($1, $4); }
 ;
 
 intersection_type:
@@ -842,8 +852,16 @@ type_without_static:
 union_type_without_static:
 		type_without_static '|' type_without_static
 			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	'(' intersection_type_without_static ')' '|' type_without_static
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $2, $5); }
+	|	type_without_static '|' '(' intersection_type_without_static ')'
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $4); }
+	|	'(' intersection_type_without_static ')' '|' '(' intersection_type_without_static ')'
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $2, $6); }
 	|	union_type_without_static '|' type_without_static
 			{ $$ = zend_ast_list_add($1, $3); }
+	|	union_type_without_static '|' '(' intersection_type_without_static ')'
+			{ $$ = zend_ast_list_add($1, $4); }
 ;
 
 intersection_type_without_static:
