@@ -307,10 +307,16 @@ static void add_token(
 			}
 		}
 	} else if (token_type >= 256) {
-		array_init(&token);
-		add_next_index_long(&token, token_type);
-		add_next_index_str(&token, make_str(text, leng, interned_strings));
-		add_next_index_long(&token, lineno);
+		array_init_size(&token, 3);
+		zend_hash_real_init_packed(Z_ARRVAL(token));
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL(token)) {
+			ZEND_HASH_FILL_SET_LONG(token_type);
+			ZEND_HASH_FILL_NEXT();
+			ZEND_HASH_FILL_SET_STR(make_str(text, leng, interned_strings));
+			ZEND_HASH_FILL_NEXT();
+			ZEND_HASH_FILL_SET_LONG(lineno);
+			ZEND_HASH_FILL_NEXT();
+		} ZEND_HASH_FILL_END();
 	} else {
 		ZVAL_STR(&token, make_str(text, leng, interned_strings));
 	}
