@@ -546,10 +546,10 @@ static zend_string *create_win_command_from_args(HashTable *args)
 
 /* Get a boolean option from the `other_options` array which can be passed to `proc_open`.
  * (Currently, all options apply on Windows only.) */
-static bool get_option(zval *other_options, char *opt_name)
+static bool get_option(zval *other_options, char *opt_name, size_t opt_name_len)
 {
 	HashTable *opt_ary = Z_ARRVAL_P(other_options);
-	zval *item = zend_hash_str_find_deref(opt_ary, opt_name, strlen(opt_name));
+	zval *item = zend_hash_str_find_deref(opt_ary, opt_name, opt_name_len);
 	return item != NULL &&
 		(Z_TYPE_P(item) == IS_TRUE ||
 		((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item)));
@@ -1072,12 +1072,12 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (other_options) {
-		suppress_errors      = get_option(other_options, "suppress_errors");
+		suppress_errors      = get_option(other_options, "suppress_errors", strlen("suppress_errors"));
 		/* TODO: Deprecate in favor of array command? */
-		bypass_shell         = bypass_shell || get_option(other_options, "bypass_shell");
-		blocking_pipes       = get_option(other_options, "blocking_pipes");
-		create_process_group = get_option(other_options, "create_process_group");
-		create_new_console   = get_option(other_options, "create_new_console");
+		bypass_shell         = bypass_shell || get_option(other_options, "bypass_shell", strlen("bypass_shell"));
+		blocking_pipes       = get_option(other_options, "blocking_pipes", strlen("blocking_pipes"));
+		create_process_group = get_option(other_options, "create_process_group", strlen("create_process_group"));
+		create_new_console   = get_option(other_options, "create_new_console", strlen("create_new_console"));
 	}
 #endif
 
