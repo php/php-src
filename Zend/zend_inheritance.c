@@ -430,9 +430,6 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 
 			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
 			fe_ce = lookup_class(fe_scope, fe_class_name);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			if (!proto_ce) proto_ce = lookup_class(proto_scope, proto_class_name);
-			fe_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type in an intersection type is impossible,
 			 * because it would be a fatal compile error */
@@ -456,8 +453,9 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 
 /* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
 static inheritance_status zend_is_class_subtype_of_type(
-		zend_class_entry *fe_scope, zend_string *fe_class_name, zend_class_entry *fe_ce,
+		zend_class_entry *fe_scope, zend_string *fe_class_name,
 		zend_class_entry *proto_scope, zend_type proto_type) {
+	zend_class_entry *fe_ce = NULL;
 	bool have_unresolved = 0;
 
 	/* If the parent has 'object' as a return type, any class satisfies the co-variant check */
@@ -503,9 +501,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 
 			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 			proto_ce = lookup_class(proto_scope, proto_class_name);
-		} else if (ZEND_TYPE_HAS_CE(*single_type)) {
-			if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
-			proto_ce = ZEND_TYPE_CE(*single_type);
 		} else {
 			/* standard type */
 			ZEND_ASSERT(!is_intersection);
@@ -535,15 +530,9 @@ static inheritance_status zend_is_class_subtype_of_type(
 	return is_intersection ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
-static zend_string *get_class_from_type(
-		zend_class_entry **ce, zend_class_entry *scope, zend_type single_type) {
+static zend_string *get_class_from_type(zend_class_entry *scope, zend_type single_type) {
 	if (ZEND_TYPE_HAS_NAME(single_type)) {
-		*ce = NULL;
 		return resolve_class_name(scope, ZEND_TYPE_NAME(single_type));
-	}
-	if (ZEND_TYPE_HAS_CE(single_type)) {
-		*ce = ZEND_TYPE_CE(single_type);
-		return (*ce)->name;
 	}
 	return NULL;
 }
@@ -617,14 +606,11 @@ static inheritance_status zend_perform_covariant_type_check(
 		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_ITERABLE)) {
 			bool any_class = (proto_type_mask & MAY_BE_OBJECT) != 0;
 			ZEND_TYPE_FOREACH(fe_type, single_type) {
-				zend_class_entry *fe_ce;
-				zend_string *fe_class_name = get_class_from_type(&fe_ce, fe_scope, *single_type);
+				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 				if (!fe_class_name) {
 					continue;
 				}
-				if (!fe_ce) {
-					fe_ce = lookup_class(fe_scope, fe_class_name);
-				}
+				zend_class_entry *fe_ce = lookup_class(fe_scope, fe_class_name);
 				if (fe_ce) {
 					if (any_class || unlinked_instanceof(fe_ce, zend_ce_traversable)) {
 						track_class_dependency(fe_ce, fe_class_name);
@@ -643,13 +629,12 @@ static inheritance_status zend_perform_covariant_type_check(
 		early_exit_status =
 			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
 		ZEND_TYPE_FOREACH(proto_type, single_type) {
-			zend_class_entry *proto_ce;
-			zend_string *proto_class_name =
-				get_class_from_type(&proto_ce, proto_scope, *single_type);
+			zend_string *proto_class_name = get_class_from_type(proto_scope, *single_type);
 			if (!proto_class_name) {
 				continue;
 			}
 
+			zend_class_entry *proto_ce = NULL;
 			inheritance_status status = zend_is_intersection_subtype_of_class(
 				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
 			if (status == early_exit_status) {
@@ -666,14 +651,13 @@ static inheritance_status zend_perform_covariant_type_check(
 		 * whether proto_type is a union or intersection (only the inner check differs). */
 		early_exit_status = INHERITANCE_ERROR;
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
-			zend_class_entry *fe_ce;
-			zend_string *fe_class_name = get_class_from_type(&fe_ce, fe_scope, *single_type);
+			zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 			if (!fe_class_name) {
 				continue;
 			}
 
 			inheritance_status status = zend_is_class_subtype_of_type(
-				fe_scope, fe_class_name, fe_ce, proto_scope, proto_type);
+				fe_scope, fe_class_name, proto_scope, proto_type);
 			if (status == early_exit_status) {
 				return status;
 			}

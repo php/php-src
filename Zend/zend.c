@@ -38,6 +38,7 @@
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
+static bool startup_done = false;
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -1018,40 +1019,6 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
-static zend_class_entry *resolve_type_name(zend_string *type_name) {
-	zend_string *lc_type_name = zend_string_tolower(type_name);
-	zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
-
-	ZEND_ASSERT(ce && ce->type == ZEND_INTERNAL_CLASS);
-	zend_string_release(lc_type_name);
-	return ce;
-}
-
-static void zend_resolve_property_types(void) /* {{{ */
-{
-	zend_class_entry *ce;
-	zend_property_info *prop_info;
-
-	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
-		if (ce->type != ZEND_INTERNAL_CLASS) {
-			continue;
-		}
-
-		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				zend_type *single_type;
-				ZEND_TYPE_FOREACH(prop_info->type, single_type) {
-					if (ZEND_TYPE_HAS_NAME(*single_type)) {
-						zend_string *type_name = ZEND_TYPE_NAME(*single_type);
-						ZEND_TYPE_SET_CE(*single_type, resolve_type_name(type_name));
-						zend_string_release(type_name);
-					}
-				} ZEND_TYPE_FOREACH_END();
-			} ZEND_HASH_FOREACH_END();
-		}
-	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
 
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
@@ -1065,7 +1032,7 @@ zend_result zend_post_startup(void) /* {{{ */
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 #endif
 
-	zend_resolve_property_types();
+	startup_done = true;
 
 	if (zend_post_startup_cb) {
 		zend_result (*cb)(void) = zend_post_startup_cb;
@@ -1164,6 +1131,7 @@ void zend_shutdown(void) /* {{{ */
 	zend_destroy_rsrc_list_dtors();
 
 	zend_optimizer_shutdown();
+	startup_done = false;
 }
 /* }}} */
 
@@ -1891,4 +1859,30 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
 		CG(map_ptr_last) = last;
 	}
+}
+
+ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
+{
+	if (ZSTR_HAS_CE_CACHE(type_name) || !ZSTR_IS_INTERNED(type_name)) {
+		return;
+	}
+
+	if ((GC_FLAGS(type_name) & IS_STR_PERMANENT) && startup_done) {
+		/* Don't allocate slot on permanent interned string outside module startup.
+		 * The cache slot would no longer be valid on the next request. */
+		return;
+	}
+
+	if (zend_string_equals_literal_ci(type_name, "self")
+			|| zend_string_equals_literal_ci(type_name, "parent")) {
+		return;
+	}
+
+	/* We use the refcount to keep map_ptr of corresponding type */
+	uint32_t ret;
+	do {
+		ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+	} while (ret <= 2);
+	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
+	GC_SET_REFCOUNT(type_name, ret);
 }

@@ -111,13 +111,11 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
  * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
  * ZEND_TYPE_IS_COMPLEX()    - checks if type is a type_list, or contains a class either as a CE or as a name
- * ZEND_TYPE_HAS_CE()        - checks if type-hint contains some class as zend_class_entry *
  * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
  * ZEND_TYPE_IS_INTERSECTION() - checks if the type_list represents an intersection type list
  * ZEND_TYPE_IS_UNION()      - checks if the type_list represents a union type list
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
- * ZEND_TYPE_CE()         - returns referenced class entry
  * ZEND_TYPE_PURE_MASK()  - returns MAY_BE_* type mask
  * ZEND_TYPE_FULL_MASK()  - returns MAY_BE_* type mask together with other flags
  *
@@ -144,9 +142,8 @@ typedef struct {
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
-#define _ZEND_TYPE_CE_BIT   (1u << 23)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
-#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
+#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
 /* TODO: bit 21 is not used */
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
@@ -163,12 +160,9 @@ typedef struct {
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
 /* If a type is complex it means it's either a list with a union or intersection,
- * or the void pointer is a CE/Name */
+ * or the void pointer is a class name */
 #define ZEND_TYPE_IS_COMPLEX(t) \
 	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
-
-#define ZEND_TYPE_HAS_CE(t) \
-	((((t).type_mask) & _ZEND_TYPE_CE_BIT) != 0)
 
 #define ZEND_TYPE_HAS_NAME(t) \
 	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
@@ -193,9 +187,6 @@ typedef struct {
 
 #define ZEND_TYPE_LITERAL_NAME(t) \
 	((const char *) (t).ptr)
-
-#define ZEND_TYPE_CE(t) \
-	((zend_class_entry *) (t).ptr)
 
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
@@ -242,13 +233,10 @@ typedef struct {
 	(t).type_mask |= (kind_bit); \
 } while (0)
 
-#define ZEND_TYPE_SET_CE(t, ce) \
-	ZEND_TYPE_SET_PTR_AND_KIND(t, ce, _ZEND_TYPE_CE_BIT)
-
 #define ZEND_TYPE_SET_LIST(t, list) \
 	ZEND_TYPE_SET_PTR_AND_KIND(t, list, _ZEND_TYPE_LIST_BIT)
 
-/* FULL_MASK() includes the MAY_BE_* type mask, the CE/NAME bits, as well as extra reserved bits.
+/* FULL_MASK() includes the MAY_BE_* type mask, as well as additional metadata bits.
  * The PURE_MASK() only includes the MAY_BE_* type mask. */
 #define ZEND_TYPE_FULL_MASK(t) \
 	((t).type_mask)
@@ -284,9 +272,6 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
 	{ (void *) (ptr), (type_mask) }
-
-#define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_PTR(_ce, _ZEND_TYPE_CE_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)

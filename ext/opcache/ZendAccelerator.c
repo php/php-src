@@ -485,8 +485,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 		do {
 			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
 			if (EXPECTED(ZSTR_H(s) == h) && zend_string_equal_content(s, str)) {
-				zend_string_release(str);
-				return s;
+				goto finish;
 			}
 			pos = STRTAB_COLLISION(s);
 		} while (pos != STRTAB_INVALID_POS);
@@ -510,6 +509,15 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 	ZSTR_LEN(s) = ZSTR_LEN(str);
 	memcpy(ZSTR_VAL(s), ZSTR_VAL(str), ZSTR_LEN(s) + 1);
 	ZCSG(interned_strings).top = STRTAB_NEXT(s);
+
+finish:
+	/* Transfer CE_CACHE map ptr slot to new interned string.
+	 * Should only happen for permanent interned strings with permanent map_ptr slot. */
+	if (ZSTR_HAS_CE_CACHE(str) && !ZSTR_HAS_CE_CACHE(s)) {
+		ZEND_ASSERT(GC_FLAGS(str) & IS_STR_PERMANENT);
+		GC_SET_REFCOUNT(s, GC_REFCOUNT(str));
+		GC_ADD_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+	}
 
 	zend_string_release(str);
 	return s;
@@ -624,6 +632,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 
 		if (ce->name) {
 			ce->name = new_interned_string(ce->name);
+			ZEND_ASSERT(ZSTR_HAS_CE_CACHE(ce->name));
 		}
 
 		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, q) {
@@ -741,20 +750,6 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 	return str;
 }
 
-static void accel_allocate_ce_cache_slots(void)
-{
-	Bucket *p;
-
-	ZEND_HASH_FOREACH_BUCKET(CG(class_table), p) {
-		zend_class_entry *ce;
-
-		ce = (zend_class_entry*)Z_PTR(p->val);
-		if (ce->name) {
-			zend_accel_get_class_name_map_ptr(ce->name);
-		}
-	} ZEND_HASH_FOREACH_END();
-}
-
 static void accel_use_shm_interned_strings(void)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -763,7 +758,6 @@ static void accel_use_shm_interned_strings(void)
 
 	if (ZCSG(interned_strings).saved_top == NULL) {
 		accel_copy_permanent_strings(accel_new_interned_string);
-		accel_allocate_ce_cache_slots();
 	} else {
 		ZCG(counted) = 1;
 		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);
@@ -3789,32 +3783,6 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	return ok || was_changed;
 }
 
-static zend_class_entry *preload_fetch_resolved_ce(zend_string *name) {
-	zend_string *lcname = zend_string_tolower(name);
-	zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lcname);
-	zend_string_release(lcname);
-	return ce;
-}
-
-static void preload_try_resolve_property_types(zend_class_entry *ce)
-{
-	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-		zend_property_info *prop;
-		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			zend_type *single_type;
-			ZEND_TYPE_FOREACH(prop->type, single_type) {
-				if (ZEND_TYPE_HAS_NAME(*single_type)) {
-					zend_class_entry *p =
-						preload_fetch_resolved_ce(ZEND_TYPE_NAME(*single_type));
-					if (p) {
-						ZEND_TYPE_SET_CE(*single_type, p);
-					}
-				}
-			} ZEND_TYPE_FOREACH_END();
-		} ZEND_HASH_FOREACH_END();
-	}
-}
-
 static void (*orig_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 
 static void preload_error_cb(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message)
@@ -3985,18 +3953,6 @@ static void preload_link(void)
 			}
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
-
-	/* Resolve property types */
-	ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-		ce = Z_PTR_P(zv);
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			break;
-		}
-		if (!(ce->ce_flags & ZEND_ACC_TRAIT)) {
-			preload_try_resolve_property_types(ce);
-		}
-	} ZEND_HASH_FOREACH_END();
-
 
 	do {
 		changed = 0;
