@@ -5556,28 +5556,8 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (packed_loaded) {
 					|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
 				}
-				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || packed_loaded) {
+				if (!(op1_info & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_HASH)) || packed_loaded) {
 					|2:
-					|	//retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
-					if (!op2_loaded) {
-						|	// hval = Z_LVAL_P(dim);
-						|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
-					}
-					|.if X64
-						|	LOAD_ADDR_ZTS CARG3, executor_globals, uninitialized_zval
-					|.else
-						|	sub r4, 12
-						|	PUSH_ADDR_ZTS executor_globals, uninitialized_zval, r0
-					|.endif
-					|	EXT_CALL zend_hash_index_add_new, r0
-					|.if not(X64)
-					|	add r4, 12
-					|.endif
-					if (op1_info & MAY_BE_ARRAY_HASH) {
-						|	jmp >8
-					}
-				}
-				if (op1_info & MAY_BE_ARRAY_HASH) {
 					|4:
 					if (!op2_loaded) {
 						|	// hval = Z_LVAL_P(dim);
