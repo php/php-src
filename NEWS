@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - SNMP:
   . Implement SHA256 and SHA512 for security protocol. (remi)
 
+- Standard:
+  . Fixed bug #81142 (PHP 7.3+ memory leak when unserialize() is used on an
+    associative array). (Nikita)
+
 05 Aug 2021, PHP 8.1.0beta2
 
 - Core:
