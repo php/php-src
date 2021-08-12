@@ -25,7 +25,7 @@ array(4) {
   [2]=>
   string(1) "c"
   [3]=>
-  &string(1) "d"
+  string(1) "d"
 }
 array(4) {
   [0]=>
@@ -35,12 +35,12 @@ array(4) {
   [2]=>
   string(1) "c"
   [3]=>
-  &string(1) "d"
+  string(1) "d"
 }
 string(1) "d"
 array(4) {
   [0]=>
-  &string(1) "d"
+  string(1) "d"
   [1]=>
   string(1) "c"
   [2]=>

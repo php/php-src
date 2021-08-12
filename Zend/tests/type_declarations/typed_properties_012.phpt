@@ -15,5 +15,5 @@ var_dump($foo);
 --EXPECT--
 object(Foo)#1 (1) {
   ["bar"]=>
-  &int(2)
+  int(2)
 }

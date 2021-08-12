@@ -61,11 +61,12 @@ Loop::test2:
 0000 RETURN null
 
 Loop::test3:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=%d, args=0, vars=1, tmps=1)
      ; (after optimizer)
      ; %sdce_009.php:15-18
-0000 V0 = FE_RESET_RW array(...) 0001
-0001 FE_FREE V0
-0002 RETURN null
+0000 V1 = FE_RESET_RW array(...) 0001
+0001 FE_FREE V1
+0002 UNWRAP_REF CV0($v)
+0003 RETURN null
 Start
 Done

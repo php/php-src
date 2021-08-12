@@ -40,5 +40,5 @@ array(3) {
   [1]=>
   string(2) "bq"
   [2]=>
-  &string(2) "cq"
+  string(2) "cq"
 }

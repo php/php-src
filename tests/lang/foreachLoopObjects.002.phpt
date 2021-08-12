@@ -533,7 +533,7 @@ object(C)#%d (5) {
   ["b"]=>
   string(9) "changed.b"
   ["c"]=>
-  &string(9) "changed.c"
+  string(9) "changed.c"
   ["d":protected]=>
   string(10) "Original d"
   ["e":"C":private]=>
@@ -550,7 +550,7 @@ object(D)#%d (7) {
   ["b"]=>
   string(9) "changed.b"
   ["c"]=>
-  &string(9) "changed.c"
+  string(9) "changed.c"
   ["d":protected]=>
   string(10) "Original d"
   ["e":"C":private]=>
@@ -571,7 +571,7 @@ object(E)#%d (8) {
   ["b"]=>
   string(9) "changed.b"
   ["c"]=>
-  &string(9) "changed.c"
+  string(9) "changed.c"
   ["d":protected]=>
   string(12) "Overridden d"
   ["e":"C":private]=>

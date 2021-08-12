@@ -122,7 +122,7 @@ object(C)#%d (5) {
   ["b"]=>
   string(9) "changed.b"
   ["c"]=>
-  &string(9) "changed.c"
+  string(9) "changed.c"
   ["d":protected]=>
   string(10) "Original d"
   ["e":"C":private]=>
@@ -220,7 +220,7 @@ object(C)#%d (17) {
   ["new7"]=>
   string(16) "Added property 7"
   ["new8"]=>
-  &string(16) "Added property 8"
+  string(16) "Added property 8"
   ["new9"]=>
   string(16) "Added property 9"
   ["new10"]=>

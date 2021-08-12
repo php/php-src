@@ -97,7 +97,7 @@ array(2) {
 --> State of array after loop:
 array(1) {
   [0]=>
-  &string(3) "v.0"
+  string(3) "v.0"
 }
 
 ---( Array with 3 element(s): )---
@@ -139,7 +139,7 @@ array(2) {
   [0]=>
   string(3) "v.0"
   [1]=>
-  &string(3) "v.1"
+  string(3) "v.1"
 }
 
 
@@ -310,7 +310,7 @@ array(7) {
   [4]=>
   string(5) "new.3"
   [5]=>
-  &string(5) "new.4"
+  string(5) "new.4"
   [6]=>
   string(5) "new.5"
 }
@@ -344,7 +344,7 @@ array(8) {
   [4]=>
   string(5) "new.2"
   [5]=>
-  &string(5) "new.3"
+  string(5) "new.3"
   [6]=>
   string(5) "new.4"
   [7]=>
@@ -382,7 +382,7 @@ array(9) {
   [4]=>
   string(5) "new.1"
   [5]=>
-  &string(5) "new.2"
+  string(5) "new.2"
   [6]=>
   string(5) "new.3"
   [7]=>
@@ -424,7 +424,7 @@ array(10) {
   [4]=>
   string(5) "new.0"
   [5]=>
-  &string(5) "new.1"
+  string(5) "new.1"
   [6]=>
   string(5) "new.2"
   [7]=>
@@ -451,7 +451,7 @@ array(2) {
   [0]=>
   string(5) "new.0"
   [1]=>
-  &string(3) "v.0"
+  string(3) "v.0"
 }
 
 ---( Array with 2 element(s): )---
@@ -474,7 +474,7 @@ array(4) {
   [2]=>
   string(3) "v.0"
   [3]=>
-  &string(3) "v.1"
+  string(3) "v.1"
 }
 
 ---( Array with 3 element(s): )---
@@ -504,7 +504,7 @@ array(6) {
   [4]=>
   string(3) "v.1"
   [5]=>
-  &string(3) "v.2"
+  string(3) "v.2"
 }
 
 ---( Array with 4 element(s): )---
@@ -541,5 +541,5 @@ array(8) {
   [6]=>
   string(3) "v.2"
   [7]=>
-  &string(3) "v.3"
+  string(3) "v.3"
 }

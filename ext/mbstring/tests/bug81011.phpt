@@ -34,7 +34,7 @@ array(2) {
       int(0)
     }
     [234]=>
-    &array(3) {
+    array(3) {
       ["name"]=>
       string(4) "that"
       ["id"]=>

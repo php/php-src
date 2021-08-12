@@ -3661,6 +3661,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
 			break;
+		case ZEND_UNWRAP_REF:
+			UPDATE_SSA_TYPE(t1 & ~MAY_BE_REF, ssa_op->op1_def);
+			break;
 		case ZEND_CATCH:
 			/* Forbidden opcodes */
 			ZEND_UNREACHABLE();
@@ -4485,6 +4488,9 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 								&& op_array->function_name) {
 							continue;
 						}
+						if (op_array->opcodes[use].opcode == ZEND_UNWRAP_REF) {
+							continue;
+						}
 						zend_bitset_incl(worklist, op->op1_def);
 					}
 				}
@@ -4657,6 +4663,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_COPY_TMP:
 		case ZEND_CASE_STRICT:
 		case ZEND_JMP_NULL:
+		case ZEND_UNWRAP_REF:
 			return 0;
 		case ZEND_SEND_VAR:
 		case ZEND_SEND_VAL:
