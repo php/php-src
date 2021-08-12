@@ -64,6 +64,11 @@
 #define MAY_BE_ARRAY_KEY_STRING     (1<<23)
 #define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
 
+#define MAY_BE_PACKED(t)            ((t) & MAY_BE_ARRAY_PACKED)
+#define MAY_BE_HASH(t)              ((t) & (MAY_BE_ARRAY_HASH | MAY_BE_ARRAY_KEY_STRING))
+#define MAY_BE_PACKED_ONLY(t)       (MAY_BE_PACKED(t) && !MAY_BE_HASH(t))
+#define MAY_BE_HASH_ONLY(t)         (MAY_BE_HASH(t) && !MAY_BE_PACKED(t))
+
 #define MAY_BE_CLASS                (1<<24)
 #define MAY_BE_INDIRECT             (1<<25)
 
