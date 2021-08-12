@@ -40,31 +40,6 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 #define UPSERT_STATUS_GET_LAST_INSERT_ID(status)			(status)->last_insert_id
 #define UPSERT_STATUS_SET_LAST_INSERT_ID(status, id)		(status)->last_insert_id = (id)
 
-
-/* Error handling */
-#define SET_NEW_MESSAGE(buf, buf_len, message, len) \
-	{\
-		if ((buf)) { \
-			mnd_efree((buf)); \
-		} \
-		if ((message)) { \
-			(buf) = mnd_pestrndup((message), (len), 0); \
-		} else { \
-			(buf) = NULL; \
-		} \
-		(buf_len) = (len); \
-	}
-
-#define SET_EMPTY_MESSAGE(buf, buf_len) \
-	{\
-		if ((buf)) { \
-			mnd_efree((buf)); \
-			(buf) = NULL; \
-		} \
-		(buf_len) = 0; \
-	}
-
-
 PHPAPI void mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const bool persistent);
 PHPAPI void	mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info);
 
