@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #81280 (Unicode characters in cli.prompt causes segfault).
     (krakjoe)
+  . Fixed bug #81192 ("Declaration should be compatible with" gives incorrect
+    line number with traits). (Nikita)
 
 - Date:
   . Fixed bug #79580 (date_create_from_format misses leap year). (Derick)

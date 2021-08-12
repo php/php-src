@@ -961,6 +961,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 }
 /* }}} */
 
+static zend_always_inline zend_string *func_filename(const zend_function *fn) {
+	return fn->common.type == ZEND_USER_FUNCTION ? fn->op_array.filename : NULL;
+}
+
 static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 	return fn->common.type == ZEND_USER_FUNCTION ? fn->op_array.line_start : 0;
 }
@@ -979,7 +983,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 		} ZEND_HASH_FOREACH_END();
 		ZEND_ASSERT(unresolved_class);
 
-		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
+		zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Could not check compatibility between %s and %s, because class %s is not available",
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype), ZSTR_VAL(unresolved_class));
 	} else if (status == INHERITANCE_WARNING) {
@@ -990,7 +994,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 		);
 
 		if (!return_type_will_change_attribute) {
-			zend_error_at(E_DEPRECATED, NULL, func_lineno(child),
+			zend_error_at(E_DEPRECATED, func_filename(child), func_lineno(child),
 				"Return type of %s should either be compatible with %s, "
 				"or the #[ReturnTypeWillChange] attribute should be used to temporarily suppress the notice",
 				ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
@@ -1000,7 +1004,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 			}
 		}
 	} else {
-		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
+		zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Declaration of %s must be compatible with %s",
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
 	}
@@ -1047,7 +1051,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
-		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Cannot override final method %s::%s()",
 			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name));
 	}
@@ -1060,11 +1064,11 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			return INHERITANCE_ERROR;
 		}
 		if (child_flags & ZEND_ACC_STATIC) {
-			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 				"Cannot make non static method %s::%s() static in class %s",
 				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 		} else {
-			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 				"Cannot make static method %s::%s() non static in class %s",
 				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 		}
@@ -1075,7 +1079,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
-		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Cannot make non abstract method %s::%s() abstract in class %s",
 			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
@@ -1119,7 +1123,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
-		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Access level to %s::%s() must be %s (as in class %s)%s",
 			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
