@@ -6289,7 +6289,11 @@ static zend_type zend_compile_typename(
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
 			/* An intersection of standard types cannot exist so invalidate it */
-			if (ZEND_TYPE_PURE_MASK(single_type)) {
+			/* Check for iterable early */
+			if (ZEND_TYPE_IS_ITERABLE_FALLBACK(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type iterable cannot be part of an intersection type");
+			}
+			if (ZEND_TYPE_IS_ONLY_MASK(single_type)) {
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
