@@ -2878,7 +2878,12 @@ static int zend_accel_init_shm(void)
 		*STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), 0) = STRTAB_INVALID_POS;
 	}
 
-	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
+	/* We can reuse init_interned_string_for_php for the "init_existing_interned" case,
+	 * because the function does not create new interned strings at runtime. */
+	zend_interned_strings_set_request_storage_handlers(
+		accel_new_interned_string_for_php,
+		accel_init_interned_string_for_php,
+		accel_init_interned_string_for_php);
 
 	zend_reset_cache_vars();
 
@@ -3198,7 +3203,10 @@ static zend_result accel_post_startup(void)
 #endif
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
-				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
+				zend_interned_strings_set_request_storage_handlers(
+					accel_new_interned_string_for_php,
+					accel_init_interned_string_for_php,
+					accel_init_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:

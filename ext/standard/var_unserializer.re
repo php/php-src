@@ -1024,7 +1024,7 @@ use_double:
 
 	if (!var_hash) {
 		/* Array or object key unserialization */
-		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
+		ZVAL_STR(rval, zend_string_init_existing_interned(str, len, 0));
 	} else {
 		ZVAL_STRINGL_FAST(rval, str, len);
 	}
