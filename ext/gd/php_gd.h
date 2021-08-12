@@ -55,9 +55,6 @@
 #define PHP_IMG_TGA  128
 #define PHP_IMG_AVIF 256
 
-/* constant for webp encoding. Matches gdWebpLossless in gd.h */
-#define PHP_IMG_WEBP_LOSSLESS 101
-
 #ifdef PHP_WIN32
 #	ifdef PHP_GD_EXPORTS
 #		define PHP_GD_API __declspec(dllexport)
