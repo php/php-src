@@ -868,14 +868,13 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ce->inheritance_cache = NULL;
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
+			if (ZSTR_HAS_CE_CACHE(ce->name)) {
+				ZSTR_SET_CE_CACHE(ce->name, NULL);
+			}
 			zend_accel_store_interned_string(ce->name);
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
 			 && !ZCG(current_persistent_script)->corrupted) {
-				if (ZSTR_HAS_CE_CACHE(ce->name)) {
-					ZSTR_SET_CE_CACHE(ce->name, NULL);
-				} else {
-					zend_accel_get_class_name_map_ptr(ce->name);
-				}
+				zend_accel_get_class_name_map_ptr(ce->name);
 			}
 			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
 				zend_accel_store_interned_string(ce->parent_name);
