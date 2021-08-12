@@ -236,7 +236,7 @@ if ($pid) {
 					continue;
 				}
 
-				if ((!empty($ssl)) && (!stream_socket_enable_crypto($fs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER, $s))) {
+				if ((!empty($ssl)) && (!stream_socket_enable_crypto($fs, true, STREAM_CRYPTO_METHOD_TLS_SERVER, $s))) {
 					die("SSLv23 handshake failed.\n");
 				}
 
