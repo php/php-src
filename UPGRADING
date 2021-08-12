@@ -562,6 +562,11 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- GD:
+  imagewebp() can do lossless WebP encoding by passing IMG_WEBP_LOSSLESS as
+  quality. This constant is only defined, if a libgd is used which supports
+  lossless WebP encoding.
+
 - MySQLi:
   . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
     available when linking against libmysqlclient.
