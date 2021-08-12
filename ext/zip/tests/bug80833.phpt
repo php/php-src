@@ -3,6 +3,7 @@ Bug #80833 (ZipArchive::getStream doesn't use setPassword)
 --SKIPIF--
 <?php
 if (!extension_loaded('zip')) die("skip zip extension not available");
+if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encryption not supported');
 ?>
 --FILE--
 <?php
