@@ -70,7 +70,7 @@ static ssize_t write_compressed_packet(
 
 	int3store(compress_buf, payload_size);
 	int1store(compress_buf + 3, pfc->data->compressed_envelope_packet_no);
-	DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
+	DBG_INF_FMT("writing %zu bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
 
 	ssize_t bytes_sent = vio->data->m.network_write(vio, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, conn_stats, error_info);
 	pfc->data->compressed_envelope_packet_no++;
@@ -125,11 +125,11 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 	ssize_t bytes_sent;
 
 	DBG_ENTER("mysqlnd_pfc::send");
-	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, pfc->data->compressed);
+	DBG_INF_FMT("count=%zu compression=%u", count, pfc->data->compressed);
 
 	if (pfc->data->compressed == TRUE) {
 		size_t comp_buf_size = MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE + MIN(left, MYSQLND_MAX_PACKET_SIZE);
-		DBG_INF_FMT("compress_buf_size="MYSQLND_SZ_T_SPEC, comp_buf_size);
+		DBG_INF_FMT("compress_buf_size=%zu", comp_buf_size);
 		compress_buf = mnd_emalloc(comp_buf_size);
 	}
 
@@ -187,7 +187,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 		*/
 	} while (bytes_sent > 0 && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
-	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, pfc->data->packet_no);
+	DBG_INF_FMT("packet_size=%zu packet_no=%u", left, pfc->data->packet_no);
 
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats,
 			STAT_BYTES_SENT, count + packets_sent * MYSQLND_HEADER_SIZE,
@@ -270,7 +270,7 @@ MYSQLND_METHOD(mysqlnd_pfc, decode)(zend_uchar * uncompressed_data, const size_t
 	DBG_ENTER("mysqlnd_pfc::decode");
 	error = uncompress(uncompressed_data, &tmp_complen, compressed_data, compressed_data_len);
 
-	DBG_INF_FMT("compressed data: decomp_len=%lu compressed_size="MYSQLND_SZ_T_SPEC, tmp_complen, compressed_data_len);
+	DBG_INF_FMT("compressed data: decomp_len=%lu compressed_size=%zu", tmp_complen, compressed_data_len);
 	if (error != Z_OK) {
 		DBG_INF_FMT("decompression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
 	}
@@ -323,13 +323,13 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 	if (pfc->data->compressed) {
 		if (pfc->data->uncompressed_data) {
 			size_t to_read_from_buffer = MIN(pfc->data->uncompressed_data->bytes_left(pfc->data->uncompressed_data), to_read);
-			DBG_INF_FMT("reading "MYSQLND_SZ_T_SPEC" from uncompressed_data buffer", to_read_from_buffer);
+			DBG_INF_FMT("reading %zu from uncompressed_data buffer", to_read_from_buffer);
 			if (to_read_from_buffer) {
 				pfc->data->uncompressed_data->read(pfc->data->uncompressed_data, to_read_from_buffer, (zend_uchar *) p);
 				p += to_read_from_buffer;
 				to_read -= to_read_from_buffer;
 			}
-			DBG_INF_FMT("left "MYSQLND_SZ_T_SPEC" to read", to_read);
+			DBG_INF_FMT("left %zu to read", to_read);
 			if (TRUE == pfc->data->uncompressed_data->is_empty(pfc->data->uncompressed_data)) {
 				/* Everything was consumed. This should never happen here, but for security */
 				pfc->data->uncompressed_data->free_buffer(&pfc->data->uncompressed_data);
@@ -346,10 +346,10 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 			net_payload_size = uint3korr(net_header);
 			packet_no = uint1korr(net_header + 3);
 			if (pfc->data->compressed_envelope_packet_no != packet_no) {
-				DBG_ERR_FMT("Transport level: packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
+				DBG_ERR_FMT("Transport level: packets out of order. Expected %u received %u. Packet size=%zu",
 							pfc->data->compressed_envelope_packet_no, packet_no, net_payload_size);
 
-				php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
+				php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size=%zu",
 						  pfc->data->compressed_envelope_packet_no, packet_no, net_payload_size);
 				DBG_RETURN(FAIL);
 			}
@@ -400,7 +400,7 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 				DBG_RETURN(FAIL);
 			}
 			pfc->cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, pfc->cmd_buffer.length);
+			DBG_INF_FMT("new_length=%zu", pfc->cmd_buffer.length);
 			if (!pfc->cmd_buffer.buffer) {
 				pfc->cmd_buffer.buffer = mnd_pemalloc(pfc->cmd_buffer.length, pfc->persistent);
 			} else {

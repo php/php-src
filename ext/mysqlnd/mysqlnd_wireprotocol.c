@@ -266,10 +266,10 @@ mysqlnd_read_header(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, MYSQLND_PACKET_HEADER 
 		DBG_RETURN(PASS);
 	}
 
-	DBG_ERR_FMT("Logical link: packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
+	DBG_ERR_FMT("Logical link: packets out of order. Expected %u received %u. Packet size=%zu",
 				pfc->data->packet_no, header->packet_no, header->size);
 
-	php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
+	php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size=%zu",
 			  pfc->data->packet_no, header->packet_no, header->size);
 	DBG_RETURN(FAIL);
 }
@@ -452,7 +452,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("GREET packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "GREET packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -727,7 +727,7 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "AUTH_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "AUTH_RESPONSE packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -867,7 +867,7 @@ php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "OK packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -954,7 +954,7 @@ php_mysqlnd_eof_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("EOF packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "EOF packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1114,7 +1114,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(ret);
 premature_end:
 	DBG_ERR_FMT("RSET_HEADER packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "RSET_HEADER packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1327,7 +1327,7 @@ faulty_or_fake:
 	DBG_RETURN(FAIL);
 premature_end:
 	DBG_ERR_FMT("RSET field packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
+	php_error_docref(NULL, E_WARNING, "Result set field packet %zu bytes "
 			 		"shorter than expected", p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1540,7 +1540,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 		if (len == MYSQLND_NULL_LENGTH) {
 			ZVAL_NULL(current_field);
 		} else if ((p + len) > packet_end) {
-			php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing "MYSQLND_SZ_T_SPEC
+			php_error_docref(NULL, E_WARNING, "Malformed server packet. Field length pointing %zu"
 											  " bytes after end of packet", (p + len) - packet_end - 1);
 			DBG_RETURN(FAIL);
 		} else {
@@ -1852,7 +1852,7 @@ php_mysqlnd_prepare_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("PREPARE packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "PREPARE packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1922,7 +1922,7 @@ php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("CHANGE_USER packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "CHANGE_USER packet %zu bytes shorter than expected",
 						 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -2007,7 +2007,7 @@ php_mysqlnd_sha256_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _pa
 
 premature_end:
 	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -2119,7 +2119,7 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 premature_end:
 	DBG_ERR_FMT("OK packet %zu bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }

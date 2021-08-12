@@ -47,13 +47,11 @@ This file is public domain and comes with NO WARRANTY of any kind */
 /* Go around some bugs in different OS and compilers */
 
 #ifdef PHP_WIN32
-#define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
 
-#define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL
 #endif

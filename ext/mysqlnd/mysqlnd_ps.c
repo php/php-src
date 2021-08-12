@@ -1096,7 +1096,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			php_error_docref(NULL, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
-							 "smaller chunks of data. Answer was "MYSQLND_SZ_T_SPEC" bytes long.", packet_len);
+							 "smaller chunks of data. Answer was %zu bytes long.", packet_len);
 			SET_CLIENT_ERROR(stmt->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE,
 							"Server responded to COM_STMT_SEND_LONG_DATA.");
 			ret = FAIL;

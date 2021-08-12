@@ -81,7 +81,7 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_vio::network_read");
-	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
+	DBG_INF_FMT("count=%zu", count);
 
 	while (to_read) {
 		ssize_t ret = php_stream_read(net_stream, (char *) p, to_read);
@@ -331,7 +331,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
 			net->data->options.net_read_buffer_size = *(unsigned int*) value;
-			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->data->options.net_read_buffer_size);
+			DBG_INF_FMT("new_length=%zu", net->data->options.net_read_buffer_size);
 			break;
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
