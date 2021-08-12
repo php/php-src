@@ -9460,6 +9460,11 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 			|	bne >1
 			|.cold_code
 			|1:
+			if (Z_MODE(op1_addr) == IS_REG) {
+				/* set type to avoid zval_ptr_dtor() on uninitialized value */
+				zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+				|	SET_ZVAL_TYPE_INFO addr, IS_UNDEF, TMP1w, TMP2
+			}
 			|	SET_EX_OPLINE opline, REG0
 			|	b ->throw_cannot_pass_by_ref
 			|.code
