@@ -1582,7 +1582,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 /* {{{ data_available
  */
 int
-data_available(ftpbuf_t *ftp, php_socket_t s)
+data_available(ftpbuf_t *ftp, php_socket_t s, zend_bool ignore_timeout)
 {
 	int		n;
 
@@ -1590,6 +1590,7 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 	if (n < 1) {
 		char buf[256];
 		if (n == 0) {
+			if (ignore_timeout) return 0;
 #ifdef PHP_WIN32
 			_set_errno(ETIMEDOUT);
 #else
@@ -1919,7 +1920,7 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 		done = 0;
 	}
 
-	while (!done && data_available(ftp, fd)) {
+	while (!done && data_available(ftp, fd, 1)) {
 		ERR_clear_error();
 		nread = SSL_read(ssl_handle, buf, sizeof(buf));
 		if (nread <= 0) {
@@ -2174,7 +2175,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 	data = ftp->data;
 
 	/* check if there is already more data */
-	if (!data_available(ftp, data->fd)) {
+	if (!data_available(ftp, data->fd, 0)) {
 		return PHP_FTP_MOREDATA;
 	}
 

@@ -236,6 +236,10 @@ if ($pid) {
 					continue;
 				}
 
+				if ((!empty($ssl)) && (!stream_socket_enable_crypto($fs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER, $s))) {
+					die("SSLv23 handshake failed.\n");
+				}
+
 				$data = stream_get_contents($fs);
 				$orig = file_get_contents(dirname(__FILE__).'/'.$m[1]);
 
