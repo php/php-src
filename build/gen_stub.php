@@ -2462,7 +2462,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             continue;
         }
 
-        $replacedXml = getReplacedClassSynopsisXml($xml);
+        $replacedXml = getReplacedSynopsisXml($xml);
 
         $doc = new DOMDocument();
         $doc->formatOutput = false;
@@ -2473,10 +2473,6 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             echo "Failed opening $pathName\n";
             continue;
         }
-
-        $docComparator = new DOMDocument();
-        $docComparator->preserveWhiteSpace = false;
-        $docComparator->formatOutput = true;
 
         $classSynopsisElements = [];
         foreach ($doc->getElementsByTagName("classsynopsis") as $element) {
@@ -2509,20 +2505,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
 
             // Check if there is any change - short circuit if there is not any.
 
-            $xml1 = $doc->saveXML($classSynopsis);
-            $xml1 = getReplacedClassSynopsisXml($xml1);
-            $docComparator->loadXML($xml1);
-            $xml1 = $docComparator->saveXML();
-
-            $classSynopsis->parentNode->replaceChild($newClassSynopsis, $classSynopsis);
-
-            $xml2 = $doc->saveXML($newClassSynopsis);
-            $xml2 = getReplacedClassSynopsisXml($xml2);
-
-            $docComparator->loadXML($xml2);
-            $xml2 = $docComparator->saveXML();
-
-            if ($xml1 === $xml2) {
+            if (areXmlsEqual($doc, $classSynopsis, $newClassSynopsis)) {
                 continue;
             }
 
@@ -2551,7 +2534,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
     return $classSynopses;
 }
 
-function getReplacedClassSynopsisXml(string $xml): string
+function getReplacedSynopsisXml(string $xml): string
 {
     return preg_replace(
         [
@@ -2612,7 +2595,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             continue;
         }
 
-        $replacedXml = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml);
+        $replacedXml = getReplacedSynopsisXml($xml);
 
         $doc = new DOMDocument();
         $doc->formatOutput = false;
@@ -2623,10 +2606,6 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             echo "Failed opening $pathName\n";
             continue;
         }
-
-        $docComparator = new DOMDocument();
-        $docComparator->preserveWhiteSpace = false;
-        $docComparator->formatOutput = true;
 
         $methodSynopsisElements = [];
         foreach ($doc->getElementsByTagName("constructorsynopsis") as $element) {
@@ -2691,19 +2670,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
 
             // Check if there is any change - short circuit if there is not any.
 
-            $xml1 = $doc->saveXML($methodSynopsis);
-            $xml1 = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml1);
-            $docComparator->loadXML($xml1);
-            $xml1 = $docComparator->saveXML();
-
-            $methodSynopsis->parentNode->replaceChild($newMethodSynopsis, $methodSynopsis);
-
-            $xml2 = $doc->saveXML($newMethodSynopsis);
-            $xml2 = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml2);
-            $docComparator->loadXML($xml2);
-            $xml2 = $docComparator->saveXML();
-
-            if ($xml1 === $xml2) {
+            if (areXmlsEqual($doc, $methodSynopsis, $newMethodSynopsis)) {
                 continue;
             }
 
@@ -2752,6 +2719,28 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
     }
 
     return $methodSynopses;
+}
+
+function areXmlsEqual(DOMDocument $doc, DOMElement $originalSynopsis, DOMElement $newSynopsis): bool
+{
+    $docComparator = new DOMDocument();
+    $docComparator->preserveWhiteSpace = false;
+    $docComparator->formatOutput = true;
+
+    $xml1 = $doc->saveXML($originalSynopsis);
+    $xml1 = getReplacedSynopsisXml($xml1);
+    $docComparator->loadXML($xml1);
+    $xml1 = $docComparator->saveXML();
+
+    $originalSynopsis->parentNode->replaceChild($newSynopsis, $originalSynopsis);
+
+    $xml2 = $doc->saveXML($newSynopsis);
+    $xml2 = getReplacedSynopsisXml($xml2);
+
+    $docComparator->loadXML($xml2);
+    $xml2 = $docComparator->saveXML();
+
+    return $xml1 === $xml2;
 }
 
 function installPhpParser(string $version, string $phpParserDir) {
