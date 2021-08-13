@@ -1417,7 +1417,7 @@ PHP_FUNCTION(xml_parse)
 	}
 
 	if (parser->isparsing) {
-		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively.");
+		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
 		RETURN_FALSE;
 	}
 	parser->isparsing = 1;
@@ -1472,7 +1472,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
 	if (parser->isparsing) {
-		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively.");
+		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
 		RETURN_FALSE;
 	}
 	parser->isparsing = 1;

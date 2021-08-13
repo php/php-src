@@ -21,9 +21,9 @@ HERE;
     xml_parse($parser, $xml);
 ?>
 --EXPECTF--
-Warning: xml_parse(): Parser must not be called recursively. in %s%ebug73135.php on line %d
+Warning: xml_parse(): Parser must not be called recursively in %s%ebug73135.php on line %d
 
-Warning: xml_parse(): Parser must not be called recursively. in %s%ebug73135.php on line %d
+Warning: xml_parse(): Parser must not be called recursively in %s%ebug73135.php on line %d
 
 Warning: xml_parse(): Unable to call handler ahihi() in %s%ebug73135.php on line %d
 
