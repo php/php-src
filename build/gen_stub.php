@@ -2505,7 +2505,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
 
             // Check if there is any change - short circuit if there is not any.
 
-            if (areXmlsEqual($doc, $classSynopsis, $newClassSynopsis)) {
+            if (replaceAndCompareXmls($doc, $classSynopsis, $newClassSynopsis)) {
                 continue;
             }
 
@@ -2670,7 +2670,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
 
             // Check if there is any change - short circuit if there is not any.
 
-            if (areXmlsEqual($doc, $methodSynopsis, $newMethodSynopsis)) {
+            if (replaceAndCompareXmls($doc, $methodSynopsis, $newMethodSynopsis)) {
                 continue;
             }
 
@@ -2721,7 +2721,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
     return $methodSynopses;
 }
 
-function areXmlsEqual(DOMDocument $doc, DOMElement $originalSynopsis, DOMElement $newSynopsis): bool
+function replaceAndCompareXmls(DOMDocument $doc, DOMElement $originalSynopsis, DOMElement $newSynopsis): bool
 {
     $docComparator = new DOMDocument();
     $docComparator->preserveWhiteSpace = false;
