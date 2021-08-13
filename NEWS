@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #81346 (Non-seekable streams don't update position after write).
     (cmb)
 
+- XML:
+  . Fixed bug #81351 (xml_parse may fail, but has no error code). (cmb, Nikita)
+
 26 Aug 2021, PHP 7.4.23
 
 - Core:
