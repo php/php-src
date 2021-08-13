@@ -4,11 +4,11 @@
 
 final class mysqli_driver
 {
-    public string $client_info;
+    public readonly string $client_info;
 
-    public int $client_version;
+    public readonly int $client_version;
 
-    public int $driver_version;
+    public readonly int $driver_version;
 
     public bool $reconnect = false;
 
@@ -17,41 +17,41 @@ final class mysqli_driver
 
 class mysqli
 {
-    public int|string $affected_rows;
+    public readonly int|string $affected_rows;
 
-    public string $client_info;
+    public readonly string $client_info;
 
-    public int $client_version;
+    public readonly int $client_version;
 
-    public int $connect_errno;
+    public readonly int $connect_errno;
 
-    public ?string $connect_error;
+    public readonly ?string $connect_error;
 
-    public int $errno;
+    public readonly int $errno;
 
-    public string $error;
+    public readonly string $error;
 
-    public array $error_list;
+    public readonly array $error_list;
 
-    public int $field_count;
+    public readonly int $field_count;
 
-    public string $host_info;
+    public readonly string $host_info;
 
-    public ?string $info;
+    public readonly ?string $info;
 
-    public int|string $insert_id;
+    public readonly int|string $insert_id;
 
-    public string $server_info;
+    public readonly string $server_info;
 
-    public int $server_version;
+    public readonly int $server_version;
 
-    public string $sqlstate;
+    public readonly string $sqlstate;
 
-    public int $protocol_version;
+    public readonly int $protocol_version;
 
-    public int $thread_id;
+    public readonly int $thread_id;
 
-    public int $warning_count;
+    public readonly int $warning_count;
 
     public function __construct(
         ?string $hostname = null,
@@ -349,15 +349,15 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    public int $current_field;
+    public readonly int $current_field;
 
-    public int $field_count;
+    public readonly int $field_count;
 
-    public ?array $lengths;
+    public readonly ?array $lengths;
 
-    public int|string $num_rows;
+    public readonly int|string $num_rows;
 
-    public int $type;
+    public readonly int $type;
 
     public function __construct(mysqli $mysql, int $result_mode = MYSQLI_STORE_RESULT) {}
 
@@ -447,25 +447,25 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    public int|string $affected_rows;
+    public readonly int|string $affected_rows;
 
-    public int|string $insert_id;
+    public readonly int|string $insert_id;
 
-    public int|string $num_rows;
+    public readonly int|string $num_rows;
 
-    public int $param_count;
+    public readonly int $param_count;
 
-    public int $field_count;
+    public readonly int $field_count;
 
-    public int $errno;
+    public readonly int $errno;
 
-    public string $error;
+    public readonly string $error;
 
-    public array $error_list;
+    public readonly array $error_list;
 
-    public string $sqlstate;
+    public readonly string $sqlstate;
 
-    public int $id;
+    public readonly int $id;
 
     public function __construct(mysqli $mysql, ?string $query = null) {}
 
