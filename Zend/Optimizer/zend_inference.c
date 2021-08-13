@@ -2107,16 +2107,16 @@ static uint32_t assign_dim_result_type(
 				tmp |= MAY_BE_ARRAY_OF_NULL;
 			}
 			if (dim_op_type == IS_UNUSED) {
-				tmp |= MAY_BE_ARRAY_KEY_LONG;
+				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 			} else {
 				if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-					tmp |= MAY_BE_ARRAY_KEY_LONG;
+					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 				}
 				if (dim_type & MAY_BE_STRING) {
 					tmp |= MAY_BE_ARRAY_KEY_STRING;
 					if (dim_op_type != IS_CONST) {
 						// FIXME: numeric string
-						tmp |= MAY_BE_ARRAY_KEY_LONG;
+						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 					}
 				}
 				if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
@@ -3179,6 +3179,13 @@ static zend_always_inline int _zend_update_type_info(
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
+				uint32_t arr_type;
+
+				if (opline->opcode == ZEND_INIT_ARRAY) {
+					arr_type = 0;
+				} else {
+					arr_type = RES_USE_INFO();
+				}
 				tmp = MAY_BE_RC1|MAY_BE_ARRAY;
 				if (ssa_op->result_use >= 0) {
 					tmp |= ssa_var_info[ssa_op->result_use].type;
@@ -3192,16 +3199,16 @@ static zend_always_inline int _zend_update_type_info(
 						tmp |= MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 					}
 					if (opline->op2_type == IS_UNUSED) {
-						tmp |= MAY_BE_ARRAY_KEY_LONG;
+						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 					} else {
 						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
-							tmp |= MAY_BE_ARRAY_KEY_LONG;
+							tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 						}
 						if (t2 & (MAY_BE_STRING)) {
 							tmp |= MAY_BE_ARRAY_KEY_STRING;
 							if (opline->op2_type != IS_CONST) {
 								// FIXME: numeric string
-								tmp |= MAY_BE_ARRAY_KEY_LONG;
+								tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 							}
 						}
 						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
@@ -3343,16 +3350,16 @@ static zend_always_inline int _zend_update_type_info(
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 					if (opline->op2_type == IS_UNUSED) {
-						key_type |= MAY_BE_ARRAY_KEY_LONG;
+						key_type |= MAY_BE_HASH_ONLY(t1) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 					} else {
 						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-							key_type |= MAY_BE_ARRAY_KEY_LONG;
+							key_type |= MAY_BE_HASH_ONLY(t1) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 						}
 						if (t2 & MAY_BE_STRING) {
 							key_type |= MAY_BE_ARRAY_KEY_STRING;
 							if (opline->op2_type != IS_CONST) {
 								// FIXME: numeric string
-								key_type |= MAY_BE_ARRAY_KEY_LONG;
+								key_type |= MAY_BE_HASH_ONLY(t1) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 							}
 						}
 						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {

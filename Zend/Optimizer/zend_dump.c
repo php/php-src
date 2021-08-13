@@ -239,6 +239,19 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		}
 		if (info & MAY_BE_ARRAY) {
 			if (first) first = 0; else fprintf(stderr, ", ");
+			if (!(info & MAY_BE_ARRAY_KEY_STRING) || (info & MAY_BE_PACKED_GUARD)) {
+				if (MAY_BE_PACKED_ONLY(info)) {
+					if (info & MAY_BE_PACKED_GUARD) {
+						fprintf(stderr, "!");
+					}
+					fprintf(stderr, "packed ");
+				} else if (MAY_BE_HASH_ONLY(info)) {
+					if (info & MAY_BE_PACKED_GUARD) {
+						fprintf(stderr, "!");
+					}
+					fprintf(stderr, "hash ");
+				}
+			}
 			fprintf(stderr, "array");
 			if ((info & MAY_BE_ARRAY_KEY_ANY) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
