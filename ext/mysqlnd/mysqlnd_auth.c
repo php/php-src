@@ -353,7 +353,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		goto end;
 	}
 
-	mysqlnd_set_message(&conn->last_message, auth_resp_packet.message, auth_resp_packet.message_len);
+	mysqlnd_set_string(&conn->last_message, auth_resp_packet.message, auth_resp_packet.message_len);
 	ret = PASS;
 end:
 	PACKET_FREE(&auth_resp_packet);

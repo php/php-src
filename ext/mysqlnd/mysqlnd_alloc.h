@@ -71,14 +71,14 @@ static inline MYSQLND_CSTRING mnd_str2c(const MYSQLND_STRING str)
 	return ret;
 }
 
-static inline void mysqlnd_set_message(MYSQLND_STRING *buf, const char *message, size_t len) {
+static inline void mysqlnd_set_string(MYSQLND_STRING *buf, const char *string, size_t len) {
 	if (buf->s) {
 		mnd_efree(buf->s);
 		buf->s = NULL;
 		buf->l = 0;
 	}
-	if (message) {
-		buf->s = mnd_pestrndup(message, len, 0);
+	if (string) {
+		buf->s = mnd_pestrndup(string, len, 0);
 		buf->l = len;
 	}
 }
