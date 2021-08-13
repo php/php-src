@@ -165,7 +165,7 @@ retry:
 			CK((*filter->output_function)(0x203e, filter->data));
 		} else if (filter->status == 0x20 && c > 0x20 && c < 0x60) {		/* kana */
 			CK((*filter->output_function)(0xff40 + c, filter->data));
-		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x93) {		/* kanji first char */
+		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c <= 0x97) { /* kanji first char */
 			filter->cache = c;
 			filter->status += 1;
 		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
