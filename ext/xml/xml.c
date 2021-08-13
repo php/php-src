@@ -1402,7 +1402,7 @@ PHP_FUNCTION(xml_parser_free)
 
 	parser = Z_XMLPARSER_P(pind);
 	if (parser->isparsing == 1) {
-		php_error_docref(NULL, E_WARNING, "Parser cannot be freed while it is parsing.");
+		php_error_docref(NULL, E_WARNING, "Parser cannot be freed while it is parsing");
 		RETURN_FALSE;
 	}
 
