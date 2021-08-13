@@ -32,6 +32,6 @@ try {
 
 ?>
 --EXPECT--
-Enum properties are immutable
-Enum properties are immutable
-Enum properties are immutable
+Cannot modify readonly property Foo::$name
+Cannot modify readonly property Foo::$name
+Cannot create dynamic property Foo::$value

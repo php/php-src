@@ -31,7 +31,7 @@ Class [ <user> final class Foo implements UnitEnum ] {
   }
 
   - Properties [1] {
-    Property [ public string $name ]
+    Property [ public readonly string $name ]
   }
 
   - Methods [0] {
