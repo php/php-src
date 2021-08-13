@@ -2505,8 +2505,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 		upsert_status->server_status &= ~SERVER_MORE_RESULTS_EXISTS;
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(upsert_status);
 	} else {
-		SET_NEW_MESSAGE(last_message->s, last_message->l,
-						ok_response.message, ok_response.message_len);
+		mysqlnd_set_string(last_message, ok_response.message, ok_response.message_len);
 		if (!ignore_upsert_status) {
 			UPSERT_STATUS_RESET(upsert_status);
 			UPSERT_STATUS_SET_WARNINGS(upsert_status, ok_response.warning_count);
