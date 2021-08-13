@@ -251,11 +251,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 				DBG_INF("Result set pending");
-				if (conn->last_message.s) {
-					mnd_efree(conn->last_message.s);
-					conn->last_message.s = NULL;
-				}
-				conn->last_message.l = 0;
+				mysqlnd_set_message(&conn->last_message, NULL, 0);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
 				UPSERT_STATUS_RESET(conn->upsert_status);
