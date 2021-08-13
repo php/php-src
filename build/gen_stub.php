@@ -2462,17 +2462,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             continue;
         }
 
-        $replacedXml = preg_replace(
-            [
-                "/&([A-Za-z0-9._{}%-]+?;)/",
-                "/<(\/)*xi:([A-Za-z]+?)/"
-            ],
-            [
-                "REPLACED-ENTITY-$1",
-                "<$1XI$2",
-            ],
-            $xml
-        );
+        $replacedXml = getReplacedClassSynopsisXml($xml);
 
         $doc = new DOMDocument();
         $doc->formatOutput = false;
@@ -2520,34 +2510,14 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             // Check if there is any change - short circuit if there is not any.
 
             $xml1 = $doc->saveXML($classSynopsis);
-            $xml1 = preg_replace(
-                [
-                    "/&([A-Za-z0-9._{}%-]+?;)/",
-                    "/<(\/)*xi:([A-Za-z]+?)/",
-                ],
-                [
-                    "REPLACED-ENTITY-$1",
-                    "<$1XI$2",
-                ],
-                $xml1
-            );
+            $xml1 = getReplacedClassSynopsisXml($xml1);
             $docComparator->loadXML($xml1);
             $xml1 = $docComparator->saveXML();
 
             $classSynopsis->parentNode->replaceChild($newClassSynopsis, $classSynopsis);
 
             $xml2 = $doc->saveXML($newClassSynopsis);
-            $xml2 = preg_replace(
-                [
-                    "/&([A-Za-z0-9._{}%-]+?;)/",
-                    "/<(\/)*xi:([A-Za-z]+?)/",
-                ],
-                [
-                    "REPLACED-ENTITY-$1",
-                    "<$1XI$2",
-                ],
-                $xml2
-            );
+            $xml2 = getReplacedClassSynopsisXml($xml2);
 
             $docComparator->loadXML($xml2);
             $xml2 = $docComparator->saveXML();
@@ -2579,6 +2549,22 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
     }
 
     return $classSynopses;
+}
+
+function getReplacedClassSynopsisXml(string $xml): string|array|null
+{
+    $replacedXml = preg_replace(
+        [
+            "/&([A-Za-z0-9._{}%-]+?;)/",
+            "/<(\/)*xi:([A-Za-z]+?)/"
+        ],
+        [
+            "REPLACED-ENTITY-$1",
+            "<$1XI$2",
+        ],
+        $xml
+    );
+    return $replacedXml;
 }
 
 /**
