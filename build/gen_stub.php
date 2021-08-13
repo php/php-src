@@ -108,13 +108,13 @@ class Context {
 }
 
 class ArrayType extends SimpleType {
-    /** @var Type|null */
+    /** @var Type */
     public $keyType;
 
-    /** @var Type|null */
+    /** @var Type */
     public $valueType;
 
-    public function __construct(?Type $keyType, ?Type $valueType)
+    public function __construct(Type $keyType, Type $valueType)
     {
         parent::__construct("array", true);
 
@@ -124,20 +124,10 @@ class ArrayType extends SimpleType {
 
     public function toOptimizerTypeMask(): string {
         $typeMasks = [
-            parent::toTypeMask()
+            parent::toOptimizerTypeMask(),
+            $this->keyType->toOptimizerTypeMaskForArrayKey(),
+            $this->valueType->toOptimizerTypeMaskForArrayValue(),
         ];
-
-        if ($this->keyType) {
-            $typeMasks[] = $this->keyType->toOptimizerTypeMask();
-        } else {
-            $typeMasks[] = Type::fromString("string|int")->toOptimizerTypeMask();
-        }
-
-        if ($this->valueType) {
-            $typeMasks[] = $this->valueType->toOptimizerTypeMask();
-        } else {
-            $typeMasks[] = Type::fromString("mixed")->toOptimizerTypeMask();
-        }
 
         return implode("|", $typeMasks);
     }
@@ -192,7 +182,7 @@ class SimpleType {
             case "never":
                 return new SimpleType(strtolower($typeString), true);
             case "array":
-                return new ArrayType(null, null);
+                return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
             case "self":
                 throw new Exception('The exact class name must be used instead of "self"');
         }
@@ -288,10 +278,58 @@ class SimpleType {
                 return "MAY_BE_NEVER";
             default:
                 throw new Exception("Not implemented: $this->name");
-            }
+        }
+    }
+
+    public function toOptimizerTypeMaskForArrayKey(): string {
+        assert($this->isBuiltin);
+
+        switch (strtolower($this->name)) {
+            case "int":
+                return "MAY_BE_ARRAY_KEY_LONG";
+            case "string":
+                return "MAY_BE_ARRAY_KEY_STRING";
+            default:
+                throw new Exception("Type $this->name cannot be an array key");
+        }
+    }
+
+    public function toOptimizerTypeMaskForArrayValue(): string {
+        if (!$this->isBuiltin) {
+            return "MAY_BE_ARRAY_OF_OBJECT";
+        }
+
+        switch (strtolower($this->name)) {
+            case "null":
+                return "MAY_BE_ARRAY_OF_NULL";
+            case "false":
+                return "MAY_BE_ARRAY_OF_FALSE";
+            case "bool":
+                return "MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE";
+            case "int":
+                return "MAY_BE_ARRAY_OF_LONG";
+            case "float":
+                return "MAY_BE_ARRAY_OF_DOUBLE";
+            case "string":
+                return "MAY_BE_ARRAY_OF_STRING";
+            case "array":
+                return "MAY_BE_ARRAY_OF_ARRAY";
+            case "object":
+                return "MAY_BE_ARRAY_OF_OBJECT";
+            case "resource":
+                return "MAY_BE_ARRAY_OF_RESOURCE";
+            case "mixed":
+                return "MAY_BE_ARRAY_OF_ANY";
+            default:
+                throw new Exception("Type $this->name cannot be an array value");
+        }
     }
 
     public function toOptimizerTypeMask(): string {
+        if ($this->isBuiltin && strtolower($this->name) === "resource") {
+            return "MAY_BE_RESOURCE";
+        }
+
         return $this->toTypeMask();
     }
 
@@ -309,6 +347,9 @@ class Type {
     /** @var SimpleType[] $types */
     public $types;
 
+    /**
+     * @param SimpleType[] $types
+     */
     public function __construct(array $types) {
         $this->types = $types;
     }
@@ -327,11 +368,35 @@ class Type {
     }
 
     public static function fromString(string $typeString): self {
-        $types = explode("|", $typeString);
-
+        $typeString .= "|";
         $simpleTypes = [];
-        foreach ($types as $type) {
-            $simpleTypes[] = SimpleType::fromString($type);
+        $simpleTypeOffset = 0;
+        $inArray = false;
+
+        $typeStringLength = strlen($typeString);
+        for ($i = 0; $i < $typeStringLength; $i++) {
+            $char = $typeString[$i];
+
+            if ($char === "<") {
+                $inArray = true;
+                continue;
+            }
+
+            if ($char === ">") {
+                $inArray = false;
+                continue;
+            }
+
+            if ($inArray) {
+                continue;
+            }
+
+            if ($char === "|") {
+                $simpleTypeName = trim(substr($typeString, $simpleTypeOffset, $i - $simpleTypeOffset));
+                $simpleTypes[] = SimpleType::fromString($simpleTypeName);
+
+                $simpleTypeOffset = $i + 1;
+            }
         }
 
         return new Type($simpleTypes);
@@ -385,6 +450,26 @@ class Type {
         }
 
         return implode("|", $optimizerTypes);
+    }
+
+    public function toOptimizerTypeMaskForArrayKey(): string {
+        $typeMasks = [];
+
+        foreach ($this->types as $type) {
+            $typeMasks[] = $type->toOptimizerTypeMaskForArrayKey();
+        }
+
+        return implode("|", $typeMasks);
+    }
+
+    public function toOptimizerTypeMaskForArrayValue(): string {
+        $typeMasks = [];
+
+        foreach ($this->types as $type) {
+            $typeMasks[] = $type->toOptimizerTypeMaskForArrayValue();
+        }
+
+        return implode("|", $typeMasks);
     }
 
     public function getTypeForDoc(DOMDocument $doc): DOMElement {
@@ -933,25 +1018,20 @@ class FuncInfo {
             return null;
         }
 
-        $phpDocType = $this->return->phpDocType;
-        if ($this->refcount === null && $phpDocType === null) {
+        if ($this->refcount === null) {
             return null;
         }
 
-        $type = $phpDocType ?? $this->return->type;
+        if ($this->refcount === "0" && Type::equals($this->return->type, $this->return->phpDocType)) {
+            return null;
+        }
+
+        $type = $this->return->phpDocType ?? $this->return->type;
         if ($type === null) {
             return null;
         }
 
-        $optimizerTypeMask = $type->toOptimizerTypeMask();
-
-        if ($this->refcount === "0" && $optimizerTypeMask === $phpDocType->toArginfoType()->toTypeMask()) {
-            return null;
-        }
-
-        $code = "    F" . ($this->refcount ?? "0") . '("' . $this->name->__toString() . '", ' . $optimizerTypeMask . "),\n";
-
-        return $code;
+        return "    F" . $this->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -2519,7 +2599,10 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
 
 /** @param FuncInfo[] $funcInfos */
 function generateOptimizerInfo(array $funcInfos): string {
-    $code = "static const func_info_t func_infos[] = {\n";
+
+    $code = "/* This is a generated file, edit the .stub.php files instead. */\n\n";
+
+    $code .= "static const func_info_t func_infos[] = {\n";
 
     $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
         return $funcInfo->getOptimizerInfo();
@@ -3146,7 +3229,7 @@ if ($replaceMethodSynopses) {
 }
 
 if ($generateOptimizerInfo) {
-    $filename = "./Zend/Optimizer/zend_func_infos.h";
+    $filename = dirname(__FILE__, 2) . "/Zend/Optimizer/zend_func_infos.h";
     $optimizerInfo = generateOptimizerInfo($funcMap);
 
     if (file_put_contents($filename, $optimizerInfo)) {

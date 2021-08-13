@@ -266,6 +266,10 @@ function base64_decode(string $string, bool $strict = false): string|false {}
 
 /* basic_functions.c */
 
+/**
+ * @param string $name
+ * @refcount N
+ */
 function constant(string $name): mixed {}
 
 function ip2long(string $ip): int|false {}
@@ -288,6 +292,10 @@ function sleep(int $seconds): int {}
 function usleep(int $microseconds): void {}
 
 #if HAVE_NANOSLEEP
+/**
+ * @return array<string, int>|bool
+ * @refcount 1
+ */
 function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 
 function time_sleep_until(float $timestamp): bool {}
@@ -421,6 +429,8 @@ function checkdnsrr(string $hostname, string $type = "MX"): bool {}
 /**
  * @param array $authoritative_name_servers
  * @param array $additional_records
+ * @return array<int, array>|false
+ * @refcount 1
  */
 function dns_get_record(string $hostname, int $type = DNS_ANY, &$authoritative_name_servers = null, &$additional_records = null, bool $raw = false): array|false {}
 
@@ -705,6 +715,7 @@ function utf8_decode(string $string): string {}
 /**
  * @param resource|null $context
  * @return resource|false
+ * @refcount N
  */
 function opendir(string $directory, $context = null) {}
 
@@ -772,7 +783,10 @@ function get_meta_tags(string $filename, bool $use_include_path = false): array|
 /** @param resource $handle */
 function pclose($handle): int {}
 
-/** @return resource|false */
+/**
+ * @return resource|false
+ * @refcount 1
+ */
 function popen(string $command, string $mode) {}
 
 /** @param resource|null $context */

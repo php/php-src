@@ -47,6 +47,8 @@ typedef struct _func_info_t {
 #define FC(name, callback) \
 	{name, sizeof(name)-1, 0, callback}
 
+#include "zend_func_infos.h"
+
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
 	if (!call_info->send_unpack
@@ -85,14 +87,9 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	}
 }
 
-static const func_info_t func_infos[] = {
+static const func_info_t old_func_infos[] = {
 	/* zend */
-	F1("zend_version",            MAY_BE_STRING),
-	FN("func_get_args",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars",          MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	F1("get_class_methods",       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F1("get_included_files",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	FN("set_error_handler",       MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_OBJECT | MAY_BE_OBJECT),
 	F0("restore_error_handler",   MAY_BE_TRUE),
 	F0("restore_exception_handler", MAY_BE_TRUE),
 	F1("get_declared_traits",     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
@@ -100,19 +97,13 @@ static const func_info_t func_infos[] = {
 	F1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	F1("get_resource_type",       MAY_BE_STRING),
-	F1("get_defined_constants",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("debug_backtrace",         MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_loaded_extensions",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_extension_funcs",     MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/standard */
-	FN("constant",                     MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("bin2hex",                      MAY_BE_STRING),
 	F1("hex2bin",                      MAY_BE_FALSE | MAY_BE_STRING),
-#if HAVE_NANOSLEEP
-	F1("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
-#endif
 #if HAVE_STRPTIME
 	F1("strptime",                     MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 #endif
@@ -266,12 +257,6 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GETHOSTNAME
 	F1("gethostname",                  MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
-	F1("dns_get_record",               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
-# endif
-#endif
-	F1("popen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("fgets",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fread",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fopen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -312,7 +297,6 @@ static const func_info_t func_infos[] = {
 	F1("unpack",                       MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("get_browser",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("crypt",                        MAY_BE_STRING),
-	FN("opendir",                      MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("getcwd",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("readdir",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F1("dir",                          MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -889,25 +873,33 @@ ZEND_API uint32_t zend_get_func_info(
 	return ret;
 }
 
-int zend_func_info_startup(void)
+void zend_func_info_add(const func_info_t *func_infos)
 {
 	size_t i;
 
+	for (i = 0; i < sizeof(*func_infos)/sizeof(func_info_t); i++) {
+		zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
+
+		if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
+			fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
+		}
+
+		zend_string_release_ex(key, 1);
+	}
+}
+
+int zend_func_info_startup(void)
+{
 	if (zend_func_info_rid == -1) {
 		zend_func_info_rid = zend_get_resource_handle("Zend Optimizer");
 		if (zend_func_info_rid < 0) {
 			return FAILURE;
 		}
 
-		zend_hash_init(&func_info, sizeof(func_infos)/sizeof(func_info_t), NULL, NULL, 1);
-		for (i = 0; i < sizeof(func_infos)/sizeof(func_info_t); i++) {
-			zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
+		zend_hash_init(&func_info, sizeof(old_func_infos)/sizeof(func_info_t) + sizeof(func_infos)/sizeof(func_info_t), NULL, NULL, 1);
 
-			if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
-				fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
-			}
-			zend_string_release_ex(key, 1);
-		}
+		zend_func_info_add(old_func_infos);
+		zend_func_info_add(func_infos);
 	}
 
 	return SUCCESS;
