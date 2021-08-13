@@ -2604,39 +2604,17 @@ ZEND_METHOD(ReflectionParameter, getClass)
 	// TODO: This is going to return null for union types, which is rather odd.
 	if (ZEND_TYPE_HAS_NAME(param->arg_info->type)) {
 		/* Class name is stored as a string, we might also get "self" or "parent"
-		 * - For "self", simply use the function scope. If scope is NULL then
-		 *   the function is global and thus self does not make any sense
-		 *
-		 * - For "parent", use the function scope's parent. If scope is NULL then
-		 *   the function is global and thus parent does not make any sense.
-		 *   If the parent is NULL then the class does not extend anything and
-		 *   thus parent does not make any sense, either.
-		 *
-		 * TODO: Think about moving these checks to the compiler or some sort of
-		 * lint-mode.
+		 * - For "self", simply use the function scope.
+		 * - For "parent", use the function scope's parent.
 		 */
-		zend_string *class_name;
-
-		class_name = ZEND_TYPE_NAME(param->arg_info->type);
+		zend_string *class_name = ZEND_TYPE_NAME(param->arg_info->type);
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			ce = param->fptr->common.scope;
-			if (!ce) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses \"self\" as type but function is not a class member");
-				RETURN_THROWS();
-			}
+			ZEND_ASSERT(ce);
 		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
 			ce = param->fptr->common.scope;
-			if (!ce) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses \"parent\" as type but function is not a class member");
-				RETURN_THROWS();
-			}
-			if (!ce->parent) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter uses \"parent\" as type although class does not have a parent");
-				RETURN_THROWS();
-			}
+			ZEND_ASSERT(ce);
+			ZEND_ASSERT(ce->parent);
 			ce = ce->parent;
 		} else {
 			ce = zend_lookup_class(class_name);
