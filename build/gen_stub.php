@@ -2551,9 +2551,9 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
     return $classSynopses;
 }
 
-function getReplacedClassSynopsisXml(string $xml): string|array|null
+function getReplacedClassSynopsisXml(string $xml): string
 {
-    $replacedXml = preg_replace(
+    return preg_replace(
         [
             "/&([A-Za-z0-9._{}%-]+?;)/",
             "/<(\/)*xi:([A-Za-z]+?)/"
@@ -2564,7 +2564,6 @@ function getReplacedClassSynopsisXml(string $xml): string|array|null
         ],
         $xml
     );
-    return $replacedXml;
 }
 
 /**
