@@ -1251,8 +1251,8 @@ PHP_FUNCTION(xml_parse)
 
 	parser = Z_XMLPARSER_P(pind);
 	if (parser->isparsing) {
-		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Parser must not be called recursively");
+		RETURN_THROWS();
 	}
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, isFinal);
