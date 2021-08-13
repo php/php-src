@@ -2009,6 +2009,8 @@ simple_list:
 				case ZEND_IS_NOT_EQUAL:        BINARY_OP(" != ",  170, 171, 171);
 				case ZEND_IS_SMALLER:          BINARY_OP(" < ",   180, 181, 181);
 				case ZEND_IS_SMALLER_OR_EQUAL: BINARY_OP(" <= ",  180, 181, 181);
+				case ZEND_IS_LARGER:			BINARY_OP(" > ",   180, 181, 181);
+				case ZEND_IS_LARGER_OR_EQUAL:	BINARY_OP(" >= ",  180, 181, 181);
 				case ZEND_POW:                 BINARY_OP(" ** ",  250, 251, 250);
 				case ZEND_BOOL_XOR:            BINARY_OP(" xor ",  40,  40,  41);
 				case ZEND_SPACESHIP:           BINARY_OP(" <=> ", 180, 181, 181);

@@ -62,6 +62,8 @@ ZEND_API zend_result ZEND_FASTCALL is_not_identical_function(zval *result, zval 
 ZEND_API zend_result ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API zend_result ZEND_FASTCALL is_larger_function(zval *result, zval *op1, zval *op2);
+ZEND_API zend_result ZEND_FASTCALL is_larger_or_equal_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API bool ZEND_FASTCALL zend_class_implements_interface(const zend_class_entry *class_ce, const zend_class_entry *interface_ce);
 ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *instance_ce, const zend_class_entry *ce);

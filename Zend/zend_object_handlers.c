@@ -301,22 +301,38 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				break;
 
 			case ZEND_IS_SMALLER:
-				fcic.function_handler = ce->__lessthan;
+				if (zobj == Z_OBJ_P(op1)) {
+					fcic.function_handler = ce->__lessthan;
+				} else {
+					fcic.function_handler = ce->__greaterthan;
+				}
 				operator = "<";
 				break;
 
 			case ZEND_IS_SMALLER_OR_EQUAL:
-				fcic.function_handler = ce->__lessthanoreq;
+				if (zobj == Z_OBJ_P(op1)) {
+					fcic.function_handler = ce->__lessthanoreq;
+				} else {
+					fcic.function_handler = ce->__greaterthanoreq;
+				}
 				operator = "<=";
 				break;
 
 			case ZEND_IS_LARGER:
-				fcic.function_handler = ce->__greaterthan;
+				if (zobj == Z_OBJ_P(op1)) {
+					fcic.function_handler = ce->__greaterthan;
+				} else {
+					fcic.function_handler = ce->__lessthan;
+				}
 				operator = ">";
 				break;
 
 			case ZEND_IS_LARGER_OR_EQUAL:
-				fcic.function_handler = ce->__greaterthanoreq;
+				if (zobj == Z_OBJ_P(op1)) {
+					fcic.function_handler = ce->__greaterthanoreq;
+				} else {
+					fcic.function_handler = ce->__lessthanoreq;
+				}
 				operator = ">=";
 				break;
 
