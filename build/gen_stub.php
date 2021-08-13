@@ -107,6 +107,42 @@ class Context {
     public $forceRegeneration = false;
 }
 
+class ArrayType extends SimpleType {
+    /** @var Type|null */
+    public $keyType;
+
+    /** @var Type|null */
+    public $valueType;
+
+    public function __construct(?Type $keyType, ?Type $valueType)
+    {
+        parent::__construct("array", true);
+
+        $this->keyType = $keyType;
+        $this->valueType = $valueType;
+    }
+
+    public function toOptimizerTypeMask(): string {
+        $typeMasks = [
+            parent::toTypeMask()
+        ];
+
+        if ($this->keyType) {
+            $typeMasks[] = $this->keyType->toOptimizerTypeMask();
+        } else {
+            $typeMasks[] = Type::fromString("string|int")->toOptimizerTypeMask();
+        }
+
+        if ($this->valueType) {
+            $typeMasks[] = $this->valueType->toOptimizerTypeMask();
+        } else {
+            $typeMasks[] = Type::fromString("mixed")->toOptimizerTypeMask();
+        }
+
+        return implode("|", $typeMasks);
+    }
+}
+
 class SimpleType {
     /** @var string */
     public $name;
@@ -138,9 +174,9 @@ class SimpleType {
         throw new Exception("Unexpected node type");
     }
 
-    public static function fromPhpDoc(string $type): SimpleType
+    public static function fromString(string $typeString): SimpleType
     {
-        switch (strtolower($type)) {
+        switch (strtolower($typeString)) {
             case "void":
             case "null":
             case "false":
@@ -148,23 +184,32 @@ class SimpleType {
             case "int":
             case "float":
             case "string":
-            case "array":
             case "iterable":
             case "object":
             case "resource":
             case "mixed":
             case "static":
             case "never":
-                return new SimpleType(strtolower($type), true);
+                return new SimpleType(strtolower($typeString), true);
+            case "array":
+                return new ArrayType(null, null);
             case "self":
                 throw new Exception('The exact class name must be used instead of "self"');
         }
 
-        if (strpos($type, "[]") !== false) {
-            return new SimpleType("array", true);
+        $matches = [];
+        $isArray = preg_match("/(.*)\s*\[\s*\]/", $typeString, $matches);
+        if ($isArray) {
+            return new ArrayType(Type::fromString("int"), Type::fromString($matches[1]));
         }
 
-        return new SimpleType($type, false);
+        $matches = [];
+        $isArray = preg_match("/array\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
+        if ($isArray) {
+            return new ArrayType(Type::fromString($matches[1]), Type::fromString($matches[2]));
+        }
+
+        return new SimpleType($typeString, false);
     }
 
     public static function null(): SimpleType
@@ -184,72 +229,77 @@ class SimpleType {
     public function toTypeCode(): string {
         assert($this->isBuiltin);
         switch (strtolower($this->name)) {
-        case "bool":
-            return "_IS_BOOL";
-        case "int":
-            return "IS_LONG";
-        case "float":
-            return "IS_DOUBLE";
-        case "string":
-            return "IS_STRING";
-        case "array":
-            return "IS_ARRAY";
-        case "object":
-            return "IS_OBJECT";
-        case "void":
-            return "IS_VOID";
-        case "callable":
-            return "IS_CALLABLE";
-        case "iterable":
-            return "IS_ITERABLE";
-        case "mixed":
-            return "IS_MIXED";
-        case "static":
-            return "IS_STATIC";
-        case "never":
-            return "IS_NEVER";
-        default:
-            throw new Exception("Not implemented: $this->name");
+            case "bool":
+                return "_IS_BOOL";
+            case "int":
+                return "IS_LONG";
+            case "float":
+                return "IS_DOUBLE";
+            case "string":
+                return "IS_STRING";
+            case "array":
+                return "IS_ARRAY";
+            case "object":
+                return "IS_OBJECT";
+            case "void":
+                return "IS_VOID";
+            case "callable":
+                return "IS_CALLABLE";
+            case "iterable":
+                return "IS_ITERABLE";
+            case "mixed":
+                return "IS_MIXED";
+            case "static":
+                return "IS_STATIC";
+            case "never":
+                return "IS_NEVER";
+            default:
+                throw new Exception("Not implemented: $this->name");
         }
     }
 
-    public function toTypeMask() {
+    public function toTypeMask(): string {
         assert($this->isBuiltin);
+
         switch (strtolower($this->name)) {
-        case "null":
-            return "MAY_BE_NULL";
-        case "false":
-            return "MAY_BE_FALSE";
-        case "bool":
-            return "MAY_BE_BOOL";
-        case "int":
-            return "MAY_BE_LONG";
-        case "float":
-            return "MAY_BE_DOUBLE";
-        case "string":
-            return "MAY_BE_STRING";
-        case "array":
-            return "MAY_BE_ARRAY";
-        case "object":
-            return "MAY_BE_OBJECT";
-        case "callable":
-            return "MAY_BE_CALLABLE";
-        case "mixed":
-            return "MAY_BE_ANY";
-        case "static":
-            return "MAY_BE_STATIC";
-        case "never":
-            return "MAY_BE_NEVER";
-        default:
-            throw new Exception("Not implemented: $this->name");
-        }
+            case "null":
+                return "MAY_BE_NULL";
+            case "false":
+                return "MAY_BE_FALSE";
+            case "bool":
+                return "MAY_BE_BOOL";
+            case "int":
+                return "MAY_BE_LONG";
+            case "float":
+                return "MAY_BE_DOUBLE";
+            case "string":
+                return "MAY_BE_STRING";
+            case "array":
+                return "MAY_BE_ARRAY";
+            case "object":
+                return "MAY_BE_OBJECT";
+            case "callable":
+                return "MAY_BE_CALLABLE";
+            case "mixed":
+                return "MAY_BE_ANY";
+            case "static":
+                return "MAY_BE_STATIC";
+            case "never":
+                return "MAY_BE_NEVER";
+            default:
+                throw new Exception("Not implemented: $this->name");
+            }
+    }
+
+    public function toOptimizerTypeMask(): string {
+        return $this->toTypeMask();
     }
 
     public function toEscapedName(): string {
         return str_replace('\\', '\\\\', $this->name);
     }
 
-    public function equals(SimpleType $other) {
+    public function equals(SimpleType $other): bool {
         return $this->name === $other->name
             && $this->isBuiltin === $other->isBuiltin;
     }
@@ -276,12 +326,12 @@ class Type {
         return new Type([SimpleType::fromNode($node)]);
     }
 
-    public static function fromPhpDoc(string $phpDocType) {
-        $types = explode("|", $phpDocType);
+    public static function fromString(string $typeString): self {
+        $types = explode("|", $typeString);
 
         $simpleTypes = [];
         foreach ($types as $type) {
-            $simpleTypes[] = SimpleType::fromPhpDoc($type);
+            $simpleTypes[] = SimpleType::fromString($type);
         }
 
         return new Type($simpleTypes);
@@ -321,6 +371,20 @@ class Type {
             }
         }
         return new ArginfoType($classTypes, $builtinTypes);
+    }
+
+    public function toOptimizerTypeMask(): string {
+        $optimizerTypes = [];
+
+        foreach ($this->types as $type) {
+            if ($type->isBuiltin) {
+                $optimizerTypes[] = $type->toOptimizerTypeMask();
+            } else {
+                $optimizerTypes[] = "MAY_BE_OBJECT";
+            }
+        }
+
+        return implode("|", $optimizerTypes);
     }
 
     public function getTypeForDoc(DOMDocument $doc): DOMElement {
@@ -669,6 +733,8 @@ class FuncInfo {
     public $numRequiredArgs;
     /** @var string|null */
     public $cond;
+    /** @var string|null */
+    public $refcount;
 
     public function __construct(
         FunctionOrMethodName $name,
@@ -681,7 +747,8 @@ class FuncInfo {
         array $args,
         ReturnInfo $return,
         int $numRequiredArgs,
-        ?string $cond
+        ?string $cond,
+        ?string $refcount
     ) {
         $this->name = $name;
         $this->classFlags = $classFlags;
@@ -694,6 +761,7 @@ class FuncInfo {
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
+        $this->refcount = $refcount;
     }
 
     public function isMethod(): bool
@@ -752,7 +820,7 @@ class FuncInfo {
         return false;
     }
 
-    public function equalsApartFromName(FuncInfo $other): bool {
+    public function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
         if (count($this->args) !== count($other->args)) {
             return false;
         }
@@ -858,6 +926,32 @@ class FuncInfo {
         } else {
             throw new Error("Cannot happen");
         }
+    }
+
+    public function getOptimizerInfo(): ?string {
+        if ($this->isMethod() && !$this->isFinalMethod()) {
+            return null;
+        }
+
+        $phpDocType = $this->return->phpDocType;
+        if ($this->refcount === null && $phpDocType === null) {
+            return null;
+        }
+
+        $type = $phpDocType ?? $this->return->type;
+        if ($type === null) {
+            return null;
+        }
+
+        $optimizerTypeMask = $type->toOptimizerTypeMask();
+
+        if ($this->refcount === "0" && $optimizerTypeMask === $phpDocType->toArginfoType()->toTypeMask()) {
+            return null;
+        }
+
+        $code = "    F" . ($this->refcount ?? "0") . '("' . $this->name->__toString() . '", ' . $optimizerTypeMask . "),\n";
+
+        return $code;
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -1733,9 +1827,9 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
         } elseif ($this->name === "return") {
-            preg_match('/^\s*([\w\|\\\\\[\]]+)(\s+|$)/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)(\s+|$)/', $value, $matches);
         }
 
         if (isset($matches[1]) === false) {
@@ -1799,6 +1893,7 @@ function parseFunctionLike(
         $docReturnType = null;
         $tentativeReturnType = false;
         $docParamTypes = [];
+        $refcount = null;
 
         if ($comment) {
             $tags = parseDocComment($comment);
@@ -1827,6 +1922,11 @@ function parseFunctionLike(
                     $docReturnType = $tag->getType();
                 } else if ($tag->name === 'param') {
                     $docParamTypes[$tag->getVariableName()] = $tag->getType();
+                } else if ($tag->name === 'refcount') {
+                    $refcount = $tag->getValue();
+                    if (in_array($refcount, ["0", "1", "N"]) === false) {
+                        throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+                    }
                 }
             }
         }
@@ -1883,7 +1983,7 @@ function parseFunctionLike(
                 $sendBy,
                 $param->variadic,
                 $type,
-                isset($docParamTypes[$varName]) ? Type::fromPhpDoc($docParamTypes[$varName]) : null,
+                isset($docParamTypes[$varName]) ? Type::fromString($docParamTypes[$varName]) : null,
                 $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null
             );
             if (!$param->default && !$param->variadic) {
@@ -1903,7 +2003,7 @@ function parseFunctionLike(
         $return = new ReturnInfo(
             $func->returnsByRef(),
             $returnType ? Type::fromNode($returnType) : null,
-            $docReturnType ? Type::fromPhpDoc($docReturnType) : null,
+            $docReturnType ? Type::fromString($docReturnType) : null,
             $tentativeReturnType
         );
 
@@ -1918,7 +2018,8 @@ function parseFunctionLike(
             $args,
             $return,
             $numRequiredArgs,
-            $cond
+            $cond,
+            $refcount
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());
@@ -2302,7 +2403,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
 /** @param FuncInfo[] $generatedFuncInfos */
 function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): ?FuncInfo {
     foreach ($generatedFuncInfos as $generatedFuncInfo) {
-        if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
+        if ($generatedFuncInfo->equalsApartFromNameAndRefcount($funcInfo)) {
             return $generatedFuncInfo;
         }
     }
@@ -2416,6 +2517,19 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
     return $code;
 }
 
+/** @param FuncInfo[] $funcInfos */
+function generateOptimizerInfo(array $funcInfos): string {
+    $code = "static const func_info_t func_infos[] = {\n";
+
+    $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
+        return $funcInfo->getOptimizerInfo();
+    });
+
+    $code .= "};\n";
+
+    return $code;
+}
+
 /**
  * @param ClassInfo[] $classMap
  * @return array<string, string>
@@ -2432,7 +2546,6 @@ function generateClassSynopses(array $classMap): array {
 
     return $result;
 }
-
 
 /**
  * @param ClassInfo[] $classMap
@@ -2812,7 +2925,7 @@ $options = getopt(
     "fh",
     [
         "force-regeneration", "parameter-stats", "help", "verify", "generate-classsynopses", "replace-classsynopses",
-        "generate-methodsynopses", "replace-methodsynopses"
+        "generate-methodsynopses", "replace-methodsynopses", "generate-optimizer-info"
     ],
     $optind
 );
@@ -2824,8 +2937,9 @@ $generateClassSynopses = isset($options["generate-classsynopses"]);
 $replaceClassSynopses = isset($options["replace-classsynopses"]);
 $generateMethodSynopses = isset($options["generate-methodsynopses"]);
 $replaceMethodSynopses = isset($options["replace-methodsynopses"]);
+$generateOptimizerInfo = isset($options["generate-optimizer-info"]);
 $context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $generateClassSynopses || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
+$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $generateClassSynopses || $generateOptimizerInfo || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
 
 $targetSynopses = $argv[$argc - 1] ?? null;
 if ($replaceClassSynopses && $targetSynopses === null) {
@@ -3004,7 +3118,6 @@ if ($replaceClassSynopses) {
     }
 }
 
-
 if ($generateMethodSynopses) {
     $methodSynopsesDirectory = getcwd() . "/methodsynopses";
 
@@ -3029,5 +3142,14 @@ if ($replaceMethodSynopses) {
         if (file_put_contents($filename, $content)) {
             echo "Saved $filename\n";
         }
+    }
+}
+
+if ($generateOptimizerInfo) {
+    $filename = "./Zend/Optimizer/zend_func_infos.h";
+    $optimizerInfo = generateOptimizerInfo($funcMap);
+
+    if (file_put_contents($filename, $optimizerInfo)) {
+        echo "Saved $filename\n";
     }
 }

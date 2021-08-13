@@ -6,12 +6,17 @@ class stdClass
 {
 }
 
+/** @refcount 1 */
 function zend_version(): string {}
 
 function func_num_args(): int {}
 
 function func_get_arg(int $position): mixed {}
 
+/**
+ * @return array<int, mixed>
+ * @refcount N
+ */
 function func_get_args(): array {}
 
 function strlen(string $string): int {}
