@@ -33,6 +33,7 @@ function shiftJISDecode($bytes) {
 
 /* Read in table of all characters in CP932 charset */
 $cp932Chars = array(); /* CP932 -> UTF-16BE */
+$nonInvertible = array();
 $fp = fopen(__DIR__ . '/data/CP932.txt', 'r+');
 while ($line = fgets($fp, 256)) {
   if ($line[0] == '#')
@@ -41,9 +42,12 @@ while ($line = fgets($fp, 256)) {
   if (sscanf($line, "0x%x\t0x%x", $bytes, $codepoint) == 2) {
     if ($bytes < 256)
       continue;
-    if ($bytes > 0xFA00) // We don't handle these extra characters from ku 114 and above
-      continue;
-    $cp932Chars[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+
+    if ($bytes >= 0xFA00) {
+      $nonInvertible[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+    } else {
+      $cp932Chars[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+    }
   }
 }
 
@@ -61,7 +65,6 @@ for ($i = 0xF0; $i <= 0xF9; $i++) {
 
 /* There are 396 Unicode codepoints which are non-invertible in CP932
  * (multiple CP932 byte sequences map to the same codepoint) */
-$nonInvertible = array();
 for ($i = 0xED00; $i <= 0xEEFF; $i++) {
   $bytes = pack('n', shiftJISDecode($i));
   if (isset($cp932Chars[$bytes])) {
@@ -194,7 +197,7 @@ foreach ($nonInvertible as $cp932 => $utf16BE) {
 }
 
 /* All invalid 2-byte CP932 characters */
-for ($i = 0x21; $i <= 0x7E; $i++) {
+for ($i = 0x21; $i <= 0x97; $i++) {
   for ($j = 0; $j < 256; $j++) {
     $testString = chr($i) . chr($j);
     if (!isset($cp932Chars[$testString]) && !isset($nonInvertible[$testString])) {
@@ -206,7 +209,7 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 }
 
 /* Try truncated 2-byte characters */
-for ($i = 0x21; $i <= 0x7E; $i++) {
+for ($i = 0x21; $i <= 0x97; $i++) {
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50220');
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50221');
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50222');
