@@ -1588,10 +1588,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ADD_OP2_TRACE_GUARD();
 					}
 					if (op1_type == IS_ARRAY
-					 && orig_op1_type != IS_UNKNOWN
-					 && !(orig_op1_type & IS_TRACE_REFERENCE)
 					 && !(orig_op1_type & IS_TRACE_PACKED)
-					 && opline->op1_type != IS_CONST
 					 && ((opline->op2_type == IS_CONST
 					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
 					  || (opline->op2_type != IS_CONST
@@ -1752,8 +1749,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP2_TRACE_GUARD();
 
 					if (op1_type == IS_ARRAY
-					 && orig_op1_type != IS_UNKNOWN
-					 && !(orig_op1_type & IS_TRACE_REFERENCE)
 					 && opline->op1_type != IS_CONST
 					 && ((opline->op2_type == IS_CONST
 					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
@@ -1784,10 +1779,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP1_TRACE_GUARD();
 					ADD_OP2_TRACE_GUARD();
 					if (op1_type == IS_ARRAY
-					 && orig_op1_type != IS_UNKNOWN
-					 && !(orig_op1_type & IS_TRACE_REFERENCE)
 					 && !(orig_op1_type & IS_TRACE_PACKED)
-					 && opline->op1_type != IS_CONST
 					 && ((opline->op2_type == IS_CONST
 					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
 					  || (opline->op2_type != IS_CONST
