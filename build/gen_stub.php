@@ -1494,7 +1494,7 @@ class ClassInfo {
                 $parentClassName = self::getClassSynopsisFilename($parent);
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='Properties']]))"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1512,7 +1512,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')]"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1530,7 +1530,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')]"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2440,7 +2440,113 @@ function generateClassSynopses(array $classMap): array {
  */
 function replaceClassSynopses(string $targetDirectory, array $classMap): array
 {
-    throw new Exception("Not yet implemented!");
+    $classSynopses = [];
+
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($targetDirectory),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+
+    foreach ($it as $file) {
+        $pathName = $file->getPathName();
+        if (!preg_match('/\.xml$/i', $pathName)) {
+            continue;
+        }
+
+        $xml = file_get_contents($pathName);
+        if ($xml === false) {
+            continue;
+        }
+
+        if (stripos($xml, "<classsynopsis") === false) {
+            continue;
+        }
+
+        $replacedXml = getReplacedSynopsisXml($xml);
+
+        $doc = new DOMDocument();
+        $doc->formatOutput = false;
+        $doc->preserveWhiteSpace = true;
+        $doc->validateOnParse = true;
+        $success = $doc->loadXML($replacedXml);
+        if (!$success) {
+            echo "Failed opening $pathName\n";
+            continue;
+        }
+
+        $classSynopsisElements = [];
+        foreach ($doc->getElementsByTagName("classsynopsis") as $element) {
+            $classSynopsisElements[] = $element;
+        }
+
+        foreach ($classSynopsisElements as $classSynopsis) {
+            if (!$classSynopsis instanceof DOMElement) {
+                continue;
+            }
+
+            $firstChild = $classSynopsis->firstElementChild;
+            if ($firstChild === null) {
+                continue;
+            }
+            $firstChild = $firstChild->firstElementChild;
+            if ($firstChild === null) {
+                continue;
+            }
+            $className = $firstChild->textContent;
+            if (!isset($classMap[$className])) {
+                continue;
+            }
+            $classInfo = $classMap[$className];
+
+            $newClassSynopsis = $classInfo->getClassSynopsisElement($doc, $classMap);
+            if ($newClassSynopsis === null) {
+                continue;
+            }
+
+            // Check if there is any change - short circuit if there is not any.
+
+            if (replaceAndCompareXmls($doc, $classSynopsis, $newClassSynopsis)) {
+                continue;
+            }
+
+            // Return the updated XML
+
+            $replacedXml = $doc->saveXML();
+
+            $replacedXml = preg_replace(
+                [
+                    "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
+                    "/<phpdoc:classref\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    "/<phpdoc:classref\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                ],
+                [
+                    "&$1",
+                    "<phpdoc:classref xml:id=\"$4\" xmlns:phpdoc=\"$1\" xmlns=\"$2\" xmlns:xi=\"$4\">",
+                    "<phpdoc:classref xml:id=\"$5\" xmlns:phpdoc=\"$1\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
+                ],
+                $replacedXml
+            );
+
+            $classSynopses[$pathName] = $replacedXml;
+        }
+    }
+
+    return $classSynopses;
+}
+
+function getReplacedSynopsisXml(string $xml): string
+{
+    return preg_replace(
+        [
+            "/&([A-Za-z0-9._{}%-]+?;)/",
+            "/<(\/)*xi:([A-Za-z]+?)/"
+        ],
+        [
+            "REPLACED-ENTITY-$1",
+            "<$1XI$2",
+        ],
+        $xml
+    );
 }
 
 /**
@@ -2489,7 +2595,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             continue;
         }
 
-        $replacedXml = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml);
+        $replacedXml = getReplacedSynopsisXml($xml);
 
         $doc = new DOMDocument();
         $doc->formatOutput = false;
@@ -2500,10 +2606,6 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             echo "Failed opening $pathName\n";
             continue;
         }
-
-        $docComparator = new DOMDocument();
-        $docComparator->preserveWhiteSpace = false;
-        $docComparator->formatOutput = true;
 
         $methodSynopsisElements = [];
         foreach ($doc->getElementsByTagName("constructorsynopsis") as $element) {
@@ -2568,19 +2670,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
 
             // Check if there is any change - short circuit if there is not any.
 
-            $xml1 = $doc->saveXML($methodSynopsis);
-            $xml1 = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml1);
-            $docComparator->loadXML($xml1);
-            $xml1 = $docComparator->saveXML();
-
-            $methodSynopsis->parentNode->replaceChild($newMethodSynopsis, $methodSynopsis);
-
-            $xml2 = $doc->saveXML($newMethodSynopsis);
-            $xml2 = preg_replace("/&([A-Za-z0-9._{}%-]+?;)/", "REPLACED-ENTITY-$1", $xml2);
-            $docComparator->loadXML($xml2);
-            $xml2 = $docComparator->saveXML();
-
-            if ($xml1 === $xml2) {
+            if (replaceAndCompareXmls($doc, $methodSynopsis, $newMethodSynopsis)) {
                 continue;
             }
 
@@ -2629,6 +2719,28 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
     }
 
     return $methodSynopses;
+}
+
+function replaceAndCompareXmls(DOMDocument $doc, DOMElement $originalSynopsis, DOMElement $newSynopsis): bool
+{
+    $docComparator = new DOMDocument();
+    $docComparator->preserveWhiteSpace = false;
+    $docComparator->formatOutput = true;
+
+    $xml1 = $doc->saveXML($originalSynopsis);
+    $xml1 = getReplacedSynopsisXml($xml1);
+    $docComparator->loadXML($xml1);
+    $xml1 = $docComparator->saveXML();
+
+    $originalSynopsis->parentNode->replaceChild($newSynopsis, $originalSynopsis);
+
+    $xml2 = $doc->saveXML($newSynopsis);
+    $xml2 = getReplacedSynopsisXml($xml2);
+
+    $docComparator->loadXML($xml2);
+    $xml2 = $docComparator->saveXML();
+
+    return $xml1 === $xml2;
 }
 
 function installPhpParser(string $version, string $phpParserDir) {
@@ -2715,13 +2827,12 @@ $replaceMethodSynopses = isset($options["replace-methodsynopses"]);
 $context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
 $context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $generateClassSynopses || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
 
-$targetClassSynopses = $argv[$optind + 1] ?? null;
-if ($replaceClassSynopses && $targetClassSynopses === null) {
+$targetSynopses = $argv[$argc - 1] ?? null;
+if ($replaceClassSynopses && $targetSynopses === null) {
     die("A target class synopsis directory must be provided for.\n");
 }
 
-$targetMethodSynopses = $argv[$optind + 1 + ($targetClassSynopses !== null)] ?? null;
-if ($replaceMethodSynopses && $targetMethodSynopses === null) {
+if ($replaceMethodSynopses && $targetSynopses === null) {
     die("A target method synopsis directory must be provided.\n");
 }
 
@@ -2884,7 +2995,7 @@ if ($generateClassSynopses) {
 }
 
 if ($replaceClassSynopses) {
-    $classSynopses = replaceClassSynopses($targetClassSynopses, $classMap);
+    $classSynopses = replaceClassSynopses($targetSynopses, $classMap);
 
     foreach ($classSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {
@@ -2912,7 +3023,7 @@ if ($generateMethodSynopses) {
 }
 
 if ($replaceMethodSynopses) {
-    $methodSynopses = replaceMethodSynopses($targetMethodSynopses, $funcMap, $aliasMap);
+    $methodSynopses = replaceMethodSynopses($targetSynopses, $funcMap, $aliasMap);
 
     foreach ($methodSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {
