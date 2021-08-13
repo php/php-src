@@ -2332,26 +2332,44 @@ propagate_arg:
 					if (!(t1 & MAY_BE_GUARD)
 					 || is_checked_guard(tssa, ssa_opcodes, phi->sources[1], phi->ssa_var)) {
 						ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
-						ssa_var_info[phi->sources[0]].type =
-							(t0 & MAY_BE_ARRAY_KEY_ANY) |
-							(t & ~(MAY_BE_ARRAY_KEY_ANY|MAY_BE_PACKED_GUARD)) |
+						t0 = (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
+							(t0 & ~(MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
 							MAY_BE_GUARD;
+						if (!(t0 & MAY_BE_ARRAY)) {
+							t0 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
+						}
+						if (!(t0 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+							t0 &= ~(MAY_BE_RC1|MAY_BE_RCN);
+						}
+						ssa_var_info[phi->sources[0]].type = t0;
+						ssa_var_info[phi->sources[0]].type = t0;
 					}
 				} else {
 					if ((t0 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
-						ssa_var_info[phi->sources[0]].type =
-							(t0 & MAY_BE_ARRAY_KEY_ANY) |
-							(t & t0 & ~(MAY_BE_ARRAY_KEY_ANY|MAY_BE_PACKED_GUARD)) |
+						t0 = (t & t0 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
+							(t0 & ~(MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
 							MAY_BE_GUARD;
-
+						if (!(t0 & MAY_BE_ARRAY)) {
+							t0 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
+						}
+						if (!(t0 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+							t0 &= ~(MAY_BE_RC1|MAY_BE_RCN);
+						}
+						ssa_var_info[phi->sources[0]].type = t0;
 					}
 					if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
 						if (((t & t1) & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != 0
 						 && is_checked_guard(tssa, ssa_opcodes, phi->sources[1], phi->ssa_var)) {
-							ssa_var_info[phi->sources[1]].type =
-								(t1 & MAY_BE_ARRAY_KEY_ANY) |
-								(t & t1 & ~(MAY_BE_ARRAY_KEY_ANY|MAY_BE_PACKED_GUARD)) |
+							t1 = (t & t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
+								(t1 & ~(MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) |
 								MAY_BE_GUARD;
+							if (!(t1 & MAY_BE_ARRAY)) {
+								t1 &= ~(MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_ARRAY_KEY_ANY);
+							}
+							if (!(t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+								t1 &= ~(MAY_BE_RC1|MAY_BE_RCN);
+							}
+							ssa_var_info[phi->sources[1]].type = t1;
 							ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
 						}
 					}
