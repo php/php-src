@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -260,35 +260,35 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
 	}
-	memcpy(ZSTR_VAL((zend_string*)ZCG(mem)) + info->str_size, str, len);
+
+	zend_string *new_str = (zend_string *) (ZSTR_VAL((zend_string*)ZCG(mem)) + info->str_size);
+	memcpy(new_str, str, len);
+	GC_ADD_FLAGS(new_str, IS_STR_INTERNED);
+	GC_DEL_FLAGS(new_str, IS_STR_PERMANENT|IS_STR_CLASS_NAME_MAP_PTR);
 	info->str_size += len;
 	return ret;
 }
 
 static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 {
-	zend_string *ret;
-
 	str = (zend_string*)((char*)ZCG(mem) + ((size_t)(str) & ~Z_UL(1)));
-	if (in_shm) {
-		ret = accel_new_interned_string(str);
-		if (ret == str) {
-			/* We have to create new SHM allocated string */
-			size_t size = _ZSTR_STRUCT_SIZE(ZSTR_LEN(str));
-			ret = zend_shared_alloc(size);
-			if (!ret) {
-				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
-				LONGJMP(*EG(bailout), FAILURE);
-			}
-			memcpy(ret, str, size);
-			/* String wasn't interned but we will use it as interned anyway */
-			GC_SET_REFCOUNT(ret, 1);
-			GC_TYPE_INFO(ret) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
+	if (!in_shm) {
+		return str;
+	}
+
+	zend_string *ret = accel_new_interned_string(str);
+	if (ret == str) {
+		/* We have to create new SHM allocated string */
+		size_t size = _ZSTR_STRUCT_SIZE(ZSTR_LEN(str));
+		ret = zend_shared_alloc(size);
+		if (!ret) {
+			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
+			LONGJMP(*EG(bailout), FAILURE);
 		}
-	} else {
-		ret = str;
-		GC_ADD_FLAGS(ret, IS_STR_INTERNED);
-		GC_DEL_FLAGS(ret, IS_STR_PERMANENT);
+		memcpy(ret, str, size);
+		/* String wasn't interned but we will use it as interned anyway */
+		GC_SET_REFCOUNT(ret, 1);
+		GC_TYPE_INFO(ret) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 	}
 	return ret;
 }
@@ -440,10 +440,6 @@ static void zend_file_cache_serialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		SERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
-	} else if (ZEND_TYPE_HAS_CE(*type)) {
-		zend_class_entry *ce = ZEND_TYPE_CE(*type);
-		SERIALIZE_PTR(ce);
-		ZEND_TYPE_SET_PTR(*type, ce);
 	}
 }
 
@@ -884,18 +880,18 @@ static void zend_file_cache_serialize_warnings(
 		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
 {
 	if (script->warnings) {
-		zend_recorded_warning **warnings;
+		zend_error_info **warnings;
 		SERIALIZE_PTR(script->warnings);
 		warnings = script->warnings;
 		UNSERIALIZE_PTR(warnings);
 
 		for (uint32_t i = 0; i < script->num_warnings; i++) {
-			zend_recorded_warning *warning;
+			zend_error_info *warning;
 			SERIALIZE_PTR(warnings[i]);
 			warning = warnings[i];
 			UNSERIALIZE_PTR(warning);
-			SERIALIZE_STR(warning->error_filename);
-			SERIALIZE_STR(warning->error_message);
+			SERIALIZE_STR(warning->filename);
+			SERIALIZE_STR(warning->message);
 		}
 	}
 }
@@ -1230,22 +1226,11 @@ static void zend_file_cache_unserialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		UNSERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
-		if (!(script->corrupted)) {
-			uint32_t ptr = zend_accel_get_type_map_ptr(type_name, scope);
-
-			if (ptr) {
-				type->type_mask |= _ZEND_TYPE_CACHE_BIT;
-				type->ce_cache__ptr = ptr;
-			} else {
-				type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
-			}
+		if (!script->corrupted) {
+			zend_accel_get_class_name_map_ptr(type_name);
 		} else {
-			type->type_mask &= ~_ZEND_TYPE_CACHE_BIT;
+			zend_alloc_ce_cache(type_name);
 		}
-	} else if (ZEND_TYPE_HAS_CE(*type)) {
-		zend_class_entry *ce = ZEND_TYPE_CE(*type);
-		UNSERIALIZE_PTR(ce);
-		ZEND_TYPE_SET_PTR(*type, ce);
 	}
 }
 
@@ -1253,15 +1238,17 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
 {
-	if (!(script->corrupted)
-	 && op_array != &script->script.main_op_array) {
-		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+	if (!script->corrupted) {
+		if (op_array != &script->script.main_op_array) {
+			op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
+			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		} else {
+			ZEND_ASSERT(!(op_array->fn_flags & ZEND_ACC_IMMUTABLE));
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		}
 		if (op_array->static_variables) {
 			ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
-		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 		if (op_array->static_variables) {
@@ -1504,6 +1491,13 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
+	if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+		if (!script->corrupted) {
+			zend_accel_get_class_name_map_ptr(ce->name);
+		} else {
+			zend_alloc_ce_cache(ce->name);
+		}
+	}
 	if (ce->parent) {
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			UNSERIALIZE_STR(ce->parent_name);
@@ -1643,11 +1637,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__callstatic);
 	UNSERIALIZE_PTR(ce->__debugInfo);
 
-	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_ANON_CLASS))) {
-		ce->serialize = zend_class_serialize_deny;
-		ce->unserialize = zend_class_unserialize_deny;
-	}
-
 	if (ce->iterator_funcs_ptr) {
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr);
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_new_iterator);
@@ -1661,17 +1650,19 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	if (!(script->corrupted)) {
 		ce->ce_flags |= ZEND_ACC_IMMUTABLE;
 		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
-		if (ce->ce_flags & ZEND_ACC_IMMUTABLE && ce->default_static_members_table) {
-			ZEND_MAP_PTR_NEW(ce->static_members_table);
-		} else {
-			ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
-		}
 		ZEND_MAP_PTR_NEW(ce->mutable_data);
+		if (ce->default_static_members_count) {
+			ZEND_MAP_PTR_NEW(ce->static_members_table);
+		}
 	} else {
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
-		ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+		if (ce->default_static_members_count) {
+			ZEND_MAP_PTR_INIT(ce->static_members_table,
+				zend_arena_alloc(&CG(arena), sizeof(zval *)));
+			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+		}
 	}
 }
 
@@ -1681,8 +1672,8 @@ static void zend_file_cache_unserialize_warnings(zend_persistent_script *script,
 		UNSERIALIZE_PTR(script->warnings);
 		for (uint32_t i = 0; i < script->num_warnings; i++) {
 			UNSERIALIZE_PTR(script->warnings[i]);
-			UNSERIALIZE_STR(script->warnings[i]->error_filename);
-			UNSERIALIZE_STR(script->warnings[i]->error_message);
+			UNSERIALIZE_STR(script->warnings[i]->filename);
+			UNSERIALIZE_STR(script->warnings[i]->message);
 		}
 	}
 }

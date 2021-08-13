@@ -3,8 +3,8 @@ Phar front controller with valid callback that is not good [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller32.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller32.php
 REQUEST_URI=/frontcontroller32.php

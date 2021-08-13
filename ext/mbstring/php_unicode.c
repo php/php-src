@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -105,9 +105,9 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 }
 
 static inline unsigned mph_hash(unsigned d, unsigned x) {
-    x ^= d;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    return x;
+	x ^= d;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	return x;
 }
 
 #define CODE_NOT_FOUND ((unsigned) -1)

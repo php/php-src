@@ -112,6 +112,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed);
+ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht);
 
 /* additions/updates/changes */
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag);
@@ -176,13 +177,13 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char 
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
 
-/* The same as zend_hash_find(), but hash value of the key must be already calculated */
-ZEND_API zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
+/* The same as zend_hash_find(), but hash value of the key must be already calculated. */
+ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
 
 static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	if (known_hash) {
-		return _zend_hash_find_known_hash(ht, key);
+		return zend_hash_find_known_hash(ht, key);
 	} else {
 		return zend_hash_find(ht, key);
 	}
@@ -957,16 +958,18 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define zend_hash_get_current_data_ptr(ht) \
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
-#define ZEND_HASH_FOREACH(_ht, indirect) do { \
+#define ZEND_HASH_FOREACH_FROM(_ht, indirect, _from) do { \
 		HashTable *__ht = (_ht); \
-		Bucket *_p = __ht->arData; \
-		Bucket *_end = _p + __ht->nNumUsed; \
+		Bucket *_p = __ht->arData + (_from); \
+		Bucket *_end = __ht->arData + __ht->nNumUsed; \
 		for (; _p != _end; _p++) { \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
 			} \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_HASH_FOREACH(_ht, indirect) ZEND_HASH_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
@@ -1010,6 +1013,10 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	ZEND_HASH_FOREACH(ht, 0); \
 	_bucket = _p;
 
+#define ZEND_HASH_FOREACH_BUCKET_FROM(ht, _bucket, _from) \
+	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
+	_bucket = _p;
+
 #define ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_bucket = _p;
@@ -1032,6 +1039,10 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_PTR(ht, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_HASH_FOREACH_PTR_FROM(ht, _ptr, _from) \
+	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
@@ -1076,6 +1087,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(ht, _key, _val, _from) \
+	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
 	_key = _p->key; \
 	_val = _z;
 
@@ -1161,6 +1177,16 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
 		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
 
+#define ZEND_HASH_FILL_GROW() do { \
+		if (UNEXPECTED(__fill_idx >= __fill_ht->nTableSize)) { \
+			__fill_ht->nNumUsed = __fill_idx; \
+			__fill_ht->nNumOfElements = __fill_idx; \
+			__fill_ht->nNextFreeElement = __fill_idx; \
+			zend_hash_packed_grow(__fill_ht); \
+			__fill_bkt = __fill_ht->arData + __fill_idx; \
+		} \
+	} while (0);
+
 #define ZEND_HASH_FILL_SET(_val) \
 		ZVAL_COPY_VALUE(&__fill_bkt->val, _val)
 
@@ -1206,7 +1232,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	} while (0)
 
 /* Check if an array is a list */
-static zend_always_inline zend_bool zend_array_is_list(zend_array *array)
+static zend_always_inline bool zend_array_is_list(zend_array *array)
 {
 	zend_long expected_idx = 0;
 	zend_long num_idx;

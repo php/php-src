@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -494,6 +494,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				handler = alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags);
 				break;
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
@@ -694,7 +695,7 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 				return SUCCESS;
 			case PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL:
 				*(int *) arg = OG(running)->level;
-                return SUCCESS;
+				return SUCCESS;
 			case PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE:
 				OG(running)->flags &= ~(PHP_OUTPUT_HANDLER_REMOVABLE|PHP_OUTPUT_HANDLER_CLEANABLE);
 				return SUCCESS;
@@ -884,7 +885,7 @@ static inline php_output_handler *php_output_handler_init(zend_string *name, siz
 }
 /* }}} */
 
-/* {{{ static int php_output_handler_appen(php_output_handler *handler, const php_output_buffer *buf)
+/* {{{ static int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
  * Appends input to the output handlers buffer and indicates whether the buffer does not have to be processed by the output handler */
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
 {
@@ -896,7 +897,7 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used - (handler->buffer.size - handler->buffer.used));
 			size_t grow_max = MAX(grow_int, grow_buf);
 
-			handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size + grow_max);
+			handler->buffer.data = safe_erealloc(handler->buffer.data, 1, handler->buffer.size, grow_max);
 			handler->buffer.size += grow_max;
 		}
 		memcpy(handler->buffer.data + handler->buffer.used, buf->data, buf->used);
@@ -1023,7 +1024,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		case PHP_OUTPUT_HANDLER_NO_DATA:
 			/* handler ate all */
 			php_output_context_reset(context);
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case PHP_OUTPUT_HANDLER_SUCCESS:
 			/* no more buffered data */
 			handler->buffer.used = 0;

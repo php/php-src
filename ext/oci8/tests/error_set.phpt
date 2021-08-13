@@ -1,7 +1,7 @@
 --TEST--
 Check oci_set_{action,client_identifier,module_name,client_info} error handling
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

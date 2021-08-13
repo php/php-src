@@ -1,7 +1,7 @@
 --TEST--
 ResourceBundle double construction should not be allowed
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

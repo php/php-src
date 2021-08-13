@@ -1,9 +1,7 @@
 --TEST--
 Bug #47667 (ZipArchive::OVERWRITE seems to have no effect)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $thisdir = __DIR__;

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -55,7 +55,7 @@ PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **
 static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, bool override_protection);
 
 /* The longest property name we use in an uploaded file array */
-#define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
+#define MAX_SIZE_OF_INDEX sizeof("[full_path]")
 
 /* The longest anonymous name */
 #define MAX_SIZE_ANONNAME 33
@@ -87,7 +87,7 @@ static void normalize_protected_variable(char *varname) /* {{{ */
 {
 	char *s = varname, *index = NULL, *indexend = NULL, *p;
 
-	/* overjump leading space */
+	/* skip leading space */
 	while (*s == ' ') {
 		s++;
 	}
@@ -678,7 +678,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0;
 	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
-	int skip_upload = 0, anonindex = 0, is_anonymous;
+	int skip_upload = 0, anonymous_index = 0;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
@@ -921,11 +921,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			}
 
 			if (!param) {
-				is_anonymous = 1;
 				param = emalloc(MAX_SIZE_ANONNAME);
-				snprintf(param, MAX_SIZE_ANONNAME, "%u", anonindex++);
-			} else {
-				is_anonymous = 0;
+				snprintf(param, MAX_SIZE_ANONNAME, "%u", anonymous_index++);
 			}
 
 			/* New Rule: never repair potential malicious user input */
@@ -1138,10 +1135,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				s = filename;
 			}
 
-			if (!is_anonymous) {
-				safe_php_register_variable(lbuf, s, strlen(s), NULL, 0);
-			}
-
 			/* Add $foo[name] */
 			if (is_arr_upload) {
 				snprintf(lbuf, llen, "%s[name][%s]", abuf, array_index);
@@ -1149,8 +1142,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				snprintf(lbuf, llen, "%s[name]", param);
 			}
 			register_http_post_files_variable(lbuf, s, &PG(http_globals)[TRACK_VARS_FILES], 0);
-			efree(filename);
 			s = NULL;
+
+			/* Add full path of supplied file for folder uploads via 
+			 * <input type="file" name="files" multiple webkitdirectory>
+			 */
+			/* Add $foo[full_path] */
+			if (is_arr_upload) {
+				snprintf(lbuf, llen, "%s[full_path][%s]", abuf, array_index);
+			} else {
+				snprintf(lbuf, llen, "%s[full_path]", param);
+			}
+			register_http_post_files_variable(lbuf, filename, &PG(http_globals)[TRACK_VARS_FILES], 0);
+			efree(filename);
 
 			/* Possible Content-Type: */
 			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
@@ -1161,16 +1165,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				if (s != NULL) {
 					*s = '\0';
 				}
-			}
-
-			/* Add $foo_type */
-			if (is_arr_upload) {
-				snprintf(lbuf, llen, "%s_type[%s]", abuf, array_index);
-			} else {
-				snprintf(lbuf, llen, "%s_type", param);
-			}
-			if (!is_anonymous) {
-				safe_php_register_variable(lbuf, cd, strlen(cd), NULL, 0);
 			}
 
 			/* Add $foo[type] */
@@ -1194,16 +1188,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 				/* Initialize variables */
 				add_protected_variable(param);
-
-				/* if param is of form xxx[.*] this will cut it to xxx */
-				if (!is_anonymous) {
-					if (temp_filename) {
-						ZVAL_STR_COPY(&zfilename, temp_filename);
-					} else {
-						ZVAL_EMPTY_STRING(&zfilename);
-					}
-					safe_php_register_variable_ex(param, &zfilename, NULL, 1);
-				}
 
 				/* Add $foo[tmp_name] */
 				if (is_arr_upload) {
@@ -1256,19 +1240,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					snprintf(lbuf, llen, "%s[error]", param);
 				}
 				register_http_post_files_variable_ex(lbuf, &error_type, &PG(http_globals)[TRACK_VARS_FILES], 0);
-
-				/* Add $foo_size */
-				if (is_arr_upload) {
-					snprintf(lbuf, llen, "%s_size[%s]", abuf, array_index);
-				} else {
-					snprintf(lbuf, llen, "%s_size", param);
-				}
-				if (!is_anonymous) {
-					if (size_overflow) {
-						ZVAL_STRING(&file_size, file_size_buf);
-					}
-					safe_php_register_variable_ex(lbuf, &file_size, NULL, size_overflow);
-				}
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {

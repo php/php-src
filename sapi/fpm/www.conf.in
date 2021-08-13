@@ -295,7 +295,7 @@ pm.max_spare_servers = 3
 ;      it can accept the following format:
 ;      - %{seconds}d (default)
 ;      - %{milliseconds}d
-;      - %{mili}d
+;      - %{milli}d
 ;      - %{microseconds}d
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
@@ -330,17 +330,17 @@ pm.max_spare_servers = 3
 ;  %t: server time the request was received
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %T: time the log has been written (the request has finished)
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %u: remote user
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
-;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
 
 ; The log file for slow requests
 ; Default Value: not set

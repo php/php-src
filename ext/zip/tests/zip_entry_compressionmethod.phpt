@@ -1,9 +1,7 @@
 --TEST--
 zip_entry_compressionmethod() function
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = zip_open(__DIR__."/test_procedural.zip");

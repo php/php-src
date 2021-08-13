@@ -70,9 +70,9 @@ shmop
         echo "ok\n";
     }
 ?>
---EXPECT--
+--EXPECTF--
 shm open for create: ok
-shm size is: 1024
+shm size is: %d
 shm write test #1: ok
 data in memory is: test #1 of the shmop() extension
 shm open for read only: ok

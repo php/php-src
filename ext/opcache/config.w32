@@ -25,6 +25,7 @@ if (PHP_OPCACHE != "no") {
 				dasm_flags += " -D ZTS=1";
 			}
 			DEFINE("DASM_FLAGS", dasm_flags);
+			DEFINE("DASM_ARCH", "x86");
 
 			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
 			/* XXX read this dynamically */

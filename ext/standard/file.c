@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -153,11 +153,19 @@ static void file_globals_dtor(php_file_globals *file_globals_p)
 #endif
 }
 
+static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
+{
+	if (zend_ini_parse_bool(new_value)) {
+		zend_error(E_DEPRECATED, "auto_detect_line_endings is deprecated");
+	}
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
-	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateBool, auto_detect_line_endings, php_file_globals, file_globals)
+	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateAutoDetectLineEndings, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
@@ -300,8 +308,8 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -651,7 +659,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_FALSE:
 		case IS_TRUE:
 			convert_to_string(data);
-
+			ZEND_FALLTHROUGH;
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
@@ -699,6 +707,7 @@ PHP_FUNCTION(file_put_contents)
 					break;
 				}
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			numbytes = -1;
 			break;
@@ -721,7 +730,7 @@ PHP_FUNCTION(file)
 	char *filename;
 	size_t filename_len;
 	char *p, *s, *e;
-	register int i = 0;
+	int i = 0;
 	char eol_marker = '\n';
 	zend_long flags = 0;
 	bool use_include_path;
@@ -1463,6 +1472,44 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
+PHP_FUNCTION(fsync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
+}
+
+PHP_FUNCTION(fdatasync)
+{
+	zval *res;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STREAM_TO_ZVAL(stream, res);
+
+	if (!php_stream_sync_supported(stream)) {
+		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
+}
+
 /* {{{ Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
 {
@@ -1774,7 +1821,7 @@ quit_loop:
 			if (last_chars[0] == '\r') {
 				return ptr - 2;
 			}
-			/* break is omitted intentionally */
+			ZEND_FALLTHROUGH;
 		case '\r':
 			return ptr - 1;
 	}
@@ -2008,10 +2055,10 @@ PHP_FUNCTION(fgetcsv)
 
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
 {
-	char *temp, *tptr, *bptr, *line_end, *limit;
+	char *temp, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
 	int inc_len;
-	bool first_field = 1;
+	bool first_field = true;
 
 	ZEND_ASSERT((escape_char >= 0 && escape_char <= UCHAR_MAX) || escape_char == PHP_CSV_NO_ESCAPE);
 
@@ -2023,9 +2070,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
 	bptr = buf;
-	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
-	line_end_len = buf_len - (size_t)(tptr - buf);
-	line_end = limit = tptr;
+	line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
+	line_end_len = buf_len - (size_t)(limit - buf);
 
 	/* reserve workspace for building each individual field */
 	temp_len = buf_len;
@@ -2039,25 +2085,24 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 	do {
 		char *comp_end, *hunk_begin;
-
-		tptr = temp;
+		char *tptr = temp;
 
 		inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 		if (inc_len == 1) {
 			char *tmp = bptr;
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
 				tmp++;
-  			}
+			}
 			if (*tmp == enclosure) {
 				bptr = tmp;
 			}
-  		}
+		}
 
 		if (first_field && bptr == line_end) {
 			add_next_index_null(return_value);
 			break;
 		}
-		first_field = 0;
+		first_field = false;
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (inc_len != 0 && *bptr == enclosure) {
 			int state = 0;
@@ -2080,13 +2125,9 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
 								tptr += (bptr - hunk_begin);
 								hunk_begin = bptr;
-								/* break is omitted intentionally */
+								ZEND_FALLTHROUGH;
 
 							case 0: {
-								char *new_buf;
-								size_t new_len;
-								char *new_temp;
-
 								if (hunk_begin != line_end) {
 									memcpy(tptr, hunk_begin, bptr - hunk_begin);
 									tptr += (bptr - hunk_begin);
@@ -2099,7 +2140,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 								if (stream == NULL) {
 									goto quit_loop_2;
-								} else if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+								}
+
+								size_t new_len;
+								char *new_buf = php_stream_get_line(stream, NULL, 0, &new_len);
+								if (!new_buf) {
 									/* we've got an unterminated enclosure,
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
@@ -2111,8 +2156,9 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 									RETVAL_FALSE;
 									goto out;
 								}
+
 								temp_len += new_len;
-								new_temp = erealloc(temp, temp_len);
+								char *new_temp = erealloc(temp, temp_len);
 								tptr = new_temp + (size_t)(tptr - temp);
 								temp = new_temp;
 
@@ -2132,7 +2178,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -2:
 					case -1:
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						/* we need to determine if the enclosure is
 						 * 'real' or is it escaped */
@@ -2201,7 +2247,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_3;
@@ -2232,7 +2278,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 					case -1:
 						inc_len = 1;
 						php_mb_reset();
-						/* break is omitted intentionally */
+						ZEND_FALLTHROUGH;
 					case 1:
 						if (*bptr == delimiter) {
 							goto quit_loop_4;

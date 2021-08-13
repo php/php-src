@@ -1,7 +1,7 @@
 --TEST--
 Bug #45923 (mb_st[r]ripos() offset not handled correctly)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

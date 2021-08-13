@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 17: user fault (through return)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test() {

@@ -1,7 +1,7 @@
 --TEST--
 Bug: tidy segfaults with markup=false
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

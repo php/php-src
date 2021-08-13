@@ -1,7 +1,7 @@
 --TEST--
 Test 11: php:function Support
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 print "Test 11: php:function Support\n";

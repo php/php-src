@@ -12,10 +12,10 @@ function test(SplFixedArray &$arr) {
 
 try {
     test($a[]);
-} catch (Exception $e) {
+} catch (\Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Index invalid or out of range
+[] operator not supported for SplFixedArray

@@ -1642,7 +1642,7 @@ array(45) {
   ["ExifImageLength"]=>
   int(1)
   ["GPSVersion"]=>
-  string(4) "  "
+  string(4) "%0%0"
   ["GPSLatitudeRef"]=>
   string(1) "N"
   ["GPSLatitude"]=>
@@ -1666,7 +1666,7 @@ array(45) {
     string(3) "0/1"
   }
   ["GPSAltitudeRef"]=>
-  string(1) " "
+  string(1) "%0"
   ["GPSAltitude"]=>
   string(5) "295/1"
   ["GPSTimeStamp"]=>

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -140,11 +140,11 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 {
-    if (!FG(wrapper_errors)) {
-        return NULL;
-    } else {
-        return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-    }
+	if (!FG(wrapper_errors)) {
+		return NULL;
+	} else {
+		return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
+	}
 }
 
 /* {{{ wrapper error reporting */
@@ -340,7 +340,7 @@ static const char *_php_stream_pretty_free_options(int close_options, char *out)
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM)
 		strcat(out, "RELEASE_STREAM, ");
 	if (close_options & PHP_STREAM_FREE_PRESERVE_HANDLE)
-		strcat(out, "PREVERSE_HANDLE, ");
+		strcat(out, "PRESERVE_HANDLE, ");
 	if (close_options & PHP_STREAM_FREE_RSRC_DTOR)
 		strcat(out, "RSRC_DTOR, ");
 	if (close_options & PHP_STREAM_FREE_PERSISTENT)
@@ -368,7 +368,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	php_stream_context *context;
 
 	/* During shutdown resources may be released before other resources still holding them.
-	 * When only resoruces are referenced this is not a problem, because they are refcounted
+	 * When only resources are referenced this is not a problem, because they are refcounted
 	 * and will only be fully freed once the refcount drops to zero. However, if php_stream*
 	 * is held directly, we don't have this guarantee. To avoid use-after-free we ignore all
 	 * stream free operations in shutdown unless they come from the resource list destruction,
@@ -1105,7 +1105,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 
 	ret_buf = zend_string_alloc(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
-	 * data is guaranteedly buffered */
+	 * data is guaranteed to be buffered */
 	ZSTR_LEN(ret_buf) = php_stream_read(stream, ZSTR_VAL(ret_buf), tent_ret_len);
 
 	if (found_delim) {
@@ -1121,8 +1121,8 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 {
 	ssize_t didwrite = 0;
 
- 	/* if we have a seekable stream we need to ensure that data is written at the
- 	 * current stream->position. This means invalidating the read buffer and then
+	/* if we have a seekable stream we need to ensure that data is written at the
+	 * current stream->position. This means invalidating the read buffer and then
 	 * performing a low-level seek */
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && stream->readpos != stream->writepos) {
 		stream->readpos = stream->writepos = 0;
@@ -1144,12 +1144,7 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		buf += justwrote;
 		count -= justwrote;
 		didwrite += justwrote;
-
-		/* Only screw with the buffer if we can seek, otherwise we lose data
-		 * buffered from fifos and sockets */
-		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-			stream->position += justwrote;
-		}
+		stream->position += justwrote;
 	}
 
 	return didwrite;
@@ -1404,6 +1399,15 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	}
 
 	return ret;
+}
+
+PHPAPI int _php_stream_sync(php_stream *stream, bool data_only)
+{
+	int op = PHP_STREAM_SYNC_FSYNC;
+	if (data_only) {
+		op = PHP_STREAM_SYNC_FDSYNC;
+	}
+	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, op, NULL);
 }
 
 PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)
@@ -1682,11 +1686,11 @@ void php_shutdown_stream_hashes(void)
 		FG(stream_filters) = NULL;
 	}
 
-    if (FG(wrapper_errors)) {
+	if (FG(wrapper_errors)) {
 		zend_hash_destroy(FG(wrapper_errors));
 		efree(FG(wrapper_errors));
 		FG(wrapper_errors) = NULL;
-    }
+	}
 }
 
 int php_init_stream_wrappers(int module_number)
@@ -1904,7 +1908,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	}
 
 	if (wrapper && wrapper->is_url &&
-        (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
+	    (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
 	    (!PG(allow_url_fopen) ||
 	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
 	       PG(in_user_include)) && !PG(allow_url_include)))) {

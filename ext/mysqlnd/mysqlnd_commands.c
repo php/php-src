@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -524,7 +524,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_ENTER("mysqlnd_command::enable_ssl");
 
-	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
+	DBG_INF_FMT("client_capability_flags=%zu", client_capabilities);
 	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", client_capabilities & CLIENT_LONG_PASSWORD? 1:0);
 	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", client_capabilities & CLIENT_FOUND_ROWS? 1:0);
 	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", client_capabilities & CLIENT_LONG_FLAG? 1:0);
@@ -619,7 +619,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	DBG_ENTER("mysqlnd_command::handshake");
 
 	DBG_INF_FMT("stream=%p", conn->vio->data->m.get_stream(conn->vio));
-	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
+	DBG_INF_FMT("[user=%s] [db=%s:%zu] [flags=%zu]", user, db, db_len, mysql_flags);
 
 	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 

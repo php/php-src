@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -127,6 +127,18 @@ ZEND_GET_MODULE(oci8)
 
 #include "oci8_arginfo.h"
 
+static PHP_INI_MH(OnUpdateOldCloseSemantics)
+{
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	*p = zend_ini_parse_bool(new_value);
+
+	if (*p) {
+		zend_error(E_DEPRECATED, "Directive oci8.old_oci_close_semantics is deprecated");
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ extension definition structures */
 
 zend_module_entry oci8_module_entry = {
@@ -155,7 +167,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("oci8.privileged_connect",		"0",	PHP_INI_SYSTEM,	OnUpdateBool,		privileged_connect,		zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.statement_cache_size",	"20",	PHP_INI_SYSTEM,	OnUpdateLong,	statement_cache_size,	zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.default_prefetch",		"100",	PHP_INI_SYSTEM,	OnUpdateLong,	default_prefetch,		zend_oci_globals,	oci_globals)
-	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateBool,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
+	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateOldCloseSemantics,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
 #if (OCI_MAJOR_VERSION >= 11)
 	STD_PHP_INI_ENTRY(	"oci8.connection_class",		"",		PHP_INI_ALL,	OnUpdateString,		connection_class,		zend_oci_globals,	oci_globals)
 #endif
@@ -640,7 +652,7 @@ void php_oci_define_hash_dtor(zval *data)
 
 	zval_ptr_dtor(&define->val);
 
-    efree(define);
+	efree(define);
 }
 /* }}} */
 
@@ -1885,7 +1897,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		} else {
 			RETURN_FALSE;
 		}
-    }
+	}
 #endif /* OCI_MAJOR_VERSION */
 
 	if (placeholder == NULL) {
@@ -2046,7 +2058,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus);
 		iserror = 1;
 		goto exit_create_spool;
- 	}
+	}
 	/* }}} */
 
 	/* {{{ Set the edition attribute on the auth handle */

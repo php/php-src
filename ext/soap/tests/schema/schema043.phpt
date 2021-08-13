@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 43: Extension of simple type (2)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

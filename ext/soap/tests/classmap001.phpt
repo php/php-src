@@ -1,7 +1,7 @@
 --TEST--
 SOAP Classmap 1: SoapServer support for classmap
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

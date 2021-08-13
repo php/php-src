@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -662,6 +662,8 @@ int odbc_bindcols(odbc_result *result)
 #else
 				charextraalloc = 1;
 #endif
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			default:
 				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
@@ -1148,7 +1150,7 @@ PHP_FUNCTION(odbc_cursor)
 	SQLUSMALLINT max_len;
 	SQLSMALLINT len;
 	char *cursorname;
-   	odbc_result *result;
+	odbc_result *result;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
@@ -1419,6 +1421,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1447,6 +1450,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
+				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
+					ZVAL_FALSE(&tmp);
 				} else {
 					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
 				}
@@ -1455,6 +1461,10 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
+					break;
+				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
+					ZVAL_FALSE(&tmp);
 					break;
 				}
 				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
@@ -1573,6 +1583,8 @@ PHP_FUNCTION(odbc_fetch_into)
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
 
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1600,6 +1612,9 @@ PHP_FUNCTION(odbc_fetch_into)
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
 					break;
+				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
+					ZVAL_FALSE(&tmp);
 				} else {
 					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
 				}
@@ -1608,6 +1623,10 @@ PHP_FUNCTION(odbc_fetch_into)
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA) {
 					ZVAL_NULL(&tmp);
+					break;
+				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
+					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
+					ZVAL_FALSE(&tmp);
 					break;
 				}
 				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
@@ -1797,6 +1816,9 @@ PHP_FUNCTION(odbc_result)
 			if (result->binmode <= 0) {
 				break;
 			}
+			/* TODO: Check this is the intended behaviour */
+			ZEND_FALLTHROUGH;
+
 		case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 		case SQL_WLONGVARCHAR:
@@ -1836,6 +1858,10 @@ PHP_FUNCTION(odbc_result)
 			} else if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				zend_string_efree(field_str);
 				RETURN_NULL();
+			} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
+				zend_string_efree(field_str);
+				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
+				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might
 			   have binary strings... */
@@ -1859,6 +1885,9 @@ PHP_FUNCTION(odbc_result)
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 				RETURN_NULL();
+			} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
+				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
+				RETURN_FALSE;
 			} else {
 				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
 			}
@@ -1890,6 +1919,10 @@ PHP_FUNCTION(odbc_result)
 		if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 			efree(field);
 			RETURN_NULL();
+		} else if (result->values[field_ind].vallen == SQL_NO_TOTAL) {
+			php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
+			efree(field);
+			RETURN_FALSE;
 		}
 		/* chop the trailing \0 by outputting only 4095 bytes */
 		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? 4095 : result->values[field_ind].vallen);
@@ -1969,6 +2002,9 @@ PHP_FUNCTION(odbc_result_all)
 						break;
 					}
 					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY;
+
+					/* TODO: Check this is the intended behaviour */
+					ZEND_FALLTHROUGH;
 				case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				case SQL_WLONGVARCHAR:
@@ -1994,7 +2030,14 @@ PHP_FUNCTION(odbc_result_all)
 						RETURN_FALSE;
 					}
 					if (rc == SQL_SUCCESS_WITH_INFO) {
-						PHPWRITE(buf, result->longreadlen);
+						if (result->values[i].vallen == SQL_NO_TOTAL) {
+							php_printf("</td></tr></table>");
+							php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1);
+							efree(buf);
+							RETURN_FALSE;
+						} else {
+							PHPWRITE(buf, result->longreadlen);
+						}
 					} else if (rc != SQL_SUCCESS) {
 						php_printf("</td></tr></table>");
 						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (retcode %u)", i + 1, rc);
@@ -2011,13 +2054,16 @@ PHP_FUNCTION(odbc_result_all)
 				default:
 					if (result->values[i].vallen == SQL_NULL_DATA) {
 						php_printf("<td>NULL</td>");
+					} else if (result->values[i].vallen == SQL_NO_TOTAL) {
+						php_error_docref(NULL, E_WARNING, "Cannot get data of column #%zu (driver cannot determine length)", i + 1);
+						php_printf("<td>FALSE</td>");
 					} else {
 						php_printf("<td>%s</td>", result->values[i].value);
 					}
 					break;
 			}
 		}
-   		php_printf("</tr>\n");
+		php_printf("</tr>\n");
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)

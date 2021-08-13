@@ -1,9 +1,7 @@
 --TEST--
 Incomplete initialization edge case where mysql->mysql is NULL
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
 

@@ -1,9 +1,7 @@
 --TEST--
 Bug #75317 (UConverter::setDestinationEncoding changes source instead of destinatination)
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension is not available');
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $utf8 = UConverter::getAliases('utf-8')[0];

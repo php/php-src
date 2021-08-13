@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,6 @@
  * - optimize INIT_FCALL_BY_NAME to DO_FCALL
  */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -59,7 +58,7 @@ static void zend_delete_call_instructions(zend_op *opline)
 					MAKE_NOP(opline);
 					return;
 				}
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_NEW:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
@@ -178,7 +177,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					ctx->script, op_array, opline, &call_stack[call].is_prototype);
 				call_stack[call].try_inline =
 					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call].opline = opline;
@@ -189,6 +188,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
 				call--;
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
@@ -217,7 +217,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
-					 && call_stack[call].try_inline) {
+							&& call_stack[call].try_inline
+							&& opline->opcode != ZEND_CALLABLE_CONVERT) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
 					}
 				}

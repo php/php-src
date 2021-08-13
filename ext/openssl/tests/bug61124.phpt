@@ -1,8 +1,7 @@
 --TEST--
 Bug #61124: Segmentation fault with openssl_decrypt
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 var_dump(openssl_decrypt('kzo w2RMExUTYQXW2Xzxmg==', 'aes-128-cbc', 'pass', false, 'pass'));

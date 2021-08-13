@@ -1,11 +1,7 @@
 --TEST--
 Test function stream_get_meta_data on a zlib stream
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 echo "no wrapper\n";

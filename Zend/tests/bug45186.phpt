@@ -54,4 +54,4 @@ string(1) "y"
 ok
 __callstatic:
 string(3) "www"
-call_user_func(): Argument #1 ($function) must be a valid callback, cannot access "self" when no class scope is active
+call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active

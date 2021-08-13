@@ -3,7 +3,7 @@ Formatted print functions
 --FILE--
 <?php
 
-$fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
+$fp = fopen("php://stdout", "w") or die("Bug!!");
 $x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
 echo "\n";
 var_dump($x);

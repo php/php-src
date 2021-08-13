@@ -34,6 +34,13 @@ void zend_verify_enum(zend_class_entry *ce);
 void zend_enum_register_funcs(zend_class_entry *ce);
 void zend_enum_register_props(zend_class_entry *ce);
 
+ZEND_API zend_class_entry *zend_register_internal_enum(
+	const char *name, zend_uchar type, zend_function_entry *functions);
+ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, zval *value);
+ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zval *value);
+ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name);
+ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name);
+
 static zend_always_inline zval *zend_enum_fetch_case_name(zend_object *zobj)
 {
 	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -110,9 +110,9 @@ PHPAPI php_basic_globals basic_globals;
 #include "basic_functions_arginfo.h"
 
 typedef struct _user_tick_function_entry {
-	zval *arguments;
-	int arg_count;
-	int calling;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	bool calling;
 } user_tick_function_entry;
 
 /* some prototypes for local functions */
@@ -551,8 +551,8 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
 
- 	BG(page_uid) = -1;
- 	BG(page_gid) = -1;
+	BG(page_uid) = -1;
+	BG(page_gid) = -1;
 	return SUCCESS;
 }
 /* }}} */
@@ -773,7 +773,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		}
 	}
 #else
-    tsrm_env_lock();
+	tsrm_env_lock();
 
 	/* system method returns a const */
 	char *ptr = getenv(str);
@@ -782,7 +782,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		result = zend_string_init(ptr, strlen(ptr), 0);
 	}
 
-    tsrm_env_unlock();
+	tsrm_env_unlock();
 	return result;
 #endif
 }
@@ -1054,17 +1054,17 @@ PHP_FUNCTION(getopt)
 	/* Get argv from the global symbol table. We calculate argc ourselves
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
-	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
+	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 		((args = zend_hash_find_ex_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL ||
 		(args = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL)
 	) {
 		int pos = 0;
 		zval *entry;
 
- 		if (Z_TYPE_P(args) != IS_ARRAY) {
- 			RETURN_FALSE;
- 		}
- 		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
+		if (Z_TYPE_P(args) != IS_ARRAY) {
+			RETURN_FALSE;
+		}
+		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
 
 		/* Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL */
@@ -1506,12 +1506,20 @@ PHP_FUNCTION(error_get_last)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PG(last_error_message)) {
+		zval tmp;
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
-		add_assoc_str_ex(return_value, "message", sizeof("message")-1,
-			zend_string_copy(PG(last_error_message)));
-		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
-		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
+
+		ZVAL_LONG(&tmp, PG(last_error_type));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+
+		ZVAL_STR_COPY(&tmp, PG(last_error_message));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+
+		ZVAL_STR_COPY(&tmp, PG(last_error_file));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+
+		ZVAL_LONG(&tmp, PG(last_error_lineno));
+		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	}
 }
 /* }}} */
@@ -1529,7 +1537,7 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {
-			free(PG(last_error_file));
+			zend_string_release(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
 	}
@@ -1656,76 +1664,52 @@ PHP_FUNCTION(forward_static_call_array)
 
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
-	int i;
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 
-	zval_ptr_dtor(&shutdown_function_entry->function_name);
-	for (i = 0; i < shutdown_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
-	}
-	efree(shutdown_function_entry->arguments);
+	zval_ptr_dtor(&shutdown_function_entry->fci.function_name);
+	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
 	efree(shutdown_function_entry);
 }
 /* }}} */
 
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
-	int i;
-
-	for (i = 0; i < tick_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&tick_function_entry->arguments[i]);
-	}
-	efree(tick_function_entry->arguments);
+	zval_ptr_dtor(&tick_function_entry->fci.function_name);
+	zend_fcall_info_args_clear(&tick_function_entry->fci, true);
 }
 /* }}} */
 
 static int user_shutdown_function_call(zval *zv) /* {{{ */
 {
-    php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
+	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
+	zend_result call_status;
 
-	if (!zend_is_callable(&shutdown_function_entry->function_name, 0, NULL)) {
-		zend_string *function_name = zend_get_callable_name(&shutdown_function_entry->function_name);
-		zend_throw_error(NULL, "Registered shutdown function %s() cannot be called, function does not exist", ZSTR_VAL(function_name));
-		zend_string_release(function_name);
-		return 0;
-	}
+	/* set retval zval for FCI struct */
+	shutdown_function_entry->fci.retval = &retval;
+	call_status = zend_call_function(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
+	ZEND_ASSERT(call_status == SUCCESS);
+	zval_ptr_dtor(&retval);
 
-	if (call_user_function(NULL, NULL,
-				&shutdown_function_entry->function_name,
-				&retval,
-				shutdown_function_entry->arg_count,
-				shutdown_function_entry->arguments) == SUCCESS)
-	{
-		zval_ptr_dtor(&retval);
-	}
 	return 0;
 }
 /* }}} */
 
 static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 {
-	zval retval;
-	zval *function = &tick_fe->arguments[0];
+	/* Prevent re-entrant calls to the same user ticks function */
+	if (!tick_fe->calling) {
+		zval tmp;
 
-	/* Prevent reentrant calls to the same user ticks function */
-	if (! tick_fe->calling) {
-		tick_fe->calling = 1;
+		/* set tmp zval */
+		tick_fe->fci.retval = &tmp;
 
-		if (call_user_function(NULL, NULL,
-								function,
-								&retval,
-								tick_fe->arg_count - 1,
-								tick_fe->arguments + 1
-								) == SUCCESS) {
-			zval_ptr_dtor(&retval);
-		} else {
-			zend_string *function_name = zend_get_callable_name(function);
-			zend_throw_error(NULL, "Registered tick function %s() cannot be called, function does not exist", ZSTR_VAL(function_name));
-			zend_string_release(function_name);
-		}
+		tick_fe->calling = true;
+		zend_call_function(&tick_fe->fci, &tick_fe->fci_cache);
 
-		tick_fe->calling = 0;
+		/* Destroy return value */
+		zval_ptr_dtor(&tmp);
+		tick_fe->calling = false;
 	}
 }
 /* }}} */
@@ -1738,8 +1722,8 @@ static void run_user_tick_functions(int tick_count, void *arg) /* {{{ */
 
 static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_tick_function_entry * tick_fe2) /* {{{ */
 {
-	zval *func1 = &tick_fe1->arguments[0];
-	zval *func2 = &tick_fe2->arguments[0];
+	zval *func1 = &tick_fe1->fci.function_name;
+	zval *func2 = &tick_fe2->fci.function_name;
 	int ret;
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
@@ -1765,8 +1749,7 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
 			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
-		}
-		zend_end_try();
+		} zend_end_try();
 	}
 }
 /* }}} */
@@ -1790,23 +1773,19 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry entry;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval *args;
-	int arg_count = 0;
+	zval *params = NULL;
+	uint32_t param_count = 0;
+	bool status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &fci, &fcc, &args, &arg_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &entry.fci, &entry.fci_cache, &params, &param_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY(&entry.function_name, &fci.function_name);
-	entry.arguments = (zval *) safe_emalloc(sizeof(zval), arg_count, 0);
-	entry.arg_count = arg_count;
-	for (int i = 0; i < arg_count; i++) {
-		ZVAL_COPY(&entry.arguments[i], &args[i]);
-	}
+	Z_TRY_ADDREF(entry.fci.function_name);
+	zend_fcall_info_argp(&entry.fci, param_count, params);
 
-	append_user_shutdown_function(&entry);
+	status = append_user_shutdown_function(&entry);
+	ZEND_ASSERT(status);
 }
 /* }}} */
 
@@ -2267,12 +2246,13 @@ PHP_FUNCTION(ignore_user_abort)
 /* {{{ Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
-	char *name, *proto;
-	size_t name_len, proto_len;
+	zend_string *name;
+	char *proto;
+	size_t proto_len;
 	struct servent *serv;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STR(name)
 		Z_PARAM_STRING(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2285,14 +2265,14 @@ PHP_FUNCTION(getservbyname)
 	}
 #endif
 
-	serv = getservbyname(name, proto);
+	serv = getservbyname(ZSTR_VAL(name), proto);
 
 #if defined(_AIX)
 	/*
         On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
         If a request for imap gives no result, we try again with imap2.
         */
-	if (serv == NULL && strcmp(name,  "imap") == 0) {
+	if (serv == NULL && zend_string_equals_literal(name, "imap")) {
 		serv = getservbyname("imap2", proto);
 	}
 #endif
@@ -2379,35 +2359,16 @@ PHP_FUNCTION(getprotobynumber)
 PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
-	int i;
-	zend_string *function_name = NULL;
+	zval *params = NULL;
+	uint32_t param_count = 0;
 
-	tick_fe.calling = 0;
-	tick_fe.arg_count = ZEND_NUM_ARGS();
-
-	if (tick_fe.arg_count < 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	tick_fe.arguments = (zval *) safe_emalloc(sizeof(zval), tick_fe.arg_count, 0);
-
-	if (zend_get_parameters_array(ZEND_NUM_ARGS(), tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
-		efree(tick_fe.arguments);
-		RETURN_FALSE;
-	}
-
-	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
-		efree(tick_fe.arguments);
-		zend_argument_type_error(1, "must be a valid tick callback, \"%s\" given", ZSTR_VAL(function_name));
-		zend_string_release_ex(function_name, 0);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache, &params, &param_count) == FAILURE) {
 		RETURN_THROWS();
-	} else if (function_name) {
-		zend_string_release_ex(function_name, 0);
 	}
 
-	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {
-		convert_to_string(&tick_fe.arguments[0]);
-	}
+	tick_fe.calling = false;
+	Z_TRY_ADDREF(tick_fe.fci.function_name);
+	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
 
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
@@ -2415,10 +2376,6 @@ PHP_FUNCTION(register_tick_function)
 						sizeof(user_tick_function_entry),
 						(llist_dtor_func_t) user_tick_function_dtor, 0);
 		php_add_tick_function(run_user_tick_functions, NULL);
-	}
-
-	for (i = 0; i < tick_fe.arg_count; i++) {
-		Z_TRY_ADDREF(tick_fe.arguments[i]);
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
@@ -2431,22 +2388,16 @@ PHP_FUNCTION(register_tick_function)
 PHP_FUNCTION(unregister_tick_function)
 {
 	user_tick_function_entry tick_fe;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_FUNC(tick_fe.fci, tick_fe.fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!BG(user_tick_functions)) {
 		return;
 	}
 
-	tick_fe.arguments = (zval *) emalloc(sizeof(zval));
-	ZVAL_COPY_VALUE(&tick_fe.arguments[0], &fci.function_name);
-	tick_fe.arg_count = 1;
 	zend_llist_del_element(BG(user_tick_functions), &tick_fe, (int (*)(void *, void *)) user_tick_function_compare);
-	efree(tick_fe.arguments);
 }
 /* }}} */
 

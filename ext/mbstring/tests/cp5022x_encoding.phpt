@@ -1,8 +1,9 @@
 --TEST--
 Exhaustive test of CP50220, CP50221, and CP50222 encodings
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
@@ -285,9 +286,16 @@ foreach ($fullwidthKatakana as $cp => $kuten) {
 
 echo "Folding of fullwidth katakana for CP50220 OK\n";
 
+testInvalidString("\xD8\x00", '%', 'UTF-16BE', 'CP50220');
+testInvalidString("\xD8\x00", '%', 'UTF-16BE', 'CP50221');
+testInvalidString("\xD8\x00", '%', 'UTF-16BE', 'CP50222');
+
+echo "Invalid Unicode is flagged when converting to CP5022x\n";
+
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 CP932 support OK
 Folding of fullwidth katakana for CP50220 OK
+Invalid Unicode is flagged when converting to CP5022x

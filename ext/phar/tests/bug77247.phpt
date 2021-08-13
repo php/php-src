@@ -1,7 +1,7 @@
 --TEST--
 PHP bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {

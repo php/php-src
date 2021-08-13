@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,12 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
-#include "zend_jit_x86.h"
+#if ZEND_JIT_TARGET_X86
+# include "zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "zend_jit_arm64.h"
+#endif
+
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -36,9 +41,12 @@
 # if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
 register const zend_op* volatile opline __asm__("%r15");
-# else
+# elif defined(i386)
 register zend_execute_data* volatile execute_data __asm__("%esi");
 register const zend_op* volatile opline __asm__("%edi");
+# elif defined(__aarch64__)
+register zend_execute_data* volatile execute_data __asm__("x27");
+register const zend_op* volatile opline __asm__("x28");
 # endif
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
@@ -250,12 +258,12 @@ static zend_always_inline zend_constant* _zend_quick_get_constant(
 	zend_constant *c = NULL;
 
 	/* null/true/false are resolved during compilation, so don't check for them here. */
-	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+	zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
 	if (zv) {
 		c = (zend_constant*)Z_PTR_P(zv);
 	} else if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
 		key++;
-		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+		zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
 		if (zv) {
 			c = (zend_constant*)Z_PTR_P(zv);
 		}
@@ -732,7 +740,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				}
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, EX(call)->func);
 			}
-		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL
+				|| opline->opcode == ZEND_CALLABLE_CONVERT) {
+			/* TODO: Support tracing JIT for ZEND_CALLABLE_CONVERT. */
 			stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 			break;
 		}
@@ -763,7 +773,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			opline = EX(opline);
 #endif
 
-            op_array = &EX(func)->op_array;
+			op_array = &EX(func)->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)
@@ -798,7 +808,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				}
 
 				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
-					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETRUN_VALUE_USED : 0,
+					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETURN_VALUE_USED : 0,
 					op_array);
 
 				count = zend_jit_trace_recursive_call_count(&EX(func)->op_array, unrolled_calls, ret_level, level);

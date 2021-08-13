@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -340,7 +340,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint32_t len;
+	uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -575,8 +575,8 @@ static void sapi_update_response_code(int ncode)
 }
 
 /*
- * since zend_llist_del_element only remove one matched item once,
- * we should remove them by ourself
+ * since zend_llist_del_element only removes one matched item once,
+ * we should remove them manually
  */
 static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;

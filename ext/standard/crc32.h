@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,6 +22,14 @@
  */
 
 #define CRC32(crc, ch)	 (crc = (crc >> 8) ^ crc32tab[(crc ^ (ch)) & 0xff])
+
+#define php_crc32_bulk_init() (0 ^ 0xffffffff)
+#define php_crc32_bulk_end(c) ((c) ^ 0xffffffff)
+
+PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
+
+/* Return FAILURE if stream reading fail */
+PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);
 
 /* generated using the AUTODIN II polynomial
  *	x^32 + x^26 + x^23 + x^22 + x^16 +

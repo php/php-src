@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -155,6 +155,7 @@ static inline bool may_have_side_effects(
 		case ZEND_TICKS:
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
+		case ZEND_VERIFY_NEVER_TYPE:
 			/* Intrinsic side effects */
 			return 1;
 		case ZEND_DO_FCALL:
@@ -233,14 +234,22 @@ static inline bool may_have_side_effects(
 			}
 			return 0;
 		case ZEND_BIND_STATIC:
-			if (op_array->static_variables
-			 && (opline->extended_value & ZEND_BIND_REF) != 0) {
-				zval *value =
-					(zval*)((char*)op_array->static_variables->arData +
-						(opline->extended_value & ~ZEND_BIND_REF));
-				if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-					/* AST may contain undefined constants */
+			if (op_array->static_variables) {
+				/* Implicit and Explicit bind static is effectively prologue of closure so
+				   report it has side effects like RECV, RECV_INIT; This allows us to
+				   reflect on the closure and discover used variable at runtime */
+				if ((opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 					return 1;
+				}
+
+				if ((opline->extended_value & ZEND_BIND_REF) != 0) {
+					zval *value =
+						(zval*)((char*)op_array->static_variables->arData +
+							(opline->extended_value & ~ZEND_BIND_REF));
+					if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
+						/* AST may contain undefined constants */
+						return 1;
+					}
 				}
 			}
 			return 0;
@@ -378,14 +387,18 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 	return 0;
 }
 
+static zend_always_inline bool may_be_refcounted(uint32_t type) {
+	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+}
+
 static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_FREE:
 			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
-			if (!(ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			if (!may_be_refcounted(ctx->ssa->var_info[ssa_op->op1_use].type)) {
 				return 0;
 			}
-			/* break missing intentionally */
+			ZEND_FALLTHROUGH;
 		case ZEND_FE_FREE:
 			return !is_var_dead(ctx, ssa_op->op1_use);
 		default:
@@ -410,9 +423,8 @@ static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
-				&& opline->opcode != ZEND_CASE
-				&& opline->opcode != ZEND_CASE_STRICT) {
+			if (may_be_refcounted(ssa->var_info[ssa_op->op1_use].type)
+					&& opline->opcode != ZEND_CASE && opline->opcode != ZEND_CASE_STRICT) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}
@@ -420,7 +432,7 @@ static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 	if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) && !is_var_dead(ctx, ssa_op->op2_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op2_use, ssa_op->op2_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op2_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			if (may_be_refcounted(ssa->var_info[ssa_op->op2_use].type)) {
 				if (free_var >= 0) {
 					// TODO: We can't free two vars. Keep instruction alive.
 					zend_bitset_excl(ctx->instr_dead, opline - ctx->op_array->opcodes);
@@ -527,7 +539,18 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 	ctx.phi_dead = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
-	/* Mark reacable instruction without side effects as dead */
+	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
+	 * of the producing instructions, as it combines producing the result with control flow.
+	 * This can be made more precise if there are any cases where this is not the case. */
+	FOREACH_PHI(phi) {
+		if (phi->var >= op_array->last_var
+				&& may_be_refcounted(ssa->var_info[phi->ssa_var].type)) {
+			zend_bitset_excl(ctx.phi_dead, phi->ssa_var);
+			add_phi_sources_to_worklists(&ctx, phi, 0);
+		}
+	} FOREACH_PHI_END();
+
+	/* Mark reachable instruction without side effects as dead */
 	int b = ssa->cfg.blocks_count;
 	while (b > 0) {
 		int	op_data = -1;

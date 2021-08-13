@@ -1,5 +1,7 @@
 --TEST--
 Bug #72157 (use-after-free caused by dba_open)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');

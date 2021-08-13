@@ -2,10 +2,10 @@
   +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -318,9 +318,16 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 					/* MS Access, for instance, doesn't support SQLDescribeParam,
 					 * so we need to guess */
-					sqltype = PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
-									SQL_LONGVARBINARY :
-									SQL_LONGVARCHAR;
+					switch (PDO_PARAM_TYPE(param->param_type)) {
+						case PDO_PARAM_INT:
+							sqltype = SQL_INTEGER;
+							break;
+						case PDO_PARAM_LOB:
+							sqltype = SQL_LONGVARBINARY;
+							break;
+						default:
+							sqltype = SQL_LONGVARCHAR;
+					}
 					precision = 4000;
 					scale = 5;
 					nullable = 1;
@@ -484,11 +491,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					}
 					zval_ptr_dtor(parameter);
 
-					switch (P->len) {
-						case SQL_NULL_DATA:
-							ZVAL_NULL(parameter);
-							break;
-						default:
+					if (P->len >= 0) {
 							ZVAL_STRINGL(parameter, P->outbuf, P->len);
 							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, parameter)) {
 								case PDO_ODBC_CONV_FAIL:
@@ -498,6 +501,8 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								case PDO_ODBC_CONV_OK:
 									break;
 							}
+					} else {
+						ZVAL_NULL(parameter);
 					}
 				}
 				return 1;
@@ -608,7 +613,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		rc = SQLBindCol(S->stmt, colno+1,
 			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
 			S->cols[colno].data,
- 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
+			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_stmt_error("SQLBindCol");
@@ -650,13 +655,13 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
  			256, &C->fetched_len);
 		orig_fetched_len = C->fetched_len;
 
-		if (rc == SQL_SUCCESS) {
+		if (rc == SQL_SUCCESS && C->fetched_len < 256) {
 			/* all the data fit into our little buffer;
 			 * jump down to the generic bound data case */
 			goto in_data;
 		}
 
-		if (rc == SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_SUCCESS_WITH_INFO || rc == SQL_SUCCESS) {
 			/* this is a 'long column'
 
 			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
@@ -683,7 +688,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 				}
 
 				/* resize output buffer and reassemble block */
-				if (rc==SQL_SUCCESS_WITH_INFO) {
+				if (rc==SQL_SUCCESS_WITH_INFO || (rc==SQL_SUCCESS && C->fetched_len > 255)) {
 					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
 					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > 255 (greater than buf2's size)
 					 (if a driver fails to follow that and wrote less than 255 bytes to buf2, this will AV or read garbage into buf) */

@@ -16,7 +16,7 @@ class Caster
     const EXCLUDE_PRIVATE = 32;
     const EXCLUDE_STRICT = 512;
 
-    public static function filter(array $a, $filter)
+    public static function filter(array $a, $filter): int
     {
         foreach ($a as $k => $v) {
             if (!isset($k[1])) {

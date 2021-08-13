@@ -1,9 +1,7 @@
 --TEST--
 Bug #75245 Don't set content of elements with only whitespaces
---SKIPIF--
-<?php
-if (!extension_loaded('simplexml')) die('skip simplexml not available');
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 var_dump(simplexml_load_string('<test1><test2>    </test2><test3></test3></test1>'));

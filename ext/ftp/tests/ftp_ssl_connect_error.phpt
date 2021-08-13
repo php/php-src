@@ -27,7 +27,7 @@ echo "===DONE===\n";
 
 -- Testing ftp_ssl_connect() function on failure --
 
-Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s on line %d
+Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo for %s failed: %s in %s on line %d
 bool(false)
 
 -- Testing ftp_ssl_connect() function timeout exception for value 0 --

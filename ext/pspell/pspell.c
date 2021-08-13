@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,7 +19,6 @@
 #endif
 
 #include "php.h"
-#include "zend_interfaces.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -55,7 +54,7 @@ static zend_class_entry *php_pspell_config_ce = NULL;
 static zend_object_handlers php_pspell_config_handlers;
 
 zend_module_entry pspell_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"pspell",
 	ext_functions,
 	PHP_MINIT(pspell),
@@ -88,7 +87,7 @@ static zend_object *php_pspell_object_to_zend_object(php_pspell_object *obj) {
 
 static zend_function *php_pspell_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpell object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Dictionary object except through helper functions");
 	return NULL;
 }
 
@@ -126,7 +125,7 @@ static zend_object *php_pspell_config_object_to_zend_object(php_pspell_config_ob
 
 static zend_function *php_pspell_config_object_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "You cannot initialize a PSpellConfig object except through helper functions");
+	zend_throw_error(NULL, "You cannot initialize a PSpell\\Config object except through helper functions");
 	return NULL;
 }
 
@@ -150,10 +149,8 @@ static void php_pspell_config_object_free(zend_object *zobj) {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pspell)
 {
-	php_pspell_ce = register_class_PSpell();
+	php_pspell_ce = register_class_PSpell_Dictionary();
 	php_pspell_ce->create_object = php_pspell_object_create;
-	php_pspell_ce->serialize = zend_class_serialize_deny;
-	php_pspell_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_pspell_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_pspell_handlers.clone_obj = NULL;
@@ -161,10 +158,8 @@ static PHP_MINIT_FUNCTION(pspell)
 	php_pspell_handlers.get_constructor = php_pspell_object_get_constructor;
 	php_pspell_handlers.offset = XtOffsetOf(php_pspell_object, std);
 
-	php_pspell_config_ce = register_class_PSpellConfig();
+	php_pspell_config_ce = register_class_PSpell_Config();
 	php_pspell_config_ce->create_object = php_pspell_config_object_create;
-	php_pspell_config_ce->serialize = zend_class_serialize_deny;
-	php_pspell_config_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&php_pspell_config_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_pspell_config_handlers.clone_obj = NULL;
@@ -615,7 +610,7 @@ PHP_FUNCTION(pspell_config_create)
 
 	pspell_config_replace(config, "language-tag", language);
 
- 	if (spelling_len) {
+	if (spelling_len) {
 		pspell_config_replace(config, "spelling", spelling);
 	}
 

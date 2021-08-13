@@ -1,7 +1,7 @@
 --TEST--
 SimpleXml: foreach by reference
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

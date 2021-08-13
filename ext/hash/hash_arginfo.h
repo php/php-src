@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3973a03a64b0939de0c3677da55a5104c29b1b99 */
+ * Stub hash: 8c35168fb1c95e76c5c77fd0c0e8d295e13a0414 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hash, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -180,19 +180,19 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash_equals, arginfo_hash_equals)
 	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
+	ZEND_DEP_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
+	ZEND_DEP_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
+	ZEND_DEP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_count, arginfo_mhash_count)
+	ZEND_DEP_FE(mhash_count, arginfo_mhash_count)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash, arginfo_mhash)
+	ZEND_DEP_FE(mhash, arginfo_mhash)
 #endif
 	ZEND_FE_END
 };

@@ -1,9 +1,7 @@
 --TEST--
 imagecolormatch
---SKIPIF--
-<?php
-        if (!function_exists('imagecolormatch')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

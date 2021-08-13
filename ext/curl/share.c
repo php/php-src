@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "Zend/zend_interfaces.h"
 
 #include "curl_private.h"
 
@@ -164,8 +163,6 @@ void curl_share_free_obj(zend_object *object)
 
 void curl_share_register_handlers(void) {
 	curl_share_ce->create_object = curl_share_create_object;
-	curl_share_ce->serialize = &zend_class_serialize_deny;
-	curl_share_ce->unserialize = &zend_class_unserialize_deny;
 
 	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_handlers.offset = XtOffsetOf(php_curlsh, std);

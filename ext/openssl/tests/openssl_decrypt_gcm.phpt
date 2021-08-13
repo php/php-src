@@ -1,9 +1,9 @@
 --TEST--
 openssl_decrypt() with GCM cipher algorithm tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!in_array('aes-128-gcm', openssl_get_cipher_methods()))
     die("skip: aes-128-gcm not available");
 ?>

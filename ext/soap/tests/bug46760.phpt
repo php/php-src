@@ -1,7 +1,7 @@
 --TEST--
 Bug #46760 (SoapClient doRequest fails when proxy is used)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

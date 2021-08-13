@@ -1,7 +1,7 @@
 --TEST--
 Test that cloning of Curl objects is supported
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

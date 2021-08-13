@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -38,12 +38,8 @@
 static zend_array php_password_algos;
 
 int php_password_algo_register(const char *ident, const php_password_algo *algo) {
-	zval zalgo;
-	ZVAL_PTR(&zalgo, (php_password_algo*)algo);
-	if (zend_hash_str_add(&php_password_algos, ident, strlen(ident), &zalgo)) {
-		return SUCCESS;
-	}
-	return FAILURE;
+	zend_string *key = zend_string_init_interned(ident, strlen(ident), 1);
+	return zend_hash_add_ptr(&php_password_algos, key, (void *) algo) ? SUCCESS : FAILURE;
 }
 
 void php_password_algo_unregister(const char *ident) {

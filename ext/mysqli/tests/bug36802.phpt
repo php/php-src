@@ -1,7 +1,7 @@
 --TEST--
 Bug #36802 (crashes with with mysqli_set_charset())
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
     class really_my_mysqli extends mysqli {

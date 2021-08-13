@@ -31,10 +31,13 @@ elseif (PHP_OS == 'FreeBSD') {
   $lines = explode("\n",`sysctl -a`);
   $infos = array();
   foreach ($lines as $line) {
-    if(!$line){
+    if (!$line){
       continue;
     }
     $tmp = explode(":", $line);
+    if (count($tmp) < 2) {
+      continue;
+    }
     $index = strtolower($tmp[0]);
     $value = trim($tmp[1], " ");
     $infos[$index] = $value;

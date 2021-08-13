@@ -18,7 +18,7 @@ enum StringFoo: string {
 enum CustomFoo implements JsonSerializable {
     case Bar;
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         return 'Custom ' . $this->name;
     }
 }

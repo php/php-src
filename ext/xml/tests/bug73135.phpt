@@ -1,7 +1,7 @@
 --TEST--
 Bug #73135 (xml_parse() segmentation fault)
---SKIPIF--
-<?php if (!extension_loaded('xml')) die('skip xml extension not loaded'); ?>
+--EXTENSIONS--
+xml
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
 --FILE--

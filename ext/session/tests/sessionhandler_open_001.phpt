@@ -1,5 +1,7 @@
 --TEST--
 Testing repated SessionHandler::open() calls
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -7,20 +9,37 @@ Testing repated SessionHandler::open() calls
 
 ini_set('session.save_handler', 'files');
 $x = new SessionHandler;
-$x->open('','');
-$x->open('','');
-$x->open('','');
-$x->open('','');
+
+try {
+    $x->open('','');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $x->open('','');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $x->open('','');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $x->open('','');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 print "Done!\n";
 
 ?>
---EXPECTF--
-Warning: SessionHandler::open(): Session is not active in %s on line 5
-
-Warning: SessionHandler::open(): Session is not active in %s on line 6
-
-Warning: SessionHandler::open(): Session is not active in %s on line 7
-
-Warning: SessionHandler::open(): Session is not active in %s on line 8
+--EXPECT--
+Session is not active
+Session is not active
+Session is not active
+Session is not active
 Done!

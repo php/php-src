@@ -1477,7 +1477,15 @@ int main() {
 ], [
   cookie_io_functions_use_off64_t=no
 ], [
-  cookie_io_functions_use_off64_t=no
+  dnl Cross compilation.
+  case $host_alias in
+    *linux*)
+      cookie_io_functions_use_off64_t=yes
+      ;;
+    *)
+      cookie_io_functions_use_off64_t=no
+      ;;
+  esac
 ])
 
     else
@@ -1582,7 +1590,10 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[found=no])
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[
+      dnl Cross compilation.
+      found=yes
+    ])
     LIBS=$ac_libs
   fi
 
@@ -2298,7 +2309,14 @@ int main()
     ],[
       ac_cv_write_stdout=no
     ],[
-      ac_cv_write_stdout=no
+      case $host_alias in
+        *linux*)
+          ac_cv_write_stdout=yes
+          ;;
+        *)
+          ac_cv_write_stdout=no
+          ;;
+      esac
     ])
   ])
   if test "$ac_cv_write_stdout" = "yes"; then

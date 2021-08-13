@@ -12,11 +12,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef MYSQLND_PORTABILITY_H
 #define MYSQLND_PORTABILITY_H
 
-
-
-/* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
-#define STRUCT_OFFSET(t, f)   XtOffsetOf(t, f)
-
 #ifndef __attribute
 #if !defined(__GNUC__)
 #define __attribute(A)
@@ -51,18 +46,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Go around some bugs in different OS and compilers */
 
-#if SIZEOF_LONG_LONG > 4
-#define HAVE_LONG_LONG 1
-#endif
-
 #ifdef PHP_WIN32
-#define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
 
-#define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL
 #endif

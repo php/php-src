@@ -1,12 +1,10 @@
 --TEST--
 Bug #73037 SoapServer reports Bad Request when gzipped, var 0
+--EXTENSIONS--
+soap
+zlib
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
-    if (!extension_loaded("zlib")) {
-        echo "skip zlib is required for this test";
-    }
-
     if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
         echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
     }

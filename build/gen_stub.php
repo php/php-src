@@ -125,6 +125,10 @@ class SimpleType {
                 return new SimpleType($node->toString(), true);
             }
 
+            if ($node->toLowerString() === 'self') {
+                throw new Exception('The exact class name must be used instead of "self"');
+            }
+
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
@@ -149,9 +153,11 @@ class SimpleType {
             case "object":
             case "resource":
             case "mixed":
-            case "self":
             case "static":
+            case "never":
                 return new SimpleType(strtolower($type), true);
+            case "self":
+                throw new Exception('The exact class name must be used instead of "self"');
         }
 
         if (strpos($type, "[]") !== false) {
@@ -200,6 +206,8 @@ class SimpleType {
             return "IS_MIXED";
         case "static":
             return "IS_STATIC";
+        case "never":
+            return "IS_NEVER";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -230,6 +238,8 @@ class SimpleType {
             return "MAY_BE_ANY";
         case "static":
             return "MAY_BE_STATIC";
+        case "never":
+            return "MAY_BE_NEVER";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -311,6 +321,22 @@ class Type {
             }
         }
         return new ArginfoType($classTypes, $builtinTypes);
+    }
+
+    public function getTypeForDoc(DOMDocument $doc): DOMElement {
+        if (count($this->types) > 1) {
+            $typeElement = $doc->createElement('type');
+            $typeElement->setAttribute("class", "union");
+
+            foreach ($this->types as $type) {
+                $unionTypeElement = $doc->createElement('type', $type->name);
+                $typeElement->appendChild($unionTypeElement);
+            }
+        } else {
+            $typeElement = $doc->createElement('type', $this->types[0]->name);
+        }
+
+        return $typeElement;
     }
 
     public static function equals(?Type $a, ?Type $b): bool {
@@ -599,16 +625,20 @@ class ReturnInfo {
     public $type;
     /** @var Type|null */
     public $phpDocType;
+    /** @var bool */
+    public $tentativeReturnType;
 
-    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType) {
+    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType) {
         $this->byRef = $byRef;
         $this->type = $type;
         $this->phpDocType = $phpDocType;
+        $this->tentativeReturnType = $tentativeReturnType;
     }
 
     public function equals(ReturnInfo $other): bool {
         return $this->byRef === $other->byRef
-            && Type::equals($this->type, $other->type);
+            && Type::equals($this->type, $other->type)
+            && $this->tentativeReturnType === $other->tentativeReturnType;
     }
 
     public function getMethodSynopsisType(): ?Type {
@@ -926,7 +956,7 @@ class FuncInfo {
 
         $returnType = $this->return->getMethodSynopsisType();
         if ($returnType) {
-            $this->appendMethodSynopsisTypeToElement($doc, $methodSynopsis, $returnType);
+            $methodSynopsis->appendChild($returnType->getTypeForDoc($doc));
         }
 
         $methodname = $doc->createElement('methodname', $this->name->__toString());
@@ -948,7 +978,7 @@ class FuncInfo {
                 }
 
                 $methodSynopsis->appendChild($methodparam);
-                $this->appendMethodSynopsisTypeToElement($doc, $methodparam, $arg->getMethodSynopsisType());
+                $methodparam->appendChild($arg->getMethodSynopsisType()->getTypeForDoc($doc));
 
                 $parameter = $doc->createElement('parameter', $arg->name);
                 if ($arg->sendBy !== ArgInfo::SEND_BY_VAL) {
@@ -973,22 +1003,6 @@ class FuncInfo {
 
         return $methodSynopsis;
     }
-
-    private function appendMethodSynopsisTypeToElement(DOMDocument $doc, DOMElement $elementToAppend, Type $type) {
-        if (count($type->types) > 1) {
-            $typeElement = $doc->createElement('type');
-            $typeElement->setAttribute("class", "union");
-
-            foreach ($type->types as $type) {
-                $unionTypeElement = $doc->createElement('type', $type->name);
-                $typeElement->appendChild($unionTypeElement);
-            }
-        } else {
-            $typeElement = $doc->createElement('type', $type->types[0]->name);
-        }
-
-        $elementToAppend->appendChild($typeElement);
-    }
 }
 
 class PropertyInfo
@@ -1001,13 +1015,19 @@ class PropertyInfo
     public $type;
     /** @var Expr|null */
     public $defaultValue;
+    /** @var string|null */
+    public $defaultValueString;
+    /** @var bool */
+    public $isDocReadonly;
 
-    public function __construct(PropertyName $name, int $flags, ?Type $type, ?Expr $defaultValue)
+    public function __construct(PropertyName $name, int $flags, ?Type $type, ?Expr $defaultValue, ?string $defaultValueString, bool $isDocReadonly)
     {
         $this->name = $name;
         $this->flags = $flags;
         $this->type = $type;
         $this->defaultValue = $defaultValue;
+        $this->defaultValueString = $defaultValueString;
+        $this->isDocReadonly = $isDocReadonly;
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -1024,17 +1044,7 @@ class PropertyInfo
             $defaultValue = null;
             $defaultValueType = "undefined";
         } else {
-            $evaluator = new ConstExprEvaluator(
-                function (Expr $expr) use (&$defaultValueConstant) {
-                    if ($expr instanceof Expr\ConstFetch) {
-                        $defaultValueConstant = true;
-                        return null;
-                    }
-
-                    throw new Exception("Property $this->name has an unsupported default value");
-                }
-            );
-            $defaultValue = $evaluator->evaluateDirectly($this->defaultValue);
+            $defaultValue = $this->evaluateDefaultValue($defaultValueConstant);
             $defaultValueType = gettype($defaultValue);
         }
 
@@ -1164,7 +1174,73 @@ class PropertyInfo
             $flags .= "|ZEND_ACC_STATIC";
         }
 
+        if ($this->flags & Class_::MODIFIER_READONLY) {
+            $flags .= "|ZEND_ACC_READONLY";
+        }
+
         return $flags;
+    }
+
+    public function getFieldSynopsisElement(DOMDocument $doc): DOMElement
+    {
+        $fieldsynopsisElement = $doc->createElement("fieldsynopsis");
+
+        if ($this->flags & Class_::MODIFIER_PUBLIC) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public"));
+        } elseif ($this->flags & Class_::MODIFIER_PROTECTED) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected"));
+        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
+        }
+
+        if ($this->flags & Class_::MODIFIER_STATIC) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
+        } elseif ($this->flags & Class_::MODIFIER_READONLY || $this->isDocReadonly) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
+        }
+
+        if ($this->type) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($this->type->getTypeForDoc($doc));
+        }
+
+        $className = str_replace("\\", "-", $this->name->class->toLowerString());
+        $varnameElement = $doc->createElement("varname", $this->name->property);
+        $varnameElement->setAttribute("linkend", "$className.props." . strtolower($this->name->property));
+        $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+        $fieldsynopsisElement->appendChild($varnameElement);
+
+        if ($this->defaultValueString) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $initializerElement = $doc->createElement("initializer",  $this->defaultValueString);
+            $fieldsynopsisElement->appendChild($initializerElement);
+        }
+
+        $fieldsynopsisElement->appendChild(new DOMText("\n    "));
+
+        return $fieldsynopsisElement;
+    }
+
+    /** @return mixed */
+    private function evaluateDefaultValue(bool &$defaultValueConstant)
+    {
+        $evaluator = new ConstExprEvaluator(
+            function (Expr $expr) use (&$defaultValueConstant) {
+                if ($expr instanceof Expr\ConstFetch) {
+                    $defaultValueConstant = true;
+                    return null;
+                }
+
+                throw new Exception("Property $this->name has an unsupported default value");
+            }
+        );
+
+        return $evaluator->evaluateDirectly($this->defaultValue);
     }
 }
 
@@ -1181,6 +1257,8 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
+    /** @var bool */
+    public $isNotSerializable;
     /** @var Name[] */
     public $extends;
     /** @var Name[] */
@@ -1203,6 +1281,7 @@ class ClassInfo {
         ?string $alias,
         bool $isDeprecated,
         bool $isStrictProperties,
+        bool $isNotSerializable,
         array $extends,
         array $implements,
         array $propertyInfos,
@@ -1214,6 +1293,7 @@ class ClassInfo {
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
+        $this->isNotSerializable = $isNotSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->propertyInfos = $propertyInfos;
@@ -1304,7 +1384,293 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
         }
 
+        if ($this->isNotSerializable) {
+            $flags[] = "ZEND_ACC_NOT_SERIALIZABLE";
+        }
+
         return implode("|", $flags);
+    }
+
+    /**
+     * @param ClassInfo[] $classMap
+     */
+    public function getClassSynopsisDocument(array $classMap): ?string {
+
+        $doc = new DOMDocument();
+        $doc->formatOutput = true;
+        $classSynopsis = $this->getClassSynopsisElement($doc, $classMap);
+        if (!$classSynopsis) {
+            return null;
+        }
+
+        $doc->appendChild($classSynopsis);
+
+        return $doc->saveXML();
+    }
+
+    /**
+     * @param ClassInfo[] $classMap
+     */
+    public function getClassSynopsisElement(DOMDocument $doc, array $classMap): ?DOMElement {
+
+        $classSynopsis = $doc->createElement("classsynopsis");
+        $classSynopsis->appendChild(new DOMText("\n    "));
+
+        $ooElement = self::createOoElement($doc, $this, false, false, 4);
+        if (!$ooElement) {
+            return null;
+        }
+        $classSynopsis->appendChild($ooElement);
+        $classSynopsis->appendChild(new DOMText("\n\n    "));
+
+        $classSynopsisInfo = $doc->createElement("classsynopsisinfo");
+        $classSynopsisInfo->appendChild(new DOMText("\n     "));
+        $ooElement = self::createOoElement($doc, $this, true, false, 5);
+        if (!$ooElement) {
+            return null;
+        }
+        $classSynopsisInfo->appendChild($ooElement);
+
+        $classSynopsis->appendChild($classSynopsisInfo);
+
+        foreach ($this->extends as $k => $parent) {
+            $parentInfo = $classMap[$parent->toString()] ?? null;
+            if (!$parentInfo) {
+                throw new Exception("Missing parent class " . $parent->toString());
+            }
+
+            $ooElement = self::createOoElement($doc, $parentInfo, false, $k === 0 && $parentInfo->type === "class", 5);
+            if (!$ooElement) {
+                return null;
+            }
+
+            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
+            $classSynopsisInfo->appendChild($ooElement);
+        }
+
+        foreach ($this->implements as $interface) {
+            $interfaceInfo = $classMap[$interface->toString()] ?? null;
+            if (!$interfaceInfo) {
+                throw new Exception("Missing implemented interface " . $interface->toString());
+            }
+
+            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false, 5);
+            if (!$ooElement) {
+                return null;
+            }
+            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
+            $classSynopsisInfo->appendChild($ooElement);
+        }
+        $classSynopsisInfo->appendChild(new DOMText("\n    "));
+
+        /** @var Name[] $parentsWithInheritedProperties */
+        $parentsWithInheritedProperties = [];
+        /** @var Name[] $parentsWithInheritedMethods */
+        $parentsWithInheritedMethods = [];
+
+        $this->collectInheritedMembers($parentsWithInheritedProperties, $parentsWithInheritedMethods, $classMap);
+
+        if (!empty($this->propertyInfos)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+
+            foreach ($this->propertyInfos as $propertyInfo) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc);
+                $classSynopsis->appendChild($fieldSynopsisElement);
+            }
+        }
+
+        if (!empty($parentsWithInheritedProperties)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedProperties;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+
+            foreach ($parentsWithInheritedProperties as $parent) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $parentClassName = self::getClassSynopsisFilename($parent);
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
+        }
+
+        if (!empty($this->funcInfos)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+
+            $className = self::getClassSynopsisFilename($this->name);
+
+            if ($this->hasConstructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')]"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
+
+            if ($this->hasMethods()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
+
+            if ($this->hasDestructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')]"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
+        }
+
+        if (!empty($parentsWithInheritedMethods)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedMethods;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+
+            foreach ($parentsWithInheritedMethods as $parent) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $parentClassName = self::getClassSynopsisFilename($parent);
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
+        }
+
+        $classSynopsis->appendChild(new DOMText("\n   "));
+
+        return $classSynopsis;
+    }
+
+    private static function createOoElement(
+        DOMDocument $doc,
+        ClassInfo $classInfo,
+        bool $withModifiers,
+        bool $isExtends,
+        int $indentationLevel
+    ): ?DOMElement {
+        $indentation = str_repeat(" ", $indentationLevel);
+
+        if ($classInfo->type !== "class" && $classInfo->type !== "interface") {
+            echo "Class synopsis generation is not implemented for " . $classInfo->type . "\n";
+            return null;
+        }
+
+        $ooElement = $doc->createElement('oo' . $classInfo->type);
+        $ooElement->appendChild(new DOMText("\n$indentation "));
+        if ($isExtends) {
+            $ooElement->appendChild($doc->createElement('modifier', 'extends'));
+            $ooElement->appendChild(new DOMText("\n$indentation "));
+        } elseif ($withModifiers) {
+            if ($classInfo->flags & Class_::MODIFIER_FINAL) {
+                $ooElement->appendChild($doc->createElement('modifier', 'final'));
+                $ooElement->appendChild(new DOMText("\n$indentation "));
+            }
+            if ($classInfo->flags & Class_::MODIFIER_ABSTRACT) {
+                $ooElement->appendChild($doc->createElement('modifier', 'abstract'));
+                $ooElement->appendChild(new DOMText("\n$indentation "));
+            }
+        }
+
+        $nameElement = $doc->createElement($classInfo->type . 'name', $classInfo->name->toString());
+        $ooElement->appendChild($nameElement);
+        $ooElement->appendChild(new DOMText("\n$indentation"));
+
+        return $ooElement;
+    }
+
+    public static function getClassSynopsisFilename(Name $name): string {
+        return strtolower(implode('-', $name->parts));
+    }
+
+    /**
+     * @param Name[] $parentsWithInheritedProperties
+     * @param Name[] $parentsWithInheritedMethods
+     * @param ClassInfo[] $classMap
+     */
+    private function collectInheritedMembers(array &$parentsWithInheritedProperties, array &$parentsWithInheritedMethods, array $classMap): void
+    {
+        if ($this->type !== "class") {
+            return;
+        }
+
+        foreach ($this->extends as $parent) {
+            $parentInfo = $classMap[$parent->toString()] ?? null;
+            if (!$parentInfo) {
+                throw new Exception("Missing parent class " . $parent->toString());
+            }
+
+            if (!empty($parentInfo->propertyInfos) && !isset($parentsWithInheritedProperties[$parent->toString()])) {
+                $parentsWithInheritedProperties[$parent->toString()] = $parent;
+            }
+
+            if (!empty($parentInfo->funcInfos) && !isset($parentsWithInheritedMethods[$parent->toString()])) {
+                $parentsWithInheritedMethods[$parent->toString()] = $parent;
+            }
+
+            $parentInfo->collectInheritedMembers($parentsWithInheritedProperties, $parentsWithInheritedMethods, $classMap);
+        }
+    }
+
+    private function hasConstructor(): bool
+    {
+        foreach ($this->funcInfos as $funcInfo) {
+            if ($funcInfo->name->isConstructor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasDestructor(): bool
+    {
+        foreach ($this->funcInfos as $funcInfo) {
+            if ($funcInfo->name->isDestructor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasMethods(): bool
+    {
+        foreach ($this->funcInfos as $funcInfo) {
+            if (!$funcInfo->name->isConstructor() && !$funcInfo->name->isDestructor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function createIncludeElement(DOMDocument $doc, string $query): DOMElement
+    {
+        $includeElement = $doc->createElement("xi:include");
+        $includeElement->setAttribute("xpointer", $query);
+        $fallbackElement = $doc->createElement("xi:fallback");
+        $includeElement->appendChild(new DOMText("\n     "));
+        $includeElement->appendChild($fallbackElement);
+        $includeElement->appendChild(new DOMText("\n    "));
+
+        return $includeElement;
     }
 }
 
@@ -1431,6 +1797,7 @@ function parseFunctionLike(
         $isDeprecated = false;
         $verify = true;
         $docReturnType = null;
+        $tentativeReturnType = false;
         $docParamTypes = [];
 
         if ($comment) {
@@ -1452,8 +1819,10 @@ function parseFunctionLike(
                     }
                 } else if ($tag->name === 'deprecated') {
                     $isDeprecated = true;
-                }  else if ($tag->name === 'no-verify') {
+                } else if ($tag->name === 'no-verify') {
                     $verify = false;
+                } else if ($tag->name === 'tentative-return-type') {
+                    $tentativeReturnType = true;
                 } else if ($tag->name === 'return') {
                     $docReturnType = $tag->getType();
                 } else if ($tag->name === 'param') {
@@ -1503,6 +1872,10 @@ function parseFunctionLike(
                 }
             }
 
+            if ($param->default instanceof Expr\ClassConstFetch && $param->default->class->toLowerString() === "self") {
+                throw new Exception('The exact class name must be used instead of "self"');
+            }
+
             $foundVariadic = $param->variadic;
 
             $args[] = new ArgInfo(
@@ -1530,7 +1903,8 @@ function parseFunctionLike(
         $return = new ReturnInfo(
             $func->returnsByRef(),
             $returnType ? Type::fromNode($returnType) : null,
-            $docReturnType ? Type::fromPhpDoc($docReturnType) : null
+            $docReturnType ? Type::fromPhpDoc($docReturnType) : null,
+            $tentativeReturnType
         );
 
         return new FuncInfo(
@@ -1556,15 +1930,19 @@ function parseProperty(
     int $flags,
     Stmt\PropertyProperty $property,
     ?Node $type,
-    ?DocComment $comment
+    ?DocComment $comment,
+    PrettyPrinterAbstract $prettyPrinter
 ): PropertyInfo {
     $docType = false;
+    $isDocReadonly = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
         foreach ($tags as $tag) {
             if ($tag->name === 'var') {
                 $docType = true;
+            } elseif ($tag->name === 'readonly') {
+                $isDocReadonly = true;
             }
         }
     }
@@ -1589,7 +1967,9 @@ function parseProperty(
         new PropertyName($class, $property->name->__toString()),
         $flags,
         $propertyType,
-        $property->default
+        $property->default,
+        $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
+        $isDocReadonly
     );
 }
 
@@ -1603,6 +1983,7 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
     $alias = null;
     $isDeprecated = false;
     $isStrictProperties = false;
+    $isNotSerializable = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -1613,6 +1994,8 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
                 $isDeprecated = true;
             } else if ($tag->name === 'strict-properties') {
                 $isStrictProperties = true;
+            } else if ($tag->name === 'not-serializable') {
+                $isNotSerializable = true;
             }
         }
     }
@@ -1636,6 +2019,7 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
         $alias,
         $isDeprecated,
         $isStrictProperties,
+        $isNotSerializable,
         $extends,
         $implements,
         $properties,
@@ -1748,7 +2132,8 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                             $flags,
                             $property,
                             $classStmt->type,
-                            $classStmt->getDocComment()
+                            $classStmt->getDocComment(),
+                            $prettyPrinter
                         );
                     }
                 } else if ($classStmt instanceof Stmt\ClassMethod) {
@@ -1772,7 +2157,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
 }
 
 function parseStubFile(string $code): FileInfo {
-    $lexer = new PhpParser\Lexer();
+    $lexer = new PhpParser\Lexer\Emulative();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
@@ -1814,18 +2199,22 @@ function parseStubFile(string $code): FileInfo {
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
     $returnType = $funcInfo->return->type;
+    $isTentativeReturnType = $funcInfo->return->tentativeReturnType;
+
     if ($returnType !== null) {
         if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
             if ($simpleReturnType->isBuiltin) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    "%s(%s, %d, %d, %s, %d)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $simpleReturnType->toTypeCode(), $returnType->isNullable()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    "%s(%s, %d, %d, %s, %d)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $simpleReturnType->toEscapedName(), $returnType->isNullable()
@@ -1835,14 +2224,16 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
             $arginfoType = $returnType->toArginfoType();
             if ($arginfoType->hasClassType()) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(%s, %d, %d, %s, %s)\n",
+                    "%s(%s, %d, %d, %s, %s)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $arginfoType->toClassTypeString(), $arginfoType->toTypeMask()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(%s, %d, %d, %s)\n",
+                    "%s(%s, %d, %d, %s)\n",
+                    $isTentativeReturnType ? "ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX" : "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX",
                     $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
                     $funcInfo->numRequiredArgs,
                     $arginfoType->toTypeMask()
@@ -2023,6 +2414,33 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
     $code .= "};\n";
 
     return $code;
+}
+
+/**
+ * @param ClassInfo[] $classMap
+ * @return array<string, string>
+ */
+function generateClassSynopses(array $classMap): array {
+    $result = [];
+
+    foreach ($classMap as $classInfo) {
+        $classSynopsis = $classInfo->getClassSynopsisDocument($classMap);
+        if ($classSynopsis !== null) {
+            $result[ClassInfo::getClassSynopsisFilename($classInfo->name) . ".xml"] = $classSynopsis;
+        }
+    }
+
+    return $result;
+}
+
+
+/**
+ * @param ClassInfo[] $classMap
+ * @return array<string, string>
+ */
+function replaceClassSynopses(string $targetDirectory, array $classMap): array
+{
+    throw new Exception("Not yet implemented!");
 }
 
 /**
@@ -2263,7 +2681,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.9.0";
+    $version = "4.12.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -2278,37 +2696,54 @@ function initPhpParser() {
 }
 
 $optind = null;
-$options = getopt("fh", ["force-regeneration", "parameter-stats", "help", "verify", "generate-methodsynopses", "replace-methodsynopses"], $optind);
+$options = getopt(
+    "fh",
+    [
+        "force-regeneration", "parameter-stats", "help", "verify", "generate-classsynopses", "replace-classsynopses",
+        "generate-methodsynopses", "replace-methodsynopses"
+    ],
+    $optind
+);
 
 $context = new Context;
 $printParameterStats = isset($options["parameter-stats"]);
 $verify = isset($options["verify"]);
+$generateClassSynopses = isset($options["generate-classsynopses"]);
+$replaceClassSynopses = isset($options["replace-classsynopses"]);
 $generateMethodSynopses = isset($options["generate-methodsynopses"]);
 $replaceMethodSynopses = isset($options["replace-methodsynopses"]);
 $context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
-$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $generateMethodSynopses || $replaceMethodSynopses;
-$targetMethodSynopses = $argv[$optind + 1] ?? null;
+$context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $generateClassSynopses || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
+
+$targetClassSynopses = $argv[$optind + 1] ?? null;
+if ($replaceClassSynopses && $targetClassSynopses === null) {
+    die("A target class synopsis directory must be provided for.\n");
+}
+
+$targetMethodSynopses = $argv[$optind + 1 + ($targetClassSynopses !== null)] ?? null;
 if ($replaceMethodSynopses && $targetMethodSynopses === null) {
-    die("A target directory must be provided.\n");
+    die("A target method synopsis directory must be provided.\n");
 }
 
 if (isset($options["h"]) || isset($options["help"])) {
-    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
+    die("\nusage: gen-stub.php [ -f | --force-regeneration ] [ --generate-classsynopses ] [ --replace-classsynopses ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
 }
 
 $fileInfos = [];
-$location = $argv[$optind] ?? ".";
-if (is_file($location)) {
-    // Generate single file.
-    $fileInfo = processStubFile($location, $context);
-    if ($fileInfo) {
-        $fileInfos[] = $fileInfo;
+$locations = array_slice($argv, $optind) ?: ['.'];
+foreach (array_unique($locations) as $location) {
+    if (is_file($location)) {
+        // Generate single file.
+        $fileInfo = processStubFile($location, $context);
+        if ($fileInfo) {
+            $fileInfos[] = $fileInfo;
+        }
+    } else if (is_dir($location)) {
+        array_push($fileInfos, ...processDirectory($location, $context));
+    } else {
+        echo "$location is neither a file nor a directory.\n";
+        exit(1);
     }
-} else if (is_dir($location)) {
-    $fileInfos = processDirectory($location, $context);
-} else {
-    echo "$location is neither a file nor a directory.\n";
-    exit(1);
 }
 
 if ($printParameterStats) {
@@ -2329,19 +2764,28 @@ if ($printParameterStats) {
     echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
 }
 
+/** @var ClassInfo[] $classMap */
+$classMap = [];
 /** @var FuncInfo[] $funcMap */
 $funcMap = [];
 /** @var FuncInfo[] $aliasMap */
 $aliasMap = [];
 
 foreach ($fileInfos as $fileInfo) {
-    foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-        /** @var FuncInfo $funcInfo */
-        $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+    foreach ($fileInfo->classInfos as $classInfo) {
+        $classMap[$classInfo->name->__toString()] = $classInfo;
 
-        // TODO: Don't use aliasMap for methodsynopsis?
-        if ($funcInfo->aliasType === "alias") {
-            $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
+        foreach ($fileInfo->funcInfos as $funcInfo) {
+            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+        }
+
+        foreach ($classInfo->funcInfos as $funcInfo) {
+            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+
+            // TODO: Don't use aliasMap for methodsynopsis?
+            if ($funcInfo->aliasType === "alias") {
+                $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
+            }
         }
     }
 }
@@ -2421,6 +2865,34 @@ if ($verify) {
         exit(1);
     }
 }
+
+if ($generateClassSynopses) {
+    $classSynopsesDirectory = getcwd() . "/classsynopses";
+
+    $classSynopses = generateClassSynopses($classMap);
+    if (!empty($classSynopses)) {
+        if (!file_exists($classSynopsesDirectory)) {
+            mkdir($classSynopsesDirectory);
+        }
+
+        foreach ($classSynopses as $filename => $content) {
+            if (file_put_contents("$classSynopsesDirectory/$filename", $content)) {
+                echo "Saved $filename\n";
+            }
+        }
+    }
+}
+
+if ($replaceClassSynopses) {
+    $classSynopses = replaceClassSynopses($targetClassSynopses, $classMap);
+
+    foreach ($classSynopses as $filename => $content) {
+        if (file_put_contents($filename, $content)) {
+            echo "Saved $filename\n";
+        }
+    }
+}
+
 
 if ($generateMethodSynopses) {
     $methodSynopsesDirectory = getcwd() . "/methodsynopses";

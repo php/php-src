@@ -13,5 +13,5 @@ try {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 Hierarchy Request Error

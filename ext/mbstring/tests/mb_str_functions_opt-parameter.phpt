@@ -1,7 +1,7 @@
 --TEST--
 Optional long parameter might be null (deprecated)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo mb_strpos('abb', 'b', null, 'UTF-8') . "\n";

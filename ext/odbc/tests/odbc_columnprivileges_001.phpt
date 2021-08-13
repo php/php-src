@@ -1,5 +1,7 @@
 --TEST--
 odbc_columnprivileges(): Basic test
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

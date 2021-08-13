@@ -29,8 +29,11 @@ explained at the end of this document in
  3. Ensure that the relevant tests on CI are green.
 
     See:
-      https://ci.appveyor.com/project/php/php-src
-      https://dev.azure.com/phpazuredevops/PHP/
+
+    - https://travis-ci.com/github/php/php-src
+    - https://ci.appveyor.com/project/php/php-src
+    - https://dev.azure.com/phpazuredevops/PHP/
+    - https://cirrus-ci.com/github/php/php-src
 
     It is recommended to do so a couple of days before the packaging day, to
     have enough time to investigate failures, communicate with the authors and
@@ -58,7 +61,7 @@ explained at the end of this document in
 
 ## Packaging a non stable release (alpha/beta/RC)
 
- 1. Check the tests at https://travis-ci.org/php/php-src/builds.
+ 1. Check the tests at https://travis-ci.com/php/php-src/builds.
 
  2. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
@@ -71,7 +74,7 @@ explained at the end of this document in
     beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
     not `#define PHP_VERSION "7.4.22-RC1"`.
 
-    When releasing the first release candidate, you must also bump the API
+    ⚠️  When releasing the **first release candidate**, you must also bump the API
     version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and
     `main/php.h`. The API versions between the alpha/beta/.0RCx releases can be
     left the same, or bumped as little as possible because PHP extensions will
@@ -143,7 +146,7 @@ explained at the end of this document in
 
     Note: Remember to update the sha256 checksum information.
 
- 2. Skip this step for non stable releases after GA of minor or major versions
+ 2. Skip this step for non-stable releases after GA of minor or major versions
     (e.g. announce 7.4.0RC1, but not 7.4.1RC1):
 
     Add a short notice to web-php stating that there is a new release, and
@@ -180,7 +183,7 @@ explained at the end of this document in
 
     ```sh
     ssh lists.php.net
-    sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
+    sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
     ```
  6. For RCs, post tweet with release announcement (and link to news article on
     php.net) ([@official_php](https://twitter.com/official_php))
@@ -197,7 +200,7 @@ explained at the end of this document in
     branch. Don't forget to update `NEWS` manually in an extra commit then.
 
  3. Commit those changes. Ensure the tests at
-    https://travis-ci.org/php/php-src/builds are still passing.
+    https://travis-ci.com/php/php-src/builds are still passing.
 
  4. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
@@ -363,13 +366,13 @@ explained at the end of this document in
 
 ## Forking a new release branch
 
- 1. One week prior to cutting X.Y.0beta1, warn internals@ that your version's
-    branch is about to be cut, and that PHP-X.Y will be moving into feature
-    freeze. Try to be specific about when the branch will be cut.
+ 1. One week prior to cutting X.Y.0RC1, warn internals@ that your version's
+    branch is about to be cut. Try to be specific about when the branch will
+    be cut.
 
     Example: http://news.php.net/php.internals/99864
 
- 2. Just prior to cutting X.Y.0beta1, create the new branch locally.
+ 2. Just prior to cutting X.Y.0RC1, create the new branch locally.
 
     Add a commit on master after the branch point clearing the `NEWS`,
     `UPGRADING` and `UPGRADING.INTERNALS` files, updating the version in
@@ -396,8 +399,6 @@ explained at the end of this document in
     the new branch. Example:
 
     https://github.com/php/web-php/commit/74bcad4c770d95f21b7fbeeedbd76d943bb83f23
-
- 5. Notify nlopess@ to add PHP_X_Y tag to gcov.php.net.
 
 ## Preparing for the initial stable version (PHP X.Y.0)
 
@@ -433,7 +434,7 @@ branch:
  1. Email systems@php.net to get setup for access to downloads.php.net and to be added
     to the release-managers@ distribution list.
     
- 2. Request membership to the Release Managers group on github.
+ 2. Request membership to the Release Managers group on GitHub.
 
  3. Create a GPG key for your @php.net address and publish it by editing
     `include/gpg-keys.inc` in the `web-php` repository, adding the output of

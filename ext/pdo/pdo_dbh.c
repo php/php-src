@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -31,7 +31,6 @@
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
-#include "zend_interfaces.h"
 #include "pdo_dbh_arginfo.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
@@ -690,7 +689,7 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
 			if (IS_LONG == is_numeric_str_function(Z_STR_P(value), lval, NULL)) {
 				return true;
 			}
-			/* fallthrough */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value));
 			return false;
@@ -1326,12 +1325,9 @@ void pdo_dbh_init(void)
 {
 	pdo_dbh_ce = register_class_PDO();
 	pdo_dbh_ce->create_object = pdo_dbh_new;
-	pdo_dbh_ce->serialize = zend_class_serialize_deny;
-	pdo_dbh_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
-	pdo_dbh_object_handlers.dtor_obj = zend_objects_destroy_object;
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
@@ -1357,6 +1353,7 @@ void pdo_dbh_init(void)
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_FETCH_POST",	(zend_long)PDO_PARAM_EVT_FETCH_POST);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_NORMALIZE",	(zend_long)PDO_PARAM_EVT_NORMALIZE);
 
+	REGISTER_PDO_CLASS_CONST_LONG("FETCH_DEFAULT", (zend_long)PDO_FETCH_USE_DEFAULT);
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_LAZY", (zend_long)PDO_FETCH_LAZY);
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_ASSOC", (zend_long)PDO_FETCH_ASSOC);
 	REGISTER_PDO_CLASS_CONST_LONG("FETCH_NUM",  (zend_long)PDO_FETCH_NUM);
@@ -1477,7 +1474,7 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 static void pdo_dbh_free_storage(zend_object *std)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(std);
-	if (dbh->in_txn && dbh->methods && dbh->methods->rollback) {
+	if (dbh->driver_data && dbh->methods && dbh->methods->rollback && pdo_is_in_transaction(dbh)) {
 		dbh->methods->rollback(dbh);
 		dbh->in_txn = false;
 	}

@@ -130,7 +130,7 @@ void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
 zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, bool by_ref);
 void zend_eval_const_expr(zend_ast **ast_ptr);
-void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr);
+void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynamic);
 
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
@@ -220,6 +220,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Readonly property                                      |     |     |     */
+#define ZEND_ACC_READONLY                (1 <<  7) /*     |     |  X  |     */
+/*                                                        |     |     |     */
 /* Immutable op_array and class_entries                   |     |     |     */
 /* (implemented only for lazy loading of op_arrays)       |     |     |     */
 #define ZEND_ACC_IMMUTABLE               (1 <<  7) /*  X  |  X  |     |     */
@@ -233,12 +236,12 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Flag to differenciate cases from constants.            |     |     |     */
-/* Stored in Z_ACCESS_FLAGS, must not conflict with       |     |     |     */
-/* ZEND_ACC_ visibility flags or IS_CONSTANT_VISITED_MARK |     |     |     */
+/* Flag to differentiate cases from constants.            |     |     |     */
+/* Must not conflict with ZEND_ACC_ visibility flags      |     |     |     */
+/* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 29...)                            |     |     |     */
+/* Class Flags (unused: 15,21,30,31)                      |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -267,9 +270,6 @@ typedef struct _zend_oparray_context {
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 14) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Whether all property types are resolved to CEs         |     |     |     */
-#define ZEND_ACC_PROPERTY_TYPES_RESOLVED (1 << 15) /*  X  |     |     |     */
-/*                                                        |     |     |     */
 /* Children must reuse parent get_iterator()              |     |     |     */
 #define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 16) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -285,9 +285,6 @@ typedef struct _zend_oparray_context {
 /* Class is linked apart from variance obligations.       |     |     |     */
 #define ZEND_ACC_NEARLY_LINKED           (1 << 20) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Whether this class was used in its unlinked state.     |     |     |     */
-#define ZEND_ACC_HAS_UNLINKED_USES       (1 << 21) /*  X  |     |     |     */
-/*                                                        |     |     |     */
 /* stored in opcache (may be partially)                   |     |     |     */
 #define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -300,6 +297,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* loaded from file cache to process memory               |     |     |     */
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class cannot be serialized or unserialized             |     |     |     */
+#define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 27-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
@@ -393,11 +393,13 @@ typedef struct _zend_property_info {
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 typedef struct _zend_class_constant {
-	zval value; /* access flags and other constant flags are stored in reserved: zval.u2.access_flags */
+	zval value; /* flags are stored in u2 */
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;
 } zend_class_constant;
+
+#define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
 
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
@@ -792,6 +794,8 @@ bool zend_handle_encoding_declaration(zend_ast *ast);
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
 
+ZEND_API zend_class_entry *zend_bind_class_in_slot(
+		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);
 ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
@@ -807,6 +811,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 void zend_init_static_variables_map_ptr(zend_op_array *op_array);
+zend_string *zval_make_interned_string(zval *zv);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
@@ -816,7 +821,7 @@ struct _zend_arena;
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *filename);
-ZEND_API zend_op_array *compile_filename(int type, zval *filename);
+ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
@@ -827,7 +832,6 @@ ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
-ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_type_release(zend_type type, bool persistent);
 ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name);
 
@@ -981,16 +985,19 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
 
-/* The send mode and is_variadic flag are stored as part of zend_type */
+/* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
 #define _ZEND_IS_VARIADIC_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 2))
 #define _ZEND_IS_PROMOTED_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 3))
+#define _ZEND_IS_TENTATIVE_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 4))
 #define ZEND_ARG_SEND_MODE(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) >> _ZEND_SEND_MODE_SHIFT) & 3)
 #define ZEND_ARG_IS_VARIADIC(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_VARIADIC_BIT) != 0)
 #define ZEND_ARG_IS_PROMOTED(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_PROMOTED_BIT) != 0)
+#define ZEND_ARG_TYPE_IS_TENTATIVE(arg_info) \
+	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce */
 #define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
@@ -1052,6 +1059,7 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 #define ZEND_BIND_VAL      0
 #define ZEND_BIND_REF      1
 #define ZEND_BIND_IMPLICIT 2
+#define ZEND_BIND_EXPLICIT 4
 
 #define ZEND_RETURNS_FUNCTION (1<<0)
 #define ZEND_RETURNS_VALUE    (1<<1)
@@ -1103,7 +1111,7 @@ END_EXTERN_C()
 #define ZEND_COMPILE_EXTENDED_FCALL             (1<<1)
 #define ZEND_COMPILE_EXTENDED_INFO              (ZEND_COMPILE_EXTENDED_STMT|ZEND_COMPILE_EXTENDED_FCALL)
 
-/* call op_array handler of extendions */
+/* call op_array handler of extensions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<2)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
@@ -1111,7 +1119,7 @@ END_EXTERN_C()
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
- * may apper in run-time */
+ * may appear in run-time */
 #define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<4)
 
 /* generate ZEND_DECLARE_CLASS_DELAYED opcode to delay early binding */
@@ -1156,6 +1164,8 @@ END_EXTERN_C()
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
+ZEND_API bool zend_is_op_long_compatible(zval *op);
 ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2);
+ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op);
 
 #endif /* ZEND_COMPILE_H */

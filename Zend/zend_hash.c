@@ -150,6 +150,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), 1);
 	} else if (EXPECTED(ht->nTableSize == HT_MIN_SIZE)) {
+		/* Use specialized API with constant allocation amount for a particularly common case. */
 		data = emalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_MIN_MASK));
 	} else {
 		data = emalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK));
@@ -300,7 +301,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2)
 	return ht;
 }
 
-static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
+ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 {
 	HT_ASSERT_RC1(ht);
 	if (ht->nTableSize >= HT_MAX_SIZE) {
@@ -425,17 +426,17 @@ ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 
 static uint32_t zend_array_recalc_elements(HashTable *ht)
 {
-       zval *val;
-       uint32_t num = ht->nNumOfElements;
+	zval *val;
+	uint32_t num = ht->nNumOfElements;
 
-	   ZEND_HASH_FOREACH_VAL(ht, val) {
-		   if (Z_TYPE_P(val) == IS_INDIRECT) {
-			   if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
-				   num--;
-			   }
-		   }
-       } ZEND_HASH_FOREACH_END();
-       return num;
+	ZEND_HASH_FOREACH_VAL(ht, val) {
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
+				num--;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return num;
 }
 /* }}} */
 
@@ -998,7 +999,8 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	}
 
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
-		if (h < ht->nNumUsed) {
+		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) != (HASH_ADD_NEW|HASH_ADD_NEXT)
+		 && h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				if (flag & HASH_LOOKUP) {
@@ -1842,7 +1844,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht)
  * return codes are possible:
  * ZEND_HASH_APPLY_KEEP   - continue
  * ZEND_HASH_APPLY_STOP   - stop iteration
- * ZEND_HASH_APPLY_REMOVE - delete the element, combineable with the former
+ * ZEND_HASH_APPLY_REMOVE - delete the element, combinable with the former
  */
 
 ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_func)
@@ -1871,7 +1873,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_fu
 
 ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *argument)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	int result;
 
@@ -1954,7 +1956,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 
 ZEND_API void ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	zval *new_entry, *data;
 
@@ -2169,7 +2171,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 
 ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {
-    uint32_t idx;
+	uint32_t idx;
 	Bucket *p;
 	zval *t, *s;
 
@@ -2269,7 +2271,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 	return p ? &p->val : NULL;
 }
 
-ZEND_API zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
+ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
 {
 	Bucket *p;
 
@@ -2392,9 +2394,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, Ha
 			}
 		}
 		*pos = ht->nNumUsed;
- 		return SUCCESS;
+		return SUCCESS;
 	} else {
- 		return FAILURE;
+		return FAILURE;
 	}
 }
 
@@ -2731,7 +2733,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, bucket_compar
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx)
 {
-	register const char *tmp = key;
+	const char *tmp = key;
 
 	const char *end = key + length;
 

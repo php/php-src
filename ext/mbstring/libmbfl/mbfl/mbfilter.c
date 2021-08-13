@@ -285,24 +285,23 @@ size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 /*
  * encoding detector
  */
-static int mbfl_estimate_encoding_likelihood(int c, void* data)
+static int mbfl_estimate_encoding_likelihood(int c, void *void_data)
 {
-	mbfl_convert_filter *filter = *((mbfl_convert_filter**)data);
-	uintptr_t *score = (uintptr_t*)(&filter->opaque);
+	mbfl_encoding_detector_data *data = void_data;
 
 	/* Receive wchars decoded from test string using candidate encoding
 	 * If the test string was invalid in the candidate encoding, we assume
 	 * it's the wrong one. */
 	if (c & MBFL_WCSGROUP_THROUGH) {
-		filter->num_illegalchar++;
+		data->num_illegalchars++;
 	} else if (php_unicode_is_cntrl(c) || php_unicode_is_private(c)) {
 		/* Otherwise, count how many control characters and 'private use'
 		 * codepoints we see. Those are rarely used and may indicate that
 		 * the candidate encoding is not the right one. */
-		*score += 10;
+		data->score += 10;
 	} else if (php_unicode_is_punct(c)) {
 		/* Punctuation is also less common than letters/digits */
-		(*score)++;
+		data->score++;
 	}
 	return c;
 }
@@ -315,12 +314,17 @@ mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, 
 
 	mbfl_encoding_detector *identd = emalloc(sizeof(mbfl_encoding_detector));
 	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_convert_filter*));
+	identd->filter_data = ecalloc(elistsz, sizeof(mbfl_encoding_detector_data));
+
+	int filter_list_size = 0;
 	for (int i = 0; i < elistsz; i++) {
-		identd->filter_list[i] = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
-			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_list[i]);
-		identd->filter_list[i]->opaque = (void*)0;
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
+			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_data[filter_list_size]);
+		if (filter) {
+			identd->filter_list[filter_list_size++] = filter;
+		}
 	}
-	identd->filter_list_size = elistsz;
+	identd->filter_list_size = filter_list_size;
 	identd->strict = strict;
 	return identd;
 }
@@ -331,6 +335,7 @@ void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
 		mbfl_convert_filter_delete(identd->filter_list[i]);
 	}
 	efree(identd->filter_list);
+	efree(identd->filter_data);
 	efree(identd);
 }
 
@@ -346,7 +351,7 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 			mbfl_convert_filter *filter = identd->filter_list[i];
 			if (!filter->num_illegalchar) {
 				(*filter->filter_function)(*p, filter);
-				if (filter->num_illegalchar) {
+				if (identd->filter_data[i].num_illegalchars) {
 					bad++;
 				}
 			}
@@ -369,14 +374,15 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 
 const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd)
 {
-	uintptr_t best_score = UINT_MAX; /* Low score is 'better' */
+	size_t best_score = SIZE_MAX; /* Low score is 'better' */
 	const mbfl_encoding *enc = NULL;
 
 	for (int i = 0; i < identd->filter_list_size; i++) {
 		mbfl_convert_filter *filter = identd->filter_list[i];
-		if (!filter->num_illegalchar && (uintptr_t)filter->opaque < best_score) {
+		mbfl_encoding_detector_data *data = &identd->filter_data[i];
+		if (!data->num_illegalchars && data->score < best_score) {
 			enc = filter->from;
-			best_score = (uintptr_t)filter->opaque;
+			best_score = data->score;
 		}
 	}
 
@@ -1484,7 +1490,6 @@ mbfl_ja_jp_hantozen(
 	mbfl_convert_filter *encoder = NULL;
 	mbfl_convert_filter *tl_filter = NULL;
 	mbfl_convert_filter *next_filter = NULL;
-	mbfl_filt_tl_jisx0201_jisx0208_param *param = NULL;
 
 	mbfl_memory_device_init(&device, string->len, 0);
 	mbfl_string_init(result);
@@ -1500,20 +1505,16 @@ mbfl_ja_jp_hantozen(
 	}
 	next_filter = decoder;
 
-	param = emalloc(sizeof(mbfl_filt_tl_jisx0201_jisx0208_param));
-	param->mode = mode;
-
 	tl_filter = mbfl_convert_filter_new2(
 		&vtbl_tl_jisx0201_jisx0208,
 		(int(*)(int, void*))next_filter->filter_function,
 		(flush_function_t)next_filter->filter_flush,
 		next_filter);
 	if (tl_filter == NULL) {
-		efree(param);
 		goto out;
 	}
 
-	tl_filter->opaque = param;
+	tl_filter->opaque = (void*)((intptr_t)mode);
 	next_filter = tl_filter;
 
 	encoder = mbfl_convert_filter_new(
@@ -1542,9 +1543,6 @@ mbfl_ja_jp_hantozen(
 	result = mbfl_memory_device_result(&device, result);
 out:
 	if (tl_filter != NULL) {
-		if (tl_filter->opaque != NULL) {
-			efree(tl_filter->opaque);
-		}
 		mbfl_convert_filter_delete(tl_filter);
 	}
 

@@ -46,6 +46,8 @@ function ptr2str($ptr)
 ?>
 DONE
 --EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
 Notice: unserialize(): Error at offset 0 of 3 bytes in %sbug70436.php on line %d
 
 Notice: unserialize(): Error at offset 93 of 94 bytes in %sbug70436.php on line %d

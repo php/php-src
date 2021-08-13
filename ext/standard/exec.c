@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -281,7 +281,7 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 {
-	register size_t x, y;
+	size_t x, y;
 	size_t l = strlen(str);
 	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;
@@ -358,7 +358,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 #else
 				ZSTR_VAL(cmd)[y++] = '\\';
 #endif
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			default:
 				ZSTR_VAL(cmd)[y++] = str[x];
 
@@ -432,7 +432,7 @@ PHPAPI zend_string *php_escape_shell_arg(const char *str)
 			ZSTR_VAL(cmd)[y++] = '\\';
 			ZSTR_VAL(cmd)[y++] = '\'';
 #endif
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			ZSTR_VAL(cmd)[y++] = str[x];
 		}

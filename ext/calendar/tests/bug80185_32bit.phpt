@@ -13,9 +13,9 @@ try {
 } catch (ValueError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
-var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440588));
+var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440588)));
 try {
-    var_dump(jdtounix(PHP_INT_MAX / 86400 + 2440589));
+    var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440589)));
 } catch (ValueError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }

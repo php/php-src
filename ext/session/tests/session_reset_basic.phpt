@@ -1,5 +1,7 @@
 --TEST--
 Test session_reset() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

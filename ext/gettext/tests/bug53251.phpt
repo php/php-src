@@ -1,8 +1,9 @@
 --TEST--
 Bug #53251 (bindtextdomain with null dir doesn't return old value)
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-if (!extension_loaded('gettext')) die('skip gettext extension not available');
 if (getenv('SKIP_REPEAT')) die('skip gettext leaks global state across requests');
 ?>
 --FILE--

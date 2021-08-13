@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,6 +27,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 #include "zend_enum.h"
+#include "zend_exceptions.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -479,7 +480,6 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -507,17 +507,8 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			smart_str_appends(buf, tmp_str);
-			/* Without a decimal point, PHP treats a number literal as an int.
-			 * This check even works for scientific notation, because the
-			 * mantissa always contains a decimal point.
-			 * We need to check for finiteness, because INF, -INF and NAN
-			 * must not have a decimal point added.
-			 */
-			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
-				smart_str_appendl(buf, ".0", 2);
-			}
+			smart_str_append_double(
+				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
@@ -595,13 +586,13 @@ again:
 				}
 			}
 
-			if (myht && !is_enum) {
-				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
-					php_object_element_export(val, index, key, level, buf);
-				} ZEND_HASH_FOREACH_END();
-				GC_TRY_UNPROTECT_RECURSION(myht);
-			}
 			if (myht) {
+				if (!is_enum) {
+					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
+						php_object_element_export(val, index, key, level, buf);
+					} ZEND_HASH_FOREACH_END();
+				}
+				GC_TRY_UNPROTECT_RECURSION(myht);
 				zend_release_properties(myht);
 			}
 			if (level > 1 && !is_enum) {
@@ -714,10 +705,7 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 	char b[32];
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, val);
 	size_t l = b + sizeof(b) - 1 - s;
-	size_t new_len = smart_str_alloc(buf, 2 + l + 1, 0);
-	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-
-	ZSTR_LEN(buf->s) = new_len;
+	char *res = smart_str_extend(buf, 2 + l + 1);
 	memcpy(res, "i:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -730,10 +718,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 	char b[32];
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, len);
 	size_t l = b + sizeof(b) - 1 - s;
-	size_t new_len = smart_str_alloc(buf, 2 + l + 2 + len + 2, 0);
-	char *res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-
-	ZSTR_LEN(buf->s) = new_len;
+	char *res = smart_str_extend(buf, 2 + l + 2 + len + 2);
 	memcpy(res, "s:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -748,17 +733,14 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 
 static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
 {
-	char b[32], *s, *res;
-	size_t l, new_len;
+	char b[32];
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
 	size_t class_name_len = ZSTR_LEN(class_name);
-	s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
-	l = b + sizeof(b) - 1 - s;
-	new_len = smart_str_alloc(buf, 2 + l + 2 + class_name_len + 2, 0);
-	res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-	ZSTR_LEN(buf->s) = new_len;
+	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
+	size_t l = b + sizeof(b) - 1 - s;
+	char *res = smart_str_extend(buf, 2 + l + 2 + class_name_len + 2);
 	memcpy(res, "O:", 2);
 	res += 2;
 	memcpy(res, s, l);
@@ -773,15 +755,16 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 }
 /* }}} */
 
-static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function *fn, zval *retval) /* {{{ */
+static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
 {
 	zend_result res;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zval retval;
 
 	fci.size = sizeof(fci);
 	fci.object = obj;
-	fci.retval = retval;
+	fci.retval = &retval;
 	fci.param_count = 0;
 	fci.params = NULL;
 	fci.named_params = NULL;
@@ -795,18 +778,18 @@ static zend_result php_var_serialize_call_sleep(zend_object *obj, zend_function 
 	res = zend_call_function(&fci, &fci_cache);
 	BG(serialize_lock)--;
 
-	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
-		zval_ptr_dtor(retval);
-		return FAILURE;
+	if (res == FAILURE || Z_ISUNDEF(retval)) {
+		zval_ptr_dtor(&retval);
+		return NULL;
 	}
 
-	if (!HASH_OF(retval)) {
-		zval_ptr_dtor(retval);
+	if (Z_TYPE(retval) != IS_ARRAY) {
+		zval_ptr_dtor(&retval);
 		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
-		return FAILURE;
+		return NULL;
 	}
 
-	return SUCCESS;
+	return Z_ARRVAL(retval);
 }
 /* }}} */
 
@@ -873,7 +856,7 @@ static int php_var_serialize_get_sleep_props(
 	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
 	/* TODO: Rewrite this by fetching the property info instead of trying out different
 	 * name manglings? */
-	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+	ZEND_HASH_FOREACH_VAL_IND(sleep_retval, name_val) {
 		zend_string *name, *tmp_name, *priv_name, *prot_name;
 
 		ZVAL_DEREF(name_val);
@@ -986,10 +969,11 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 }
 /* }}} */
 
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, php_serialize_data_t var_hash) /* {{{ */
 {
 	HashTable props;
-	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
+
+	if (php_var_serialize_get_sleep_props(&props, struc, ht) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
 			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
@@ -1044,15 +1028,11 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[PHP_DOUBLE_MAX_LENGTH], *res;
-			size_t len, new_len;
+			char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
+			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			len = strlen(tmp_str);
-			new_len = smart_str_alloc(buf, 2 + len + 1, 0);
-			res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-			ZSTR_LEN(buf->s) = new_len;
-
+			size_t len = strlen(tmp_str);
+			char *res = smart_str_extend(buf, 2 + len + 1);
 			memcpy(res, "d:", 2);
 			res += 2;
 			memcpy(res, tmp_str, len);
@@ -1068,6 +1048,12 @@ again:
 				zend_class_entry *ce = Z_OBJCE_P(struc);
 				bool incomplete_class;
 				uint32_t count;
+
+				if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+					zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed",
+						ZSTR_VAL(ce->name));
+					return;
+				}
 
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
 					PHP_CLASS_ATTRIBUTES;
@@ -1129,16 +1115,12 @@ again:
 					size_t serialized_length;
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash) == SUCCESS) {
-						char b1[32], b2[32], *s1, *s2, *res;
-						size_t l1, l2, new_len;
-
-						s1 = zend_print_long_to_buf(b1 + sizeof(b1) - 1, ZSTR_LEN(Z_OBJCE_P(struc)->name));
-						l1 = b1 + sizeof(b1) - 1 - s1;
-						s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
-						l2 = b2 + sizeof(b2) - 1 - s2;
-						new_len = smart_str_alloc(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1, 0);
-						res = ZSTR_VAL(buf->s) + ZSTR_LEN(buf->s);
-						ZSTR_LEN(buf->s) = new_len;
+						char b1[32], b2[32];
+						char *s1 = zend_print_long_to_buf(b1 + sizeof(b1) - 1, ZSTR_LEN(Z_OBJCE_P(struc)->name));
+						size_t l1 = b1 + sizeof(b1) - 1 - s1;
+						char *s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
+						size_t l2 = b2 + sizeof(b2) - 1 - s2;
+						char *res = smart_str_extend(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1);
 						memcpy(res, "C:", 2);
 						res += 2;
 						memcpy(res, s1, l1);
@@ -1172,13 +1154,14 @@ again:
 				}
 
 				if (ce != PHP_IC_ENTRY) {
-					zval *zv = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP), 1);
+					zval *zv = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP));
 
 					if (zv) {
-						zval retval, tmp;
+						HashTable *ht;
+						zval tmp;
 
 						ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
-						if (php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv), &retval) == FAILURE) {
+						if (!(ht = php_var_serialize_call_sleep(Z_OBJ(tmp), Z_FUNC_P(zv)))) {
 							if (!EG(exception)) {
 								/* we should still add element even if it's not OK,
 								 * since we already wrote the length of the array before */
@@ -1188,8 +1171,8 @@ again:
 							return;
 						}
 
-						php_var_serialize_class(buf, &tmp, &retval, var_hash);
-						zval_ptr_dtor(&retval);
+						php_var_serialize_class(buf, &tmp, ht, var_hash);
+						zend_array_release(ht);
 						OBJ_RELEASE(Z_OBJ(tmp));
 						return;
 					}

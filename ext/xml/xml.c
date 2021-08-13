@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,7 +26,6 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h"
-#include "zend_interfaces.h"
 
 #ifdef HAVE_XML
 
@@ -125,10 +124,10 @@ typedef struct {
 
 
 enum php_xml_option {
-    PHP_XML_OPTION_CASE_FOLDING = 1,
-    PHP_XML_OPTION_TARGET_ENCODING,
-    PHP_XML_OPTION_SKIP_TAGSTART,
-    PHP_XML_OPTION_SKIP_WHITE
+	PHP_XML_OPTION_CASE_FOLDING = 1,
+	PHP_XML_OPTION_TARGET_ENCODING,
+	PHP_XML_OPTION_SKIP_TAGSTART,
+	PHP_XML_OPTION_SKIP_WHITE
 };
 
 /* {{{ dynamically loadable module stuff */
@@ -191,10 +190,10 @@ static const zend_module_dep xml_deps[] = {
 
 zend_module_entry xml_module_entry = {
 #ifdef LIBXML_EXPAT_COMPAT
-    STANDARD_MODULE_HEADER_EX, NULL,
+	STANDARD_MODULE_HEADER_EX, NULL,
 	xml_deps,
 #else
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 #endif
 	"xml",                /* extension name */
 	ext_functions,        /* extension function list */
@@ -203,11 +202,11 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request startup function */
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
-    PHP_XML_VERSION,
-    PHP_MODULE_GLOBALS(xml), /* globals descriptor */
-    PHP_GINIT(xml),          /* globals ctor */
-    NULL,                    /* globals dtor */
-    NULL,                    /* post deactivate */
+	PHP_XML_VERSION,
+	PHP_MODULE_GLOBALS(xml), /* globals descriptor */
+	PHP_GINIT(xml),          /* globals ctor */
+	NULL,                    /* globals dtor */
+	NULL,                    /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -255,8 +254,6 @@ PHP_MINIT_FUNCTION(xml)
 {
 	xml_parser_ce = register_class_XMLParser();
 	xml_parser_ce->create_object = xml_parser_create_object;
-	xml_parser_ce->serialize = zend_class_serialize_deny;
-	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
@@ -1001,15 +998,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	xml_parser *parser;
 	int auto_detect = 0;
 
-	char *encoding_param = NULL;
-	size_t encoding_param_len = 0;
+	zend_string *encoding_param = NULL;
 
 	char *ns_param = NULL;
 	size_t ns_param_len = 0;
 
 	XML_Char *encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|s!s": "|s!"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|S!s": "|S!"), &encoding_param, &ns_param, &ns_param_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1017,14 +1013,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (encoding_param_len == 0) {
+		if (ZSTR_LEN(encoding_param) == 0) {
 			encoding = XML(default_encoding);
 			auto_detect = 1;
-		} else if (strcasecmp(encoding_param, "ISO-8859-1") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "ISO-8859-1")) {
 			encoding = (XML_Char*)"ISO-8859-1";
-		} else if (strcasecmp(encoding_param, "UTF-8") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "UTF-8")) {
 			encoding = (XML_Char*)"UTF-8";
-		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "US-ASCII")) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
 			zend_argument_value_error(1, "is not a supported source encoding");
@@ -1041,7 +1037,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	object_init_ex(return_value, xml_parser_ce);
 	parser = Z_XMLPARSER_P(return_value);
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
-                                         &php_xml_mem_hdlrs, (XML_Char*)ns_param);
+	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;

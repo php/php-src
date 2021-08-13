@@ -1,11 +1,7 @@
 --TEST--
 Test function fflush() on a zlib stream wrapper
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 

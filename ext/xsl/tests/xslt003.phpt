@@ -1,7 +1,7 @@
 --TEST--
 Test 3: Using Parameters
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 3: Using Parameters";

@@ -1,7 +1,7 @@
 --TEST--
 Bug #48227 (NumberFormatter::format leaks memory)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

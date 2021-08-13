@@ -2,6 +2,7 @@
 FR #78270 (Usage of __vectorcall convention with FFI)
 --EXTENSIONS--
 ffi
+zend_test
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
@@ -9,8 +10,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms 
 require_once('utils.inc');
 try {
     FFI::cdef(<<<EOC
-        __vectorcall int zend_atoi(const char *str, size_t str_len);
-        EOC, ffi_get_php_dll_name());
+        __vectorcall int bug78270(const char *str, size_t str_len);
+        EOC, "php_zend_test.dll");
 } catch (FFI\ParserException $ex) {
     die('skip __vectorcall not supported');
 }

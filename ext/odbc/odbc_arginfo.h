@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6d7d8d8f495236297745b9b1087e5cf955976127 */
+ * Stub hash: 27a50ba79ed632721ee458527ef543e4b44ee897 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -330,7 +330,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_fetch_into, arginfo_odbc_fetch_into)
 	ZEND_FE(odbc_fetch_row, arginfo_odbc_fetch_row)
 	ZEND_FE(odbc_result, arginfo_odbc_result)
-	ZEND_FE(odbc_result_all, arginfo_odbc_result_all)
+	ZEND_DEP_FE(odbc_result_all, arginfo_odbc_result_all)
 	ZEND_FE(odbc_free_result, arginfo_odbc_free_result)
 	ZEND_FE(odbc_connect, arginfo_odbc_connect)
 	ZEND_FE(odbc_pconnect, arginfo_odbc_pconnect)

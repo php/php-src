@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 
 #include <stdio.h>
@@ -1153,6 +1152,16 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_VERSION_ALTSVC);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+	REGISTER_CURL_CONSTANT(CURLOPT_ISSUERCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_ISSUERCERT);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_ISSUERCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_SSLCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_SSLKEY_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSLCERT_BLOB);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSLKEY_BLOB);
+#endif
+
 	REGISTER_CURL_CONSTANT(CURLOPT_SAFE_UPLOAD);
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
@@ -1179,8 +1188,6 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;
-	curl_ce->serialize = zend_class_serialize_deny;
-	curl_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&curl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_object_handlers.offset = XtOffsetOf(php_curl, std);
@@ -2277,6 +2284,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 				error = curl_easy_setopt(ch->cp, option, 2);
 				break;
 			}
+			ZEND_FALLTHROUGH;
 		case CURLOPT_AUTOREFERER:
 		case CURLOPT_BUFFERSIZE:
 		case CURLOPT_CONNECTTIMEOUT:
@@ -2520,6 +2528,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		case CURLOPT_PROXY_TLS13_CIPHERS:
 		case CURLOPT_TLS13_CIPHERS:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+		case CURLOPT_PROXY_ISSUERCERT:
+#endif
 		{
 			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
@@ -2667,7 +2678,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
 						return FAILURE;
 					}
-					/* break omitted intentionally */
+					ZEND_FALLTHROUGH;
 				default:
 					error = curl_easy_setopt(ch->cp, option, fp);
 					break;
@@ -2921,6 +2932,29 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 			}
 			ZVAL_COPY(&ch->handlers.fnmatch->func_name, zvalue);
 			break;
+
+		/* Curl blob options */
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+		case CURLOPT_ISSUERCERT_BLOB:
+		case CURLOPT_PROXY_ISSUERCERT_BLOB:
+		case CURLOPT_PROXY_SSLCERT_BLOB:
+		case CURLOPT_PROXY_SSLKEY_BLOB:
+		case CURLOPT_SSLCERT_BLOB:
+		case CURLOPT_SSLKEY_BLOB:
+			{
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+
+				struct curl_blob stblob;
+				stblob.data = ZSTR_VAL(str);
+				stblob.len = ZSTR_LEN(str);
+				stblob.flags = CURL_BLOB_COPY;
+				error = curl_easy_setopt(ch->cp, option, &stblob);
+
+				zend_tmp_string_release(tmp_str);
+			}
+			break;
+#endif
 
 		default:
 			if (is_array_config) {

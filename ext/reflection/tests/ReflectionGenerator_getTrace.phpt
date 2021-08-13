@@ -25,7 +25,7 @@ var_dump((new ReflectionGenerator($gen))->getTrace());
 
 ?>
 --EXPECTF--
-array(2) {
+array(3) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -46,6 +46,14 @@ array(2) {
     int(%d)
     ["function"]=>
     string(3) "bar"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(2) {
+    ["function"]=>
+    string(3) "baz"
     ["args"]=>
     array(0) {
     }

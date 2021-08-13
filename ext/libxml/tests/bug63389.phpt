@@ -1,7 +1,7 @@
 --TEST--
 Bug #63389 (Missing context check on libxml_set_streams_context() causes memleak)
---SKIPIF--
-<?php if (!extension_loaded('libxml')) die('skip libxml extension not available'); ?>
+--EXTENSIONS--
+libxml
 --FILE--
 <?php
 $fp = fopen("php://input", "r");

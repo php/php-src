@@ -79,6 +79,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);
 ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);
+ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length);
 
 END_EXTERN_C()
 
@@ -283,7 +284,9 @@ END_EXTERN_C()
 #define ZEND_JMP_NULL                   198
 #define ZEND_CHECK_UNDEF_ARGS           199
 #define ZEND_FETCH_GLOBALS              200
+#define ZEND_VERIFY_NEVER_TYPE          201
+#define ZEND_CALLABLE_CONVERT           202
 
-#define ZEND_VM_LAST_OPCODE             200
+#define ZEND_VM_LAST_OPCODE             202
 
 #endif

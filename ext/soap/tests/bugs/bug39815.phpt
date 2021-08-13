@@ -1,8 +1,9 @@
 --TEST--
 Bug #39815 (to_zval_double() in ext/soap/php_encoding.c is not locale-independent)
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (!@setlocale(LC_ALL, 'sv_SE', 'sv_SE.ISO8859-1')) die('skip sv_SE locale not available');
 if (!@setlocale(LC_ALL, 'en_US', 'en_US.ISO8859-1')) die('skip en_US locale not available');
 ?>
@@ -22,7 +23,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('test');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

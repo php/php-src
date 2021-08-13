@@ -131,6 +131,7 @@ Options:
                 Run the tests multiple times in the same process and check the
                 output of the last execution (CLI SAPI only).
 
+    --bless     Bless failed tests using scripts/dev/bless_tests.php.
 
 HELP;
 }
@@ -157,7 +158,8 @@ function main(): void
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
-           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats;
+           $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
+           $bless;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -296,7 +298,6 @@ function main(): void
         'precision=14',
         'serialize_precision=-1',
         'memory_limit=128M',
-        'log_errors_max_len=0',
         'opcache.fast_shutdown=0',
         'opcache.file_update_protection=0',
         'opcache.revalidate_freq=0',
@@ -358,6 +359,7 @@ function main(): void
     $preload = false;
     $file_cache = null;
     $shuffle = false;
+    $bless = false;
     $workers = null;
     $context_line_count = 3;
     $num_repeats = 1;
@@ -491,6 +493,7 @@ function main(): void
                     break;
                 case '--preload':
                     $preload = true;
+                    $environment['SKIP_PRELOAD'] = 1;
                     break;
                 case '--file-cache-prime':
                     $file_cache = 'prime';
@@ -582,6 +585,9 @@ function main(): void
                 case '--repeat':
                     $num_repeats = (int) $argv[++$i];
                     $environment['SKIP_REPEAT'] = 1;
+                    break;
+                case '--bless':
+                    $bless = true;
                     break;
                 //case 'w'
                 case '-':
@@ -783,6 +789,9 @@ function main(): void
     }
 
     $junit->saveXML();
+    if ($bless) {
+        bless_failed_tests($PHP_FAILED_TESTS['FAILED']);
+    }
     if (getenv('REPORT_EXIT_STATUS') !== '0' && getenv('REPORT_EXIT_STATUS') !== 'no' &&
             ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
         exit(1);
@@ -861,9 +870,22 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
     @unlink($info_file);
 
-    // load list of enabled extensions
-    save_text($info_file,
-        '<?php echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions())); ?>');
+    // load list of enabled and loadable extensions
+    save_text($info_file, <<<'PHP'
+        <?php
+        echo str_replace("Zend OPcache", "opcache", implode(",", get_loaded_extensions()));
+        $ext_dir = ini_get("extension_dir");
+        foreach (scandir($ext_dir) as $file) {
+            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                continue;
+            }
+            $ext = $matches[1];
+            if (!extension_loaded($ext) && @dl($file)) {
+                echo ",", $ext;
+            }
+        }
+        ?>
+    PHP);
     $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -1304,14 +1326,24 @@ function system_with_timeout(
 function run_all_tests(array $test_files, array $env, $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $preload;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
-    if ($file_cache !== null) {
-        /* Automatically skip opcache tests in --file-cache mode,
-         * because opcache generally doesn't expect those to run under file cache */
-        $test_files = array_filter($test_files, function($test) {
-            return !is_string($test) || false === strpos($test, 'ext/opcache');
+    if ($file_cache !== null || $preload) {
+        /* Automatically skip opcache tests in --file-cache and --preload mode,
+         * because opcache generally expects these to run under a default configuration. */
+        $test_files = array_filter($test_files, function($test) use($preload) {
+            if (!is_string($test)) {
+                return true;
+            }
+            if (false !== strpos($test, 'ext/opcache')) {
+                return false;
+            }
+            if ($preload && false !== strpos($test, 'ext/zend_test/tests/observer')) {
+                return false;
+            }
+            return true;
         });
     }
 
@@ -1452,7 +1484,7 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
     $startTime = microtime(true);
     for ($i = 1; $i <= $workers; $i++) {
         $proc = proc_open(
-            $thisPHP . ' ' . escapeshellarg($thisScript),
+            [$thisPHP, $thisScript],
             [], // Inherit our stdin, stdout and stderr
             $pipes,
             null,
@@ -1666,6 +1698,7 @@ escape:
                                 'E_USER_NOTICE',
                                 'E_STRICT', // TODO Cleanup when removed from Zend Engine.
                                 'E_RECOVERABLE_ERROR',
+                                'E_DEPRECATED',
                                 'E_USER_DEPRECATED'
                             ];
                             $error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
@@ -1838,6 +1871,7 @@ function run_test(string $php, $file, array $env): string
 
     $temp_filenames = null;
     $org_file = $file;
+    $orig_php = $php;
 
     if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
         $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
@@ -2033,7 +2067,8 @@ TEST $file
     $env['TZ'] = '';
 
     if ($test->sectionNotEmpty('ENV')) {
-        foreach (explode("\n", $test->getSection('ENV')) as $e) {
+        $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
             if (!empty($e[0]) && isset($e[1])) {
@@ -2051,12 +2086,12 @@ TEST $file
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
         $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
             if (!in_array(strtolower($req_ext), $loaded)) {
-                if ($req_ext == 'opcache') {
+                if ($req_ext == 'opcache' || $req_ext == 'xdebug') {
                     $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
                     $ini_settings['zend_extension'][] = $ext_file;
                 } else {
@@ -2475,8 +2510,6 @@ COMMAND $cmd
         }
     }
 
-    @unlink($preload_filename);
-
     $leaked = false;
     $passed = false;
 
@@ -2615,6 +2648,7 @@ COMMAND $cmd
             $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
+            $wanted_re = str_replace('%0', '\x00', $wanted_re);
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
@@ -2622,6 +2656,7 @@ COMMAND $cmd
             $passed = true;
             if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
+                @unlink($preload_filename);
             }
             @unlink($tmp_post);
 
@@ -2650,6 +2685,7 @@ COMMAND $cmd
 
             if (!$cfg['keep']['php'] && !$leaked) {
                 @unlink($test_file);
+                @unlink($preload_filename);
             }
             @unlink($tmp_post);
 
@@ -2741,9 +2777,14 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
+            $env_lines = [];
+            foreach ($env as $env_var => $env_val) {
+                $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
+            }
+            $exported_environment = $env_lines ? "\n" . implode("\n", $env_lines) . "\n" : "";
             $sh_script = <<<SH
 #!/bin/sh
-
+{$exported_environment}
 case "$1" in
 "gdb")
     gdb --args {$orig_cmd}
@@ -3973,6 +4014,21 @@ function check_proc_open_function_exists(): void
 NO_PROC_OPEN_ERROR;
         exit(1);
     }
+}
+
+function bless_failed_tests(array $failedTests): void
+{
+    if (empty($failedTests)) {
+        return;
+    }
+    $args = [
+        PHP_BINARY,
+        __DIR__ . '/scripts/dev/bless_tests.php',
+    ];
+    foreach ($failedTests as $test) {
+        $args[] = $test['name'];
+    }
+    proc_open($args, [], $pipes);
 }
 
 main();

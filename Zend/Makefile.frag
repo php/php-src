@@ -32,7 +32,13 @@ $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)
 
-$(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.c: $(srcdir)/zend_vm_def.h $(srcdir)/zend_vm_execute.skl $(srcdir)/zend_vm_gen.php
+# Use an intermediate target to indicate that zend_vm_gen.php produces both files
+# at the same time, rather than the same recipe applying for two different targets.
+# The "grouped targets" feature, which would solve this directly, is only available
+# since GNU Make 4.3.
+$(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.c: vm.gen.intermediate ;
+.INTERMEDIATE: vm.gen.intermediate
+vm.gen.intermediate: $(srcdir)/zend_vm_def.h $(srcdir)/zend_vm_execute.skl $(srcdir)/zend_vm_gen.php
 	@if test ! -z "$(PHP)"; then \
 		$(PHP) $(srcdir)/zend_vm_gen.php; \
 	fi;

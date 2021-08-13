@@ -63,7 +63,7 @@ typedef struct php_http_parser_settings php_http_parser_settings;
  * HEAD request which may contain 'Content-Length' or 'Transfer-Encoding:
  * chunked' headers that indicate the presence of a body.
  *
- * http_data_cb does not return data chunks. It will be call arbitrarally
+ * http_data_cb does not return data chunks. It will be call arbitrarily
  * many times for each string. E.G. you might get 10 callbacks for "on_path"
  * each providing just a few characters more data.
  */

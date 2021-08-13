@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e1d300639ded25533502902180fb76dd5b4d92b2 */
+ * Stub hash: d9dd3b93c0d1623fe61ea0bd8ee9d4c3a359bf78 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -82,6 +82,45 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getName, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getKind, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_FFI_CType_getSize arginfo_class_FFI_CType_getKind
+
+#define arginfo_class_FFI_CType_getAlignment arginfo_class_FFI_CType_getKind
+
+#define arginfo_class_FFI_CType_getAttributes arginfo_class_FFI_CType_getKind
+
+#define arginfo_class_FFI_CType_getEnumKind arginfo_class_FFI_CType_getKind
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getArrayElementType, 0, 0, FFI\\CType, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_FFI_CType_getArrayLength arginfo_class_FFI_CType_getKind
+
+#define arginfo_class_FFI_CType_getPointerType arginfo_class_FFI_CType_getArrayElementType
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getStructFieldNames, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getStructFieldOffset, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getStructFieldType, 0, 1, FFI\\CType, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_FFI_CType_getFuncABI arginfo_class_FFI_CType_getKind
+
+#define arginfo_class_FFI_CType_getFuncReturnType arginfo_class_FFI_CType_getArrayElementType
+
+#define arginfo_class_FFI_CType_getFuncParameterCount arginfo_class_FFI_CType_getKind
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncParameterType, 0, 1, FFI\\CType, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(FFI, cdef);
 ZEND_METHOD(FFI, load);
@@ -101,6 +140,21 @@ ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
 ZEND_METHOD(FFI_CType, getName);
+ZEND_METHOD(FFI_CType, getKind);
+ZEND_METHOD(FFI_CType, getSize);
+ZEND_METHOD(FFI_CType, getAlignment);
+ZEND_METHOD(FFI_CType, getAttributes);
+ZEND_METHOD(FFI_CType, getEnumKind);
+ZEND_METHOD(FFI_CType, getArrayElementType);
+ZEND_METHOD(FFI_CType, getArrayLength);
+ZEND_METHOD(FFI_CType, getPointerType);
+ZEND_METHOD(FFI_CType, getStructFieldNames);
+ZEND_METHOD(FFI_CType, getStructFieldOffset);
+ZEND_METHOD(FFI_CType, getStructFieldType);
+ZEND_METHOD(FFI_CType, getFuncABI);
+ZEND_METHOD(FFI_CType, getFuncReturnType);
+ZEND_METHOD(FFI_CType, getFuncParameterCount);
+ZEND_METHOD(FFI_CType, getFuncParameterType);
 
 
 static const zend_function_entry class_FFI_methods[] = {
@@ -132,6 +186,21 @@ static const zend_function_entry class_FFI_CData_methods[] = {
 
 static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_ME(FFI_CType, getName, arginfo_class_FFI_CType_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getKind, arginfo_class_FFI_CType_getKind, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getSize, arginfo_class_FFI_CType_getSize, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getAlignment, arginfo_class_FFI_CType_getAlignment, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getAttributes, arginfo_class_FFI_CType_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getEnumKind, arginfo_class_FFI_CType_getEnumKind, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getArrayElementType, arginfo_class_FFI_CType_getArrayElementType, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getArrayLength, arginfo_class_FFI_CType_getArrayLength, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getPointerType, arginfo_class_FFI_CType_getPointerType, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getStructFieldNames, arginfo_class_FFI_CType_getStructFieldNames, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getStructFieldOffset, arginfo_class_FFI_CType_getStructFieldOffset, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getStructFieldType, arginfo_class_FFI_CType_getStructFieldType, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncABI, arginfo_class_FFI_CType_getFuncABI, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncReturnType, arginfo_class_FFI_CType_getFuncReturnType, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncParameterCount, arginfo_class_FFI_CType_getFuncParameterCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(FFI_CType, getFuncParameterType, arginfo_class_FFI_CType_getFuncParameterType, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -151,7 +220,7 @@ static zend_class_entry *register_class_FFI(void)
 
 	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -162,7 +231,7 @@ static zend_class_entry *register_class_FFI_CData(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "CData", class_FFI_CData_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -173,7 +242,7 @@ static zend_class_entry *register_class_FFI_CType(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "CType", class_FFI_CType_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

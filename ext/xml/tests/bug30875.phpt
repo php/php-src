@@ -1,9 +1,7 @@
 --TEST--
 Bug #30875 (xml_parse_into_struct() does not resolve entities)
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) die('skip xml extension not available');
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 

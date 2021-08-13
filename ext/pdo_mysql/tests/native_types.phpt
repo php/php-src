@@ -1,8 +1,9 @@
 --TEST--
 PDO MySQL should use native types if ATTR_STRINGIFY_FETCHES is not enabled
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (!MySQLPDOTest::isPDOMySQLnd()) die('skip mysqlnd only');

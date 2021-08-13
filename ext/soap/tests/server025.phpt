@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 25: One-way SOAP headers encoding using WSDL
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

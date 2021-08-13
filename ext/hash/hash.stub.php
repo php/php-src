@@ -34,14 +34,19 @@ function hash_equals(string $known_string, string $user_string): bool {}
 function hash_hkdf(string $algo, string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
+/** @deprecated */
 function mhash_get_block_size(int $algo): int|false {}
 
+/** @deprecated */
 function mhash_get_hash_name(int $algo): string|false {}
 
+/** @deprecated */
 function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length): string|false {}
 
+/** @deprecated */
 function mhash_count(): int {}
 
+/** @deprecated */
 function mhash(int $algo, string $data, ?string $key = null): string|false {}
 #endif
 

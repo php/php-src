@@ -1,11 +1,7 @@
 --TEST--
 Bug #38112 (GIF Invalid Code size ).
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available\n");
-    }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatefromgif(__DIR__ . '/bug38112.gif');

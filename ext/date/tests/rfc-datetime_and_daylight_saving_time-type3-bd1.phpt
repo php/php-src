@@ -45,4 +45,4 @@ bd1 2010-11-07 05:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/N
 bd2 2010-11-07 04:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P1DT0H
 bd3 2010-11-07 03:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT24H
 bd4 2010-11-07 02:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT23H
-bd7 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT0H
+bd7 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P0DT24H

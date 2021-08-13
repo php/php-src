@@ -1,8 +1,9 @@
 --TEST--
 Phar::buildFromDirectory() - non-directory passed as first parameter
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-    if (!extension_loaded("phar")) die("skip");
     if (substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");
 ?>
 --INI--

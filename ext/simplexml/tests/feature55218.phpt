@@ -1,10 +1,7 @@
 --TEST--
 Bug #55218 getDocNamespaces from current element and not root
---SKIPIF--
-<?php
-if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

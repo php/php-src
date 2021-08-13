@@ -18,11 +18,11 @@ class IT implements Iterator {
         }
     }
 
-    function rewind()  {$this->trap(__FUNCTION__); $this->n = 0;}
-    function valid()   {$this->trap(__FUNCTION__); return $this->n < $this->count;}
-    function key()     {$this->trap(__FUNCTION__); return $this->n;}
-    function current() {$this->trap(__FUNCTION__); return $this->n;}
-    function next()    {$this->trap(__FUNCTION__); $this->n++;}
+    function rewind(): void  {$this->trap(__FUNCTION__); $this->n = 0;}
+    function valid(): bool   {$this->trap(__FUNCTION__); return $this->n < $this->count;}
+    function key(): mixed     {$this->trap(__FUNCTION__); return $this->n;}
+    function current(): mixed {$this->trap(__FUNCTION__); return $this->n;}
+    function next(): void    {$this->trap(__FUNCTION__); $this->n++;}
 }
 
 foreach(['rewind', 'valid', 'key', 'current', 'next'] as $trap) {

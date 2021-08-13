@@ -16,5 +16,5 @@ var_dump(error_get_last());
 
 ?>
 --EXPECT--
-string(105) "DateTime::__construct(): Failed to parse time string (9999-11-33) at position 9 (3): Unexpected character"
+string(80) "Failed to parse time string (9999-11-33) at position 9 (3): Unexpected character"
 NULL

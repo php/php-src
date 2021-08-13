@@ -2,6 +2,10 @@
 
 /** @generate-class-entries */
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Closure
 {
     private function __construct() {}

@@ -1,11 +1,7 @@
 --TEST--
 test if bind_textdomain_codeset() returns correct value
---SKIPIF--
-<?php
-    if (!extension_loaded("gettext")) {
-        die("skip");
-    }
-?>
+--EXTENSIONS--
+gettext
 --FILE--
 <?php
     var_dump(bind_textdomain_codeset(false,false));

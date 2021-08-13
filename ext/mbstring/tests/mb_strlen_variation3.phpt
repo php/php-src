@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strlen() function : usage variations - Pass list of encodings
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strlen') or die("skip mb_strlen() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

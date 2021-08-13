@@ -2,8 +2,8 @@
 ldap_set_option() - Basic test for TLS cipher suite ldap option
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";

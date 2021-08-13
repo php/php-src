@@ -1,7 +1,7 @@
 <?php
 
 $rootDir = __DIR__ . '/../..';
-$infile = $rootDir . '/Zend/zend_language_parser.h';
+$infile = $rootDir . '/Zend/zend_language_parser.y';
 $outfile = $rootDir . '/ext/tokenizer/tokenizer_data.c';
 
 if (!file_exists($infile)) {
@@ -10,7 +10,8 @@ $infile is missing.
 
 Please, generate the PHP parser files by scripts/dev/genfiles
 or by running the ./configure build step.
-ERROR);
+ERROR
+    );
     exit(1);
 }
 
@@ -24,7 +25,7 @@ $result .= <<<CODE
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -48,7 +49,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 CODE;
 
 $incontent = file_get_contents($infile);
-preg_match_all('(^    (?<token_name>T_.*?)\b)m', $incontent, $matches);
+preg_match_all('(^%token.*\b(?<token_name>T_.*?)\b)m', $incontent, $matches);
 
 foreach ($matches['token_name'] as $tokenName) {
     if ($tokenName === 'T_NOELSE' || $tokenName === 'T_ERROR') {

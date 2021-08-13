@@ -2,8 +2,9 @@
 ldap_exop_passwd() - Giving wrong value for old password
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php

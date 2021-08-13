@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -216,7 +216,7 @@ PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
 	if (data) {
-		ZVAL_COPY_DEREF(return_value, data);
+		RETURN_COPY_DEREF(data);
 	}
 }
 
@@ -295,7 +295,6 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
-	IntlIterator_handlers.dtor_obj = zend_objects_destroy_object;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
 
 }

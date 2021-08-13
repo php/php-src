@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -3283,7 +3283,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 	/* Use HTTP/1.1 with "Connection: close" by default */
 	if ((tmp = php_stream_context_get_option(context, "http", "protocol_version")) == NULL) {
-    	zval http_version;
+		zval http_version;
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);

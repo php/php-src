@@ -1,9 +1,7 @@
 --TEST--
 Bug #66339 (PHP segfaults in imagexbm)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreate(8, 8);

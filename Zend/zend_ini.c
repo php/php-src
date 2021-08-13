@@ -238,7 +238,7 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 			return FAILURE;
 		}
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
-            (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
+		    (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
 
 			p->value = zend_new_interned_string(zend_string_copy(Z_STR_P(default_value)));
 		} else {
@@ -284,8 +284,8 @@ ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_va
 
 ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage) /* {{{ */
 {
-    zend_result ret;
-    zend_string *new_value;
+	zend_result ret;
+	zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
@@ -296,8 +296,8 @@ ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *v
 
 ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change) /* {{{ */
 {
-    zend_result ret;
-    zend_string *new_value;
+	zend_result ret;
+	zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change);
@@ -485,9 +485,10 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 
 ZEND_API bool zend_ini_parse_bool(zend_string *str)
 {
-	if ((ZSTR_LEN(str) == 4 && strcasecmp(ZSTR_VAL(str), "true") == 0)
-	  || (ZSTR_LEN(str) == 3 && strcasecmp(ZSTR_VAL(str), "yes") == 0)
-	  || (ZSTR_LEN(str) == 2 && strcasecmp(ZSTR_VAL(str), "on") == 0)) {
+	if (zend_string_equals_literal_ci(str, "true")
+			|| zend_string_equals_literal_ci(str, "yes")
+			|| zend_string_equals_literal_ci(str, "on")
+	) {
 		return 1;
 	} else {
 		return atoi(ZSTR_VAL(str)) != 0;

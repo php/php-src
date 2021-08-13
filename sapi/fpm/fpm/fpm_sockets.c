@@ -106,21 +106,21 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 
 static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
 {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 /* }}} */
 
 static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
 {
-    if (sa->sa_family == AF_INET) {
-        return ntohs(((struct sockaddr_in*)sa)->sin_port);
-    }
+	if (sa->sa_family == AF_INET) {
+		return ntohs(((struct sockaddr_in*)sa)->sin_port);
+	}
 
-    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+	return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
 }
 /* }}} */
 
@@ -230,7 +230,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (0 > fpm_unix_set_socket_premissions(wp, path)) {
+		if (0 > fpm_unix_set_socket_permissions(wp, path)) {
 			close(sock);
 			return -1;
 		}
@@ -438,7 +438,7 @@ int fpm_sockets_init_main() /* {{{ */
 				break;
 
 			case FPM_AF_UNIX :
-				if (0 > fpm_unix_resolve_socket_premissions(wp)) {
+				if (0 > fpm_unix_resolve_socket_permissions(wp)) {
 					return -1;
 				}
 				wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);

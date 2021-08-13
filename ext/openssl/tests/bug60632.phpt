@@ -1,9 +1,7 @@
 --TEST--
 Bug #60632: openssl_seal fails with AES
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

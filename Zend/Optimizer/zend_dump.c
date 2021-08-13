@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
 #include "zend_ssa.h"
@@ -179,6 +178,10 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 	if (info & MAY_BE_UNDEF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
+	}
+	if (info & MAY_BE_INDIRECT) {
+		if (first) first = 0; else fprintf(stderr, ", ");
+		fprintf(stderr, "ind");
 	}
 	if (info & MAY_BE_REF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
@@ -471,6 +474,9 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			case IS_VOID:
 				fprintf(stderr, " (void)");
 				break;
+			case IS_NEVER:
+				fprintf(stderr, " (never)");
+				break;
 			default:
 				fprintf(stderr, " (\?\?\?)");
 				break;
@@ -714,11 +720,15 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 }
 
-static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
 	zend_ssa_op *ssa_op = NULL;
+	
+	if (dump_flags & ZEND_DUMP_LINE_NUMBERS) {
+		fprintf(stderr, "L%04u ", opline->lineno);
+	}
 
 	len = fprintf(stderr, "%04u", (uint32_t)(opline - op_array->opcodes));
 	fprintf(stderr, "%*c", 5-len, ' ');
@@ -926,7 +936,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 	}
 	if (func_flags & ZEND_FUNC_IRREDUCIBLE) {
-		fprintf(stderr, ", irreducable");
+		fprintf(stderr, ", irreducible");
 	}
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");

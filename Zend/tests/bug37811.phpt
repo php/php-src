@@ -13,21 +13,21 @@ class TestClass
 
 define("Bar", new TestClass);
 var_dump(Bar);
+var_dump((string) Bar);
 
+define("Baz", new stdClass);
+var_dump(Baz);
 try {
-    define("Baz", new stdClass);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-try {
-    var_dump(Baz);
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    var_dump((string) Baz);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
+object(TestClass)#1 (0) {
+}
 string(3) "Foo"
-define(): Argument #2 ($value) cannot be an object, stdClass given
-Undefined constant "Baz"
+object(stdClass)#2 (0) {
+}
+Object of class stdClass could not be converted to string

@@ -1,7 +1,7 @@
 --TEST--
 Parse errors during token_get_all() with TOKEN_PARSE flag
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

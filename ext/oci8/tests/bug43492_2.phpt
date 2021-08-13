@@ -1,5 +1,7 @@
 --TEST--
 Bug #43492 (Nested cursor leaks after related bug #44206 fixed)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

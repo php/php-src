@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -89,8 +89,12 @@ typedef struct _zend_script {
 	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
+typedef void (*zend_optimizer_pass_t)(zend_script *, void *context);
+
 BEGIN_EXTERN_C()
 ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
+ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass);
+ZEND_API void zend_optimizer_unregister_pass(int idx);
 int zend_optimizer_startup(void);
 int zend_optimizer_shutdown(void);
 END_EXTERN_C()

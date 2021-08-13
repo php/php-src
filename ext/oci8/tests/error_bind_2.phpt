@@ -1,8 +1,9 @@
 --TEST--
 Test some more oci_bind_by_name error conditions
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);

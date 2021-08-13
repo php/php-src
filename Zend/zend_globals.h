@@ -61,7 +61,8 @@ END_EXTERN_C()
 
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
-
+typedef struct _zend_fiber_context zend_fiber_context;
+typedef struct _zend_fiber zend_fiber;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -229,7 +230,7 @@ struct _zend_executor_globals {
 
 	zend_long assertions;
 
-	uint32_t           ht_iterators_count;     /* number of allocatd slots */
+	uint32_t           ht_iterators_count;     /* number of allocated slots */
 	uint32_t           ht_iterators_used;      /* number of used slots */
 	HashTableIterator *ht_iterators;
 	HashTableIterator  ht_iterators_slots[16];
@@ -248,6 +249,21 @@ struct _zend_executor_globals {
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
+
+	zend_fiber_context *main_fiber_context;
+	zend_fiber_context *current_fiber_context;
+
+	/* Active instance of Fiber. */
+	zend_fiber *active_fiber;
+
+	/* Default fiber C stack size. */
+	zend_long fiber_stack_size;
+
+	/* If record_errors is enabled, all emitted diagnostics will be recorded,
+	 * in addition to being processed as usual. */
+	bool record_errors;
+	uint32_t num_errors;
+	zend_error_info **errors;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

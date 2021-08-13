@@ -1,5 +1,5 @@
 --TEST--
-Test ReflectionMethod::setAccessible().
+Test that ReflectionMethod::setAccessible() has no effects
 --FILE--
 <?php
 class A {
@@ -14,74 +14,19 @@ $privateStatic   = new ReflectionMethod('A', 'aPrivateStatic');
 $protected       = new ReflectionMethod('A', 'aProtected');
 $protectedStatic = new ReflectionMethod('A', 'aProtectedStatic');
 
-try {
-    $private->invoke(new A, NULL);
-}
+$private->invoke(new A, NULL);
+$private->invokeArgs(new A, array(NULL));
+$privateStatic->invoke(NULL, NULL);
+$privateStatic->invokeArgs(NULL, array(NULL));
+$protected->invoke(new A, NULL);
+$protected->invokeArgs(new A, array(NULL));
+$protectedStatic->invoke(NULL, NULL);
+$protectedStatic->invokeArgs(NULL, array(NULL));
 
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $private->invokeArgs(new A, array(NULL));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $privateStatic->invoke(NULL, NULL);
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $privateStatic->invokeArgs(NULL, array(NULL));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $protected->invoke(new A, NULL);
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $protected->invokeArgs(new A, array(NULL));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $protectedStatic->invoke(NULL, NULL);
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    $protectedStatic->invokeArgs(NULL, array(NULL));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-$private->setAccessible(TRUE);
-$privateStatic->setAccessible(TRUE);
-$protected->setAccessible(TRUE);
-$protectedStatic->setAccessible(TRUE);
+$private->setAccessible(FALSE);
+$privateStatic->setAccessible(FALSE);
+$protected->setAccessible(FALSE);
+$protectedStatic->setAccessible(FALSE);
 
 $private->invoke(new A, NULL);
 $private->invokeArgs(new A, array(NULL));
@@ -93,14 +38,14 @@ $protectedStatic->invoke(NULL, NULL);
 $protectedStatic->invokeArgs(NULL, array(NULL));
 ?>
 --EXPECT--
-string(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
-string(73) "Trying to invoke private method A::aPrivate() from scope ReflectionMethod"
-string(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
-string(79) "Trying to invoke private method A::aPrivateStatic() from scope ReflectionMethod"
-string(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
-string(77) "Trying to invoke protected method A::aProtected() from scope ReflectionMethod"
-string(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
-string(83) "Trying to invoke protected method A::aProtectedStatic() from scope ReflectionMethod"
+A::aPrivate
+A::aPrivate
+A::aPrivateStatic
+A::aPrivateStatic
+A::aProtected
+A::aProtected
+A::aProtectedStatic
+A::aProtectedStatic
 A::aPrivate
 A::aPrivate
 A::aPrivateStatic

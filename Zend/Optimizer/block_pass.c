@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,7 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -399,7 +398,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
 					break;
 				}
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
@@ -968,14 +967,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			continue;
 		}
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
-			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-				/* Only keep the FREE for the loop var */
-				ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
-						|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
-				len += b->len = 1;
-				continue;
-			}
-
 			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
@@ -1037,7 +1028,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				break;
 			case ZEND_JMPZNZ:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[1]].start);
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -1458,7 +1449,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/*       is not used on the following path and             */
 					/*       should be used once on the branch path.           */
 					/*                                                         */
-					/*       The pattern works well only if jums processed in  */
+					/*       The pattern works well only if jumps processed in */
 					/*       direct order, otherwise it breaks JMPZ_EX         */
 					/*       sequences too early.                              */
 					last_op->result.var = target->result.var;

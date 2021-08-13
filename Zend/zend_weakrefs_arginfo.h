@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97fff017125955a3def85d9ed5a31746de7b808a */
+ * Stub hash: d91889851d9732d41e43fffddb6235d033c67534 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_WeakReference___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -70,7 +70,7 @@ static zend_class_entry *register_class_WeakReference(void)
 
 	INIT_CLASS_ENTRY(ce, "WeakReference", class_WeakReference_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -81,7 +81,7 @@ static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_Ar
 
 	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 3, class_entry_ArrayAccess, class_entry_Countable, class_entry_IteratorAggregate);
 
 	return class_entry;

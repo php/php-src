@@ -2,8 +2,9 @@
 ldap_exop() and ldap_parse_exop() - EXOP operations
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -67,12 +68,12 @@ string(%d) "dn:%s"
 string(0) ""
 bool(true)
 string(%d) "dn:cn=user%s"
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 string(%d) "dn:%s"
 bool(true)
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 string(%d) "%s"

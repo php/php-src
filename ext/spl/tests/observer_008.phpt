@@ -12,7 +12,7 @@ $a = new A;
 $a->attach($o1);
 $a->attach($o2);
 
-$b = new SplObjectSTorage();
+$b = new SplObjectStorage();
 $b->attach($o2);
 $b->attach($o3);
 

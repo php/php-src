@@ -1,7 +1,7 @@
 --TEST--
 ReflectionMethod::getDocComment() uses left over doc comment from previous scanner run
---SKIPIF--
-<?php if (!extension_loaded('tokenizer')) die('skip tokenizer extension not loaded'); ?>
+--EXTENSIONS--
+tokenizer
 --INI--
 opcache.save_comments=1
 --FILE--

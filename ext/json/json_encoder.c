@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -80,11 +80,11 @@ static inline int php_json_is_valid_double(double d) /* {{{ */
 static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	size_t len;
-	char num[PHP_DOUBLE_MAX_LENGTH];
+	char num[ZEND_DOUBLE_MAX_LENGTH];
 
-	php_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
+	zend_gcvt(d, (int)PG(serialize_precision), '.', 'e', num);
 	len = strlen(num);
-	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_DOUBLE_MAX_LENGTH - 2) {
+	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < ZEND_DOUBLE_MAX_LENGTH - 2) {
 		num[len++] = '.';
 		num[len++] = '0';
 		num[len] = '\0';
@@ -635,6 +635,7 @@ again:
 				return php_json_encode_serializable_enum(buf, val, options, encoder);
 			}
 			/* fallthrough -- Non-serializable object */
+			ZEND_FALLTHROUGH;
 		case IS_ARRAY: {
 			/* Avoid modifications (and potential freeing) of the array through a reference when a
 			 * jsonSerialize() method is invoked. */

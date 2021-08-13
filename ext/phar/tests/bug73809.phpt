@@ -1,10 +1,8 @@
 --TEST--
 Bug #73809 (Phar Zip parse crash - mmap fail)
---SKIPIF--
-<?php
-if (!extension_loaded('phar')) die('skip phar extension not available');
-if (!extension_loaded('zip')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+phar
+zip
 --FILE--
 <?php
 // create the ZIP to be tested

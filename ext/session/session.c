@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -513,7 +513,7 @@ static void php_session_save_current_state(int write) /* {{{ */
 }
 /* }}} */
 
-static void php_session_normalize_vars() /* {{{ */
+static void php_session_normalize_vars(void) /* {{{ */
 {
 	PS_ENCODE_VARS;
 
@@ -604,7 +604,7 @@ static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
+	if (zend_string_equals_literal_ci(new_value, "on")) {
 		PS(use_trans_sid) = (bool) 1;
 	} else {
 		PS(use_trans_sid) = (bool) atoi(ZSTR_VAL(new_value));
@@ -769,8 +769,7 @@ static PHP_INI_MH(OnUpdateLazyWrite) /* {{{ */
 
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
-	int tmp;
-	tmp = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	int tmp = ZEND_ATOL(ZSTR_VAL(new_value));
 	if(tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
@@ -1367,9 +1366,9 @@ static int php_session_send_cookie(void) /* {{{ */
 	}
 
 	if (PS(cookie_samesite)[0]) {
-    	smart_str_appends(&ncookie, COOKIE_SAMESITE);
-    	smart_str_appends(&ncookie, PS(cookie_samesite));
-    }
+		smart_str_appends(&ncookie, COOKIE_SAMESITE);
+		smart_str_appends(&ncookie, PS(cookie_samesite));
+	}
 
 	smart_str_0(&ncookie);
 
@@ -1527,7 +1526,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 				}
 			}
 			PS(session_status) = php_session_none;
-			/* Fall through */
+			ZEND_FALLTHROUGH;
 
 		case php_session_none:
 		default:
@@ -1572,7 +1571,7 @@ PHPAPI int php_session_start(void) /* {{{ */
 			/* Check the REQUEST_URI symbol for a string of the form
 			 * '<session-name>=<session-id>' to allow URLs of the form
 			 * http://yoursite/<session-name>=<session-id>/script.php */
-			if (!PS(id) && zend_is_auto_global_str("_SERVER", sizeof("_SERVER") - 1) == SUCCESS &&
+			if (!PS(id) && zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER)) == SUCCESS &&
 				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
 				Z_TYPE_P(data) == IS_STRING &&
 				(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
@@ -1732,24 +1731,24 @@ PHP_FUNCTION(session_set_cookie_params)
 		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
-				if(!strcasecmp("lifetime", ZSTR_VAL(key))) {
+				if (zend_string_equals_literal_ci(key, "lifetime")) {
 					lifetime = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("path", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "path")) {
 					path = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("domain", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "domain")) {
 					domain = zval_get_string(value);
 					found++;
-				} else if(!strcasecmp("secure", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "secure")) {
 					secure = zval_is_true(value);
 					secure_null = 0;
 					found++;
-				} else if(!strcasecmp("httponly", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "httponly")) {
 					httponly = zval_is_true(value);
 					httponly_null = 0;
 					found++;
-				} else if(!strcasecmp("samesite", ZSTR_VAL(key))) {
+				} else if (zend_string_equals_literal_ci(key, "samesite")) {
 					samesite = zval_get_string(value);
 					found++;
 				} else {
@@ -1938,7 +1937,7 @@ PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-static int save_handler_check_session() {
+static int save_handler_check_session(void) {
 	if (PS(session_status) == php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session save handler cannot be changed when a session is active");
 		return FAILURE;
@@ -2047,13 +2046,18 @@ PHP_FUNCTION(session_set_save_handler)
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
-			ZVAL_STRING(&shutdown_function_entry.function_name, "session_register_shutdown");
-			shutdown_function_entry.arg_count = 0;
-			shutdown_function_entry.arguments = NULL;
+			zval callable;
+			zend_result result;
+
+			ZVAL_STRING(&callable, "session_register_shutdown");
+			result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
+				&shutdown_function_entry.fci_cache, NULL, NULL);
+
+			ZEND_ASSERT(result == SUCCESS);
 
 			/* add shutdown function, removing the old one if it exists */
 			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry)) {
-				zval_ptr_dtor(&shutdown_function_entry.function_name);
+				zval_ptr_dtor(&callable);
 				php_error_docref(NULL, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
@@ -2322,7 +2326,7 @@ PHP_FUNCTION(session_create_id)
 				/* Detect collision and retry */
 				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == SUCCESS) {
 					zend_string_release_ex(new_id, 0);
-                    new_id = NULL;
+					new_id = NULL;
 					continue;
 				}
 				break;
@@ -2654,6 +2658,8 @@ PHP_FUNCTION(session_status)
 PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;
+	zval callable;
+	zend_result result;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2663,13 +2669,14 @@ PHP_FUNCTION(session_register_shutdown)
 	 * function after calling session_set_save_handler(), which expects
 	 * the session still to be available.
 	 */
+	ZVAL_STRING(&callable, "session_write_close");
+	result = zend_fcall_info_init(&callable, 0, &shutdown_function_entry.fci,
+		&shutdown_function_entry.fci_cache, NULL, NULL);
 
-	ZVAL_STRING(&shutdown_function_entry.function_name, "session_write_close");
-	shutdown_function_entry.arg_count = 0;
-	shutdown_function_entry.arguments = NULL;
+	ZEND_ASSERT(result == SUCCESS);
 
 	if (!append_user_shutdown_function(&shutdown_function_entry)) {
-		zval_ptr_dtor(&shutdown_function_entry.function_name);
+		zval_ptr_dtor(&callable);
 
 		/* Unable to register shutdown function, presumably because of lack
 		 * of memory, so flush the session now. It would be done in rshutdown

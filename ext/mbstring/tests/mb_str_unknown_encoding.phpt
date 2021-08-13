@@ -3,8 +3,8 @@ mb_str*() - unknown encoding
 --CREDITS--
 Jachim Coudenys <jachimcoudenys@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

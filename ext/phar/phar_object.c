@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -569,17 +569,17 @@ PHP_METHOD(Phar, webPhar)
 
 	/* retrieve requested file within phar */
 	if (!(SG(request_info).request_method
-          && SG(request_info).request_uri
-          && (!strcmp(SG(request_info).request_method, "GET")
-           || !strcmp(SG(request_info).request_method, "POST")
-           || !strcmp(SG(request_info).request_method, "DELETE")
-           || !strcmp(SG(request_info).request_method, "HEAD")
-           || !strcmp(SG(request_info).request_method, "OPTIONS")
-           || !strcmp(SG(request_info).request_method, "PATCH")
-           || !strcmp(SG(request_info).request_method, "PUT")
-          )
-         )
-      ) {
+	      && SG(request_info).request_uri
+	      && (!strcmp(SG(request_info).request_method, "GET")
+	       || !strcmp(SG(request_info).request_method, "POST")
+	       || !strcmp(SG(request_info).request_method, "DELETE")
+	       || !strcmp(SG(request_info).request_method, "HEAD")
+	       || !strcmp(SG(request_info).request_method, "OPTIONS")
+	       || !strcmp(SG(request_info).request_method, "PATCH")
+	       || !strcmp(SG(request_info).request_method, "PUT")
+	      )
+	     )
+	   ) {
 		return;
 	}
 
@@ -885,22 +885,16 @@ PHP_METHOD(Phar, mungServer)
 			RETURN_THROWS();
 		}
 
-		if (Z_STRLEN_P(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_P(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
+		if (zend_string_equals_literal(Z_STR_P(data), "PHP_SELF")) {
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_PHP_SELF;
-		}
-
-		if (Z_STRLEN_P(data) == sizeof("REQUEST_URI")-1) {
-			if (!strncmp(Z_STRVAL_P(data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
-				PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_REQUEST_URI;
-			}
-			if (!strncmp(Z_STRVAL_P(data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
-				PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_NAME;
-			}
-		}
-
-		if (Z_STRLEN_P(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_P(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+		} else if (zend_string_equals_literal(Z_STR_P(data), "REQUEST_URI")) {
+			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_REQUEST_URI;
+		} else if (zend_string_equals_literal(Z_STR_P(data), "SCRIPT_NAME")) {
+			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_NAME;
+		} else if (zend_string_equals_literal(Z_STR_P(data), "SCRIPT_FILENAME")) {
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
 		}
+		// TODO Warning for invalid value?
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -1245,9 +1239,13 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	add_next_index_stringl(return_value, "SHA-512", 7);
 #ifdef PHAR_HAVE_OPENSSL
 	add_next_index_stringl(return_value, "OpenSSL", 7);
+	add_next_index_stringl(return_value, "OpenSSL_SHA256", 14);
+	add_next_index_stringl(return_value, "OpenSSL_SHA512", 14);
 #else
 	if (zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
 		add_next_index_stringl(return_value, "OpenSSL", 7);
+		add_next_index_stringl(return_value, "OpenSSL_SHA256", 14);
+		add_next_index_stringl(return_value, "OpenSSL_SHA512", 14);
 	}
 #endif
 }
@@ -1365,10 +1363,9 @@ PHP_METHOD(Phar, __destruct)
 struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
-	char *b;
+	zend_string *base;
 	zval *ret;
 	php_stream *fp;
-	uint32_t l;
 	int count;
 };
 
@@ -1377,12 +1374,12 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zval *value;
 	bool close_fp = 1;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	size_t str_key_len, base_len = p_obj->l;
+	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t fname_len;
 	size_t contents_len;
-	char *fname, *error = NULL, *base = p_obj->b, *save = NULL, *temp = NULL;
+	char *fname, *error = NULL, *base = ZSTR_VAL(p_obj->base), *save = NULL, *temp = NULL;
 	zend_string *opened;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
@@ -1485,7 +1482,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 						goto phar_spl_fileinfo;
 				}
 			}
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
@@ -1692,13 +1689,13 @@ after_open_fp:
  */
 PHP_METHOD(Phar, buildFromDirectory)
 {
-	char *dir, *error, *regex = NULL;
-	size_t dir_len, regex_len = 0;
+	char *error;
 	bool apply_reg = 0;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
+	zend_string *dir, *regex = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s", &dir, &dir_len, &regex, &regex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|S", &dir, &regex) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1710,23 +1707,18 @@ PHP_METHOD(Phar, buildFromDirectory)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(dir_len)) {
-		RETURN_FALSE;
-	}
-
 	if (SUCCESS != object_init_ex(&iter, spl_ce_RecursiveDirectoryIterator)) {
 		zval_ptr_dtor(&iter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unable to instantiate directory iterator for %s", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	ZVAL_STRINGL(&arg, dir, dir_len);
+	ZVAL_STR(&arg, dir);
 	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
 	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
 		Z_OBJ(iter), NULL, &arg, &arg2);
 
-	zval_ptr_dtor(&arg);
 	if (EG(exception)) {
 		zval_ptr_dtor(&iter);
 		RETURN_THROWS();
@@ -1750,7 +1742,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	zval_ptr_dtor(&iter);
 
-	if (regex_len > 0) {
+	if (regex && ZSTR_LEN(regex) > 0) {
 		apply_reg = 1;
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
@@ -1760,19 +1752,16 @@ PHP_METHOD(Phar, buildFromDirectory)
 			RETURN_THROWS();
 		}
 
-		ZVAL_STRINGL(&arg2, regex, regex_len);
-
+		ZVAL_STR(&arg2, regex);
 		zend_call_known_instance_method_with_2_params(spl_ce_RegexIterator->constructor,
 			Z_OBJ(regexiter), NULL, &iteriter, &arg2);
-		zval_ptr_dtor(&arg2);
 	}
 
 	array_init(return_value);
 
 	pass.c = apply_reg ? Z_OBJCE(regexiter) : Z_OBJCE(iteriter);
 	pass.p = phar_obj;
-	pass.b = dir;
-	pass.l = (uint32_t)dir_len;
+	pass.base = dir;
 	pass.count = 0;
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
@@ -1829,11 +1818,10 @@ PHP_METHOD(Phar, buildFromIterator)
 {
 	zval *obj;
 	char *error;
-	size_t base_len = 0;
-	char *base = NULL;
+	zend_string *base = ZSTR_EMPTY_ALLOC();
 	struct _phar_t pass;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s!", &obj, zend_ce_traversable, &base, &base_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|S!", &obj, zend_ce_traversable, &base) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1845,10 +1833,6 @@ PHP_METHOD(Phar, buildFromIterator)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(base_len)) {
-		RETURN_FALSE;
-	}
-
 	if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
@@ -1858,8 +1842,7 @@ PHP_METHOD(Phar, buildFromIterator)
 
 	pass.c = Z_OBJCE_P(obj);
 	pass.p = phar_obj;
-	pass.b = base;
-	pass.l = (uint32_t)base_len;
+	pass.base = base;
 	pass.ret = return_value;
 	pass.count = 0;
 	pass.fp = php_stream_fopen_tmpfile();
@@ -3024,6 +3007,8 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 		case PHAR_SIG_MD5:
 		case PHAR_SIG_SHA1:
 		case PHAR_SIG_OPENSSL:
+		case PHAR_SIG_OPENSSL_SHA256:
+		case PHAR_SIG_OPENSSL_SHA512:
 			if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 				RETURN_THROWS();
@@ -3062,19 +3047,25 @@ PHP_METHOD(Phar, getSignature)
 		add_assoc_stringl(return_value, "hash", phar_obj->archive->signature, phar_obj->archive->sig_len);
 		switch(phar_obj->archive->sig_flags) {
 			case PHAR_SIG_MD5:
-				add_assoc_stringl(return_value, "hash_type", "MD5", 3);
+				add_assoc_string(return_value, "hash_type", "MD5");
 				break;
 			case PHAR_SIG_SHA1:
-				add_assoc_stringl(return_value, "hash_type", "SHA-1", 5);
+				add_assoc_string(return_value, "hash_type", "SHA-1");
 				break;
 			case PHAR_SIG_SHA256:
-				add_assoc_stringl(return_value, "hash_type", "SHA-256", 7);
+				add_assoc_string(return_value, "hash_type", "SHA-256");
 				break;
 			case PHAR_SIG_SHA512:
-				add_assoc_stringl(return_value, "hash_type", "SHA-512", 7);
+				add_assoc_string(return_value, "hash_type", "SHA-512");
 				break;
 			case PHAR_SIG_OPENSSL:
-				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7);
+				add_assoc_string(return_value, "hash_type", "OpenSSL");
+				break;
+			case PHAR_SIG_OPENSSL_SHA256:
+				add_assoc_string(return_value, "hash_type", "OpenSSL_SHA256");
+				break;
+			case PHAR_SIG_OPENSSL_SHA512:
+				add_assoc_string(return_value, "hash_type", "OpenSSL_SHA512");
 				break;
 			default:
 				unknown = strpprintf(0, "Unknown (%u)", phar_obj->archive->sig_flags);
@@ -3780,11 +3771,7 @@ PHP_METHOD(Phar, offsetUnset)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
 			}
-
-			RETURN_TRUE;
 		}
-	} else {
-		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -4540,8 +4527,8 @@ PHP_METHOD(PharFileInfo, isCompressed)
 		case PHAR_ENT_COMPRESSED_BZ2:
 			RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSED_BZ2);
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-				"Unknown compression type specified"); \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4564,8 +4551,8 @@ PHP_METHOD(PharFileInfo, getCRC32)
 	if (entry_obj->entry->is_crc_checked) {
 		RETURN_LONG(entry_obj->entry->crc32);
 	} else {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Phar entry was not CRC checked"); \
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Phar entry was not CRC checked");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -4953,8 +4940,8 @@ PHP_METHOD(PharFileInfo, compress)
 			entry_obj->entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-				"Unknown compression type specified"); \
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			RETURN_THROWS();
 	}
 
 	entry_obj->entry->phar->is_modified = 1;
@@ -5044,7 +5031,7 @@ PHP_METHOD(PharFileInfo, decompress)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 			"Phar error: Cannot decompress %s-compressed file \"%s\" in phar \"%s\": %s", compression_type, entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
 		efree(error);
-		return;
+		RETURN_THROWS();
 	}
 
 	entry_obj->entry->old_flags = entry_obj->entry->flags;
@@ -5089,6 +5076,8 @@ void phar_object_init(void) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA256", PHAR_SIG_OPENSSL_SHA256)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA512", PHAR_SIG_OPENSSL_SHA512)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)

@@ -3,8 +3,8 @@ SimpleXMLElement: Test to ensure that the required attribute name correctly is g
 --CREDITS--
 Havard Eide <nucleuz@gmail.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) { echo "skip extension not available"; } ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $a = new SimpleXMLElement("<php>testfest</php>");

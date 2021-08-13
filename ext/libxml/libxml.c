@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -165,6 +165,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 					node->ns = NULL;
 				}
 				node->type = XML_ELEMENT_NODE;
+				ZEND_FALLTHROUGH;
 			default:
 				xmlFreeNode(node);
 		}
@@ -188,9 +189,10 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					php_libxml_node_free_list((xmlNodePtr) node->properties);
 					break;
 				case XML_ATTRIBUTE_NODE:
-						if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-							xmlRemoveID(node->doc, (xmlAttrPtr) node);
-						}
+					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+						xmlRemoveID(node->doc, (xmlAttrPtr) node);
+					}
+					ZEND_FALLTHROUGH;
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
@@ -378,7 +380,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 
 					if (encoding) {
 						char *end;
-						
+
 						encoding += sizeof("charset=")-1;
 						if (*encoding == '"') {
 							encoding++;

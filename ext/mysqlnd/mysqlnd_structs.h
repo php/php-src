@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -294,14 +294,10 @@ typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 
 typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
-typedef void (*mysqlnd_stat_trigger)(MYSQLND_STATS * stats, enum_mysqlnd_collected_stats stat, int64_t change);
-
 struct st_mysqlnd_stats
 {
 	uint64_t				*values;
-	mysqlnd_stat_trigger	*triggers;
 	size_t					count;
-	bool				in_trigger;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
@@ -436,8 +432,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__connect)(MYSQLND_CONN_DATA * 
 typedef zend_ulong			(*func_mysqlnd_conn_data__escape_string)(MYSQLND_CONN_DATA * const conn, char *newstr, const char *escapestr, size_t escapestr_len);
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_charset)(MYSQLND_CONN_DATA * const conn, const char * const charset);
 typedef enum_func_status	(*func_mysqlnd_conn_data__query)(MYSQLND_CONN_DATA * conn, const char * const query, const size_t query_len);
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_query)(MYSQLND_CONN_DATA * conn, const char * const query, const size_t query_len, enum_mysqlnd_send_query_type type, zval *read_cb, zval *err_cb);
-typedef enum_func_status	(*func_mysqlnd_conn_data__reap_query)(MYSQLND_CONN_DATA * conn, enum_mysqlnd_reap_result_type type);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_query)(MYSQLND_CONN_DATA * conn, const char * const query, const size_t query_len, zval *read_cb, zval *err_cb);
+typedef enum_func_status	(*func_mysqlnd_conn_data__reap_query)(MYSQLND_CONN_DATA * conn);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__use_result)(MYSQLND_CONN_DATA * const conn);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__store_result)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__next_result)(MYSQLND_CONN_DATA * const conn);
@@ -507,8 +503,6 @@ typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLN
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_start)(MYSQLND_CONN_DATA * conn, const size_t this_func);
-typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DATA * conn, const size_t this_func, const enum_func_status status);
 typedef enum_func_status	(*func_mysqlnd_conn_data__execute_init_commands)(MYSQLND_CONN_DATA * conn);
 typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags);
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const MYSQLND_CSTRING * const scheme, const MYSQLND_CSTRING * const username, const MYSQLND_CSTRING * const password, const MYSQLND_CSTRING * const database, const unsigned int mysql_flags);
@@ -597,9 +591,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 	func_mysqlnd_conn_data__tx_cor_options_to_string tx_cor_options_to_string;
 	func_mysqlnd_conn_data__tx_savepoint tx_savepoint;
 	func_mysqlnd_conn_data__tx_savepoint_release tx_savepoint_release;
-
-	func_mysqlnd_conn_data__local_tx_start local_tx_start;
-	func_mysqlnd_conn_data__local_tx_end local_tx_end;
 
 	func_mysqlnd_conn_data__execute_init_commands execute_init_commands;
 	func_mysqlnd_conn_data__get_updated_connect_flags get_updated_connect_flags;
@@ -813,7 +804,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt)
 	func_mysqlnd_stmt__bind_result bind_result;
 	func_mysqlnd_stmt__bind_one_result bind_one_result;
 	func_mysqlnd_stmt__send_long_data send_long_data;
-	func_mysqlnd_stmt__get_parameter_metadata get_parameter_metadata;
 	func_mysqlnd_stmt__get_result_metadata get_result_metadata;
 
 	func_mysqlnd_stmt__get_last_insert_id get_last_insert_id;

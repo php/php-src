@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,10 +30,6 @@
 #define MAY_BE_CLASS_GUARD          (1<<27) /* needs class guard */
 #define MAY_BE_GUARD                (1<<28) /* needs type guard */
 //#define MAY_BE_IN_REG               (1<<29) /* deprecated and not used */
-
-//TODO: remome MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
@@ -256,14 +252,7 @@ ZEND_API int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_arra
 
 ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 
-int  zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int var, int widening, int narrowing, zend_ssa_range *tmp);
 ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
-void zend_inference_init_range(const zend_op_array *op_array, zend_ssa *ssa, int var, bool underflow, zend_long min, zend_long max, bool overflow);
-int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
-int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
-void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
-
-int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
 ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
@@ -271,12 +260,7 @@ ZEND_API void zend_init_func_return_info(
 	const zend_op_array *op_array, const zend_script *script, zend_ssa_var_info *ret);
 uint32_t zend_get_return_info_from_signature_only(
 		const zend_function *func, const zend_script *script,
-		zend_class_entry **ce, bool *ce_is_instanceof);
-void zend_func_return_info(const zend_op_array   *op_array,
-                           const zend_script     *script,
-                           int                    recursive,
-                           int                    widening,
-                           zend_ssa_var_info     *ret);
+		zend_class_entry **ce, bool *ce_is_instanceof, bool use_tentative_return_info);
 
 ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
 ZEND_API int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);

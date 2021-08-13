@@ -1,10 +1,8 @@
 --TEST--
 Phar: zip-based phar, require_hash=1, no signature
---SKIPIF--
-<?php
-if (!extension_loaded('phar')) die('skip');
-if (!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+phar
+zip
 --INI--
 phar.readonly=1
 phar.require_hash=0

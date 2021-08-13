@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -105,15 +105,15 @@
 	}
 
 #define ADD_PROPERTY_STRINGL(_table, _key, _string, _len) \
-   { \
-       zval tmp; \
-       if (_string) { \
-           ZVAL_STRINGL(&tmp, (char *)_string, _len); \
-       } else { \
-           ZVAL_EMPTY_STRING(&tmp); \
-       } \
-       zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-   }
+	{ \
+		zval tmp; \
+		if (_string) { \
+			ZVAL_STRINGL(&tmp, (char *)_string, _len); \
+		} else { \
+			ZVAL_EMPTY_STRING(&tmp); \
+		} \
+		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
+	}
 
 #define ADD_PROPERTY_LONG(_table, _key, _long) \
 	{ \
@@ -130,7 +130,7 @@
 	}
 
 #define ADD_PROPERTY_BOOL(_table, _key, _bool) \
-    { \
+	{ \
 		zval tmp; \
 		ZVAL_BOOL(&tmp, _bool); \
 		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
@@ -887,15 +887,7 @@ static PHP_INI_MH(php_tidy_set_clean_output)
 	int status;
 	bool value;
 
-	if (ZSTR_LEN(new_value)==2 && strcasecmp("on", ZSTR_VAL(new_value))==0) {
-		value = (bool) 1;
-	} else if (ZSTR_LEN(new_value)==3 && strcasecmp("yes", ZSTR_VAL(new_value))==0) {
-		value = (bool) 1;
-	} else if (ZSTR_LEN(new_value)==4 && strcasecmp("true", ZSTR_VAL(new_value))==0) {
-		value = (bool) 1;
-	} else {
-		value = (bool) atoi(ZSTR_VAL(new_value));
-	}
+	value = zend_ini_parse_bool(new_value);
 
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		status = php_output_get_status();
@@ -1313,7 +1305,7 @@ PHP_FUNCTION(tidy_getopt)
 
 	if (!opt) {
 		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
-    	RETURN_THROWS();
+		RETURN_THROWS();
 	}
 
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
@@ -1371,7 +1363,7 @@ PHP_METHOD(tidy, __construct)
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 			zend_value_error("Input string is too long");
-    		RETURN_THROWS();
+			RETURN_THROWS();
 		}
 
 		TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
@@ -1409,7 +1401,7 @@ PHP_METHOD(tidy, parseFile)
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 		zend_value_error("Input string is too long");
-    	RETURN_THROWS();
+		RETURN_THROWS();
 	}
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);

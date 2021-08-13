@@ -1,8 +1,9 @@
 --TEST--
 Forking a child and using the same connection.
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('pcntl_fork'))

@@ -1,171 +1,186 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 65836ce6bd16316bb022bc75ce5e2fbbdd1880b7 */
+ * Stub hash: 2b8605be915f05929dc0ade2edfb6f6ab942218c */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_charAge, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_charAge, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_charDigitValue arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_charDigitValue, 0, 1, IS_LONG, 1)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_charDirection arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_charDirection arginfo_class_IntlChar_charDigitValue
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_charFromName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_charFromName, 0, 1, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_charMirror arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_charMirror, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_charName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_charName, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_charType arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_charType arginfo_class_IntlChar_charDigitValue
 
-#define arginfo_class_IntlChar_chr arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_chr, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_digit, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_digit, 0, 1, MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 3, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, start, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_MASK(0, end, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::UNICODE_CHAR_NAME")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_enumCharTypes, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_enumCharTypes, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_foldCase, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_foldCase, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "IntlChar::FOLD_CASE_DEFAULT")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_forDigit, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_forDigit, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, digit, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getBidiPairedBracket, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_getBidiPairedBracket, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_class_IntlChar_getBlockCode arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_getBlockCode arginfo_class_IntlChar_charDigitValue
 
-#define arginfo_class_IntlChar_getCombiningClass arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_getCombiningClass arginfo_class_IntlChar_charDigitValue
 
-#define arginfo_class_IntlChar_getFC_NFKC_Closure arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_getFC_NFKC_Closure, 0, 1, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getIntPropertyMaxValue, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getIntPropertyMaxValue, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlChar_getIntPropertyMinValue arginfo_class_IntlChar_getIntPropertyMaxValue
 
-#define arginfo_class_IntlChar_getIntPropertyValue arginfo_class_IntlChar_hasBinaryProperty
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getIntPropertyValue, 0, 2, IS_LONG, 1)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_getNumericValue arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getNumericValue, 0, 1, IS_DOUBLE, 1)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyEnum, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getPropertyEnum, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_getPropertyName, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyValueEnum, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getPropertyValueEnum, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getPropertyValueName, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_getPropertyValueName, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, property, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "IntlChar::LONG_PROPERTY_NAME")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_getUnicodeVersion, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_getUnicodeVersion, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_isalnum arginfo_class_IntlChar_charAge
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_isalnum, 0, 1, _IS_BOOL, 1)
+	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_isalpha arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isalpha arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isbase arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isbase arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isblank arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isblank arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_iscntrl arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_iscntrl arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isdefined arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isdefined arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isdigit arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isdigit arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isgraph arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isgraph arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isIDIgnorable arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isIDIgnorable arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isIDPart arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isIDPart arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isIDStart arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isIDStart arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isISOControl arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isISOControl arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isJavaIDPart arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isJavaIDPart arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isJavaIDStart arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isJavaIDStart arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isJavaSpaceChar arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isJavaSpaceChar arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_islower arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_islower arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isMirrored arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isMirrored arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isprint arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isprint arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_ispunct arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_ispunct arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isspace arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isspace arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_istitle arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_istitle arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isUAlphabetic arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isUAlphabetic arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isULowercase arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isULowercase arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isupper arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isupper arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isUUppercase arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isUUppercase arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isUWhiteSpace arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isUWhiteSpace arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isWhitespace arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isWhitespace arginfo_class_IntlChar_isalnum
 
-#define arginfo_class_IntlChar_isxdigit arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_isxdigit arginfo_class_IntlChar_isalnum
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlChar_ord, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_ord, 0, 1, IS_LONG, 1)
 	ZEND_ARG_TYPE_MASK(0, character, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlChar_tolower arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_tolower arginfo_class_IntlChar_charMirror
 
-#define arginfo_class_IntlChar_totitle arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_totitle arginfo_class_IntlChar_charMirror
 
-#define arginfo_class_IntlChar_toupper arginfo_class_IntlChar_charAge
+#define arginfo_class_IntlChar_toupper arginfo_class_IntlChar_charMirror
 
 
 ZEND_METHOD(IntlChar, hasBinaryProperty);

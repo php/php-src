@@ -5,7 +5,7 @@ SPL: Countable
 
 class Test implements Countable
 {
-    function count()
+    function count(): int
     {
         return 4;
     }

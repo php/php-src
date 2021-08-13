@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -34,7 +34,6 @@
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 #include "ldap_arginfo.h"
-#include "Zend/zend_interfaces.h"
 
 #ifdef PHP_WIN32
 #include <string.h>
@@ -121,7 +120,7 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP, use ldap_create() instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_create() instead");
 	return NULL;
 }
 
@@ -167,7 +166,7 @@ static zend_object *ldap_result_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_result_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAPResult, use the dedicated functions instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Result, use the dedicated functions instead");
 	return NULL;
 }
 
@@ -205,7 +204,7 @@ static zend_object *ldap_result_entry_create_object(zend_class_entry *class_type
 }
 
 static zend_function *ldap_result_entry_get_constructor(zend_object *obj) {
-	zend_throw_error(NULL, "Cannot directly construct LDAPResultEntry, use the dedicated functions instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead");
 	return NULL;
 }
 
@@ -826,10 +825,8 @@ PHP_MINIT_FUNCTION(ldap)
 {
 	REGISTER_INI_ENTRIES();
 
-	ldap_link_ce = register_class_LDAP();
+	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
-	ldap_link_ce->serialize = zend_class_serialize_deny;
-	ldap_link_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = XtOffsetOf(ldap_linkdata, std);
@@ -838,10 +835,8 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_ce = register_class_LDAPResult();
+	ldap_result_ce = register_class_LDAP_Result();
 	ldap_result_ce->create_object = ldap_result_create_object;
-	ldap_result_ce->serialize = zend_class_serialize_deny;
-	ldap_result_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_object_handlers.offset = XtOffsetOf(ldap_resultdata, std);
@@ -850,10 +845,8 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_result_object_handlers.clone_obj = NULL;
 	ldap_result_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_entry_ce = register_class_LDAPResultEntry();
+	ldap_result_entry_ce = register_class_LDAP_ResultEntry();
 	ldap_result_entry_ce->create_object = ldap_result_entry_create_object;
-	ldap_result_entry_ce->serialize = zend_class_serialize_deny;
-	ldap_result_entry_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_result_entry_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_entry_object_handlers.offset = XtOffsetOf(ldap_result_entry, std);
@@ -1572,7 +1565,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
-	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
+	int num_attribs = 0, ret = 1, i, ldap_errno, argcount = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(3, 9)
 		Z_PARAM_ZVAL(link)
@@ -1592,12 +1585,16 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		case 9:
 		case 8:
 			ldap_deref = deref;
+			ZEND_FALLTHROUGH;
 		case 7:
 			ldap_timelimit = timelimit;
+			ZEND_FALLTHROUGH;
 		case 6:
 			ldap_sizelimit = sizelimit;
+			ZEND_FALLTHROUGH;
 		case 5:
 			ldap_attrsonly = attrsonly;
+			ZEND_FALLTHROUGH;
 		case 4:
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
@@ -1617,6 +1614,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ldap_attrs[i] = Z_STRVAL_P(attr);
 			}
 			ldap_attrs[num_attribs] = NULL;
+			ZEND_FALLTHROUGH;
 		default:
 			break;
 	}
@@ -1774,15 +1772,15 @@ cleanup_parallel:
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		errno = ldap_search_ext_s(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
+		ldap_errno = ldap_search_ext_s(ld->link, ZSTR_VAL(ldap_base_dn), scope, ZSTR_VAL(ldap_filter), ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
 
-		if (errno != LDAP_SUCCESS
-			&& errno != LDAP_SIZELIMIT_EXCEEDED
+		if (ldap_errno != LDAP_SUCCESS
+			&& ldap_errno != LDAP_SIZELIMIT_EXCEEDED
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
-			&& errno != LDAP_ADMINLIMIT_EXCEEDED
+			&& ldap_errno != LDAP_ADMINLIMIT_EXCEEDED
 #endif
 #ifdef LDAP_REFERRAL
-			&& errno != LDAP_REFERRAL
+			&& ldap_errno != LDAP_REFERRAL
 #endif
 		) {
 			/* ldap_res should be freed regardless of return value of ldap_search_ext_s()
@@ -1790,14 +1788,14 @@ cleanup_parallel:
 			if (ldap_res != NULL) {
 				ldap_msgfree(ldap_res);
 			}
-			php_error_docref(NULL, E_WARNING, "Search: %s", ldap_err2string(errno));
+			php_error_docref(NULL, E_WARNING, "Search: %s", ldap_err2string(ldap_errno));
 			ret = 0;
 		} else {
-			if (errno == LDAP_SIZELIMIT_EXCEEDED) {
+			if (ldap_errno == LDAP_SIZELIMIT_EXCEEDED) {
 				php_error_docref(NULL, E_WARNING, "Partial search results returned: Sizelimit exceeded");
 			}
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
-			else if (errno == LDAP_ADMINLIMIT_EXCEEDED) {
+			else if (ldap_errno == LDAP_ADMINLIMIT_EXCEEDED) {
 				php_error_docref(NULL, E_WARNING, "Partial search results returned: Adminlimit exceeded");
 			}
 #endif
@@ -3033,7 +3031,7 @@ PHP_FUNCTION(ldap_compare)
 	size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
-	int errno;
+	int ldap_errno;
 	struct berval lvalue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osss|a!", &link, ldap_link_ce, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
@@ -3054,9 +3052,9 @@ PHP_FUNCTION(ldap_compare)
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
-	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
+	ldap_errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
 
-	switch (errno) {
+	switch (ldap_errno) {
 		case LDAP_COMPARE_TRUE:
 			RETVAL_TRUE;
 			break;
@@ -3066,7 +3064,7 @@ PHP_FUNCTION(ldap_compare)
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(errno));
+			php_error_docref(NULL, E_WARNING, "Compare: %s", ldap_err2string(ldap_errno));
 			RETVAL_LONG(-1);
 	}
 
@@ -3465,6 +3463,7 @@ PHP_FUNCTION(ldap_parse_result)
 	switch (myargcount) {
 		case 7:
 			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
+			ZEND_FALLTHROUGH;
 		case 6:
 			referrals = zend_try_array_init(referrals);
 			if (!referrals) {
@@ -3478,6 +3477,7 @@ PHP_FUNCTION(ldap_parse_result)
 				}
 				ldap_memvfree((void**)lreferrals);
 			}
+			ZEND_FALLTHROUGH;
 		case 5:
 			if (lerrmsg == NULL) {
 				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(errmsg);
@@ -3485,6 +3485,7 @@ PHP_FUNCTION(ldap_parse_result)
 				ZEND_TRY_ASSIGN_REF_STRING(errmsg, lerrmsg);
 				ldap_memfree(lerrmsg);
 			}
+			ZEND_FALLTHROUGH;
 		case 4:
 			if (lmatcheddn == NULL) {
 				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(matcheddn);
@@ -3538,6 +3539,7 @@ PHP_FUNCTION(ldap_parse_exop)
 				ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			}
+			ZEND_FALLTHROUGH;
 		case 3:
 			/* use arg #3 as the data returned by the server */
 			if (lretdata == NULL) {

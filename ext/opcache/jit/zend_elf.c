@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -64,8 +64,7 @@ void zend_elf_load_symbols(void)
 	}
 	int fd = open(path, O_RDONLY);
 #elif defined(__sun)
-	const char *path = getexecname();
-	int fd = open(path, O_RDONLY);
+	int fd = open("/proc/self/path/a.out", O_RDONLY);
 #elif defined(__HAIKU__)
 	char path[PATH_MAX];
 	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,

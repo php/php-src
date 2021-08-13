@@ -1,10 +1,7 @@
 --TEST--
 Test parameter handling in socket_select().
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $sockets = null;
@@ -18,7 +15,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 socket_select(): At least one array argument must be passed
 --CREDITS--
 Till Klampaeckel, till@php.net

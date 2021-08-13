@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -459,7 +459,7 @@ static int php_htoi(char *s)
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
-	register unsigned char c;
+	unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
 	zend_string *start;
@@ -587,7 +587,7 @@ PHP_FUNCTION(urldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -649,7 +649,7 @@ PHP_FUNCTION(rawurldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -728,7 +728,7 @@ no_name_header:
 
 				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
+				} else { /* some headers may occur more than once, therefore we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}

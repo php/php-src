@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -55,18 +55,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (ZSTR_LEN(new_value) == 2 && !strcasecmp("on", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 3 && !strcasecmp("yes", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 4 && !strcasecmp("true", ZSTR_VAL(new_value))) {
-		ini = (bool) 1;
-	}
-	else {
-		ini = (bool) atoi(ZSTR_VAL(new_value));
-	}
+	ini = zend_ini_parse_bool(new_value);
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
@@ -688,13 +677,14 @@ void phar_metadata_tracker_copy(phar_metadata_tracker *dest, const phar_metadata
 /* }}} */
 
 /**
- * Increment reference counts after a metadata entry was copied
+ * Copy constructor for a non-persistent clone.
  */
 void phar_metadata_tracker_clone(phar_metadata_tracker *tracker) /* {{{ */
 {
 	Z_TRY_ADDREF_P(&tracker->val);
 	if (tracker->str) {
-		tracker->str = zend_string_copy(tracker->str);
+		/* Duplicate the string, as the original may have been persistent. */
+		tracker->str = zend_string_dup(tracker->str, false);
 	}
 }
 /* }}} */
@@ -868,6 +858,8 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 		PHAR_GET_32(sig_ptr, sig_flags);
 
 		switch(sig_flags) {
+			case PHAR_SIG_OPENSSL_SHA512:
+			case PHAR_SIG_OPENSSL_SHA256:
 			case PHAR_SIG_OPENSSL: {
 				uint32_t signature_len;
 				char *sig;
@@ -902,7 +894,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 					return FAILURE;
 				}
 
-				if (FAILURE == phar_verify_signature(fp, end_of_phar, PHAR_SIG_OPENSSL, sig, signature_len, fname, &signature, &sig_len, error)) {
+				if (FAILURE == phar_verify_signature(fp, end_of_phar, sig_flags, sig, signature_len, fname, &signature, &sig_len, error)) {
 					efree(savebuf);
 					efree(sig);
 					php_stream_close(fp);
@@ -2384,8 +2376,8 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
  */
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip) /* {{{ */
 {
-	uint32_t crc = ~0;
-	int len = idata->internal_file->uncompressed_filesize;
+	uint32_t crc = php_crc32_bulk_init();
+	int len = idata->internal_file->uncompressed_filesize, ret;
 	php_stream *fp = idata->fp;
 	phar_entry_info *entry = idata->internal_file;
 
@@ -2450,13 +2442,11 @@ int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, 
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
-	while (len--) {
-		CRC32(crc, php_stream_getc(fp));
-	}
+	ret = php_crc32_stream_bulk_update(&crc, fp, len);
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
-	if (~crc == crc32) {
+	if (SUCCESS == ret && php_crc32_bulk_end(crc) == crc32) {
 		entry->is_crc_checked = 1;
 		return SUCCESS;
 	} else {
@@ -2550,7 +2540,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
-	uint32_t manifest_len, mytime, loc, new_manifest_count;
+	uint32_t manifest_len, mytime, new_manifest_count;
 	uint32_t newcrc32;
 	php_stream *file, *oldfile, *newfile, *stubfile;
 	php_stream_filter *filter;
@@ -2806,12 +2796,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			}
 			return EOF;
 		}
-		newcrc32 = ~0;
-		mytime = entry->uncompressed_filesize;
-		for (loc = 0;loc < mytime; ++loc) {
-			CRC32(newcrc32, php_stream_getc(file));
-		}
-		entry->crc32 = ~newcrc32;
+		newcrc32 = php_crc32_bulk_init();
+		php_crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize);
+		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		entry->is_crc_checked = 1;
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
 			/* not compressed */
@@ -3161,7 +3148,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 				php_stream_write(newfile, digest, digest_len);
 				efree(digest);
-				if (phar->sig_flags == PHAR_SIG_OPENSSL) {
+				if (phar->sig_flags == PHAR_SIG_OPENSSL ||
+					phar->sig_flags == PHAR_SIG_OPENSSL_SHA256 ||
+					phar->sig_flags == PHAR_SIG_OPENSSL_SHA512) {
 					phar_set_32(sig_buf, digest_len);
 					php_stream_write(newfile, sig_buf, 4);
 				}

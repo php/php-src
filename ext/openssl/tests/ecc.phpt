@@ -1,7 +1,9 @@
 --TEST--
 openssl_*() with OPENSSL_KEYTYPE_EC
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl") || !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php if (!defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
 --FILE--
 <?php
 $args = array(
@@ -32,6 +34,16 @@ var_dump($key2);
 $d2 = openssl_pkey_get_details($key2);
 // Compare array
 var_dump($d1 === $d2);
+
+// Check that the public key info is computed from the private key if it is missing.
+$d1_priv = $d1;
+unset($d1_priv["ec"]["x"]);
+unset($d1_priv["ec"]["y"]);
+
+$key3 = openssl_pkey_new($d1_priv);
+var_dump($key3);
+$d3 = openssl_pkey_get_details($key3);
+var_dump($d1 === $d3);
 
 $dn = array(
     "countryName" => "BR",
@@ -89,6 +101,9 @@ bool(false)
 int(384)
 int(215)
 string(9) "secp384r1"
+bool(true)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
 bool(true)
 object(OpenSSLAsymmetricKey)#%d (0) {
 }

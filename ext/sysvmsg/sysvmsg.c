@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -25,7 +25,6 @@
 #include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "Zend/zend_interfaces.h"
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -110,8 +109,6 @@ PHP_MINIT_FUNCTION(sysvmsg)
 {
 	sysvmsg_queue_ce = register_class_SysvMessageQueue();
 	sysvmsg_queue_ce->create_object = sysvmsg_queue_create_object;
-	sysvmsg_queue_ce->serialize = zend_class_serialize_deny;
-	sysvmsg_queue_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);

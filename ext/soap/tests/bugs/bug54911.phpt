@@ -1,11 +1,11 @@
 --TEST--
 Bug #54911 (Access to a undefined member in inherit SoapClient may cause Segmentation Fault)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
     class XSoapClient extends SoapClient {
-        function __doRequest($request, $location, $action, $version, $one_way=false) {
+        function __doRequest($request, $location, $action, $version, $one_way=false): ?string {
             echo self::$crash;
         }
     }

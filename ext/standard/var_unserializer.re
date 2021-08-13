@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -18,6 +18,7 @@
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
+#include "zend_exceptions.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
@@ -139,6 +140,17 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 			return;
 		}
 		ZVAL_COPY(tmp_var, rval);
+	}
+}
+
+static zend_never_inline void var_push_dtor_value(php_unserialize_data_t *var_hashx, zval *rval)
+{
+	if (Z_REFCOUNTED_P(rval)) {
+		zval *tmp_var = var_tmp_var(var_hashx);
+		if (!tmp_var) {
+			return;
+		}
+		ZVAL_COPY_VALUE(tmp_var, rval);
 	}
 }
 
@@ -451,7 +463,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash
 
-static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER);
 
 static zend_always_inline int process_nested_array_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements)
 {
@@ -468,54 +480,43 @@ static zend_always_inline int process_nested_array_data(UNSERIALIZE_PARAMETER, H
 	}
 
 	while (elements-- > 0) {
-		zval key, *data, d, *old_data;
+		zval key, *data;
 		zend_ulong idx;
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_internal(&key, p, max, NULL, 1)) {
+		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
 
-		data = NULL;
-		ZVAL_UNDEF(&d);
-
 		if (Z_TYPE(key) == IS_LONG) {
 			idx = Z_LVAL(key);
 numeric_key:
-			if (UNEXPECTED((old_data = zend_hash_index_find(ht, idx)) != NULL)) {
-				//??? update hash
-				var_push_dtor(var_hash, old_data);
-				data = zend_hash_index_update(ht, idx, &d);
-			} else {
-				data = zend_hash_index_add_new(ht, idx, &d);
+			data = zend_hash_index_lookup(ht, idx);
+			if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
+				var_push_dtor_value(var_hash, data);
+				ZVAL_NULL(data);
 			}
 		} else if (Z_TYPE(key) == IS_STRING) {
 			if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
+				zval_ptr_dtor_str(&key);
 				goto numeric_key;
 			}
-			if (UNEXPECTED((old_data = zend_hash_find(ht, Z_STR(key))) != NULL)) {
-				//??? update hash
-				var_push_dtor(var_hash, old_data);
-				data = zend_hash_update(ht, Z_STR(key), &d);
-			} else {
-				data = zend_hash_add_new(ht, Z_STR(key), &d);
+			data = zend_hash_lookup(ht, Z_STR(key));
+			if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
+				var_push_dtor_value(var_hash, data);
+				ZVAL_NULL(data);
 			}
+			zval_ptr_dtor_str(&key);
 		} else {
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
 
-		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
-			zval_ptr_dtor(&key);
+		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			goto failure;
 		}
-
-		if (BG(unserialize).level > 1) {
-			var_push_dtor(var_hash, data);
-		}
-		zval_ptr_dtor_str(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -587,73 +588,70 @@ static zend_always_inline int process_nested_object_data(UNSERIALIZE_PARAMETER, 
 	}
 
 	while (elements-- > 0) {
-		zval key, *data, d, *old_data;
+		zval key, *data;
 		zend_property_info *info = NULL;
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_internal(&key, p, max, NULL, 1)) {
+		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
 			zval_ptr_dtor(&key);
 			goto failure;
 		}
 
-		data = NULL;
-		ZVAL_UNDEF(&d);
-
 		if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
-			if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+			data = zend_hash_find(ht, Z_STR(key));
+			if (data != NULL) {
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
 declared_property:
 					/* This is a property with a declaration */
-					old_data = Z_INDIRECT_P(old_data);
-					info = zend_get_typed_property_info_for_slot(obj, old_data);
+					data = Z_INDIRECT_P(data);
+					info = zend_get_typed_property_info_for_slot(obj, data);
 					if (info) {
-						if (Z_ISREF_P(old_data)) {
+						if (Z_ISREF_P(data)) {
 							/* If the value is overwritten, remove old type source from ref. */
-							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(old_data), info);
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(data), info);
 						}
 
 						if ((*var_hash)->ref_props) {
 							/* Remove old entry from ref_props table, if it exists. */
 							zend_hash_index_del(
-								(*var_hash)->ref_props, (zend_uintptr_t) old_data);
+								(*var_hash)->ref_props, (zend_uintptr_t) data);
 						}
 					}
-					var_push_dtor(var_hash, old_data);
-					Z_TRY_DELREF_P(old_data);
-					ZVAL_UNDEF(old_data);
-					data = old_data;
+					/* We may override default property value, but they are usually immutable */
+					if (Z_REFCOUNTED_P(data)) {
+						var_push_dtor_value(var_hash, data);
+					}
+					ZVAL_NULL(data);
 				} else {
+					/* Unusual override of dynamic property */
 					int ret = is_property_visibility_changed(obj->ce, &key);
 
-					if (EXPECTED(!ret)) {
-						var_push_dtor(var_hash, old_data);
-						data = zend_hash_update(ht, Z_STR(key), &d);
+					if (ret > 0) {
+						goto second_try;
+					} else if (!ret) {
+						var_push_dtor_value(var_hash, data);
+						ZVAL_NULL(data);
 					} else if (ret < 0) {
 						goto failure;
-					} else {
-						goto second_try;
 					}
 				}
 			} else {
 				int ret = is_property_visibility_changed(obj->ce, &key);
 
 				if (EXPECTED(!ret)) {
-					data = zend_hash_add_new(ht, Z_STR(key), &d);
+					data = zend_hash_add_new(ht, Z_STR(key), &EG(uninitialized_zval));
 				} else if (ret < 0) {
 					goto failure;
 				} else {
 second_try:
-					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-						if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-							goto declared_property;
-						} else {
-							var_push_dtor(var_hash, old_data);
-							data = zend_hash_update(ht, Z_STR(key), &d);
-						}
-					} else {
-						data = zend_hash_add_new(ht, Z_STR(key), &d);
+					data = zend_hash_lookup(ht, Z_STR(key));
+					if (Z_TYPE_P(data) == IS_INDIRECT) {
+						goto declared_property;
+					} else if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
+						var_push_dtor_value(var_hash, data);
+						ZVAL_NULL(data);
 					}
 				}
 			}
@@ -667,7 +665,7 @@ second_try:
 			goto failure;
 		}
 
-		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
+		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			if (info && Z_ISREF_P(data)) {
 				/* Add type source even if we failed to unserialize.
 				 * The data is still stored in the property. */
@@ -695,10 +693,6 @@ second_try:
 				zend_hash_index_update_ptr(
 					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
 			}
-		}
-
-		if (BG(unserialize).level > 1) {
-			var_push_dtor(var_hash, data);
 		}
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
@@ -834,7 +828,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
 	int result;
 
-	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU, 0);
+	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU);
 
 	if (!result) {
 		/* If the unserialization failed, mark all elements that have been added to var_hash
@@ -855,7 +849,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return result;
 }
 
-static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key)
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
@@ -886,7 +880,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key)
 		return 0;
 	}
 
-	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
+	if (rval_ref == rval || (Z_ISREF_P(rval_ref) && Z_REFVAL_P(rval_ref) == rval)) {
 		return 0;
 	}
 
@@ -1028,8 +1022,9 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-	if (as_key) {
-		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
+	if (!var_hash) {
+		/* Array or object key unserialization */
+		ZVAL_STR(rval, zend_string_init_existing_interned(str, len, 0));
 	} else {
 		ZVAL_STRINGL_FAST(rval, str, len);
 	}
@@ -1157,11 +1152,19 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
+	class_name = zend_string_init_interned(str, len, 0);
 
 	do {
-		zend_string *lc_name = zend_string_tolower(class_name);
+		zend_string *lc_name;
 
+		if (!(*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				break;
+			}
+		}
+
+		lc_name = zend_string_tolower(class_name);
 		if(!unserialize_allowed_class(lc_name, var_hash)) {
 			zend_string_release_ex(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
@@ -1173,6 +1176,14 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
+		if ((*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+			ce = ZSTR_GET_CE_CACHE(class_name);
+			if (ce) {
+				zend_string_release_ex(lc_name, 0);
+				break;
+			}
+		}
+
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		if (ce
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
@@ -1181,7 +1192,7 @@ object ":" uiv ":" ["]	{
 			break;
 		}
 
-		if (!zend_is_valid_class_name(class_name)) {
+		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
 			zend_string_release_ex(lc_name, 0);
 			zend_string_release_ex(class_name, 0);
 			return 0;
@@ -1253,10 +1264,16 @@ object ":" uiv ":" ["]	{
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&args[0]);
-		break;
-	} while (1);
+	} while (0);
 
 	*p = YYCURSOR;
+
+	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
+			ZSTR_VAL(ce->name));
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
 
 	if (custom_object) {
 		int ret;
@@ -1364,7 +1381,7 @@ object ":" uiv ":" ["]	{
 		goto fail;
 	}
 
-	if (!(Z_ACCESS_FLAGS(c->value) & ZEND_CLASS_CONST_IS_CASE)) {
+	if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
 		php_error_docref(NULL, E_WARNING, "%s::%s is not an enum case", ZSTR_VAL(enum_name), ZSTR_VAL(case_name));
 		goto fail;
 	}

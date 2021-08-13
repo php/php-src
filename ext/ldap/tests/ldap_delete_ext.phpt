@@ -2,8 +2,9 @@
 ldap_delete_ext() - Delete operation with controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
 require_once('skipifcontrol.inc');
@@ -43,7 +44,7 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "dc=my-domain,$base");
 ?>
 --EXPECTF--
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)

@@ -18,6 +18,7 @@ jobs:
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
             --enable-option-checking=fatal \
+            --build=i686-pc-linux-gnu \
             --prefix=/usr \
             --enable-phpdbg \
             --enable-fpm \

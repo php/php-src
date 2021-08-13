@@ -5,31 +5,31 @@ SPL: SplObjectStorage
 
 class MyObjectStorage extends SplObjectStorage
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "()\n";
         parent::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "(" . (parent::valid() ? 1 : 0) . ")\n";
         return parent::valid();
     }
 
-    function key()
+    function key(): int
     {
         echo __METHOD__ . "(" . parent::key() . ")\n";
         return parent::key();
     }
 
-    function current()
+    function current(): object
     {
         echo __METHOD__ . "(" . parent::current()->getName() . ")\n";
         return parent::current();
     }
 
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "()\n";
         parent::next();
@@ -45,7 +45,7 @@ class ObserverImpl implements SplObserver
         $this->name = '$' . $name;
     }
 
-    function update(SplSubject $subject)
+    function update(SplSubject $subject): void
     {
         echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
     }
@@ -67,24 +67,24 @@ class SubjectImpl implements SplSubject
         $this->name = '$' . $name;
     }
 
-    function attach(SplObserver $observer)
+    function attach(SplObserver $observer): void
     {
         echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
         $this->observers->attach($observer);
     }
 
-    function detach(SplObserver $observer)
+    function detach(SplObserver $observer): void
     {
         echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
         $this->observers->detach($observer);
     }
 
-    function count()
+    function count(): int
     {
         return $this->observers->count();
     }
 
-    function notify()
+    function notify(): void
     {
         echo $this->name . '->' . __METHOD__ . "();\n";
         foreach($this->observers as $key => $observer)

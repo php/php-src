@@ -1,8 +1,7 @@
 --TEST--
 Bug #71516 IntlDateFormatter losts locale if pattern is set via constructor
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

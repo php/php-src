@@ -36,7 +36,7 @@ $doc->xinclude();
 
 $count = loopElements(array($doc->documentElement));
 
-var_dump($count);
+var_dump($count == 13 || $count == 11);
 ?>
 --EXPECT--
-int(13)
+bool(true)

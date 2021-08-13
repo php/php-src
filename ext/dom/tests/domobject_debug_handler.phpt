@@ -17,6 +17,7 @@ print_r($d);
 --EXPECTF--
 DOMDocument Object
 (
+    [config] => 
     [dynamicProperty] => stdClass Object
         (
         )
@@ -33,7 +34,6 @@ DOMDocument Object
     [xmlVersion] => 1.0
     [strictErrorChecking] => 1
     [documentURI] => %s
-    [config] => 
     [formatOutput] => 
     [validateOnParse] => 
     [resolveExternals] => 

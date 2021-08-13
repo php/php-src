@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -34,6 +34,12 @@
 
 static double _timer_scale = .0;
 
+#elif PHP_HRTIME_PLATFORM_APPLE
+
+# include <mach/mach_time.h>
+# include <string.h>
+static mach_timebase_info_data_t _timerlib_info;
+
 #elif PHP_HRTIME_PLATFORM_HPUX
 
 # include <sys/time.h>
@@ -48,7 +54,7 @@ static double _timer_scale = .0;
 #define NANO_IN_SEC 1000000000
 /* }}} */
 
-static int _timer_init()
+static int _timer_init(void)
 {/*{{{*/
 #if PHP_HRTIME_PLATFORM_WINDOWS
 
@@ -60,7 +66,9 @@ static int _timer_init()
 
 #elif PHP_HRTIME_PLATFORM_APPLE
 
-	/* pass */
+	if (mach_timebase_info(&_timerlib_info)) {
+		return -1;
+	}
 
 #elif PHP_HRTIME_PLATFORM_POSIX
 
@@ -107,8 +115,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 	QueryPerformanceCounter(&lt);
 	return (php_hrtime_t)((php_hrtime_t)lt.QuadPart * _timer_scale);
 #elif PHP_HRTIME_PLATFORM_APPLE
-	/* the value is of php_hrtime_t type already */
-	return clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW);
+	return (php_hrtime_t)mach_absolute_time() * _timerlib_info.numer / _timerlib_info.denom;
 #elif PHP_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
 	if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {

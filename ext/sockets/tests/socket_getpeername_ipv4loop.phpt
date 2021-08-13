@@ -3,19 +3,15 @@ ext/sockets - socket_getpeername_ipv4loop - basic test
 --CREDITS--
 Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
---SKIPIF--
-<?php
-        if (!extension_loaded('sockets')) {
-                die('skip sockets extension not available.');
-        }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
     /* Bind and connect sockets to localhost */
     $localhost = '127.0.0.1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$server) {
                 die('Unable to create AF_INET socket [server]');
         }
@@ -37,7 +33,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$client) {
                 die('Unable to create AF_INET socket [client]');
         }

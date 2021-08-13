@@ -1,8 +1,9 @@
 --TEST--
 Interface of the class mysqli_result
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -35,6 +36,7 @@ require_once('skipifconnectfailure.inc');
         'fetch_fields'          => true,
         'fetch_object'          => true,
         'fetch_row'             => true,
+        'fetch_column'          => true,
         'field_seek'            => true,
         'free'                  => true,
         'free_result'           => true,

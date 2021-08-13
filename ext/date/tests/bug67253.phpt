@@ -16,13 +16,13 @@ array(12) {
   ["day"]=>
   bool(false)
   ["hour"]=>
-  int(0)
+  bool(false)
   ["minute"]=>
-  int(0)
+  bool(false)
   ["second"]=>
-  int(0)
+  bool(false)
   ["fraction"]=>
-  float(0)
+  bool(false)
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
@@ -31,10 +31,8 @@ array(12) {
   ["error_count"]=>
   int(3)
   ["errors"]=>
-  array(3) {
+  array(2) {
     [0]=>
-    string(51) "Meridian can only come after an hour has been found"
-    [1]=>
     string(29) "A meridian could not be found"
     [9]=>
     string(12) "Data missing"

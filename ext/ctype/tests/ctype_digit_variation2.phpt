@@ -14,7 +14,7 @@ echo "*** Testing ctype_digit() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-    if (ctype_digit($i)) {
+    if (ctype_digit(chr($i))) {
         echo "character code $i is a numeric digit\n";
     }
 }

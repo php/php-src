@@ -3,8 +3,8 @@ Test curl_copy_handle() with User Agent
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

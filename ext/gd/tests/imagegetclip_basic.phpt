@@ -1,9 +1,7 @@
 --TEST--
 imagegetclip() - basic functionality
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreate(10, 10);

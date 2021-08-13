@@ -1,7 +1,7 @@
 --TEST--
 Bug #69079 (enhancement for mb_substitute_character)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

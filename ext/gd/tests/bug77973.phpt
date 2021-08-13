@@ -1,8 +1,9 @@
 --TEST--
 Bug #77973 (Uninitialized read in gdImageCreateFromXbm)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die("skip gd extension not available");
 if (!function_exists('imagecreatefromxbm')) die("skip imagecreatefromxbm not available");
 ?>
 --FILE--

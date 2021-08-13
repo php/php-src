@@ -329,7 +329,7 @@ function ini_get_all(?string $extension = null, bool $details = true): array|fal
 function ini_set(string $option, string|int|float|bool|null $value): string|false {}
 
 /** @alias ini_set */
-function ini_alter(string $option, string $value): string|false {}
+function ini_alter(string $option, string|int|float|bool|null $value): string|false {}
 
 function ini_restore(string $option): void {}
 
@@ -396,6 +396,7 @@ function crypt(string $string, string $salt): string {}
 /* datetime.c */
 
 #if HAVE_STRPTIME
+/** @deprecated */
 function strptime(string $timestamp, string $format): array|false {}
 #endif
 
@@ -439,7 +440,9 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 function net_get_interfaces(): array|false {}
+#endif
 
 /* ftok.c */
 
@@ -538,7 +541,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-function assert_options(int $option, mixed $value = UNKNOWN): array|object|int|string|null {}
+function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
 
@@ -705,13 +708,7 @@ function utf8_decode(string $string): string {}
  */
 function opendir(string $directory, $context = null) {}
 
-/** @param resource $context */
-function getdir(string $directory, $context = null): Directory|false {}
-
-/**
- * @param resource|null $context
- * @alias getdir
- */
+/** @param resource|null $context */
 function dir(string $directory, $context = null): Directory|false {}
 
 /** @param resource|null $dir_handle */
@@ -830,6 +827,12 @@ function ftell($stream): int|false {}
 
 /** @param resource $stream */
 function fflush($stream): bool {}
+
+/** @param resource $stream */
+function fsync($stream): bool {}
+
+/** @param resource $stream */
+function fdatasync($stream): bool {}
 
 /** @param resource $stream */
 function fwrite($stream, string $data, ?int $length = null): int|false {}
@@ -1209,7 +1212,7 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
 
 /** @return resource */
 function stream_context_create(?array $options = null, ?array $params = null) {}

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -115,7 +115,7 @@ void dom_normalize (xmlNodePtr nodep);
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
 void php_dom_create_implementation(zval *retval);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
-int dom_has_feature(char *feature, char *version);
+bool dom_has_feature(zend_string *feature, zend_string *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
 void php_dom_create_iterator(zval *return_value, int ce_type);

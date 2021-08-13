@@ -1,13 +1,11 @@
 --TEST--
 Bug #69668 (SOAP: special XML characters in namespace URIs not encoded)
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class MySoapClient extends SoapClient {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0) {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
         echo $request, PHP_EOL;
         return '';
     }

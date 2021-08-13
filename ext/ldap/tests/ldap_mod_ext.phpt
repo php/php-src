@@ -3,8 +3,9 @@ ldap_mod_ext() - Modify operations with controls
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
 require_once('skipifcontrol.inc');
@@ -62,7 +63,7 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)
@@ -134,7 +135,7 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-object(LDAPResult)#%d (0) {
+object(LDAP\Result)#%d (0) {
 }
 bool(true)
 int(0)

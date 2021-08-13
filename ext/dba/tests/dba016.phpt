@@ -1,5 +1,7 @@
 --TEST--
 DBA lock modifier error message test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "flatfile";

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -352,7 +352,7 @@ static int check_http_host(char *target)
 	zend_string *host_tmp;
 	char *colon;
 
-	if ((tmp  = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"))) &&
+	if ((tmp = zend_hash_find(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 		Z_TYPE_P(tmp) == IS_ARRAY &&
 		(host = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("HTTP_HOST"))) &&
 		Z_TYPE_P(host) == IS_STRING) {

@@ -1,5 +1,5 @@
 --TEST--
-Attempt to use a closed FTPConnection
+Attempt to use a closed FTP\Connection
 --EXTENSIONS--
 ftp
 pcntl
@@ -21,4 +21,4 @@ try {
 --EXPECT--
 bool(true)
 bool(true)
-Exception: FTPConnection is already closed
+Exception: FTP\Connection is already closed

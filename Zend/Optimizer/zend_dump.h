@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,11 +27,13 @@
 #define ZEND_DUMP_CFG                  (1<<2)
 #define ZEND_DUMP_SSA                  (1<<3)
 #define ZEND_DUMP_LIVE_RANGES          (1<<4)
+#define ZEND_DUMP_LINE_NUMBERS         (1<<5)
 
 BEGIN_EXTERN_C()
 
 ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, const char *msg, const void *data);
 ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op);
+ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data);
 void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg);
 void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg);
 void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa);

@@ -5,20 +5,20 @@
 class Directory
 {
     /**
-     * @return void
+     * @tentative-return-type
      * @implementation-alias closedir
      */
-    public function close() {}
+    public function close(): void {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @implementation-alias rewinddir
      */
-    public function rewind() {}
+    public function rewind(): void {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @implementation-alias readdir
      */
-    public function read() {}
+    public function read(): string|false {}
 }

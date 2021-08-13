@@ -1,8 +1,9 @@
 --TEST--
 Bug #74432, BC issue on undocumented connect string
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

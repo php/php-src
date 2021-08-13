@@ -1,7 +1,7 @@
 --TEST--
 Phar: create and modify phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -49,8 +49,8 @@ include $pname . '/b.php';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 brand new!
-string(40) "%s"
-string(40) "%s"
+string(%d) "%s"
+string(%d) "%s"
 bool(true)
 modified!
 another!

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -845,8 +845,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					return 0;
 				}
 				if (!stmt->fetch.cls.fci.size) {
-					if (!do_fetch_class_prepare(stmt))
-					{
+					if (!do_fetch_class_prepare(stmt)) {
+						zval_ptr_dtor(return_value);
 						return 0;
 					}
 				}
@@ -1124,7 +1124,7 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 				zend_argument_value_error(mode_arg_num, "cannot be PDO::FETCH_LAZY in PDOStatement::fetchAll()");
 				return 0;
 			}
-			/* fall through */
+			ZEND_FALLTHROUGH;
 		default:
 			if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
 				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_SERIALIZE with PDO::FETCH_CLASS");
@@ -1138,9 +1138,12 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 				zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 				return 0;
 			}
-			/* no break; */
+			ZEND_FALLTHROUGH;
 
 		case PDO_FETCH_CLASS:
+			if (flags & PDO_FETCH_SERIALIZE) {
+				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+			}
 			return 1;
 	}
 }
@@ -1197,12 +1200,10 @@ PHP_METHOD(PDOStatement, fetchObject)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	if (ctor_args) {
-		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-			ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
-		} else {
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-		}
+	if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+		ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
+	} else {
+		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 	}
 	if (ce) {
 		stmt->fetch.cls.ce = ce;
@@ -2018,11 +2019,13 @@ PHP_METHOD(PDOStatement, getIterator)
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	if (zend_string_equals_literal(name, "queryString")) {
-		zend_throw_error(NULL, "Property queryString is read only");
-		return value;
-	} else {
-		return zend_std_write_property(object, name, value, cache_slot);
+		zval *query_string = OBJ_PROP_NUM(object, 0);
+		if (!Z_ISUNDEF_P(query_string)) {
+			zend_throw_error(NULL, "Property queryString is read only");
+			return value;
+		}
 	}
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 
 static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
@@ -2440,34 +2443,10 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	return props;
 }
 
-static zend_function *row_method_get(
-	zend_object **object_pp,
-	zend_string *method_name, const zval *key)
-{
-	zend_function *fbc;
-	zend_string *lc_method_name;
-
-	lc_method_name = zend_string_tolower(method_name);
-
-	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
-		zend_string_release_ex(lc_method_name, 0);
-		return NULL;
-	}
-
-	zend_string_release_ex(lc_method_name, 0);
-
-	return fbc;
-}
-
 static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
 	return NULL;
-}
-
-static zend_string *row_get_classname(const zend_object *object)
-{
-	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
 }
 
 void pdo_row_free_storage(zend_object *std)
@@ -2493,12 +2472,9 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
-	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
-	pdo_dbstmt_object_handlers.dtor_obj = zend_objects_destroy_object;
 	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
@@ -2508,8 +2484,6 @@ void pdo_stmt_init(void)
 
 	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
-	pdo_row_ce->serialize = zend_class_serialize_deny;
-	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
@@ -2524,8 +2498,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.has_dimension = row_dim_exists;
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
-	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
-	pdo_row_object_handlers.get_class_name = row_get_classname;
 	pdo_row_object_handlers.compare = zend_objects_not_comparable;
 }

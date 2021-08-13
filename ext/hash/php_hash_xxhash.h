@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,7 @@
 
 typedef struct {
 	XXH32_state_t s;
-} PHP_XXH32_CTX; 
+} PHP_XXH32_CTX;
 #define PHP_XXH32_SPEC "llllllllllll"
 
 PHP_HASH_API void PHP_XXH32Init(PHP_XXH32_CTX *ctx, HashTable *args);
@@ -32,7 +32,7 @@ PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_cont
 
 typedef struct {
 	XXH64_state_t s;
-} PHP_XXH64_CTX; 
+} PHP_XXH64_CTX;
 #define PHP_XXH64_SPEC "qqqqqqqqqllq"
 
 PHP_HASH_API void PHP_XXH64Init(PHP_XXH64_CTX *ctx, HashTable *args);

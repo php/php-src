@@ -295,7 +295,17 @@ if test "$ac_cv_attribute_aligned" = "yes"; then
   AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
-AC_FUNC_FNMATCH
+if test "$cross_compiling" = yes ; then
+  case $host_alias in
+    *linux*)
+      AC_DEFINE([HAVE_FNMATCH], 1,
+		     [Define to 1 if your system has a working POSIX `fnmatch'
+		      function.])
+      ;;
+  esac
+else
+  AC_FUNC_FNMATCH
+fi
 
 dnl
 dnl Check if there is a support means of creating a new process and defining

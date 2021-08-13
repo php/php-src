@@ -8,7 +8,7 @@ class a extends exception {
         $this->message = NULL;
         $this->string  = NULL;
         $this->code    = array();
-        $this->line = "hello";
+        $this->line = 0;
     }
 }
 

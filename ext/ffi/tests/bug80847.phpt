@@ -4,7 +4,7 @@ Bug #80847 (Nested structs)
 ffi
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY == 'Windows' && ((1 << 31) > 0)) die('xfail libffi doesn\'t properly support passing big strctures by value on Windows/64');
+if (PHP_OS_FAMILY == 'Windows' && ((1 << 31) > 0)) die('xfail libffi doesn\'t properly support passing big structures by value on Windows/64');
 ?>
 --FILE--
 <?php

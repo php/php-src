@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -186,15 +186,20 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(exception)) {
 		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
+		if (ASSERTG(bail)) {
+			/* When bail is turned on, the exception will not be caught. */
+			zend_exception_error(EG(exception), E_ERROR);
+		}
 	} else if (ASSERTG(warning)) {
 		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
 	}
 
 	if (ASSERTG(bail)) {
-		zend_bailout();
+		zend_throw_unwind_exit();
+		RETURN_THROWS();
+	} else {
+		RETURN_FALSE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 

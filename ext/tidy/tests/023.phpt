@@ -1,7 +1,7 @@
 --TEST--
 tidy and tidyNode OO
---SKIPIF--
-<?php if (!extension_loaded('tidy')) echo 'skip'; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

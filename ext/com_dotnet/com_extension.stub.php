@@ -66,6 +66,7 @@ function com_message_pump(int $timeout_milliseconds  = 0): bool {}
 
 function com_load_typelib(string $typelib, bool $case_insensitive = true): bool {}
 
+/** @not-serializable */
 class variant
 {
     public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}

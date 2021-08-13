@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fdeef1c2a9e835b443d6e4cced23656ce21d8a30 */
+ * Stub hash: 0d09bd2f3b0a155cef25ca343319ecf470424d71 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -7,18 +7,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, posted_filename, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_getFilename, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_getFilename, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CURLFile_getMimeType arginfo_class_CURLFile_getFilename
 
 #define arginfo_class_CURLFile_getPostFilename arginfo_class_CURLFile_getFilename
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setMimeType, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_setMimeType, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, mime_type, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, posted_filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -60,23 +60,24 @@ static zend_class_entry *register_class_CURLFile(void)
 
 	INIT_CLASS_ENTRY(ce, "CURLFile", class_CURLFile_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_name_default_value;
 	ZVAL_EMPTY_STRING(&property_name_default_value);
 	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-	zend_declare_property_ex(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_name_name);
 
 	zval property_mime_default_value;
 	ZVAL_EMPTY_STRING(&property_mime_default_value);
 	zend_string *property_mime_name = zend_string_init("mime", sizeof("mime") - 1, 1);
-	zend_declare_property_ex(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_mime_name);
 
 	zval property_postname_default_value;
 	ZVAL_EMPTY_STRING(&property_postname_default_value);
 	zend_string *property_postname_name = zend_string_init("postname", sizeof("postname") - 1, 1);
-	zend_declare_property_ex(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_postname_name);
 
 	return class_entry;

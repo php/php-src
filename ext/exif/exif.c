@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -134,12 +134,12 @@ ZEND_INI_MH(OnUpdateDecode)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("exif.encode_unicode",          "ISO-8859-15", PHP_INI_ALL, OnUpdateEncode, encode_unicode,    zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_unicode_motorola", "UCS-2BE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_be, zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_unicode_intel",    "UCS-2LE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_le, zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.encode_jis",              "",            PHP_INI_ALL, OnUpdateEncode, encode_jis,        zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_jis_motorola",     "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_be,     zend_exif_globals, exif_globals)
-    STD_PHP_INI_ENTRY("exif.decode_jis_intel",        "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_le,     zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.encode_unicode",          "ISO-8859-15", PHP_INI_ALL, OnUpdateEncode, encode_unicode,    zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_unicode_motorola", "UCS-2BE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_be, zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_unicode_intel",    "UCS-2LE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_le, zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.encode_jis",              "",            PHP_INI_ALL, OnUpdateEncode, encode_jis,        zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_jis_motorola",     "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_be,     zend_exif_globals, exif_globals)
+	STD_PHP_INI_ENTRY("exif.decode_jis_intel",        "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_le,     zend_exif_globals, exif_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -2216,11 +2216,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			 * return;
 			 */
 			info_data->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+			ZEND_FALLTHROUGH;
 		case TAG_FMT_SBYTE:
 		case TAG_FMT_BYTE:
 		/* in contrast to strings bytes do not need to allocate buffer for NULL if length==0 */
-			if (!length)
+			if (!length) {
 				break;
+			}
+			ZEND_FALLTHROUGH;
 		case TAG_FMT_UNDEFINED:
 			if (length > value_len) {
 				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %d > %zu", length, value_len);
@@ -2520,6 +2523,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									}
 									break;
 								}
+								ZEND_FALLTHROUGH;
 							case TAG_FMT_USHORT:
 							case TAG_FMT_ULONG:
 								if (l==1) {
@@ -2546,6 +2550,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									}
 									break;
 								}
+								ZEND_FALLTHROUGH;
 							case TAG_FMT_SSHORT:
 							case TAG_FMT_SLONG:
 								if (l==1) {
@@ -4649,7 +4654,7 @@ PHP_FUNCTION(exif_read_data)
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Width",  ImageInfo.Thumbnail.width);
 	}
-   	EFREE_IF(sections_str);
+	EFREE_IF(sections_str);
 
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Adding image infos");
@@ -4774,7 +4779,7 @@ PHP_FUNCTION(exif_imagetype)
 	char *imagefile;
 	size_t imagefile_len;
 	php_stream * stream;
- 	int itype = 0;
+	int itype = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &imagefile, &imagefile_len) == FAILURE) {
 		RETURN_THROWS();

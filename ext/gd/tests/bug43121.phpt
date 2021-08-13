@@ -1,8 +1,9 @@
 --TEST--
 Bug #43121 (gdImageFill with IMG_COLOR_TILED crashes httpd)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
     if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.0', '<')) {
         die("skip test requires GD 2.2.0 or higher");
     }

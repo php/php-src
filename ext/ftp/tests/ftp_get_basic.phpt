@@ -23,7 +23,7 @@ unlink($tmpfname);
 //test binary data transfer
 $tmpfname = tempnam(__DIR__, "ftp_test");
 var_dump(ftp_get($ftp, $tmpfname, 'binary data.bin', FTP_BINARY));
-var_dump(urlencode(file_get_contents($tmpfname)));
+echo json_encode(file_get_contents($tmpfname)), "\n";
 unlink($tmpfname);
 
 //test non-existent file request
@@ -34,6 +34,6 @@ bool(true)
 bool(true)
 For sale: baby shoes, never worn.
 bool(true)
-string(21) "BINARYFoo%00Bar%0D%0A"
+"BINARYFoo\u0000Bar\r\n"
 
 Warning: ftp_get(): a warning: No such file or directory  in %sftp_get_basic.php on line %d

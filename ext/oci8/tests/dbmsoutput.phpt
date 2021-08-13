@@ -1,5 +1,7 @@
 --TEST--
 PL/SQL: dbms_output
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -62,7 +64,7 @@ function getdbmsoutput_do($c)
     $s = oci_parse($c, "begin dbms_output.get_line(:ln, :st); end;");
     oci_bind_by_name($s, ":ln", $ln, 100);
     oci_bind_by_name($s, ":st", $st, -1, SQLT_INT);
-    $res = false;
+    $res = [];
     while (($succ = oci_execute($s)) && !$st) {
         $res[] = $ln;  // append each line to the array
     }
@@ -91,7 +93,7 @@ function getdbmsoutput_pl($c)
 {
     $s = oci_parse($c, "select * from table(mydofetch())");
     oci_execute($s);
-    $res = false;
+    $res = [];
     while ($row = oci_fetch_array($s, OCI_NUM)) {
         $res[] = $row[0];
     }

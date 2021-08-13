@@ -1,8 +1,9 @@
 --TEST--
 Exhaustive test of verification and conversion of ISO-8859-X text
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--

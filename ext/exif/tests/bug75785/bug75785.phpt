@@ -11,7 +11,7 @@ echo $tags['GPS']['GPSLatitude'][0] . PHP_EOL;
 echo $tags['GPS']['GPSLongitude'][0] . PHP_EOL;
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 38/1
 122/1
 ===DONE===

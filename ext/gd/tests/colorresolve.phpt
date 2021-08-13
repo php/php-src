@@ -1,9 +1,7 @@
 --TEST--
 imagecolorresolve
---SKIPIF--
-<?php
-        if (!function_exists('imagecolorresolve')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

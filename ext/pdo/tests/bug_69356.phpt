@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #69356 (PDOStatement::debugDumpParams() truncates query)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip query not supported');

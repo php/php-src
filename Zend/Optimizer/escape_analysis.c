@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_bitset.h"
@@ -148,22 +147,6 @@ static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zen
 }
 /* }}} */
 
-static inline zend_class_entry *get_class_entry(const zend_script *script, zend_string *lcname) /* {{{ */
-{
-	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
-	if (ce) {
-		return ce;
-	}
-
-	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
-		return ce;
-	}
-
-	return NULL;
-}
-/* }}} */
-
 static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
 	zend_ssa_op *ssa_op = ssa->ops + def;
@@ -176,7 +159,8 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			case ZEND_NEW:
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
+					zend_class_entry *ce = zend_optimizer_get_class_entry(
+						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					uint32_t forbidden_flags =
 						/* These flags will always cause an exception */
 						ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
@@ -204,7 +188,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				}
 				break;
 		}
-    } else if (ssa_op->op1_def == var) {
+	} else if (ssa_op->op1_def == var) {
 		switch (opline->opcode) {
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
@@ -224,7 +208,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 		}
 	}
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
@@ -243,7 +227,8 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 			case ZEND_NEW:
 				/* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
+					zend_class_entry *ce = zend_optimizer_get_class_entry(
+						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set && !ce->parent) {
 						return 1;

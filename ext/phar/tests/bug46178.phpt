@@ -1,7 +1,7 @@
 --TEST--
 Phar: PHP bug #46178: "memory leak in ext/phar"
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0

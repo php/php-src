@@ -1,92 +1,102 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 02045a0de09413796dd1ca7495b0b1beff14a074 */
+ * Stub hash: 3f945431687a2f45b0ec8c3a6435ef68008c75ad */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_countEquivalentIDs, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_countEquivalentIDs, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_createDefault arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_createDefault, 0, 0, IntlTimeZone, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_createEnumeration, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlTimeZone_createEnumeration, 0, 0, IntlIterator, MAY_BE_FALSE)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_createTimeZone arginfo_class_IntlTimeZone_countEquivalentIDs
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_createTimeZone, 0, 1, IntlTimeZone, 1)
+	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, 0, 1, IntlIterator, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rawOffset, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_fromDateTimeZone, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_fromDateTimeZone, 0, 1, IntlTimeZone, 1)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getCanonicalID, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getCanonicalID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, isSystemId, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getDisplayName, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getDisplayName, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dst, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, style, IS_LONG, 0, "IntlTimeZone::DISPLAY_LONG")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getDSTSavings arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_getDSTSavings, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getEquivalentID, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getEquivalentID, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getErrorCode arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getErrorCode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getErrorMessage arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getErrorMessage, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getGMT arginfo_class_IntlTimeZone___construct
+#define arginfo_class_IntlTimeZone_getGMT arginfo_class_IntlTimeZone_createDefault
 
-#define arginfo_class_IntlTimeZone_getID arginfo_class_IntlTimeZone___construct
+#define arginfo_class_IntlTimeZone_getID arginfo_class_IntlTimeZone_getErrorMessage
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getOffset, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_getOffset, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, local, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, rawOffset)
 	ZEND_ARG_INFO(1, dstOffset)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getRawOffset arginfo_class_IntlTimeZone___construct
+#define arginfo_class_IntlTimeZone_getRawOffset arginfo_class_IntlTimeZone_getDSTSavings
 
-#define arginfo_class_IntlTimeZone_getRegion arginfo_class_IntlTimeZone_countEquivalentIDs
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getRegion, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_getTZDataVersion arginfo_class_IntlTimeZone___construct
+#define arginfo_class_IntlTimeZone_getTZDataVersion arginfo_class_IntlTimeZone_getErrorMessage
 
-#define arginfo_class_IntlTimeZone_getUnknown arginfo_class_IntlTimeZone___construct
+#define arginfo_class_IntlTimeZone_getUnknown arginfo_class_IntlTimeZone_createDefault
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getWindowsID, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getIDForWindowsID, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getIDForWindowsID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_hasSameRules, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_hasSameRules, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, other, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_toDateTimeZone arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlTimeZone_toDateTimeZone, 0, 0, DateTimeZone, MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_IntlTimeZone_useDaylightTime arginfo_class_IntlTimeZone___construct
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_useDaylightTime, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(IntlTimeZone, __construct);

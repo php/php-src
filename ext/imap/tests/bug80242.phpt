@@ -1,9 +1,7 @@
 --TEST--
 Bug #80242 (imap_mail_compose() segfaults for multipart with rfc822)
---SKIPIF--
-<?php
-if (!extension_loaded('imap')) die('skip imap extension not available');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $bodies = [[

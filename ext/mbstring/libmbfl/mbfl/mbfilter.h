@@ -154,8 +154,14 @@ MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
  */
 typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
 
+typedef struct {
+	size_t num_illegalchars;
+	size_t score;
+} mbfl_encoding_detector_data;
+
 struct _mbfl_encoding_detector {
 	mbfl_convert_filter **filter_list;
+	mbfl_encoding_detector_data *filter_data;
 	int filter_list_size;
 	int strict;
 };
@@ -289,7 +295,7 @@ MBFLAPI extern mbfl_string *
 mbfl_html_numeric_entity(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, int type);
 
 /*
- * convert of harfwidth and fullwidth for japanese
+ * convert of halfwidth and fullwidth for japanese
  */
 MBFLAPI extern mbfl_string *
 mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);

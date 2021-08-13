@@ -49,10 +49,6 @@ Override .phpgdbinit location (implies -I)
 .B \-I
 Ignore .phpdbginit (default init file)
 .TP
-.B \-O \fIfile\fR
-Set oplog output to
-.IR file
-.TP
 .B \-r
 Jump straight to run
 .TP
@@ -68,15 +64,6 @@ Read code to execute from stdin with an optional
 .TP
 .B \-S \fIsapi_name\fP
 Override SAPI name
-.TP
-.B \-l \fIport\fP
-Setup remote console port
-.TP
-.B \-a \fIaddress\fP
-Setup remote console bind address
-.TP
-.B \-x
-Enable XML output
 .TP
 .B \-p \fIopcode\fP
 Output opcodes and quit
@@ -141,7 +128,7 @@ that is bundled with this package in the file LICENSE, and is
 available through the world-wide-web at the following url:
 .PD 0
 .P
-.B http://www.php.net/license/3_01.txt
+.B https://www.php.net/license/3_01.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to

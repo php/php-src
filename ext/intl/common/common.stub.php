@@ -4,18 +4,18 @@
 
 class IntlIterator implements Iterator
 {
-    /** @return mixed */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): mixed {}
 
-    /** @return mixed */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): mixed {}
 
-    /** @return void */
-    public function next() {}
+    /** @tentative-return-type */
+    public function next(): void {}
 
-    /** @return void */
-    public function rewind() {}
+    /** @tentative-return-type */
+    public function rewind(): void {}
 
-    /** @return bool */
-    public function valid() {}
+    /** @tentative-return-type */
+    public function valid(): bool {}
 }

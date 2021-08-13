@@ -2067,7 +2067,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
                     } else {
-                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_IP_GLOBAL_REG)\n");
+                        out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)\n");
                         out($f,$m[1]."struct {\n");
                         out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                         out($f,$m[1]."\tconst zend_op *orig_opline;\n");
@@ -2089,12 +2089,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#else\n");
                         out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
                         out($f,"#endif\n");
-                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
-                        out($f,$m[1]."memset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
-                        out($f,$m[1]."if (zend_touch_vm_stack_data) {\n");
-                        out($f,$m[1]."\tzend_touch_vm_stack_data(&vm_stack_data);\n");
-                        out($f,$m[1]."}\n");
-                        out($f,"#endif\n");
                     }
                     break;
                 case "INTERNAL_LABELS":
@@ -2114,6 +2108,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         if ($kind == ZEND_VM_KIND_HYBRID) {
                             out($f,$prolog."\tmemset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));\n");
                             out($f,$prolog."\thybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;\n");
+	                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+	                        out($f,$prolog."\tmemset(vm_stack_data.hybrid_jit_red_zone, 0, ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE);\n");
+	                        out($f,"#endif\n");
+	                        out($f,$prolog."\tif (zend_touch_vm_stack_data) {\n");
+	                        out($f,$prolog."\t\tzend_touch_vm_stack_data(&vm_stack_data);\n");
+	                        out($f,$prolog."\t}\n");
                             out($f,$prolog."\tgoto HYBRID_HALT_LABEL;\n");
                         } else {
                             out($f,$prolog."\treturn;\n");
@@ -2374,7 +2374,8 @@ function gen_vm_opcodes_header(
     $str .= "\n";
     $str .= "BEGIN_EXTERN_C()\n\n";
     $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n";
-    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n";
+    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n";
+    $str .= "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
     $code_len = strlen((string) $max_opcode);
@@ -2670,6 +2671,16 @@ function gen_vm($def, $skel) {
     fputs($f, "\t\topcode = ZEND_NOP;\n");
     fputs($f, "\t}\n");
     fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
+    fputs($f, "}\n");
+
+    fputs($f, "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length) {\n");
+    fputs($f, "\tzend_uchar opcode;\n");
+    fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
+    fputs($f, "\t\tif (strncmp(zend_vm_opcodes_names[opcode], name, length) == 0) {\n");
+    fputs($f, "\t\t\treturn opcode;\n");
+    fputs($f, "\t\t}\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
     fputs($f, "}\n");
 
     fclose($f);

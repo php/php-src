@@ -14,7 +14,7 @@ echo "*** Testing ctype_xdigit() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for($c = 1; $c < 256; $c++) {
-    if (ctype_xdigit($c)) {
+    if (ctype_xdigit(chr($c))) {
         echo "character code $c is a hexadecimal 'digit'\n";
     }
 }

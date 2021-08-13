@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -315,6 +315,15 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	S->done = 0;
 
 	if (S->stmt) {
+		uint32_t num_bound_params =
+			stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0;
+		if (num_bound_params < (uint32_t) S->num_params) {
+			/* too few parameter bound */
+			PDO_DBG_ERR("too few parameters bound");
+			strcpy(stmt->error_code, "HY093");
+			PDO_DBG_RETURN(0);
+		}
+
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
 
@@ -403,13 +412,6 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				PDO_DBG_RETURN(1);
 
 			case PDO_PARAM_EVT_EXEC_PRE:
-				if (zend_hash_num_elements(stmt->bound_params) < (unsigned int) S->num_params) {
-					/* too few parameter bound */
-					PDO_DBG_ERR("too few parameters bound");
-					strcpy(stmt->error_code, "HY093");
-					PDO_DBG_RETURN(0);
-				}
-
 				if (!Z_ISREF(param->parameter)) {
 					parameter = &param->parameter;
 				} else {
@@ -560,7 +562,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (S->stmt) {
-		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || fetched_anything == FALSE) {
+		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || !fetched_anything) {
 			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
 		}
@@ -715,48 +717,48 @@ static char *type_to_name_native(int type) /* {{{ */
 {
 #define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
 
-    switch (type) {
-        PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
-        PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
+	switch (type) {
+		PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
+		PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
 #ifdef FIELD_TYPE_TINY
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
 #endif
 #ifdef FIELD_TYPE_BIT
-        PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
-        PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
+		PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
+		PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
+		PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
 #ifdef FIELD_TYPE_NEWDECIMAL
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
 #endif
 #ifdef FIELD_TYPE_GEOMETRY
-        PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
+		PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
 #ifdef FIELD_TYPE_YEAR
-        PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
+		PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SET)
-        PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(SET)
+		PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
 #ifdef FIELD_TYPE_NEWDATE
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
-        default:
-            return NULL;
-    }
+		PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
+		default:
+			return NULL;
+	}
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
 } /* }}} */
 

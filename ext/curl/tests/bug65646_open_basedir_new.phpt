@@ -2,10 +2,8 @@
 Bug #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir or safe_mode): open_basedir enabled; curl >= 7.19.4
 --INI--
 open_basedir=.
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $ch = curl_init();

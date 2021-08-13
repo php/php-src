@@ -1,7 +1,7 @@
 --TEST--
 Bug #47745 (FILTER_VALIDATE_INT doesn't allow minimum integer)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $s = (string)(-PHP_INT_MAX-1);

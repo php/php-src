@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -193,7 +193,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 				&& !zend_shared_alloc_get_xlat_entry(&op_array->function_name)) {
 			zend_shared_alloc_register_xlat_entry(&op_array->function_name, old_name);
 		}
-    }
+	}
 
 	if (op_array->scope) {
 		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
@@ -246,7 +246,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		uint32_t num_args = op_array->num_args;
 		uint32_t i;
 
-		num_args = op_array->num_args;
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
@@ -331,7 +330,6 @@ static void zend_persist_class_method_calc(zval *zv)
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_IMMUTABLE)
-	 && !op_array->static_variables
 	 && !ZCG(current_persistent_script)->corrupted
 	 && zend_accel_in_shm(op_array)) {
 		zend_shared_alloc_register_xlat_entry(op_array, op_array);
@@ -561,12 +559,12 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_persist_warnings_calc(zend_persistent_script *script) {
-	ADD_SIZE(script->num_warnings * sizeof(zend_recorded_warning *));
-	for (uint32_t i = 0; i < script->num_warnings; i++) {
-		ADD_SIZE(sizeof(zend_recorded_warning));
-		ADD_STRING(script->warnings[i]->error_filename);
-		ADD_STRING(script->warnings[i]->error_message);
+void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warnings) {
+	ADD_SIZE(num_warnings * sizeof(zend_error_info *));
+	for (uint32_t i = 0; i < num_warnings; i++) {
+		ADD_SIZE(sizeof(zend_error_info));
+		ADD_STRING(warnings[i]->filename);
+		ADD_STRING(warnings[i]->message);
 	}
 }
 
@@ -585,7 +583,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
-	ADD_STRING(new_persistent_script->script.filename);
+	ADD_INTERNED_STRING(new_persistent_script->script.filename);
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align size to 64-byte boundary */
@@ -606,7 +604,8 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		zend_persist_op_array_calc(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
-	zend_persist_warnings_calc(new_persistent_script);
+	zend_persist_warnings_calc(
+		new_persistent_script->num_warnings, new_persistent_script->warnings);
 
 	new_persistent_script->corrupted = 0;
 

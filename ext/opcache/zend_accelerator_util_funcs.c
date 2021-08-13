@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -136,7 +136,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find_ex(target, p->key, 1);
+		t = zend_hash_find_known_hash(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
 			goto failure;
 		}
@@ -173,7 +173,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 	for (; p != end; p++) {
 		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find_ex(target, p->key, 1);
+		t = zend_hash_find_known_hash(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Runtime definition key. There are two circumstances under which the key can
@@ -200,7 +200,13 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 				continue;
 			}
 		} else {
+			zend_class_entry *ce = Z_PTR(p->val);
 			t = _zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			if ((ce->ce_flags & ZEND_ACC_LINKED)
+			 && ZSTR_HAS_CE_CACHE(ce->name)
+			 && ZSTR_VAL(p->key)[0]) {
+				ZSTR_SET_CE_CACHE(ce->name, ce);
+			}
 		}
 	}
 	target->nInternalPointer = 0;

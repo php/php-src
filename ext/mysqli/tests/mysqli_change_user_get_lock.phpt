@@ -1,8 +1,9 @@
 --TEST--
 mysqli_change_user() - GET_LOCK()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 die("skip - is the server still buggy?");
 ?>

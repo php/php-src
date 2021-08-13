@@ -1,9 +1,7 @@
 --TEST--
 Bug #44327.2 (PDORow::queryString property & numeric offsets / Crash)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

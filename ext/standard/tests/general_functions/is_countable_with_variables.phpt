@@ -28,4 +28,4 @@ bool(true)
 bool(true)
 bool(false)
 int(2)
-count(): Argument #1 ($var) must be of type Countable|array, null given
+count(): Argument #1 ($value) must be of type Countable|array, null given

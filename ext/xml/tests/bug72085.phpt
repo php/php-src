@@ -1,9 +1,7 @@
 --TEST--
 Bug #72085 (SEGV on unknown address zif_xml_parse)
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) die('skip xml extension not available');
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 $var1 = xml_parser_create_ns();

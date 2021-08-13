@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -154,7 +154,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 void php_clear_stmt_bind(MY_STMT *stmt)
 {
 	if (stmt->stmt) {
-		if (mysqli_stmt_close(stmt->stmt, TRUE)) {
+		if (mysqli_stmt_close(stmt->stmt, true)) {
 			php_error_docref(NULL, E_WARNING, "Error occurred while closing statement");
 			return;
 		}
@@ -287,61 +287,56 @@ static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 }
 /* }}} */
 
-/* {{{ mysqli_write_na */
-static int mysqli_write_na(mysqli_object *obj, zval *newval)
-{
-	zend_throw_error(NULL, "Cannot write property");
-
-	return FAILURE;
-}
-/* }}} */
-
 /* {{{ mysqli_read_property */
 zval *mysqli_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	zval *retval;
-	mysqli_object *obj;
-	mysqli_prop_handler *hnd = NULL;
-
-	obj = php_mysqli_fetch_object(object);
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
-
-	if (hnd) {
-		if (hnd->read_func(obj, rv, type == BP_VAR_IS) == SUCCESS) {
-			retval = rv;
-		} else {
-			retval = &EG(uninitialized_zval);
+	mysqli_object *obj = php_mysqli_fetch_object(object);
+	if (obj->prop_handler) {
+		mysqli_prop_handler *hnd = zend_hash_find_ptr(obj->prop_handler, name);
+		if (hnd) {
+			if (hnd->read_func(obj, rv, type == BP_VAR_IS) == SUCCESS) {
+				return rv;
+			} else {
+				return &EG(uninitialized_zval);
+			}
 		}
-	} else {
-		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
-	return retval;
+	return zend_std_read_property(object, name, type, cache_slot, rv);
 }
 /* }}} */
 
 /* {{{ mysqli_write_property */
 zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	mysqli_object *obj;
-	mysqli_prop_handler *hnd = NULL;
+	mysqli_object *obj = php_mysqli_fetch_object(object);
+	if (obj->prop_handler) {
+		const mysqli_prop_handler *hnd = zend_hash_find_ptr(obj->prop_handler, name);
+		if (hnd) {
+			if (!hnd->write_func) {
+				zend_throw_error(NULL, "Cannot write read-only property %s::$%s",
+					ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+				return &EG(error_zval);
+			}
 
-	obj = php_mysqli_fetch_object(object);
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
+			zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
+			if (prop && ZEND_TYPE_IS_SET(prop->type)) {
+				zval tmp;
+				ZVAL_COPY(&tmp, value);
+				if (!zend_verify_property_type(prop, &tmp,
+							ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
+					zval_ptr_dtor(&tmp);
+					return &EG(error_zval);
+				}
+				hnd->write_func(obj, &tmp);
+				zval_ptr_dtor(&tmp);
+			} else {
+				hnd->write_func(obj, value);
+			}
+			return value;
+		}
 	}
-
-	if (hnd) {
-		hnd->write_func(obj, value);
-	} else {
-		value = zend_std_write_property(object, name, value, cache_slot);
-	}
-
-	return value;
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 /* }}} */
 
@@ -351,7 +346,7 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 
 	p.name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
-	p.write_func = (w_func) ? w_func : mysqli_write_na;
+	p.write_func = w_func;
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
 	zend_string_release_ex(p.name, 1);
 }
@@ -524,7 +519,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->report_mode = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;;
 	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->local_infile_directory = NULL;
-	mysqli_globals->rollback_on_cached_plink = FALSE;
+	mysqli_globals->rollback_on_cached_plink = false;
 }
 /* }}} */
 
@@ -721,9 +716,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_SET_CHARSET_DIR", MYSQL_SET_CHARSET_DIR, CONST_CS | CONST_PERSISTENT);
 
 	/* bind support */
-	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 #ifdef MYSQL_DATA_TRUNCATED
-	REGISTER_LONG_CONSTANT("MYSQLI_DATA_TRUNCATED", MYSQL_DATA_TRUNCATED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_DATA_TRUNCATED", MYSQL_DATA_TRUNCATED, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 #endif
 
 	/* reporting */
@@ -744,13 +739,13 @@ PHP_MINIT_FUNCTION(mysqli)
 #endif
 #endif
 
-	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED", SERVER_QUERY_NO_GOOD_INDEX_USED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_INDEX_USED", SERVER_QUERY_NO_INDEX_USED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED", SERVER_QUERY_NO_GOOD_INDEX_USED, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_INDEX_USED", SERVER_QUERY_NO_INDEX_USED, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 #ifdef SERVER_QUERY_WAS_SLOW
-	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_WAS_SLOW", SERVER_QUERY_WAS_SLOW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_WAS_SLOW", SERVER_QUERY_WAS_SLOW, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 #endif
 #ifdef SERVER_PS_OUT_PARAMS
-	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PS_OUT_PARAMS", SERVER_PS_OUT_PARAMS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PS_OUT_PARAMS", SERVER_PS_OUT_PARAMS, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 #endif
 
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_GRANT",      REFRESH_GRANT, CONST_CS | CONST_PERSISTENT);
@@ -1058,7 +1053,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 				/* even though lval is declared as unsigned, the value
-				 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+				 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
 				 * use MYSQLI_LL_SPEC.
 				 */
 				snprintf(tmp, sizeof(tmp), (mysql_fetch_field_direct(result, i)->flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);

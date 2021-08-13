@@ -211,7 +211,7 @@ int fpm_env_init_main() /* {{{ */
 	char *first = NULL;
 	char *last = NULL;
 	/*
-	 * This piece of code has been inspirated from nginx and pureftpd code, which
+	 * This piece of code has been inspired from nginx and pureftpd code, which
 	 * are under BSD licence.
 	 *
 	 * To change the process title in Linux we have to set argv[1] to NULL

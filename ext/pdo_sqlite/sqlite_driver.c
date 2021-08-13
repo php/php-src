@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -220,7 +220,7 @@ static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string 
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
-	return php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db));
+	return zend_i64_to_str(sqlite3_last_insert_rowid(H->db));
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */

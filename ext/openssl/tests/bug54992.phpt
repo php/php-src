@@ -1,8 +1,9 @@
 --TEST--
 Bug #54992: Stream not closed and error not returned when SSL CN_match fails
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

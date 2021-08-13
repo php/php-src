@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -88,6 +88,7 @@ typedef struct _zend_jit_registers_buf {
 } zend_jit_registers_buf;
 
 #define ZREG_FIRST_FPR ZREG_XMM0
+#define ZREG_COPY      ZREG_R0
 
 #define ZREG_RAX ZREG_R0
 #define ZREG_RCX ZREG_R1
@@ -112,6 +113,8 @@ typedef struct _zend_jit_registers_buf {
 #define ZREG_RX  ZREG_IP
 
 typedef uint32_t zend_regset;
+
+#define ZEND_REGSET_64BIT 0
 
 #ifdef _WIN64
 # define ZEND_REGSET_FIXED \

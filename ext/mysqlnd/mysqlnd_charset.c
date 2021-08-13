@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -410,7 +410,7 @@ static unsigned int check_mb_utf16(const char * const start, const char * const 
 
 static uint32_t mysqlnd_mbcharlen_utf16(const unsigned int utf16)
 {
-  return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
+	return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }
 /* }}} */
 

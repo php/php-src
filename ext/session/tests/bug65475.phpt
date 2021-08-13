@@ -3,6 +3,8 @@ Bug #65475: Session ID is not initialized when session.usr_strict_mode=1
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

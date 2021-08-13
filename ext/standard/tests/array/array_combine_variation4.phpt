@@ -52,7 +52,7 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-             $fp => 'resource', 133 => "int", 444.432 => "float",
+             $fp => 'resource', 133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -142,7 +142,7 @@ array(2) {
   string(8) "resource"
 }
 -- Iteration 9 --
-array(7) {
+array(6) {
   [1]=>
   int(1)
   ["2.2"]=>
@@ -151,8 +151,6 @@ array(7) {
   string(8) "resource"
   ["int"]=>
   string(3) "int"
-  ["float"]=>
-  string(5) "float"
   ["unset"]=>
   string(5) "unset"
   ["heredoc"]=>
