@@ -23,5 +23,5 @@ var_dump(Test::A->name);
 ?>
 --EXPECT--
 string(1) "A"
-Enum properties are immutable
+Cannot modify readonly property Test::$name
 string(1) "A"

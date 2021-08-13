@@ -22,9 +22,6 @@
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
 
-#define ZEND_ENUM_PROPERTY_ERROR() \
-	zend_throw_error(NULL, "Enum properties are immutable")
-
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
