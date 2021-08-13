@@ -1760,7 +1760,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
 							info->type |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
-								info->type &= ~(MAY_BE_ARRAY_HASH|MAY_BE_ARRAY_KEY_STRING);
+								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 							} else {
 								info->type &= ~MAY_BE_ARRAY_PACKED;
 							}
@@ -5247,7 +5247,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								&& orig_op1_type != IS_UNKNOWN) {
 							op1_info |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
-								op1_info &= ~(MAY_BE_ARRAY_HASH|MAY_BE_ARRAY_KEY_STRING);
+								op1_info &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 							} else {
 								op1_info &= ~MAY_BE_ARRAY_PACKED;
 							}
@@ -5390,7 +5390,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								&& orig_op1_type != IS_UNKNOWN) {
 							op1_info |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
-								op1_info &= ~(MAY_BE_ARRAY_HASH|MAY_BE_ARRAY_KEY_STRING);
+								op1_info &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 							} else {
 								op1_info &= ~MAY_BE_ARRAY_PACKED;
 							}

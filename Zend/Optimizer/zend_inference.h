@@ -176,7 +176,7 @@ static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
 		} ZEND_HASH_FOREACH_END();
 		if (HT_IS_PACKED(ht)) {
-			tmp &= ~MAY_BE_ARRAY_HASH;
+			tmp &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 		}
 		return tmp;
 	} else {
