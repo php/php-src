@@ -6668,10 +6668,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
-			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_NEVER) {
-				zend_error_noreturn(E_COMPILE_ERROR, "never cannot be used as a parameter type");
-			}
-
 			if (force_nullable && ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
 				zend_string *type_str = zend_type_to_string(arg_info->type);
 				zend_error_noreturn(E_COMPILE_ERROR,
