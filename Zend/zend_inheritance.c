@@ -680,9 +680,14 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
 		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
 {
-	if (ZEND_TYPE_PURE_MASK(proto_arg_info->type) == MAY_BE_NEVER) {
-		/* Parent with type as never is always compatible */
+	if (ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_PURE_MASK(proto_arg_info->type) == MAY_BE_NEVER) {
+		/* Parent with type as never is always compatible when type is specified */
 		return INHERITANCE_SUCCESS;
+	}
+
+	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_PURE_MASK(proto_arg_info->type) == MAY_BE_NEVER) {
+		/* Parent with type as never requires explicit type widening */
+		return INHERITANCE_ERROR;
 	}
 
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {

@@ -41,7 +41,7 @@ class B extends A
         throw new UnexpectedValueException('child');
     }
 
-    public function someReturningStaticMethod($var)
+    public function someReturningStaticMethod(string $var)
     {
         throw new UnexpectedValueException('child');
     }
