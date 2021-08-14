@@ -76,9 +76,9 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		int esc_html=0;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-			if (ini_entry->orig_value && ZSTR_VAL(ini_entry->orig_value)[0]) {
-				display_string = ZSTR_VAL(ini_entry->orig_value);
-				display_string_length = ZSTR_LEN(ini_entry->orig_value);
+		    if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
+		        display_string = ZSTR_VAL(ini_entry->value);
+		        display_string_length = ZSTR_LEN(ini_entry->value);
 				esc_html = !sapi_module.phpinfo_as_text;
 			} else {
 				if (!sapi_module.phpinfo_as_text) {
