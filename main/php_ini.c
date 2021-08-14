@@ -76,7 +76,6 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		int esc_html=0;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-
 		    if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
 		        display_string = ZSTR_VAL(ini_entry->value);
 		        display_string_length = ZSTR_LEN(ini_entry->value);
