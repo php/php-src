@@ -7,5 +7,5 @@ function foobar(never $a) {}
 
 echo "OK!";
 ?>
---EXPECTF--
+--EXPECT--
 OK!
