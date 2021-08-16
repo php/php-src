@@ -228,8 +228,9 @@ static zend_always_inline void register_unresolved_class(zend_string *name) {
 static zend_class_entry *lookup_class_ex(
 		zend_class_entry *scope, zend_string *name, bool register_unresolved) {
 	zend_class_entry *ce;
+	bool in_preload = CG(compiler_options) & ZEND_COMPILE_PRELOAD;
 
-	if (UNEXPECTED(!EG(active))) {
+	if (UNEXPECTED(!EG(active) && !in_preload)) {
 		zend_string *lc_name = zend_string_tolower(name);
 
 		ce = zend_hash_find_ptr(CG(class_table), lc_name);
@@ -248,7 +249,7 @@ static zend_class_entry *lookup_class_ex(
 	ce = zend_lookup_class_ex(
 	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
-	if (!CG(in_compilation) || (CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
+	if (!CG(in_compilation) || in_preload) {
 		if (ce) {
 			return ce;
 		}
