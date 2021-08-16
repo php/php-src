@@ -272,7 +272,6 @@ static const func_info_t func_infos[] = {
 # endif
 #endif
 	F1("popen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("fgetc",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fgets",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fread",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("fopen",                        MAY_BE_FALSE | MAY_BE_RESOURCE),
