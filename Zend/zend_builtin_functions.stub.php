@@ -83,7 +83,11 @@ function class_alias(string $class, string $alias, bool $autoload = true): bool 
  */
 function get_included_files(): array {}
 
-/** @alias get_included_files */
+/**
+ * @return array<int, string>
+ * @refcount 1
+ * @alias get_included_files
+ */
 function get_required_files(): array {}
 
 function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool {}
@@ -97,6 +101,10 @@ function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
  */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
+/**
+ * @return true
+ * @refcount 0
+ */
 function restore_error_handler(): bool {}
 
 /**
@@ -105,6 +113,10 @@ function restore_error_handler(): bool {}
  */
 function set_exception_handler(?callable $callback) {}
 
+/**
+ * @return true
+ * @refcount 0
+ */
 function restore_exception_handler(): bool {}
 
 function get_declared_classes(): array {}

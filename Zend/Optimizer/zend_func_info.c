@@ -90,8 +90,6 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 static const func_info_t old_func_infos[] = {
 	/* zend */
 	F1("get_class_vars",          MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	F0("restore_error_handler",   MAY_BE_TRUE),
-	F0("restore_exception_handler", MAY_BE_TRUE),
 	F1("get_declared_traits",     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_classes",    MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),

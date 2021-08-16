@@ -170,6 +170,7 @@ class SimpleType {
             case "void":
             case "null":
             case "false":
+            case "true":
             case "bool":
             case "int":
             case "float":
@@ -271,7 +272,7 @@ class SimpleType {
             case "callable":
                 return "MAY_BE_CALLABLE";
             case "mixed":
-                return "MAY_BE_ANY";
+                return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
             case "static":
                 return "MAY_BE_STATIC";
             case "never":
@@ -328,6 +329,10 @@ class SimpleType {
     public function toOptimizerTypeMask(): string {
         if ($this->isBuiltin && strtolower($this->name) === "resource") {
             return "MAY_BE_RESOURCE";
+        }
+
+        if ($this->isBuiltin && strtolower($this->name) === "true") {
+            return "MAY_BE_TRUE";
         }
 
         return $this->toTypeMask();
@@ -482,7 +487,14 @@ class Type {
                 $typeElement->appendChild($unionTypeElement);
             }
         } else {
-            $typeElement = $doc->createElement('type', $this->types[0]->name);
+            $type = $this->types[0];
+            if ($type->isBuiltin && strtolower($type->name) === "true") {
+                $name = "bool";
+            } else {
+                $name = $type->name;
+            }
+
+            $typeElement = $doc->createElement('type', $name);
         }
 
         return $typeElement;
@@ -776,15 +788,18 @@ class ReturnInfo {
     public $phpDocType;
     /** @var bool */
     public $tentativeReturnType;
+    /** @var string|null */
+    public $refcount;
 
-    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType) {
+    public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
         $this->byRef = $byRef;
         $this->type = $type;
         $this->phpDocType = $phpDocType;
         $this->tentativeReturnType = $tentativeReturnType;
+        $this->refcount = $refcount;
     }
 
-    public function equals(ReturnInfo $other): bool {
+    public function equalsApartFromPhpDocAndRefcount(ReturnInfo $other): bool {
         return $this->byRef === $other->byRef
             && Type::equals($this->type, $other->type)
             && $this->tentativeReturnType === $other->tentativeReturnType;
@@ -818,8 +833,6 @@ class FuncInfo {
     public $numRequiredArgs;
     /** @var string|null */
     public $cond;
-    /** @var string|null */
-    public $refcount;
 
     public function __construct(
         FunctionOrMethodName $name,
@@ -832,8 +845,7 @@ class FuncInfo {
         array $args,
         ReturnInfo $return,
         int $numRequiredArgs,
-        ?string $cond,
-        ?string $refcount
+        ?string $cond
     ) {
         $this->name = $name;
         $this->classFlags = $classFlags;
@@ -846,7 +858,6 @@ class FuncInfo {
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
-        $this->refcount = $refcount;
     }
 
     public function isMethod(): bool
@@ -916,7 +927,7 @@ class FuncInfo {
             }
         }
 
-        return $this->return->equals($other->return)
+        return $this->return->equalsApartFromPhpDocAndRefcount($other->return)
             && $this->numRequiredArgs === $other->numRequiredArgs
             && $this->cond === $other->cond;
     }
@@ -1014,15 +1025,15 @@ class FuncInfo {
     }
 
     public function getOptimizerInfo(): ?string {
-        if ($this->isMethod() && !$this->isFinalMethod()) {
+        if ($this->isMethod()) {
             return null;
         }
 
-        if ($this->refcount === null) {
+        if ($this->return->refcount === null) {
             return null;
         }
 
-        if ($this->refcount === "0" && Type::equals($this->return->type, $this->return->phpDocType)) {
+        if ($this->return->refcount === "0" && Type::equals($this->return->type, $this->return->phpDocType)) {
             return null;
         }
 
@@ -1031,7 +1042,7 @@ class FuncInfo {
             return null;
         }
 
-        return "    F" . $this->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
+        return "    F" . $this->return->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -2084,7 +2095,8 @@ function parseFunctionLike(
             $func->returnsByRef(),
             $returnType ? Type::fromNode($returnType) : null,
             $docReturnType ? Type::fromString($docReturnType) : null,
-            $tentativeReturnType
+            $tentativeReturnType,
+            $refcount
         );
 
         return new FuncInfo(
@@ -2098,8 +2110,7 @@ function parseFunctionLike(
             $args,
             $return,
             $numRequiredArgs,
-            $cond,
-            $refcount
+            $cond
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());
@@ -3158,12 +3169,25 @@ if ($verify) {
             $aliasArgs, $aliasedArgs
         );
 
+        $aliasedReturn = $aliasedFunc->return;
+        $aliasReturn = $aliasFunc->return;
+
         if (!$aliasedFunc->name->isConstructor() && !$aliasFunc->name->isConstructor()) {
-            $aliasedReturnType = $aliasedFunc->return->type ?? $aliasedFunc->return->phpDocType;
-            $aliasReturnType = $aliasFunc->return->type ?? $aliasFunc->return->phpDocType;
+            $aliasedReturnType = $aliasedReturn->type ?? $aliasedReturn->phpDocType;
+            $aliasReturnType = $aliasReturn->type ?? $aliasReturn->phpDocType;
             if ($aliasReturnType != $aliasedReturnType) {
                 $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same return type";
             }
+        }
+
+        $aliasedPhpDocReturnType = $aliasedReturn->phpDocType;
+        $aliasPhpDocReturnType = $aliasReturn->phpDocType;
+        if ($aliasedPhpDocReturnType != $aliasPhpDocReturnType && $aliasedPhpDocReturnType != $aliasReturn->type && $aliasPhpDocReturnType != $aliasedReturn->type) {
+            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same PHPDoc return type";
+        }
+
+        if ($aliasedReturn->refcount !== $aliasReturn->refcount) {
+            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same refcount";
         }
     }
 
