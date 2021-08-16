@@ -4528,17 +4528,6 @@ static int accel_preload(const char *config, bool in_child)
 			goto finish;
 		}
 
-		/* Inheritance errors may be thrown during linking */
-		zend_try {
-			preload_link();
-		} zend_catch {
-			CG(map_ptr_last) = orig_map_ptr_last;
-			ret = FAILURE;
-			goto finish;
-		} zend_end_try();
-
-		preload_remove_empty_includes();
-
 		/* Don't preload constants */
 		if (EG(zend_constants)) {
 			zend_string *key;
@@ -4568,6 +4557,17 @@ static int accel_preload(const char *config, bool in_child)
 				zend_string_release(key);
 			} ZEND_HASH_FOREACH_END_DEL();
 		}
+
+		/* Inheritance errors may be thrown during linking */
+		zend_try {
+			preload_link();
+		} zend_catch {
+			CG(map_ptr_last) = orig_map_ptr_last;
+			ret = FAILURE;
+			goto finish;
+		} zend_end_try();
+
+		preload_remove_empty_includes();
 
 		script = create_persistent_script();
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
