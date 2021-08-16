@@ -4359,7 +4359,6 @@ static int accel_preload(const char *config, bool in_child)
 	int ret;
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
-	zval *zv;
 	uint32_t orig_compiler_options;
 
 	ZCG(enabled) = 0;
@@ -4448,79 +4447,10 @@ static int accel_preload(const char *config, bool in_child)
 		php_output_end_all();
 		php_free_shutdown_functions();
 
-		EG(active) = 0;
-
 		/* Release stored values to avoid dangling pointers */
-		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+		zend_shutdown_executor_values(/* fast_shutdown */ false);
+
 		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
-
-#if ZEND_DEBUG
-		if (gc_enabled() && !CG(unclean_shutdown)) {
-			gc_collect_cycles();
-		}
-#endif
-
-		zend_objects_store_free_object_storage(&EG(objects_store), 1);
-
-		/* Cleanup static variables of preloaded functions */
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-			zend_op_array *op_array = Z_PTR_P(zv);
-			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
-				break;
-			}
-			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_PRELOADED);
-			if (op_array->static_variables) {
-				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-				if (ht) {
-					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-					zend_array_destroy(ht);
-					ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		/* Cleanup static properties and variables of preloaded classes */
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			zend_class_entry *ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
-			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_PRELOADED);
-			if (ce->default_static_members_count) {
-				zend_cleanup_internal_class_data(ce);
-			}
-			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-				zend_op_array *op_array;
-
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION) {
-						if (op_array->static_variables) {
-							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-							if (ht) {
-								if (GC_DELREF(ht) == 0) {
-									zend_array_destroy(ht);
-								}
-								ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-							}
-						}
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-		}
-
-		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_exception_handler));
-			ZVAL_UNDEF(&EG(user_exception_handler));
-		}
-
-		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		CG(map_ptr_last) = orig_map_ptr_last;
 

@@ -259,19 +259,11 @@ void shutdown_destructors(void) /* {{{ */
 }
 /* }}} */
 
-void shutdown_executor(void) /* {{{ */
+/* Free values held by the executor. */
+ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
 	zend_string *key;
 	zval *zv;
-#if ZEND_DEBUG
-	bool fast_shutdown = 0;
-#else
-	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
-#endif
-
-	zend_try {
-		zend_stream_shutdown();
-	} zend_end_try();
 
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
 	zend_try {
@@ -324,8 +316,10 @@ void shutdown_executor(void) /* {{{ */
 				zend_cleanup_internal_class_data(ce);
 			}
 
-			if (ZEND_MAP_PTR(ce->mutable_data) && ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
-				zend_cleanup_mutable_class_data(ce);
+			if (ZEND_MAP_PTR(ce->mutable_data)) {
+				if (ZEND_MAP_PTR_GET_IMM(ce->mutable_data)) {
+					zend_cleanup_mutable_class_data(ce);
+				}
 			} else if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 				/* Constants may contain objects, destroy the values before the object store. */
 				zend_class_constant *c;
@@ -378,6 +372,23 @@ void shutdown_executor(void) /* {{{ */
 	}
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
+}
+
+void shutdown_executor(void) /* {{{ */
+{
+	zend_string *key;
+	zval *zv;
+#if ZEND_DEBUG
+	bool fast_shutdown = 0;
+#else
+	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
+#endif
+
+	zend_try {
+		zend_stream_shutdown();
+	} zend_end_try();
+
+	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
 	zend_fiber_shutdown();
