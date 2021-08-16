@@ -886,12 +886,12 @@ cleanup_args:
 		EG(jit_trace_num) = orig_jit_trace_num;
 	} else {
 		ZEND_ASSERT(func->type == ZEND_INTERNAL_FUNCTION);
-#if ZEND_DEBUG
-		bool should_throw = zend_internal_call_should_throw(func, call);
-#endif
 		ZVAL_NULL(fci->retval);
 		call->prev_execute_data = EG(current_execute_data);
 		EG(current_execute_data) = call;
+#if ZEND_DEBUG
+		bool should_throw = zend_internal_call_should_throw(func, call);
+#endif
 		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
 			func->internal_function.handler(call, fci->retval);
