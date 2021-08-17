@@ -4439,33 +4439,9 @@ static int accel_preload(const char *config, bool in_child)
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
 		}
 
-		/* Cleanup executor */
-		EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
-
-		php_call_shutdown_functions();
-		zend_call_destructors();
-		php_output_end_all();
-		php_free_shutdown_functions();
-
-		/* Release stored values to avoid dangling pointers */
-		zend_shutdown_executor_values(/* fast_shutdown */ false);
-
-		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
-
-		CG(map_ptr_last) = orig_map_ptr_last;
-
-		if (EG(full_tables_cleanup)) {
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading is not compatible with dl() function.");
-			ret = FAILURE;
-			goto finish;
-		}
-
-		/* Don't preload constants */
 		if (EG(zend_constants)) {
-			zend_string *key;
-			zval *zv;
-
-			/* Remember __COMPILER_HALT_OFFSET__(s) */
+			/* Remember __COMPILER_HALT_OFFSET__(s). Do this early,
+			 * as zend_shutdown_executor_values() destroys constants. */
 			ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 				zend_execute_data *orig_execute_data = EG(current_execute_data);
 				zend_execute_data fake_execute_data;
@@ -4479,15 +4455,31 @@ static int accel_preload(const char *config, bool in_child)
 				}
 				EG(current_execute_data) = orig_execute_data;
 			} ZEND_HASH_FOREACH_END();
+		}
 
-			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
-				zend_constant *c = Z_PTR_P(zv);
-				if (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) {
-					break;
-				}
-				EG(zend_constants)->pDestructor(zv);
-				zend_string_release(key);
-			} ZEND_HASH_FOREACH_END_DEL();
+		/* Cleanup executor */
+		EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+
+		php_call_shutdown_functions();
+		zend_call_destructors();
+		php_output_end_all();
+		php_free_shutdown_functions();
+
+		/* Release stored values to avoid dangling pointers */
+		zend_shutdown_executor_values(/* fast_shutdown */ false);
+
+		/* We don't want to preload constants.
+		 * Check that  zend_shutdown_executor_values() also destroys constants. */
+		ZEND_ASSERT(zend_hash_num_elements(EG(zend_constants)) == EG(persistent_constants_count));
+
+		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+
+		CG(map_ptr_last) = orig_map_ptr_last;
+
+		if (EG(full_tables_cleanup)) {
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading is not compatible with dl() function.");
+			ret = FAILURE;
+			goto finish;
 		}
 
 		/* Inheritance errors may be thrown during linking */
