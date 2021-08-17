@@ -115,6 +115,14 @@ typedef struct _user_tick_function_entry {
 	bool calling;
 } user_tick_function_entry;
 
+#if HAVE_PUTENV
+typedef struct {
+	char *putenv_string;
+	char *previous_value;
+	zend_string *key;
+} putenv_entry;
+#endif
+
 /* some prototypes for local functions */
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
@@ -152,7 +160,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 		 * is already set; if the SetEnvironmentVariable() API call
 		 * fails, the Crt will double free() a string.
 		 * We try to avoid this by setting our own value first */
-		SetEnvironmentVariable(pe->key, "bugbug");
+		SetEnvironmentVariable(ZSTR_VAL(pe->key), "bugbug");
 # endif
 		putenv(pe->previous_value);
 # if defined(PHP_WIN32)
@@ -160,17 +168,18 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 # endif
 	} else {
 # if HAVE_UNSETENV
-		unsetenv(pe->key);
+		unsetenv(ZSTR_VAL(pe->key));
 # elif defined(PHP_WIN32)
-		SetEnvironmentVariable(pe->key, NULL);
+		SetEnvironmentVariable(ZSTR_VAL(pe->key), NULL);
 # ifndef ZTS
-		_putenv_s(pe->key, "");
+		_putenv_s(ZSTR_VAL(pe->key), "");
 # endif
 # else
 		char **env;
 
 		for (env = environ; env != NULL && *env != NULL; env++) {
-			if (!strncmp(*env, pe->key, pe->key_len) && (*env)[pe->key_len] == '=') {	/* found it */
+			if (!strncmp(*env, ZSTR_VAL(pe->key), ZSTR_LEN(pe->key))
+					&& (*env)[ZSTR_LEN(pe->key)] == '=') {	/* found it */
 				*env = "";
 				break;
 			}
@@ -180,13 +189,13 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 #ifdef HAVE_TZSET
 	/* don't forget to reset the various libc globals that
 	 * we might have changed by an earlier call to tzset(). */
-	if (!strncmp(pe->key, "TZ", pe->key_len)) {
+	if (zend_string_equals_literal_ci(pe->key, "TZ")) {
 		tzset();
 	}
 #endif
 
 	free(pe->putenv_string);
-	efree(pe->key);
+	zend_string_release(pe->key);
 	efree(pe);
 }
 /* }}} */
@@ -835,8 +844,7 @@ PHP_FUNCTION(putenv)
 	char *p, **env;
 	putenv_entry pe;
 #ifdef PHP_WIN32
-	char *value = NULL;
-	int equals = 0;
+	const char *value = NULL;
 	int error_code;
 #endif
 
@@ -850,33 +858,23 @@ PHP_FUNCTION(putenv)
 	}
 
 	pe.putenv_string = zend_strndup(setting, setting_len);
-	pe.key = estrndup(setting, setting_len);
-	if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
-		*p = '\0';
+	if ((p = strchr(setting, '='))) {
+		pe.key = zend_string_init(setting, p - setting, 0);
 #ifdef PHP_WIN32
-		equals = 1;
+		value = p + 1;
 #endif
+	} else {
+		pe.key = zend_string_init(setting, setting_len, 0);
 	}
-
-	pe.key_len = strlen(pe.key);
-#ifdef PHP_WIN32
-	if (equals) {
-		if (pe.key_len < setting_len - 1) {
-			value = p + 1;
-		} else {
-			/* empty string*/
-			value = p;
-		}
-	}
-#endif
 
 	tsrm_env_lock();
-	zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
+	zend_hash_del(&BG(putenv_ht), pe.key);
 
 	/* find previous value */
 	pe.previous_value = NULL;
 	for (env = environ; env != NULL && *env != NULL; env++) {
-		if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
+		if (!strncmp(*env, ZSTR_VAL(pe.key), ZSTR_LEN(pe.key))
+				&& (*env)[ZSTR_LEN(pe.key)] == '=') {	/* found it */
 #if defined(PHP_WIN32)
 			/* must copy previous value because MSVCRT's putenv can free the string without notice */
 			pe.previous_value = estrdup(*env);
@@ -898,7 +896,7 @@ PHP_FUNCTION(putenv)
 # else
 		wchar_t *keyw, *valw = NULL;
 
-		keyw = php_win32_cp_any_to_w(pe.key);
+		keyw = php_win32_cp_any_to_w(ZSTR_VAL(pe.key));
 		if (value) {
 			valw = php_win32_cp_any_to_w(value);
 		}
@@ -906,7 +904,7 @@ PHP_FUNCTION(putenv)
 		if (!keyw || !valw && value) {
 			tsrm_env_unlock();
 			free(pe.putenv_string);
-			efree(pe.key);
+			zend_string_release(pe.key);
 			free(keyw);
 			free(valw);
 			RETURN_FALSE;
@@ -926,9 +924,9 @@ PHP_FUNCTION(putenv)
 	) { /* success */
 # endif
 #endif
-		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
+		zend_hash_add_mem(&BG(putenv_ht), pe.key, &pe, sizeof(putenv_entry));
 #ifdef HAVE_TZSET
-		if (!strncmp(pe.key, "TZ", pe.key_len)) {
+		if (zend_string_equals_literal_ci(pe.key, "TZ")) {
 			tzset();
 		}
 #endif
@@ -940,7 +938,7 @@ PHP_FUNCTION(putenv)
 		RETURN_TRUE;
 	} else {
 		free(pe.putenv_string);
-		efree(pe.key);
+		zend_string_release(pe.key);
 #if defined(PHP_WIN32)
 		free(keyw);
 		free(valw);
