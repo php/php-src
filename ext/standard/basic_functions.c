@@ -185,7 +185,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 	}
 #endif
 
-	efree(pe->putenv_string);
+	free(pe->putenv_string);
 	efree(pe->key);
 	efree(pe);
 }
@@ -849,7 +849,7 @@ PHP_FUNCTION(putenv)
 		RETURN_THROWS();
 	}
 
-	pe.putenv_string = estrndup(setting, setting_len);
+	pe.putenv_string = zend_strndup(setting, setting_len);
 	pe.key = estrndup(setting, setting_len);
 	if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
 		*p = '\0';
@@ -905,7 +905,7 @@ PHP_FUNCTION(putenv)
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
 		if (!keyw || !valw && value) {
 			tsrm_env_unlock();
-			efree(pe.putenv_string);
+			free(pe.putenv_string);
 			efree(pe.key);
 			free(keyw);
 			free(valw);
@@ -939,7 +939,7 @@ PHP_FUNCTION(putenv)
 #endif
 		RETURN_TRUE;
 	} else {
-		efree(pe.putenv_string);
+		free(pe.putenv_string);
 		efree(pe.key);
 #if defined(PHP_WIN32)
 		free(keyw);
