@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0beta3
+?? ??? ????, PHP 8.1.0RC1
+
+
+
+19 Aug 2021, PHP 8.1.0beta3
 
 - Core:
   . Fixed bug #81342 (New ampersand token parsing depends on new line after it).
