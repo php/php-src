@@ -1099,7 +1099,9 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			ecur = IMAPG(imap_errorstack);
 			while (ecur != NIL) {
-				php_error_docref(NULL, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
+				zend_try {
+					php_error_docref(NULL, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
+				} zend_end_try();
 				ecur = ecur->next;
 			}
 		}
@@ -1112,7 +1114,9 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			acur = IMAPG(imap_alertstack);
 			while (acur != NIL) {
-				php_error_docref(NULL, E_NOTICE, "%s", acur->LTEXT);
+				zend_try {
+					php_error_docref(NULL, E_NOTICE, "%s", acur->LTEXT);
+				} zend_end_try();
 				acur = acur->next;
 			}
 		}
