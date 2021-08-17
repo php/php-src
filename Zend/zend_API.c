@@ -2978,29 +2978,27 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 {
 	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
-	zend_try {
-		if (EG(full_tables_cleanup)) {
-			zend_module_entry *module;
+	if (EG(full_tables_cleanup)) {
+		zend_module_entry *module;
 
-			ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
-				if (module->request_shutdown_func) {
-#if 0
-					zend_printf("%s: Request shutdown\n", module->name);
-#endif
+		ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+			if (module->request_shutdown_func) {
+				zend_try {
 					module->request_shutdown_func(module->type, module->module_number);
-				}
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			zend_module_entry **p = module_request_shutdown_handlers;
-
-			while (*p) {
-				zend_module_entry *module = *p;
-
-				module->request_shutdown_func(module->type, module->module_number);
-				p++;
+				} zend_end_try();
 			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		zend_module_entry **p = module_request_shutdown_handlers;
+
+		while (*p) {
+			zend_module_entry *module = *p;
+			zend_try {
+				module->request_shutdown_func(module->type, module->module_number);
+			} zend_end_try();
+			p++;
 		}
-	} zend_end_try();
+	}
 }
 /* }}} */
 
