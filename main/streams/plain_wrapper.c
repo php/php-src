@@ -1369,8 +1369,11 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		return 0;
 	}
 
+	if (php_check_open_basedir(buf)) {
+		return 0;
+	}
+
 	/* we look for directory separator from the end of string, thus hopefully reducing our work load */
-	int ret;
 	char *p;
 	zend_stat_t sb;
 	size_t dir_len = strlen(dir), offset = 0;
@@ -1406,32 +1409,32 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		}
 	}
 
-	if (p == buf) {
-		ret = php_mkdir(dir, mode);
-	} else if (!(ret = php_mkdir(buf, mode))) {
-		if (!p) {
-			p = buf;
+	if (!p) {
+		p = buf;
+	}
+	while (true) {
+		int ret = VCWD_MKDIR(buf, (mode_t) mode);
+		if (ret < 0) {
+			if (options & REPORT_ERRORS) {
+				php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			}
+			return 0;
 		}
-		/* create any needed directories if the creation of the 1st directory worked */
+
+		bool replaced_slash = false;
 		while (++p != e) {
 			if (*p == '\0') {
+				replaced_slash = true;
 				*p = DEFAULT_SLASH;
-				if ((*(p+1) != '\0') &&
-					(ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
-					if (options & REPORT_ERRORS) {
-						php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-					}
+				if (*(p+1) != '\0') {
 					break;
 				}
 			}
 		}
-	}
-	if (ret < 0) {
-		/* Failure */
-		return 0;
-	} else {
-		/* Success */
-		return 1;
+		if (p == e || !replaced_slash) {
+			/* No more directories to create */
+			return 1;
+		}
 	}
 }
 
