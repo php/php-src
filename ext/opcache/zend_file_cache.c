@@ -375,16 +375,6 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 				zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 			}
 			break;
-		case IS_REFERENCE:
-			if (!IS_SERIALIZED(Z_REF_P(zv))) {
-				zend_reference *ref;
-
-				SERIALIZE_PTR(Z_REF_P(zv));
-				ref = Z_REF_P(zv);
-				UNSERIALIZE_PTR(ref);
-				zend_file_cache_serialize_zval(&ref->val, script, info, buf);
-			}
-			break;
 		case IS_CONSTANT_AST:
 			if (!IS_SERIALIZED(Z_AST_P(zv))) {
 				zend_ast_ref *ast;
@@ -398,6 +388,9 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 		case IS_INDIRECT:
 			/* Used by static properties. */
 			SERIALIZE_PTR(Z_INDIRECT_P(zv));
+			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
 	}
 }
@@ -1171,15 +1164,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 						script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 			}
 			break;
-		case IS_REFERENCE:
-			if (!IS_UNSERIALIZED(Z_REF_P(zv))) {
-				zend_reference *ref;
-
-				UNSERIALIZE_PTR(Z_REF_P(zv));
-				ref = Z_REF_P(zv);
-				zend_file_cache_unserialize_zval(&ref->val, script, buf);
-			}
-			break;
 		case IS_CONSTANT_AST:
 			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
 				UNSERIALIZE_PTR(Z_AST_P(zv));
@@ -1189,6 +1173,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 		case IS_INDIRECT:
 			/* Used by static properties. */
 			UNSERIALIZE_PTR(Z_INDIRECT_P(zv));
+			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
 	}
 }
