@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #81353 (segfault with preloading and statically bound closure).
     (Nikita)
 
+- Standard:
+  . Fixed bug #71542 (disk_total_space does not work with relative paths). (cmb)
+
 - XML:
   . Fixed bug #81351 (xml_parse may fail, but has no error code). (cmb, Nikita)
 
