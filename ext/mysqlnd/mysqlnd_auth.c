@@ -484,6 +484,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 	}
 	if (ret == PASS) {
+		ZEND_ASSERT(conn->username.s != user && conn->password.s != passwd);
 		mysqlnd_set_persistent_string(&conn->username, user, user_len, conn->persistent);
 
 		char * tmp = mnd_pestrdup(passwd, conn->persistent);
