@@ -213,8 +213,12 @@ class SimpleType {
         return new SimpleType("void", true);
     }
 
+    public function isScalar(): bool {
+        return $this->isBuiltin && in_array(strtolower($this->name), ["null", "false", "true", "bool", "int", "float"], true);
+    }
+
     public function isNull(): bool {
-        return $this->isBuiltin && $this->name === 'null';
+        return $this->isBuiltin && strtolower($this->name) === 'null';
     }
 
     public function toTypeCode(): string {
@@ -349,7 +353,7 @@ class SimpleType {
 }
 
 class Type {
-    /** @var SimpleType[] $types */
+    /** @var SimpleType[] */
     public $types;
 
     /**
@@ -405,6 +409,15 @@ class Type {
         }
 
         return new Type($simpleTypes);
+    }
+
+    public function isScalar(): bool {
+        foreach ($this->types as $type) {
+            if (!$type->isScalar()) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public function isNullable(): bool {
@@ -780,6 +793,16 @@ class MethodName implements FunctionOrMethodName {
 }
 
 class ReturnInfo {
+    const REFCOUNT_0 = "0";
+    const REFCOUNT_1 = "1";
+    const REFCOUNT_N = "N";
+
+    const REFCOUNTS = [
+        self::REFCOUNT_0,
+        self::REFCOUNT_1,
+        self::REFCOUNT_N,
+    ];
+
     /** @var bool */
     public $byRef;
     /** @var Type|null */
@@ -797,6 +820,7 @@ class ReturnInfo {
         $this->phpDocType = $phpDocType;
         $this->tentativeReturnType = $tentativeReturnType;
         $this->refcount = $refcount;
+        $this->validateRefcount();
     }
 
     public function equalsApartFromPhpDocAndRefcount(ReturnInfo $other): bool {
@@ -807,6 +831,26 @@ class ReturnInfo {
 
     public function getMethodSynopsisType(): ?Type {
         return $this->type ?? $this->phpDocType;
+    }
+
+    private function validateRefcount(): void
+    {
+        if ($this->refcount === null) {
+            return;
+        }
+
+        if (!in_array($this->refcount, ReturnInfo::REFCOUNTS, true)) {
+            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $this->refcount given");
+        }
+
+        $type = $this->phpDocType ?? $this->type;
+        if ($type === null) {
+            return;
+        }
+
+        if ($type->isScalar() && $this->refcount !== self::REFCOUNT_0) {
+            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
+        }
     }
 }
 
@@ -1033,7 +1077,7 @@ class FuncInfo {
             return null;
         }
 
-        if ($this->return->refcount === "0" && Type::equals($this->return->type, $this->return->phpDocType)) {
+        if ($this->return->refcount === ReturnInfo::REFCOUNT_0 && Type::equals($this->return->type, $this->return->phpDocType)) {
             return null;
         }
 
@@ -1923,7 +1967,7 @@ class DocCommentTag {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)(\s+|$)/', $value, $matches);
         }
 
-        if (isset($matches[1]) === false) {
+        if (!isset($matches[1])) {
             throw new Exception("@$this->name doesn't contain a type or has an invalid format \"$value\"");
         }
 
@@ -1944,7 +1988,7 @@ class DocCommentTag {
             preg_match('/^\s*\$(\w+).*$/', $value, $matches);
         }
 
-        if (isset($matches[1]) === false) {
+        if (!isset($matches[1])) {
             throw new Exception("@$this->name doesn't contain a variable name or has an invalid format \"$value\"");
         }
 
@@ -2015,9 +2059,6 @@ function parseFunctionLike(
                     $docParamTypes[$tag->getVariableName()] = $tag->getType();
                 } else if ($tag->name === 'refcount') {
                     $refcount = $tag->getValue();
-                    if (in_array($refcount, ["0", "1", "N"]) === false) {
-                        throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
-                    }
                 }
             }
         }
