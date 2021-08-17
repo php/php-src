@@ -704,13 +704,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
 		if (EG(error_reporting) & E_NOTICE) {
-			ecur = IMAPG(imap_errorstack);
-			while (ecur != NIL) {
-				zend_try {
+			zend_try {
+				ecur = IMAPG(imap_errorstack);
+				while (ecur != NIL) {
 					php_error_docref(NULL, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
-				} zend_end_try();
-				ecur = ecur->next;
-			}
+					ecur = ecur->next;
+				}
+			} zend_end_try();
 		}
 		mail_free_errorlist(&IMAPG(imap_errorstack));
 		IMAPG(imap_errorstack) = NIL;
@@ -719,13 +719,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 	if (IMAPG(imap_alertstack) != NIL) {
 		/* output any remaining alerts at E_NOTICE level */
 		if (EG(error_reporting) & E_NOTICE) {
-			acur = IMAPG(imap_alertstack);
-			while (acur != NIL) {
-				zend_try {
+			zend_try {
+				acur = IMAPG(imap_alertstack);
+				while (acur != NIL) {
 					php_error_docref(NULL, E_NOTICE, "%s", acur->LTEXT);
-				} zend_end_try();
-				acur = acur->next;
-			}
+					acur = acur->next;
+				}
+			} zend_end_try();
 		}
 		mail_free_stringlist(&IMAPG(imap_alertstack));
 		IMAPG(imap_alertstack) = NIL;
