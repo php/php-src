@@ -234,27 +234,30 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		is_retry = 1;
 	}
 
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
+
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
 
 	zval params[2];
-	zval *left;
+	zval left;
 
-	fci.param_count = 1;
+	fci.param_count = 2;
 	fci.size = sizeof(fci);
 	fci.retval = result;
 
 	do {
 		fci.object = zobj;
 
-		Z_TYPE_INFO_P(left) = is_retry ? IS_FALSE : IS_TRUE;
+		Z_TYPE_INFO(left) = is_retry ? IS_FALSE : IS_TRUE;
 
 		if (zobj == Z_OBJ_P(op1)) {
-			params[0] = *op2;
-			params[1] = *left;
+			ZVAL_COPY_VALUE(&params[0], op2);
+			ZVAL_COPY_VALUE(&params[1], &left);
 		} else {
-			params[0] = *op1;
-			params[1] = *left;
+			ZVAL_COPY_VALUE(&params[0], op1);
+			ZVAL_COPY_VALUE(&params[1], &left);
 		}
 
 		fci.params = params;
@@ -296,7 +299,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				break;
 
 			case ZEND_IS_NOT_EQUAL:
-				fcic.function_handler = ce->__notequals;
+				fcic.function_handler = ce->__equals;
 				operator = "!=";
 				break;
 
@@ -359,7 +362,31 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		fcic.called_scope = ce;
 		fcic.object = zobj;
 		fcic.function_handler->type = ZEND_USER_FUNCTION;
+		fci.named_params = NULL;
 		int tmp = zend_call_function(&fci, &fcic);
+
+		if (tmp == SUCCESS) {
+			switch (opcode) {
+				case ZEND_IS_NOT_EQUAL:
+					/* reverse __equals for not equals */
+					Z_TYPE_INFO_P(result) = Z_TYPE_INFO_P(result) == IS_TRUE ? IS_FALSE : IS_TRUE;
+					break;
+
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_IS_LARGER:
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (is_retry) {
+						Z_LVAL_P(result) = Z_LVAL_P(result) * -1;
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		EG(fake_scope) = orig_fake_scope;
 
 		return tmp;
 	} while(1);
@@ -1733,7 +1760,7 @@ static int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
-	zval *result;
+	zval *result = (result);
 
 	zval params[1];
 	params[0] = *o2;

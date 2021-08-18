@@ -42,6 +42,7 @@ ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
+ZEND_API zend_class_entry *zend_ce_operator_error;
 
 /* Internal pseudo-exception that is not exposed to userland. Throwing this exception *does not* execute finally blocks. */
 static zend_class_entry zend_ce_unwind_exit;

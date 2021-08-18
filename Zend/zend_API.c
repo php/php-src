@@ -2426,6 +2426,15 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 		}
 }
 
+static void zend_check_magic_method_explicit_type(uint32_t arg_num, const zend_class_entry *ce, const zend_function *fptr, int error_type)
+{
+	if (!ZEND_TYPE_IS_SET(fptr->common.arg_info[arg_num].type)) {
+		zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must explicitly define a type",
+				   ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
+				   arg_num + 1, ZSTR_VAL(fptr->common.arg_info[arg_num].name));
+	}
+}
+
 static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
 {
 	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
@@ -2490,10 +2499,9 @@ static void zend_check_magic_method_binary_operator_overload(
     zend_check_magic_method_args(2, ce, fptr, error_type);
     zend_check_magic_method_non_static(ce, fptr, error_type);
     zend_check_magic_method_public(ce, fptr, error_type);
+	zend_check_magic_method_explicit_type(0, ce, fptr, error_type);
     zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ANY);
     zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_BOOL);
-    zend_check_magic_method_return_type(ce, fptr, error_type,
-            (MAY_BE_BOOL|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT));
 }
 
 static void zend_check_magic_method_comparison_operator_overload(
@@ -2502,6 +2510,7 @@ static void zend_check_magic_method_comparison_operator_overload(
     zend_check_magic_method_args(1, ce, fptr, error_type);
     zend_check_magic_method_non_static(ce, fptr, error_type);
     zend_check_magic_method_public(ce, fptr, error_type);
+    zend_check_magic_method_explicit_type(0, ce, fptr, error_type);
     zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ANY);
     zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_BOOL);
 }
@@ -2626,6 +2635,7 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	    zend_check_magic_method_args(1, ce, fptr, error_type);
 	    zend_check_magic_method_non_static(ce, fptr, error_type);
 	    zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_explicit_type(0, ce, fptr, error_type);
 	    zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ANY);
 	    zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_LONG);
 	}
