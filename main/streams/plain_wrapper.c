@@ -1415,7 +1415,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	while (true) {
 		int ret = VCWD_MKDIR(buf, (mode_t) mode);
 		if (ret < 0 && errno != EEXIST) {
-		    /* stop running and issue a warning if ret < 0 and errno != EEXIST */
+		    /* stop running and issue a warning to client if ret < 0 and errno != EEXIST */
 		    php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 			return 0;
 		}
@@ -1433,7 +1433,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 <<<<<<< HEAD
 		if (p == e || !replaced_slash) {
 			/* No more directories to create */
-			/* issue a warning if the last directory was created failed */
+			/* issue a warning to client if the last directory was created failed */
 			if (ret < 0) {
 			    if (options & REPORT_ERRORS) {
 			        php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
