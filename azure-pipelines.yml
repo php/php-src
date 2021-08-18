@@ -29,4 +29,4 @@ jobs:
       parameters:
         configurationName: DEBUG_NTS_OPCACHE
         configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
