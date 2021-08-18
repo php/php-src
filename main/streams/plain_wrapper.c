@@ -1437,6 +1437,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		        if (options & REPORT_ERRORS) {
 		            php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		        }
+		        return 0;
 		    }
 			return 1;
 		}
