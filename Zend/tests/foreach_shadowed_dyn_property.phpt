@@ -21,7 +21,8 @@ $test2->prop = "Test2";
 $test2->run();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Test2::$prop is deprecated in %s on line %d
 prop => Test
 array(1) {
   ["prop"]=>

@@ -7,6 +7,9 @@ memory_limit=2G
 
 class foo
 {
+    public $x;
+    public $y;
+
     public function __construct()
     {
         $this->x = $this;

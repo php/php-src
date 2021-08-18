@@ -40,7 +40,8 @@ foreach($o as $k=>$v) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property base::$d is deprecated in %s on line %d
 ===base::function===
 a=>1
 b=>2
@@ -49,6 +50,8 @@ d=>4
 ===base,foreach===
 a=>1
 d=>4
+
+Deprecated: Creation of dynamic property derived::$d is deprecated in %s on line %d
 ===derived::function===
 a=>1
 b=>2

@@ -67,6 +67,8 @@ __isset publicProperty
 __isset protectedProperty
 __isset privateProperty
 __set nonExisting
+
+Deprecated: Creation of dynamic property Test::$nonExisting is deprecated in %s on line %d
 __set publicProperty
 __set protectedProperty
 __set privateProperty

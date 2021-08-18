@@ -15,5 +15,10 @@ f();
 gc_collect_cycles();
 echo "End\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property E::$a is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property E::$e1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property E::$a is deprecated in %s on line %d
 End

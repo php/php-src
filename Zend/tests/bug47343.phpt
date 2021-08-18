@@ -20,6 +20,8 @@ class A
 
 class B
 {
+    public $A;
+
     public function __construct($A)
     {
         $this->A = $A;
@@ -40,5 +42,8 @@ for ($i = 0; $i < 2; $i++)
 
 echo "DONE\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property A::$data is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property A::$data is deprecated in %s on line %d
 DONE

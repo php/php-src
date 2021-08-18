@@ -126,6 +126,7 @@ function test_pow() {
 test_pow();
 
 class Y {
+    public $x;
     function __toString() {
         return "y";
     }

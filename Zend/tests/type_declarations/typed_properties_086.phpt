@@ -18,7 +18,8 @@ $t->$x--;
 var_dump($t);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property T::$1 is deprecated in %s on line %d
 object(T)#1 (1) {
   ["i"]=>
   uninitialized(int)

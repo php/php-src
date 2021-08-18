@@ -11,6 +11,7 @@ $f->bar =& $f->foo;
 var_dump($f->foo);
 var_dump($f->bar);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Foo::$bar is deprecated in %s on line %d
 string(4) "test"
 string(4) "test"

@@ -31,7 +31,10 @@ var_export((array) $ao);
 echo "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property B::$dyn is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property B::$6 is deprecated in %s on line %d
 array (
   'pub' => 1,
   '' . "\0" . '*' . "\0" . 'prot' => 2,
@@ -40,6 +43,8 @@ array (
   'dyn' => 5,
   6 => 6,
 )
+
+Deprecated: Creation of dynamic property AO::$dyn is deprecated in %s on line %d
 array (
   '' . "\0" . 'AO' . "\0" . 'priv' => 1,
   'dyn' => 2,

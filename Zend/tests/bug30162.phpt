@@ -42,8 +42,16 @@ $db = new hariCow;
 var_dump($db);
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property FIIFO::$x is deprecated in %s on line %d
+
 Warning: Undefined variable $db in %s on line %d
 NULL
+
+Deprecated: Creation of dynamic property hariCow::$x is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property hariCow::$y is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property FIIFO::$x is deprecated in %s on line %d
 object(hariCow)#%d (2) {
   ["x"]=>
   string(1) "x"

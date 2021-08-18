@@ -13,6 +13,7 @@ var_dump($obj->fflush());
 */
 //create a basic stream class
 class VariableStream {
+    var $context;
     var $position;
     var $varname;
 

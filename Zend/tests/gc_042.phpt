@@ -18,7 +18,8 @@ gc_collect_cycles();
 var_dump($x);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Test::$x is deprecated in %s on line %d
 object(Test)#1 (1) {
   ["x"]=>
   object(stdClass)#2 (1) {

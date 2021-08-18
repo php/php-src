@@ -22,7 +22,10 @@ unset($foo);
 gc_collect_cycles();
 var_dump($bar);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property bad::$x is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property bad::$y is deprecated in %s on line %d
 object(bad)#2 (2) {
   ["x"]=>
   object(stdClass)#3 (0) {

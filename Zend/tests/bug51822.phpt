@@ -34,7 +34,9 @@ if (!isset(Test::$mystatic))
 
 echo "bla\n";
 ?>
---EXPECT--
+--EXPECTF--
 bla
+
+Deprecated: Creation of dynamic property DestructorCreator::$test is deprecated in %s on line %d
 1
 2

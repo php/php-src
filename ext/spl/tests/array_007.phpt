@@ -38,7 +38,10 @@ foreach($test as $key => $val)
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property test::$imp is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property test::$dyn is deprecated in %s on line %d
 test Object
 (
     [pub] => public

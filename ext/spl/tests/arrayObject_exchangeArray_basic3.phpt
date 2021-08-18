@@ -51,6 +51,10 @@ var_dump($ao, $original, $copy);
 ?>
 --EXPECTF--
 --> exchangeArray() with objects:
+
+Deprecated: Creation of dynamic property C::$addedToSwapIn is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property C::$addedToOriginal is deprecated in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -83,6 +87,8 @@ array(2) {
 --> exchangeArray() with no arg:
 Exception: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
 
+Deprecated: Creation of dynamic property C::$addedToOriginal is deprecated in %s on line %d
+
 Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
@@ -104,6 +110,8 @@ NULL
 
 --> exchangeArray() with bad arg type:
 ArrayObject::exchangeArray(): Argument #1 ($array) must be of type array, null given
+
+Deprecated: Creation of dynamic property C::$addedToOriginal is deprecated in %s on line %d
 
 Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#3 (1) {

@@ -39,7 +39,11 @@ $c = new c;
 --EXPECTF--
 Notice: Accessing static property c::$prop5 as non static in %s on line %d
 
+Deprecated: Creation of dynamic property c::$prop5 is deprecated in %s on line %d
+
 Notice: Accessing static property c::$prop6 as non static in %s on line %d
+
+Deprecated: Creation of dynamic property c::$prop6 is deprecated in %s on line %d
 NULL
 NULL
 NULL

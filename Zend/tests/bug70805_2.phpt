@@ -5,9 +5,11 @@ zend.enable_gc = 1
 --FILE--
 <?php
 class A {
+    public $b;
 }
 
 class B {
+    public $a;
 }
 
 class C {

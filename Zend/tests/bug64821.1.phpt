@@ -16,6 +16,8 @@ throw new a;
 
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property a::$string is deprecated in %s on line %d
+
 Fatal error: Uncaught a in %s:0
 Stack trace:
 #0 {main}

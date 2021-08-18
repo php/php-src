@@ -278,14 +278,28 @@ caught Exception 2
 caught Exception 3
 caught Exception 4
 caught Exception 5
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 6
 caught Exception 7
 caught Exception 8
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 9
 caught Exception 10
+
+Deprecated: Creation of dynamic property class@anonymous::$bar is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 11
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 12
 caught Exception 13
+
+Deprecated: Creation of dynamic property class@anonymous::$bar is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 14
 
 Notice: Indirect modification of overloaded element of ArrayAccess@anonymous has no effect in %s on line %d
@@ -293,9 +307,13 @@ caught Exception 15
 
 Notice: Indirect modification of overloaded element of ArrayAccess@anonymous has no effect in %s on line %d
 caught Exception 16
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 17
 caught Exception 18
 caught Exception 19
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 20
 caught Exception 21
 caught Exception 22

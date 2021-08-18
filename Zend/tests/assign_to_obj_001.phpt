@@ -20,5 +20,8 @@ $a->test();
 $a->test();
 echo "okey";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property A::$a is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property A::$a is deprecated in %s on line %d
 okey

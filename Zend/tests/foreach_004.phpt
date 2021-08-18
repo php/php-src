@@ -4,6 +4,7 @@ Iterator exceptions in foreach by reference
 <?php
 class IT extends ArrayIterator {
     private $n = 0;
+    private $trap;
 
     function __construct($trap = null) {
         parent::__construct([0, 1]);

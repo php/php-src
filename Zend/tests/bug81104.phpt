@@ -7,6 +7,7 @@ report_memleaks=0
 <?php
 class X {
     public $x;
+    public $y;
     public function __construct() { $this->x = [$this]; }
 }
 gc_disable();

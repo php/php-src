@@ -58,12 +58,16 @@ object(D)#%d (1) {
 }
 
 Unset superclass's private property, and recreate it as public in subclass:
+
+Deprecated: Creation of dynamic property D::$p is deprecated in %s on line %d
 object(D)#%d (1) {
   ["p"]=>
   string(12) "changed in D"
 }
 
 Unset superclass's private property, and recreate it as public at global scope:
+
+Deprecated: Creation of dynamic property D::$p is deprecated in %s on line %d
 object(D)#%d (1) {
   ["p"]=>
   string(34) "this will create a public property"

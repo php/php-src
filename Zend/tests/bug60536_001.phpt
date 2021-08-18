@@ -22,5 +22,7 @@ $a->__construct();
 echo "DONE";
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property Z::$x is deprecated in %s on line %d
+
 Warning: Undefined property: Z::$x in %s on line %d
 DONE

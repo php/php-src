@@ -16,5 +16,6 @@ $arr['prop'] = 'new value';
 echo $obj->prop, "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Test::$1 is deprecated in %s on line %d
 default value

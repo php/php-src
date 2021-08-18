@@ -37,6 +37,8 @@ Warning: Undefined property: C::$x in %s on line %d
 
 Notice: Accessing static property C::$x as non static in %s on line 13
 
+Deprecated: Creation of dynamic property C::$x is deprecated in %s on line %d
+
 Notice: Accessing static property C::$x as non static in %s on line 15
 
 Notice: Accessing static property C::$x as non static in %s on line 16

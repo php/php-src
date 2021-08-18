@@ -17,7 +17,8 @@ $clone = clone $A;
 $clone->a = array();
 print_r($A);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property A::$a is deprecated in %s on line %d
 A Object
 (
     [a] => Array

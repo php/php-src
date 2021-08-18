@@ -11,10 +11,13 @@ class A {
 
 }
 
+// Note that this will use __get() for the read, but actually create a new dynamic
+// property A::$f for the write.
 $a = new A;
 echo $a->f++;
 echo $a->f++;
 echo $a->f++;
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property A::$f is deprecated in %s on line %d
 012

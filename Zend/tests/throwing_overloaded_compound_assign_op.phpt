@@ -28,7 +28,7 @@ try {
 var_dump($test2);
 
 ?>
---EXPECT--
+--EXPECTF--
 Modulo by zero
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
@@ -37,6 +37,8 @@ object(ArrayObject)#1 (1) {
     int(42)
   }
 }
+
+Deprecated: Creation of dynamic property Test::$prop is deprecated in %s on line %d
 Modulo by zero
 object(Test)#3 (1) {
   ["prop"]=>

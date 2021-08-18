@@ -130,17 +130,41 @@ object(C)#%d (5) {
 }
 
 Adding properties to an an object.
+
+Deprecated: Creation of dynamic property C::$new0 is deprecated in %s on line %d
 string(10) "Original a"
+
+Deprecated: Creation of dynamic property C::$new1 is deprecated in %s on line %d
 string(10) "Original b"
+
+Deprecated: Creation of dynamic property C::$new2 is deprecated in %s on line %d
 string(10) "Original c"
+
+Deprecated: Creation of dynamic property C::$new3 is deprecated in %s on line %d
 string(16) "Added property 0"
+
+Deprecated: Creation of dynamic property C::$new4 is deprecated in %s on line %d
 string(16) "Added property 1"
+
+Deprecated: Creation of dynamic property C::$new5 is deprecated in %s on line %d
 string(16) "Added property 2"
+
+Deprecated: Creation of dynamic property C::$new6 is deprecated in %s on line %d
 string(16) "Added property 3"
+
+Deprecated: Creation of dynamic property C::$new7 is deprecated in %s on line %d
 string(16) "Added property 4"
+
+Deprecated: Creation of dynamic property C::$new8 is deprecated in %s on line %d
 string(16) "Added property 5"
+
+Deprecated: Creation of dynamic property C::$new9 is deprecated in %s on line %d
 string(16) "Added property 6"
+
+Deprecated: Creation of dynamic property C::$new10 is deprecated in %s on line %d
 string(16) "Added property 7"
+
+Deprecated: Creation of dynamic property C::$new11 is deprecated in %s on line %d
 Loop detected
 object(C)#%d (17) {
   ["a"]=>
@@ -180,17 +204,41 @@ object(C)#%d (17) {
 }
 
 Adding properties to an an object, using &$value.
+
+Deprecated: Creation of dynamic property C::$new0 is deprecated in %s on line %d
 string(10) "Original a"
+
+Deprecated: Creation of dynamic property C::$new1 is deprecated in %s on line %d
 string(10) "Original b"
+
+Deprecated: Creation of dynamic property C::$new2 is deprecated in %s on line %d
 string(10) "Original c"
+
+Deprecated: Creation of dynamic property C::$new3 is deprecated in %s on line %d
 string(16) "Added property 0"
+
+Deprecated: Creation of dynamic property C::$new4 is deprecated in %s on line %d
 string(16) "Added property 1"
+
+Deprecated: Creation of dynamic property C::$new5 is deprecated in %s on line %d
 string(16) "Added property 2"
+
+Deprecated: Creation of dynamic property C::$new6 is deprecated in %s on line %d
 string(16) "Added property 3"
+
+Deprecated: Creation of dynamic property C::$new7 is deprecated in %s on line %d
 string(16) "Added property 4"
+
+Deprecated: Creation of dynamic property C::$new8 is deprecated in %s on line %d
 string(16) "Added property 5"
+
+Deprecated: Creation of dynamic property C::$new9 is deprecated in %s on line %d
 string(16) "Added property 6"
+
+Deprecated: Creation of dynamic property C::$new10 is deprecated in %s on line %d
 string(16) "Added property 7"
+
+Deprecated: Creation of dynamic property C::$new11 is deprecated in %s on line %d
 Loop detected
 object(C)#%d (17) {
   ["a"]=>

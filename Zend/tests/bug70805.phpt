@@ -3,9 +3,11 @@ Bug #70805 (Segmentation faults whilst running Drupal 8 test suite)
 --FILE--
 <?php
 class A {
+    public $b;
 }
 
 class B {
+    public $a;
 }
 
 class C {

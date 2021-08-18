@@ -130,6 +130,10 @@ check($obj, 1);
 ?>
 --EXPECTF--
 ArrayObjectEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayObjectEx::$imp1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayObjectEx::$dyn1 is deprecated in %s on line %d
 ===CHECK===
 ArrayObjectEx::setFlags(0)
 ArrayObjectEx::dump()
@@ -175,6 +179,10 @@ array(3) {
 ArrayObjectEx::show()
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -243,6 +251,10 @@ array(1) {
 ===FOREACH===
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -364,6 +376,10 @@ array(3) {
 ArrayObjectEx::show()
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -432,6 +448,10 @@ array(1) {
 ===FOREACH===
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -546,6 +566,10 @@ array(3) {
 ArrayObjectEx::show()
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -605,6 +629,10 @@ array(1) {
 ===FOREACH===
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -708,6 +736,10 @@ array(3) {
 ArrayObjectEx::show()
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>
@@ -767,6 +799,10 @@ array(1) {
 ===FOREACH===
 ArrayObjectEx::getIterator()
 ArrayIteratorEx::__construct()
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$imp2 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayIteratorEx::$dyn2 is deprecated in %s on line %d
 ArrayIteratorEx::dump()
 array(3) {
   ["Flags"]=>

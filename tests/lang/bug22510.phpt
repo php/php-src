@@ -29,6 +29,8 @@ class foo
 
 class bar
 {
+    public $instance;
+
     function run1() {
         print __CLASS__."::".__FUNCTION__."\n";
         $this->instance = new foo();
@@ -103,6 +105,8 @@ done!
 ok2
 bar::run2
 foo::method2
+
+Deprecated: Creation of dynamic property foo::$foo is deprecated in %s on line %d
 foo::method2
 foo::finalize
 done!

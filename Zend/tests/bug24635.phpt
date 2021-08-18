@@ -3,6 +3,7 @@ Bug #24635 (crash on dtor calling other functions)
 --FILE--
 <?php
 class SiteClass {
+    public $page;
     function __construct()	{ $this->page = new PageClass(); }
 }
 class PageClass {
@@ -11,6 +12,7 @@ class PageClass {
     }
 }
 class SectionClass {
+    public $Comment;
     function __construct($comment) {
         $this->Comment = $comment;
     }

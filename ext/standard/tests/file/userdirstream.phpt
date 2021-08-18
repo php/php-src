@@ -3,6 +3,7 @@ Directory Streams
 --FILE--
 <?php
 class test {
+    public $context;
     public $idx = 0;
 
     function dir_opendir($path, $options) {

@@ -15,7 +15,10 @@ $ao1['new.ao1'] = 'new element added to ao1';
 $ao2['new.ao2'] = 'new element added to ao2';
 var_dump($c, $ao1, $ao2);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property C::$p1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property C::$p2 is deprecated in %s on line %d
 object(C)#1 (3) {
   ["p1"]=>
   string(32) "new prop added to c before clone"

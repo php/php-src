@@ -25,4 +25,6 @@ echo "okey";
 ?>
 --EXPECTF--
 Warning: Undefined property: Bar::$bar in %s on line %d
+
+Deprecated: Creation of dynamic property Foo::$blah is deprecated in %s on line %d
 okey
