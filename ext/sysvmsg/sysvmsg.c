@@ -362,7 +362,7 @@ PHP_FUNCTION(msg_send)
 	sysvmsg_queue_t * mq = NULL;
 	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;
-	int message_len = 0;
+	size_t message_len = 0;
 
 	RETVAL_FALSE;
 
