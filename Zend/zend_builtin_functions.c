@@ -34,6 +34,7 @@
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_standard_class_def = register_class_stdClass();
+	zend_standard_class_def->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	zend_register_default_classes();
 

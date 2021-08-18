@@ -22822,7 +22822,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -22953,7 +22953,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -23084,7 +23084,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -23215,7 +23215,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -25380,7 +25380,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -25511,7 +25511,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -25642,7 +25642,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -25773,7 +25773,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -29305,7 +29305,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -29436,7 +29436,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -29567,7 +29567,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -29698,7 +29698,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -31705,7 +31705,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -31836,7 +31836,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -31967,7 +31967,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -32098,7 +32098,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -33558,7 +33558,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -33689,7 +33689,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -33820,7 +33820,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -33951,7 +33951,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -36028,7 +36028,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -36159,7 +36159,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -36290,7 +36290,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -36421,7 +36421,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -40172,7 +40172,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -40303,7 +40303,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -40434,7 +40434,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -40565,7 +40565,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -43803,7 +43803,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -43934,7 +43934,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -44065,7 +44065,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -44196,7 +44196,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -48834,7 +48834,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -48965,7 +48965,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -49096,7 +49096,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
@@ -49227,7 +49227,7 @@ fast_assign_obj:
 					}
 				}
 
-				if (!zobj->ce->__set) {
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					if (EXPECTED(zobj->properties == NULL)) {
 						rebuild_object_properties(zobj);
 					}
