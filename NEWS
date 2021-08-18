@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #81302 (Stream position after stream filter removed). (cmb)
   . Fixed bug #81346 (Non-seekable streams don't update position after write).
     (cmb)
+  . Fixed bug #73122 (Integer Overflow when concatenating strings). (cmb)
 
 - Opcache:
   . Fixed bug #81353 (segfault with preloading and statically bound closure).
