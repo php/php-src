@@ -1140,7 +1140,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-			if (!IS_UNSERIALIZED(Z_STR_P(zv))) {
+			/* We can't use !IS_UNSERIALIZED here, because that does not recognize unserialized
+			 * interned strings in non-shm mode. */
+			if (IS_SERIALIZED(Z_STR_P(zv)) || IS_SERIALIZED_INTERNED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
 			}
 			break;
