@@ -269,12 +269,6 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xE000 && c < (0xE000 + 20*94)) {
-		/* Private Use Area (95ku - 114ku) */
-		s1 = c - 0xE000;
-		c1 = (s1 / 94) + 0x7F;
-		c2 = (s1 % 94) + 0x21;
-		s1 = (c1 << 8) | c2;
 	}
 
 	if (s1 <= 0) {

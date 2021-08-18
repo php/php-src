@@ -209,6 +209,7 @@ convertInvalidString("\x1B\$", "BAD+1B24", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$.", "BAD+1B242E", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$(X", "BAD+242858", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$B\x9F", "BAD+9F", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
+convertInvalidString("\xE0\x00", "U+E000", "UTF-16BE", "ISO-2022-JP-KDDI");
 
 echo "Done!\n";
 ?>
