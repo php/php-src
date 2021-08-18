@@ -1430,7 +1430,6 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 				}
 			}
 		}
-<<<<<<< HEAD
 		if (p == e || !replaced_slash) {
 			/* No more directories to create */
 			/* issue a warning to client if the last directory was created failed */
@@ -1441,37 +1440,6 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 			    return 0;
 			}
 			return 1;
-=======
-
-		if (p == buf) {
-			ret = php_mkdir(dir, mode);
-		} else {
-		    /* split php_mkdir() into php_check_open_basedir() and VCWD_MKDIR() */
-            if ((ret = php_check_open_basedir(dir)) < 0
-                || ((ret = VCWD_MKDIR(buf, (mode_t) mode)) < 0 && EEXIST != errno)) {
-		        php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		    } else {
-                if (!p) {
-                    p = buf;
-                }
-                /* create any needed directories if the creation of the 1st directory worked */
-                while (++p != e) {
-                    if (*p == '\0') {
-                        *p = DEFAULT_SLASH;
-                        if ((*(p+1) != '\0') && (ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
-                            /* parent directory already exists, try to create child directory */
-                            if (EEXIST == errno && (size_t) strlen(buf) < dir_len) {
-                                continue;
-                            }
-                            if (options & REPORT_ERRORS) {
-                                php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
->>>>>>> 88fe4c8322 (modify if condition)
 		}
 	}
 }
