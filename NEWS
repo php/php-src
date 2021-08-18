@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #71542 (disk_total_space does not work with relative paths). (cmb)
 
+- SysVMsg:
+  . Fixed bug #78819 (Heap Overflow in msg_send). (cmb)
+
 - XML:
   . Fixed bug #81351 (xml_parse may fail, but has no error code). (cmb, Nikita)
 
