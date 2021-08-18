@@ -101,7 +101,7 @@ jobs:
       parameters:
         configurationName: DEBUG_NTS_OPCACHE
         configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
     - template: azure/job.yml
       parameters:
         configurationName: DEBUG_NTS_REPEAT

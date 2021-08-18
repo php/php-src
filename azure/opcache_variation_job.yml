@@ -47,7 +47,7 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache Only (prime)'
+        runTestsName: 'File Cache (prime file)'
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so
@@ -56,12 +56,20 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'File Cache Only (use)'
+        runTestsName: 'File Cache (prime file, use file)'
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so
           --file-cache-use
           -d opcache.file_cache_only=1
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'File Cache (prime file, use shm)'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          --file-cache-use
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
