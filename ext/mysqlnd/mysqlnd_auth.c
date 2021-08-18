@@ -99,7 +99,10 @@ mysqlnd_run_authentication(
 			switch_to_auth_protocol = NULL;
 			switch_to_auth_protocol_len = 0;
 
-			mysqlnd_set_persistent_string(&conn->authentication_plugin_data, plugin_data, plugin_data_len, conn->persistent);
+			mysqlnd_set_persistent_string(&conn->authentication_plugin_data, NULL, 0, conn->persistent);
+			conn->authentication_plugin_data.l = plugin_data_len;
+			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
+			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
 
 			DBG_INF_FMT("salt(%zu)=[%.*s]", plugin_data_len, (int) plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
