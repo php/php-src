@@ -766,6 +766,9 @@ static timelib_long timelib_parse_tz_cor(char **ptr)
 				return sHOUR(tmp / 100) + sMIN(tmp % 100);
 			}
 		case 5: /* HH:MM */
+			if (begin[2] != ':') {
+				return 0;
+			}
 			tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10));
 			return tmp;
 	}
