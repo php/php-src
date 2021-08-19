@@ -673,19 +673,18 @@ PHP_METHOD(SoapVar, __construct)
 	zval *data, *this_ptr;
 	zend_long type;
 	bool type_is_null = 1;
-	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
-	size_t stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
+	zend_string *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!l!|s!s!s!s!", &data, &type, &type_is_null, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!l!|S!S!S!S!", &data, &type, &type_is_null, &stype, &ns, &name, &namens) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	this_ptr = ZEND_THIS;
 	if (type_is_null) {
-		add_property_long(this_ptr, "enc_type", UNKNOWN_TYPE);
+		ZVAL_LONG(Z_VAR_ENC_TYPE_P(this_ptr), UNKNOWN_TYPE);
 	} else {
 		if (zend_hash_index_exists(&SOAP_GLOBAL(defEncIndex), type)) {
-			add_property_long(this_ptr, "enc_type", type);
+			ZVAL_LONG(Z_VAR_ENC_TYPE_P(this_ptr), type);
 		} else {
 			zend_argument_value_error(2, "is not a valid encoding");
 			RETURN_THROWS();
@@ -693,20 +692,20 @@ PHP_METHOD(SoapVar, __construct)
 	}
 
 	if (data) {
-		add_property_zval(this_ptr, "enc_value", data);
+		ZVAL_COPY(Z_VAR_ENC_VALUE_P(this_ptr), data);
 	}
 
-	if (stype && stype_len > 0) {
-		add_property_stringl(this_ptr, "enc_stype", stype, stype_len);
+	if (stype && ZSTR_LEN(stype) != 0) {
+		ZVAL_STR_COPY(Z_VAR_ENC_STYPE_P(this_ptr), stype);
 	}
-	if (ns && ns_len > 0) {
-		add_property_stringl(this_ptr, "enc_ns", ns, ns_len);
+	if (ns && ZSTR_LEN(ns) != 0) {
+		ZVAL_STR_COPY(Z_VAR_ENC_NS_P(this_ptr), ns);
 	}
-	if (name && name_len > 0) {
-		add_property_stringl(this_ptr, "enc_name", name, name_len);
+	if (name && ZSTR_LEN(name) != 0) {
+		ZVAL_STR_COPY(Z_VAR_ENC_NAME_P(this_ptr), name);
 	}
-	if (namens && namens_len > 0) {
-		add_property_stringl(this_ptr, "enc_namens", namens, namens_len);
+	if (namens && ZSTR_LEN(namens) != 0) {
+		ZVAL_STR_COPY(Z_VAR_ENC_NAMENS_P(this_ptr), namens);
 	}
 }
 /* }}} */

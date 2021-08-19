@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a5baf303718efbc6fa5700de62fe8f33e6be0874 */
+ * Stub hash: 6e48f3873213091cf629f9dc7f2c7285ffcf23eb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -281,6 +281,42 @@ static zend_class_entry *register_class_SoapVar(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapVar", class_SoapVar_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_enc_type_default_value;
+	ZVAL_UNDEF(&property_enc_type_default_value);
+	zend_string *property_enc_type_name = zend_string_init("enc_type", sizeof("enc_type") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_type_name, &property_enc_type_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_enc_type_name);
+
+	zval property_enc_value_default_value;
+	ZVAL_NULL(&property_enc_value_default_value);
+	zend_string *property_enc_value_name = zend_string_init("enc_value", sizeof("enc_value") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_value_name, &property_enc_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_enc_value_name);
+
+	zval property_enc_stype_default_value;
+	ZVAL_NULL(&property_enc_stype_default_value);
+	zend_string *property_enc_stype_name = zend_string_init("enc_stype", sizeof("enc_stype") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_stype_name, &property_enc_stype_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_enc_stype_name);
+
+	zval property_enc_ns_default_value;
+	ZVAL_NULL(&property_enc_ns_default_value);
+	zend_string *property_enc_ns_name = zend_string_init("enc_ns", sizeof("enc_ns") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_ns_name, &property_enc_ns_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_enc_ns_name);
+
+	zval property_enc_name_default_value;
+	ZVAL_NULL(&property_enc_name_default_value);
+	zend_string *property_enc_name_name = zend_string_init("enc_name", sizeof("enc_name") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_name_name, &property_enc_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_enc_name_name);
+
+	zval property_enc_namens_default_value;
+	ZVAL_NULL(&property_enc_namens_default_value);
+	zend_string *property_enc_namens_name = zend_string_init("enc_namens", sizeof("enc_namens") - 1, 1);
+	zend_declare_typed_property(class_entry, property_enc_namens_name, &property_enc_namens_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_enc_namens_name);
 
 	return class_entry;
 }

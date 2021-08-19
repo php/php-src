@@ -28,6 +28,13 @@ class SoapFault extends Exception
 
 class SoapVar
 {
+    public int $enc_type;
+    public mixed $enc_value = null;
+    public ?string $enc_stype = null;
+    public ?string $enc_ns = null;
+    public ?string $enc_name = null;
+    public ?string $enc_namens = null;
+
     public function __construct(mixed $data, ?int $encoding, ?string $typeName = null, ?string $typeNamespace = null, ?string $nodeName = null, ?string $nodeNamespace = null) {}
 }
 
