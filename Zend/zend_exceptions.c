@@ -850,10 +850,12 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *except
 
 ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, zend_string *message, zend_long code, int severity) /* {{{ */
 {
-	zval tmp;
 	zend_object *obj = zend_throw_exception_zstr(exception_ce, message, code);
-	ZVAL_LONG(&tmp, severity);
-	zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	if (exception_ce && instanceof_function(exception_ce, zend_ce_error_exception)) {
+		zval tmp;
+		ZVAL_LONG(&tmp, severity);
+		zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	}
 	return obj;
 }
 /* }}} */
