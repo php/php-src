@@ -40,6 +40,9 @@ class SoapVar
 
 class SoapServer
 {
+    /** @var resource */
+    public $service;
+
     public function __construct(?string $wsdl, array $options = []) {}
 
     /** @tentative-return-type */

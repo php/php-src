@@ -143,12 +143,15 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 #define FIND_TYPEMAP_PROPERTY(ss,tmp) (tmp = zend_hash_str_find(Z_OBJPROP_P(ss), "typemap", sizeof("typemap")-1))
 #define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
+#define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_PARAM_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_SERVER_SERVICE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+
 #define FETCH_THIS_SERVICE(ss) \
 	{ \
-		zval *tmp; \
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(ZEND_THIS),"service", sizeof("service")-1)) != NULL) { \
-			ss = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service); \
-		} else { \
+		zval *tmp = Z_SERVER_SERVICE_P(ZEND_THIS); \
+		ss = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service); \
+		if (!ss) { \
 			zend_throw_error(NULL, "Cannot fetch SoapServer object"); \
 			SOAP_SERVER_END_CODE(); \
 			RETURN_THROWS(); \
@@ -161,9 +164,6 @@ static zend_class_entry* soap_fault_class_entry;
 static zend_class_entry* soap_header_class_entry;
 static zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_var_class_entry;
-
-#define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
-#define Z_PARAM_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
@@ -927,7 +927,7 @@ PHP_METHOD(SoapServer, __construct)
 	}
 
 	res = zend_register_resource(service, le_service);
-	add_property_resource(ZEND_THIS, "service", res);
+	ZVAL_RES(Z_SERVER_SERVICE_P(ZEND_THIS), res);
 
 	SOAP_SERVER_END_CODE();
 }
@@ -1841,20 +1841,19 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 		zval fault_obj;
 
 		if (error_num & E_FATAL_ERRORS) {
-			char* code = SOAP_GLOBAL(error_code);
+			char *code = SOAP_GLOBAL(error_code);
+			zval *error_object = &SOAP_GLOBAL(error_object);
 			zend_string *buffer;
 			zval outbuf;
-			zval *tmp;
 			soapServicePtr service;
 
 			ZVAL_UNDEF(&outbuf);
 			if (code == NULL) {
 				code = "Server";
 			}
-			if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
-			    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_server_class_entry) &&
-		        (tmp = zend_hash_str_find(Z_OBJPROP(SOAP_GLOBAL(error_object)), "service", sizeof("service")-1)) != NULL &&
-				(service = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service)) &&
+			if (Z_OBJ_P(error_object) &&
+			    instanceof_function(Z_OBJCE_P(error_object), soap_server_class_entry) &&
+				(service = (soapServicePtr)zend_fetch_resource_ex(Z_SERVER_SERVICE_P(error_object), "service", le_service)) &&
 				!service->send_errors) {
 				buffer = zend_string_init("Internal Error", sizeof("Internal Error")-1, 0);
 			} else {
