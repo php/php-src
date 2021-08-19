@@ -8,6 +8,9 @@ function is_soap_fault(mixed $object): bool {}
 
 class SoapParam
 {
+    public string $param_name;
+    public mixed $param_data;
+
     public function __construct(mixed $data, string $name) {}
 }
 

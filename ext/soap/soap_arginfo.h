@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c72f989c179f1bc136fe008c78ac3605efe55141 */
+ * Stub hash: a5baf303718efbc6fa5700de62fe8f33e6be0874 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -239,6 +239,18 @@ static zend_class_entry *register_class_SoapParam(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapParam", class_SoapParam_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_param_name_default_value;
+	ZVAL_UNDEF(&property_param_name_default_value);
+	zend_string *property_param_name_name = zend_string_init("param_name", sizeof("param_name") - 1, 1);
+	zend_declare_typed_property(class_entry, property_param_name_name, &property_param_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_param_name_name);
+
+	zval property_param_data_default_value;
+	ZVAL_UNDEF(&property_param_data_default_value);
+	zend_string *property_param_data_name = zend_string_init("param_data", sizeof("param_data") - 1, 1);
+	zend_declare_typed_property(class_entry, property_param_data_name, &property_param_data_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_param_data_name);
 
 	return class_entry;
 }

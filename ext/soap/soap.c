@@ -162,6 +162,9 @@ static zend_class_entry* soap_header_class_entry;
 static zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_var_class_entry;
 
+#define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_PARAM_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, zend_string *, const uint32_t, zend_string *);
@@ -499,22 +502,21 @@ PHP_MINFO_FUNCTION(soap)
 PHP_METHOD(SoapParam, __construct)
 {
 	zval *data;
-	char *name;
-	size_t name_length;
+	zend_string *name;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &data, &name, &name_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &data, &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (name_length == 0) {
+	if (ZSTR_LEN(name) == 0) {
 		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	this_ptr = ZEND_THIS;
-	add_property_stringl(this_ptr, "param_name", name, name_length);
-	add_property_zval(this_ptr, "param_data", data);
+	ZVAL_STR_COPY(Z_PARAM_NAME_P(this_ptr), name);
+	ZVAL_COPY(Z_PARAM_DATA_P(this_ptr), data);
 }
 /* }}} */
 
@@ -4064,15 +4066,12 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 	xmlNodePtr xmlParam;
 	char paramNameBuf[10];
 
-	if (param_val &&
-	    Z_TYPE_P(param_val) == IS_OBJECT &&
-	    Z_OBJCE_P(param_val) == soap_param_class_entry) {
-		zval *param_name;
-		zval *param_data;
-
-		if ((param_name = zend_hash_str_find(Z_OBJPROP_P(param_val), "param_name", sizeof("param_name")-1)) != NULL &&
-		    Z_TYPE_P(param_name) == IS_STRING &&
-		    (param_data = zend_hash_str_find(Z_OBJPROP_P(param_val), "param_data", sizeof("param_data")-1)) != NULL) {
+	if (param_val && Z_TYPE_P(param_val) == IS_OBJECT
+			&& Z_OBJCE_P(param_val) == soap_param_class_entry) {
+		zval *param_name = Z_PARAM_NAME_P(param_val);
+		zval *param_data = Z_PARAM_DATA_P(param_val);
+		ZVAL_DEREF(param_name);
+		if (Z_TYPE_P(param_name) == IS_STRING && Z_TYPE_P(param_data) != IS_UNDEF) {
 			param_val = param_data;
 			name = Z_STRVAL_P(param_name);
 		}
