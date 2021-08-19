@@ -1394,50 +1394,16 @@ PHP_METHOD(SoapServer, handle)
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
 			/* Call constructor */
-			if (zend_hash_str_exists(&Z_OBJCE(tmp_soap)->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1)) {
-				zval c_ret, constructor;
-
-				ZVAL_STRING(&constructor, ZEND_CONSTRUCTOR_FUNC_NAME);
-				if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv) == FAILURE) {
-					php_error_docref(NULL, E_ERROR, "Error calling constructor");
-				}
+			if (service->soap_class.ce->constructor) {
+				zend_call_known_instance_method(
+					service->soap_class.ce->constructor, Z_OBJ(tmp_soap), NULL,
+					service->soap_class.argc, service->soap_class.argv);
 				if (EG(exception)) {
 					php_output_discard();
 					_soap_server_exception(service, function, ZEND_THIS);
-					zval_ptr_dtor_str(&constructor);
-					zval_ptr_dtor(&c_ret);
 					zval_ptr_dtor(&tmp_soap);
 					goto fail;
 				}
-				zval_ptr_dtor_str(&constructor);
-				zval_ptr_dtor(&c_ret);
-			} else {
-				int class_name_len = ZSTR_LEN(service->soap_class.ce->name);
-				char *class_name = emalloc(class_name_len+1);
-
-				memcpy(class_name, ZSTR_VAL(service->soap_class.ce->name), class_name_len+1);
-				if (zend_hash_str_exists(&Z_OBJCE(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len)) {
-					zval c_ret, constructor;
-
-					ZVAL_STR_COPY(&constructor, service->soap_class.ce->name);
-					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv) == FAILURE) {
-						php_error_docref(NULL, E_ERROR, "Error calling constructor");
-					}
-
-					if (EG(exception)) {
-						php_output_discard();
-						_soap_server_exception(service, function, ZEND_THIS);
-						zval_ptr_dtor_str(&constructor);
-						zval_ptr_dtor(&c_ret);
-						efree(class_name);
-						zval_ptr_dtor(&tmp_soap);
-						goto fail;
-					}
-
-					zval_ptr_dtor_str(&constructor);
-					zval_ptr_dtor(&c_ret);
-				}
-				efree(class_name);
 			}
 #if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
