@@ -1112,11 +1112,6 @@ END_EXTERN_C()
 #define ZEND_MOD_FUNC_NAME			"__mod"
 #define ZEND_POW_FUNC_NAME			"__pow"
 #define ZEND_EQ_FUNC_NAME			"__equals"
-#define ZEND_NEQ_FUNC_NAME			"__notequals"
-#define ZEND_LT_FUNC_NAME			"__lessthan"
-#define ZEND_LTE_FUNC_NAME			"__lessthanoreq"
-#define ZEND_GT_FUNC_NAME			"__greaterthan"
-#define ZEND_GTE_FUNC_NAME			"__greaterthanoreq"
 #define ZEND_COMPARE_FUNC_NAME		"__compareto"
 
 /* The following constants may be combined in CG(compiler_options)

@@ -3,10 +3,7 @@ comparing objects to other types
 --FILE--
 <?php
 
-class Bar {
-}
-
-$b = new Bar;
+$b = new stdClass;
 
 var_dump($b == NULL);
 var_dump($b != NULL);
@@ -37,24 +34,24 @@ bool(true)
 bool(false)
 bool(true)
 
-Notice: Object of class Bar could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to int in %s on line %d
 bool(false)
 
-Notice: Object of class Bar could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to int in %s on line %d
 bool(true)
 
-Notice: Object of class Bar could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to int in %s on line %d
 bool(true)
 
-Notice: Object of class Bar could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to int in %s on line %d
 bool(false)
 
-Notice: Object of class Bar could not be converted to float in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
 bool(true)
 
-Notice: Object of class Bar could not be converted to float in %s on line %d
+Notice: Object of class stdClass could not be converted to float in %s on line %d
 bool(false)
 
-Notice: Object of class Bar could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to int in %s on line %d
 bool(true)
 Done

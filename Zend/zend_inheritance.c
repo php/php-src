@@ -185,21 +185,6 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__equals)) {
 		ce->__equals = parent->__equals;
 	}
-	if (EXPECTED(!ce->__notequals)) {
-		ce->__notequals = parent->__notequals;
-	}
-	if (EXPECTED(!ce->__lessthan)) {
-		ce->__lessthan = parent->__lessthan;
-	}
-	if (EXPECTED(!ce->__lessthanoreq)) {
-		ce->__lessthanoreq = parent->__lessthanoreq;
-	}
-	if (EXPECTED(!ce->__greaterthan)) {
-		ce->__greaterthan = parent->__greaterthan;
-	}
-	if (EXPECTED(!ce->__greaterthanoreq)) {
-		ce->__greaterthanoreq = parent->__greaterthanoreq;
-	}
 	if (EXPECTED(!ce->__compareto)) {
 		ce->__compareto = parent->__compareto;
 	}

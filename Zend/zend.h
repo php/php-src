@@ -185,11 +185,6 @@ struct _zend_class_entry {
 	zend_function *__mod;
 	zend_function *__pow;
 	zend_function *__equals;
-	zend_function *__notequals;
-	zend_function *__lessthan;
-	zend_function *__lessthanoreq;
-	zend_function *__greaterthan;
-	zend_function *__greaterthanoreq;
 	zend_function *__compareto;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */

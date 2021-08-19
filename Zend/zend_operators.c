@@ -2087,20 +2087,30 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2) /* {{{ */
+ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar equals) /* {{{ */
 {
 	zval ret;
 	int retVal;
+	int result;
 	if (Z_TYPE_P(op1) == IS_OBJECT &&
 			Z_TYPE_P(op2) == IS_OBJECT &&
 			Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
 		return 0;
 	} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-		Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_IS_EQUAL, &ret, op1, op2);
-		retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
+		result = Z_OBJ_HANDLER_P(op1, do_operation)(equals, &ret, op1, op2);
+		if (result == FAILURE) {
+			retVal = zend_compare(op1, op2);
+		} else {
+			retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
+		}
 		return retVal;
 	} else {
-		Z_OBJ_HANDLER_P(op2, do_operation)(ZEND_IS_EQUAL, &ret, op1, op2);
+		result = Z_OBJ_HANDLER_P(op2, do_operation)(equals, &ret, op1, op2);
+		if (result == FAILURE) {
+			retVal = zend_compare(op1, op2);
+		} else {
+			retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
+		}
 		retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
 		return retVal;
 	}

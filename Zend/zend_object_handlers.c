@@ -303,42 +303,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				operator = "!=";
 				break;
 
-			case ZEND_IS_SMALLER:
-				if (zobj == Z_OBJ_P(op1)) {
-					fcic.function_handler = ce->__lessthan;
-				} else {
-					fcic.function_handler = ce->__greaterthan;
-				}
-				operator = "<";
-				break;
-
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (zobj == Z_OBJ_P(op1)) {
-					fcic.function_handler = ce->__lessthanoreq;
-				} else {
-					fcic.function_handler = ce->__greaterthanoreq;
-				}
-				operator = "<=";
-				break;
-
-			case ZEND_IS_LARGER:
-				if (zobj == Z_OBJ_P(op1)) {
-					fcic.function_handler = ce->__greaterthan;
-				} else {
-					fcic.function_handler = ce->__lessthan;
-				}
-				operator = ">";
-				break;
-
-			case ZEND_IS_LARGER_OR_EQUAL:
-				if (zobj == Z_OBJ_P(op1)) {
-					fcic.function_handler = ce->__greaterthanoreq;
-				} else {
-					fcic.function_handler = ce->__lessthanoreq;
-				}
-				operator = ">=";
-				break;
-
 			default:
 				return FAILURE;
 		}
@@ -350,6 +314,18 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				ce = Z_OBJCE_P(op2);
 				is_retry = 1;
 				continue;
+			}
+
+			if ((Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op2) == IS_NULL ||
+				Z_TYPE_INFO_P(op1) == IS_FALSE || Z_TYPE_INFO_P(op2) == IS_FALSE) &&
+				(opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL)) {
+				Z_TYPE_INFO_P(result) = IS_FALSE;
+				return SUCCESS;
+			}
+
+			if ((Z_TYPE_P(op1) == IS_OBJECT && Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM) ||
+				(Z_TYPE_P(op2) == IS_OBJECT && Z_OBJCE_P(op2)->ce_flags & ZEND_ACC_ENUM)) {
+				return FAILURE;
 			}
 
 			if (ce->type != ZEND_INTERNAL_CLASS) {
@@ -364,27 +340,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		fcic.function_handler->type = ZEND_USER_FUNCTION;
 		fci.named_params = NULL;
 		int tmp = zend_call_function(&fci, &fcic);
-
-		if (tmp == SUCCESS) {
-			switch (opcode) {
-				case ZEND_IS_NOT_EQUAL:
-					/* reverse __equals for not equals */
-					Z_TYPE_INFO_P(result) = Z_TYPE_INFO_P(result) == IS_TRUE ? IS_FALSE : IS_TRUE;
-					break;
-
-				case ZEND_IS_SMALLER:
-				case ZEND_IS_SMALLER_OR_EQUAL:
-				case ZEND_IS_LARGER:
-				case ZEND_IS_LARGER_OR_EQUAL:
-					if (is_retry) {
-						Z_LVAL_P(result) = Z_LVAL_P(result) * -1;
-					}
-					break;
-
-				default:
-					break;
-			}
-		}
 
 		EG(fake_scope) = orig_fake_scope;
 
@@ -1744,23 +1699,26 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
-static int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
+ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
-	zend_bool is_retry = 0;
+	zend_bool is_retry;
 	zend_object *zobj;
 	zend_class_entry *ce;
 
 	if(Z_TYPE_P(o1) == IS_OBJECT) {
 		zobj = Z_OBJ_P(o1);
 		ce = Z_OBJCE_P(o1);
+		is_retry = 0;
 	} else if(Z_TYPE_P(o2) == IS_OBJECT) {
 		zobj = Z_OBJ_P(o2);
 		ce = Z_OBJCE_P(o2);
+		is_retry = 1;
 	}
 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
-	zval *result = (result);
+	zval result;
+	int resultLval;
 
 	zval params[1];
 	params[0] = *o2;
@@ -1768,7 +1726,7 @@ static int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 	fci.param_count = 1;
 	fci.params = params;
 	fci.size = sizeof(fci);
-	fci.retval = result;
+	fci.retval = &result;
 
 	do {
 		fci.object = zobj;
@@ -1792,7 +1750,13 @@ static int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 		int tmp = zend_call_function(&fci, &fcic);
 
 		if (tmp == SUCCESS) {
-			return result->value.lval;
+			resultLval = Z_LVAL(result);
+			/* Normalize ints out of range for compare op */
+			resultLval = (resultLval > 1 ? 1 : resultLval);
+			resultLval = (resultLval < -1 ? -1 : resultLval);
+			/* Reverse for right hand operand */
+			resultLval = (is_retry ? resultLval*-1 : resultLval);
+			return resultLval;
 		} else {
 			return ZEND_UNCOMPARABLE;
 		}

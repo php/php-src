@@ -9,7 +9,7 @@ $testobj2 = new Test;
 $testobj1->x = $testobj1;
 $testobj2->x = $testobj2;
 
-var_dump($testobj1 == $testobj2);
+var_dump($testobj1 <= $testobj2);
 ?>
 --EXPECTF--
 Fatal error: Nesting level too deep - recursive dependency? in %sbug63882.php on line 9

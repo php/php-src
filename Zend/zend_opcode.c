@@ -1189,10 +1189,6 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 			return (binary_op_type) is_smaller_function;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			return (binary_op_type) is_smaller_or_equal_function;
-		case ZEND_IS_LARGER:
-			return (binary_op_type) is_larger_function;
-		case ZEND_IS_LARGER_OR_EQUAL:
-			return (binary_op_type) is_larger_or_equal_function;
 		case ZEND_SPACESHIP:
 			return (binary_op_type) compare_function;
 		case ZEND_BW_OR:

@@ -13,13 +13,27 @@ var_dump($a == $b, $b == $c);
 class foo { }
 
 $d = clone $a = $b = new foo;
-var_dump($a == $d, $b == $d, $c == $a);
+try {
+    var_dump($a == $d);
+} catch (InvalidOperator) {
+    echo "InvalidOperator thrown".PHP_EOL;
+}
+try {
+    var_dump($b == $d);
+} catch (InvalidOperator) {
+    echo "InvalidOperator thrown".PHP_EOL;
+}
+try {
+    var_dump($c == $a);
+} catch (InvalidOperator) {
+    echo "InvalidOperator thrown".PHP_EOL;
+}
 
 ?>
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
-bool(true)
-bool(true)
-bool(false)
+InvalidOperator thrown
+InvalidOperator thrown
+InvalidOperator thrown

@@ -1881,11 +1881,6 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__mod = NULL;
 		ce->__pow = NULL;
 		ce->__equals = NULL;
-		ce->__notequals = NULL;
-		ce->__lessthan = NULL;
-		ce->__lessthanoreq = NULL;
-		ce->__greaterthan = NULL;
-		ce->__greaterthanoreq = NULL;
 		ce->__compareto = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
@@ -2161,8 +2156,6 @@ ZEND_API bool zend_is_smart_branch(const zend_op *opline) /* {{{ */
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
-		case ZEND_IS_LARGER:
-		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
 		case ZEND_ISSET_ISEMPTY_CV:
@@ -8653,12 +8646,6 @@ void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
 		zval_ptr_dtor(&left_node.u.constant);
 		zval_ptr_dtor(&right_node.u.constant);
 		return;
-	}
-
-	if (left_node.op_type == IS_OBJECT || right_node.op_type == IS_OBJECT) {
-		zend_emit_op_tmp(result,
-			ast->kind == ZEND_AST_GREATER ? ZEND_IS_LARGER : ZEND_IS_LARGER_OR_EQUAL,
-			&left_node, &right_node);
 	}
 
 	zend_emit_op_tmp(result,

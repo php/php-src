@@ -581,7 +581,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_equal_hel
 		op_2 = ZVAL_UNDEFINED_OP2();
 	}
 	if (Z_TYPE_P(op_1) == IS_OBJECT || Z_TYPE_P(op_2) == IS_OBJECT) {
-		ret = zend_equals_object(op_1, op_2);
+		ret = zend_equals_object(op_1, op_2, ZEND_IS_EQUAL);
 	} else {
 		ret = zend_compare(op_1, op_2);
 	}
@@ -607,7 +607,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_not_equal
 		op_2 = ZVAL_UNDEFINED_OP2();
 	}
 	if (Z_TYPE_P(op_1) == IS_OBJECT || Z_TYPE_P(op_2) == IS_OBJECT) {
-		ret = zend_equals_object(op_1, op_2);
+		ret = zend_equals_object(op_1, op_2, ZEND_IS_NOT_EQUAL);
 	} else {
 		ret = zend_compare(op_1, op_2);
 	}

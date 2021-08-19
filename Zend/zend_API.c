@@ -2621,16 +2621,6 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	    zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_EQ_FUNC_NAME)) {
 	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
-	} else if (zend_string_equals_literal(lcname, ZEND_NEQ_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
-	} else if (zend_string_equals_literal(lcname, ZEND_LT_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
-	} else if (zend_string_equals_literal(lcname, ZEND_LTE_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
-	} else if (zend_string_equals_literal(lcname, ZEND_GT_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
-	} else if (zend_string_equals_literal(lcname, ZEND_GTE_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_COMPARE_FUNC_NAME)) {
 	    zend_check_magic_method_args(1, ce, fptr, error_type);
 	    zend_check_magic_method_non_static(ce, fptr, error_type);
@@ -2691,16 +2681,6 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 	    ce->__pow = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_EQ_FUNC_NAME)) {
 	    ce->__equals = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_NEQ_FUNC_NAME)) {
-	    ce->__notequals = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_LT_FUNC_NAME)) {
-	    ce->__lessthan = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_LTE_FUNC_NAME)) {
-	    ce->__lessthanoreq = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_GT_FUNC_NAME)) {
-	    ce->__greaterthan = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_GTE_FUNC_NAME)) {
-	    ce->__greaterthanoreq = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_COMPARE_FUNC_NAME)) {
 	    ce->__compareto = fptr;
 	}
