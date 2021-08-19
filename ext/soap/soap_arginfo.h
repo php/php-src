@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7717522131d47f9d133ac2a9649f1974f70b6a05 */
+ * Stub hash: f17ad4bc7a647e717128f8f081d8841113158236 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -373,6 +373,66 @@ static zend_class_entry *register_class_SoapClient(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapClient", class_SoapClient_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_uri_default_value;
+	ZVAL_NULL(&property_uri_default_value);
+	zend_string *property_uri_name = zend_string_init("uri", sizeof("uri") - 1, 1);
+	zend_declare_typed_property(class_entry, property_uri_name, &property_uri_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_uri_name);
+
+	zval property_style_default_value;
+	ZVAL_NULL(&property_style_default_value);
+	zend_string *property_style_name = zend_string_init("style", sizeof("style") - 1, 1);
+	zend_declare_typed_property(class_entry, property_style_name, &property_style_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_style_name);
+
+	zval property_use_default_value;
+	ZVAL_NULL(&property_use_default_value);
+	zend_string *property_use_name = zend_string_init("use", sizeof("use") - 1, 1);
+	zend_declare_typed_property(class_entry, property_use_name, &property_use_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_use_name);
+
+	zval property_location_default_value;
+	ZVAL_NULL(&property_location_default_value);
+	zend_string *property_location_name = zend_string_init("location", sizeof("location") - 1, 1);
+	zend_declare_typed_property(class_entry, property_location_name, &property_location_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_location_name);
+
+	zval property_trace_default_value;
+	ZVAL_BOOL(&property_trace_default_value, 0);
+	zend_string *property_trace_name = zend_string_init("trace", sizeof("trace") - 1, 1);
+	zend_declare_typed_property(class_entry, property_trace_name, &property_trace_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_trace_name);
+
+	zval property_compression_default_value;
+	ZVAL_NULL(&property_compression_default_value);
+	zend_string *property_compression_name = zend_string_init("compression", sizeof("compression") - 1, 1);
+	zend_declare_typed_property(class_entry, property_compression_name, &property_compression_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_compression_name);
+
+	zval property_sdl_default_value;
+	ZVAL_NULL(&property_sdl_default_value);
+	zend_string *property_sdl_name = zend_string_init("sdl", sizeof("sdl") - 1, 1);
+	zend_declare_property_ex(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_sdl_name);
+
+	zval property_typemap_default_value;
+	ZVAL_NULL(&property_typemap_default_value);
+	zend_string *property_typemap_name = zend_string_init("typemap", sizeof("typemap") - 1, 1);
+	zend_declare_property_ex(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_typemap_name);
+
+	zval property_httpsocket_default_value;
+	ZVAL_NULL(&property_httpsocket_default_value);
+	zend_string *property_httpsocket_name = zend_string_init("httpsocket", sizeof("httpsocket") - 1, 1);
+	zend_declare_property_ex(class_entry, property_httpsocket_name, &property_httpsocket_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_httpsocket_name);
+
+	zval property_httpurl_default_value;
+	ZVAL_NULL(&property_httpurl_default_value);
+	zend_string *property_httpurl_name = zend_string_init("httpurl", sizeof("httpurl") - 1, 1);
+	zend_declare_property_ex(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_httpurl_name);
 
 	return class_entry;
 }

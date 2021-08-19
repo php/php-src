@@ -208,4 +208,15 @@ void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 #define soap_error3(severity, format, param1, param2, param3) \
 	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
 
+#define Z_CLIENT_URI_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_CLIENT_STYLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_CLIENT_USE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
+#define Z_CLIENT_LOCATION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
+#define Z_CLIENT_TRACE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+#define Z_CLIENT_COMPRESSION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 5)
+#define Z_CLIENT_SDL_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 6)
+#define Z_CLIENT_TYPEMAP_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 7)
+#define Z_CLIENT_HTTPSOCKET_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 8)
+#define Z_CLIENT_HTTPURL_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 9)
+
 #endif

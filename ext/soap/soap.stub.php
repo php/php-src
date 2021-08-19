@@ -81,6 +81,21 @@ class SoapServer
 
 class SoapClient
 {
+    public ?string $uri = null;
+    public ?int $style = null;
+    public ?int $use = null;
+    public ?string $location = null;
+    public bool $trace = false;
+    public ?int $compression = null;
+    /** @var resource|null */
+    public $sdl = null;
+    /** @var resource|null */
+    public $typemap = null;
+    /** @var resource|null */
+    public $httpsocket = null;
+    /** @var resource|null */
+    public $httpurl = null;
+
     public function __construct(?string $wsdl, array $options = []) {}
 
     /** @tentative-return-type */

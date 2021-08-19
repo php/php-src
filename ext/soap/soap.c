@@ -129,18 +129,16 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 
 #define FETCH_THIS_SDL(ss) \
 	{ \
-		zval *__tmp; \
-		if(FIND_SDL_PROPERTY(ZEND_THIS, __tmp) != NULL) { \
+		zval *__tmp = Z_CLIENT_SDL_P(ZEND_THIS); \
+		if (Z_TYPE_P(__tmp) == IS_RESOURCE) { \
 			FETCH_SDL_RES(ss,__tmp); \
 		} else { \
 			ss = NULL; \
 		} \
 	}
 
-#define FIND_SDL_PROPERTY(ss,tmp) (tmp = zend_hash_str_find(Z_OBJPROP_P(ss), "sdl", sizeof("sdl")-1))
 #define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource_ex(tmp, "sdl", le_sdl)
 
-#define FIND_TYPEMAP_PROPERTY(ss,tmp) (tmp = zend_hash_str_find(Z_OBJPROP_P(ss), "typemap", sizeof("typemap")-1))
 #define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
 #define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
@@ -1934,7 +1932,7 @@ PHP_METHOD(SoapClient, __construct)
 			/* Fetching non-WSDL mode options */
 			if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL &&
 			    Z_TYPE_P(tmp) == IS_STRING) {
-				add_property_str(this_ptr, "uri", zend_string_copy(Z_STR_P(tmp)));
+				ZVAL_STR_COPY(Z_CLIENT_URI_P(this_ptr), Z_STR_P(tmp));
 			} else {
 				php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
 			}
@@ -1942,13 +1940,13 @@ PHP_METHOD(SoapClient, __construct)
 			if ((tmp = zend_hash_str_find(ht, "style", sizeof("style")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_LONG &&
 					(Z_LVAL_P(tmp) == SOAP_RPC || Z_LVAL_P(tmp) == SOAP_DOCUMENT)) {
-				add_property_long(this_ptr, "style", Z_LVAL_P(tmp));
+				ZVAL_LONG(Z_CLIENT_STYLE_P(this_ptr), Z_LVAL_P(tmp));
 			}
 
 			if ((tmp = zend_hash_str_find(ht, "use", sizeof("use")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_LONG &&
 					(Z_LVAL_P(tmp) == SOAP_LITERAL || Z_LVAL_P(tmp) == SOAP_ENCODED)) {
-				add_property_long(this_ptr, "use", Z_LVAL_P(tmp));
+				ZVAL_LONG(Z_CLIENT_USE_P(this_ptr), Z_LVAL_P(tmp));
 			}
 		}
 
@@ -1962,7 +1960,7 @@ PHP_METHOD(SoapClient, __construct)
 
 		if ((tmp = zend_hash_str_find(ht, "location", sizeof("location")-1)) != NULL &&
 		    Z_TYPE_P(tmp) == IS_STRING) {
-			add_property_str(this_ptr, "location", zend_string_copy(Z_STR_P(tmp)));
+			ZVAL_STR_COPY(Z_CLIENT_LOCATION_P(this_ptr), Z_STR_P(tmp));
 		} else if (!wsdl) {
 			php_error_docref(NULL, E_ERROR, "'location' option is required in nonWSDL mode");
 		}
@@ -2019,7 +2017,7 @@ PHP_METHOD(SoapClient, __construct)
 		if ((tmp = zend_hash_str_find(ht, "trace", sizeof("trace")-1)) != NULL &&
 		    (Z_TYPE_P(tmp) == IS_TRUE ||
 		     (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 1))) {
-			add_property_long(this_ptr, "trace", 1);
+			ZVAL_TRUE(Z_CLIENT_TRACE_P(this_ptr));
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "exceptions", sizeof("exceptions")-1)) != NULL &&
@@ -2035,7 +2033,7 @@ PHP_METHOD(SoapClient, __construct)
 	      zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1) &&
 	      zend_hash_str_exists(EG(function_table), "gzcompress", sizeof("gzcompress")-1) &&
 	      zend_hash_str_exists(EG(function_table), "gzencode", sizeof("gzencode")-1)) {
-			add_property_long(this_ptr, "compression", Z_LVAL_P(tmp));
+			ZVAL_LONG(Z_CLIENT_COMPRESSION_P(this_ptr), Z_LVAL_P(tmp));
 		}
 		if ((tmp = zend_hash_str_find(ht, "encoding", sizeof("encoding")-1)) != NULL &&
 		    Z_TYPE_P(tmp) == IS_STRING) {
@@ -2118,7 +2116,7 @@ PHP_METHOD(SoapClient, __construct)
 		sdl = get_sdl(this_ptr, ZSTR_VAL(wsdl), cache_wsdl);
 		res = zend_register_resource(sdl, le_sdl);
 
-		add_property_resource(this_ptr, "sdl", res);
+		ZVAL_RES(Z_CLIENT_SDL_P(this_ptr), res);
 
 		SOAP_GLOBAL(soap_version) = old_soap_version;
 	}
@@ -2126,10 +2124,8 @@ PHP_METHOD(SoapClient, __construct)
 	if (typemap_ht) {
 		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
 		if (typemap) {
-			zend_resource *res;
-
-			res = zend_register_resource(typemap, le_typemap);
-			add_property_resource(this_ptr, "typemap", res);
+			zend_resource *res = zend_register_resource(typemap, le_typemap);
+			ZVAL_RES(Z_CLIENT_TYPEMAP_P(this_ptr), res);
 		}
 	}
 	SOAP_CLIENT_END_CODE();
@@ -2143,7 +2139,6 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	int    buf_size;
 	zval   func;
 	zval  params[5];
-	zval  *trace;
 	zval  *fault;
 	int    _bailout = 0;
 
@@ -2156,8 +2151,9 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	}
 
 	zend_try {
-		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
+		ZVAL_DEREF(trace);
+		if (Z_TYPE_P(trace) == IS_TRUE) {
 			add_property_stringl(this_ptr, "__last_request", buf, buf_size);
 		}
 
@@ -2191,8 +2187,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 				add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL);
 			}
 			ret = FALSE;
-		} else if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		} else if (Z_TYPE_P(trace) == IS_TRUE) {
 			add_property_str(this_ptr, "__last_response", zend_string_copy(Z_STR_P(response)));
 		}
 	} zend_catch {
@@ -2245,8 +2240,9 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	SOAP_CLIENT_BEGIN_CODE();
 
-	if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		(Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+	trace = Z_CLIENT_TRACE_P(this_ptr);
+	ZVAL_DEREF(trace);
+	if (Z_TYPE_P(trace) == IS_TRUE) {
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "__last_request", sizeof("__last_request")-1);
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "__last_response", sizeof("__last_response")-1);
 	}
@@ -2258,17 +2254,21 @@ static void do_soap_call(zend_execute_data *execute_data,
 	}
 
 	if (location == NULL) {
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
-		  location = Z_STRVAL_P(tmp);
+		tmp = Z_CLIENT_LOCATION_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (Z_TYPE_P(tmp) == IS_STRING) {
+			location = Z_STRVAL_P(tmp);
 		}
 	}
 
-	if (FIND_SDL_PROPERTY(this_ptr,tmp) != NULL) {
+	tmp = Z_CLIENT_SDL_P(this_ptr);
+	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 		FETCH_SDL_RES(sdl,tmp);
 	}
-	if (FIND_TYPEMAP_PROPERTY(this_ptr,tmp) != NULL) {
-		FETCH_TYPEMAP_RES(typemap,tmp);
+
+	tmp = Z_CLIENT_TYPEMAP_P(this_ptr);
+	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
+		FETCH_TYPEMAP_RES(typemap, tmp);
 	}
 
 	clear_soap_fault(this_ptr);
@@ -2347,9 +2347,9 @@ static void do_soap_call(zend_execute_data *execute_data,
 				smart_str_free(&error);
 			}
 		} else {
-			zval *uri;
-
-			if ((uri = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "uri", sizeof("uri")-1)) == NULL || Z_TYPE_P(uri) != IS_STRING) {
+			zval *uri = Z_CLIENT_URI_P(this_ptr);
+			ZVAL_DEREF(uri);
+			if (Z_TYPE_P(uri) != IS_STRING) {
 				add_soap_fault(this_ptr, "Client", "Error finding \"uri\" property", NULL, NULL);
 			} else if (location == NULL) {
 				add_soap_fault(this_ptr, "Client", "Error could not find \"location\" property", NULL, NULL);
@@ -2826,25 +2826,19 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
    The function returns old value of location options. */
 PHP_METHOD(SoapClient, __setLocation)
 {
-	char *location = NULL;
-	size_t  location_len = 0;
-	zval *tmp;
+	zend_string *location = NULL;
 	zval *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &location, &location_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &location) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
-		RETVAL_STR_COPY(Z_STR_P(tmp));
-	} else {
-		RETVAL_NULL();
-	}
+	RETVAL_COPY_VALUE(Z_CLIENT_LOCATION_P(this_ptr));
 
-	if (location && location_len) {
-		add_property_stringl(this_ptr, "location", location, location_len);
+	if (location && ZSTR_LEN(location) != 0) {
+		ZVAL_STR_COPY(Z_CLIENT_LOCATION_P(this_ptr), location);
 	} else {
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "location", sizeof("location")-1);
+		ZVAL_NULL(Z_CLIENT_LOCATION_P(this_ptr));
 	}
 }
 /* }}} */
@@ -3885,8 +3879,9 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 			}
 		}
 	} else {
-		if ((zstyle = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "style", sizeof("style")-1)) != NULL &&
-			Z_TYPE_P(zstyle) == IS_LONG) {
+		zstyle = Z_CLIENT_STYLE_P(this_ptr);
+		ZVAL_DEREF(zstyle);
+		if (Z_TYPE_P(zstyle) == IS_LONG) {
 			style = Z_LVAL_P(zstyle);
 		} else {
 			style = SOAP_RPC;
@@ -3908,8 +3903,9 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 			method = body;
 		}
 
-		if ((zuse = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use")-1)) != NULL &&
-			 Z_TYPE_P(zuse) == IS_LONG && Z_LVAL_P(zuse) == SOAP_LITERAL) {
+		zuse = Z_CLIENT_USE_P(this_ptr);
+		ZVAL_DEREF(zuse);
+		if (Z_TYPE_P(zuse) == IS_LONG && Z_LVAL_P(zuse) == SOAP_LITERAL) {
 			use = SOAP_LITERAL;
 		} else {
 			use = SOAP_ENCODED;

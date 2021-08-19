@@ -371,7 +371,9 @@ int make_http_soap_request(zval        *this_ptr,
 
 	request = buf;
 	/* Compress request */
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression")-1)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+	tmp = Z_CLIENT_COMPRESSION_P(this_ptr);
+	ZVAL_DEREF(tmp);
+	if (Z_TYPE_P(tmp) == IS_LONG) {
 		int level = Z_LVAL_P(tmp) & 0x0f;
 		int kind  = Z_LVAL_P(tmp) & SOAP_COMPRESSION_DEFLATE;
 
@@ -415,7 +417,8 @@ int make_http_soap_request(zval        *this_ptr,
 	  }
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1)) != NULL) {
+	tmp = Z_CLIENT_HTTPSOCKET_P(this_ptr);
+	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 		php_stream_from_zval_no_verify(stream,tmp);
 		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
 			use_proxy = Z_LVAL_P(tmp);
@@ -484,9 +487,10 @@ try_again:
 
 	/* Check if request to the same host */
 	if (stream != NULL) {
-	  php_url *orig;
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1)) != NULL &&
-		    (orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
+		php_url *orig;
+		tmp = Z_CLIENT_HTTPURL_P(this_ptr);
+		if (Z_TYPE_P(tmp) == IS_RESOURCE &&
+			(orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
 		    ((use_proxy && !use_ssl) ||
 		     (((use_ssl && orig->scheme != NULL && zend_string_equals_literal(orig->scheme, "https")) ||
 		      (!use_ssl && orig->scheme == NULL) ||
@@ -495,8 +499,8 @@ try_again:
 		     orig->port == phpurl->port))) {
 		} else {
 			php_stream_close(stream);
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1);
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
+			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 			stream = NULL;
 			use_proxy = 0;
@@ -506,8 +510,8 @@ try_again:
 	/* Check if keep-alive connection is still opened */
 	if (stream != NULL && php_stream_eof(stream)) {
 		php_stream_close(stream);
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1);
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+		convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
+		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		stream = NULL;
 		use_proxy = 0;
@@ -517,7 +521,7 @@ try_again:
 		stream = http_connect(this_ptr, phpurl, use_ssl, context, &use_proxy);
 		if (stream) {
 			php_stream_auto_cleanup(stream);
-			add_property_resource(this_ptr, "httpsocket", stream->res);
+			ZVAL_RES(Z_CLIENT_HTTPSOCKET_P(this_ptr), stream->res);
 			GC_ADDREF(stream->res);
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
@@ -536,10 +540,8 @@ try_again:
 	if (stream) {
 		zval *cookies, *login, *password;
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
-
-		add_property_resource(this_ptr, "httpurl", ret);
+		ZVAL_RES(Z_CLIENT_HTTPURL_P(this_ptr), ret);
 		GC_ADDREF(ret);
-		/*zend_list_addref(ret);*/
 
 		if (context &&
 		    (tmp = php_stream_context_get_option(context, "http", "protocol_version")) != NULL &&
@@ -867,8 +869,9 @@ try_again:
 
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
-		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		trace = Z_CLIENT_TRACE_P(this_ptr);
+		ZVAL_DEREF(trace);
+		if (Z_TYPE_P(trace) == IS_TRUE) {
 			add_property_stringl(this_ptr, "__last_request_headers", ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
 		}
 		smart_str_appendl(&soap_headers, request->val, request->len);
@@ -880,8 +883,8 @@ try_again:
 				zend_string_release_ex(request, 0);
 			}
 			php_stream_close(stream);
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1);
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
+			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
 			smart_str_free(&soap_headers_z);
@@ -896,7 +899,7 @@ try_again:
 
 	if (!return_value) {
 		php_stream_close(stream);
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		smart_str_free(&soap_headers_z);
 		return TRUE;
@@ -909,15 +912,16 @@ try_again:
 				zend_string_release_ex(request, 0);
 			}
 			php_stream_close(stream);
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
 			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
 
-		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
+		trace = Z_CLIENT_TRACE_P(this_ptr);
+		ZVAL_DEREF(trace);
+		if (Z_TYPE_P(trace) == IS_TRUE) {
 			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
 		}
 
@@ -1087,7 +1091,7 @@ try_again:
 		}
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL);
 		if (http_msg) {
@@ -1103,7 +1107,7 @@ try_again:
 
 	if (http_close) {
 		php_stream_close(stream);
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		stream = NULL;
 	}
